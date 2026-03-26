@@ -1,0 +1,366 @@
+.saju-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-xl);
+}
+
+/* Loading */
+.saju-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--space-lg);
+  color: var(--color-text-secondary);
+}
+
+.saju-loading__symbol {
+  font-size: 4rem;
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Intro */
+.saju-intro {
+  text-align: center;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.saju-intro__symbol {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-md);
+  animation: float 3s ease-in-out infinite;
+}
+
+.saju-intro__title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--color-accent-gold), #fff, var(--color-accent-gold-light));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+  margin-bottom: var(--space-sm);
+}
+
+.saju-intro__desc {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Input */
+.saju-input {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Tabs */
+.saju-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.saju-tab {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.saju-tab--active {
+  background: rgba(124, 58, 237, 0.3);
+  color: var(--color-text);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.2);
+}
+
+/* Section Title */
+.saju-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Four Pillars */
+.saju-pillars {
+  padding: var(--space-lg);
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.pillar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.pillar-col--empty {
+  opacity: 0.4;
+}
+
+.pillar-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.pillar-char {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 2px;
+}
+
+.pillar-stem {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pillar-branch {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pillar-hanja {
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.pillar-korean {
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.pillar-element {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+.pillar-unknown .pillar-hanja {
+  color: var(--color-text-muted);
+}
+
+.pillar-daymaster {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Five Elements */
+.saju-elements {
+  padding: var(--space-lg);
+}
+
+.elements-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.element-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.element-bar-label {
+  width: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.element-bar-track {
+  flex: 1;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.element-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1s ease;
+  min-width: 4px;
+}
+
+.element-bar-count {
+  width: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.elements-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.elements-tag {
+  font-size: 0.8rem;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* Readings */
+.saju-reading {
+  padding: var(--space-lg);
+}
+
+.saju-reading__text {
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+  word-break: keep-all;
+}
+
+.saju-reading__text--pre {
+  white-space: pre-wrap;
+}
+
+/* Actions */
+.saju-actions {
+  padding: var(--space-md) 0;
+}
+
+.saju-reset-btn {
+  width: 100%;
+  padding: var(--space-md);
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.saju-reset-btn:hover {
+  border-color: var(--color-primary-light);
+  color: var(--color-text);
+}
+
+/* ─── 심화분석: 격국 ─── */
+.saju-gyeokguk { text-align: center; }
+.saju-gyeokguk__name { display: inline-block; font-size: 22px; font-weight: 900; color: var(--color-accent-gold); padding: 8px 24px; border: 2px solid rgba(251,191,36,0.3); border-radius: 12px; background: rgba(251,191,36,0.08); margin-bottom: 8px; }
+.saju-gyeokguk__desc { font-size: 13px; color: var(--color-text-muted); margin-top: 8px; }
+
+/* ─── 심화분석: 12운성 ─── */
+.saju-twelve-stages { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.saju-stage-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); min-width: 70px; }
+.saju-stage-pillar { font-size: 11px; color: var(--color-text-muted); font-weight: 600; }
+.saju-stage-name { font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.8); }
+.saju-stage--strong { color: #4ade80 !important; }
+.saju-stage--weak { color: #f87171 !important; }
+
+/* ─── 심화분석: 합충형해 ─── */
+.saju-interactions { display: flex; flex-direction: column; gap: 8px; }
+.saju-inter-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; border-left: 3px solid transparent; }
+.saju-inter--hap { background: rgba(74,222,128,0.06); border-left-color: #4ade80; }
+.saju-inter--chung { background: rgba(248,113,113,0.06); border-left-color: #f87171; }
+.saju-inter--hyung { background: rgba(251,191,36,0.06); border-left-color: #fbbf24; }
+.saju-inter--hae { background: rgba(168,85,247,0.06); border-left-color: #a855f7; }
+.saju-inter-type { font-size: 14px; font-weight: 900; min-width: 24px; }
+.saju-inter-detail { font-size: 12px; color: var(--color-text-muted); font-weight: 600; min-width: 80px; }
+.saju-inter-desc { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+/* ─── 심화분석: 신살 ─── */
+.saju-sinsal-list { display: flex; flex-direction: column; gap: 8px; }
+.saju-sinsal-item { padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+.saju-sinsal--inactive { opacity: 0.4; }
+.saju-sinsal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.saju-sinsal-badge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+.saju-sinsal-badge--positive { background: rgba(74,222,128,0.15); color: #4ade80; }
+.saju-sinsal-badge--negative { background: rgba(248,113,113,0.15); color: #f87171; }
+.saju-sinsal-name { font-size: 14px; font-weight: 800; color: #fff; }
+.saju-sinsal-found { font-size: 12px; color: var(--color-accent-gold); font-weight: 600; }
+.saju-sinsal-absent { font-size: 12px; color: var(--color-text-muted); }
+.saju-sinsal-desc { font-size: 12px; color: var(--color-text-muted); line-height: 1.5; }
+
+/* ─── 심화분석: 대운 ─── */
+.saju-daeun-timeline { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; -webkit-overflow-scrolling: touch; }
+.saju-daeun-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 10px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); min-width: 80px; flex-shrink: 0; position: relative; transition: all 0.3s; }
+.saju-daeun--current { background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(251,191,36,0.1)); border-color: rgba(124,58,237,0.5); box-shadow: 0 4px 16px rgba(124,58,237,0.2); }
+.saju-daeun-age { font-size: 11px; color: var(--color-text-muted); font-weight: 600; }
+.saju-daeun-hanja { font-size: 18px; font-weight: 900; color: #fff; }
+.saju-daeun-name { font-size: 11px; color: rgba(255,255,255,0.6); }
+.saju-daeun-pillar { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.saju-daeun-info { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.saju-daeun-sipsung { font-size: 12px; font-weight: 700; color: var(--color-accent-gold); }
+.saju-daeun-stage { font-size: 11px; color: var(--color-text-muted); }
+.saju-daeun-current-badge { position: absolute; top: -6px; right: -6px; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: var(--color-accent-gold); color: #000; }
+.saju-daeun-empty { text-align: center; color: var(--color-text-muted); font-size: 13px; padding: 16px 0; }
+
+/* ─── 월운 그리드 ─── */
+.saju-monthly-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.saju-month-item { padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); transition: all 0.3s; }
+.saju-month--now { border-color: rgba(124,58,237,0.5); box-shadow: 0 4px 16px rgba(124,58,237,0.15); background: rgba(124,58,237,0.06); }
+.saju-month-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.saju-month-num { font-size: 14px; font-weight: 800; color: #fff; }
+.saju-month-pillar { font-size: 12px; color: var(--color-text-muted); font-weight: 600; margin-bottom: 4px; }
+.saju-month-tags { display: flex; gap: 6px; margin-bottom: 6px; }
+.saju-month-sipsung { font-size: 11px; font-weight: 700; color: var(--color-accent-gold); padding: 2px 6px; background: rgba(251,191,36,0.1); border-radius: 4px; }
+.saju-month-stage { font-size: 11px; font-weight: 600; color: var(--color-text-muted); padding: 2px 6px; background: rgba(255,255,255,0.05); border-radius: 4px; }
+.saju-month-summary { font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.7); }
+.saju-month-now-tag { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: var(--color-primary, #7c3aed); color: #fff; margin-left: auto; }
+.saju-month-rating { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+
+/* Rating colors (shared) */
+.saju-rating--best { background: rgba(74,222,128,0.15); color: #4ade80; }
+.saju-rating--good { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.saju-rating--normal { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.saju-rating--bad { background: rgba(248,113,113,0.15); color: #f87171; }
+.saju-rating--worst { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+/* ─── 일운 리스트 ─── */
+.saju-daily-list { display: flex; flex-direction: column; gap: 6px; }
+.saju-daily-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); position: relative; }
+.saju-daily--today { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); }
+.saju-daily-date { display: flex; flex-direction: column; align-items: center; min-width: 45px; }
+.saju-daily-day { font-size: 13px; font-weight: 800; color: #fff; }
+.saju-daily-weekday { font-size: 10px; color: var(--color-text-muted); }
+.saju-daily-pillar { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.8); min-width: 80px; }
+.saju-daily-info { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.saju-daily-sipsung { font-size: 12px; font-weight: 700; color: var(--color-accent-gold); }
+.saju-daily-rating { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+.saju-daily-today-tag { position: absolute; top: -4px; right: 8px; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: var(--color-accent-gold); color: #000; }

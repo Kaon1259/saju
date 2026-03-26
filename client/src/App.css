@@ -1,0 +1,186 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--space-md);
+  padding-top: 64px; /* 상단 로고바 */
+  padding-bottom: 80px; /* 하단 탭바 */
+}
+
+/* Page transitions */
+.app-main > * {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (min-width: 481px) {
+  .app-main {
+    padding: var(--space-lg);
+    padding-top: 68px;
+    padding-bottom: 88px;
+  }
+}
+
+/* ─── Splash Screen ─── */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(ellipse at 50% 40%, #1a0a3e 0%, #0d0221 60%, #050011 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.splash--out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.splash-content {
+  text-align: center;
+  position: relative;
+  animation: splashIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes splashIn {
+  from { opacity: 0; transform: scale(0.7) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.splash-symbol {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #FBBF24;
+  border-right-color: rgba(251, 191, 36, 0.3);
+  animation: splashSpin 2s linear infinite;
+}
+
+@keyframes splashSpin {
+  to { transform: rotate(360deg); }
+}
+
+.splash-yin {
+  font-size: 52px;
+  animation: splashPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5));
+}
+
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.4)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.7)); }
+}
+
+.splash-title {
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FBBF24, #fff, #FBBF24);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+  letter-spacing: 4px;
+  margin: 0;
+}
+
+.splash-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+.splash-stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.splash-star {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.4);
+  animation: splashTwinkle 2.5s ease-in-out infinite;
+}
+
+@keyframes splashTwinkle {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.8; }
+}
+
+/* ─── 번개 효과 ─── */
+.splash-lightning {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(167, 139, 250, 0.4) 0%, transparent 50%);
+  opacity: 0;
+  animation: lightning 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.splash-lightning--2 {
+  background: radial-gradient(ellipse at 70% 30%, rgba(251, 191, 36, 0.3) 0%, transparent 50%);
+  animation: lightning2 4s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes lightning {
+  0%, 100% { opacity: 0; }
+  4% { opacity: 0.9; }
+  6% { opacity: 0; }
+  8% { opacity: 0.6; }
+  10% { opacity: 0; }
+  50% { opacity: 0; }
+}
+
+@keyframes lightning2 {
+  0%, 100% { opacity: 0; }
+  3% { opacity: 0; }
+  5% { opacity: 0.7; }
+  7% { opacity: 0; }
+  9% { opacity: 0.4; }
+  11% { opacity: 0; }
+  55% { opacity: 0; }
+}
+
+/* ─── 비/빛 입자 효과 ─── */
+.splash-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.splash-drop {
+  position: absolute;
+  top: -20px;
+  width: 1px;
+  height: 18px;
+  background: linear-gradient(to bottom, transparent, rgba(167, 139, 250, 0.6), transparent);
+  animation: splashRain 1s linear infinite;
+}
+
+@keyframes splashRain {
+  0% { transform: translateY(-20px); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}

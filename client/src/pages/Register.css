@@ -1,0 +1,264 @@
+.register-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Header */
+.register-header {
+  text-align: center;
+  padding: var(--space-lg) 0;
+}
+
+.register-header__title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.register-header__subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+/* Form */
+.register-form {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.form-input {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1rem;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text);
+  outline: none;
+  transition: all 0.3s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary-light);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Date input color scheme for dark mode */
+.form-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.form-select option {
+  background: #1a0533;
+  color: var(--color-text);
+}
+
+/* Gender Toggle */
+.form-toggle {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.form-toggle__btn {
+  flex: 1;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-toggle__btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-toggle__btn--active {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: var(--color-primary-light);
+  color: var(--color-text);
+  font-weight: 700;
+  box-shadow: inset 0 0 16px rgba(124, 58, 237, 0.1);
+}
+
+/* Zodiac Display */
+.register-zodiac {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: rgba(251, 191, 36, 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.register-zodiac__emoji {
+  font-size: 2.2rem;
+}
+
+.register-zodiac__text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+}
+
+/* Error */
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+/* Submit */
+.register-submit {
+  margin-top: var(--space-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-size: 1.1rem;
+}
+
+.register-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.register-submit__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Step Indicator */
+.register-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-top: var(--space-lg);
+}
+
+.register-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.register-step--active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+}
+
+.register-step__line {
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Skip & Back buttons */
+.register-skip {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  padding: var(--space-md);
+  transition: color 0.2s;
+}
+
+.register-skip:hover {
+  color: var(--color-primary-light);
+}
+
+.register-back-step {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  padding: var(--space-sm);
+  transition: color 0.2s;
+}
+
+.register-back-step:hover {
+  color: var(--color-text);
+}
+
+/* Profile calendar tag */
+.profile-info__calendar-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--color-primary-light);
+  font-weight: 600;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+
+/* Blood type / MBTI selection */
+.form-toggle--4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+.form-mbti-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.form-mbti-btn { padding: 8px 4px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.form-mbti-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
+.form-mbti-btn--active { background: rgba(124,58,237,0.3); border-color: rgba(124,58,237,0.6); color: #fff; box-shadow: 0 0 12px rgba(124,58,237,0.2); }

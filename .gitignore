@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.gradle/
+*.class
+*.jar
+.idea/
+*.iml
+.DS_Store
+server/src/main/resources/application.yml
+server.zip
+.claude/

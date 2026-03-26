@@ -1,0 +1,175 @@
+package com.saju.server.service;
+
+import com.saju.server.saju.SajuCalculator;
+import com.saju.server.saju.SajuConstants;
+import com.saju.server.saju.SajuPillar;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * 점신급 AI 프롬프트 빌더
+ * 오늘의 천간지지, 오행, 계절 기운을 반영한 역술 프롬프트 생성
+ */
+@Component
+public class FortunePromptBuilder {
+
+    private static final String[] SEASON = {"겨울", "겨울", "봄", "봄", "봄", "여름", "여름", "여름", "가을", "가을", "가을", "겨울"};
+    private static final String[] SEASON_ENERGY = {
+        "수(水)의 저장 기운", "수(水)의 저장 기운",
+        "목(木)의 생장 기운", "목(木)의 생장 기운", "목(木)의 생장 기운",
+        "화(火)의 확산 기운", "화(火)의 확산 기운", "화(火)의 확산 기운",
+        "금(金)의 수렴 기운", "금(金)의 수렴 기운", "금(金)의 수렴 기운",
+        "수(水)의 저장 기운"
+    };
+
+    private static final String[] ELEMENT_NATURE = {"성장·창의·인자", "열정·활력·표현", "안정·중재·신뢰", "결단·정의·강인", "지혜·적응·소통"};
+
+    /**
+     * 오늘의 천기(天氣) 정보 문자열 생성
+     */
+    public String buildTodayContext(LocalDate date) {
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar monthPillar = SajuCalculator.calculateMonthPillar(date, yearPillar.getStemIndex());
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+
+        int dayStemEl = SajuConstants.CHEONGAN_OHENG[dayPillar.getStemIndex()];
+        int dayBranchEl = SajuConstants.JIJI_OHENG[dayPillar.getBranchIndex()];
+        boolean dayYang = SajuConstants.CHEONGAN_YINYANG[dayPillar.getStemIndex()] == 0;
+
+        int month = date.getMonthValue();
+        String season = SEASON[month - 1];
+        String seasonEnergy = SEASON_ENERGY[month - 1];
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("【오늘의 천기(天氣)】\n");
+        sb.append("양력: ").append(date.format(DateTimeFormatter.ofPattern("yyyy년 M월 d일"))).append("\n");
+        sb.append("년주: ").append(yearPillar.getFullHanja()).append("(").append(yearPillar.getFullName()).append("년) — ").append(yearPillar.getAnimal()).append("띠 해\n");
+        sb.append("월주: ").append(monthPillar.getFullHanja()).append("(").append(monthPillar.getFullName()).append("월)\n");
+        sb.append("일주: ").append(dayPillar.getFullHanja()).append("(").append(dayPillar.getFullName()).append("일)\n");
+        sb.append("일간 오행: ").append(SajuConstants.OHENG[dayStemEl]).append("(").append(SajuConstants.OHENG_HANJA[dayStemEl]).append(") — ").append(dayYang ? "양" : "음").append("\n");
+        sb.append("일간 성질: ").append(ELEMENT_NATURE[dayStemEl]).append("\n");
+        sb.append("일지 오행: ").append(SajuConstants.OHENG[dayBranchEl]).append("(").append(SajuConstants.OHENG_HANJA[dayBranchEl]).append(")\n");
+        sb.append("계절: ").append(season).append(" — ").append(seasonEnergy).append("\n");
+
+        // 오행 상생상극 관계
+        int producedBy = SajuConstants.OHENG_PRODUCES[dayStemEl]; // 일간이 생하는 오행
+        int overcoming = SajuConstants.OHENG_OVERCOMES[dayStemEl]; // 일간이 극하는 오행
+        sb.append("일간 상생: ").append(SajuConstants.OHENG[dayStemEl]).append(" → ").append(SajuConstants.OHENG[producedBy]).append(" (에너지가 흐르는 방향)\n");
+        sb.append("일간 상극: ").append(SajuConstants.OHENG[dayStemEl]).append(" → ").append(SajuConstants.OHENG[overcoming]).append(" (제어하는 방향)\n");
+
+        return sb.toString();
+    }
+
+    /**
+     * 혈액형 운세용 역술가급 시스템 프롬프트
+     */
+    public String bloodTypeSystemPrompt() {
+        return """
+당신은 대한민국 최고의 역술인이자 40년 경력의 사주명리학 대가이며, 혈액형 심리학 전문가입니다.
+당신의 이름은 '천명(天命) 선생'입니다.
+
+【역할】
+- 동양 역학(오행·천간지지)과 서양 혈액형 기질론을 융합한 독보적 해석을 제공합니다
+- 오늘의 일진(日辰)의 기운이 각 혈액형 기질과 어떻게 상호작용하는지 분석합니다
+- 단순한 격려가 아닌, 시간대·방위·행동에 대한 구체적 조언을 합니다
+
+【혈액형 기질 체계】
+- A형: 목(木)·음 기질 — 신중, 계획적, 세심, 내면 깊음, 스트레스에 민감
+- B형: 화(火)·양 기질 — 자유, 창의, 직관, 열정적, 변화 추구
+- O형: 금(金)·양 기질 — 리더십, 추진력, 대범, 목표지향, 승부욕
+- AB형: 수(水)·음 기질 — 분석, 독창, 이중성, 천재형, 내면 복잡
+
+【작성 규칙】
+1. 반드시 JSON만 응답 (설명 텍스트 없이)
+2. 각 항목은 3-4문장, 구체적 시간/방위/색상/행동 포함
+3. 오늘 일진의 오행과 혈액형 기질의 상생/상극 관계를 반영
+4. 계절의 기운을 반영
+5. "~할 수 있습니다" 같은 모호한 표현 대신 "~하세요", "~입니다" 단정적 표현 사용
+6. 점수는 일진과 기질의 조화도에 따라 45-98 사이로 책정""";
+    }
+
+    /**
+     * 혈액형 운세 유저 프롬프트
+     */
+    public String bloodTypeUserPrompt(String bloodType, String zodiacAnimal, LocalDate date) {
+        String todayCtx = buildTodayContext(date);
+        return todayCtx + "\n" +
+            "【의뢰인】" + bloodType + "형 / " + zodiacAnimal + "띠\n\n" +
+            "위 천기 정보와 의뢰인의 혈액형 기질·띠를 종합 분석하여 오늘의 운세를 작성하세요.\n" +
+            "반드시 아래 JSON 형식으로만 응답:\n" +
+            """
+{"overall":"총운 (오전/오후 시간대별 기운 변화 포함, 3-4문장)",\
+"love":"애정운 (구체적 행동 조언, 3문장)",\
+"money":"재물운 (금전 방향·시간대 조언, 3문장)",\
+"health":"건강운 (주의 부위·음식·운동 조언, 3문장)",\
+"work":"직장운 (업무 전략·대인관계 조언, 3문장)",\
+"score":점수(45-98),\
+"luckyNumber":행운숫자(1-99),\
+"luckyColor":"행운색상",\
+"dayAnalysis":"오늘 일진과 혈액형 기질의 관계 해석 (1-2문장)"}""";
+    }
+
+    /**
+     * MBTI 운세용 역술가급 시스템 프롬프트
+     */
+    public String mbtiSystemPrompt() {
+        return """
+당신은 동양 역학과 MBTI 심리학을 융합한 한국 최고의 운세 전문가 '천명(天命) 선생'입니다.
+
+【역할】
+- 오늘의 일진(天干地支)이 16가지 MBTI 유형의 인지기능과 어떻게 상호작용하는지 분석합니다
+- 단순한 MBTI 설명이 아닌, 오늘의 기운에 맞춘 구체적 조언을 제공합니다
+
+【MBTI × 오행 매핑】
+- NT(분석가): 금(金) 기질 — 논리·분석·전략적 사고
+- NF(외교관): 수(水) 기질 — 공감·직관·이상주의
+- SJ(관리자): 토(土) 기질 — 안정·책임·체계
+- SP(탐험가): 화(火) 기질 — 행동·자유·현재 집중
+
+【작성 규칙】
+1. 반드시 JSON만 응답
+2. MBTI 고유 인지기능(Fi, Fe, Ti, Te, Ni, Ne, Si, Se)을 반영
+3. 오늘 일진 오행과 해당 유형의 기질 상호작용 분석
+4. 구체적 시간·행동·관계 조언 포함
+5. tip은 그 유형만을 위한 맞춤 한마디
+6. 점수는 45-98 사이""";
+    }
+
+    /**
+     * MBTI 운세 유저 프롬프트
+     */
+    public String mbtiUserPrompt(String mbtiType, String zodiacAnimal, LocalDate date) {
+        String todayCtx = buildTodayContext(date);
+        return todayCtx + "\n" +
+            "【의뢰인】MBTI " + mbtiType + " / " + zodiacAnimal + "띠\n\n" +
+            "위 천기 정보와 의뢰인의 MBTI 유형·띠를 종합 분석하여 오늘의 운세를 작성하세요.\n" +
+            "반드시 아래 JSON 형식으로만 응답:\n" +
+            """
+{"overall":"총운 (인지기능과 일진의 상호작용, 3-4문장)",\
+"love":"애정운 (유형별 연애 패턴 반영, 3문장)",\
+"work":"직장운 (인지기능 활용 전략, 3문장)",\
+"tip":"오늘의 맞춤 한마디 (1문장, 임팩트 있게)",\
+"score":점수(45-98),\
+"luckyNumber":행운숫자(1-99),\
+"luckyColor":"행운색상"}""";
+    }
+
+    /**
+     * 궁합 분석용 프롬프트
+     */
+    public String compatibilityPrompt(String type, String val1, String val2, LocalDate date) {
+        String todayCtx = buildTodayContext(date);
+        if ("bloodtype".equals(type)) {
+            return todayCtx + "\n" +
+                val1 + "형과 " + val2 + "형의 혈액형 궁합을 오늘의 일진 기운을 반영하여 분석하세요.\n" +
+                "각 혈액형의 오행 기질과 상생/상극 관계, 오늘 특히 주의할 점, 관계를 발전시키는 구체적 행동 조언을 포함하여 5줄 이내로 한국어로 답변하세요.";
+        } else {
+            return todayCtx + "\n" +
+                val1 + "과 " + val2 + "의 MBTI 궁합을 오늘의 일진 기운을 반영하여 분석하세요.\n" +
+                "두 유형의 인지기능 상호작용, 오행 기질 조화, 오늘 함께하면 좋은 활동, 주의점을 포함하여 5줄 이내로 한국어로 답변하세요.";
+        }
+    }
+}

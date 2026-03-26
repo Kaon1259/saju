@@ -1,0 +1,274 @@
+.fortune-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-xl);
+}
+
+/* Back Button */
+.fortune-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: var(--space-sm) 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  align-self: flex-start;
+}
+
+.fortune-back:hover {
+  color: var(--color-text);
+}
+
+/* Score Section */
+.fortune-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) 0;
+}
+
+.fortune-score__circle {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fortune-score__svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.3));
+}
+
+.fortune-score__progress {
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fortune-score__value {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.fortune-score__number {
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--color-accent-gold), var(--color-accent-gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.fortune-score__label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.fortune-score__zodiac {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.fortune-score__date {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* Fortune Cards */
+.fortune-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Lucky Info */
+.fortune-lucky {
+  padding: var(--space-lg);
+}
+
+.fortune-lucky__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  color: var(--color-accent-gold);
+}
+
+.fortune-lucky__items {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.fortune-lucky__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fortune-lucky__item-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.fortune-lucky__item-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.fortune-lucky__number {
+  color: var(--color-accent-gold);
+  font-size: 1.5rem;
+}
+
+.fortune-lucky__color {
+  color: var(--color-secondary);
+}
+
+/* Actions */
+.fortune-actions {
+  padding: var(--space-md) 0;
+}
+
+.btn-share {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-full);
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.btn-share:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(124, 58, 237, 0.5);
+}
+
+.fortune-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+/* Loading - 동물 애니메이션 */
+.fortune-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 20px;
+}
+
+.fortune-animal-scene {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fortune-animal-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,191,36,0.15), rgba(124,58,237,0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fortuneAnimalBounce 1.5s ease-in-out infinite;
+  z-index: 2;
+}
+
+.fortune-animal-emoji {
+  font-size: 44px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+@keyframes fortuneAnimalBounce {
+  0%, 100% { transform: scale(1) translateY(0); }
+  30% { transform: scale(1.15) translateY(-8px); }
+  60% { transform: scale(0.95) translateY(2px); }
+}
+
+.fortune-animal-ring {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(251,191,36,0.3);
+  animation: fortuneRingSpin 3s linear infinite;
+}
+
+.fortune-animal-ring--2 {
+  inset: 0;
+  border-color: rgba(167,139,250,0.2);
+  animation-direction: reverse;
+  animation-duration: 4s;
+}
+
+@keyframes fortuneRingSpin { to { transform: rotate(360deg); } }
+
+.fortune-animal-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent-gold);
+  transform: rotate(var(--angle)) translateX(55px);
+  animation: fortuneParticleGlow 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(251,191,36,0.5);
+}
+
+@keyframes fortuneParticleGlow {
+  0%, 100% { opacity: 0.3; transform: rotate(var(--angle)) translateX(55px) scale(0.6); }
+  50% { opacity: 1; transform: rotate(var(--angle)) translateX(60px) scale(1.2); }
+}
+
+.fortune-loading-text {
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Error */
+.fortune-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}

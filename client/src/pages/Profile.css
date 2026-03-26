@@ -1,0 +1,124 @@
+.profile-page { max-width: 600px; margin: 0 auto; padding: 0 16px 40px; }
+
+/* ─── 별자리 히어로 ─── */
+.pf-constellation-hero {
+  position: relative;
+  text-align: center;
+  padding: 40px 20px 24px;
+  margin: -16px -16px 16px;
+  background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--c-color) 20%, transparent), transparent 70%);
+  overflow: hidden;
+}
+
+.pf-stars-bg { position: absolute; inset: 0; }
+.pf-star {
+  position: absolute;
+  color: rgba(255,255,255,0.4);
+  animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.pf-constellation-name {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--c-color);
+  margin-top: 8px;
+  letter-spacing: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.pf-constellation-dates {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.pf-user-name {
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── 뱃지 ─── */
+.pf-badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pf-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.7);
+}
+.pf-badge--const { background: rgba(255,255,255,0.03); }
+.pf-badge--bt { border-color: rgba(244,114,182,0.4); color: #F472B6; background: rgba(244,114,182,0.08); }
+.pf-badge--mbti { border-color: rgba(52,211,153,0.4); color: #34D399; background: rgba(52,211,153,0.08); }
+.pf-badge--zodiac { border-color: rgba(251,191,36,0.4); color: #FBBF24; background: rgba(251,191,36,0.08); }
+
+/* ─── 정보 카드 ─── */
+.pf-info { padding: 16px 18px; margin-bottom: 16px; }
+.pf-info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+.pf-info-label { font-size: 14px; color: var(--color-text-muted); font-weight: 600; }
+.pf-info-value { font-size: 14px; color: #fff; font-weight: 700; }
+.pf-info-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(124,58,237,0.2); color: #A78BFA; font-weight: 600; margin-left: 4px; }
+.pf-info-divider { height: 1px; background: rgba(255,255,255,0.06); }
+
+/* ─── 액션 ─── */
+.pf-actions { display: flex; flex-direction: column; gap: 10px; }
+.pf-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pf-btn--primary {
+  background: linear-gradient(135deg, var(--color-primary, #7C3AED), #A855F7);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+}
+.pf-btn--primary:hover { transform: translateY(-2px); }
+.pf-btn--logout {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+}
+.pf-btn--logout:hover { border-color: rgba(239,68,68,0.4); color: #EF4444; }
+
+/* ─── 이번 주 일운 ─── */
+.profile-daily { padding: 16px; }
+.profile-section-title { font-size: 15px; font-weight: 800; color: #fff; margin: 0 0 12px; }
+.profile-daily-list { display: flex; flex-direction: column; gap: 6px; }
+.profile-daily-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); position: relative; }
+.profile-daily--today { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); }
+.profile-daily-date { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); min-width: 80px; }
+.profile-daily-pillar { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8); min-width: 70px; }
+.profile-daily-sipsung { font-size: 12px; font-weight: 700; color: var(--color-accent-gold); }
+.profile-daily-rating { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; margin-left: auto; }
+.rate-best { background: rgba(74,222,128,0.15); color: #4ade80; }
+.rate-good { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.rate-normal { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.rate-bad { background: rgba(248,113,113,0.15); color: #f87171; }
+.profile-daily-now { position: absolute; top: -4px; right: 8px; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: var(--color-accent-gold); color: #000; }
+
+/* 로딩 */
+.profile-loading { text-align: center; padding: 80px 20px; color: var(--color-text-muted); }
+.pf-spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--color-accent-gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }

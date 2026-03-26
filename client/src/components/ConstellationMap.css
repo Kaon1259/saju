@@ -1,0 +1,42 @@
+.const-map {
+  position: relative;
+  margin: 0 auto;
+}
+
+.const-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* 연결선 애니메이션 */
+.const-line {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: drawLine 0.8s ease forwards;
+}
+
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+/* 별 나타남 */
+.const-star {
+  opacity: 0;
+  animation: starAppear 0.4s ease forwards;
+}
+
+@keyframes starAppear {
+  from { opacity: 0; r: 0; }
+  to { opacity: 1; }
+}
+
+/* 밝은 별 펄스 */
+.const-star-bright {
+  animation: starPulse 3s ease-in-out infinite;
+}
+
+@keyframes starPulse {
+  0%, 100% { opacity: 1; r: 1; }
+  50% { opacity: 0.5; r: 2.5; }
+}

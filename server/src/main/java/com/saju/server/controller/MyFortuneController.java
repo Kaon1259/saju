@@ -1,0 +1,84 @@
+package com.saju.server.controller;
+
+import com.saju.server.dto.UserResponse;
+import com.saju.server.saju.SajuResult;
+import com.saju.server.service.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/my")
+@RequiredArgsConstructor
+public class MyFortuneController {
+
+    private final UserService userService;
+    private final SajuService sajuService;
+    private final LunarCalendarService lunarCalendarService;
+    private final BloodTypeFortuneService bloodTypeFortuneService;
+    private final MbtiFortuneService mbtiFortuneService;
+
+    /**
+     * 나의 통합 운세 (사주 AI + 혈액형 + MBTI)
+     */
+    @GetMapping("/fortune/{userId}")
+    public ResponseEntity<Map<String, Object>> getMyFortune(@PathVariable Long userId) {
+        UserResponse user = userService.getUser(userId);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("user", Map.of(
+            "name", user.getName(),
+            "zodiacAnimal", user.getZodiacAnimal(),
+            "bloodType", user.getBloodType() != null ? user.getBloodType() : "",
+            "mbtiType", user.getMbtiType() != null ? user.getMbtiType() : "",
+            "birthDate", user.getBirthDate().toString(),
+            "birthTime", user.getBirthTime() != null ? user.getBirthTime() : ""
+        ));
+
+        // 1. 사주 기반 AI 오늘의 운세 (생년월일+시간 기반)
+        LocalDate birthDate = user.getBirthDate();
+        if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
+            birthDate = lunarCalendarService.lunarToSolar(birthDate);
+        }
+        SajuResult sajuResult = sajuService.analyze(birthDate, user.getBirthTime(), user.getGender());
+
+        // 사주 운세를 기존 포맷에 맞춰 변환
+        Map<String, Object> sajuFortune = new LinkedHashMap<>();
+        SajuResult.CategoryFortune today = sajuResult.getTodayFortune();
+        if (today != null) {
+            sajuFortune.put("overall", today.getOverall());
+            sajuFortune.put("love", today.getLove());
+            sajuFortune.put("money", today.getMoney());
+            sajuFortune.put("health", today.getHealth());
+            sajuFortune.put("work", today.getWork());
+            sajuFortune.put("score", today.getScore());
+            sajuFortune.put("luckyNumber", today.getLuckyNumber());
+            sajuFortune.put("luckyColor", today.getLuckyColor());
+        }
+        sajuFortune.put("dayMaster", sajuResult.getDayMasterHanja() + " " + sajuResult.getDayMaster());
+        sajuFortune.put("dayMasterElement", sajuResult.getDayMasterElement());
+        sajuFortune.put("personalityReading", sajuResult.getPersonalityReading());
+        sajuFortune.put("yearFortune", sajuResult.getYearFortune());
+        sajuFortune.put("zodiacAnimal", user.getZodiacAnimal());
+        sajuFortune.put("fortuneDate", LocalDate.now().toString());
+        result.put("saju", sajuFortune);
+
+        // 2. 혈액형 운세 (있으면)
+        if (user.getBloodType() != null && !user.getBloodType().isBlank()) {
+            var btFortune = bloodTypeFortuneService.getTodayFortune(user.getBloodType(), user.getZodiacAnimal());
+            result.put("bloodType", btFortune);
+        }
+
+        // 3. MBTI 운세 (있으면)
+        if (user.getMbtiType() != null && !user.getMbtiType().isBlank()) {
+            var mbtiFortune = mbtiFortuneService.getTodayFortune(user.getMbtiType(), user.getZodiacAnimal());
+            result.put("mbti", mbtiFortune);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+}

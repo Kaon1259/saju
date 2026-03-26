@@ -1,0 +1,201 @@
+.cs-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 40px; }
+.cs-hero { text-align: center; padding: 8px 0 16px; }
+.cs-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #60A5FA, #A78BFA, #FBBF24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cs-subtitle { color: var(--color-text-muted); margin-top: 4px; font-size: 13px; }
+
+/* ─── 별자리 그리드 ─── */
+.cs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cs-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 8px 14px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  overflow: hidden;
+  animation: csIn 0.4s ease both;
+}
+
+@keyframes csIn { from { opacity:0; transform: scale(0.85) translateY(10px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+/* 반짝이는 배경 효과 */
+.cs-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent 0%, color-mix(in srgb, var(--cs-color) 8%, transparent) 25%, transparent 50%);
+  animation: csShimmer 6s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.cs-card:hover::before,
+.cs-card.active::before {
+  opacity: 1;
+}
+
+@keyframes csShimmer {
+  to { transform: rotate(360deg); }
+}
+
+/* 카드 내부 별 반짝임 */
+.cs-card::after {
+  content: '✦';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 8px;
+  color: var(--cs-color);
+  opacity: 0.3;
+  animation: csTwinkle 2s ease-in-out infinite;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+
+@keyframes csTwinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.cs-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--cs-color) 50%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--cs-color) 22%, transparent);
+}
+
+.cs-card.active {
+  border-color: var(--cs-color);
+  background: color-mix(in srgb, var(--cs-color) 15%, transparent);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--cs-color) 30%, transparent),
+    0 0 20px color-mix(in srgb, var(--cs-color) 15%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* 심볼 - 크고 반짝이게 */
+.cs-card-symbol {
+  font-size: 28px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cs-color) 40%, transparent));
+  animation: csSymbolGlow 3s ease-in-out infinite;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+
+@keyframes csSymbolGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--cs-color) 30%, transparent)); }
+  50% { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--cs-color) 60%, transparent)); }
+}
+
+.cs-card.active .cs-card-symbol {
+  font-size: 32px;
+  filter: drop-shadow(0 0 14px var(--cs-color));
+}
+
+/* 별자리 이름 - 더 크고 선명하게 */
+.cs-card-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.65);
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+.cs-card.active .cs-card-name {
+  color: #fff;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--cs-color) 50%, transparent);
+}
+
+/* 원소 태그 */
+.cs-card-element {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--cs-color);
+  opacity: 0.6;
+  position: relative;
+  z-index: 1;
+}
+
+.cs-card.active .cs-card-element {
+  opacity: 1;
+}
+
+/* 점수 */
+.cs-card-score {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-accent-gold);
+  position: relative;
+  z-index: 1;
+}
+.cs-card-score small { font-size: 9px; opacity: 0.7; }
+
+/* MY 뱃지 */
+.cs-card-mine {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #fff;
+  background: var(--cs-color);
+  padding: 2px 6px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--cs-color) 40%, transparent);
+}
+
+/* 맵 숨김 (심볼로 대체) */
+.cs-card-map {
+  display: none;
+}
+
+/* ─── 결과 히어로 ─── */
+.cs-result-hero { position: relative; text-align: center; padding: 24px 20px 20px; margin-bottom: 16px; border-radius: 20px; background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--cs-color) 15%, transparent), transparent 70%); overflow: hidden; }
+.cs-result-stars { position: absolute; inset: 0; }
+.cs-tiny-star { position: absolute; color: rgba(255,255,255,0.3); font-size: 2px; animation: twinkle 3s ease-in-out infinite; }
+@keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+.cs-result-name { font-size: 22px; font-weight: 900; color: var(--cs-color); margin-top: 8px; letter-spacing: 2px; position: relative; z-index: 1; }
+.cs-result-meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; position: relative; z-index: 1; }
+
+/* 성격 */
+.cs-personality { padding: 16px; margin-bottom: 16px; }
+.cs-personality p { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); }
+
+/* 점수 */
+.cs-score-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 20px; }
+.cs-score-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.cs-score-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+.cs-score-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
+.cs-score-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+.cs-score-num { font-size: 34px; font-weight: 900; color: #fff; display: block; }
+.cs-score-unit { font-size: 13px; color: var(--color-text-muted); }
+
+.cs-fortunes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+/* 럭키 */
+.cs-lucky { display: flex; align-items: center; padding: 16px; }
+.cs-lucky-item { flex: 1; text-align: center; }
+.cs-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
+.cs-lucky-value { font-size: 18px; font-weight: 800; color: var(--color-accent-gold); }
+.cs-lucky-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.08); }
+
+/* 로딩 */
+.cs-loading { text-align: center; padding: 40px; color: var(--color-text-muted); }
+.cs-spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #A78BFA; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }

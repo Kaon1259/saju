@@ -1,0 +1,781 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Weather Background Effects ─── */
+.weather-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+
+/* Sunny */
+.weather--sunny { background: radial-gradient(ellipse at 50% -10%, rgba(251,191,36,0.08), transparent 60%); }
+.weather-sunray { position: absolute; top: -20%; left: 50%; width: 2px; height: 40%; background: linear-gradient(to bottom, rgba(251,191,36,0.15), transparent); transform-origin: bottom center; transform: rotate(var(--ray-angle)); animation: sunrayPulse 4s ease-in-out infinite; }
+@keyframes sunrayPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+.weather-light-orb { position: absolute; border-radius: 50%; filter: blur(40px); }
+.weather-light-orb--1 { top: -5%; left: 30%; width: 200px; height: 200px; background: rgba(251,191,36,0.06); animation: orbFloat 8s ease-in-out infinite; }
+.weather-light-orb--2 { top: 10%; right: 20%; width: 150px; height: 150px; background: rgba(245,158,11,0.05); animation: orbFloat 6s ease-in-out infinite reverse; }
+@keyframes orbFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(20px); } }
+
+/* Rainbow */
+.weather--rainbow { background: radial-gradient(ellipse at 50% 0%, rgba(167,139,250,0.05), transparent 50%); }
+.weather-sparkle { position: absolute; color: rgba(251,191,36,0.5); font-size: 6px; animation: sparkleFloat 3s ease-in-out infinite; }
+@keyframes sparkleFloat { 0%,100% { opacity: 0.2; transform: translateY(0) scale(0.8); } 50% { opacity: 0.9; transform: translateY(-8px) scale(1.3); } }
+
+/* Cloudy */
+.weather--cloudy {}
+.weather-cloud { position: absolute; font-size: 40px; opacity: 0.12; animation: cloudDrift 20s linear infinite; }
+.weather-cloud--1 { top: 5%; left: -10%; animation-duration: 25s; }
+.weather-cloud--2 { top: 15%; left: -20%; font-size: 30px; animation-duration: 35s; animation-delay: 5s; }
+.weather-cloud--3 { top: 8%; left: -15%; font-size: 50px; animation-duration: 30s; animation-delay: 10s; }
+@keyframes cloudDrift { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 100px)); } }
+
+/* Rain */
+.weather--rain {}
+.weather-raindrop { position: absolute; top: -10px; width: 1.5px; height: 16px; background: linear-gradient(to bottom, transparent, rgba(96,165,250,0.5), transparent); animation: rainFall 0.8s linear infinite; }
+.weather-raindrop--heavy { height: 22px; width: 2px; background: linear-gradient(to bottom, transparent, rgba(96,165,250,0.7), transparent); }
+@keyframes rainFall { 0% { transform: translateY(-10px); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
+
+/* Storm */
+.weather--storm {}
+.weather-storm-flash { position: absolute; inset: 0; background: rgba(167,139,250,0.15); opacity: 0; animation: stormFlash 5s ease-in-out infinite; }
+@keyframes stormFlash { 0%,100% { opacity: 0; } 4% { opacity: 0.8; } 6% { opacity: 0; } 8% { opacity: 0.4; } 10% { opacity: 0; } }
+
+/* Weather Badge */
+.home-weather-badge { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 10px; padding: 8px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8); width: fit-content; margin-left: auto; margin-right: auto; }
+.home-weather-desc { color: var(--color-text-muted); font-weight: 500; font-size: 12px; }
+
+/* ─── Landing (Guest Fun) ─── */
+.home-landing { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+.home-landing-visual { text-align: center; padding: 8px 0 12px; width: 100%; }
+.home-landing-msg { font-size: 15px; color: rgba(255,255,255,0.7); font-weight: 600; line-height: 1.6; margin-top: 10px; }
+
+/* 날씨 씬 */
+.home-weather-scene { position: relative; width: 100%; height: 140px; border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, rgba(13,2,33,0.3) 0%, rgba(13,2,33,0.6) 100%); display: flex; align-items: center; justify-content: center; transition: background 0.5s; }
+
+/* 날씨별 밝기/색감 */
+.home-weather-anim--sunny ~ .home-weather-info-big { text-shadow: 0 2px 20px rgba(251,191,36,0.3); }
+.home-weather-anim--sunny + .home-weather-info-big .home-weather-temp-big { color: #FBBF24; }
+
+.home-weather-anim--cloudy ~ .home-weather-info-big .home-weather-temp-big { color: rgba(255,255,255,0.6); }
+
+.home-weather-anim--rain ~ .home-weather-info-big .home-weather-temp-big { color: #60A5FA; }
+
+.home-weather-anim--snow ~ .home-weather-info-big .home-weather-temp-big { color: #c4e0ff; }
+
+/* 날씨별 배경 그라데이션 */
+.home-weather-scene:has(.home-weather-anim--sunny) { background: linear-gradient(180deg, rgba(251,191,36,0.12) 0%, rgba(245,158,11,0.04) 100%); }
+.home-weather-scene:has(.home-weather-anim--cloudy) { background: linear-gradient(180deg, rgba(100,116,139,0.15) 0%, rgba(13,2,33,0.5) 100%); }
+.home-weather-scene:has(.home-weather-anim--rain) { background: linear-gradient(180deg, rgba(30,58,95,0.25) 0%, rgba(13,2,33,0.6) 100%); }
+.home-weather-scene:has(.home-weather-anim--snow) { background: linear-gradient(180deg, rgba(140,170,210,0.15) 0%, rgba(30,40,70,0.3) 100%); }
+.home-weather-anim { position: absolute; inset: 0; overflow: hidden; }
+.home-weather-info-big { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.home-weather-temp-big { font-size: 48px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+.home-weather-desc-big { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 4px; }
+
+/* 눈 */
+.home-snowflake { position: absolute; top: -20px; color: #fff; animation: snowFall linear infinite; }
+@keyframes snowFall { 0% { transform: translateY(-20px) rotate(0deg); } 100% { transform: translateY(160px) rotate(360deg); } }
+
+/* 비 */
+.home-raindrop { position: absolute; top: -10px; width: 2px; height: 14px; background: linear-gradient(to bottom, transparent, rgba(130,170,255,0.7), transparent); animation: homeRain linear infinite; }
+@keyframes homeRain { 0% { transform: translateY(-10px); } 100% { transform: translateY(160px); } }
+
+/* 맑음 - 태양 */
+.home-sun { position: absolute; top: 15px; right: 25%; width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, rgba(251,191,36,0.9), rgba(245,158,11,0.4)); box-shadow: 0 0 40px rgba(251,191,36,0.4), 0 0 80px rgba(251,191,36,0.15); animation: sunPulse 3s ease-in-out infinite; }
+@keyframes sunPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 40px rgba(251,191,36,0.4); } 50% { transform: scale(1.1); box-shadow: 0 0 60px rgba(251,191,36,0.6); } }
+.home-sun-ray { position: absolute; top: 15px; right: calc(25% + 23px); width: 2px; height: 30px; background: linear-gradient(to bottom, rgba(251,191,36,0.4), transparent); transform-origin: bottom center; transform: translateY(-25px) rotate(var(--ray-angle)); animation: sunrayPulse 4s ease-in-out infinite; }
+
+/* 구름 */
+.home-cloud-anim { position: absolute; font-size: 36px; opacity: 0.3; animation: cloudDrift 18s linear infinite; }
+.home-cloud-anim--1 { top: 10px; left: -40px; font-size: 44px; animation-duration: 22s; }
+.home-cloud-anim--2 { top: 40px; left: -60px; font-size: 32px; animation-duration: 28s; animation-delay: 4s; }
+.home-cloud-anim--3 { top: 20px; left: -50px; font-size: 50px; opacity: 0.2; animation-duration: 35s; animation-delay: 8s; }
+
+/* 날씨 없을 때 기본 */
+.home-default-visual { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.home-default-symbol { font-size: 60px; opacity: 0.3; animation: defaultPulse 4s ease-in-out infinite; }
+@keyframes defaultPulse { 0%,100% { transform: scale(1) rotate(0deg); opacity: 0.2; } 50% { transform: scale(1.1) rotate(10deg); opacity: 0.4; } }
+
+/* ─── 동양풍 메뉴 카드 ─── */
+.home-landing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.home-landing-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 12px 16px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); text-align: center; overflow: hidden; }
+.home-landing-card:hover { transform: translateY(-4px); }
+.home-landing-card:active { transform: scale(0.96); }
+
+/* 한자 장식 */
+.home-card-deco { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 2px; transition: all 0.3s; }
+
+.home-landing-card-title { font-size: 14px; font-weight: 800; color: #fff; position: relative; z-index: 1; }
+.home-landing-card-desc { font-size: 11px; color: var(--color-text-muted); line-height: 1.4; position: relative; z-index: 1; }
+
+/* 오늘의 운세 */
+.home-card--fortune { border-color: rgba(167,139,250,0.2); }
+.home-card--fortune:hover { border-color: rgba(167,139,250,0.5); box-shadow: 0 8px 24px rgba(167,139,250,0.15); background: rgba(167,139,250,0.06); }
+.home-card--fortune .home-card-deco { color: #A78BFA; text-shadow: 0 0 12px rgba(167,139,250,0.5); }
+
+/* 사주팔자 - 동양풍 */
+.home-card--saju { border-color: rgba(251,191,36,0.2); }
+.home-card--saju::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(251,191,36,0.06), transparent 70%); }
+.home-card--saju:hover { border-color: rgba(251,191,36,0.5); box-shadow: 0 8px 24px rgba(251,191,36,0.15); background: rgba(251,191,36,0.04); }
+.home-card--saju .home-card-deco { color: #FBBF24; font-family: serif; text-shadow: 0 0 12px rgba(251,191,36,0.4); }
+
+/* 토정비결 - 동양풍 */
+.home-card--tojeong { border-color: rgba(239,68,68,0.15); }
+.home-card--tojeong::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(239,68,68,0.05), transparent 70%); }
+.home-card--tojeong:hover { border-color: rgba(239,68,68,0.4); box-shadow: 0 8px 24px rgba(239,68,68,0.12); background: rgba(239,68,68,0.04); }
+.home-card--tojeong .home-card-deco { color: #EF4444; font-family: serif; text-shadow: 0 0 12px rgba(239,68,68,0.4); }
+
+/* 별자리 */
+.home-card--star { border-color: rgba(96,165,250,0.2); }
+.home-card--star:hover { border-color: rgba(96,165,250,0.5); box-shadow: 0 8px 24px rgba(96,165,250,0.15); background: rgba(96,165,250,0.04); }
+.home-card--star .home-card-deco { color: #60A5FA; font-size: 24px; animation: starTwinkle 2s ease-in-out infinite; }
+@keyframes starTwinkle { 0%,100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
+
+/* Real Weather Card */
+.home-real-weather { display: flex; align-items: center; gap: 12px; padding: 14px 18px; width: 100%; }
+.home-real-weather-icon { font-size: 36px; }
+.home-real-weather-info { display: flex; flex-direction: column; }
+.home-real-weather-temp { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
+.home-real-weather-desc { font-size: 13px; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
+.home-real-weather-label { margin-left: auto; font-size: 11px; color: var(--color-text-muted); font-weight: 600; padding: 4px 10px; background: rgba(255,255,255,0.06); border-radius: 8px; }
+
+/* Guest result - relative for weather bg */
+.home-guest-result { position: relative; z-index: 1; }
+
+/* ─── Hero ─── */
+.home-hero {
+  padding: 8px 4px 0;
+}
+
+.home-hero__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-hero__left {
+  flex: 1;
+}
+
+.home-hero__title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--color-accent-gold) 0%, #fff 50%, var(--color-accent-gold) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+
+.home-hero__sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.home-hero__date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 14px;
+  min-width: 70px;
+}
+
+.home-hero__day {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--color-accent-gold, #fbbf24);
+  line-height: 1;
+}
+
+.home-hero__date {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* ─── Swipe Container ─── */
+.home-fortune-section {
+  padding: 0;
+}
+
+.swipe-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 0;
+  padding: 0 4px;
+}
+
+.swipe-container::-webkit-scrollbar {
+  display: none;
+}
+
+.swipe-card {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.swipe-card-inner {
+  padding: 16px;
+  min-height: 200px;
+}
+
+.swipe-card-inner:hover {
+  transform: none;
+}
+
+.swipe-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.swipe-card-icon {
+  font-size: 22px;
+}
+
+.swipe-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--card-accent, var(--color-accent-gold));
+}
+
+/* ─── Swipe Card Content ─── */
+.swipe-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Score Circle */
+.home-score-wrap {
+  position: relative;
+  margin: 0 auto;
+}
+
+.home-score-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.home-score-fill {
+  transition: stroke-dashoffset 1s ease;
+}
+
+.home-score-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.home-score-num {
+  font-size: 30px;
+  font-weight: 900;
+  color: #fff;
+  display: block;
+  line-height: 1;
+}
+
+.home-score-unit {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Category items in swipe card */
+.swipe-card-categories {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.swipe-cat-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.swipe-cat-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.swipe-cat-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.swipe-cat-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-accent-gold);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.swipe-cat-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  word-break: keep-all;
+}
+
+/* Tip */
+.swipe-card-tip {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.swipe-card-tip p {
+  margin: 0;
+}
+
+/* Day analysis */
+.swipe-card-analysis {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(244, 114, 182, 0.08);
+  border: 1px solid rgba(244, 114, 182, 0.15);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.swipe-card-analysis p {
+  margin: 0;
+}
+
+/* Lucky info in swipe card */
+.swipe-card-lucky {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.swipe-lucky-item {
+  flex: 1;
+  text-align: center;
+}
+
+.swipe-lucky-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.swipe-lucky-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-accent-gold);
+}
+
+.swipe-lucky-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Dot Indicators ─── */
+.swipe-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0 4px;
+}
+
+.swipe-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.swipe-dot.active {
+  background: var(--color-accent-gold);
+  width: 24px;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+
+/* ─── Fortune Loading ─── */
+.home-fortune-loading {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--color-text-muted);
+}
+
+.home-fortune-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--color-accent-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 14px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.home-fortune-loading p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.home-fortune-loading-hint {
+  font-size: 12px !important;
+  color: var(--color-text-muted) !important;
+  margin-top: 6px !important;
+}
+
+.home-fortune-empty {
+  text-align: center;
+  padding: 32px 20px;
+  margin: 0 4px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* ─── Guest Section ─── */
+.home-guest-section {
+  padding: 0 4px;
+}
+
+.home-guest {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 폼 카드에서 hover 흔들림 방지 */
+.home-guest:hover {
+  transform: none !important;
+  background: var(--color-glass) !important;
+  border-color: var(--color-glass-border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.home-guest__title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.home-guest__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-guest__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.home-guest__toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.home-guest__toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.home-guest__toggle-btn.active {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.5);
+  color: #fff;
+}
+
+.home-guest__input {
+  width: 100%;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.home-guest__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23999' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* select option 텍스트가 보이도록 */
+.home-guest__select option {
+  background: #1a0533;
+  color: #fff;
+}
+
+/* date input 캘린더 아이콘 & 텍스트 */
+.home-guest__input[type="date"] {
+  color-scheme: dark;
+}
+
+.home-guest__input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+.home-guest__input:focus {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.home-guest__submit-full {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--color-accent-gold, #fbbf24), #f59e0b);
+  color: #1a0533;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+
+.home-guest__submit-full:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.home-guest__submit-full:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+}
+
+.home-guest__link {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.home-guest__link:hover {
+  color: var(--color-primary-light);
+}
+
+/* ─── Guest Result (Inline) ─── */
+.home-guest-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.home-guest-result-header {
+  text-align: center;
+}
+
+.home-guest-result-header h3 {
+  font-size: 18px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--color-accent-gold) 0%, #fff 50%, var(--color-accent-gold) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+.home-guest-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--color-accent-gold);
+  margin-top: 8px;
+}
+
+.home-guest-fortunes {
+  width: 100%;
+}
+
+.home-guest-fortunes .fortune-card {
+  margin-bottom: 8px;
+}
+
+.home-guest-reset-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+
+.home-guest-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* ─── Zodiac Grid Section ─── */
+.home-grid-section {
+  padding: 0 2px;
+}
+
+.home-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.home-grid-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text, #fff);
+}
+
+.home-grid-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* Skeleton loading */
+.home-loading {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+/* ─── CTA Button ─── */
+.home-cta {
+  padding: 4px 2px 0;
+}
+
+.home-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--color-primary, #7c3aed), #a855f7);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow:
+    0 4px 16px rgba(124, 58, 237, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.home-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 24px rgba(124, 58, 237, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.home-cta-btn:active {
+  transform: scale(0.97);
+}
+
+.home-cta-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* ─── Fade In Animation ─── */
+.fade-in {
+  animation: fadeInUp 0.4s ease;
+}
