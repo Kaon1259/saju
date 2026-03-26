@@ -10,3 +10,4 @@ build/
 server/src/main/resources/application.yml
 server.zip
 .claude/
+backup/
