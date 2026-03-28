@@ -40,7 +40,7 @@ CREATE TABLE `bloodtype_fortune` (
   `zodiac_animal` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UKh8cgu3f4nh9mwe4un3d1ptyl` (`blood_type`,`zodiac_animal`,`fortune_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,7 +64,7 @@ CREATE TABLE `constellation_fortune` (
   `sign` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UKh99p6bueaplbmx09a0ibd8jlv` (`sign`,`fortune_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,7 +89,7 @@ CREATE TABLE `daily_fortune` (
   `zodiac_animal` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UKouu6xak1aayn4s5fil6e6y3o6` (`zodiac_animal`,`fortune_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +115,26 @@ CREATE TABLE `mbti_fortune` (
   `zodiac_animal` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK929n9kwkpol0po765fte6ksqx` (`mbti_type`,`zodiac_animal`,`fortune_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `special_fortune`
+--
+
+DROP TABLE IF EXISTS `special_fortune`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `special_fortune` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `cache_key` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `fortune_date` date NOT NULL,
+  `fortune_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `result_json` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKqxs597o8xwpmx2flddk2h1nc0` (`fortune_type`,`cache_key`,`fortune_date`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,8 +155,15 @@ CREATE TABLE `users` (
   `calendar_type` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
   `blood_type` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `mbti_type` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_birth_date` date DEFAULT NULL,
+  `partner_birth_time` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_blood_type` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_mbti_type` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `relationship_status` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_du5v5sr43g5bfnji4vb8hg5s3` (`phone`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -149,4 +175,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-26 23:51:20
+-- Dump completed on 2026-03-29  8:20:18
