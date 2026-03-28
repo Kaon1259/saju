@@ -31,8 +31,11 @@ public class MbtiController {
 
     @GetMapping("/compatibility")
     public ResponseEntity<Map<String, Object>> getCompatibility(
-            @RequestParam String type1,
-            @RequestParam String type2) {
+            @RequestParam(required = false) String type1,
+            @RequestParam(required = false) String type2) {
+        if (type1 == null || type1.isBlank() || type2 == null || type2.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "type1과 type2를 모두 선택해주세요."));
+        }
         return ResponseEntity.ok(mbtiFortuneService.getCompatibility(type1, type2));
     }
 }

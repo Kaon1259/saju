@@ -207,10 +207,49 @@
   font-weight: 600;
 }
 
+/* ─── 읽어주기 바 ─── */
+.home-speech-bar {
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
 /* ─── Swipe Container ─── */
 .home-fortune-section {
   padding: 0;
 }
+
+/* ─── 운세 메뉴 카드 (로그인) ─── */
+.home-menu-cards { display: flex; flex-direction: column; gap: 10px; }
+
+.home-menu-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; border-radius: 16px; border: none; cursor: pointer;
+  text-align: left; width: 100%;
+  transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  border-left: 3px solid var(--menu-accent, #fbbf24);
+}
+.home-menu-card:hover { transform: translateX(4px); }
+.home-menu-card:active { transform: scale(0.98); }
+
+.home-menu-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.home-menu-icon { font-size: 28px; flex-shrink: 0; }
+.home-menu-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.home-menu-label { font-size: 15px; font-weight: 800; color: var(--color-text); }
+.home-menu-summary {
+  font-size: 13px; color: var(--color-text-secondary); line-height: 1.4;
+  margin: 0; overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+
+.home-menu-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.home-menu-score { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+.home-menu-score small { font-size: 12px; font-weight: 600; opacity: 0.7; margin-left: 1px; }
+.home-menu-arrow { font-size: 22px; color: var(--color-text-muted); font-weight: 300; }
+
+/* 라이트 모드 */
+[data-theme="light"] .home-menu-label { color: #111; }
+[data-theme="light"] .home-menu-summary { color: #555; }
+[data-theme="light"] .home-menu-arrow { color: #aaa; }
 
 .swipe-container {
   display: flex;
@@ -697,6 +736,193 @@
   color: #fff;
 }
 
+/* ─── 특수 운세 배너 ─── */
+.home-special-section { padding: 0 16px; margin-bottom: 20px; }
+.home-special-title { font-size: 17px; font-weight: 800; color: var(--color-text); margin: 0 0 12px; }
+/* ═══ 오늘의 연애 온도 ═══ */
+.home-love-section {
+  margin: 0 16px 16px;
+  padding: 20px 14px 14px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(233,30,99,0.1), rgba(255,107,107,0.04), rgba(224,64,251,0.07));
+  border: 1.5px solid rgba(233,30,99,0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 떠다니는 하트 배경 */
+.home-love-hearts-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.home-love-float-heart {
+  position: absolute;
+  bottom: -10px;
+  left: var(--hf-x);
+  font-size: var(--hf-size);
+  animation: homeLoveFloat var(--hf-dur) ease-out infinite;
+  animation-delay: var(--hf-delay);
+  opacity: 0;
+}
+
+@keyframes homeLoveFloat {
+  0% { transform: translateY(0) scale(0.5) rotate(-5deg); opacity: 0; }
+  12% { opacity: 0.6; }
+  60% { opacity: 0.25; }
+  100% { transform: translateY(-120px) scale(1.2) rotate(20deg); opacity: 0; }
+}
+
+/* 온도 표시 */
+.home-love-temp-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.home-love-temp-heart {
+  font-size: 38px;
+  filter: drop-shadow(0 0 12px var(--love-temp-color, #E91E63));
+  animation: loveTempPump 1.8s ease-in-out infinite;
+}
+
+@keyframes loveTempPump {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.18); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.1); }
+}
+
+.home-love-temp-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-love-temp-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 1px;
+}
+
+.home-love-temp-num {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.home-love-temp-msg {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 14px;
+  position: relative;
+  z-index: 1;
+  line-height: 1.5;
+}
+
+/* 연애 4종 카드 */
+.home-love-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; position: relative; z-index: 1; }
+.home-love-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 14px 4px; border-radius: 14px; border: none; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative; overflow: hidden;
+}
+.home-love-card:hover { transform: translateY(-3px); }
+.home-love--relationship {
+  background: linear-gradient(160deg, rgba(156,39,176,0.18), rgba(156,39,176,0.05));
+  border: 1.5px solid rgba(156,39,176,0.25);
+}
+.home-love--relationship:hover { box-shadow: 0 4px 16px rgba(156,39,176,0.25); }
+.home-love--reunion {
+  background: linear-gradient(160deg, rgba(233,30,99,0.18), rgba(233,30,99,0.05));
+  border: 1.5px solid rgba(233,30,99,0.25);
+}
+.home-love--reunion:hover { box-shadow: 0 6px 20px rgba(233,30,99,0.25); }
+.home-love--remarriage {
+  background: linear-gradient(160deg, rgba(255,152,0,0.18), rgba(255,152,0,0.05));
+  border: 1.5px solid rgba(255,152,0,0.25);
+}
+.home-love--remarriage:hover { box-shadow: 0 6px 20px rgba(255,152,0,0.25); }
+.home-love--blind {
+  background: linear-gradient(160deg, rgba(224,64,251,0.18), rgba(224,64,251,0.05));
+  border: 1.5px solid rgba(224,64,251,0.25);
+}
+.home-love--blind:hover { box-shadow: 0 6px 20px rgba(224,64,251,0.25); }
+.home-love-icon { font-size: 22px; }
+.home-love-label { font-size: 12px; font-weight: 800; color: var(--color-text); }
+
+/* 연애 온도 라이트 모드 */
+[data-theme="light"] .home-love-section { background: linear-gradient(180deg, rgba(233,30,99,0.04), transparent 80%); }
+[data-theme="light"] .home-love-temp-label { color: #444; }
+[data-theme="light"] .home-love-temp-msg { color: #444; }
+[data-theme="light"] .home-love-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+[data-theme="light"] .home-love-label { color: #222; }
+[data-theme="light"] .home-love--relationship { background: linear-gradient(160deg, rgba(156,39,176,0.12), rgba(156,39,176,0.03)); border-color: rgba(156,39,176,0.2); }
+[data-theme="light"] .home-love--reunion { background: linear-gradient(160deg, rgba(233,30,99,0.12), rgba(233,30,99,0.03)); border-color: rgba(233,30,99,0.2); }
+[data-theme="light"] .home-love--remarriage { background: linear-gradient(160deg, rgba(255,152,0,0.12), rgba(255,152,0,0.03)); border-color: rgba(255,152,0,0.2); }
+[data-theme="light"] .home-love--blind { background: linear-gradient(160deg, rgba(224,64,251,0.12), rgba(224,64,251,0.03)); border-color: rgba(224,64,251,0.2); }
+
+.home-special-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.home-special-card {
+  display: flex; flex-direction: column; gap: 4px; padding: 16px 14px;
+  border-radius: 16px; border: none; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative; overflow: hidden; text-align: left;
+}
+.home-special-card:hover { transform: translateY(-3px); }
+.home-special-card--love {
+  background: linear-gradient(135deg, rgba(233,30,99,0.15), rgba(255,107,107,0.08));
+  border: 1.5px solid rgba(233,30,99,0.2);
+}
+.home-special-card--love:hover { box-shadow: 0 6px 20px rgba(233,30,99,0.2); }
+.home-special-card--morning {
+  background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.08));
+  border: 1.5px solid rgba(251,191,36,0.2);
+}
+.home-special-card--morning:hover { box-shadow: 0 6px 20px rgba(251,191,36,0.2); }
+.home-special-card--time {
+  background: linear-gradient(135deg, rgba(33,150,243,0.15), rgba(66,165,245,0.08));
+  border: 1.5px solid rgba(33,150,243,0.2);
+}
+.home-special-card--time:hover { box-shadow: 0 6px 20px rgba(33,150,243,0.2); }
+.home-special-icon { font-size: 24px; }
+.home-special-label { font-size: 14px; font-weight: 800; color: var(--color-text); }
+.home-special-desc { font-size: 11px; color: var(--color-text-muted); }
+.home-special-arrow {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; color: var(--color-text-muted); opacity: 0.5;
+}
+
+/* ─── 새 기능 그리드 ─── */
+.home-new-section { position: relative; z-index: 1; }
+.home-new-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.home-new-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 18px 8px 14px; border-radius: 16px; border: none; cursor: pointer;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--new-color) 15%, transparent), color-mix(in srgb, var(--new-color) 4%, transparent));
+  border: 1.5px solid color-mix(in srgb, var(--new-color) 25%, transparent);
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.home-new-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px color-mix(in srgb, var(--new-color) 25%, transparent); }
+.home-new-icon { font-size: 28px; }
+.home-new-label { font-size: 14px; font-weight: 800; color: var(--color-text); }
+.home-new-desc { font-size: 11px; color: var(--color-text-muted); }
+
+[data-theme="light"] .home-new-card {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--new-color) 8%, transparent), color-mix(in srgb, var(--new-color) 2%, transparent));
+  border-color: color-mix(in srgb, var(--new-color) 20%, transparent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .home-new-label { color: #222; }
+
 /* ─── Zodiac Grid Section ─── */
 .home-grid-section {
   padding: 0 2px;
@@ -779,3 +1005,267 @@
 .fade-in {
   animation: fadeInUp 0.4s ease;
 }
+
+/* ═══════════════════════════════════════════ */
+/* ─── 오늘의 일진 섹션 ─── */
+/* ═══════════════════════════════════════════ */
+.home-iljin-section { position: relative; z-index: 1; }
+
+.home-iljin-card {
+  padding: 20px; border-radius: 18px; position: relative; overflow: hidden;
+}
+.home-iljin-card::before {
+  content: ''; position: absolute; top: -30%; right: -20%; width: 140px; height: 140px;
+  background: radial-gradient(circle, rgba(251,191,36,0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.home-iljin-badge {
+  font-size: 12px; font-weight: 700; color: var(--color-text-muted);
+  letter-spacing: 0.5px; text-transform: uppercase; display: block; margin-bottom: 14px;
+}
+
+.home-iljin-main {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.home-iljin-emoji {
+  font-size: 44px;
+  filter: drop-shadow(0 0 16px var(--iljin-glow, rgba(251,191,36,0.4)));
+  animation: iljinPulse 3s ease-in-out infinite;
+}
+@keyframes iljinPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+.home-iljin-info { display: flex; flex-direction: column; gap: 3px; }
+.home-iljin-name { font-size: 22px; font-weight: 900; color: var(--color-text); letter-spacing: -0.3px; }
+.home-iljin-el-tag { font-size: 13.5px; font-weight: 600; }
+
+/* 오행 에너지 바 */
+.home-iljin-bars { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+.home-iljin-bar-row { display: flex; align-items: center; gap: 8px; }
+.home-iljin-bar-row.home-iljin-bar--dominant .home-iljin-bar-label { font-weight: 800; color: var(--color-text); }
+.home-iljin-bar-icon { font-size: 15px; width: 22px; text-align: center; }
+.home-iljin-bar-label { font-size: 12.5px; font-weight: 600; color: var(--color-text-muted); width: 18px; }
+.home-iljin-bar-track {
+  flex: 1; height: 8px; border-radius: 4px;
+  background: rgba(255,255,255,0.06); overflow: hidden;
+}
+.home-iljin-bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.home-iljin-msg {
+  font-size: 14.5px; font-weight: 500; color: var(--color-text-secondary);
+  text-align: center; line-height: 1.5; margin: 0;
+  padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* 히어로 일진 미니 뱃지 */
+.home-hero-iljin {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: var(--color-text-secondary);
+  margin-top: 8px;
+  background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 20px;
+}
+.home-hero-iljin-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.home-hero-iljin-el { font-weight: 800; }
+
+/* 라이트 모드 */
+[data-theme="light"] .home-iljin-bar-track { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .home-iljin-msg { color: #555; border-top-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .home-iljin-badge { color: #888; }
+[data-theme="light"] .home-hero-iljin { background: rgba(0,0,0,0.05); color: #555; }
+[data-theme="light"] .home-iljin-bar-row.home-iljin-bar--dominant .home-iljin-bar-label { color: #222; }
+
+/* ═══════════════════════════════════════════ */
+/* ─── 연애 운세 바텀시트 모달 ─── */
+/* ═══════════════════════════════════════════ */
+.love-modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.70);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: loveOverlayIn 0.25s ease;
+}
+@keyframes loveOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.love-modal-sheet {
+  width: 100%; max-width: 480px; max-height: 92vh;
+  background: var(--color-surface, #1c1c32);
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto; overflow-x: hidden;
+  animation: loveSheetUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
+}
+@keyframes loveSheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.love-modal-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.25); margin: 10px auto 0;
+}
+
+.love-modal-header {
+  text-align: center; padding: 16px 20px 12px; position: relative;
+}
+.love-modal-icon { font-size: 40px; display: block; margin-bottom: 6px; }
+.love-modal-title { font-size: 24px; font-weight: 900; color: #fff; margin: 0 0 4px; letter-spacing: -0.3px; }
+.love-modal-desc { font-size: 14.5px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+.love-modal-close {
+  position: absolute; top: 14px; right: 16px;
+  background: rgba(255,255,255,0.12); border: none; color: rgba(255,255,255,0.7);
+  width: 34px; height: 34px; border-radius: 50%; font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.love-modal-close:hover { background: rgba(255,255,255,0.22); }
+
+.love-modal-body { padding: 0 22px 28px; }
+
+/* 폼 */
+.love-modal-autofill {
+  width: 100%; padding: 11px; border-radius: 12px;
+  border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
+  color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s;
+}
+.love-modal-autofill:hover { background: rgba(155,89,182,0.15); border-color: rgba(155,89,182,0.6); }
+[data-theme="light"] .love-modal-autofill { color: #7c3aed; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.3); }
+[data-theme="light"] .love-modal-autofill:hover { background: rgba(124,58,237,0.1); }
+
+.love-modal-form {
+  display: flex; flex-direction: column; gap: 20px;
+  animation: loveFormIn 0.4s ease;
+}
+@keyframes loveFormIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.love-modal-form.sliding-up {
+  animation: loveFormSlideUp 0.5s ease forwards;
+}
+@keyframes loveFormSlideUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+.love-modal-field { display: flex; flex-direction: column; gap: 9px; }
+.love-modal-label { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.2px; }
+.love-modal-opt { font-size: 12.5px; color: rgba(255,255,255,0.5); font-weight: 500; }
+.love-modal-input {
+  padding: 15px 16px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.1); color: #fff; font-size: 16px;
+  line-height: 1.4; letter-spacing: -0.1px;
+}
+.love-modal-input::placeholder { color: rgba(255,255,255,0.4); }
+.love-modal-input:focus { outline: none; border-color: #C49BF0; box-shadow: 0 0 0 3px rgba(176,124,232,0.25); background: rgba(255,255,255,0.12); }
+.love-modal-toggle { display: flex; gap: 10px; }
+.love-modal-toggle-btn {
+  flex: 1; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6);
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.love-modal-toggle-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+.love-modal-toggle-btn.active {
+  border-color: #C49BF0; background: rgba(176,124,232,0.25); color: #fff;
+  box-shadow: 0 0 0 3px rgba(176,124,232,0.15);
+}
+.love-modal-partner-btn {
+  background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px;
+  color: rgba(255,255,255,0.65);
+  font-size: 14px; font-weight: 600; padding: 12px; cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.love-modal-partner-btn:hover { border-color: rgba(233,30,99,0.4); color: rgba(255,255,255,0.8); }
+.love-modal-partner {
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 16px; border-radius: 14px;
+  background: rgba(147,51,234,0.06); border: 1px solid rgba(147,51,234,0.2);
+}
+.love-modal-submit {
+  width: 100%; padding: 16px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #E91E63, #FF6B6B);
+  color: #fff; font-size: 17px; font-weight: 800; cursor: pointer;
+  transition: all 0.3s; margin-top: 8px; letter-spacing: -0.2px;
+  box-shadow: 0 4px 16px rgba(233,30,99,0.25);
+}
+.love-modal-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(233,30,99,0.35); }
+.love-modal-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* 로딩 */
+.love-modal-loading {
+  text-align: center; padding: 40px 0; color: rgba(255,255,255,0.85);
+  font-size: 15px; font-weight: 600;
+  animation: loveLoadIn 0.5s ease 0.2s both;
+}
+@keyframes loveLoadIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.love-modal-loading-hearts { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
+.love-modal-loading-heart { font-size: 32px; animation: lovePulse 1s ease-in-out infinite; }
+@keyframes lovePulse { 0%,100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.3); opacity: 1; } }
+
+/* 결과 */
+.love-modal-result { display: flex; flex-direction: column; gap: 12px; }
+.love-modal-score-card {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  padding: 28px 20px 18px; border-radius: 20px; overflow: hidden;
+  background: rgba(255,255,255,0.03);
+}
+.love-modal-heart-aura {
+  position: absolute; inset: -20%; pointer-events: none; opacity: 0.5;
+}
+.love-modal-heart-center { position: relative; z-index: 1; margin-bottom: 8px; }
+.love-modal-heart-big {
+  font-size: 80px; display: block; filter: drop-shadow(0 0 20px var(--heart-color, #ffc0cb));
+  animation: heartBeat 1.5s ease-in-out infinite;
+}
+@keyframes heartBeat { 0%,100% { transform: scale(1); } 15% { transform: scale(1.12); } 30% { transform: scale(1); } 45% { transform: scale(1.08); } }
+.love-modal-heart-num {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%);
+  font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.love-modal-heart-unit {
+  position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 28px), -10%);
+  font-size: 12px; color: rgba(255,255,255,0.7);
+}
+.love-modal-heart-grade { position: relative; z-index: 1; font-size: 20px; font-weight: 900; letter-spacing: 1px; }
+
+/* 행운 정보 */
+.love-modal-lucky { display: flex; justify-content: space-around; padding: 18px 16px; flex-wrap: wrap; gap: 10px; }
+.love-modal-lucky-item { text-align: center; }
+.love-modal-lucky-label { display: block; font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 5px; font-weight: 600; }
+.love-modal-lucky-value { font-size: 16px; font-weight: 800; color: #fbbf24; }
+
+.love-modal-reset {
+  width: 100%; padding: 15px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06); color: #e0e0e0;
+  font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.love-modal-reset:hover { background: rgba(255,255,255,0.1); }
+
+/* 라이트 모드 */
+[data-theme="light"] .love-modal-overlay { background: rgba(0,0,0,0.4); }
+[data-theme="light"] .love-modal-sheet { background: #fafafa; }
+[data-theme="light"] .love-modal-handle { background: rgba(0,0,0,0.18); }
+[data-theme="light"] .love-modal-close { background: rgba(0,0,0,0.08); color: #444; }
+[data-theme="light"] .love-modal-title { color: #111; }
+[data-theme="light"] .love-modal-label { color: #111; font-weight: 800; }
+[data-theme="light"] .love-modal-desc { color: #444; }
+[data-theme="light"] .love-modal-opt { color: #888; }
+[data-theme="light"] .love-modal-input {
+  border-color: rgba(0,0,0,0.2); background: #fff; color: #111;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+[data-theme="light"] .love-modal-input:focus { border-color: #9B59B6; box-shadow: 0 0 0 3px rgba(155,89,182,0.15); }
+[data-theme="light"] .love-modal-toggle-btn {
+  border-color: rgba(0,0,0,0.18); background: #fff; color: #444;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+[data-theme="light"] .love-modal-toggle-btn.active {
+  border-color: #9B59B6; background: rgba(147,51,234,0.1); color: #111;
+  box-shadow: 0 0 0 3px rgba(155,89,182,0.1);
+}
+[data-theme="light"] .love-modal-partner-btn { color: #444; }
+[data-theme="light"] .love-modal-partner { border-left-color: rgba(147,51,234,0.3); }
+[data-theme="light"] .love-modal-loading { color: #222; }
+[data-theme="light"] .love-modal-score-card { background: rgba(0,0,0,0.02); }
+[data-theme="light"] .love-modal-heart-num { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+[data-theme="light"] .love-modal-lucky-label { color: #555; }
+[data-theme="light"] .love-modal-lucky-value { color: #b8860b; }
+[data-theme="light"] .love-modal-reset { border-color: rgba(0,0,0,0.15); background: #fff; color: #222; }

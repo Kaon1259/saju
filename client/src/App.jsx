@@ -14,10 +14,27 @@ import Constellation from './pages/Constellation';
 import Tojeong from './pages/Tojeong';
 import Compatibility from './pages/Compatibility';
 import Manseryeok from './pages/Manseryeok';
+import Tarot from './pages/Tarot';
+import SpecialFortune from './pages/SpecialFortune';
+import ProfileEdit from './pages/ProfileEdit';
+import Dream from './pages/Dream';
+import FaceReading from './pages/FaceReading';
+import PsychTest from './pages/PsychTest';
+import Biorhythm from './pages/Biorhythm';
+import YearFortune from './pages/YearFortune';
+import MonthlyFortune from './pages/MonthlyFortune';
+import WeeklyFortune from './pages/WeeklyFortune';
 import './App.css';
 
 function Splash({ onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
+  const userProfile = (() => {
+    try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; }
+  })();
+  const isLoggedIn = !!localStorage.getItem('userId');
+  const relStatus = userProfile.relationshipStatus;
+  const isLovey = relStatus === 'IN_RELATIONSHIP' || relStatus === 'SOME';
+  const isSingle = isLoggedIn && !isLovey;
 
   useEffect(() => {
     const t1 = setTimeout(() => setFadeOut(true), 1200);
@@ -55,14 +72,65 @@ function Splash({ onDone }) {
         ))}
       </div>
 
+      {/* 로그인 + 연애중/썸: 러블리 하트 */}
+      {isLovey && (
+        <div className="splash-hearts">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <span key={i} className="splash-heart" style={{
+              left: `${5 + Math.random() * 90}%`,
+              animationDelay: `${Math.random() * 1.2}s`,
+              animationDuration: `${1.5 + Math.random() * 1}s`,
+              fontSize: `${12 + Math.random() * 18}px`,
+              color: ['#ff4081', '#e91e63', '#f06292', '#ff80ab', '#ff1744'][Math.floor(Math.random()*5)],
+            }}>{['❤','💕','💗','💖','✨'][Math.floor(Math.random()*5)]}</span>
+          ))}
+        </div>
+      )}
+
+      {/* 로그인 + 솔로: 별빛 강화 */}
+      {isSingle && (
+        <div className="splash-solo-sparkles">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <span key={i} className="splash-solo-star" style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 1.5}s`,
+              fontSize: `${6 + Math.random() * 12}px`,
+            }}>{['✦','⭐','💫','🌟'][Math.floor(Math.random()*4)]}</span>
+          ))}
+        </div>
+      )}
+
       {/* 메인 콘텐츠 */}
       <div className="splash-content">
-        <div className="splash-symbol">
-          <div className="splash-ring" />
-          <span className="splash-yin">☯</span>
-        </div>
-        <h1 className="splash-title">사주운세</h1>
-        <p className="splash-sub">사주팔자로 보는 당신의 운명</p>
+        {isLovey ? (
+          <>
+            <div className="splash-symbol splash-symbol--love">
+              <div className="splash-ring splash-ring--love" />
+              <span className="splash-yin splash-yin--love">💕</span>
+            </div>
+            <h1 className="splash-title splash-title--love">사주운세</h1>
+            <p className="splash-sub">{relStatus === 'IN_RELATIONSHIP' ? '사랑이 빛나는 오늘 하루' : '설레는 인연이 다가오고 있어요'}</p>
+          </>
+        ) : isSingle ? (
+          <>
+            <div className="splash-symbol">
+              <div className="splash-ring" />
+              <span className="splash-yin">🌟</span>
+            </div>
+            <h1 className="splash-title">사주운세</h1>
+            <p className="splash-sub">빛나는 당신의 하루가 시작됩니다</p>
+          </>
+        ) : (
+          <>
+            <div className="splash-symbol">
+              <div className="splash-ring" />
+              <span className="splash-yin">☯</span>
+            </div>
+            <h1 className="splash-title">사주운세</h1>
+            <p className="splash-sub">사주팔자로 보는 당신의 운명</p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -97,6 +165,16 @@ function App() {
               <Route path="/tojeong" element={<Tojeong />} />
               <Route path="/compatibility" element={<Compatibility />} />
               <Route path="/manseryeok" element={<Manseryeok />} />
+              <Route path="/tarot" element={<Tarot />} />
+              <Route path="/special" element={<SpecialFortune />} />
+              <Route path="/profile/edit" element={<ProfileEdit />} />
+              <Route path="/dream" element={<Dream />} />
+              <Route path="/face-reading" element={<FaceReading />} />
+              <Route path="/psych-test" element={<PsychTest />} />
+              <Route path="/biorhythm" element={<Biorhythm />} />
+              <Route path="/year-fortune" element={<YearFortune />} />
+              <Route path="/monthly-fortune" element={<MonthlyFortune />} />
+              <Route path="/weekly-fortune" element={<WeeklyFortune />} />
             </Routes>
           </main>
         </TransitionProvider>

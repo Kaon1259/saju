@@ -25,3 +25,11 @@ spring:
 claude:
   api-key: YOUR_CLAUDE_API_KEY
   model: claude-haiku-4-5-20251001
+
+# Naver Clova TTS (https://www.ncloud.com/product/aiService/clovaSpeech)
+clova:
+  tts:
+    client-id: YOUR_CLOVA_CLIENT_ID
+    client-secret: YOUR_CLOVA_CLIENT_SECRET
+    speaker: vdain        # vdain(여성,따뜻), nara(여성,밝음), jinho(남성,차분), ndain(아이)
+    cache-dir: ./tts-cache

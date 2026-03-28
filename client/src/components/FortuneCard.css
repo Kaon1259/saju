@@ -43,3 +43,7 @@
   border-radius: 1px;
   opacity: 0.5;
 }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .fortune-card__title { color: #111; }
+[data-theme="light"] .fortune-card__desc { color: #444; }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { analyzeSaju, getUserSaju, getDailyFortunes } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import SpeechButton from '../components/SpeechButton';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -123,6 +124,17 @@ function SajuAnalysis() {
         </section>
 
         <div className="saju-input glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          {localStorage.getItem('userId') && (
+            <button className="sf-autofill-btn" style={{ marginBottom: 12 }} onClick={() => {
+              try {
+                const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                if (p.birthDate) setBirthDate(p.birthDate);
+                if (p.gender) setGender(p.gender);
+                if (p.birthTime) setBirthTime(p.birthTime);
+                if (p.calendarType) setCalendarType(p.calendarType);
+              } catch {}
+            }}>✨ 내 정보로 채우기</button>
+          )}
           <div className="form-group">
             <label className="form-label">달력 구분</label>
             <div className="form-toggle">
@@ -233,6 +245,23 @@ function SajuAnalysis() {
 
       {activeTab === 'saju' ? (
         <>
+          {/* Speech Button */}
+          {result && (
+            <div style={{ margin: '12px 0' }}>
+              <SpeechButton
+                label="사주 분석 읽어주기"
+                text={[
+                  result.personalityReading ? `일간 성격 분석입니다. ${result.personalityReading}` : '',
+                  result.yearFortune ? `${new Date().getFullYear()}년 운세입니다. ${result.yearFortune}` : '',
+                ].filter(Boolean).join(' ')}
+                summaryText={[
+                  result.personalityReading ? `일간 성격 분석: ${result.personalityReading.split('.').slice(0,2).join('.')}.` : '',
+                  result.yearFortune ? `${new Date().getFullYear()}년 운세: ${result.yearFortune.split('.').slice(0,2).join('.')}.` : '',
+                ].filter(Boolean).join(' ')}
+              />
+            </div>
+          )}
+
           {/* Four Pillars */}
           <section className="saju-pillars glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
             <h2 className="saju-section-title">사주팔자 (四柱八字)</h2>
@@ -495,6 +524,27 @@ function SajuAnalysis() {
         </>
       ) : (
         <>
+          {/* Speech Button */}
+          {todayFortune && (
+            <div style={{ margin: '12px 0' }}>
+              <SpeechButton
+                label="오늘의 운세 읽어주기"
+                text={[
+                  todayFortune.score ? `오늘의 운세 점수는 ${todayFortune.score}점입니다.` : '',
+                  todayFortune.overall ? `총운입니다. ${todayFortune.overall}` : '',
+                  todayFortune.love ? `애정운입니다. ${todayFortune.love}` : '',
+                  todayFortune.money ? `재물운입니다. ${todayFortune.money}` : '',
+                  todayFortune.health ? `건강운입니다. ${todayFortune.health}` : '',
+                  todayFortune.work ? `직장운입니다. ${todayFortune.work}` : '',
+                ].filter(Boolean).join(' ')}
+                summaryText={[
+                  todayFortune.score ? `오늘의 운세 점수는 ${todayFortune.score}점입니다.` : '',
+                  todayFortune.overall ? `총운: ${todayFortune.overall.split('.').slice(0,2).join('.')}.` : '',
+                ].filter(Boolean).join(' ')}
+              />
+            </div>
+          )}
+
           {/* Today Fortune Score */}
           {todayFortune && (
             <>

@@ -18,6 +18,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String phone;
+
     @Column(nullable = false)
     private String name;
 
@@ -41,6 +44,17 @@ public class User {
 
     @Column(length = 4)
     private String mbtiType;
+
+    @Column(length = 20)
+    private String relationshipStatus; // IN_RELATIONSHIP, SOME, SINGLE
+
+    // 상대방 정보
+    private LocalDate partnerBirthDate;
+    private String partnerBirthTime;
+    @Column(length = 4)
+    private String partnerBloodType;
+    @Column(length = 4)
+    private String partnerMbtiType;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

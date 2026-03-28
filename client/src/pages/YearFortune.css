@@ -1,0 +1,662 @@
+/* ═══════════════════════════════════════════════════
+   2026 신년운세 - 축제 골드/레드 테마
+   ═══════════════════════════════════════════════════ */
+
+.yf-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px 16px 100px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* ═══ 배경 효과 ═══ */
+.yf-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.yf-sparkle {
+  position: absolute;
+  color: rgba(255, 215, 0, 0.4);
+  animation: yfSparkle 3s ease-in-out infinite;
+}
+
+@keyframes yfSparkle {
+  0%, 100% { transform: scale(0.5) rotate(0deg); opacity: 0.1; }
+  50% { transform: scale(1.3) rotate(180deg); opacity: 0.7; }
+}
+
+.yf-firework {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FFD700;
+  animation: yfFirework 3s ease-out infinite;
+}
+
+@keyframes yfFirework {
+  0% { transform: scale(0); opacity: 1; box-shadow: none; }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+    box-shadow:
+      0 -20px 0 #ff3d7f, 0 20px 0 #fbbf24,
+      -20px 0 0 #4ade80, 20px 0 0 #60a5fa,
+      -14px -14px 0 #f472b6, 14px -14px 0 #a78bfa,
+      -14px 14px 0 #fbbf24, 14px 14px 0 #ff6b6b;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+    box-shadow:
+      0 -40px 0 transparent, 0 40px 0 transparent,
+      -40px 0 0 transparent, 40px 0 0 transparent,
+      -28px -28px 0 transparent, 28px -28px 0 transparent,
+      -28px 28px 0 transparent, 28px 28px 0 transparent;
+  }
+}
+
+/* ═══ 히어로 ═══ */
+.yf-hero {
+  text-align: center;
+  padding: 24px 0 16px;
+  position: relative;
+}
+
+.yf-hero-glow {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at 50% 60%, rgba(255, 215, 0, 0.1), transparent 70%);
+  pointer-events: none;
+}
+
+.yf-hero-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 8px;
+  animation: yfHeroBounce 2s ease-in-out infinite;
+}
+
+@keyframes yfHeroBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.yf-title {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FFD700, #FF6B6B, #FFD700);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  animation: yfTitleShimmer 3s ease-in-out infinite;
+}
+
+@keyframes yfTitleShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.yf-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+/* ═══ 입력 폼 ═══ */
+.yf-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.yf-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.yf-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.yf-input {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.yf-input:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.yf-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.yf-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.yf-toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.yf-toggle-btn.active {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.12);
+  color: var(--color-text);
+}
+
+.yf-submit {
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #FFD700, #FF6B6B);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.yf-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+}
+
+.yf-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ═══ 로딩 ═══ */
+.yf-loading {
+  text-align: center;
+  padding: 50px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.yf-loading-fireworks {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.yf-loading-burst {
+  font-size: 32px;
+  animation: yfBurst 1.5s ease-in-out infinite;
+}
+
+@keyframes yfBurst {
+  0%, 100% { transform: scale(1) translateY(0); opacity: 0.6; }
+  50% { transform: scale(1.3) translateY(-10px); opacity: 1; }
+}
+
+.yf-loading-text {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.yf-dots::after {
+  content: '';
+  animation: yfDots 1.5s steps(4, end) infinite;
+}
+
+@keyframes yfDots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+/* ═══ 결과 ═══ */
+.yf-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 테마 배지 */
+.yf-theme-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.yf-theme-emoji {
+  font-size: 32px;
+}
+
+.yf-theme-text {
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FFD700, #FF6B6B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 점수 원형 */
+.yf-score-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.yf-score-circle {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 8px;
+}
+
+.yf-score-circle svg {
+  display: block;
+}
+
+.yf-score-ring {
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
+.yf-score-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.yf-score-num {
+  display: block;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.yf-score-unit {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.yf-grade {
+  font-size: 20px;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+/* 요약 */
+.yf-summary {
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.yf-summary p {
+  margin: 0;
+}
+
+/* 섹션 */
+.yf-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.yf-section-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.yf-section-title span {
+  font-size: 18px;
+}
+
+/* 분기별 타임라인 */
+.yf-quarters-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.yf-quarter-card {
+  padding: 14px 12px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  border: 1.5px solid var(--color-glass-border);
+  transition: border-color 0.3s;
+}
+
+.yf-quarter-card:hover {
+  border-color: var(--q-color);
+}
+
+.yf-quarter-icon {
+  font-size: 22px;
+}
+
+.yf-quarter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.yf-quarter-score-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 2px 0;
+}
+
+.yf-quarter-score-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+
+.yf-quarter-score {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--q-color);
+}
+
+.yf-quarter-keyword {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* 행운/주의 달 */
+.yf-months {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.yf-months-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.yf-months-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  min-width: 80px;
+}
+
+.yf-months-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.yf-month-badge {
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.yf-month-badge--lucky {
+  background: rgba(255, 215, 0, 0.15);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.yf-month-badge--caution {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+/* 럭키 정보 */
+.yf-lucky {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.yf-lucky-item {
+  text-align: center;
+}
+
+.yf-lucky-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.yf-lucky-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #FFD700;
+}
+
+/* 읽어주기 */
+.yf-speech-area {
+  margin: 4px 0;
+}
+
+/* 액션 버튼 */
+.yf-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.yf-action-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.yf-action-btn:hover {
+  border-color: #FFD700;
+}
+
+.yf-share-btn:hover {
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.yf-reset-btn:hover {
+  background: rgba(147, 51, 234, 0.08);
+  border-color: #9B59B6;
+}
+
+/* ═══ 공통 ═══ */
+.fade-in {
+  animation: yfFadeIn 0.4s ease;
+}
+
+@keyframes yfFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ 라이트 모드 ═══ */
+[data-theme="light"] .yf-sparkle {
+  color: rgba(255, 165, 0, 0.3);
+}
+
+[data-theme="light"] .yf-label {
+  color: #333;
+}
+
+[data-theme="light"] .yf-input {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #111;
+}
+
+[data-theme="light"] .yf-input:focus {
+  border-color: #E8A800;
+}
+
+[data-theme="light"] .yf-select {
+  background-color: #fff;
+}
+
+[data-theme="light"] .yf-toggle-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #555;
+}
+
+[data-theme="light"] .yf-toggle-btn.active {
+  border-color: #E8A800;
+  background: rgba(255, 215, 0, 0.08);
+  color: #111;
+}
+
+[data-theme="light"] .yf-subtitle {
+  color: #666;
+}
+
+[data-theme="light"] .yf-summary {
+  color: #444;
+}
+
+[data-theme="light"] .yf-quarter-score-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .yf-quarter-keyword {
+  background: rgba(0, 0, 0, 0.04);
+  color: #555;
+}
+
+[data-theme="light"] .yf-month-badge--lucky {
+  background: rgba(184, 134, 11, 0.1);
+  color: #96700a;
+  border-color: rgba(184, 134, 11, 0.25);
+}
+
+[data-theme="light"] .yf-month-badge--caution {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+[data-theme="light"] .yf-lucky-value {
+  color: #96700a;
+}
+
+[data-theme="light"] .yf-action-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #333;
+}
+
+[data-theme="light"] .yf-action-btn:hover {
+  border-color: #E8A800;
+}
+
+[data-theme="light"] .yf-hero-glow {
+  background: radial-gradient(circle at 50% 60%, rgba(255, 215, 0, 0.06), transparent 70%);
+}
+
+[data-theme="light"] .yf-score-circle svg circle:first-child {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .yf-loading-text {
+  color: #666;
+}
+
+[data-theme="light"] .yf-section-title {
+  color: #222;
+}
+
+[data-theme="light"] .yf-theme-badge {
+  background: rgba(255, 215, 0, 0.04);
+}
+
+[data-theme="light"] .sf-autofill-btn {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.06);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+[data-theme="light"] .sf-autofill-btn:hover {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+[data-theme="light"] .yf-months-label {
+  color: #444;
+}

@@ -184,3 +184,71 @@
   20% { opacity: 1; }
   100% { transform: translateY(100vh); opacity: 0; }
 }
+
+/* ─── 스플래시: 연애중/썸 러블리 효과 ─── */
+.splash-hearts { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.splash-heart {
+  position: absolute; bottom: -30px;
+  opacity: 0;
+  animation: splashHeartFloat ease-out forwards;
+  filter: drop-shadow(0 0 6px rgba(255,64,129,0.3));
+}
+@keyframes splashHeartFloat {
+  0% { opacity: 0; transform: translateY(0) scale(0.4) rotate(0deg); }
+  15% { opacity: 0.85; }
+  100% { opacity: 0; transform: translateY(-100vh) scale(1.1) rotate(20deg); }
+}
+
+.splash-ring--love { border-top-color: #E91E63; border-right-color: rgba(233,30,99,0.3); }
+.splash-yin--love { filter: drop-shadow(0 0 24px rgba(233,30,99,0.5)); }
+.splash-title--love {
+  background: linear-gradient(135deg, #E91E63, #fff, #FF6B6B);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* 솔로: 별빛 강화 */
+.splash-solo-sparkles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.splash-solo-star {
+  position: absolute; opacity: 0;
+  animation: splashSoloStar 2s ease-in-out infinite;
+}
+@keyframes splashSoloStar {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.9; transform: scale(1.2); }
+}
+
+/* ─── 스플래시 라이트 모드 ─── */
+[data-theme="light"] .splash {
+  background: radial-gradient(ellipse at 50% 40%, #f5f0ff 0%, #e8e0f0 40%, #ddd5ee 100%);
+}
+[data-theme="light"] .splash-ring {
+  border-top-color: #9B59B6;
+  border-right-color: rgba(155, 89, 182, 0.3);
+}
+[data-theme="light"] .splash-yin {
+  filter: drop-shadow(0 0 20px rgba(155, 89, 182, 0.4));
+}
+[data-theme="light"] .splash-title {
+  background: linear-gradient(135deg, #7c3aed, #333, #7c3aed);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+[data-theme="light"] .splash-sub { color: rgba(0, 0, 0, 0.4); }
+[data-theme="light"] .splash-star { color: rgba(124, 58, 237, 0.3); }
+[data-theme="light"] .splash-lightning {
+  background: radial-gradient(ellipse at 30% 20%, rgba(167, 139, 250, 0.2) 0%, transparent 50%);
+}
+[data-theme="light"] .splash-lightning--2 {
+  background: radial-gradient(ellipse at 70% 30%, rgba(155, 89, 182, 0.15) 0%, transparent 50%);
+}
+[data-theme="light"] .splash-drop {
+  background: linear-gradient(to bottom, transparent, rgba(124, 58, 237, 0.35), transparent);
+}
+[data-theme="light"] .splash-title--love {
+  background: linear-gradient(135deg, #c2185b, #333, #e91e63);
+  background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+[data-theme="light"] .splash-ring--love { border-top-color: #c2185b; border-right-color: rgba(194,24,91,0.3); }
+[data-theme="light"] .splash-yin--love { filter: drop-shadow(0 0 20px rgba(194,24,91,0.3)); }

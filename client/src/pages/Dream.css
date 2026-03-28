@@ -1,0 +1,811 @@
+/* ═══════════════════════════════════════════════════
+   꿈해몽 - 달빛 신비 테마
+   ═══════════════════════════════════════════════════ */
+
+/* ═══ 페이지 ═══ */
+.dream-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px 16px 100px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* ═══ 신비로운 배경 ═══ */
+.dream-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(88, 28, 135, 0.15), transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(30, 58, 138, 0.12), transparent 60%);
+}
+
+.dream-star {
+  position: absolute;
+  color: rgba(196, 181, 253, 0.7);
+  animation: dreamStarTwinkle var(--dur, 4s) ease-in-out infinite;
+}
+
+@keyframes dreamStarTwinkle {
+  0%, 100% { opacity: 0.1; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.5); }
+}
+
+.dream-mist {
+  position: absolute;
+  width: 200%;
+  height: 200px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.06;
+}
+
+.dream-mist--1 {
+  background: #7c3aed;
+  top: 10%;
+  left: -50%;
+  animation: dreamMist1 18s ease-in-out infinite;
+}
+
+.dream-mist--2 {
+  background: #1e40af;
+  bottom: 5%;
+  right: -50%;
+  animation: dreamMist2 22s ease-in-out infinite;
+}
+
+@keyframes dreamMist1 {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(30px) translateY(-20px); }
+}
+
+@keyframes dreamMist2 {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-25px) translateY(15px); }
+}
+
+/* ═══ 히어로 ═══ */
+.dream-hero {
+  text-align: center;
+  padding: 24px 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.dream-hero-glow {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.dream-hero-moon {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 20px rgba(253, 230, 138, 0.4));
+  animation: dreamMoonFloat 4s ease-in-out infinite;
+}
+
+@keyframes dreamMoonFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.dream-title {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #c4b5fd, #a78bfa, #fde68a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  position: relative;
+}
+
+.dream-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin: 6px 0 0;
+  position: relative;
+}
+
+/* ═══ 섹션 공통 ═══ */
+.dream-section {
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.dream-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dream-section-icon {
+  font-size: 16px;
+}
+
+/* ═══ 키워드 칩 ═══ */
+.dream-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dream-keyword-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(8px);
+}
+
+.dream-keyword-chip:hover {
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(167, 139, 250, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+}
+
+.dream-keyword-chip:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.dream-chip-emoji {
+  font-size: 15px;
+}
+
+.dream-chip-label {
+  font-size: 13px;
+}
+
+/* ═══ 텍스트 영역 ═══ */
+.dream-textarea-wrap {
+  position: relative;
+}
+
+.dream-textarea {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.dream-textarea:focus {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.6);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08), 0 0 20px rgba(124, 58, 237, 0.06);
+}
+
+.dream-textarea::placeholder {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.dream-char-count {
+  text-align: right;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  padding-right: 4px;
+}
+
+.dream-char-limit {
+  color: #f87171;
+  font-weight: 700;
+}
+
+/* ═══ 개인화 옵션 ═══ */
+.dream-personal-toggle {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--color-glass-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.dream-personal-toggle:hover {
+  border-color: rgba(167, 139, 250, 0.5);
+  color: #a78bfa;
+}
+
+.dream-personal-form {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dream-personal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.dream-optional {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.dream-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dream-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.dream-input {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.dream-input:focus {
+  outline: none;
+  border-color: #a78bfa;
+}
+
+.dream-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.dream-toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dream-toggle-btn.active {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.15);
+  color: var(--color-text);
+}
+
+/* ═══ 제출 버튼 ═══ */
+.dream-submit-btn {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #6366f1, #4f46e5);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.dream-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.35);
+}
+
+.dream-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.dream-submit-icon {
+  font-size: 20px;
+}
+
+.dream-submit-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  animation: dreamSubmitShine 3s ease-in-out infinite;
+}
+
+@keyframes dreamSubmitShine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ═══ 로딩 ═══ */
+.dream-loading {
+  text-align: center;
+  padding: 60px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.dream-loading-scene {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 24px;
+}
+
+.dream-loading-moon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 56px;
+  filter: drop-shadow(0 0 25px rgba(253, 230, 138, 0.5));
+  animation: dreamLoadMoon 3s ease-in-out infinite;
+}
+
+@keyframes dreamLoadMoon {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 25px rgba(253, 230, 138, 0.5)); }
+  50% { transform: translate(-50%, -55%) scale(1.1); filter: drop-shadow(0 0 40px rgba(253, 230, 138, 0.7)); }
+}
+
+.dream-loading-sparkle {
+  position: absolute;
+  font-size: 20px;
+  animation: dreamSparkleFloat 2.5s ease-in-out infinite;
+}
+
+.dream-loading-sparkle--1 {
+  top: 10%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.dream-loading-sparkle--2 {
+  top: 20%;
+  right: 10%;
+  animation-delay: 0.8s;
+}
+
+.dream-loading-sparkle--3 {
+  bottom: 15%;
+  left: 25%;
+  animation-delay: 1.5s;
+}
+
+@keyframes dreamSparkleFloat {
+  0%, 100% { opacity: 0.3; transform: translateY(0) scale(0.8); }
+  50% { opacity: 1; transform: translateY(-12px) scale(1.2); }
+}
+
+.dream-loading-cloud {
+  position: absolute;
+  width: 80px;
+  height: 30px;
+  background: rgba(167, 139, 250, 0.08);
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.dream-loading-cloud--1 {
+  bottom: 20%;
+  left: 5%;
+  animation: dreamCloudDrift 6s ease-in-out infinite;
+}
+
+.dream-loading-cloud--2 {
+  top: 25%;
+  right: 0;
+  width: 60px;
+  height: 22px;
+  animation: dreamCloudDrift 8s ease-in-out infinite reverse;
+}
+
+@keyframes dreamCloudDrift {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(20px); opacity: 0.8; }
+}
+
+.dream-loading-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.dream-dots::after {
+  content: '';
+  animation: dreamDots 1.5s steps(4) infinite;
+}
+
+@keyframes dreamDots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+.dream-loading-hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ═══ 결과 ═══ */
+.dream-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 점수 카드 ── */
+.dream-score-card {
+  text-align: center;
+  padding: 28px 20px 24px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dream-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.dream-category-symbol {
+  font-size: 18px;
+}
+
+.dream-category-text {
+  font-size: 14px;
+}
+
+.dream-score-wrap {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 16px;
+}
+
+.dream-score-circle {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.dream-score-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 8;
+}
+
+.dream-score-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s ease;
+}
+
+.dream-score-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.dream-score-num {
+  font-size: 34px;
+  font-weight: 900;
+  color: #fff;
+  display: block;
+  line-height: 1;
+}
+
+.dream-score-unit {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.dream-rating-badge {
+  display: inline-block;
+  padding: 6px 24px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+/* ── 행운 카드 ── */
+.dream-lucky {
+  display: flex;
+  align-items: center;
+  padding: 18px;
+}
+
+.dream-lucky-item {
+  flex: 1;
+  text-align: center;
+}
+
+.dream-lucky-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.dream-lucky-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-accent-gold);
+  line-height: 1.4;
+}
+
+.dream-lucky-number {
+  font-size: 22px;
+}
+
+.dream-lucky-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+/* ── TTS ── */
+.dream-speech-area {
+  margin-bottom: 4px;
+}
+
+/* ── 액션 버튼 ── */
+.dream-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dream-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dream-share-btn {
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #fff;
+}
+
+.dream-share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+}
+
+.dream-reset-btn {
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+}
+
+.dream-reset-btn:hover {
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+/* ═══ 공통 애니메이션 ═══ */
+.fade-in {
+  animation: dreamFadeIn 0.4s ease;
+}
+
+@keyframes dreamFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════
+   라이트 모드
+   ═══════════════════════════════════════════════════ */
+
+/* 배경 */
+[data-theme="light"] .dream-bg {
+  background: radial-gradient(ellipse at 30% 20%, rgba(196, 181, 253, 0.12), transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(147, 197, 253, 0.1), transparent 60%);
+}
+
+[data-theme="light"] .dream-star {
+  color: rgba(124, 58, 237, 0.25);
+}
+
+[data-theme="light"] .dream-mist--1 { background: #c4b5fd; opacity: 0.04; }
+[data-theme="light"] .dream-mist--2 { background: #93c5fd; opacity: 0.04; }
+
+/* 히어로 */
+[data-theme="light"] .dream-hero-glow {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.06), transparent 70%);
+}
+
+[data-theme="light"] .dream-hero-moon {
+  filter: drop-shadow(0 0 15px rgba(217, 119, 6, 0.25));
+}
+
+[data-theme="light"] .dream-title {
+  background: linear-gradient(135deg, #7c3aed, #6366f1, #d97706);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 키워드 칩 */
+[data-theme="light"] .dream-keyword-chip {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+[data-theme="light"] .dream-keyword-chip:hover {
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.1);
+}
+
+/* 텍스트 영역 */
+[data-theme="light"] .dream-textarea {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111;
+}
+
+[data-theme="light"] .dream-textarea:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.06);
+}
+
+[data-theme="light"] .dream-textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* 개인화 폼 */
+[data-theme="light"] .dream-personal-toggle {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #666;
+}
+
+[data-theme="light"] .dream-personal-toggle:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #7c3aed;
+}
+
+[data-theme="light"] .dream-label {
+  color: #333;
+}
+
+[data-theme="light"] .dream-input {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111;
+}
+
+[data-theme="light"] .dream-input:focus {
+  border-color: #a78bfa;
+}
+
+[data-theme="light"] .dream-toggle-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #555;
+}
+
+[data-theme="light"] .dream-toggle-btn.active {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.08);
+  color: #111;
+}
+
+/* 제출 버튼 */
+[data-theme="light"] .dream-submit-btn {
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+}
+
+[data-theme="light"] .dream-submit-btn:hover {
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+}
+
+/* 로딩 */
+[data-theme="light"] .dream-loading-moon {
+  filter: drop-shadow(0 0 18px rgba(217, 119, 6, 0.3));
+}
+
+[data-theme="light"] .dream-loading-cloud {
+  background: rgba(124, 58, 237, 0.05);
+}
+
+/* 결과 - 점수 카드 */
+[data-theme="light"] .dream-score-bg {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .dream-score-num {
+  color: #111;
+}
+
+/* 행운 */
+[data-theme="light"] .dream-lucky-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .dream-lucky-value {
+  color: #b8860b;
+}
+
+/* 액션 버튼 */
+[data-theme="light"] .dream-share-btn {
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.15);
+}
+
+[data-theme="light"] .dream-reset-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+[data-theme="light"] .dream-reset-btn:hover {
+  border-color: rgba(124, 58, 237, 0.25);
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
+import SpeechButton from '../components/SpeechButton';
 import { getFortuneByZodiac, getFortuneByUser } from '../api/fortune';
 import './Fortune.css';
 
@@ -196,6 +197,33 @@ function Fortune() {
           })}
         </p>
       </section>
+
+      {/* Speech Button */}
+      {fortune && (
+        <div style={{ margin: '12px 0' }}>
+          <SpeechButton
+            label="운세 읽어주기"
+            text={[
+              fortune.zodiacAnimal ? `${fortune.zodiacAnimal}띠 오늘의 운세입니다.` : '',
+              fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
+              fortune.overall ? `총운입니다. ${fortune.overall}` : '',
+              fortune.love ? `애정운입니다. ${fortune.love}` : '',
+              fortune.money ? `재물운입니다. ${fortune.money}` : '',
+              fortune.health ? `건강운입니다. ${fortune.health}` : '',
+              fortune.work ? `직장운입니다. ${fortune.work}` : '',
+              fortune.luckyNumber ? `행운의 숫자는 ${fortune.luckyNumber}입니다.` : '',
+              fortune.luckyColor ? `행운의 색상은 ${fortune.luckyColor}입니다.` : '',
+            ].filter(Boolean).join(' ')}
+            summaryText={[
+              fortune.zodiacAnimal ? `${fortune.zodiacAnimal}띠 오늘의 운세입니다.` : '',
+              fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
+              fortune.overall ? `총운: ${fortune.overall.split('.').slice(0,2).join('.')}.` : '',
+              fortune.luckyNumber ? `행운의 숫자 ${fortune.luckyNumber},` : '',
+              fortune.luckyColor ? `행운의 색상 ${fortune.luckyColor}.` : '',
+            ].filter(Boolean).join(' ')}
+          />
+        </div>
+      )}
 
       {/* Fortune Cards */}
       <section className="fortune-cards">

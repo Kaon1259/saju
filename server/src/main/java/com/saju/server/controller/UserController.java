@@ -21,6 +21,22 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody java.util.Map<String, String> body) {
+        String phone = body.get("phone");
+        if (phone == null || phone.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        UserResponse response = userService.login(phone);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
+        UserResponse response = userService.updateUser(id, request);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         UserResponse response = userService.getUser(id);

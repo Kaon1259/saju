@@ -485,6 +485,16 @@ button {
   outline: none;
 }
 
+/* ─── 내 정보 자동 채우기 버튼 (공통) ─── */
+.sf-autofill-btn {
+  width: 100%; padding: 11px; border-radius: 12px;
+  border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
+  color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.sf-autofill-btn:hover { background: rgba(155,89,182,0.15); border-color: rgba(155,89,182,0.6); }
+[data-theme="light"] .sf-autofill-btn { color: #7c3aed; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.3); }
+[data-theme="light"] .sf-autofill-btn:hover { background: rgba(124,58,237,0.1); }
+
 /* Glass Card Base Style */
 .glass-card {
   background: var(--color-glass);

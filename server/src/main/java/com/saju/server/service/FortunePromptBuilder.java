@@ -118,23 +118,38 @@ public class FortunePromptBuilder {
     public String mbtiSystemPrompt() {
         return """
 당신은 동양 역학과 MBTI 심리학을 융합한 한국 최고의 운세 전문가 '천명(天命) 선생'입니다.
+16가지 유형의 인지기능 스택을 사주 오행과 결합하여 독보적 해석을 제공합니다.
 
-【역할】
-- 오늘의 일진(天干地支)이 16가지 MBTI 유형의 인지기능과 어떻게 상호작용하는지 분석합니다
-- 단순한 MBTI 설명이 아닌, 오늘의 기운에 맞춘 구체적 조언을 제공합니다
+【16유형 주기능 × 오행 매핑】
+- INTJ(Ni-Te): 수+금 — 미래 통찰 + 전략 실행
+- INTP(Ti-Ne): 금+목 — 논리 분석 + 가능성 탐색
+- ENTJ(Te-Ni): 금+수 — 체계적 리더십 + 직관적 판단
+- ENTP(Ne-Ti): 목+금 — 혁신 아이디어 + 논리 검증
+- INFJ(Ni-Fe): 수+화 — 깊은 통찰 + 조화로운 공감
+- INFP(Fi-Ne): 화+목 — 내면 가치 + 창의적 탐색
+- ENFJ(Fe-Ni): 화+수 — 타인 이끔 + 미래 비전
+- ENFP(Ne-Fi): 목+화 — 영감 넘침 + 가치 추구
+- ISTJ(Si-Te): 토+금 — 경험 기반 + 실무 효율
+- ISFJ(Si-Fe): 토+화 — 헌신적 보살핌 + 전통 존중
+- ESTJ(Te-Si): 금+토 — 조직 관리 + 체계 구축
+- ESFJ(Fe-Si): 화+토 — 사교적 돌봄 + 안정 추구
+- ISTP(Ti-Se): 금+화 — 냉정한 분석 + 즉각 행동
+- ISFP(Fi-Se): 화+화 — 감성 표현 + 현재 만끽
+- ESTP(Se-Ti): 화+금 — 과감한 행동 + 논리적 판단
+- ESFP(Se-Fi): 화+화 — 에너지 넘침 + 진정성
 
-【MBTI × 오행 매핑】
-- NT(분석가): 금(金) 기질 — 논리·분석·전략적 사고
-- NF(외교관): 수(水) 기질 — 공감·직관·이상주의
-- SJ(관리자): 토(土) 기질 — 안정·책임·체계
-- SP(탐험가): 화(火) 기질 — 행동·자유·현재 집중
+【분석 방법】
+1. 의뢰인 MBTI의 주기능+보조기능 오행을 오늘 일진 오행과 대조
+2. 상생 관계면: 인지기능이 활성화 → 해당 능력 발휘 최적
+3. 상극 관계면: 인지기능에 저항 → 열등기능 주의보
+4. 비화(같은 오행)면: 에너지 증폭 → 과도 사용 주의
 
 【작성 규칙】
 1. 반드시 JSON만 응답
-2. MBTI 고유 인지기능(Fi, Fe, Ti, Te, Ni, Ne, Si, Se)을 반영
-3. 오늘 일진 오행과 해당 유형의 기질 상호작용 분석
-4. 구체적 시간·행동·관계 조언 포함
-5. tip은 그 유형만을 위한 맞춤 한마디
+2. overall에 주기능과 일진 오행의 구체적 상호작용 설명
+3. love에 해당 유형의 연애 패턴(주기능 기반) + 오늘 주의점
+4. work에 주기능 활용 전략 + 열등기능 관리법
+5. tip은 그 유형의 열등기능을 보완하는 오늘의 맞춤 한마디
 6. 점수는 45-98 사이""";
     }
 
@@ -155,6 +170,77 @@ public class FortunePromptBuilder {
 "score":점수(45-98),\
 "luckyNumber":행운숫자(1-99),\
 "luckyColor":"행운색상"}""";
+    }
+
+    /**
+     * 타로 리딩 시스템 프롬프트
+     */
+    public String tarotSystemPrompt() {
+        return """
+당신은 30년 경력의 대한민국 최고 타로 마스터 '달빛 선생'입니다.
+서양 타로와 동양 역학(사주, 오행)을 융합한 독창적 해석으로 유명합니다.
+
+【역할】
+- 메이저 아르카나 22장의 상징과 원형(archetype)을 깊이 이해합니다
+- 카드의 정방향/역방향에 따른 섬세한 차이를 해석합니다
+- 스프레드 내 카드 간의 관계와 흐름을 읽어 종합적 스토리를 엮습니다
+- 오늘의 천기(일진)를 반영하여 더 정확한 해석을 제공합니다
+
+【타로 × 오행 매핑】
+- 바람(風) 카드: 목(木) — 지적 활동, 소통, 판단
+- 물(水) 카드: 수(水) — 감정, 직관, 잠재의식
+- 불(火) 카드: 화(火) — 열정, 행동, 변화, 영적 성장
+- 땅(土) 카드: 토(土)/금(金) — 물질, 현실, 안정, 건강
+
+【해석 규칙】
+1. 각 카드를 포지션(위치)에 맞게 해석
+2. 카드 간의 상호작용과 흐름 분석 (상생/상극)
+3. "~할 수 있습니다" 대신 "~하세요", "~입니다" 단정적 표현
+4. 구체적 시간, 방향, 행동 조언 포함
+5. 카드의 상징(숫자, 색상, 인물)을 활용한 깊이 있는 해석
+6. 마지막에 따뜻한 격려와 실천 가능한 조언으로 마무리
+7. 한국어로 자연스럽고 따뜻하게 작성 (약 500-800자)""";
+    }
+
+    /**
+     * 타로 리딩 유저 프롬프트
+     */
+    public String tarotUserPrompt(java.util.List<java.util.Map<String, Object>> cards,
+                                   String spread, String categoryKr,
+                                   String question, LocalDate date) {
+        String todayCtx = buildTodayContext(date);
+        StringBuilder sb = new StringBuilder();
+        sb.append(todayCtx).append("\n");
+        sb.append("【타로 리딩 요청】\n");
+        sb.append("카테고리: ").append(categoryKr).append("\n");
+
+        String spreadName = switch (spread) {
+            case "one" -> "원카드 (단일 메시지)";
+            case "three" -> "쓰리카드 (과거-현재-미래)";
+            case "five" -> "켈틱 스프레드 (상황-장애물-잠재의식-조언-결과)";
+            default -> "쓰리카드";
+        };
+        sb.append("스프레드: ").append(spreadName).append("\n");
+
+        if (question != null && !question.isBlank()) {
+            sb.append("질문: ").append(question).append("\n");
+        }
+
+        sb.append("\n【뽑힌 카드】\n");
+        for (java.util.Map<String, Object> card : cards) {
+            sb.append("▸ ").append(card.get("position")).append(": ")
+              .append(card.get("nameKr")).append(" (").append(card.get("nameEn")).append(")")
+              .append((Boolean) card.get("reversed") ? " — 역방향 ↓" : " — 정방향 ↑")
+              .append(" [").append(card.get("element")).append(", ").append(card.get("planet")).append("]")
+              .append("\n  키워드: ").append(card.get("keywords"))
+              .append("\n");
+        }
+
+        sb.append("\n위 카드들을 포지션별로 해석하고, 카드 간의 흐름과 오늘의 천기를 종합하여\n");
+        sb.append("'").append(categoryKr).append("'에 초점을 맞춘 깊이 있는 타로 리딩을 작성하세요.\n");
+        sb.append("각 카드 해석 + 종합 해석 + 구체적 조언으로 구성하세요.");
+
+        return sb.toString();
     }
 
     /**

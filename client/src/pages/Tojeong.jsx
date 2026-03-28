@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTojeongFortune, getUserTojeong } from '../api/fortune';
+import SpeechButton from '../components/SpeechButton';
 import './Tojeong.css';
 
 const RATING_STYLE = {
@@ -94,6 +95,16 @@ function Tojeong() {
         </section>
 
         <div className="tj-input glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          {localStorage.getItem('userId') && (
+            <button className="sf-autofill-btn" style={{ marginBottom: 12 }} onClick={() => {
+              try {
+                const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                if (p.birthDate) setBirthDate(p.birthDate);
+                if (p.gender) setGender(p.gender);
+                if (p.calendarType) setCalendarType(p.calendarType);
+              } catch {}
+            }}>✨ 내 정보로 채우기</button>
+          )}
           <div className="form-group">
             <label className="form-label">달력 구분</label>
             <div className="form-toggle">
@@ -147,6 +158,24 @@ function Tojeong() {
           )}
         </div>
       </section>
+
+      {/* Speech Button */}
+      {result && (
+        <div style={{ margin: '12px 0' }}>
+          <SpeechButton
+            label="토정비결 읽어주기"
+            text={[
+              result.yearSummary ? `${new Date().getFullYear()}년 총평입니다. ${result.yearSummary}` : '',
+              ...(result.monthlyFortunes || []).map((m, idx) =>
+                m.fortune ? `${idx + 1}월 운세입니다. ${m.fortune}` : ''
+              ),
+            ].filter(Boolean).join(' ')}
+            summaryText={
+              result.yearSummary ? `${new Date().getFullYear()}년 총평: ${result.yearSummary.split('.').slice(0,2).join('.')}.` : ''
+            }
+          />
+        </div>
+      )}
 
       {/* 올해 총평 */}
       {result.yearSummary && (

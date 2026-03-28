@@ -199,3 +199,20 @@
 /* 로딩 */
 .cs-loading { text-align: center; padding: 40px; color: var(--color-text-muted); }
 .cs-spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #A78BFA; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .cs-card { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .cs-card.active { background: color-mix(in srgb, var(--cs-color) 8%, transparent); }
+[data-theme="light"] .cs-card-name { color: #444; }
+[data-theme="light"] .cs-card.active .cs-card-name { color: #111; }
+[data-theme="light"] .cs-tiny-star { color: rgba(0,0,0,0.15); }
+[data-theme="light"] .cs-result-meta { color: #666; }
+[data-theme="light"] .cs-result-hero { background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--cs-color) 8%, transparent), transparent 70%); }
+[data-theme="light"] .cs-personality p { color: #333; }
+[data-theme="light"] .cs-score-bg { stroke: rgba(0,0,0,0.06); }
+[data-theme="light"] .cs-score-num { color: #111; }
+[data-theme="light"] .cs-lucky-divider { background: rgba(0,0,0,0.08); }
+[data-theme="light"] .cs-lucky-value { color: #b8860b; }
+[data-theme="light"] .cs-card-score { color: #96700a; }
+[data-theme="light"] .cs-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #7c3aed; }
+[data-theme="light"] .cs-card-mine { color: #fff; }

@@ -1,0 +1,619 @@
+/* ═══════════════════════════════════════════════════
+   월별 운세 - 계절별 색상 테마
+   ═══════════════════════════════════════════════════ */
+
+.mf-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px 16px 100px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* ═══ 계절 테마 변수 ═══ */
+.mf-season--spring { --mf-accent: #4ade80; --mf-accent-dim: rgba(74, 222, 128, 0.12); --mf-accent-glow: rgba(74, 222, 128, 0.2); }
+.mf-season--summer { --mf-accent: #f87171; --mf-accent-dim: rgba(248, 113, 113, 0.12); --mf-accent-glow: rgba(248, 113, 113, 0.2); }
+.mf-season--autumn { --mf-accent: #fb923c; --mf-accent-dim: rgba(251, 146, 60, 0.12); --mf-accent-glow: rgba(251, 146, 60, 0.2); }
+.mf-season--winter { --mf-accent: #60a5fa; --mf-accent-dim: rgba(96, 165, 250, 0.12); --mf-accent-glow: rgba(96, 165, 250, 0.2); }
+
+/* ═══ 배경 ═══ */
+.mf-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.mf-particle {
+  position: absolute;
+  color: var(--mf-accent, rgba(147, 130, 220, 0.3));
+  animation: mfFloat 5s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+@keyframes mfFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.15; }
+  50% { transform: translateY(-20px) scale(1.3); opacity: 0.5; }
+}
+
+/* ═══ 히어로 ═══ */
+.mf-hero {
+  text-align: center;
+  padding: 24px 0 16px;
+  position: relative;
+}
+
+.mf-hero-glow {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at 50% 60%, var(--mf-accent-glow, rgba(96, 165, 250, 0.08)), transparent 70%);
+  pointer-events: none;
+}
+
+.mf-hero-icon {
+  font-size: 42px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.mf-title {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--mf-accent, #60a5fa), #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.mf-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+/* ═══ 월 선택 그리드 ═══ */
+.mf-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.mf-month-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 12px 4px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mf-month-btn:hover {
+  border-color: var(--mf-accent);
+}
+
+.mf-month-btn.active {
+  border-color: var(--mf-accent);
+  background: var(--mf-accent-dim);
+  color: var(--color-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px var(--mf-accent-glow);
+}
+
+.mf-month-btn.current::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mf-accent);
+}
+
+.mf-month-num {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.mf-month-label {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.mf-month-now {
+  position: absolute;
+  bottom: 2px;
+  font-size: 7px;
+  font-weight: 900;
+  color: var(--mf-accent);
+  letter-spacing: 0.5px;
+}
+
+/* ═══ 입력 폼 ═══ */
+.mf-form-section {
+  position: relative;
+  z-index: 1;
+}
+
+.mf-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mf-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mf-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mf-input {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.mf-input:focus {
+  outline: none;
+  border-color: var(--mf-accent);
+}
+
+.mf-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.mf-toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mf-toggle-btn.active {
+  border-color: var(--mf-accent);
+  background: var(--mf-accent-dim);
+  color: var(--color-text);
+}
+
+.mf-submit {
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--mf-accent, #60a5fa), #a78bfa);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.mf-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--mf-accent-glow);
+}
+
+.mf-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ═══ 로딩 ═══ */
+.mf-loading {
+  text-align: center;
+  padding: 50px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.mf-loading-icon {
+  font-size: 40px;
+  animation: mfLoadBounce 1.2s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes mfLoadBounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(10deg); }
+}
+
+.mf-loading-text {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.mf-dots::after {
+  content: '';
+  animation: mfDots 1.5s steps(4, end) infinite;
+}
+
+@keyframes mfDots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+/* ═══ 결과 ═══ */
+.mf-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 월 헤더 */
+.mf-result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.mf-result-season-icon {
+  font-size: 36px;
+}
+
+.mf-result-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mf-result-month {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.mf-result-pillar {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.mf-result-theme-badge {
+  margin-left: auto;
+  padding: 5px 14px;
+  border-radius: 10px;
+  background: var(--mf-accent-dim);
+  color: var(--mf-accent);
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid var(--mf-accent);
+}
+
+/* 점수 원형 */
+.mf-score-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.mf-score-circle {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 8px;
+}
+
+.mf-score-circle svg {
+  display: block;
+}
+
+.mf-score-ring {
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
+.mf-score-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.mf-score-num {
+  display: block;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.mf-score-unit {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.mf-grade {
+  font-size: 20px;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+/* 좋은 주 / 주의 주 */
+.mf-weeks {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mf-week-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+.mf-week--best {
+  background: rgba(74, 222, 128, 0.06);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.mf-week--caution {
+  background: rgba(248, 113, 113, 0.06);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.mf-week-icon {
+  font-size: 20px;
+}
+
+.mf-week-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.mf-week-value {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* 행운의 날 */
+.mf-lucky-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.mf-lucky-day-icon {
+  font-size: 22px;
+}
+
+.mf-lucky-day-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.mf-lucky-day-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--mf-accent);
+}
+
+/* 읽어주기 */
+.mf-speech-area {
+  margin: 4px 0;
+}
+
+/* 월 이동 네비 */
+.mf-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mf-nav-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mf-nav-btn:hover {
+  border-color: var(--mf-accent);
+  background: var(--mf-accent-dim);
+}
+
+.mf-nav-current {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--mf-accent);
+  min-width: 50px;
+  text-align: center;
+}
+
+/* 리셋 */
+.mf-reset {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.mf-reset:hover {
+  border-color: #9B59B6;
+}
+
+/* ═══ 공통 ═══ */
+.fade-in {
+  animation: mfFadeIn 0.4s ease;
+}
+
+@keyframes mfFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ 라이트 모드 ═══ */
+[data-theme="light"] .mf-label {
+  color: #333;
+}
+
+[data-theme="light"] .mf-input {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #111;
+}
+
+[data-theme="light"] .mf-input:focus {
+  border-color: var(--mf-accent);
+}
+
+[data-theme="light"] .mf-toggle-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #555;
+}
+
+[data-theme="light"] .mf-toggle-btn.active {
+  border-color: var(--mf-accent);
+  background: var(--mf-accent-dim);
+  color: #111;
+}
+
+[data-theme="light"] .mf-month-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #666;
+}
+
+[data-theme="light"] .mf-month-btn.active {
+  background: var(--mf-accent-dim);
+  color: #111;
+}
+
+[data-theme="light"] .mf-subtitle {
+  color: #666;
+}
+
+[data-theme="light"] .mf-hero-glow {
+  background: radial-gradient(circle at 50% 60%, var(--mf-accent-glow), transparent 70%);
+}
+
+[data-theme="light"] .mf-score-circle svg circle:first-child {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .mf-result-month {
+  color: #222;
+}
+
+[data-theme="light"] .mf-result-pillar {
+  color: #888;
+}
+
+[data-theme="light"] .mf-week--best {
+  background: rgba(22, 163, 74, 0.05);
+  border-color: rgba(22, 163, 74, 0.15);
+}
+
+[data-theme="light"] .mf-week--caution {
+  background: rgba(220, 38, 38, 0.05);
+  border-color: rgba(220, 38, 38, 0.15);
+}
+
+[data-theme="light"] .mf-week-value {
+  color: #222;
+}
+
+[data-theme="light"] .mf-nav-btn {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #333;
+}
+
+[data-theme="light"] .mf-nav-btn:hover {
+  background: var(--mf-accent-dim);
+}
+
+[data-theme="light"] .mf-reset {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #333;
+}
+
+[data-theme="light"] .mf-loading-text {
+  color: #666;
+}
+
+[data-theme="light"] .mf-section-title {
+  color: #222;
+}
+
+[data-theme="light"] .sf-autofill-btn {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.06);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+[data-theme="light"] .sf-autofill-btn:hover {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+[data-theme="light"] .mf-lucky-day-label {
+  color: #888;
+}
+
+/* 라이트 모드 계절별 색상 보정 */
+[data-theme="light"] .mf-season--spring { --mf-accent: #16a34a; }
+[data-theme="light"] .mf-season--summer { --mf-accent: #dc2626; }
+[data-theme="light"] .mf-season--autumn { --mf-accent: #ea580c; }
+[data-theme="light"] .mf-season--winter { --mf-accent: #2563eb; }

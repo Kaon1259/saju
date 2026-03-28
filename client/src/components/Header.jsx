@@ -22,7 +22,9 @@ const NAV_ITEMS = [
 ];
 
 const MORE_ITEMS = [
-  { path: '/compatibility', label: '궁합', icon: '💕', effect: 'bloodtype' },
+  { path: '/tarot', label: '타로 카드', icon: '🔮', effect: 'tarot' },
+  { path: '/special', label: '특수 운세', icon: '💘', effect: 'compatibility' },
+  { path: '/compatibility', label: '궁합', icon: '💕', effect: 'compatibility' },
   { path: '/bloodtype', label: '혈액형 운세', icon: '🩸', effect: 'bloodtype' },
   { path: '/constellation', label: '별자리 운세', icon: '⭐', effect: 'star' },
   { path: '/manseryeok', label: '만세력', icon: '📅', effect: 'saju' },
@@ -34,10 +36,12 @@ const PATH_EFFECTS = {
   '/saju': 'saju',
   '/tojeong': 'tojeong',
   '/mbti': 'mbti',
-  '/compatibility': 'bloodtype',
+  '/compatibility': 'compatibility',
   '/bloodtype': 'bloodtype',
   '/constellation': 'star',
   '/manseryeok': 'saju',
+  '/tarot': 'tarot',
+  '/special': 'compatibility',
 };
 
 function Header({ onHomeSplash }) {
@@ -118,9 +122,13 @@ function Header({ onHomeSplash }) {
           <button
             className={`top-bar-profile-btn ${location.pathname === '/profile' || location.pathname === '/register' ? 'active' : ''}`}
             onClick={() => {
-              const target = userId ? '/profile' : '/register';
-              if (location.pathname === target) return;
-              triggerTransition('profile', target);
+              if (userId) {
+                if (location.pathname === '/profile') return;
+                triggerTransition('profile', '/profile');
+              } else {
+                if (location.pathname === '/register') return;
+                navigate('/register', { state: { from: location.pathname } });
+              }
             }}
           >
             <svg viewBox="0 0 24 24" className="top-bar-profile-svg">

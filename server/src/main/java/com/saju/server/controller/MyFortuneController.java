@@ -30,14 +30,17 @@ public class MyFortuneController {
         UserResponse user = userService.getUser(userId);
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("user", Map.of(
-            "name", user.getName(),
-            "zodiacAnimal", user.getZodiacAnimal(),
-            "bloodType", user.getBloodType() != null ? user.getBloodType() : "",
-            "mbtiType", user.getMbtiType() != null ? user.getMbtiType() : "",
-            "birthDate", user.getBirthDate().toString(),
-            "birthTime", user.getBirthTime() != null ? user.getBirthTime() : ""
-        ));
+        var userMap = new java.util.LinkedHashMap<String, Object>();
+        userMap.put("name", user.getName());
+        userMap.put("zodiacAnimal", user.getZodiacAnimal());
+        userMap.put("bloodType", user.getBloodType() != null ? user.getBloodType() : "");
+        userMap.put("mbtiType", user.getMbtiType() != null ? user.getMbtiType() : "");
+        userMap.put("birthDate", user.getBirthDate().toString());
+        userMap.put("birthTime", user.getBirthTime() != null ? user.getBirthTime() : "");
+        userMap.put("gender", user.getGender());
+        userMap.put("calendarType", user.getCalendarType());
+        userMap.put("relationshipStatus", user.getRelationshipStatus() != null ? user.getRelationshipStatus() : "");
+        result.put("user", userMap);
 
         // 1. 사주 기반 AI 오늘의 운세 (생년월일+시간 기반)
         LocalDate birthDate = user.getBirthDate();

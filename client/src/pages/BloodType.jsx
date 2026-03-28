@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getBloodTypeFortune, getBloodTypeCompatibility, getUser } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import SpeechButton from '../components/SpeechButton';
 import './BloodType.css';
 
 const TYPES = [
@@ -110,6 +111,33 @@ function BloodType() {
                   <p className="bt-personality-label">성격 분석</p>
                 </div>
                 <p className="bt-personality-text">{fortune.personality}</p>
+              </div>
+
+              {/* Speech Button */}
+              <div style={{ margin: '12px 0' }}>
+                <SpeechButton
+                  label="운세 읽어주기"
+                  text={[
+                    fortune.bloodType ? `${fortune.bloodType}형 오늘의 운세입니다.` : '',
+                    fortune.personality ? `성격 분석입니다. ${fortune.personality}` : '',
+                    fortune.dayAnalysis ? `오늘의 분석입니다. ${fortune.dayAnalysis}` : '',
+                    fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
+                    fortune.overall ? `총운입니다. ${fortune.overall}` : '',
+                    fortune.love ? `애정운입니다. ${fortune.love}` : '',
+                    fortune.money ? `재물운입니다. ${fortune.money}` : '',
+                    fortune.health ? `건강운입니다. ${fortune.health}` : '',
+                    fortune.work ? `직장운입니다. ${fortune.work}` : '',
+                    fortune.luckyNumber ? `행운의 숫자는 ${fortune.luckyNumber}입니다.` : '',
+                    fortune.luckyColor ? `행운의 색상은 ${fortune.luckyColor}입니다.` : '',
+                  ].filter(Boolean).join(' ')}
+                  summaryText={[
+                    fortune.bloodType ? `${fortune.bloodType}형 오늘의 운세입니다.` : '',
+                    fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
+                    fortune.overall ? `총운: ${fortune.overall.split('.').slice(0,2).join('.')}.` : '',
+                    fortune.luckyNumber ? `행운의 숫자 ${fortune.luckyNumber},` : '',
+                    fortune.luckyColor ? `행운의 색상 ${fortune.luckyColor}.` : '',
+                  ].filter(Boolean).join(' ')}
+                />
               </div>
 
               {fortune.dayAnalysis && (

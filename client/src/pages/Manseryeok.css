@@ -35,3 +35,12 @@
 [data-theme="light"] .ms-pillar { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .ms-hour-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .ms-section-title { color: #1e293b; }
+[data-theme="light"] .ms-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .ms-pillar-hanja { color: #111; }
+[data-theme="light"] .ms-pillar-korean { color: #555; }
+[data-theme="light"] .ms-pillar-element { color: #666; }
+[data-theme="light"] .ms-pillar-animal { color: #96700a; }
+[data-theme="light"] .ms-hour-name { color: #555; }
+[data-theme="light"] .ms-hour-hanja { color: #111; }
+[data-theme="light"] .ms-hour-element { color: #666; }
+[data-theme="light"] .ms-search-btn { color: #1a0533; }

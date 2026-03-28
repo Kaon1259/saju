@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getSajuCompatibility } from '../api/fortune';
+import SpeechButton from '../components/SpeechButton';
 import './Compatibility.css';
 
 const BIRTH_TIMES = [
@@ -110,6 +111,28 @@ function Compatibility() {
             </div>
           </div>
 
+          {/* Speech Button */}
+          <div style={{ margin: '12px 0' }}>
+            <SpeechButton
+              label="궁합 결과 읽어주기"
+              text={[
+                `사주 궁합 결과입니다.`,
+                result.person1 ? `첫 번째 분은 ${result.person1.birthDate} 생, 일간 ${result.person1.dayMaster}, ${result.person1.dayMasterElement} ${result.person1.dayMasterYang ? '양' : '음'}입니다.` : '',
+                result.person2 ? `두 번째 분은 ${result.person2.birthDate} 생, 일간 ${result.person2.dayMaster}, ${result.person2.dayMasterElement} ${result.person2.dayMasterYang ? '양' : '음'}입니다.` : '',
+                result.score ? `궁합 점수는 ${result.score}점입니다.` : '',
+                result.elementRelation ? `오행 관계입니다. ${result.elementRelation}` : '',
+                result.branchRelation ? `일지 관계입니다. ${result.branchRelation}` : '',
+                result.yinyangBalance ? `음양 조화입니다. ${result.yinyangBalance}` : '',
+                result.aiAnalysis ? `AI 종합 분석입니다. ${result.aiAnalysis}` : '',
+              ].filter(Boolean).join(' ')}
+              summaryText={[
+                result.score ? `궁합 점수는 ${result.score}점,` : '',
+                result.grade ? `등급은 ${result.grade}입니다.` : '',
+                result.aiAnalysis ? `종합 분석: ${result.aiAnalysis.split('.').slice(0,2).join('.')}.` : '',
+              ].filter(Boolean).join(' ')}
+            />
+          </div>
+
           <div className="compat-grade-badge" style={{
             background: score >= 80 ? 'rgba(74,222,128,0.12)' : score >= 60 ? 'rgba(251,191,36,0.12)' : 'rgba(248,113,113,0.12)',
             color: score >= 80 ? '#4ade80' : score >= 60 ? '#fbbf24' : '#f87171',
@@ -168,6 +191,16 @@ function Compatibility() {
               <button className={`compat-g-btn compat-g-male ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>♂ 남</button>
               <button className={`compat-g-btn compat-g-female ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>♀ 여</button>
             </div>
+            {localStorage.getItem('userId') && (
+              <button className="sf-autofill-btn" style={{ marginTop: 8, fontSize: 12, padding: '8px 12px' }} onClick={() => {
+                try {
+                  const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                  if (p.birthDate) setBd1(p.birthDate);
+                  if (p.gender) setG1(p.gender);
+                  if (p.birthTime) setBt1(p.birthTime);
+                } catch {}
+              }}>✨ 내 정보</button>
+            )}
           </div>
           <input type="date" className="compat-input" value={bd1} onChange={e => setBd1(e.target.value)} max={new Date().toISOString().split('T')[0]} />
           <select className="compat-input compat-select" value={bt1} onChange={e => setBt1(e.target.value)}>

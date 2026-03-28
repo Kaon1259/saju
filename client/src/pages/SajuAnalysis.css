@@ -364,3 +364,40 @@
 .saju-daily-sipsung { font-size: 12px; font-weight: 700; color: var(--color-accent-gold); }
 .saju-daily-rating { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
 .saju-daily-today-tag { position: absolute; top: -4px; right: 8px; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: var(--color-accent-gold); color: #000; }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .saju-intro__title { background: linear-gradient(135deg, #b8860b, #333, #96700a); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .saju-tabs { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .saju-tab--active { background: rgba(124,58,237,0.12); }
+[data-theme="light"] .pillar-char { border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .pillar-stem { background: rgba(0,0,0,0.03); }
+[data-theme="light"] .pillar-branch { background: rgba(0,0,0,0.02); }
+[data-theme="light"] .pillar-hanja { color: #111; }
+[data-theme="light"] .pillar-daymaster { color: #555; border-top-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .saju-section-title { color: #96700a; }
+[data-theme="light"] .saju-stage-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .saju-stage-name { color: #222; }
+[data-theme="light"] .saju-inter-desc { color: #444; }
+[data-theme="light"] .saju-sinsal-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .saju-sinsal-name { color: #111; }
+[data-theme="light"] .saju-daeun-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .saju-daeun--current { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,191,36,0.05)); border-color: rgba(124,58,237,0.3); }
+[data-theme="light"] .saju-daeun-hanja { color: #111; }
+[data-theme="light"] .saju-daeun-name { color: #666; }
+[data-theme="light"] .saju-month-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .saju-month--now { background: rgba(124,58,237,0.04); border-color: rgba(124,58,237,0.3); }
+[data-theme="light"] .saju-month-num { color: #111; }
+[data-theme="light"] .saju-month-summary { color: #444; }
+[data-theme="light"] .saju-month-now-tag { color: #fff; }
+[data-theme="light"] .saju-month-stage { background: rgba(0,0,0,0.04); color: #666; }
+[data-theme="light"] .saju-daily-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .saju-daily--today { border-color: rgba(184,134,11,0.35); background: rgba(251,191,36,0.05); }
+[data-theme="light"] .saju-daily-day { color: #111; }
+[data-theme="light"] .saju-daily-pillar { color: #333; }
+[data-theme="light"] .saju-sinsal-badge--positive { background: rgba(22,163,74,0.1); color: #16a34a; }
+[data-theme="light"] .saju-sinsal-badge--negative { background: rgba(220,38,38,0.1); color: #dc2626; }
+[data-theme="light"] .saju-rating--best { background: rgba(22,163,74,0.08); color: #16a34a; }
+[data-theme="light"] .saju-rating--good { background: rgba(37,99,235,0.08); color: #2563eb; }
+[data-theme="light"] .saju-rating--normal { background: rgba(184,134,11,0.08); color: #92710a; }
+[data-theme="light"] .saju-rating--bad { background: rgba(220,38,38,0.08); color: #dc2626; }
+[data-theme="light"] .saju-rating--worst { background: rgba(185,28,28,0.08); color: #b91c1c; }

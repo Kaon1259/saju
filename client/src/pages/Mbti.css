@@ -78,3 +78,29 @@
 .mbti-compat-advice { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); margin-bottom: 14px; }
 .mbti-best-match { font-size: 13px; color: var(--color-accent-gold); padding: 10px; background: rgba(255,255,255,0.04); border-radius: 10px; }
 .fade-in { animation: fadeInUp 0.4s ease; }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .mbti-tab { border-color: rgba(0,0,0,0.1); color: #666; }
+[data-theme="light"] .mbti-tab.active { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(52,211,153,0.08)); border-color: rgba(139,92,246,0.35); color: #111; }
+[data-theme="light"] .mbti-group-label { color: #fff; }
+[data-theme="light"] .mbti-card { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .mbti-card-code { color: #222; }
+[data-theme="light"] .mbti-card-nick { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .mbti-card.active .mbti-card-nick { color: rgba(0,0,0,0.65); }
+[data-theme="light"] .mbti-result-code { color: #111; }
+[data-theme="light"] .mbti-result-nick { color: #555; }
+[data-theme="light"] .mbti-result-personality { color: #333; }
+[data-theme="light"] .mbti-score-bg { stroke: rgba(0,0,0,0.06); }
+[data-theme="light"] .mbti-score-num { color: #111; }
+[data-theme="light"] .mbti-tip p { color: #333; }
+[data-theme="light"] .mbti-lucky-divider { background: rgba(0,0,0,0.08); }
+[data-theme="light"] .mbti-lucky-value { color: #b8860b; }
+[data-theme="light"] .mbti-compat-btn { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); color: #666; }
+[data-theme="light"] .mbti-compat-btn.active { color: #111; }
+[data-theme="light"] .mbti-compat-advice { color: #333; }
+[data-theme="light"] .mbti-compat-bar { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .mbti-compat-type-badge { color: #fff; }
+[data-theme="light"] .mbti-compat-grade { color: #96700a; }
+[data-theme="light"] .mbti-best-match { color: #96700a; background: rgba(0,0,0,0.03); }
+[data-theme="light"] .mbti-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #7c3aed; }
+[data-theme="light"] .mbti-result-badge { background: rgba(0,0,0,0.03); }

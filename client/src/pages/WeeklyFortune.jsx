@@ -1,0 +1,264 @@
+import { useState, useRef } from 'react';
+import api from '../api/fortune';
+import FortuneCard from '../components/FortuneCard';
+import SpeechButton from '../components/SpeechButton';
+import './WeeklyFortune.css';
+
+const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
+
+function getScoreColor(score) {
+  if (score >= 85) return '#ff3d7f';
+  if (score >= 70) return '#fbbf24';
+  if (score >= 55) return '#4ade80';
+  return '#94a3b8';
+}
+
+function getWeekRange() {
+  const now = new Date();
+  const day = now.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  return `${fmt(monday)} ~ ${fmt(sunday)}`;
+}
+
+function WeeklyFortune() {
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [gender, setGender] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const resultRef = useRef(null);
+  const daysScrollRef = useRef(null);
+
+  const handleAutofill = () => {
+    try {
+      const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (p.birthDate) setBirthDate(p.birthDate);
+      if (p.gender) setGender(p.gender);
+      if (p.birthTime) setBirthTime(p.birthTime);
+    } catch {}
+  };
+
+  const handleAnalyze = async () => {
+    if (!birthDate) return;
+    setLoading(true);
+    setResult(null);
+    try {
+      const params = { birthDate };
+      if (birthTime) params.birthTime = birthTime;
+      if (gender) params.gender = gender;
+      const response = await api.get('/weekly-fortune', { params });
+      setResult(response.data);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    } catch (e) {
+      console.error('주간 운세 실패:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetAll = () => {
+    setResult(null);
+    setLoading(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const circumference = 2 * Math.PI * 52;
+  const weekRange = getWeekRange();
+
+  // 최고/주의 요일 판별
+  const bestDayName = result?.bestDay || '';
+  const cautionDayName = result?.cautionDay || '';
+
+  return (
+    <div className="wf-page">
+      {/* 배경 */}
+      <div className="wf-bg">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <span key={i} className="wf-grid-dot" style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 4}s`,
+          }} />
+        ))}
+      </div>
+
+      {/* 히어로 */}
+      <div className="wf-hero">
+        <div className="wf-hero-glow" />
+        <div className="wf-hero-icon">&#128198;</div>
+        <h1 className="wf-title">이번 주 운세</h1>
+        <p className="wf-subtitle">{weekRange}</p>
+      </div>
+
+      {/* 입력 폼 */}
+      {!result && !loading && (
+        <div className="wf-form glass-card fade-in">
+          {localStorage.getItem('userId') && (
+            <button className="sf-autofill-btn" onClick={handleAutofill}>
+              &#10024; 내 정보로 채우기
+            </button>
+          )}
+
+          <div className="wf-form-group">
+            <label className="wf-label">생년월일</label>
+            <input
+              type="date"
+              className="wf-input"
+              value={birthDate}
+              onChange={e => setBirthDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+              min="1920-01-01"
+            />
+          </div>
+
+          <div className="wf-form-group">
+            <label className="wf-label">성별</label>
+            <div className="wf-toggle">
+              <button className={`wf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
+                &#9794; 남성
+              </button>
+              <button className={`wf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
+                &#9792; 여성
+              </button>
+            </div>
+          </div>
+
+          <button className="wf-submit" onClick={handleAnalyze} disabled={!birthDate}>
+            &#128198; 이번 주 운세 보기
+          </button>
+        </div>
+      )}
+
+      {/* 로딩 */}
+      {loading && (
+        <div className="wf-loading">
+          <div className="wf-loading-cal">
+            {DAY_LABELS.map((d, i) => (
+              <span key={i} className="wf-loading-day" style={{ animationDelay: `${i * 0.15}s` }}>{d}</span>
+            ))}
+          </div>
+          <p className="wf-loading-text">이번 주 운세를 분석하고 있습니다<span className="wf-dots" /></p>
+        </div>
+      )}
+
+      {/* 결과 */}
+      {result && (
+        <div className="wf-result fade-in" ref={resultRef}>
+          {/* 주간 헤더 */}
+          <div className="wf-result-header glass-card">
+            <div className="wf-result-header-top">
+              <span className="wf-result-range">{result.weekRange || weekRange}</span>
+              {result.theme && <span className="wf-result-theme">{result.themeEmoji || '📋'} {result.theme}</span>}
+            </div>
+          </div>
+
+          {/* 종합 점수 */}
+          <div className="wf-score-card glass-card">
+            <div className="wf-score-circle">
+              <svg viewBox="0 0 120 120" width="150" height="150">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                <circle
+                  cx="60" cy="60" r="52" fill="none"
+                  stroke={getScoreColor(result.score)}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={circumference - (circumference * (result.score || 0)) / 100}
+                  transform="rotate(-90 60 60)"
+                  className="wf-score-ring"
+                />
+              </svg>
+              <div className="wf-score-inner">
+                <span className="wf-score-num">{result.score || 0}</span>
+                <span className="wf-score-unit">점</span>
+              </div>
+            </div>
+            <span className="wf-grade" style={{ color: getScoreColor(result.score) }}>
+              {result.grade || ''}
+            </span>
+          </div>
+
+          {/* 요약 */}
+          {result.summary && (
+            <div className="wf-summary glass-card">
+              <p>{result.summary}</p>
+            </div>
+          )}
+
+          {/* 7일 타임라인 */}
+          {result.days && result.days.length > 0 && (
+            <div className="wf-section">
+              <h3 className="wf-section-title"><span>&#128197;</span> 요일별 운세</h3>
+              <div className="wf-days-scroll" ref={daysScrollRef}>
+                {result.days.map((day, i) => {
+                  const isBest = day.dayLabel === bestDayName || day.day === bestDayName;
+                  const isCaution = day.dayLabel === cautionDayName || day.day === cautionDayName;
+                  const scoreColor = getScoreColor(day.score);
+                  return (
+                    <div
+                      key={i}
+                      className={`wf-day-card glass-card ${isBest ? 'wf-day--best' : ''} ${isCaution ? 'wf-day--caution' : ''}`}
+                    >
+                      {isBest && <span className="wf-day-badge wf-day-badge--best">BEST</span>}
+                      {isCaution && <span className="wf-day-badge wf-day-badge--caution">&#9888;</span>}
+                      <span className="wf-day-label">{day.dayLabel || DAY_LABELS[i] || ''}</span>
+                      <span className="wf-day-date">{day.date || ''}</span>
+                      <div className="wf-day-score-bar">
+                        <div className="wf-day-score-fill" style={{ height: `${day.score}%`, background: scoreColor }} />
+                      </div>
+                      <span className="wf-day-score" style={{ color: scoreColor }}>{day.score}</span>
+                      <span className="wf-day-keyword">{day.keyword || ''}</span>
+                      {day.tip && <span className="wf-day-tip">{day.tip}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 운세 카드들 */}
+          {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={0} />}
+          {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={80} />}
+          {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={160} />}
+
+          {/* 조언 */}
+          {result.advice && (
+            <FortuneCard icon="💡" title="이번 주 조언" description={result.advice} delay={240} />
+          )}
+
+          {/* 읽어주기 */}
+          <div className="wf-speech-area">
+            <SpeechButton
+              label="주간 운세 읽어주기"
+              text={[
+                '이번 주 운세 결과입니다.',
+                `종합 점수 ${result.score}점, ${result.grade}입니다.`,
+                result.summary,
+                result.love ? `애정운. ${result.love}` : '',
+                result.money ? `재물운. ${result.money}` : '',
+                result.career ? `직장운. ${result.career}` : '',
+                result.advice ? `조언. ${result.advice}` : '',
+              ].filter(Boolean).join(' ')}
+              summaryText={[
+                `이번 주 운세 ${result.score}점, ${result.grade}.`,
+                result.summary,
+              ].filter(Boolean).join(' ')}
+            />
+          </div>
+
+          {/* 리셋 */}
+          <button className="wf-reset" onClick={resetAll}>
+            &#128260; 다시 보기
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default WeeklyFortune;

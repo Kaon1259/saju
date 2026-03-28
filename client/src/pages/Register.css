@@ -79,11 +79,18 @@
   background-repeat: no-repeat;
   background-position: right 16px center;
   padding-right: 40px;
+  color: var(--color-text);
 }
 
 .form-select option {
-  background: #1a0533;
-  color: var(--color-text);
+  background: #1e1040;
+  color: #f1f5f9;
+  padding: 8px;
+}
+
+[data-theme="light"] .form-select option {
+  background: #fff;
+  color: #1a1a2e;
 }
 
 /* Gender Toggle */
@@ -117,26 +124,48 @@
   box-shadow: inset 0 0 16px rgba(124, 58, 237, 0.1);
 }
 
-/* Zodiac Display */
-.register-zodiac {
+/* Zodiac & Constellation Display */
+.register-info-badges {
+  display: flex;
+  gap: 10px;
+}
+
+.register-zodiac,
+.register-constellation {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-md);
+  gap: 8px;
   padding: var(--space-md);
-  background: rgba(251, 191, 36, 0.08);
   border-radius: var(--radius-md);
+}
+
+.register-zodiac {
+  background: rgba(251, 191, 36, 0.08);
   border: 1px solid rgba(251, 191, 36, 0.15);
 }
 
-.register-zodiac__emoji {
-  font-size: 2.2rem;
+.register-constellation {
+  background: rgba(147, 51, 234, 0.08);
+  border: 1px solid rgba(147, 51, 234, 0.15);
+}
+
+.register-zodiac__emoji,
+.register-constellation__emoji {
+  font-size: 1.8rem;
 }
 
 .register-zodiac__text {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-accent-gold);
+}
+
+.register-constellation__text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #BB8FCE;
 }
 
 /* Error */
@@ -172,6 +201,46 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
+}
+
+/* Mode Tabs (로그인/회원가입) */
+.register-mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+}
+
+.register-mode-tab {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.register-mode-tab--active {
+  color: var(--color-text);
+  background: var(--color-primary);
+}
+
+.register-mode-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  width: 60%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-accent-gold);
 }
 
 /* Step Indicator */
@@ -242,6 +311,53 @@
   color: var(--color-text);
 }
 
+/* ── 라이트 모드 ── */
+[data-theme="light"] .form-input {
+  border-color: #ddd;
+  background: #f8f6ff;
+  color: #1a1a2e;
+}
+[data-theme="light"] .form-input:focus {
+  border-color: #7c3aed;
+  background: #fff;
+}
+[data-theme="light"] .form-input::placeholder { color: #999; }
+[data-theme="light"] .form-toggle__btn {
+  border-color: #ddd;
+  background: #f8f6ff;
+  color: #666;
+}
+[data-theme="light"] .form-toggle__btn--active {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: #7c3aed;
+  color: #4a2d8e;
+}
+[data-theme="light"] .form-label { color: #555; }
+[data-theme="light"] .register-mode-tab { color: #999; }
+[data-theme="light"] .register-mode-tab--active { color: #fff; }
+[data-theme="light"] .register-header__title { color: #1a1a2e; }
+
+/* 상대방 정보 섹션 */
+.pe-partner-section {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(233, 30, 99, 0.04);
+  border: 1px solid rgba(233, 30, 99, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.3s;
+}
+
+.pe-partner--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  background: rgba(128, 128, 128, 0.04);
+  border-color: rgba(128, 128, 128, 0.1);
+}
+
+.pe-partner--disabled .form-label { color: var(--color-text-muted); }
+
 /* Profile calendar tag */
 .profile-info__calendar-tag {
   display: inline-block;
@@ -259,6 +375,17 @@
 /* Blood type / MBTI selection */
 .form-toggle--4 { display: grid; grid-template-columns: repeat(4, 1fr); }
 .form-mbti-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.form-mbti-btn { padding: 8px 4px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-.form-mbti-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
-.form-mbti-btn--active { background: rgba(124,58,237,0.3); border-color: rgba(124,58,237,0.6); color: #fff; box-shadow: 0 0 12px rgba(124,58,237,0.2); }
+.form-mbti-btn {
+  padding: 10px 4px; border-radius: 10px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text-secondary);
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.form-mbti-btn:hover { border-color: var(--color-primary-light); color: var(--color-text); }
+.form-mbti-btn--active {
+  background: rgba(124,58,237,0.3); border-color: rgba(124,58,237,0.7);
+  color: #fff; box-shadow: 0 0 12px rgba(124,58,237,0.3);
+}
+[data-theme="light"] .form-mbti-btn { border-color: #ddd; background: #f5f0ff; color: #555; }
+[data-theme="light"] .form-mbti-btn--active { background: #7c3aed; border-color: #7c3aed; color: #fff; }

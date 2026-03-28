@@ -171,8 +171,8 @@ public class MbtiFortuneService {
      * MBTI 궁합
      */
     public Map<String, Object> getCompatibility(String t1, String t2) {
-        final String type1 = t1.toUpperCase();
-        final String type2 = t2.toUpperCase();
+        final String type1 = (t1 != null ? t1 : "INTJ").toUpperCase();
+        final String type2 = (t2 != null ? t2 : "ENFP").toUpperCase();
         int score = COMPAT.containsKey(type1) && COMPAT.get(type1).containsKey(type2) ? COMPAT.get(type1).get(type2) : 70;
 
         String grade, advice;

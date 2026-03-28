@@ -1,0 +1,477 @@
+/* ═══════════════════════════════════════════════════
+   바이오리듬 - 과학적/데이터 시각화 스타일
+   ═══════════════════════════════════════════════════ */
+
+.bio-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px 16px 100px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+/* ═══ 배경 그리드 ═══ */
+.bio-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bio-grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ═══ 히어로 ═══ */
+.bio-hero {
+  text-align: center;
+  padding: 24px 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.bio-hero-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.bio-title {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #E74C3C, #2ECC71, #3498DB, #9B59B6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  position: relative;
+}
+
+.bio-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin: 6px 0 0;
+  position: relative;
+}
+
+.bio-hero-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3498DB, transparent);
+  margin: 16px auto 0;
+}
+
+/* ═══ 입력 ═══ */
+.bio-input-section {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+}
+
+.bio-input-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bio-input-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.bio-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.bio-date-input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.bio-date-input:focus {
+  outline: none;
+  border-color: #3498DB;
+}
+
+.bio-my-btn {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(52, 152, 219, 0.3);
+  background: rgba(52, 152, 219, 0.08);
+  color: #3498DB;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.bio-my-btn:hover {
+  background: rgba(52, 152, 219, 0.15);
+  border-color: #3498DB;
+}
+
+.bio-analyze-btn {
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #3498DB, #2980B9, #1ABC9C);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bio-analyze-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+}
+
+.bio-analyze-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ═══ 결과 ═══ */
+.bio-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══ 게이지 ═══ */
+.bio-gauges {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 380px) {
+  .bio-gauges {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bio-gauge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 10px;
+  gap: 8px;
+  animation: bioGaugeIn 0.5s ease-out both;
+}
+
+@keyframes bioGaugeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.bio-gauge-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.bio-gauge-ring {
+  animation: bioRingDraw 1.2s ease-out forwards;
+  stroke-dashoffset: 264;
+  transition: stroke-dasharray 0.8s ease;
+}
+
+@keyframes bioRingDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+.bio-gauge-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.bio-gauge-val {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.bio-gauge-pct {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
+.bio-gauge-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.bio-gauge-icon { font-size: 16px; }
+
+.bio-gauge-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.bio-gauge-phase {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.bio-phase--up {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ECC71;
+}
+
+.bio-phase--down {
+  background: rgba(231, 76, 60, 0.12);
+  color: #E74C3C;
+}
+
+.bio-phase--critical {
+  background: rgba(241, 196, 15, 0.12);
+  color: #F1C40F;
+}
+
+/* ═══ 차트 ═══ */
+.bio-chart-card {
+  padding: 16px;
+}
+
+.bio-chart-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bio-chart-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bio-chart-svg {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 200px;
+}
+
+.bio-chart-line {
+  animation: bioLineIn 1.5s ease-out forwards;
+  stroke-dasharray: 1500;
+  stroke-dashoffset: 1500;
+}
+
+@keyframes bioLineIn {
+  to { stroke-dashoffset: 0; }
+}
+
+/* 범례 */
+.bio-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.bio-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bio-legend-color {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.bio-legend-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+/* ═══ 전환기 리스트 ═══ */
+.bio-criticals {
+  padding: 16px;
+}
+
+.bio-critical-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bio-critical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bio-critical-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bio-critical-date {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+  min-width: 45px;
+}
+
+.bio-critical-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid;
+}
+
+.bio-critical-today {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 800;
+  color: #FBBF24;
+  background: rgba(251, 191, 36, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.bio-critical-days {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ═══ 조언 ═══ */
+.bio-advice {
+  padding: 18px;
+}
+
+.bio-advice-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bio-advice-text {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* 읽어주기 */
+.bio-speech-area {
+  margin-bottom: 4px;
+}
+
+/* 리셋 */
+.bio-reset-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bio-reset-btn:hover {
+  border-color: #3498DB;
+}
+
+/* ═══ 애니메이션 ═══ */
+.fade-in {
+  animation: bioFadeIn 0.4s ease;
+}
+
+@keyframes bioFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ 라이트 모드 ═══ */
+[data-theme="light"] .bio-grid-lines {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+[data-theme="light"] .bio-date-input { background: #fff; border-color: rgba(0, 0, 0, 0.15); color: #111; }
+[data-theme="light"] .bio-date-input:focus { border-color: #3498DB; }
+[data-theme="light"] .bio-my-btn { background: rgba(52, 152, 219, 0.05); border-color: rgba(52, 152, 219, 0.2); }
+[data-theme="light"] .bio-input-card { background: rgba(255, 255, 255, 0.85); }
+[data-theme="light"] .bio-input-title { color: #111; }
+[data-theme="light"] .bio-gauge-card { background: rgba(255, 255, 255, 0.85); }
+[data-theme="light"] .bio-gauge-label { color: #111; }
+[data-theme="light"] .bio-gauge-circle svg circle:first-child { stroke: rgba(0, 0, 0, 0.06); }
+[data-theme="light"] .bio-chart-card { background: rgba(255, 255, 255, 0.85); }
+[data-theme="light"] .bio-chart-title { color: #111; }
+[data-theme="light"] .bio-chart-svg line { stroke: rgba(0, 0, 0, 0.06) !important; }
+[data-theme="light"] .bio-chart-svg text { fill: rgba(0, 0, 0, 0.4) !important; }
+[data-theme="light"] .bio-chart-svg text[fill="#FBBF24"] { fill: #d97706 !important; }
+[data-theme="light"] .bio-chart-svg line[stroke="rgba(251,191,36,0.4)"] { stroke: rgba(217, 119, 6, 0.3) !important; }
+[data-theme="light"] .bio-legend-label { color: #666; }
+[data-theme="light"] .bio-criticals { background: rgba(255, 255, 255, 0.85); }
+[data-theme="light"] .bio-critical-title { color: #111; }
+[data-theme="light"] .bio-critical-item { background: rgba(0, 0, 0, 0.02); }
+[data-theme="light"] .bio-critical-date { color: #111; }
+[data-theme="light"] .bio-critical-today { background: rgba(217, 119, 6, 0.08); color: #d97706; }
+[data-theme="light"] .bio-advice { background: rgba(255, 255, 255, 0.85); }
+[data-theme="light"] .bio-advice-title { color: #111; }
+[data-theme="light"] .bio-advice-text { color: #444; }
+[data-theme="light"] .bio-reset-btn { background: #fff; border-color: rgba(0, 0, 0, 0.12); color: #333; }
+[data-theme="light"] .bio-subtitle { color: #666; }
+[data-theme="light"] .bio-phase--up { background: rgba(46, 204, 113, 0.08); color: #1a9e4a; }
+[data-theme="light"] .bio-phase--down { background: rgba(231, 76, 60, 0.08); color: #c0392b; }
+[data-theme="light"] .bio-phase--critical { background: rgba(241, 196, 15, 0.08); color: #b7950b; }

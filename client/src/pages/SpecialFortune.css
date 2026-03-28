@@ -1,0 +1,255 @@
+.sf-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 100px; }
+
+/* ═══ 히어로 ═══ */
+.sf-hero { text-align: center; padding: 20px 0 12px; position: relative; }
+.sf-hero-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 60%, rgba(233,30,99,0.08), transparent 70%); pointer-events: none; }
+.sf-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #E91E63, #FF6B6B, #FF9800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; position: relative; }
+.sf-subtitle { color: var(--color-text-secondary); font-size: 13px; margin: 6px 0 0; position: relative; }
+
+/* ═══ 상단 탭 ═══ */
+.sf-tabs {
+  display: flex; gap: 0; border-radius: 14px; overflow: hidden; margin: 16px 0;
+  border: 1.5px solid var(--color-glass-border); background: var(--color-glass); padding: 4px;
+}
+.sf-tab {
+  flex: 1; padding: 12px 8px; border-radius: 10px; border: none;
+  background: transparent; color: var(--color-text-muted);
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+}
+.sf-tab.active.sf-tab--love { background: linear-gradient(135deg, #E91E63, #FF6B6B); color: #fff; box-shadow: 0 2px 12px rgba(233,30,99,0.3); }
+.sf-tab.active.sf-tab--time { background: linear-gradient(135deg, #2196F3, #42A5F5); color: #fff; box-shadow: 0 2px 12px rgba(33,150,243,0.3); }
+
+/* ═══ 연애 운세 ═══ */
+.sf-love-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.sf-love-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 14px 6px; border-radius: 14px; border: 2px solid var(--color-glass-border);
+  background: var(--color-glass); cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.sf-love-chip:hover { border-color: rgba(233,30,99,0.3); }
+.sf-love-chip.active {
+  border-color: #E91E63; background: rgba(233,30,99,0.1);
+  transform: translateY(-3px); box-shadow: 0 6px 20px rgba(233,30,99,0.25);
+}
+.sf-love-chip.active::after {
+  content: '✓'; position: absolute; top: 4px; right: 6px; width: 18px; height: 18px;
+  border-radius: 50%; background: #E91E63; color: #fff; font-size: 10px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
+.sf-love-chip { position: relative; }
+.sf-chip-icon { font-size: 24px; }
+.sf-chip-label { font-size: 13px; font-weight: 800; color: var(--color-text); }
+.sf-chip-desc { font-size: 10px; color: var(--color-text-muted); text-align: center; line-height: 1.3; }
+
+/* ═══ 입력 폼 ═══ */
+.sf-form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.sf-form-group { display: flex; flex-direction: column; gap: 6px; }
+.sf-label { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+.sf-input {
+  padding: 12px; border-radius: 12px; border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass); color: var(--color-text); font-size: 15px; font-family: inherit;
+}
+.sf-input:focus { outline: none; border-color: #9B59B6; }
+.sf-toggle { display: flex; gap: 8px; }
+.sf-toggle-btn {
+  flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass); color: var(--color-text-secondary); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.sf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.15); color: var(--color-text); }
+.sf-form-section-title {
+  font-size: 14px; font-weight: 700; color: var(--color-text); margin: 0 0 4px;
+}
+.sf-form-section-title .sf-optional { font-size: 11px; color: var(--color-text-muted); font-weight: 400; }
+.sf-optional { font-size: 11px; color: var(--color-text-muted); font-weight: 400; }
+
+.sf-partner-toggle {
+  padding: 10px; border-radius: 10px; border: 1px dashed var(--color-glass-border);
+  background: transparent; color: var(--color-text-muted); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; width: 100%; text-align: center;
+}
+.sf-partner-toggle:hover { border-color: #E91E63; color: #E91E63; }
+
+.sf-partner-section {
+  padding: 14px; border-radius: 12px;
+  background: rgba(233,30,99,0.04); border: 1px solid rgba(233,30,99,0.1);
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.sf-submit {
+  padding: 16px; border-radius: 14px; border: none; color: #fff;
+  font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s;
+}
+.sf-submit--love { background: linear-gradient(135deg, #E91E63, #FF6B6B); }
+.sf-submit--time { background: linear-gradient(135deg, #2196F3, #42A5F5); }
+.sf-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+.sf-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ═══ 로딩 ═══ */
+.sf-loading { text-align: center; padding: 40px 0; color: var(--color-text-secondary); }
+.sf-loading-hearts { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+.sf-loading-heart { font-size: 24px; animation: heartBeat 1.2s ease-in-out infinite; }
+@keyframes heartBeat { 0%,100% { transform: scale(1); } 30% { transform: scale(1.3); } }
+.sf-loading-clock { font-size: 40px; animation: clockSpin 2s linear infinite; margin-bottom: 16px; }
+@keyframes clockSpin { to { transform: rotate(360deg); } }
+
+/* ═══ 하트 점수 카드 (연애 결과) ═══ */
+.sf-love-result { display: flex; flex-direction: column; gap: 12px; }
+.sf-speech-area { margin-bottom: 4px; }
+
+.sf-heart-score-card {
+  position: relative; text-align: center; padding: 40px 20px 24px;
+  border-radius: 20px; overflow: hidden;
+  background: var(--color-glass); border: 1px solid var(--color-glass-border);
+}
+
+.sf-heart-aura {
+  position: absolute; inset: -20px; opacity: 0.2;
+  animation: heartAuraPulse 2.5s ease-in-out infinite;
+}
+@keyframes heartAuraPulse {
+  0%, 100% { transform: scale(1); opacity: 0.15; }
+  50% { transform: scale(1.1); opacity: 0.25; }
+}
+
+.sf-hearts-container { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.sf-floating-heart {
+  position: absolute;
+  bottom: -10px;
+  left: var(--heart-x);
+  font-size: var(--heart-size);
+  color: var(--heart-color);
+  animation: heartFloat var(--float-duration) ease-out infinite;
+  animation-delay: var(--float-delay);
+  opacity: 0;
+}
+@keyframes heartFloat {
+  0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.7; }
+  70% { opacity: 0.3; }
+  100% { transform: translateY(-180px) scale(1.2) rotate(20deg); opacity: 0; }
+}
+
+.sf-heart-center { position: relative; z-index: 1; margin-bottom: 8px; }
+.sf-heart-big {
+  font-size: 72px; display: block; line-height: 1;
+  filter: drop-shadow(0 0 20px var(--heart-color, #ffc0cb));
+  animation: heartPump 1.5s ease-in-out infinite;
+}
+@keyframes heartPump {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+}
+.sf-heart-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%); font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.sf-heart-unit { position: absolute; top: 50%; left: 50%; transform: translate(32px, -20%); font-size: 12px; color: rgba(255,255,255,0.7); }
+.sf-heart-grade { position: relative; z-index: 1; font-size: 18px; font-weight: 900; }
+
+/* ═══ 럭키 ═══ */
+.sf-lucky { display: flex; justify-content: space-around; padding: 16px; flex-wrap: wrap; gap: 8px; }
+.sf-lucky-item { text-align: center; }
+.sf-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
+.sf-lucky-value { font-size: 15px; font-weight: 800; color: var(--color-accent-gold); }
+
+/* ═══ 시간별 운세 ═══ */
+.sf-time-section { }
+.sf-time-modes { display: flex; gap: 8px; margin-bottom: 16px; }
+.sf-mode-btn {
+  flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass); color: var(--color-text-muted); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.sf-mode-btn.active {
+  border-color: #2196F3; background: rgba(33,150,243,0.1); color: #42A5F5;
+  box-shadow: 0 2px 12px rgba(33,150,243,0.15);
+}
+
+/* 아침/점심/저녁 */
+.sf-timeblock-result { display: flex; flex-direction: column; gap: 12px; }
+.sf-time-summary { padding: 14px; text-align: center; font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; }
+.sf-time-summary p { margin: 0; }
+
+.sf-blocks { display: flex; flex-direction: column; gap: 10px; }
+.sf-block-card { padding: 18px; border-radius: 16px; position: relative; overflow: hidden; }
+.sf-block--best { border: 1.5px solid rgba(251,191,36,0.4); }
+.sf-block-best-badge {
+  position: absolute; top: 8px; right: 8px;
+  padding: 3px 10px; border-radius: 8px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #000;
+  font-size: 10px; font-weight: 900; letter-spacing: 1px;
+}
+.sf-block-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sf-block-icon { font-size: 28px; }
+.sf-block-name { font-size: 16px; font-weight: 800; color: var(--color-text); display: block; }
+.sf-block-time { font-size: 11px; color: var(--color-text-muted); }
+.sf-block-score-bar {
+  margin-left: auto; width: 90px; height: 22px; background: rgba(255,255,255,0.06);
+  border-radius: 11px; position: relative; overflow: hidden;
+}
+.sf-block-score-fill {
+  position: absolute; inset: 0; border-radius: 11px;
+  background: linear-gradient(90deg, #FBBF24, #F59E0B);
+  transition: width 1s ease;
+}
+.sf-block-score-num {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); z-index: 1;
+}
+.sf-block-fortune { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin: 0 0 6px; }
+.sf-block-advice { font-size: 12px; color: var(--color-primary-light); margin: 0 0 4px; }
+.sf-block-action { font-size: 11px; color: var(--color-text-muted); background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 8px; display: inline-block; }
+
+/* 12시진 */
+.sf-hourly-result { display: flex; flex-direction: column; gap: 12px; }
+.sf-best-worst { display: flex; justify-content: center; gap: 16px; margin-top: 8px; }
+.sf-best { font-size: 14px; font-weight: 700; color: #4ade80; }
+.sf-worst { font-size: 14px; font-weight: 700; color: #f87171; }
+.sf-hourly-grid { display: flex; flex-direction: column; gap: 8px; }
+.sf-hour-card { padding: 14px; border-radius: 14px; }
+.sf-hour--best { border: 1.5px solid rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
+.sf-hour--worst { border: 1.5px solid rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+.sf-hour-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.sf-hour-name { font-size: 15px; font-weight: 800; color: var(--color-text); min-width: 36px; }
+.sf-hour-time { font-size: 12px; color: var(--color-text-muted); }
+.sf-hour-score { margin-left: auto; font-size: 13px; font-weight: 800; padding: 2px 10px; border-radius: 8px; }
+.sf-hour-score.high { background: rgba(74,222,128,0.15); color: #4ade80; }
+.sf-hour-score.mid { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.sf-hour-score.low { background: rgba(248,113,113,0.15); color: #f87171; }
+.sf-hour-fortune { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
+.sf-hour-action { font-size: 12px; color: var(--color-primary-light); margin: 4px 0 0; }
+
+/* ═══ 공통 ═══ */
+.sf-reset {
+  padding: 14px; border-radius: 14px; border: 1.5px solid var(--color-glass-border);
+  background: var(--color-glass); color: var(--color-text); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; margin-top: 4px; width: 100%;
+}
+.sf-reset:hover { border-color: #9B59B6; }
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.sf-autofill-btn {
+  width: 100%; padding: 11px; border-radius: 12px;
+  border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
+  color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.sf-autofill-btn:hover { background: rgba(155,89,182,0.15); border-color: rgba(155,89,182,0.6); }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .sf-autofill-btn { color: #7c3aed; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.3); }
+[data-theme="light"] .sf-autofill-btn:hover { background: rgba(124,58,237,0.1); }
+[data-theme="light"] .sf-label { color: #333; }
+[data-theme="light"] .sf-input { background: #fff; border-color: rgba(0,0,0,0.15); color: #111; }
+[data-theme="light"] .sf-input:focus { border-color: #9B59B6; }
+[data-theme="light"] .sf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #555; }
+[data-theme="light"] .sf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.08); color: #111; }
+[data-theme="light"] .sf-partner-section { background: rgba(233,30,99,0.03); border-color: rgba(233,30,99,0.12); }
+[data-theme="light"] .sf-block-score-bar { background: rgba(0,0,0,0.06); }
+[data-theme="light"] .sf-block-action { background: rgba(0,0,0,0.03); color: #555; }
+[data-theme="light"] .sf-hour-score.high { background: rgba(22,163,74,0.08); color: #16a34a; }
+[data-theme="light"] .sf-hour-score.mid { background: rgba(184,134,11,0.08); color: #92710a; }
+[data-theme="light"] .sf-hour-score.low { background: rgba(220,38,38,0.08); color: #dc2626; }
+[data-theme="light"] .sf-best { color: #16a34a; }
+[data-theme="light"] .sf-worst { color: #dc2626; }
+[data-theme="light"] .sf-lucky-value { color: #96700a; }
+[data-theme="light"] .sf-reset { background: #fff; border-color: rgba(0,0,0,0.12); color: #333; }

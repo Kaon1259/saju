@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @Builder
 public class UserRequest {
 
+    private String phone;
+
     @NotBlank(message = "이름은 필수 입력값입니다.")
     private String name;
 
@@ -32,4 +34,10 @@ public class UserRequest {
 
     private String bloodType;  // A, B, O, AB (optional)
     private String mbtiType;   // ENFP, INTJ, etc. (optional)
+
+    private String relationshipStatus; // IN_RELATIONSHIP, SOME, SINGLE
+    private LocalDate partnerBirthDate;
+    private String partnerBirthTime;
+    private String partnerBloodType;
+    private String partnerMbtiType;
 }

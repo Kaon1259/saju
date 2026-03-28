@@ -55,7 +55,7 @@ function Profile() {
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
-    if (!userId) { navigate('/register'); return; }
+    if (!userId) { navigate('/register', { state: { from: '/profile' } }); return; }
     getUser(userId).then((u) => {
       setUser(u);
       if (u.birthDate) {
@@ -64,7 +64,7 @@ function Profile() {
     }).catch(() => {
       localStorage.removeItem('userId');
       localStorage.removeItem('userName');
-      navigate('/register');
+      navigate('/register', { state: { from: '/profile' } });
     }).finally(() => setLoading(false));
   }, [navigate]);
 
@@ -139,6 +139,14 @@ function Profile() {
             <span className="pf-info-value">{user.mbtiType}</span>
           </div>
         </>)}
+        <div className="pf-info-divider" />
+        <div className="pf-info-row">
+          <span className="pf-info-label">💕 연애 상태</span>
+          <span className="pf-info-value">
+            {user.relationshipStatus === 'IN_RELATIONSHIP' ? '❤️ 연애중' :
+             user.relationshipStatus === 'SOME' ? '💗 썸타는 중' : '✨ 화려한 솔로'}
+          </span>
+        </div>
       </section>
 
       {/* 이번 주 일운 */}
@@ -163,6 +171,9 @@ function Profile() {
       <section className="pf-actions">
         <button className="pf-btn pf-btn--primary" onClick={() => navigate('/my')}>
           🔮 나의 통합 운세 보기
+        </button>
+        <button className="pf-btn pf-btn--primary" style={{ background: 'linear-gradient(135deg, #E91E63, #FF6B6B)' }} onClick={() => navigate('/profile/edit')}>
+          ✏️ 프로필 수정
         </button>
         <button className="pf-btn pf-btn--logout" onClick={() => {
           localStorage.removeItem('userId');

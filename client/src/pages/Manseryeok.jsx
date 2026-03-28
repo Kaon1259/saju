@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getManseryeok } from '../api/fortune';
+import SpeechButton from '../components/SpeechButton';
 import './Manseryeok.css';
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -55,6 +56,27 @@ function Manseryeok() {
 
       {data && (
         <div className="ms-result fade-in">
+          {/* Speech Button */}
+          <div style={{ margin: '12px 0' }}>
+            <SpeechButton
+              label="만세력 읽어주기"
+              text={[
+                data.date ? `${data.date} 만세력 정보입니다.` : '',
+                data.zodiacAnimal ? `${data.zodiacAnimal}띠 해입니다.` : '',
+                data.yearPillar ? `년주는 ${data.yearPillar.stem} ${data.yearPillar.branch}, ${data.yearPillar.stemElement} ${data.yearPillar.branchElement}입니다.` : '',
+                data.monthPillar ? `월주는 ${data.monthPillar.stem} ${data.monthPillar.branch}, ${data.monthPillar.stemElement} ${data.monthPillar.branchElement}입니다.` : '',
+                data.dayPillar ? `일주는 ${data.dayPillar.stem} ${data.dayPillar.branch}, ${data.dayPillar.stemElement} ${data.dayPillar.branchElement}입니다.` : '',
+              ].filter(Boolean).join(' ')}
+              summaryText={[
+                data.date ? `${data.date} 만세력 정보입니다.` : '',
+                data.zodiacAnimal ? `${data.zodiacAnimal}띠 해.` : '',
+                data.yearPillar ? `년주 ${data.yearPillar.stem}${data.yearPillar.branch},` : '',
+                data.monthPillar ? `월주 ${data.monthPillar.stem}${data.monthPillar.branch},` : '',
+                data.dayPillar ? `일주 ${data.dayPillar.stem}${data.dayPillar.branch}.` : '',
+              ].filter(Boolean).join(' ')}
+            />
+          </div>
+
           <section className="ms-pillars glass-card">
             <h2 className="ms-section-title">📅 {data.date} ({data.zodiacAnimal}띠 해)</h2>
             <div className="ms-pillars-grid">

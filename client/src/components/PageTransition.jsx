@@ -129,7 +129,9 @@ export const TRANSITION_EFFECTS = {
   zodiac:        { sound: playDrum,      label: '\uD83D\uDC09', className: 'trans--zodiac' },
   bloodtype:     { sound: playHeartbeat, label: '\uD83E\uDE78', className: 'trans--bloodtype' },
   mbti:          { sound: playDigital,   label: '\uD83E\uDDEC', className: 'trans--mbti' },
-  profile:       { sound: playChime,     label: '\uD83D\uDC64', className: 'trans--profile' },
+  profile:       { sound: playChime,     label: '',             className: 'trans--profile' },
+  tarot:         { sound: playChime,     label: '🔮',          className: 'trans--stars' },
+  compatibility: { sound: playHeartbeat, label: '💕',          className: 'trans--bloodtype' },
 };
 
 // ─── PageTransition Component ───
@@ -203,11 +205,47 @@ function PageTransition({ effect, onDone }) {
         ))}
       </>}
 
-      {effect === 'profile' && <>
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="trans-shimmer-particle" style={{ left: `${Math.random()*100}%`, top: `${Math.random()*100}%`, animationDelay: `${Math.random()*0.6}s` }} />
-        ))}
-      </>}
+      {effect === 'profile' && (() => {
+        let profileData = {};
+        try { profileData = JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch {}
+        const gender = profileData.gender;
+        const relStatus = profileData.relationshipStatus;
+        const isLovey = relStatus === 'IN_RELATIONSHIP' || relStatus === 'SOME';
+        // 띠 이모지
+        const zodiacEmojis = { '쥐': '🐭', '소': '🐂', '호랑이': '🐅', '토끼': '🐇', '용': '🐉', '뱀': '🐍', '말': '🐴', '양': '🐑', '원숭이': '🐵', '닭': '🐓', '개': '🐕', '돼지': '🐷' };
+        const zodiacEmoji = zodiacEmojis[profileData.zodiacAnimal] || '✦';
+        // 별자리 이모지
+        const bd = profileData.birthDate;
+        let constEmoji = '⭐';
+        if (bd) {
+          const m = parseInt(bd.split('-')[1]), d = parseInt(bd.split('-')[2]), v = m*100+d;
+          const cs = [[120,218,'♒'],[219,320,'♓'],[321,419,'♈'],[420,520,'♉'],[521,621,'♊'],[622,722,'♋'],[723,822,'♌'],[823,922,'♍'],[923,1022,'♎'],[1023,1121,'♏'],[1122,1221,'♐']];
+          const found = cs.find(c => v >= c[0] && v <= c[1]);
+          constEmoji = found ? found[2] : '♑';
+        }
+        const genderSymbol = gender === 'F' ? '♀' : '♂';
+        return <>
+          {/* 별자리 + 성별 + 띠 */}
+          <div className="trans-profile-center">
+            <span className="trans-profile-const">{constEmoji}</span>
+            <span className="trans-profile-gender-symbol" style={{ color: gender === 'F' ? '#F472B6' : '#60A5FA' }}>{genderSymbol}</span>
+            <span className="trans-profile-zodiac">{zodiacEmoji}</span>
+          </div>
+          {/* 반짝이 파티클 */}
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={`p${i}`} className="trans-shimmer-particle" style={{ left: `${Math.random()*100}%`, top: `${Math.random()*100}%`, animationDelay: `${Math.random()*0.6}s` }} />
+          ))}
+          {/* 연애중/썸이면 하트 떠오름 */}
+          {isLovey && Array.from({ length: 12 }).map((_, i) => (
+            <span key={`h${i}`} className="trans-profile-heart" style={{
+              left: `${5 + Math.random()*90}%`,
+              animationDelay: `${Math.random()*0.8}s`,
+              animationDuration: `${0.8 + Math.random()*0.6}s`,
+              fontSize: `${14 + Math.random()*14}px`,
+            }}>&#x2764;</span>
+          ))}
+        </>;
+      })()}
 
       {effect === 'constellation' && <>
         {Array.from({ length: 15 }).map((_, i) => (

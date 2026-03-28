@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTransition } from '../components/PageTransition';
 import ZodiacGrid from '../components/ZodiacGrid';
 import FortuneCard from '../components/FortuneCard';
-import { getAllTodayFortunes, getMyFortune, getGuestFortune } from '../api/fortune';
+import { getAllTodayFortunes, getMyFortune, getGuestFortune, getLoveTemperature, getSpecialLoveFortune } from '../api/fortune';
+import SpeechButton from '../components/SpeechButton';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -39,6 +40,71 @@ const DAILY_MESSAGES = [
   '마음을 열면 기회가 보입니다 🌈',
   '당신만의 빛을 믿어보세요 🔮',
 ];
+
+const LOVE_TYPES = [
+  { id: 'relationship', label: '연애운',   icon: '💕', desc: '연인과의 오늘 하루' },
+  { id: 'reunion',      label: '재회운',   icon: '💔', desc: '다시 만날 수 있을까?' },
+  { id: 'remarriage',   label: '재혼운',   icon: '💍', desc: '새로운 인연의 가능성' },
+  { id: 'blind_date',   label: '소개팅운', icon: '💘', desc: '좋은 만남이 올까?' },
+];
+
+const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
+
+function getLoveHeartColor(score) {
+  const s = Math.max(0, Math.min(100, score || 50));
+  return `hsl(340, ${30 + s * 0.7}%, ${85 - s * 0.4}%)`;
+}
+
+// ─── 오늘의 일진 계산 ───
+const STEMS = ['갑','을','병','정','무','기','경','신','임','계'];
+const BRANCHES = ['자','축','인','묘','진','사','오','미','신','유','술','해'];
+const STEM_ELEMENT = ['목','목','화','화','토','토','금','금','수','수'];
+const BRANCH_ELEMENT = ['수','토','목','목','토','화','화','토','금','금','토','수'];
+const ELEMENT_ORDER = ['목','화','토','금','수'];
+
+const ELEMENT_CONFIG = {
+  '목': { emoji: '🌿', color: '#4ade80', label: '목', desc: '성장' },
+  '화': { emoji: '🔥', color: '#f87171', label: '화', desc: '열정' },
+  '토': { emoji: '🏔️', color: '#fbbf24', label: '토', desc: '안정' },
+  '금': { emoji: '⚡', color: '#e2e8f0', label: '금', desc: '결단' },
+  '수': { emoji: '💧', color: '#60a5fa', label: '수', desc: '지혜' },
+};
+
+const ILJIN_MESSAGES = {
+  '목': ['새로운 시작의 기운이 가득합니다', '성장과 발전의 에너지가 넘칩니다', '창의적인 아이디어가 떠오르는 날'],
+  '화': ['열정과 활력이 넘치는 하루입니다', '적극적인 행동이 좋은 결과를 만듭니다', '사교 활동에 좋은 기운이 흐릅니다'],
+  '토': ['안정과 조화의 기운이 감싸는 날입니다', '차분하게 계획을 세우기 좋은 하루', '신뢰를 쌓아가기 좋은 에너지입니다'],
+  '금': ['결단력과 집중력이 높아지는 날입니다', '정리와 마무리에 좋은 기운입니다', '명확한 판단이 빛을 발합니다'],
+  '수': ['깊은 통찰과 지혜가 빛나는 날입니다', '내면을 돌아보기 좋은 하루입니다', '유연한 대처가 행운을 가져옵니다'],
+};
+
+function getTodayIljin() {
+  const now = new Date();
+  const ref = new Date(2000, 0, 1); // 2000-01-01 = 갑오일 (cycle 30)
+  const daysDiff = Math.floor((now - ref) / 86400000);
+  const cycle = ((30 + daysDiff) % 60 + 60) % 60;
+  const stemIdx = cycle % 10;
+  const branchIdx = cycle % 12;
+  const stemEl = STEM_ELEMENT[stemIdx];
+  const branchEl = BRANCH_ELEMENT[branchIdx];
+
+  const elements = { '목': 1, '화': 1, '토': 1, '금': 1, '수': 1 }; // 기본 기운
+  elements[stemEl] += 3;
+  elements[branchEl] += 2;
+  elements[ELEMENT_ORDER[(ELEMENT_ORDER.indexOf(stemEl) + 1) % 5]] += 1; // 상생 보너스
+
+  const maxEl = Object.entries(elements).sort((a, b) => b[1] - a[1])[0][0];
+  const msgs = ILJIN_MESSAGES[maxEl];
+
+  return {
+    stem: STEMS[stemIdx], branch: BRANCHES[branchIdx],
+    stemElement: stemEl, branchElement: branchEl,
+    elements, maxElement: maxEl,
+    message: msgs[now.getDate() % msgs.length],
+    mainEmoji: ELEMENT_CONFIG[maxEl].emoji,
+    mainColor: ELEMENT_CONFIG[maxEl].color,
+  };
+}
 
 // 점수별 날씨 결정
 function getWeather(score) {
@@ -129,9 +195,10 @@ function ScoreCircle({ score, size = 120, label }) {
 
 function Home() {
   const navigate = useNavigate();
-  const swipeRef = useRef(null);
+  const swipeRef = useRef(null); // guest result scroll용
   const [zodiacScores, setZodiacScores] = useState(null);
   const [zodiacLoading, setZodiacLoading] = useState(true);
+  const [loveTemp, setLoveTemp] = useState(null);
   const [myData, setMyData] = useState(null);
   const [myLoading, setMyLoading] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
@@ -142,6 +209,19 @@ function Home() {
   const [guestResult, setGuestResult] = useState(null);
   const [guestLoading, setGuestLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  // 연애 운세 모달
+  const [loveModal, setLoveModal] = useState(null); // LOVE_TYPES id or null
+  const [loveBirth, setLoveBirth] = useState('');
+  const [loveGender, setLoveGender] = useState('');
+  const [lovePartnerDate, setLovePartnerDate] = useState('');
+  const [lovePartnerGender, setLovePartnerGender] = useState('');
+  const [loveMeetDate, setLoveMeetDate] = useState('');
+  const [loveBreakupDate, setLoveBreakupDate] = useState('');
+  const [loveShowPartner, setLoveShowPartner] = useState(false);
+  const [loveLoading, setLoveLoading] = useState(false);
+  const [loveResult, setLoveResult] = useState(null);
+  const [loveFormSliding, setLoveFormSliding] = useState(false);
+  const loveResultRef = useRef(null);
 
   const { triggerTransition } = useTransition();
 
@@ -152,31 +232,7 @@ function Home() {
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   const dayStr = dayNames[today.getDay()];
   const dailyMsg = useMemo(() => DAILY_MESSAGES[today.getDate() % DAILY_MESSAGES.length], []);
-  const [realWeather, setRealWeather] = useState(null);
-
-  // 실제 날씨 가져오기 (위치 기반)
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const { latitude, longitude } = pos.coords;
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`);
-        const data = await res.json();
-        if (data.current) {
-          const code = data.current.weather_code;
-          const temp = Math.round(data.current.temperature_2m);
-          let icon = '☀️', desc = '맑음', wCode = 'sunny';
-          if (code >= 71) { icon = '❄️'; desc = '눈'; wCode = 'snow'; }
-          else if (code >= 61) { icon = '🌧️'; desc = '비'; wCode = 'rain'; }
-          else if (code >= 51) { icon = '🌦️'; desc = '이슬비'; wCode = 'rain'; }
-          else if (code >= 45) { icon = '🌫️'; desc = '안개'; wCode = 'cloudy'; }
-          else if (code >= 3) { icon = '☁️'; desc = '흐림'; wCode = 'cloudy'; }
-          else if (code >= 1) { icon = '⛅'; desc = '구름 조금'; wCode = 'cloudy'; }
-          setRealWeather({ icon, desc, temp, code: wCode });
-        }
-      } catch { /* 날씨 가져오기 실패 - 무시 */ }
-    }, () => {}, { timeout: 5000 });
-  }, []);
+  const iljin = useMemo(() => getTodayIljin(), []);
 
   // 현재 보여지는 운세의 점수로 날씨 결정
   const activeScore = useMemo(() => {
@@ -202,13 +258,22 @@ function Home() {
       } catch { setZodiacScores({}); }
       finally { setZodiacLoading(false); }
     })();
-  }, []);
+    // 연애 온도 (로그인 시 사용자 사주 기반)
+    getLoveTemperature(userId || undefined).then(setLoveTemp).catch(() => {});
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
     setMyLoading(true);
     (async () => {
-      try { setMyData(await getMyFortune(userId)); }
+      try {
+        const data = await getMyFortune(userId);
+        setMyData(data);
+        // 프로필 정보를 localStorage에 항상 최신으로 갱신
+        if (data?.user) {
+          localStorage.setItem('userProfile', JSON.stringify(data.user));
+        }
+      }
       catch (e) { console.error(e); }
       finally { setMyLoading(false); }
     })();
@@ -230,6 +295,41 @@ function Home() {
 
   const handleGuestReset = () => { setGuestResult(null); setBirthDate(''); setBirthTime(''); setGender(''); setShowForm(false); };
 
+  const openLoveModal = (typeId) => {
+    setLoveModal(typeId);
+    setLoveResult(null);
+    setLoveLoading(false);
+    setLoveBirth('');
+    setLoveGender('');
+    setLovePartnerDate('');
+    setLovePartnerGender('');
+    setLoveMeetDate('');
+    setLoveBreakupDate('');
+    setLoveShowPartner(false);
+    setLoveFormSliding(false);
+  };
+  const closeLoveModal = () => { setLoveModal(null); setLoveResult(null); setLoveLoading(false); setLoveFormSliding(false); };
+
+  const handleLoveAnalyze = async () => {
+    if (!loveBirth || !loveModal) return;
+    setLoveLoading(true); setLoveResult(null);
+    try {
+      const data = await getSpecialLoveFortune(
+        loveModal, loveBirth, null, loveGender || null, null,
+        loveShowPartner && lovePartnerDate ? lovePartnerDate : null,
+        loveShowPartner && lovePartnerGender ? lovePartnerGender : null,
+        loveModal === 'reunion' && loveBreakupDate ? loveBreakupDate : null,
+        loveModal === 'blind_date' && loveMeetDate ? loveMeetDate : null
+      );
+      setLoveResult(data);
+      setTimeout(() => loveResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    } catch (e) { console.error(e); }
+    finally { setLoveLoading(false); }
+  };
+
+  const loveInfo = LOVE_TYPES.find(l => l.id === loveModal);
+  const loveHeartColor = loveResult?.score ? getLoveHeartColor(loveResult.score) : '#ffc0cb';
+
   const buildSwipeCards = () => {
     if (!myData) return [];
     const cards = [];
@@ -240,6 +340,37 @@ function Home() {
     return cards;
   };
   const swipeCards = userId ? buildSwipeCards() : [];
+
+  // 읽어주기 텍스트
+  const speechText = useMemo(() => {
+    if (!myData?.saju) return '';
+    const s = myData.saju;
+    const name = userName || myData.user?.name || '';
+    return [
+      `${name}님, 오늘의 사주 운세입니다.`,
+      `오늘의 운세 점수는 ${s.score || 70}점입니다.`,
+      s.overall ? `총운. ${s.overall}` : '',
+      s.love ? `애정운. ${s.love}` : '',
+      s.money ? `재물운. ${s.money}` : '',
+      s.health ? `건강운. ${s.health}` : '',
+      s.work ? `직장운. ${s.work}` : '',
+      s.luckyNumber ? `행운의 숫자는 ${s.luckyNumber},` : '',
+      s.luckyColor ? `행운의 색은 ${s.luckyColor}입니다.` : '',
+      '오늘도 좋은 하루 보내세요!',
+    ].filter(Boolean).join(' ');
+  }, [myData, userName]);
+
+  const speechSummary = useMemo(() => {
+    if (!myData?.saju) return '';
+    const s = myData.saju;
+    const name = userName || myData.user?.name || '';
+    return [
+      `${name}님, 오늘 운세 점수는 ${s.score || 70}점입니다.`,
+      s.overall ? `총운 요약. ${s.overall.split('.').slice(0, 2).join('.')}.` : '',
+      s.luckyNumber ? `행운의 숫자 ${s.luckyNumber},` : '',
+      s.luckyColor ? `행운의 색 ${s.luckyColor}입니다.` : '',
+    ].filter(Boolean).join(' ');
+  }, [myData, userName]);
 
   const renderFortuneContent = (fortune, cardType) => {
     if (!fortune) return null;
@@ -311,36 +442,141 @@ function Home() {
             <span className="home-hero__date">{dateStr}</span>
           </div>
         </div>
-        {/* 날씨 뱃지 (로그인 사용자) */}
-        {weather && userId && (
-          <div className="home-weather-badge"><span>{weather.emoji}</span> <span>{weather.label}</span> <span className="home-weather-desc">{weather.desc}</span></div>
-        )}
+        <div className="home-hero-iljin">
+          <span className="home-hero-iljin-dot" style={{ background: iljin.mainColor }} />
+          <span>{iljin.mainEmoji} {iljin.stem}{iljin.branch}일</span>
+          <span className="home-hero-iljin-el" style={{ color: iljin.mainColor }}>{ELEMENT_CONFIG[iljin.stemElement].label}+{ELEMENT_CONFIG[iljin.branchElement].label}</span>
+        </div>
       </section>
 
-      {/* ─── Logged-in User ─── */}
+      {/* ─── 오늘의 연애 온도 (최상단 전면) ─── */}
+      {(() => {
+        // 로그인/비로그인 모두 서버에서 계산된 연애 온도 사용
+        const temp = loveTemp?.temperature || 55;
+        const msg = loveTemp?.message || '사랑의 기운을 확인해보세요.';
+        const heartSat = 30 + temp * 0.7;
+        const heartLight = 80 - temp * 0.35;
+        const heartColor = `hsl(340, ${heartSat}%, ${heartLight}%)`;
+        const heartCount = Math.max(5, Math.floor(temp / 6));
+
+        return (
+          <section className="home-love-section" style={{ '--love-temp-color': heartColor }}>
+            {/* 떠다니는 하트 (온도에 따라 개수/색 변화) */}
+            <div className="home-love-hearts-bg">
+              {Array.from({ length: heartCount }).map((_, i) => (
+                <span key={i} className="home-love-float-heart" style={{
+                  '--hf-x': `${5 + (i * 97 / heartCount) % 90}%`,
+                  '--hf-delay': `${i * 0.35}s`,
+                  '--hf-dur': `${2.5 + Math.random() * 2}s`,
+                  '--hf-size': `${12 + Math.random() * 14}px`,
+                  color: heartColor,
+                }}>&#x2764;</span>
+              ))}
+            </div>
+
+            {/* 온도 표시 */}
+            <div className="home-love-temp-display">
+              <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
+              <div className="home-love-temp-info">
+                <span className="home-love-temp-label">오늘의 연애 온도</span>
+                <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
+              </div>
+            </div>
+            <p className="home-love-temp-msg">{msg}</p>
+
+            {/* 4종 카드 */}
+            <div className="home-love-cards">
+              <button className="home-love-card home-love--relationship" onClick={() => openLoveModal('relationship')}>
+                <span className="home-love-icon">💕</span>
+                <span className="home-love-label">연애운</span>
+              </button>
+              <button className="home-love-card home-love--reunion" onClick={() => openLoveModal('reunion')}>
+                <span className="home-love-icon">💔</span>
+                <span className="home-love-label">재회운</span>
+              </button>
+              <button className="home-love-card home-love--remarriage" onClick={() => openLoveModal('remarriage')}>
+                <span className="home-love-icon">💍</span>
+                <span className="home-love-label">재혼운</span>
+              </button>
+              <button className="home-love-card home-love--blind" onClick={() => openLoveModal('blind_date')}>
+                <span className="home-love-icon">💘</span>
+                <span className="home-love-label">소개팅운</span>
+              </button>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* ─── 오늘의 일진 ─── */}
+      <section className="home-iljin-section">
+        <div className="home-iljin-card glass-card">
+          <span className="home-iljin-badge">☯ 오늘의 일진</span>
+          <div className="home-iljin-main">
+            <span className="home-iljin-emoji" style={{ '--iljin-glow': iljin.mainColor }}>{iljin.mainEmoji}</span>
+            <div className="home-iljin-info">
+              <span className="home-iljin-name">{iljin.stem}{iljin.branch}일</span>
+              <span className="home-iljin-el-tag" style={{ color: iljin.mainColor }}>
+                {ELEMENT_CONFIG[iljin.stemElement].emoji} {ELEMENT_CONFIG[iljin.stemElement].label} + {ELEMENT_CONFIG[iljin.branchElement].emoji} {ELEMENT_CONFIG[iljin.branchElement].label} 에너지
+              </span>
+            </div>
+          </div>
+          <div className="home-iljin-bars">
+            {ELEMENT_ORDER.map(el => {
+              const val = iljin.elements[el];
+              const max = Math.max(...Object.values(iljin.elements));
+              const cfg = ELEMENT_CONFIG[el];
+              const isMax = el === iljin.maxElement;
+              return (
+                <div key={el} className={`home-iljin-bar-row ${isMax ? 'home-iljin-bar--dominant' : ''}`}>
+                  <span className="home-iljin-bar-icon">{cfg.emoji}</span>
+                  <span className="home-iljin-bar-label">{cfg.label}</span>
+                  <div className="home-iljin-bar-track">
+                    <div className="home-iljin-bar-fill" style={{ width: `${(val / max) * 100}%`, background: cfg.color, boxShadow: isMax ? `0 0 12px ${cfg.color}55` : 'none' }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="home-iljin-msg">{iljin.message}</p>
+        </div>
+      </section>
+
+      {/* ─── 읽어주기 ─── */}
+      {userId && speechText && !myLoading && (
+        <div className="home-speech-bar">
+          <SpeechButton label="오늘의 운세 읽어주기" text={speechText} summaryText={speechSummary} />
+        </div>
+      )}
+
+      {/* ─── Logged-in: 운세 메뉴 카드 ─── */}
       {userId && (
         <section className="home-fortune-section">
           {myLoading ? (
             <div className="home-fortune-loading"><div className="home-fortune-spinner" /><p>AI가 운세를 분석하고 있습니다...</p><p className="home-fortune-loading-hint">잠시만 기다려주세요</p></div>
-          ) : swipeCards.length > 0 ? (
-            <>
-              <div className="swipe-container" ref={swipeRef} onScroll={handleSwipeScroll}>
-                {swipeCards.map((card) => (
-                  <div key={card.id} className="swipe-card">
-                    <div className="swipe-card-inner glass-card">
-                      <div className="swipe-card-header" style={{ '--card-accent': card.color }}><span className="swipe-card-icon">{card.icon}</span><h3 className="swipe-card-title">{card.label}</h3></div>
-                      {renderFortuneContent(card.data, card.id)}
+          ) : (
+            <div className="home-menu-cards">
+              {swipeCards.map((card) => {
+                const score = card.data?.score;
+                const summary = card.data?.overall?.split('.').slice(0, 1).join('.') || '';
+                const link = card.id === 'saju' ? '/my' : card.id === 'blood' ? '/bloodtype' : '/mbti';
+                return (
+                  <button key={card.id} className="home-menu-card glass-card" onClick={() => navigate(link)} style={{ '--menu-accent': card.color }}>
+                    <div className="home-menu-left">
+                      <span className="home-menu-icon">{card.icon}</span>
+                      <div className="home-menu-info">
+                        <span className="home-menu-label">{card.label}</span>
+                        {summary && <p className="home-menu-summary">{summary}.</p>}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              {swipeCards.length > 1 && (
-                <div className="swipe-dots">{swipeCards.map((card, idx) => (
-                  <button key={card.id} className={`swipe-dot ${currentCard === idx ? 'active' : ''}`} onClick={() => { const el = swipeRef.current; if (el) el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' }); }} />
-                ))}</div>
-              )}
-            </>
-          ) : null}
+                    <div className="home-menu-right">
+                      {score != null && <span className="home-menu-score" style={{ color: card.color }}>{score}<small>점</small></span>}
+                      <span className="home-menu-arrow">›</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
 
@@ -352,47 +588,10 @@ function Home() {
           ) : guestResult ? (
             renderGuestResult()
           ) : !showForm ? (
-            /* 재미있는 랜딩 */
             <div className="home-landing fade-in">
-              {/* 날씨 기반 비주얼 */}
-              <div className="home-landing-visual">
-                {realWeather ? (
-                  <div className="home-weather-scene">
-                    <div className={`home-weather-anim home-weather-anim--${realWeather.code}`}>
-                      {realWeather.code === 'snow' && Array.from({ length: 30 }).map((_, i) => (
-                        <span key={i} className="home-snowflake" style={{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*4}s`, animationDuration: `${2+Math.random()*3}s`, fontSize: `${8+Math.random()*10}px`, opacity: 0.4+Math.random()*0.5 }}>❄</span>
-                      ))}
-                      {realWeather.code === 'rain' && Array.from({ length: 35 }).map((_, i) => (
-                        <div key={i} className="home-raindrop" style={{ left: `${Math.random()*100}%`, animationDelay: `${Math.random()*1.5}s`, animationDuration: `${0.4+Math.random()*0.4}s`, opacity: 0.3+Math.random()*0.4 }} />
-                      ))}
-                      {realWeather.code === 'sunny' && <>
-                        <div className="home-sun" />
-                        {Array.from({ length: 8 }).map((_, i) => (
-                          <div key={i} className="home-sun-ray" style={{ '--ray-angle': `${i*45}deg` }} />
-                        ))}
-                      </>}
-                      {realWeather.code === 'cloudy' && <>
-                        <div className="home-cloud-anim home-cloud-anim--1">☁️</div>
-                        <div className="home-cloud-anim home-cloud-anim--2">⛅</div>
-                        <div className="home-cloud-anim home-cloud-anim--3">☁️</div>
-                      </>}
-                    </div>
-                    <div className="home-weather-info-big">
-                      <span className="home-weather-temp-big">{realWeather.temp}°</span>
-                      <span className="home-weather-desc-big">{realWeather.desc}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="home-weather-scene">
-                    <div className="home-default-visual">
-                      <span className="home-default-symbol">☯</span>
-                    </div>
-                  </div>
-                )}
-                <p className="home-landing-msg">{dailyMsg}</p>
-              </div>
+              <p className="home-landing-msg">{dailyMsg}</p>
 
-              {/* 메뉴 카드 - 동양풍 */}
+              {/* 메뉴 카드 */}
               <div className="home-landing-cards">
                 <button className="home-landing-card home-card--fortune" onClick={() => triggerTransition('fortune', () => setShowForm(true))}>
                   <div className="home-card-deco">卦</div>
@@ -416,7 +615,7 @@ function Home() {
                 </button>
               </div>
 
-              <button className="home-cta-btn" onClick={() => navigate('/register')}>
+              <button className="home-cta-btn" onClick={() => navigate('/register', { state: { from: '/' } })}>
                 회원가입하고 맞춤 운세 받기
               </button>
             </div>
@@ -435,6 +634,72 @@ function Home() {
         </section>
       )}
 
+      {/* ─── 시간별 운세 ─── */}
+      <section className="home-special-section">
+        <h2 className="home-special-title">🕐 시간별 운세</h2>
+        <div className="home-special-cards">
+          <button className="home-special-card home-special-card--morning" onClick={() => navigate('/special?tab=time&mode=timeblock')}>
+            <span className="home-special-icon">🌅</span>
+            <span className="home-special-label">아침·점심·저녁</span>
+            <span className="home-special-desc">3구간 운세</span>
+          </button>
+          <button className="home-special-card home-special-card--time" onClick={() => navigate('/special?tab=time&mode=hourly')}>
+            <span className="home-special-icon">🕐</span>
+            <span className="home-special-label">12시진 상세</span>
+            <span className="home-special-desc">시간대별 운세</span>
+          </button>
+        </div>
+      </section>
+
+      {/* ─── 운세 캘린더: 신년 · 월별 · 주간 ─── */}
+      <section className="home-new-section">
+        <h2 className="home-special-title">📅 운세 캘린더</h2>
+        <div className="home-new-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <button className="home-new-card" onClick={() => navigate('/year-fortune')} style={{ '--new-color': '#E74C3C' }}>
+            <span className="home-new-icon">🎊</span>
+            <span className="home-new-label">2026 운세</span>
+            <span className="home-new-desc">올해의 운세</span>
+          </button>
+          <button className="home-new-card" onClick={() => navigate('/monthly-fortune')} style={{ '--new-color': '#3498DB' }}>
+            <span className="home-new-icon">📅</span>
+            <span className="home-new-label">월별 운세</span>
+            <span className="home-new-desc">12개월 분석</span>
+          </button>
+          <button className="home-new-card" onClick={() => navigate('/weekly-fortune')} style={{ '--new-color': '#27AE60' }}>
+            <span className="home-new-icon">📆</span>
+            <span className="home-new-label">주간 운세</span>
+            <span className="home-new-desc">이번 주 7일</span>
+          </button>
+        </div>
+      </section>
+
+      {/* ─── 더 알아보기: 꿈해몽 · 관상 · 심리 · 바이오리듬 ─── */}
+      <section className="home-new-section">
+        <h2 className="home-special-title">✨ 더 알아보기</h2>
+        <div className="home-new-grid">
+          <button className="home-new-card" onClick={() => navigate('/dream')} style={{ '--new-color': '#6C3483' }}>
+            <span className="home-new-icon">🌙</span>
+            <span className="home-new-label">꿈해몽</span>
+            <span className="home-new-desc">꿈 속 메시지 해석</span>
+          </button>
+          <button className="home-new-card" onClick={() => navigate('/face-reading')} style={{ '--new-color': '#DAA520' }}>
+            <span className="home-new-icon">👤</span>
+            <span className="home-new-label">AI 관상</span>
+            <span className="home-new-desc">얼굴로 보는 운세</span>
+          </button>
+          <button className="home-new-card" onClick={() => navigate('/psych-test')} style={{ '--new-color': '#E91E63' }}>
+            <span className="home-new-icon">🎭</span>
+            <span className="home-new-label">심리테스트</span>
+            <span className="home-new-desc">숨겨진 나를 발견</span>
+          </button>
+          <button className="home-new-card" onClick={() => navigate('/biorhythm')} style={{ '--new-color': '#2196F3' }}>
+            <span className="home-new-icon">📊</span>
+            <span className="home-new-label">바이오리듬</span>
+            <span className="home-new-desc">오늘의 컨디션</span>
+          </button>
+        </div>
+      </section>
+
       {/* ─── Zodiac Grid ─── */}
       <section className="home-grid-section">
         <div className="home-grid-header"><h2 className="home-grid-title">띠별 운세</h2><span className="home-grid-hint">터치하여 상세보기</span></div>
@@ -442,6 +707,133 @@ function Home() {
           <div className="home-loading">{Array.from({ length: 12 }).map((_, i) => (<div key={i} className="skeleton" style={{ height: 80, borderRadius: 12 }} />))}</div>
         ) : (<ZodiacGrid onSelect={handleZodiacSelect} scores={zodiacScores} />)}
       </section>
+
+      {/* ─── 연애 운세 바텀시트 모달 ─── */}
+      {loveModal && (
+        <div className="love-modal-overlay" onClick={closeLoveModal}>
+          <div className="love-modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="love-modal-handle" />
+            <div className="love-modal-header">
+              <span className="love-modal-icon">{loveInfo?.icon}</span>
+              <h2 className="love-modal-title">{loveInfo?.label}</h2>
+              <span className="love-modal-desc">{loveInfo?.desc}</span>
+              <button className="love-modal-close" onClick={closeLoveModal}>✕</button>
+            </div>
+
+            <div className="love-modal-body">
+              {/* 입력 폼 */}
+              {!loveResult && !loveLoading && (
+                <div className="love-modal-form fade-in">
+                  {userId && (
+                    <button className="love-modal-autofill" onClick={() => {
+                      try {
+                        const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                        if (p.birthDate) setLoveBirth(p.birthDate);
+                        if (p.gender) setLoveGender(p.gender);
+                      } catch {}
+                    }}>✨ 내 정보로 채우기</button>
+                  )}
+                  <div className="love-modal-field">
+                    <label className="love-modal-label">생년월일</label>
+                    <input type="date" className="love-modal-input" value={loveBirth}
+                      onChange={e => setLoveBirth(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                  </div>
+                  <div className="love-modal-field">
+                    <label className="love-modal-label">성별</label>
+                    <div className="love-modal-toggle">
+                      <button className={`love-modal-toggle-btn ${loveGender === 'M' ? 'active' : ''}`} onClick={() => setLoveGender('M')}>♂ 남성</button>
+                      <button className={`love-modal-toggle-btn ${loveGender === 'F' ? 'active' : ''}`} onClick={() => setLoveGender('F')}>♀ 여성</button>
+                    </div>
+                  </div>
+
+                  {loveModal === 'reunion' && (
+                    <div className="love-modal-field">
+                      <label className="love-modal-label">헤어진 시기 <span className="love-modal-opt">(선택)</span></label>
+                      <input type="date" className="love-modal-input" value={loveBreakupDate}
+                        onChange={e => setLoveBreakupDate(e.target.value)} max={new Date().toISOString().split('T')[0]} />
+                    </div>
+                  )}
+                  {loveModal === 'blind_date' && (
+                    <div className="love-modal-field">
+                      <label className="love-modal-label">소개팅 날짜 <span className="love-modal-opt">(선택)</span></label>
+                      <input type="date" className="love-modal-input" value={loveMeetDate}
+                        onChange={e => setLoveMeetDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+                    </div>
+                  )}
+
+                  <button className="love-modal-partner-btn" onClick={() => setLoveShowPartner(!loveShowPartner)}>
+                    {loveShowPartner ? '▲ 상대방 정보 접기' : '▼ 상대방 정보 추가 (선택)'}
+                  </button>
+                  {loveShowPartner && (
+                    <div className="love-modal-partner fade-in">
+                      <div className="love-modal-field">
+                        <label className="love-modal-label">상대방 생년월일</label>
+                        <input type="date" className="love-modal-input" value={lovePartnerDate}
+                          onChange={e => setLovePartnerDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                      </div>
+                      <div className="love-modal-field">
+                        <label className="love-modal-label">상대방 성별</label>
+                        <div className="love-modal-toggle">
+                          <button className={`love-modal-toggle-btn ${lovePartnerGender === 'M' ? 'active' : ''}`} onClick={() => setLovePartnerGender('M')}>♂ 남성</button>
+                          <button className={`love-modal-toggle-btn ${lovePartnerGender === 'F' ? 'active' : ''}`} onClick={() => setLovePartnerGender('F')}>♀ 여성</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <button className="love-modal-submit" onClick={handleLoveAnalyze} disabled={!loveBirth}>
+                    {loveInfo?.icon} {loveInfo?.label} 보기
+                  </button>
+                </div>
+              )}
+
+              {/* 로딩 */}
+              {loveLoading && (
+                <div className="love-modal-loading fade-in">
+                  <div className="love-modal-loading-hearts">
+                    {[0,1,2].map(i => <span key={i} className="love-modal-loading-heart" style={{ animationDelay: `${i * 0.3}s` }}>💗</span>)}
+                  </div>
+                  <p>AI가 {loveInfo?.label}을 분석하고 있습니다...</p>
+                </div>
+              )}
+
+              {/* 결과 */}
+              {loveResult && (
+                <div className="love-modal-result fade-in" ref={loveResultRef} style={{ '--heart-color': loveHeartColor }}>
+                  <SpeechButton label={`${loveInfo?.label} 읽어주기`}
+                    text={[`${loveInfo?.label} 결과입니다.`, `점수는 ${loveResult.score}점, ${loveResult.grade}입니다.`, loveResult.overall, loveResult.timing, loveResult.advice, loveResult.caution].filter(Boolean).join(' ')}
+                    summaryText={`${loveInfo?.label} ${loveResult.score}점, ${loveResult.grade}. ${(loveResult.overall||'').split('.').slice(0,2).join('.')}.`} />
+
+                  <div className="love-modal-score-card">
+                    <div className="love-modal-heart-aura" style={{ background: `radial-gradient(circle, ${loveHeartColor}, transparent 70%)` }} />
+                    <div className="love-modal-heart-center">
+                      <span className="love-modal-heart-big" style={{ color: loveHeartColor }}>&#x2764;</span>
+                      <span className="love-modal-heart-num">{loveResult.score}</span>
+                      <span className="love-modal-heart-unit">점</span>
+                    </div>
+                    <span className="love-modal-heart-grade" style={{ color: GRADE_COLORS[loveResult.grade] || loveHeartColor }}>{loveResult.grade}</span>
+                  </div>
+
+                  <FortuneCard icon={loveInfo?.icon} title="종합 분석" description={loveResult.overall} delay={0} />
+                  {loveResult.timing && <FortuneCard icon="📅" title="최적 시기" description={loveResult.timing} delay={80} />}
+                  {loveResult.advice && <FortuneCard icon="💡" title="행동 조언" description={loveResult.advice} delay={160} />}
+                  {loveResult.caution && <FortuneCard icon="⚠️" title="주의사항" description={loveResult.caution} delay={240} />}
+
+                  {(loveResult.luckyDay || loveResult.luckyPlace || loveResult.luckyColor) && (
+                    <div className="love-modal-lucky glass-card">
+                      {loveResult.luckyDay && <div className="love-modal-lucky-item"><span className="love-modal-lucky-label">행운의 날</span><span className="love-modal-lucky-value">{loveResult.luckyDay}</span></div>}
+                      {loveResult.luckyPlace && <div className="love-modal-lucky-item"><span className="love-modal-lucky-label">행운의 장소</span><span className="love-modal-lucky-value">{loveResult.luckyPlace}</span></div>}
+                      {loveResult.luckyColor && <div className="love-modal-lucky-item"><span className="love-modal-lucky-label">행운의 색</span><span className="love-modal-lucky-value">{loveResult.luckyColor}</span></div>}
+                    </div>
+                  )}
+
+                  <button className="love-modal-reset" onClick={() => { setLoveResult(null); setLoveBirth(''); }}>🔄 다시 보기</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

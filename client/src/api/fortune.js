@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  timeout: 30000,
+  timeout: 90000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,6 +27,16 @@ export const getFortuneByUser = async (userId) => {
 
 export const registerUser = async (userData) => {
   const response = await api.post('/users', userData);
+  return response.data;
+};
+
+export const loginUser = async (phone) => {
+  const response = await api.post('/users/login', { phone });
+  return response.data;
+};
+
+export const updateUser = async (userId, userData) => {
+  const response = await api.put(`/users/${userId}`, userData);
   return response.data;
 };
 
@@ -141,11 +151,140 @@ export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, b
   return response.data;
 };
 
+// ─── 타로 ───
+export const drawTarotCards = async (count = 3) => {
+  const response = await api.get('/tarot/draw', { params: { count } });
+  return response.data;
+};
+
+export const getTarotReading = async (cardIds, reversals, spread, category, question) => {
+  const params = { cardIds, reversals, spread, category };
+  if (question) params.question = question;
+  const response = await api.get('/tarot/reading', { params });
+  return response.data;
+};
+
+// ─── 오늘의 연애 온도 ───
+export const getLoveTemperature = async (userId) => {
+  const params = {};
+  if (userId) params.userId = userId;
+  const response = await api.get('/special/love-temperature', { params });
+  return response.data;
+};
+
+// ─── 특수 운세 (연애/재회/재혼/소개팅) ───
+export const getSpecialLoveFortune = async (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate) => {
+  const params = { type, birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  if (calendarType) params.calendarType = calendarType;
+  if (partnerDate) params.partnerDate = partnerDate;
+  if (partnerGender) params.partnerGender = partnerGender;
+  if (breakupDate) params.breakupDate = breakupDate;
+  if (meetDate) params.meetDate = meetDate;
+  const response = await api.get('/special/love', { params });
+  return response.data;
+};
+
+// ─── 아침/점심/저녁 운세 ───
+export const getTimeblockFortune = async (birthDate, birthTime, gender, calendarType) => {
+  const params = { birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/special/timeblock', { params });
+  return response.data;
+};
+
+// ─── 시간대별 운세 ───
+export const getHourlyFortune = async (birthDate, birthTime, gender, calendarType) => {
+  const params = { birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/special/hourly', { params });
+  return response.data;
+};
+
 // ─── 일운 (7일) ───
 export const getDailyFortunes = async (birthDate, calendarType) => {
   const params = { birthDate };
   if (calendarType) params.calendarType = calendarType;
   const response = await api.get('/saju/daily', { params });
+  return response.data;
+};
+
+// ─── 꿈해몽 ───
+export const interpretDream = async (dreamText, birthDate, gender) => {
+  const params = new URLSearchParams();
+  params.append('dreamText', dreamText);
+  if (birthDate) params.append('birthDate', birthDate);
+  if (gender) params.append('gender', gender);
+  const response = await api.post('/dream/interpret', params);
+  return response.data;
+};
+
+// ─── AI 관상 ───
+export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender) => {
+  const params = new URLSearchParams();
+  params.append('faceShape', faceShape);
+  params.append('eyeShape', eyeShape);
+  params.append('noseShape', noseShape);
+  params.append('mouthShape', mouthShape);
+  params.append('foreheadShape', foreheadShape);
+  if (birthDate) params.append('birthDate', birthDate);
+  if (gender) params.append('gender', gender);
+  const response = await api.post('/face-reading/analyze', params);
+  return response.data;
+};
+
+// ─── 심리테스트 ───
+export const getPsychTests = async () => {
+  const response = await api.get('/psych/tests');
+  return response.data;
+};
+
+export const analyzePsychTest = async (testId, answers, birthDate, gender) => {
+  const params = new URLSearchParams();
+  params.append('testId', testId);
+  params.append('answers', answers);
+  if (birthDate) params.append('birthDate', birthDate);
+  if (gender) params.append('gender', gender);
+  const response = await api.post('/psych/analyze', params);
+  return response.data;
+};
+
+// ─── 바이오리듬 ───
+export const getBiorhythm = async (birthDate) => {
+  const response = await api.get('/biorhythm', { params: { birthDate } });
+  return response.data;
+};
+
+// ─── 2026 신년운세 ───
+export const getYearFortune = async (birthDate, birthTime, gender, calendarType) => {
+  const params = { birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/year-fortune', { params });
+  return response.data;
+};
+
+// ─── 월별 운세 ───
+export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => {
+  const params = { birthDate, month };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  const response = await api.get('/monthly-fortune', { params });
+  return response.data;
+};
+
+// ─── 주간 운세 ───
+export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
+  const params = { birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  const response = await api.get('/weekly-fortune', { params });
   return response.data;
 };
 

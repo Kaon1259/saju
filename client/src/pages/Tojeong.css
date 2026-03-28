@@ -94,3 +94,21 @@
 .tj-actions { padding: 0 4px; }
 .tj-reset-btn { width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: var(--color-text-muted); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
 .tj-reset-btn:hover { border-color: var(--color-primary-light); color: var(--color-text); }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .tj-intro-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .tj-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .tj-loading-text { color: #555; }
+[data-theme="light"] .tj-num-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .tj-num-value { color: #111; }
+[data-theme="light"] .tj-num-total .tj-num-value { color: #b8860b; }
+[data-theme="light"] .tj-section-title { color: #111; }
+[data-theme="light"] .tj-summary-text { color: #333; }
+[data-theme="light"] .tj-month-name { color: #111; }
+[data-theme="light"] .tj-month-text { color: #444; }
+[data-theme="light"] .tj-month-now { color: #fff; }
+[data-theme="light"] .tj-month-card { background: rgba(0,0,0,0.01); }
+[data-theme="light"] .tj-month--current { border-color: rgba(124,58,237,0.4) !important; box-shadow: 0 4px 12px rgba(124,58,237,0.1); }
+[data-theme="light"] .tj-gwae-name { color: #96700a; background: rgba(251,191,36,0.06); border-color: rgba(184,134,11,0.25); }
+[data-theme="light"] .tj-reset-btn { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); color: #666; }
+[data-theme="light"] .tj-seal { background: rgba(192,57,43,0.03); }
