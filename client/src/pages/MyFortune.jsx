@@ -121,6 +121,7 @@ function MyFortune() {
   ];
   if (bt) tabs.push({ id: 'blood', label: `${user.bloodType}형`, icon: '🩸', data: bt });
   if (mbti) tabs.push({ id: 'mbti', label: user.mbtiType, icon: '🧬', data: mbti });
+  tabs.push({ id: 'deep', label: '심화분석', icon: '🔍', data: null });
 
   const active = tabs.find(t => t.id === activeTab) || tabs[0];
   const f = active?.data;
@@ -306,8 +307,22 @@ function MyFortune() {
         </div>
       )}
 
+      {/* 심화분석 탭 */}
+      {activeTab === 'deep' && (
+        <div className="myf-content fade-in">
+          {(() => {
+            try {
+              const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+              return profile.birthDate ? (
+                <DeepAnalysis type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} autoOpen={true} />
+              ) : <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>프로필에 생년월일을 등록해주세요</p>;
+            } catch { return null; }
+          })()}
+        </div>
+      )}
+
       {/* 점수 원형 */}
-      {f && (
+      {f && activeTab !== 'deep' && (
         <div className="myf-content fade-in" key={activeTab}>
           <div className="myf-score-wrap">
             <svg viewBox="0 0 120 120" className="myf-score-circle">
@@ -377,16 +392,6 @@ function MyFortune() {
           </div>
         </div>
       )}
-
-      {/* 심화분석 */}
-      {f && (() => {
-        try {
-          const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-          return profile.birthDate ? (
-            <DeepAnalysis type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} />
-          ) : null;
-        } catch { return null; }
-      })()}
 
       {/* 공유 */}
       {f && (

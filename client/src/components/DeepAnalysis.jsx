@@ -1,15 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getDeepAnalysis } from '../api/fortune';
 import './DeepAnalysis.css';
 
-function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra }) {
+function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra, autoOpen = false }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
 
-  const handleLoad = async () => {
-    if (data) { setOpen(!open); return; }
-    setOpen(true);
+  const loadData = async () => {
+    if (data || loading || !birthDate) return;
     setLoading(true);
     try {
       const result = await getDeepAnalysis(type, birthDate, birthTime, gender, calendarType, extra);
@@ -18,12 +17,24 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra 
     finally { setLoading(false); }
   };
 
+  useEffect(() => {
+    if (autoOpen && !data && !loading) loadData();
+  }, [autoOpen, birthDate]);
+
+  const handleLoad = async () => {
+    if (data) { setOpen(!open); return; }
+    setOpen(true);
+    loadData();
+  };
+
   return (
     <div className="deep-wrap">
-      <button className="deep-toggle-btn" onClick={handleLoad}>
-        {open ? '심화분석 접기 ▲' : '🔍 심화분석 보기 ▼'}
-      </button>
-      {open && (
+      {!autoOpen && (
+        <button className="deep-toggle-btn" onClick={handleLoad}>
+          {open ? '심화분석 접기 ▲' : '🔍 심화분석 보기 ▼'}
+        </button>
+      )}
+      {(open || autoOpen) && (
         <div className="deep-content glass-card fade-in">
           {loading ? (
             <div className="deep-loading">
