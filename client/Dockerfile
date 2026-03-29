@@ -1,12 +1,9 @@
-FROM node:20-alpine AS build
+FROM node:20-alpine
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+RUN npm install express http-proxy-middleware
 EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server.js"]
