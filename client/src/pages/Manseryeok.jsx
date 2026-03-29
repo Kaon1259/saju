@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getManseryeok } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Manseryeok.css';
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -48,7 +49,7 @@ function Manseryeok() {
       </section>
 
       <div className="ms-search glass-card">
-        <input type="date" className="ms-date-input" value={date} onChange={e => setDate(e.target.value)} />
+        <BirthDatePicker value={date} onChange={setDate} />
         <button className="ms-search-btn" onClick={handleSearch} disabled={loading}>
           {loading ? '조회 중...' : '조회'}
         </button>

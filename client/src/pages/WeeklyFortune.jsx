@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import api from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './WeeklyFortune.css';
 
 const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -106,14 +107,7 @@ function WeeklyFortune() {
 
           <div className="wf-form-group">
             <label className="wf-label">생년월일</label>
-            <input
-              type="date"
-              className="wf-input"
-              value={birthDate}
-              onChange={e => setBirthDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              min="1920-01-01"
-            />
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} />
           </div>
 
           <div className="wf-form-group">

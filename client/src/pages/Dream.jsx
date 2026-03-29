@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { interpretDream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -208,12 +209,7 @@ function Dream() {
                 </h3>
                 <div className="dream-form-group">
                   <label className="dream-label">생년월일</label>
-                  <input
-                    type="date"
-                    className="dream-input"
-                    value={birthDate}
-                    onChange={e => setBirthDate(e.target.value)}
-                  />
+                  <BirthDatePicker value={birthDate} onChange={setBirthDate} />
                 </div>
                 <div className="dream-form-group">
                   <label className="dream-label">성별</label>

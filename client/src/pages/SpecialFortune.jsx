@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { getSpecialLoveFortune, getHourlyFortune, getTimeblockFortune } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './SpecialFortune.css';
 
 const LOVE_TYPES = [
@@ -144,8 +145,7 @@ function SpecialFortune() {
               )}
               <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
-                <input type="date" className="sf-input" value={birthDate}
-                  onChange={e => setBirthDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
@@ -159,8 +159,7 @@ function SpecialFortune() {
               {loveType === 'reunion' && (
                 <div className="sf-form-group">
                   <label className="sf-label">헤어진 시기 <span className="sf-optional">(선택)</span></label>
-                  <input type="date" className="sf-input" value={breakupDate}
-                    onChange={e => setBreakupDate(e.target.value)} max={new Date().toISOString().split('T')[0]} />
+                  <BirthDatePicker value={breakupDate} onChange={setBreakupDate} />
                 </div>
               )}
 
@@ -168,8 +167,7 @@ function SpecialFortune() {
               {loveType === 'blind_date' && (
                 <div className="sf-form-group">
                   <label className="sf-label">소개팅 날짜 <span className="sf-optional">(선택)</span></label>
-                  <input type="date" className="sf-input" value={meetDate}
-                    onChange={e => setMeetDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+                  <BirthDatePicker value={meetDate} onChange={setMeetDate} />
                 </div>
               )}
 
@@ -183,8 +181,7 @@ function SpecialFortune() {
                   <h3 className="sf-form-section-title">상대방 정보 <span className="sf-optional">(더 정밀한 분석)</span></h3>
                   <div className="sf-form-group">
                     <label className="sf-label">상대방 생년월일</label>
-                    <input type="date" className="sf-input" value={partnerDate}
-                      onChange={e => setPartnerDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                    <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />
                   </div>
                   <div className="sf-form-group">
                     <label className="sf-label">상대방 성별</label>
@@ -279,8 +276,7 @@ function SpecialFortune() {
               )}
               <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
-                <input type="date" className="sf-input" value={birthDate}
-                  onChange={e => setBirthDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>

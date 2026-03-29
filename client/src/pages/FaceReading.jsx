@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { analyzeFaceReading } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -291,12 +292,7 @@ function FaceReading() {
               <div className="fr-extra-fields">
                 <div className="fr-field">
                   <label className="fr-label">생년월일</label>
-                  <input
-                    type="date"
-                    className="fr-input"
-                    value={birthDate}
-                    onChange={e => setBirthDate(e.target.value)}
-                  />
+                  <BirthDatePicker value={birthDate} onChange={setBirthDate} />
                 </div>
                 <div className="fr-field">
                   <label className="fr-label">성별</label>

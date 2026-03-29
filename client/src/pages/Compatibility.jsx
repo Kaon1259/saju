@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getSajuCompatibility } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Compatibility.css';
 
 const BIRTH_TIMES = [
@@ -202,7 +203,7 @@ function Compatibility() {
               }}>✨ 내 정보</button>
             )}
           </div>
-          <input type="date" className="compat-input" value={bd1} onChange={e => setBd1(e.target.value)} max={new Date().toISOString().split('T')[0]} />
+          <BirthDatePicker value={bd1} onChange={setBd1} />
           <select className="compat-input compat-select" value={bt1} onChange={e => setBt1(e.target.value)}>
             {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
@@ -220,7 +221,7 @@ function Compatibility() {
               <button className={`compat-g-btn compat-g-female ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>♀ 여</button>
             </div>
           </div>
-          <input type="date" className="compat-input" value={bd2} onChange={e => setBd2(e.target.value)} max={new Date().toISOString().split('T')[0]} />
+          <BirthDatePicker value={bd2} onChange={setBd2} />
           <select className="compat-input compat-select" value={bt2} onChange={e => setBt2(e.target.value)}>
             {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>

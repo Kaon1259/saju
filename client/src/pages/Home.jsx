@@ -5,6 +5,7 @@ import ZodiacGrid from '../components/ZodiacGrid';
 import FortuneCard from '../components/FortuneCard';
 import { getAllTodayFortunes, getMyFortune, getGuestFortune, getLoveTemperature, getSpecialLoveFortune } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -624,7 +625,7 @@ function Home() {
             <div className="home-guest glass-card fade-in">
               <h3 className="home-guest__title">생년월일로 오늘의 운세 보기</h3>
               <div className="home-guest__form-group"><label className="home-guest__label">달력</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button><button type="button" className={`home-guest__toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button></div></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><input type="date" className="home-guest__input" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" /></div>
+              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} /></div>
               <div className="home-guest__form-group"><label className="home-guest__label">태어난 시간 (선택)</label><select className="home-guest__input home-guest__select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>{BIRTH_TIMES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}</select></div>
               <div className="home-guest__form-group"><label className="home-guest__label">성별</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>남성</button><button type="button" className={`home-guest__toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>여성</button></div></div>
               <button className="home-guest__submit-full" onClick={handleGuestSubmit} disabled={!birthDate}>오늘의 운세 보기</button>
@@ -735,8 +736,7 @@ function Home() {
                   )}
                   <div className="love-modal-field">
                     <label className="love-modal-label">생년월일</label>
-                    <input type="date" className="love-modal-input" value={loveBirth}
-                      onChange={e => setLoveBirth(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                    <BirthDatePicker value={loveBirth} onChange={setLoveBirth} />
                   </div>
                   <div className="love-modal-field">
                     <label className="love-modal-label">성별</label>
@@ -749,15 +749,13 @@ function Home() {
                   {loveModal === 'reunion' && (
                     <div className="love-modal-field">
                       <label className="love-modal-label">헤어진 시기 <span className="love-modal-opt">(선택)</span></label>
-                      <input type="date" className="love-modal-input" value={loveBreakupDate}
-                        onChange={e => setLoveBreakupDate(e.target.value)} max={new Date().toISOString().split('T')[0]} />
+                      <BirthDatePicker value={loveBreakupDate} onChange={setLoveBreakupDate} />
                     </div>
                   )}
                   {loveModal === 'blind_date' && (
                     <div className="love-modal-field">
                       <label className="love-modal-label">소개팅 날짜 <span className="love-modal-opt">(선택)</span></label>
-                      <input type="date" className="love-modal-input" value={loveMeetDate}
-                        onChange={e => setLoveMeetDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+                      <BirthDatePicker value={loveMeetDate} onChange={setLoveMeetDate} />
                     </div>
                   )}
 
@@ -768,8 +766,7 @@ function Home() {
                     <div className="love-modal-partner fade-in">
                       <div className="love-modal-field">
                         <label className="love-modal-label">상대방 생년월일</label>
-                        <input type="date" className="love-modal-input" value={lovePartnerDate}
-                          onChange={e => setLovePartnerDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+                        <BirthDatePicker value={lovePartnerDate} onChange={setLovePartnerDate} />
                       </div>
                       <div className="love-modal-field">
                         <label className="love-modal-label">상대방 성별</label>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getTojeongFortune, getUserTojeong } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Tojeong.css';
 
 const RATING_STYLE = {
@@ -129,7 +130,7 @@ function Tojeong() {
           </div>
           <div className="form-group">
             <label className="form-label">생년월일</label>
-            <input type="date" className="form-input" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
           </div>
           <button className="btn-gold" onClick={handleAnalyze} disabled={!birthDate} style={{ opacity: birthDate ? 1 : 0.5 }}>
             토정비결 보기

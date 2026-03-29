@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import api from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './MonthlyFortune.css';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -129,14 +130,7 @@ function MonthlyFortune() {
 
             <div className="mf-form-group">
               <label className="mf-label">생년월일</label>
-              <input
-                type="date"
-                className="mf-input"
-                value={birthDate}
-                onChange={e => setBirthDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-                min="1920-01-01"
-              />
+              <BirthDatePicker value={birthDate} onChange={setBirthDate} />
             </div>
 
             <div className="mf-form-group">

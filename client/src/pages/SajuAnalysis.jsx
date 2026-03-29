@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { analyzeSaju, getUserSaju, getDailyFortunes } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -171,17 +172,13 @@ function SajuAnalysis() {
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label" htmlFor="sajuBirthDate">
+            <label className="form-label">
               생년월일 ({calendarType === 'SOLAR' ? '양력' : '음력'})
             </label>
-            <input
-              id="sajuBirthDate"
-              type="date"
-              className="form-input"
+            <BirthDatePicker
               value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              min="1920-01-01"
+              onChange={setBirthDate}
+              calendarType={calendarType}
             />
           </div>
           <div className="form-group">

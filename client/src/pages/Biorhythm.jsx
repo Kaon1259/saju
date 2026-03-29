@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getBiorhythm } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Biorhythm.css';
 
 // ═══════════════════════════════════════════════════
@@ -236,13 +237,7 @@ function Biorhythm() {
           <div className="bio-input-card glass-card">
             <h3 className="bio-input-title">{'\uD83C\uDF82'} 생년월일 입력</h3>
             <div className="bio-input-row">
-              <input
-                type="date"
-                className="bio-date-input"
-                value={birthDate}
-                onChange={e => setBirthDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-              />
+              <BirthDatePicker value={birthDate} onChange={setBirthDate} />
               <button className="bio-my-btn" onClick={handleMyBirthday}>
                 내 생일
               </button>

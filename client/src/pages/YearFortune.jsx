@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import api from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './YearFortune.css';
 
 const BIRTH_TIMES = [
@@ -141,14 +142,7 @@ function YearFortune() {
 
           <div className="yf-form-group">
             <label className="yf-label">생년월일</label>
-            <input
-              type="date"
-              className="yf-input"
-              value={birthDate}
-              onChange={e => setBirthDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              min="1920-01-01"
-            />
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
           </div>
 
           <div className="yf-form-group">

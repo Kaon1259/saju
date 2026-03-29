@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { registerUser, loginUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Register.css';
 
 const BIRTH_TIMES = [
@@ -308,8 +309,7 @@ function Register() {
             <label className="form-label" htmlFor="birthDate">
               생년월일 ({form.calendarType === 'SOLAR' ? '양력' : '음력'})
             </label>
-            <input id="birthDate" type="date" className="form-input" value={form.birthDate}
-              onChange={(e) => handleChange('birthDate', e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+            <BirthDatePicker value={form.birthDate} onChange={(v) => handleChange('birthDate', v)} calendarType={form.calendarType} />
           </div>
 
           {(zodiac || constellation) && (

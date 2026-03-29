@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUser, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
+import BirthDatePicker from '../components/BirthDatePicker';
 import './Register.css';
 
 const BIRTH_TIMES = [
@@ -156,8 +157,7 @@ function ProfileEdit() {
         </div>
         <div className="form-group">
           <label className="form-label">생년월일</label>
-          <input type="date" className="form-input" value={form.birthDate}
-            onChange={e => handleChange('birthDate', e.target.value)} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+          <BirthDatePicker value={form.birthDate} onChange={(v) => handleChange('birthDate', v)} calendarType={form.calendarType} />
         </div>
 
         {/* 성별 */}
@@ -225,9 +225,7 @@ function ProfileEdit() {
 
           <div className="form-group">
             <label className="form-label" style={{ fontSize: '12px' }}>상대방 생년월일</label>
-            <input type="date" className="form-input" value={form.partnerBirthDate}
-              onChange={e => handleChange('partnerBirthDate', e.target.value)}
-              disabled={!isPartnerEnabled} max={new Date().toISOString().split('T')[0]} min="1920-01-01" />
+            <BirthDatePicker value={form.partnerBirthDate} onChange={(v) => handleChange('partnerBirthDate', v)} />
           </div>
 
           {/* 상대방 띠 + 별자리 자동 표시 */}
