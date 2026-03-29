@@ -91,9 +91,9 @@
 .tj-month-text { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.8); }
 
 /* Actions */
-.tj-actions { padding: 0 4px; }
-.tj-reset-btn { width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: var(--color-text-muted); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
-.tj-reset-btn:hover { border-color: var(--color-primary-light); color: var(--color-text); }
+.tj-actions { padding: 24px 4px 40px; }
+.tj-reset-btn { width: 100%; padding: 16px 24px; border-radius: 16px; border: 1.5px solid rgba(236,72,153,0.3); background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(251,191,36,0.1)); color: #F9A8D4; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px; }
+.tj-reset-btn:hover { background: linear-gradient(135deg, rgba(236,72,153,0.25), rgba(251,191,36,0.15)); border-color: rgba(236,72,153,0.5); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(236,72,153,0.2); }
 
 /* ── 라이트 모드 ── */
 [data-theme="light"] .tj-intro-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -110,5 +110,6 @@
 [data-theme="light"] .tj-month-card { background: rgba(0,0,0,0.01); }
 [data-theme="light"] .tj-month--current { border-color: rgba(124,58,237,0.4) !important; box-shadow: 0 4px 12px rgba(124,58,237,0.1); }
 [data-theme="light"] .tj-gwae-name { color: #96700a; background: rgba(251,191,36,0.06); border-color: rgba(184,134,11,0.25); }
-[data-theme="light"] .tj-reset-btn { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); color: #666; }
+[data-theme="light"] .tj-reset-btn { border-color: rgba(236,72,153,0.25); background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(251,191,36,0.06)); color: #DB2777; }
+[data-theme="light"] .tj-reset-btn:hover { background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(251,191,36,0.1)); border-color: rgba(236,72,153,0.4); color: #9D174D; }
 [data-theme="light"] .tj-seal { background: rgba(192,57,43,0.03); }

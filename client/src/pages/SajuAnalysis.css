@@ -261,23 +261,40 @@
 
 /* Actions */
 .saju-actions {
-  padding: var(--space-md) 0;
+  padding: 24px 0 40px;
 }
 
 .saju-reset-btn {
   width: 100%;
-  padding: var(--space-md);
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-full);
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(251,191,36,0.1));
+  border: 1.5px solid rgba(124,58,237,0.3);
+  border-radius: 16px;
+  color: #C4B5FD;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
   transition: all 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 .saju-reset-btn:hover {
-  border-color: var(--color-primary-light);
-  color: var(--color-text);
+  background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(251,191,36,0.15));
+  border-color: rgba(124,58,237,0.5);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.2);
+}
+
+[data-theme="light"] .saju-reset-btn {
+  background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,191,36,0.06));
+  border-color: rgba(124,58,237,0.25);
+  color: #7C3AED;
+}
+[data-theme="light"] .saju-reset-btn:hover {
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(251,191,36,0.1));
+  border-color: rgba(124,58,237,0.4);
+  color: #5B21B6;
 }
 
 /* ─── 심화분석: 격국 ─── */

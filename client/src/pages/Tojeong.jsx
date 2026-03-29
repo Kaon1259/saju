@@ -227,7 +227,7 @@ function Tojeong() {
       {/* 다시하기 */}
       <section className="tj-actions animate-fade-in-up" style={{ animationDelay: '300ms' }}>
         <button className="tj-reset-btn" onClick={() => { setResult(null); setShowInput(true); }}>
-          다른 생년월일로 보기
+          🔄 다른 생년월일로 보기
         </button>
       </section>
     </div>

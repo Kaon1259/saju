@@ -632,7 +632,7 @@ function SajuAnalysis() {
       {/* Reset Button */}
       <section className="saju-actions animate-fade-in-up" style={{ animationDelay: '600ms' }}>
         <button className="saju-reset-btn" onClick={handleReset}>
-          다른 생년월일로 분석하기
+          🔄 다른 생년월일로 분석하기
         </button>
       </section>
     </div>
