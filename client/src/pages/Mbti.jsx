@@ -42,16 +42,17 @@ function Mbti() {
   const [compatLoading, setCompatLoading] = useState(false);
   const resultRef = useRef(null);
 
+  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+
   useEffect(() => {
     getMbtiTypes().then(setAllTypes).catch(() => {});
-    // 로그인 시 내 MBTI 자동 선택
     const userId = localStorage.getItem('userId');
     if (userId) {
       getUser(userId).then((u) => {
         if (u.mbtiType) {
           setSelected(u.mbtiType);
           setType1(u.mbtiType);
-          handleSelect(u.mbtiType);
+          if (autoFortune) handleSelect(u.mbtiType);
         }
       }).catch(() => {});
     }
@@ -117,6 +118,14 @@ function Mbti() {
               </div>
             </div>
           ))}
+
+          {selected && !fortune && !loading && !autoFortune && localStorage.getItem('userId') && (
+            <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
+              <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
+                🔮 내 MBTI 운세 보기
+              </button>
+            </div>
+          )}
 
           {loading && (
             <div className="mbti-loading"><div className="mbti-spinner" /><p>운세를 분석중...</p></div>

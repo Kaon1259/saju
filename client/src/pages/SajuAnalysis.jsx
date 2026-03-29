@@ -57,23 +57,30 @@ function SajuAnalysis() {
   const [activeTab, setActiveTab] = useState('saju'); // saju, fortune, advanced
   const [dailyFortunes, setDailyFortunes] = useState(null);
 
+  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+
+  const loadUserSaju = () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    setShowInput(false);
+    setLoading(true);
+    getUserSaju(userId)
+      .then((data) => {
+        setResult(data);
+        const userBd = localStorage.getItem('userBirthDate');
+        if (userBd) getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+      })
+      .catch((err) => {
+        console.error('Failed to load user saju:', err);
+        setShowInput(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     const userId = localStorage.getItem('userId');
-    if (userId) {
-      setShowInput(false);
-      setLoading(true);
-      getUserSaju(userId)
-        .then((data) => {
-          setResult(data);
-          // Fetch daily fortunes using the birth date from user
-          const userBd = localStorage.getItem('userBirthDate');
-          if (userBd) getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
-        })
-        .catch((err) => {
-          console.error('Failed to load user saju:', err);
-          setShowInput(true);
-        })
-        .finally(() => setLoading(false));
+    if (userId && autoFortune) {
+      loadUserSaju();
     }
   }, []);
 
@@ -122,6 +129,14 @@ function SajuAnalysis() {
             정밀한 사주 분석 결과를 확인할 수 있습니다
           </p>
         </section>
+
+        {localStorage.getItem('userId') && !autoFortune && (
+          <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
+            <button className="btn-gold" onClick={loadUserSaju} style={{ width: '100%' }}>
+              🔮 내 사주 운세 보기
+            </button>
+          </div>
+        )}
 
         <div className="saju-input glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           {localStorage.getItem('userId') && (

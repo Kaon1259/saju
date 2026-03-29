@@ -1,9 +1,16 @@
 package com.saju.server.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saju.server.entity.SpecialFortune;
+import com.saju.server.repository.SpecialFortuneRepository;
 import com.saju.server.saju.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -13,8 +20,18 @@ import java.util.*;
 public class CompatibilityService {
 
     private final ClaudeApiService claudeApiService;
+    private final SpecialFortuneRepository specialFortuneRepository;
+    private final ObjectMapper objectMapper;
 
+    @Transactional
     public Map<String, Object> analyzeSaju(LocalDate bd1, String bt1, LocalDate bd2, String bt2) {
+        // DB 캐시 체크
+        String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2);
+        Map<String, Object> dbCached = getFromCache("compatibility", dbCacheKey);
+        if (dbCached != null) {
+            return dbCached;
+        }
+
         SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
         SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
 
@@ -85,7 +102,44 @@ public class CompatibilityService {
             } catch (Exception e) { log.warn("AI compat failed: {}", e.getMessage()); }
         }
 
+        // DB 캐시 저장
+        saveToCache("compatibility", dbCacheKey, result);
+
         return result;
+    }
+
+    // ===== DB 캐싱 헬퍼 메서드 =====
+
+    private String buildCacheKey(String... parts) {
+        String raw = String.join("|", java.util.Arrays.stream(parts).map(p -> p != null ? p : "").toArray(String[]::new));
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 16; i++) sb.append(String.format("%02x", digest[i]));
+            return sb.toString();
+        } catch (Exception e) {
+            return String.valueOf(raw.hashCode());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getFromCache(String type, String cacheKey) {
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (cached.isPresent()) {
+                return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
+            }
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+        try {
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+        } catch (Exception e) { /* ignore duplicate */ }
     }
 
     private Map<String, Object> buildPersonInfo(SajuResult r, LocalDate bd) {

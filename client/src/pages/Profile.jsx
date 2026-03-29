@@ -167,6 +167,27 @@ function Profile() {
         </section>
       )}
 
+      {/* 설정 */}
+      <section className="pf-settings glass-card">
+        <h3 className="profile-section-title">설정</h3>
+        <div className="pf-info-row">
+          <span className="pf-info-label">자동 운세 보기</span>
+          <label className="pf-toggle">
+            <input
+              type="checkbox"
+              checked={localStorage.getItem('autoFortune') === 'on'}
+              onChange={(e) => {
+                localStorage.setItem('autoFortune', e.target.checked ? 'on' : 'off');
+                window.dispatchEvent(new Event('storage'));
+                setUser({ ...user });
+              }}
+            />
+            <span className="pf-toggle-slider" />
+          </label>
+        </div>
+        <p className="pf-settings-desc">각 운세 페이지 진입 시 자동으로 운세를 조회합니다</p>
+      </section>
+
       {/* 액션 */}
       <section className="pf-actions">
         <button className="pf-btn pf-btn--primary" onClick={() => navigate('/my')}>

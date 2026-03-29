@@ -1,5 +1,7 @@
 package com.saju.server.service;
 
+import com.saju.server.entity.SpecialFortune;
+import com.saju.server.repository.SpecialFortuneRepository;
 import com.saju.server.saju.SajuCalculator;
 import com.saju.server.saju.SajuConstants;
 import com.saju.server.saju.SajuPillar;
@@ -8,13 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +26,12 @@ public class WeeklyFortuneService {
 
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    // Simple in-memory cache: key -> result
-    private final ConcurrentHashMap<String, Map<String, Object>> cache = new ConcurrentHashMap<>();
+    private final SpecialFortuneRepository specialFortuneRepository;
+    private final ObjectMapper objectMapper;
 
     private static final String[] DAY_NAMES = {"월", "화", "수", "목", "금", "토", "일"};
 
+    @Transactional
     public Map<String, Object> getWeeklyFortune(String birthDate, String birthTime, String gender) {
         LocalDate today = LocalDate.now();
 
@@ -37,11 +39,11 @@ public class WeeklyFortuneService {
         LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-        // Cache check
-        String cacheKey = birthDate + "|" + (gender != null ? gender : "") + "|" + weekStart;
-        Map<String, Object> cached = cache.get(cacheKey);
+        // DB cache check
+        String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
+        Map<String, Object> cached = getFromCache("weekly", cacheKey);
         if (cached != null) {
-            log.debug("Weekly fortune cache hit: {}", cacheKey);
+            log.debug("Weekly fortune DB cache hit: {}", cacheKey);
             return cached;
         }
 
@@ -78,7 +80,7 @@ public class WeeklyFortuneService {
                     Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
                     result.putAll(aiResult);
                     result.put("source", "ai");
-                    cache.put(cacheKey, result);
+                    saveToCache("weekly", cacheKey, result);
                     return result;
                 }
             } catch (Exception e) {
@@ -90,8 +92,40 @@ public class WeeklyFortuneService {
         Map<String, Object> fallback = generateFallback(dayPillar, weekStart, weekEnd, weekDayPillars);
         result.putAll(fallback);
         result.put("source", "fallback");
-        cache.put(cacheKey, result);
+        saveToCache("weekly", cacheKey, result);
         return result;
+    }
+
+    private String buildCacheKey(String... parts) {
+        String raw = String.join("|", java.util.Arrays.stream(parts).map(p -> p != null ? p : "").toArray(String[]::new));
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 16; i++) sb.append(String.format("%02x", digest[i]));
+            return sb.toString();
+        } catch (Exception e) {
+            return String.valueOf(raw.hashCode());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getFromCache(String type, String cacheKey) {
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (cached.isPresent()) {
+                return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
+            }
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+        try {
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+        } catch (Exception e) { /* ignore duplicate */ }
     }
 
     private String buildSystemPrompt() {

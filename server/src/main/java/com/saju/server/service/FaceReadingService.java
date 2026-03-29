@@ -1,11 +1,16 @@
 package com.saju.server.service;
 
+import com.saju.server.entity.SpecialFortune;
+import com.saju.server.repository.SpecialFortuneRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -16,6 +21,7 @@ public class FaceReadingService {
 
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
+    private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String SYSTEM_PROMPT = """
@@ -72,9 +78,15 @@ public class FaceReadingService {
 4. 관상을 보완하는 행동/색상/방위 조언
 5. 긍정적 관점 우선, 주의점은 개선 방향과 함께 제시""";
 
+    @Transactional
     public Map<String, Object> analyzeFace(String faceShape, String eyeShape, String noseShape,
                                             String mouthShape, String foreheadShape,
                                             String birthDate, String gender) {
+        // 캐시 체크
+        String cacheKey = buildCacheKey(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender);
+        Map<String, Object> cached = getFromCache("face-reading", cacheKey);
+        if (cached != null) return cached;
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("faceShape", faceShape);
         result.put("eyeShape", eyeShape);
@@ -121,6 +133,7 @@ public class FaceReadingService {
                             result.put(e.getKey(), e.getValue().asText());
                         }
                     });
+                    saveToCache("face-reading", cacheKey, result);
                     return result;
                 }
             } catch (Exception e) {
@@ -158,5 +171,39 @@ public class FaceReadingService {
         m.put("score", 72);
         m.put("grade", "길");
         return m;
+    }
+
+    // ── 캐싱 헬퍼 ──
+
+    private String buildCacheKey(String... parts) {
+        String raw = String.join("|", java.util.Arrays.stream(parts).map(p -> p != null ? p : "").toArray(String[]::new));
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 16; i++) sb.append(String.format("%02x", digest[i]));
+            return sb.toString();
+        } catch (Exception e) {
+            return String.valueOf(raw.hashCode());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getFromCache(String type, String cacheKey) {
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (cached.isPresent()) {
+                return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
+            }
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+        try {
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+        } catch (Exception e) { /* ignore duplicate */ }
     }
 }

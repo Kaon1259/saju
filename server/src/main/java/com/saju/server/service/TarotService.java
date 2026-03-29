@@ -1,9 +1,15 @@
 package com.saju.server.service;
 
+import com.saju.server.entity.SpecialFortune;
+import com.saju.server.repository.SpecialFortuneRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,6 +21,8 @@ public class TarotService {
 
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
+    private final SpecialFortuneRepository specialFortuneRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // ═══════════════════════════════════════════════════
     // 메이저 아르카나 22장 정의
@@ -178,8 +186,13 @@ public class TarotService {
     /**
      * 타로 리딩 - AI 해석 + 폴백
      */
+    @Transactional
     public Map<String, Object> getReading(String cardIds, String reversals,
                                            String spread, String category, String question) {
+        // 캐시 체크
+        String cacheKey = buildCacheKey(cardIds, reversals, spread, category, question);
+        Map<String, Object> cached = getFromCache("tarot", cacheKey);
+        if (cached != null) return cached;
         // 카드 파싱
         int[] ids = Arrays.stream(cardIds.split(","))
             .mapToInt(s -> Integer.parseInt(s.trim()))
@@ -229,6 +242,7 @@ public class TarotService {
         result.put("advice", generateAdvice(cardDetails, category));
         result.put("luckyElement", determineLuckyElement(cardDetails));
         result.put("date", LocalDate.now().toString());
+        saveToCache("tarot", cacheKey, result);
         return result;
     }
 
@@ -342,5 +356,39 @@ public class TarotService {
             .max(Map.Entry.comparingByValue())
             .map(Map.Entry::getKey)
             .orElse("불(火)");
+    }
+
+    // ── 캐싱 헬퍼 ──
+
+    private String buildCacheKey(String... parts) {
+        String raw = String.join("|", java.util.Arrays.stream(parts).map(p -> p != null ? p : "").toArray(String[]::new));
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 16; i++) sb.append(String.format("%02x", digest[i]));
+            return sb.toString();
+        } catch (Exception e) {
+            return String.valueOf(raw.hashCode());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getFromCache(String type, String cacheKey) {
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (cached.isPresent()) {
+                return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
+            }
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+        try {
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+        } catch (Exception e) { /* ignore duplicate */ }
     }
 }

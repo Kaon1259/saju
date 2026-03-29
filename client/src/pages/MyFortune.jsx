@@ -52,16 +52,25 @@ function MyFortune() {
 
   const userId = localStorage.getItem('userId');
   const userName = localStorage.getItem('userName');
+  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+
+  const loadMyFortune = async () => {
+    if (!userId) return;
+    setLoading(true);
+    try {
+      const result = await getMyFortune(userId);
+      setData(result);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
 
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
-    (async () => {
-      try {
-        const result = await getMyFortune(userId);
-        setData(result);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    })();
+    if (autoFortune) {
+      loadMyFortune();
+    } else {
+      setLoading(false);
+    }
   }, [userId]);
 
   if (!userId) {
@@ -89,6 +98,19 @@ function MyFortune() {
       </div>
     );
   }
+
+  if (!data && !autoFortune && userId) return (
+    <div className="myf-page">
+      <div className="myf-empty">
+        <div className="myf-empty-icon">🔮</div>
+        <h2>{userName || '회원'}님의 맞춤 운세</h2>
+        <p>사주 + 혈액형 + MBTI를<br />종합한 나만의 운세를 확인하세요</p>
+        <button className="myf-register-btn" onClick={loadMyFortune}>
+          🔮 내 운세 보기
+        </button>
+      </div>
+    </div>
+  );
 
   if (!data) return (
     <div className="myf-page">

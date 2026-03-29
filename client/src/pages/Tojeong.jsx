@@ -23,15 +23,21 @@ function Tojeong() {
   const [calendarType, setCalendarType] = useState('SOLAR');
 
   const userId = localStorage.getItem('userId');
+  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+
+  const loadUserTojeong = () => {
+    if (!userId) return;
+    setShowInput(false);
+    setLoading(true);
+    getUserTojeong(userId)
+      .then(setResult)
+      .catch(() => setShowInput(true))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    if (userId) {
-      setShowInput(false);
-      setLoading(true);
-      getUserTojeong(userId)
-        .then(setResult)
-        .catch(() => setShowInput(true))
-        .finally(() => setLoading(false));
+    if (userId && autoFortune) {
+      loadUserTojeong();
     }
   }, [userId]);
 
@@ -93,6 +99,14 @@ function Tojeong() {
             올해 월별 운세를 확인하세요
           </p>
         </section>
+
+        {userId && !autoFortune && (
+          <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
+            <button className="btn-gold" onClick={loadUserTojeong} style={{ width: '100%' }}>
+              🔮 내 토정비결 보기
+            </button>
+          </div>
+        )}
 
         <div className="tj-input glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           {localStorage.getItem('userId') && (

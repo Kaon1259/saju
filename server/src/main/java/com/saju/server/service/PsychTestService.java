@@ -1,11 +1,16 @@
 package com.saju.server.service;
 
+import com.saju.server.entity.SpecialFortune;
+import com.saju.server.repository.SpecialFortuneRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -15,6 +20,7 @@ public class PsychTestService {
 
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
+    private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // ──────────────────────────────────────────────
@@ -352,10 +358,16 @@ public class PsychTestService {
     /**
      * 심리테스트 분석
      */
+    @Transactional
     public Map<String, Object> analyzeTest(String testId, String answers, String birthDate, String gender) {
         if (!TEST_QUESTIONS.containsKey(testId)) {
             return Map.of("error", "존재하지 않는 테스트입니다: " + testId);
         }
+
+        // 캐시 체크
+        String cacheKey = buildCacheKey(testId, answers, birthDate, gender);
+        Map<String, Object> cached = getFromCache("psych-test", cacheKey);
+        if (cached != null) return cached;
 
         // 답변 파싱 및 점수 계산
         String[] answerArr = answers.toUpperCase().split(",");
@@ -368,6 +380,7 @@ public class PsychTestService {
             result.put("testId", testId);
             result.put("testName", TEST_NAMES.get(testId));
             result.put("answerScores", scores);
+            saveToCache("psych-test", cacheKey, result);
             return result;
         }
 
@@ -491,5 +504,39 @@ public class PsychTestService {
         sb.append("\n위 응답 패턴을 분석하여 '").append(TEST_NAMES.get(testId)).append("' 유형 결과를 JSON으로 작성하세요.");
 
         return sb.toString();
+    }
+
+    // ── 캐싱 헬퍼 ──
+
+    private String buildCacheKey(String... parts) {
+        String raw = String.join("|", java.util.Arrays.stream(parts).map(p -> p != null ? p : "").toArray(String[]::new));
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 16; i++) sb.append(String.format("%02x", digest[i]));
+            return sb.toString();
+        } catch (Exception e) {
+            return String.valueOf(raw.hashCode());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getFromCache(String type, String cacheKey) {
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (cached.isPresent()) {
+                return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
+            }
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+        try {
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+        } catch (Exception e) { /* ignore duplicate */ }
     }
 }

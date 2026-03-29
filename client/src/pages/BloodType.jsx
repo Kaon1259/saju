@@ -22,7 +22,8 @@ function BloodType() {
   const [compatLoading, setCompatLoading] = useState(false);
   const resultRef = useRef(null);
 
-  // 로그인 시 내 혈액형 자동 선택
+  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     if (userId) {
@@ -30,7 +31,7 @@ function BloodType() {
         if (u.bloodType) {
           setSelected(u.bloodType);
           setType1(u.bloodType);
-          handleSelect(u.bloodType);
+          if (autoFortune) handleSelect(u.bloodType);
         }
       }).catch(() => {});
     }
@@ -95,6 +96,14 @@ function BloodType() {
               </button>
             ))}
           </div>
+
+          {selected && !fortune && !loading && !autoFortune && localStorage.getItem('userId') && (
+            <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
+              <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
+                🔮 내 혈액형 운세 보기
+              </button>
+            </div>
+          )}
 
           {loading && (
             <div className="bt-loading"><div className="bt-spinner" /><p>운세를 분석중...</p></div>

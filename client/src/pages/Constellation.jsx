@@ -46,16 +46,20 @@ function Constellation() {
   const [mySign, setMySign] = useState(null);
   const resultRef = useRef(null);
 
+  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+
   useEffect(() => {
     getAllConstellations().then(setSigns).catch(() => {});
-    // 로그인 시 내 별자리 자동 선택
     const userId = localStorage.getItem('userId');
     if (userId) {
       getUser(userId).then((u) => {
         if (u.birthDate) {
           const sign = getSignFromDate(u.birthDate);
           setMySign(sign);
-          if (sign) handleSelect(sign);
+          if (sign) {
+            setSelected(sign);
+            if (autoFortune) handleSelect(sign);
+          }
         }
       }).catch(() => {});
     }
@@ -104,6 +108,14 @@ function Constellation() {
           );
         })}
       </div>
+
+      {selected && !fortune && !loading && !autoFortune && localStorage.getItem('userId') && (
+        <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
+          <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
+            🔮 내 별자리 운세 보기
+          </button>
+        </div>
+      )}
 
       {loading && (
         <div className="cs-loading"><div className="cs-spinner" /><p>별의 메시지를 읽는 중...</p></div>
