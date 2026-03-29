@@ -13,12 +13,17 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
     try {
       const result = await getDeepAnalysis(type, birthDate, birthTime, gender, calendarType, extra);
       setData(result);
-    } catch (e) { console.error('심화분석 실패:', e); }
+    } catch (e) {
+      console.error('심화분석 실패:', e);
+      setData({ detailAnalysis: '심화분석을 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.' });
+    }
     finally { setLoading(false); }
   };
 
   useEffect(() => {
-    if (autoOpen && !data && !loading) loadData();
+    if (autoOpen && birthDate && !data && !loading) {
+      loadData();
+    }
   }, [autoOpen, birthDate]);
 
   const handleLoad = async () => {
@@ -36,10 +41,11 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
       )}
       {(open || autoOpen) && (
         <div className="deep-content glass-card fade-in">
-          {loading ? (
+          {loading && !data ? (
             <div className="deep-loading">
               <div className="deep-spinner" />
-              <p>AI가 심층 분석 중입니다...</p>
+              <p>AI가 프리미엄 심층 분석 중입니다...</p>
+              <p style={{ fontSize: '12px', marginTop: '8px', opacity: 0.5 }}>약 1분 정도 소요됩니다</p>
             </div>
           ) : data ? (
             <div className="deep-result">
