@@ -4,6 +4,7 @@ import { getMyFortune, analyzeSaju } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import DeepAnalysis from '../components/DeepAnalysis';
 import './MyFortune.css';
 
 function MyFortune() {
@@ -376,6 +377,16 @@ function MyFortune() {
           </div>
         </div>
       )}
+
+      {/* 심화분석 */}
+      {f && (() => {
+        try {
+          const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+          return profile.birthDate ? (
+            <DeepAnalysis type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} />
+          ) : null;
+        } catch { return null; }
+      })()}
 
       {/* 공유 */}
       {f && (

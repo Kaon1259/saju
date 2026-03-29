@@ -4,6 +4,7 @@ import { analyzeSaju, getUserSaju, getDailyFortunes } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import DeepAnalysis from '../components/DeepAnalysis';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -628,6 +629,16 @@ function SajuAnalysis() {
           )}
         </>
       )}
+
+      {/* 심화분석 */}
+      {result && (() => {
+        const bd = birthDate || localStorage.getItem('userBirthDate');
+        const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
+        const useBd = bd || profile.birthDate;
+        return useBd ? (
+          <DeepAnalysis type="today" birthDate={useBd} birthTime={birthTime || profile.birthTime} gender={gender || profile.gender} calendarType={calendarType || profile.calendarType} />
+        ) : null;
+      })()}
 
       {/* Reset Button */}
       <section className="saju-actions animate-fade-in-up" style={{ animationDelay: '600ms' }}>
