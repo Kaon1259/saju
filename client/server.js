@@ -1,5 +1,5 @@
-const http = require('http');
-const handler = require('serve-handler');
+import http from 'http';
+import handler from 'serve-handler';
 
 const server = http.createServer((req, res) => {
   return handler(req, res, {
