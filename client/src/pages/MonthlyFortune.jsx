@@ -7,6 +7,22 @@ import './MonthlyFortune.css';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
+const BIRTH_TIMES = [
+  { value: '', label: '모름 / 선택안함' },
+  { value: '자시', label: '자시 (23:00~01:00)' },
+  { value: '축시', label: '축시 (01:00~03:00)' },
+  { value: '인시', label: '인시 (03:00~05:00)' },
+  { value: '묘시', label: '묘시 (05:00~07:00)' },
+  { value: '진시', label: '진시 (07:00~09:00)' },
+  { value: '사시', label: '사시 (09:00~11:00)' },
+  { value: '오시', label: '오시 (11:00~13:00)' },
+  { value: '미시', label: '미시 (13:00~15:00)' },
+  { value: '신시', label: '신시 (15:00~17:00)' },
+  { value: '유시', label: '유시 (17:00~19:00)' },
+  { value: '술시', label: '술시 (19:00~21:00)' },
+  { value: '해시', label: '해시 (21:00~23:00)' },
+];
+
 function getSeasonClass(month) {
   if (month >= 3 && month <= 5) return 'mf-season--spring';
   if (month >= 6 && month <= 8) return 'mf-season--summer';
@@ -31,6 +47,8 @@ function getScoreColor(score) {
 function MonthlyFortune() {
   const currentMonth = new Date().getMonth() + 1;
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [calendarType, setCalendarType] = useState('SOLAR');
+  const [birthTime, setBirthTime] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,6 +60,8 @@ function MonthlyFortune() {
       const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
       if (p.birthDate) setBirthDate(p.birthDate);
       if (p.gender) setGender(p.gender);
+      if (p.calendarType) setCalendarType(p.calendarType);
+      if (p.birthTime) setBirthTime(p.birthTime);
     } catch {}
   };
 
@@ -53,6 +73,8 @@ function MonthlyFortune() {
     try {
       const params = { birthDate, month: m };
       if (gender) params.gender = gender;
+      if (calendarType) params.calendarType = calendarType;
+      if (birthTime) params.birthTime = birthTime;
       const response = await api.get('/monthly-fortune', { params });
       setResult({ ...response.data, month: m });
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
@@ -129,8 +151,16 @@ function MonthlyFortune() {
             )}
 
             <div className="mf-form-group">
+              <label className="mf-label">달력 구분</label>
+              <div className="mf-toggle">
+                <button type="button" className={`mf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
+                <button type="button" className={`mf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
+              </div>
+            </div>
+
+            <div className="mf-form-group">
               <label className="mf-label">생년월일</label>
-              <BirthDatePicker value={birthDate} onChange={setBirthDate} />
+              <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
             </div>
 
             <div className="mf-form-group">
@@ -143,6 +173,13 @@ function MonthlyFortune() {
                   &#9792; 여성
                 </button>
               </div>
+            </div>
+
+            <div className="mf-form-group">
+              <label className="mf-label">태어난 시간 (선택)</label>
+              <select className="mf-input mf-select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>
+                {BIRTH_TIMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
             </div>
 
             <button className="mf-submit" onClick={() => handleAnalyze()} disabled={!birthDate}>

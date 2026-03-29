@@ -15,6 +15,22 @@ const LOVE_TYPES = [
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
 
+const BIRTH_TIMES = [
+  { value: '', label: '모름 / 선택안함' },
+  { value: '자시', label: '자시 (23:00~01:00)' },
+  { value: '축시', label: '축시 (01:00~03:00)' },
+  { value: '인시', label: '인시 (03:00~05:00)' },
+  { value: '묘시', label: '묘시 (05:00~07:00)' },
+  { value: '진시', label: '진시 (07:00~09:00)' },
+  { value: '사시', label: '사시 (09:00~11:00)' },
+  { value: '오시', label: '오시 (11:00~13:00)' },
+  { value: '미시', label: '미시 (13:00~15:00)' },
+  { value: '신시', label: '신시 (15:00~17:00)' },
+  { value: '유시', label: '유시 (17:00~19:00)' },
+  { value: '술시', label: '술시 (19:00~21:00)' },
+  { value: '해시', label: '해시 (21:00~23:00)' },
+];
+
 function getHeartColor(score) {
   const s = Math.max(0, Math.min(100, score || 50));
   const sat = 30 + s * 0.7;
@@ -45,6 +61,8 @@ function SpecialFortune() {
   const [tab, setTab] = useState(searchParams.get('tab') || 'love');
   const [loveType, setLoveType] = useState(null);
   const [timeMode, setTimeMode] = useState('timeblock');
+  const [calendarType, setCalendarType] = useState('SOLAR');
+  const [birthTime, setBirthTime] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
   const [partnerDate, setPartnerDate] = useState('');
@@ -73,15 +91,15 @@ function SpecialFortune() {
     try {
       let data;
       if (tab === 'love' && loveType) {
-        data = await getSpecialLoveFortune(loveType, birthDate, null, gender || null, null,
+        data = await getSpecialLoveFortune(loveType, birthDate, birthTime || null, gender || null, calendarType || null,
           showPartner && partnerDate ? partnerDate : null,
           showPartner && partnerGender ? partnerGender : null,
           loveType === 'reunion' && breakupDate ? breakupDate : null,
           loveType === 'blind_date' && meetDate ? meetDate : null);
       } else if (tab === 'time' && timeMode === 'timeblock') {
-        data = await getTimeblockFortune(birthDate, null, gender || null);
+        data = await getTimeblockFortune(birthDate, birthTime || null, gender || null, calendarType || null);
       } else if (tab === 'time' && timeMode === 'hourly') {
-        data = await getHourlyFortune(birthDate, null, gender || null);
+        data = await getHourlyFortune(birthDate, birthTime || null, gender || null, calendarType || null);
       }
       setResult(data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
@@ -140,12 +158,21 @@ function SpecialFortune() {
                     const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
                     if (p.birthDate) setBirthDate(p.birthDate);
                     if (p.gender) setGender(p.gender);
+                    if (p.calendarType) setCalendarType(p.calendarType);
+                    if (p.birthTime) setBirthTime(p.birthTime);
                   } catch {}
                 }}>✨ 내 정보로 채우기</button>
               )}
               <div className="sf-form-group">
+                <label className="sf-label">달력 구분</label>
+                <div className="sf-toggle">
+                  <button type="button" className={`sf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
+                  <button type="button" className={`sf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
+                </div>
+              </div>
+              <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
-                <BirthDatePicker value={birthDate} onChange={setBirthDate} />
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
@@ -153,6 +180,12 @@ function SpecialFortune() {
                   <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>♂ 남성</button>
                   <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>♀ 여성</button>
                 </div>
+              </div>
+              <div className="sf-form-group">
+                <label className="sf-label">태어난 시간 (선택)</label>
+                <select className="sf-input sf-select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>
+                  {BIRTH_TIMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
               </div>
 
               {/* 재회: 헤어진 시기 */}
@@ -271,12 +304,21 @@ function SpecialFortune() {
                     const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
                     if (p.birthDate) setBirthDate(p.birthDate);
                     if (p.gender) setGender(p.gender);
+                    if (p.calendarType) setCalendarType(p.calendarType);
+                    if (p.birthTime) setBirthTime(p.birthTime);
                   } catch {}
                 }}>✨ 내 정보로 채우기</button>
               )}
               <div className="sf-form-group">
+                <label className="sf-label">달력 구분</label>
+                <div className="sf-toggle">
+                  <button type="button" className={`sf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
+                  <button type="button" className={`sf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
+                </div>
+              </div>
+              <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
-                <BirthDatePicker value={birthDate} onChange={setBirthDate} />
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
@@ -284,6 +326,12 @@ function SpecialFortune() {
                   <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>♂ 남성</button>
                   <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>♀ 여성</button>
                 </div>
+              </div>
+              <div className="sf-form-group">
+                <label className="sf-label">태어난 시간 (선택)</label>
+                <select className="sf-input sf-select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>
+                  {BIRTH_TIMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
               </div>
               <button className="sf-submit sf-submit--time" onClick={handleAnalyze} disabled={!birthDate || loading}>
                 {loading ? 'AI 분석 중...' : `⏰ ${timeMode === 'timeblock' ? '아침/점심/저녁' : '12시진'} 운세 보기`}

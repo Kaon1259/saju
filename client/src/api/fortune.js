@@ -124,8 +124,10 @@ export const getMbtiCompatibility = async (type1, type2) => {
 };
 
 // ─── 만세력 ───
-export const getManseryeok = async (date) => {
-  const response = await api.get('/saju/manseryeok', { params: { date } });
+export const getManseryeok = async (date, calendarType) => {
+  const params = { date };
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/saju/manseryeok', { params });
   return response.data;
 };
 
@@ -143,10 +145,12 @@ export const getUserTojeong = async (userId) => {
 };
 
 // ─── 사주 궁합 ───
-export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, birthTime2) => {
+export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2) => {
   const params = { birthDate1, birthDate2 };
   if (birthTime1) params.birthTime1 = birthTime1;
   if (birthTime2) params.birthTime2 = birthTime2;
+  if (calendarType1) params.calendarType1 = calendarType1;
+  if (calendarType2) params.calendarType2 = calendarType2;
   const response = await api.get('/compatibility/saju', { params });
   return response.data;
 };

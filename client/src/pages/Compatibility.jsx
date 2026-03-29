@@ -20,9 +20,11 @@ function Compatibility() {
   const [bd1, setBd1] = useState('');
   const [bt1, setBt1] = useState('');
   const [g1, setG1] = useState('M');
+  const [calType1, setCalType1] = useState('SOLAR');
   const [bd2, setBd2] = useState('');
   const [bt2, setBt2] = useState('');
   const [g2, setG2] = useState('F');
+  const [calType2, setCalType2] = useState('SOLAR');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +32,7 @@ function Compatibility() {
     if (!bd1 || !bd2) return;
     setLoading(true);
     try {
-      const data = await getSajuCompatibility(bd1, bd2, bt1 || undefined, bt2 || undefined);
+      const data = await getSajuCompatibility(bd1, bd2, bt1 || undefined, bt2 || undefined, calType1, calType2);
       data._g1 = g1;
       data._g2 = g2;
       setResult(data);
@@ -165,7 +167,7 @@ function Compatibility() {
           )}
         </section>
 
-        <button className="compat-reset-btn" onClick={() => { setResult(null); setBd1(''); setBd2(''); setBt1(''); setBt2(''); }}>
+        <button className="compat-reset-btn" onClick={() => { setResult(null); setBd1(''); setBd2(''); setBt1(''); setBt2(''); setCalType1('SOLAR'); setCalType2('SOLAR'); }}>
           다른 궁합 보기
         </button>
       </div>
@@ -203,7 +205,14 @@ function Compatibility() {
               }}>✨ 내 정보</button>
             )}
           </div>
-          <BirthDatePicker value={bd1} onChange={setBd1} />
+          <div className="form-group">
+            <label className="form-label">달력 구분</label>
+            <div className="form-toggle">
+              <button type="button" className={`form-toggle__btn ${calType1 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('SOLAR')}>양력</button>
+              <button type="button" className={`form-toggle__btn ${calType1 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('LUNAR')}>음력</button>
+            </div>
+          </div>
+          <BirthDatePicker value={bd1} onChange={setBd1} calendarType={calType1} />
           <select className="compat-input compat-select" value={bt1} onChange={e => setBt1(e.target.value)}>
             {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
@@ -221,7 +230,14 @@ function Compatibility() {
               <button className={`compat-g-btn compat-g-female ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>♀ 여</button>
             </div>
           </div>
-          <BirthDatePicker value={bd2} onChange={setBd2} />
+          <div className="form-group">
+            <label className="form-label">달력 구분</label>
+            <div className="form-toggle">
+              <button type="button" className={`form-toggle__btn ${calType2 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('SOLAR')}>양력</button>
+              <button type="button" className={`form-toggle__btn ${calType2 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('LUNAR')}>음력</button>
+            </div>
+          </div>
+          <BirthDatePicker value={bd2} onChange={setBd2} calendarType={calType2} />
           <select className="compat-input compat-select" value={bt2} onChange={e => setBt2(e.target.value)}>
             {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>

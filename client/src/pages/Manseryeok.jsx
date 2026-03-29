@@ -8,13 +8,14 @@ const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '
 
 function Manseryeok() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [calendarType, setCalendarType] = useState('SOLAR');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
     if (!date) return;
     setLoading(true);
-    try { setData(await getManseryeok(date)); }
+    try { setData(await getManseryeok(date, calendarType)); }
     catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -49,7 +50,14 @@ function Manseryeok() {
       </section>
 
       <div className="ms-search glass-card">
-        <BirthDatePicker value={date} onChange={setDate} />
+        <div className="form-group">
+          <label className="form-label">달력 구분</label>
+          <div className="form-toggle">
+            <button type="button" className={`form-toggle__btn ${calendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
+            <button type="button" className={`form-toggle__btn ${calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
+          </div>
+        </div>
+        <BirthDatePicker value={date} onChange={setDate} calendarType={calendarType} />
         <button className="ms-search-btn" onClick={handleSearch} disabled={loading}>
           {loading ? '조회 중...' : '조회'}
         </button>

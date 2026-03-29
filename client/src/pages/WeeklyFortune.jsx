@@ -7,6 +7,22 @@ import './WeeklyFortune.css';
 
 const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 
+const BIRTH_TIMES = [
+  { value: '', label: '모름 / 선택안함' },
+  { value: '자시', label: '자시 (23:00~01:00)' },
+  { value: '축시', label: '축시 (01:00~03:00)' },
+  { value: '인시', label: '인시 (03:00~05:00)' },
+  { value: '묘시', label: '묘시 (05:00~07:00)' },
+  { value: '진시', label: '진시 (07:00~09:00)' },
+  { value: '사시', label: '사시 (09:00~11:00)' },
+  { value: '오시', label: '오시 (11:00~13:00)' },
+  { value: '미시', label: '미시 (13:00~15:00)' },
+  { value: '신시', label: '신시 (15:00~17:00)' },
+  { value: '유시', label: '유시 (17:00~19:00)' },
+  { value: '술시', label: '술시 (19:00~21:00)' },
+  { value: '해시', label: '해시 (21:00~23:00)' },
+];
+
 function getScoreColor(score) {
   if (score >= 85) return '#ff3d7f';
   if (score >= 70) return '#fbbf24';
@@ -27,6 +43,7 @@ function getWeekRange() {
 }
 
 function WeeklyFortune() {
+  const [calendarType, setCalendarType] = useState('SOLAR');
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [gender, setGender] = useState('');
@@ -41,6 +58,7 @@ function WeeklyFortune() {
       if (p.birthDate) setBirthDate(p.birthDate);
       if (p.gender) setGender(p.gender);
       if (p.birthTime) setBirthTime(p.birthTime);
+      if (p.calendarType) setCalendarType(p.calendarType);
     } catch {}
   };
 
@@ -52,6 +70,7 @@ function WeeklyFortune() {
       const params = { birthDate };
       if (birthTime) params.birthTime = birthTime;
       if (gender) params.gender = gender;
+      if (calendarType) params.calendarType = calendarType;
       const response = await api.get('/weekly-fortune', { params });
       setResult(response.data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
@@ -106,8 +125,16 @@ function WeeklyFortune() {
           )}
 
           <div className="wf-form-group">
+            <label className="wf-label">달력 구분</label>
+            <div className="wf-toggle">
+              <button type="button" className={`wf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
+              <button type="button" className={`wf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
+            </div>
+          </div>
+
+          <div className="wf-form-group">
             <label className="wf-label">생년월일</label>
-            <BirthDatePicker value={birthDate} onChange={setBirthDate} />
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
           </div>
 
           <div className="wf-form-group">
@@ -120,6 +147,13 @@ function WeeklyFortune() {
                 &#9792; 여성
               </button>
             </div>
+          </div>
+
+          <div className="wf-form-group">
+            <label className="wf-label">태어난 시간 (선택)</label>
+            <select className="wf-input wf-select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>
+              {BIRTH_TIMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
           </div>
 
           <button className="wf-submit" onClick={handleAnalyze} disabled={!birthDate}>
