@@ -42,17 +42,25 @@ public class DeepAnalysisService {
         result.put("analysisDate", LocalDate.now().toString());
 
         try {
-            String response = claudeApiService.generate(systemPrompt, userPrompt, 4000);
+            String response = claudeApiService.generate(systemPrompt, userPrompt, 8000);
             String json = ClaudeApiService.extractJson(response);
             if (json != null) {
-                Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<>() {});
-                result.putAll(aiResult);
+                try {
+                    Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<>() {});
+                    result.putAll(aiResult);
+                } catch (Exception parseErr) {
+                    // JSON 파싱 실패 시 원본 텍스트 사용
+                    log.warn("심화분석 JSON 파싱 실패, 원본 텍스트 사용: {}", parseErr.getMessage());
+                    result.put("detailAnalysis", response.replaceAll("```json|```", "").trim());
+                }
+            } else if (response != null && !response.isEmpty()) {
+                result.put("detailAnalysis", response);
             } else {
-                result.put("analysis", response);
+                result.put("detailAnalysis", buildFallback(type));
             }
         } catch (Exception e) {
             log.warn("심화분석 AI 호출 실패: {}", e.getMessage());
-            result.put("analysis", buildFallback(type));
+            result.put("detailAnalysis", buildFallback(type));
         }
 
         // DB 캐시 저장
