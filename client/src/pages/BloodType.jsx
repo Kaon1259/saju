@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getBloodTypeFortune, getBloodTypeCompatibility, getUser } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import './BloodType.css';
 
@@ -188,6 +189,15 @@ function BloodType() {
                   <span className="bt-lucky-value">{fortune.luckyColor}</span>
                 </div>
               </div>
+
+              {/* 심화분석 */}
+              {selected && (() => {
+                const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
+                const bd = profile.birthDate;
+                return bd ? (
+                  <DeepAnalysis type="bloodtype" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} />
+                ) : null;
+              })()}
             </div>
           )}
         </div>

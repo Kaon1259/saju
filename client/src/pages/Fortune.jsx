@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import { getFortuneByZodiac, getFortuneByUser } from '../api/fortune';
+import DeepAnalysis from '../components/DeepAnalysis';
 import './Fortune.css';
 
 const ZODIAC_EMOJI = {
@@ -262,6 +263,15 @@ function Fortune() {
           </div>
         </section>
       )}
+
+      {/* 심화분석 */}
+      {fortune && (() => {
+        const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
+        const bd = profile.birthDate;
+        return bd ? (
+          <DeepAnalysis type="today" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} />
+        ) : null;
+      })()}
 
       {/* Share Button */}
       <section className="fortune-actions animate-fade-in-up" style={{ animationDelay: '800ms' }}>

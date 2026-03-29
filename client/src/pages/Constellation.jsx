@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { getAllConstellations, getConstellationFortune, getUser } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import './Constellation.css';
 
@@ -203,6 +204,15 @@ function Constellation() {
               <span className="cs-lucky-value">{fortune.luckyColor}</span>
             </div>
           </div>
+
+          {/* 심화분석 */}
+          {selected && (() => {
+            const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
+            const bd = profile.birthDate;
+            return bd ? (
+              <DeepAnalysis type="constellation" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} />
+            ) : null;
+          })()}
         </div>
       )}
     </div>

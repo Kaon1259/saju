@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import api from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './YearFortune.css';
@@ -343,6 +344,11 @@ function YearFortune() {
               ].filter(Boolean).join(' ')}
             />
           </div>
+
+          {/* 심화분석 */}
+          {birthDate && (
+            <DeepAnalysis type="yearly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+          )}
 
           {/* 액션 버튼 */}
           <div className="yf-actions">

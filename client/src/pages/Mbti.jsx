@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getMbtiTypes, getMbtiFortune, getMbtiCompatibility, getUser } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import './Mbti.css';
 
@@ -206,6 +207,15 @@ function Mbti() {
                   <span className="mbti-lucky-value">{fortune.luckyColor}</span>
                 </div>
               </div>
+
+              {/* 심화분석 */}
+              {selected && (() => {
+                const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
+                const bd = profile.birthDate;
+                return bd ? (
+                  <DeepAnalysis type="mbti" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} />
+                ) : null;
+              })()}
             </div>
           )}
         </div>

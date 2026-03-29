@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import api from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './WeeklyFortune.css';
@@ -278,6 +279,11 @@ function WeeklyFortune() {
               ].filter(Boolean).join(' ')}
             />
           </div>
+
+          {/* 심화분석 */}
+          {birthDate && (
+            <DeepAnalysis type="weekly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+          )}
 
           {/* 리셋 */}
           <button className="wf-reset" onClick={resetAll}>

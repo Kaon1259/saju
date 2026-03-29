@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getSpecialLoveFortune, getHourlyFortune, getTimeblockFortune } from '../api/fortune';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -273,6 +274,10 @@ function SpecialFortune() {
                 {result.luckyPlace && <div className="sf-lucky-item"><span className="sf-lucky-label">행운의 장소</span><span className="sf-lucky-value">{result.luckyPlace}</span></div>}
                 {result.luckyColor && <div className="sf-lucky-item"><span className="sf-lucky-label">행운의 색</span><span className="sf-lucky-value">{result.luckyColor}</span></div>}
               </div>
+
+              {birthDate && loveType && (
+                <DeepAnalysis type={loveType === 'relationship' ? 'love' : loveType} birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+              )}
 
               <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}>🔄 다시 보기</button>
             </div>

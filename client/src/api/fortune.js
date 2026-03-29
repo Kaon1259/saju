@@ -298,4 +298,15 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
   return response.data;
 };
 
+// ─── 심화분석 ───
+export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calendarType, extra) => {
+  const params = { type, birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  if (calendarType) params.calendarType = calendarType;
+  if (extra) params.extra = extra;
+  const response = await api.get('/deep/fortune', { params });
+  return response.data;
+};
+
 export default api;

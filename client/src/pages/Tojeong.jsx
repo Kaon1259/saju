@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getTojeongFortune, getUserTojeong } from '../api/fortune';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './Tojeong.css';
@@ -223,6 +224,11 @@ function Tojeong() {
           })}
         </div>
       </section>
+
+      {/* 심화분석 */}
+      {birthDate && (
+        <DeepAnalysis type="tojeong" birthDate={birthDate} calendarType={calendarType} />
+      )}
 
       {/* 다시하기 */}
       <section className="tj-actions animate-fade-in-up" style={{ animationDelay: '300ms' }}>

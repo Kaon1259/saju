@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import api from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
+import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './MonthlyFortune.css';
@@ -307,6 +308,11 @@ function MonthlyFortune() {
               ].filter(Boolean).join(' ')}
             />
           </div>
+
+          {/* 심화분석 */}
+          {birthDate && (
+            <DeepAnalysis type="monthly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+          )}
 
           {/* 월 이동 버튼 */}
           <div className="mf-nav">
