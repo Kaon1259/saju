@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getTojeongFortune, getUserTojeong } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import './Tojeong.css';
@@ -23,7 +23,8 @@ function Tojeong() {
   const [calendarType, setCalendarType] = useState('SOLAR');
 
   const userId = localStorage.getItem('userId');
-  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+  const location = useLocation();
+  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
 
   const loadUserTojeong = () => {
     if (!userId) return;
@@ -36,7 +37,7 @@ function Tojeong() {
   };
 
   useEffect(() => {
-    if (userId && autoFortune) {
+    if (userId && autoLoad) {
       loadUserTojeong();
     }
   }, [userId]);
@@ -100,7 +101,7 @@ function Tojeong() {
           </p>
         </section>
 
-        {userId && !autoFortune && (
+        {userId && !autoLoad && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
             <button className="btn-gold" onClick={loadUserTojeong} style={{ width: '100%' }}>
               🔮 내 토정비결 보기

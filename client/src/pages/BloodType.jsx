@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getBloodTypeFortune, getBloodTypeCompatibility, getUser } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
@@ -22,7 +23,8 @@ function BloodType() {
   const [compatLoading, setCompatLoading] = useState(false);
   const resultRef = useRef(null);
 
-  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+  const location = useLocation();
+  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -31,7 +33,7 @@ function BloodType() {
         if (u.bloodType) {
           setSelected(u.bloodType);
           setType1(u.bloodType);
-          if (autoFortune) handleSelect(u.bloodType);
+          if (autoLoad) handleSelect(u.bloodType);
         }
       }).catch(() => {});
     }
@@ -97,7 +99,7 @@ function BloodType() {
             ))}
           </div>
 
-          {selected && !fortune && !loading && !autoFortune && localStorage.getItem('userId') && (
+          {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
               <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
                 🔮 내 혈액형 운세 보기

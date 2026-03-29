@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { analyzeSaju, getUserSaju, getDailyFortunes } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
@@ -57,7 +57,8 @@ function SajuAnalysis() {
   const [activeTab, setActiveTab] = useState('saju'); // saju, fortune, advanced
   const [dailyFortunes, setDailyFortunes] = useState(null);
 
-  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+  const location = useLocation();
+  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
 
   const loadUserSaju = () => {
     const userId = localStorage.getItem('userId');
@@ -79,7 +80,7 @@ function SajuAnalysis() {
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
-    if (userId && autoFortune) {
+    if (userId && autoLoad) {
       loadUserSaju();
     }
   }, []);
@@ -130,7 +131,7 @@ function SajuAnalysis() {
           </p>
         </section>
 
-        {localStorage.getItem('userId') && !autoFortune && (
+        {localStorage.getItem('userId') && !autoLoad && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
             <button className="btn-gold" onClick={loadUserSaju} style={{ width: '100%' }}>
               🔮 내 사주 운세 보기

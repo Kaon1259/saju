@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getAllConstellations, getConstellationFortune, getUser } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
@@ -46,7 +47,8 @@ function Constellation() {
   const [mySign, setMySign] = useState(null);
   const resultRef = useRef(null);
 
-  const autoFortune = localStorage.getItem('autoFortune') === 'on';
+  const location = useLocation();
+  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
 
   useEffect(() => {
     getAllConstellations().then(setSigns).catch(() => {});
@@ -58,7 +60,7 @@ function Constellation() {
           setMySign(sign);
           if (sign) {
             setSelected(sign);
-            if (autoFortune) handleSelect(sign);
+            if (autoLoad) handleSelect(sign);
           }
         }
       }).catch(() => {});
@@ -109,7 +111,7 @@ function Constellation() {
         })}
       </div>
 
-      {selected && !fortune && !loading && !autoFortune && localStorage.getItem('userId') && (
+      {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
         <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
           <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
             🔮 내 별자리 운세 보기

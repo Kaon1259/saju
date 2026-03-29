@@ -560,7 +560,7 @@ function Home() {
                 const summary = card.data?.overall?.split('.').slice(0, 1).join('.') || '';
                 const link = card.id === 'saju' ? '/my' : card.id === 'blood' ? '/bloodtype' : '/mbti';
                 return (
-                  <button key={card.id} className="home-menu-card glass-card" onClick={() => navigate(link)} style={{ '--menu-accent': card.color }}>
+                  <button key={card.id} className="home-menu-card glass-card" onClick={() => navigate(link, { state: { autoLoad: true } })} style={{ '--menu-accent': card.color }}>
                     <div className="home-menu-left">
                       <span className="home-menu-icon">{card.icon}</span>
                       <div className="home-menu-info">
