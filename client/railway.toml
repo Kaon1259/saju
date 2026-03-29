@@ -1,2 +1,2 @@
 [deploy]
-startCommand = "nginx -g 'daemon off;'"
+startCommand = "node server.js"
