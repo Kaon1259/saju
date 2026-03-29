@@ -12,7 +12,7 @@ function MyFortune() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('saju');
   const [copied, setCopied] = useState(false);
-  const [showOther, setShowOther] = useState(false);
+  const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'other'
   const [otherBirthDate, setOtherBirthDate] = useState('');
   const [otherBirthTime, setOtherBirthTime] = useState('');
   const [otherGender, setOtherGender] = useState('');
@@ -126,7 +126,133 @@ function MyFortune() {
 
   return (
     <div className="myf-page">
-      {/* 헤더 */}
+      {/* 최상단 모드 탭 */}
+      <div className="myf-mode-tabs">
+        <button className={`myf-mode-tab ${viewMode === 'mine' ? 'active' : ''}`} onClick={() => setViewMode('mine')}>
+          내 운세
+        </button>
+        <button className={`myf-mode-tab ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>
+          다른 사람 운세
+        </button>
+      </div>
+
+      {viewMode === 'other' ? (
+        /* ─── 다른 사람 운세 ─── */
+        <div className="myf-other-view">
+          {!otherData ? (
+            <div className="myf-other-form glass-card">
+              <h2 style={{ textAlign: 'center', marginBottom: 20 }}>다른 사람 운세 보기</h2>
+              <div className="form-group">
+                <label className="form-label">달력 구분</label>
+                <div className="form-toggle">
+                  <button type="button" className={`form-toggle__btn ${otherCalendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('SOLAR')}>양력</button>
+                  <button type="button" className={`form-toggle__btn ${otherCalendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('LUNAR')}>음력</button>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">생년월일</label>
+                <BirthDatePicker value={otherBirthDate} onChange={setOtherBirthDate} calendarType={otherCalendarType} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">태어난 시간 (선택)</label>
+                <select className="form-input form-select" value={otherBirthTime} onChange={(e) => setOtherBirthTime(e.target.value)}>
+                  <option value="">모름 / 선택안함</option>
+                  <option value="자시">자시 (23:00~01:00)</option>
+                  <option value="축시">축시 (01:00~03:00)</option>
+                  <option value="인시">인시 (03:00~05:00)</option>
+                  <option value="묘시">묘시 (05:00~07:00)</option>
+                  <option value="진시">진시 (07:00~09:00)</option>
+                  <option value="사시">사시 (09:00~11:00)</option>
+                  <option value="오시">오시 (11:00~13:00)</option>
+                  <option value="미시">미시 (13:00~15:00)</option>
+                  <option value="신시">신시 (15:00~17:00)</option>
+                  <option value="유시">유시 (17:00~19:00)</option>
+                  <option value="술시">술시 (19:00~21:00)</option>
+                  <option value="해시">해시 (21:00~23:00)</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">성별</label>
+                <div className="form-toggle">
+                  <button type="button" className={`form-toggle__btn ${otherGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('M')}>남성</button>
+                  <button type="button" className={`form-toggle__btn ${otherGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('F')}>여성</button>
+                </div>
+              </div>
+              <button className="btn-gold" style={{ width: '100%' }} disabled={!otherBirthDate || otherLoading}
+                onClick={async () => {
+                  setOtherLoading(true);
+                  try {
+                    const result = await analyzeSaju(otherBirthDate, otherBirthTime || undefined, otherCalendarType, otherGender || undefined);
+                    setOtherData(result);
+                  } catch (e) { console.error(e); }
+                  finally { setOtherLoading(false); }
+                }}>
+                {otherLoading ? '분석중...' : '운세 보기'}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="myf-header">
+                <h1 className="myf-title">운세 분석 결과</h1>
+                {otherData.dayMaster && (
+                  <div className="myf-badges">
+                    <span className="myf-badge myf-badge--saju">{otherData.dayMasterHanja} {otherData.dayMaster} 일간</span>
+                  </div>
+                )}
+              </div>
+              <div className="myf-content fade-in">
+                <div className="myf-score-wrap">
+                  <svg viewBox="0 0 120 120" className="myf-score-circle">
+                    <circle cx="60" cy="60" r="52" className="myf-score-bg" />
+                    <circle cx="60" cy="60" r="52" className="myf-score-fill"
+                      style={{ strokeDasharray: `${((otherData.todayFortune?.score || 70) / 100) * 327} 327` }} />
+                  </svg>
+                  <div className="myf-score-inner">
+                    <span className="myf-score-num">{otherData.todayFortune?.score || 70}</span>
+                    <span className="myf-score-unit">점</span>
+                  </div>
+                </div>
+                {otherData.personalityReading && (
+                  <div className="myf-analysis glass-card">
+                    <span className="myf-analysis-icon">☯️</span>
+                    <h4 className="myf-analysis-title">사주 성격 분석</h4>
+                    <p>{otherData.personalityReading}</p>
+                  </div>
+                )}
+                {otherData.todayFortune && (
+                  <div className="myf-cards">
+                    {otherData.todayFortune.overall && <FortuneCard icon="🌟" title="총운" description={otherData.todayFortune.overall} delay={0} />}
+                    {otherData.todayFortune.love && <FortuneCard icon="💕" title="애정운" description={otherData.todayFortune.love} delay={80} />}
+                    {otherData.todayFortune.money && <FortuneCard icon="💰" title="재물운" description={otherData.todayFortune.money} delay={160} />}
+                    {otherData.todayFortune.health && <FortuneCard icon="💪" title="건강운" description={otherData.todayFortune.health} delay={240} />}
+                    {otherData.todayFortune.work && <FortuneCard icon="💼" title="직장운" description={otherData.todayFortune.work} delay={320} />}
+                  </div>
+                )}
+                {otherData.todayFortune?.luckyNumber && (
+                  <div className="myf-lucky glass-card">
+                    <div className="myf-lucky-item">
+                      <span className="myf-lucky-label">행운의 숫자</span>
+                      <span className="myf-lucky-value">{otherData.todayFortune.luckyNumber}</span>
+                    </div>
+                    <div className="myf-lucky-divider" />
+                    <div className="myf-lucky-item">
+                      <span className="myf-lucky-label">행운의 색</span>
+                      <span className="myf-lucky-value">{otherData.todayFortune.luckyColor}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="myf-actions">
+                <button className="myf-share-btn" onClick={() => { setOtherData(null); setOtherBirthDate(''); setOtherBirthTime(''); setOtherGender(''); }}>
+                  다른 사람 운세 다시 보기
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+      <>
+      {/* ─── 내 운세 ─── */}
       <div className="myf-header">
         <h1 className="myf-title">{userName || user.name}님의 운세</h1>
         <div className="myf-badges">
@@ -259,102 +385,7 @@ function MyFortune() {
           </button>
         </div>
       )}
-
-      {/* 다른 사람 운세 보기 */}
-      <section className="myf-other glass-card" style={{ marginTop: 24, padding: 20 }}>
-        <button className="btn-gold" style={{ width: '100%', marginBottom: showOther ? 16 : 0 }}
-          onClick={() => setShowOther(!showOther)}>
-          {showOther ? '접기' : '👤 다른 사람 운세 보기'}
-        </button>
-        {showOther && (
-          <div>
-            <div className="form-group" style={{ marginTop: 12 }}>
-              <label className="form-label">달력 구분</label>
-              <div className="form-toggle">
-                <button type="button" className={`form-toggle__btn ${otherCalendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('SOLAR')}>양력</button>
-                <button type="button" className={`form-toggle__btn ${otherCalendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('LUNAR')}>음력</button>
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">생년월일</label>
-              <BirthDatePicker value={otherBirthDate} onChange={setOtherBirthDate} calendarType={otherCalendarType} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">태어난 시간 (선택)</label>
-              <select className="form-input form-select" value={otherBirthTime} onChange={(e) => setOtherBirthTime(e.target.value)}>
-                <option value="">모름 / 선택안함</option>
-                <option value="자시">자시 (23:00~01:00)</option>
-                <option value="축시">축시 (01:00~03:00)</option>
-                <option value="인시">인시 (03:00~05:00)</option>
-                <option value="묘시">묘시 (05:00~07:00)</option>
-                <option value="진시">진시 (07:00~09:00)</option>
-                <option value="사시">사시 (09:00~11:00)</option>
-                <option value="오시">오시 (11:00~13:00)</option>
-                <option value="미시">미시 (13:00~15:00)</option>
-                <option value="신시">신시 (15:00~17:00)</option>
-                <option value="유시">유시 (17:00~19:00)</option>
-                <option value="술시">술시 (19:00~21:00)</option>
-                <option value="해시">해시 (21:00~23:00)</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">성별</label>
-              <div className="form-toggle">
-                <button type="button" className={`form-toggle__btn ${otherGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('M')}>남성</button>
-                <button type="button" className={`form-toggle__btn ${otherGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('F')}>여성</button>
-              </div>
-            </div>
-            <button className="btn-gold" style={{ width: '100%' }} disabled={!otherBirthDate || otherLoading}
-              onClick={async () => {
-                setOtherLoading(true);
-                try {
-                  const result = await analyzeSaju(otherBirthDate, otherBirthTime || undefined, otherCalendarType, otherGender || undefined);
-                  setOtherData(result);
-                } catch (e) { console.error(e); }
-                finally { setOtherLoading(false); }
-              }}>
-              {otherLoading ? '분석중...' : '운세 보기'}
-            </button>
-          </div>
-        )}
-      </section>
-
-      {/* 다른 사람 운세 결과 */}
-      {otherData?.todayFortune && (
-        <section className="myf-other-result glass-card" style={{ marginTop: 16, padding: 20 }}>
-          <h3 style={{ marginBottom: 12 }}>분석 결과</h3>
-          <div className="myf-score-wrap">
-            <svg viewBox="0 0 120 120" className="myf-score-circle">
-              <circle cx="60" cy="60" r="52" className="myf-score-bg" />
-              <circle cx="60" cy="60" r="52" className="myf-score-fill"
-                style={{ strokeDasharray: `${((otherData.todayFortune.score || 70) / 100) * 327} 327` }} />
-            </svg>
-            <div className="myf-score-inner">
-              <span className="myf-score-num">{otherData.todayFortune.score || 70}</span>
-              <span className="myf-score-unit">점</span>
-            </div>
-          </div>
-          <div className="myf-cards">
-            {otherData.todayFortune.overall && <FortuneCard icon="🌟" title="총운" description={otherData.todayFortune.overall} delay={0} />}
-            {otherData.todayFortune.love && <FortuneCard icon="💕" title="애정운" description={otherData.todayFortune.love} delay={80} />}
-            {otherData.todayFortune.money && <FortuneCard icon="💰" title="재물운" description={otherData.todayFortune.money} delay={160} />}
-            {otherData.todayFortune.health && <FortuneCard icon="💪" title="건강운" description={otherData.todayFortune.health} delay={240} />}
-            {otherData.todayFortune.work && <FortuneCard icon="💼" title="직장운" description={otherData.todayFortune.work} delay={320} />}
-          </div>
-          {otherData.todayFortune.luckyNumber && (
-            <div className="myf-lucky glass-card">
-              <div className="myf-lucky-item">
-                <span className="myf-lucky-label">행운의 숫자</span>
-                <span className="myf-lucky-value">{otherData.todayFortune.luckyNumber}</span>
-              </div>
-              <div className="myf-lucky-divider" />
-              <div className="myf-lucky-item">
-                <span className="myf-lucky-label">행운의 색</span>
-                <span className="myf-lucky-value">{otherData.todayFortune.luckyColor}</span>
-              </div>
-            </div>
-          )}
-        </section>
+      </>
       )}
     </div>
   );
