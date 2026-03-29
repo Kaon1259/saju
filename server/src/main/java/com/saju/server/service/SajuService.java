@@ -253,6 +253,204 @@ public class SajuService {
         } catch (Exception e) {
             log.warn("AI daily fortune failed, using template: {}", e.getMessage());
         }
+
+        // 4. AI 오행 분석 강화
+        try {
+            String elementPrompt = buildElementAnalysisPrompt(result);
+            if (elementPrompt != null) {
+                String aiElement = claudeApiService.generate(
+                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
+                    + "오행(五行)의 균형과 보충 방법에 대해 깊이 있는 지식을 가지고 있습니다. "
+                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    elementPrompt, 800);
+                if (aiElement != null && !aiElement.isBlank()) {
+                    result.setElementAnalysis(aiElement);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("AI element analysis failed, using template: {}", e.getMessage());
+        }
+
+        // 5. AI 신살 해석 강화
+        try {
+            if (result.getSinsalList() != null && !result.getSinsalList().isEmpty()) {
+                String sinsalPrompt = buildSinsalPrompt(result);
+                String aiSinsal = claudeApiService.generate(
+                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
+                    + "신살(神殺)의 의미와 일상생활에서의 구체적 영향을 해석합니다. "
+                    + "단순 목록이 아닌, 각 신살이 실생활에 미치는 영향과 주의사항을 설명합니다. "
+                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    sinsalPrompt, 800);
+                if (aiSinsal != null && !aiSinsal.isBlank()) {
+                    result.setSinsalAnalysis(aiSinsal);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("AI sinsal analysis failed, using template: {}", e.getMessage());
+        }
+
+        // 6. AI 격국 해석 강화
+        try {
+            if (result.getGyeokguk() != null && !result.getGyeokguk().isBlank()) {
+                String gyeokgukPrompt = buildGyeokgukPrompt(result);
+                String aiGyeokguk = claudeApiService.generate(
+                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
+                    + "격국(格局)의 의미를 깊이 있게 해석하며, 격국과 오행의 조합에 따른 "
+                    + "직업 추천, 결혼운, 재물운 성향을 분석합니다. "
+                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    gyeokgukPrompt, 800);
+                if (aiGyeokguk != null && !aiGyeokguk.isBlank()) {
+                    result.setGyeokgukAnalysis(aiGyeokguk);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("AI gyeokguk analysis failed, using template: {}", e.getMessage());
+        }
+
+        // 7. AI 대운 분석 강화
+        try {
+            if (result.getDaeunList() != null && !result.getDaeunList().isEmpty()) {
+                String daeunPrompt = buildDaeunPrompt(result);
+                String aiDaeun = claudeApiService.generate(
+                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
+                    + "대운(大運)의 흐름을 깊이 있게 해석하며, 현재 대운의 기회와 위기, "
+                    + "구체적 행동 지침을 제시합니다. "
+                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    daeunPrompt, 1200);
+                if (aiDaeun != null && !aiDaeun.isBlank()) {
+                    result.setDaeunAnalysis(aiDaeun);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("AI daeun analysis failed, using template: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 오행 분석 AI 프롬프트 생성
+     */
+    private String buildElementAnalysisPrompt(SajuResult result) {
+        if (result.getFiveElements() == null) return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("다음 사주의 오행 분석을 깊이 있게 해주세요.\n\n");
+        sb.append("【일간】").append(result.getDayMasterHanja()).append(" ")
+          .append(result.getDayMaster()).append(" (").append(result.getDayMasterElement()).append(")\n");
+        sb.append("【오행 분포】");
+        result.getFiveElements().forEach((k, v) -> sb.append(" ").append(k).append(":").append(v));
+        sb.append("\n");
+        sb.append("최강 오행: ").append(result.getStrongestElement())
+          .append(", 최약 오행: ").append(result.getWeakestElement()).append("\n");
+        sb.append("양:").append(result.getYangCount()).append(" 음:").append(result.getYinCount()).append("\n\n");
+
+        sb.append("아래 내용을 반드시 포함하여 분석해주세요:\n");
+        sb.append("1. 오행 전체 균형 진단 (어떤 오행이 과다하고 부족한지)\n");
+        sb.append("2. 과다한 오행이 미치는 영향과 완화 방법\n");
+        sb.append("3. 약한 오행 보충 방법을 구체적으로:\n");
+        sb.append("   - 색상: 어떤 색의 옷이나 소품을 활용하면 좋은지\n");
+        sb.append("   - 방위: 어느 방향이 길한지\n");
+        sb.append("   - 음식: 어떤 음식이 도움되는지\n");
+        sb.append("   - 활동: 어떤 취미나 운동이 좋은지\n");
+        sb.append("4. 음양 균형 진단과 조언\n");
+        sb.append("5. 오행 기반 건강 취약 부위 (목→간담, 화→심장, 토→비위, 금→폐, 수→신장)\n\n");
+        sb.append("예시 형식: '수(水)가 부족하므로 검정색 계열 옷, 북쪽 방향, 해산물/검은콩 등이 도움됩니다'\n");
+        return sb.toString();
+    }
+
+    /**
+     * 신살 해석 AI 프롬프트 생성
+     */
+    private String buildSinsalPrompt(SajuResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("다음 사주의 신살(神殺)을 깊이 있게 해석해주세요.\n\n");
+        sb.append("【일간】").append(result.getDayMasterHanja()).append(" ")
+          .append(result.getDayMaster()).append(" (").append(result.getDayMasterElement()).append(")\n\n");
+        sb.append("【신살 목록】\n");
+        for (var sinsal : result.getSinsalList()) {
+            sb.append("- ").append(sinsal.getName()).append(": ");
+            if (sinsal.isPresent()) {
+                sb.append("있음 (").append(sinsal.getFoundInPillar()).append(" ").append(sinsal.getBranchName()).append(")");
+            } else {
+                sb.append("없음");
+            }
+            sb.append("\n");
+        }
+        sb.append("\n아래 내용을 반드시 포함하여 분석해주세요:\n");
+        sb.append("1. 보유한 신살 각각에 대해:\n");
+        sb.append("   - 해당 신살의 본질적 의미\n");
+        sb.append("   - 일상생활에서의 구체적 영향 (직장, 연애, 대인관계 등)\n");
+        sb.append("   - 주의사항과 활용법\n");
+        sb.append("   - 어느 주(柱)에 있는지에 따른 의미 차이\n");
+        sb.append("2. 신살 조합의 종합적 해석\n");
+        sb.append("3. 없는 신살 중 중요한 것이 있다면 그 부재의 의미\n");
+        return sb.toString();
+    }
+
+    /**
+     * 격국 해석 AI 프롬프트 생성
+     */
+    private String buildGyeokgukPrompt(SajuResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("다음 사주의 격국(格局)을 깊이 있게 해석해주세요.\n\n");
+        sb.append("【일간】").append(result.getDayMasterHanja()).append(" ")
+          .append(result.getDayMaster()).append(" (").append(result.getDayMasterElement()).append(")\n");
+        sb.append("【격국】").append(result.getGyeokguk()).append("\n");
+        sb.append("【오행 분포】");
+        if (result.getFiveElements() != null) {
+            result.getFiveElements().forEach((k, v) -> sb.append(" ").append(k).append(":").append(v));
+        }
+        sb.append("\n");
+        if (result.getTwelveStages() != null) {
+            sb.append("【12운성】");
+            result.getTwelveStages().forEach((k, v) -> sb.append(" ").append(k).append(":").append(v));
+            sb.append("\n");
+        }
+        sb.append("\n아래 내용을 반드시 포함하여 분석해주세요:\n");
+        sb.append("1. 이 격국의 본질적 의미와 특성\n");
+        sb.append("2. 격국 + 오행 조합에 따른 해석\n");
+        sb.append("3. 직업 추천: 이 격국에 맞는 구체적 직업/분야 3-5개\n");
+        sb.append("4. 결혼운: 배우자 성향, 결혼 시기 특성, 가정에서의 역할\n");
+        sb.append("5. 재물운 성향: 돈을 버는 방식, 축재 능력, 투자 성향\n");
+        sb.append("6. 이 격국의 강점을 극대화하는 삶의 전략\n");
+        sb.append("7. 이 격국에서 주의해야 할 함정\n");
+        return sb.toString();
+    }
+
+    /**
+     * 대운 분석 AI 프롬프트 생성
+     */
+    private String buildDaeunPrompt(SajuResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("다음 사주의 대운(大運) 흐름을 깊이 있게 분석해주세요.\n\n");
+        sb.append("【일간】").append(result.getDayMasterHanja()).append(" ")
+          .append(result.getDayMaster()).append(" (").append(result.getDayMasterElement()).append(")\n");
+        if (result.getGyeokguk() != null) {
+            sb.append("【격국】").append(result.getGyeokguk()).append("\n");
+        }
+        sb.append("【오행 분포】");
+        if (result.getFiveElements() != null) {
+            result.getFiveElements().forEach((k, v) -> sb.append(" ").append(k).append(":").append(v));
+        }
+        sb.append("\n\n【대운 흐름】\n");
+        for (var daeun : result.getDaeunList()) {
+            sb.append(daeun.getStartAge()).append("~").append(daeun.getEndAge()).append("세: ");
+            sb.append(daeun.getFullHanja()).append("(").append(daeun.getFullName()).append(") - ");
+            sb.append(daeun.getSipsung()).append(" / ").append(daeun.getTwelveStage());
+            if (daeun.isCurrent()) sb.append(" ★현재 대운");
+            sb.append("\n");
+        }
+        sb.append("\n아래 내용을 반드시 포함하여 분석해주세요:\n");
+        sb.append("1. 대운의 전체적 흐름 개요 (인생 곡선)\n");
+        sb.append("2. 현재 대운(★표시) 상세 분석:\n");
+        sb.append("   - 현재 대운의 핵심 의미\n");
+        sb.append("   - 이 시기의 기회 요소\n");
+        sb.append("   - 이 시기의 위기/주의 요소\n");
+        sb.append("   - 구체적 행동 지침 (직업, 재물, 관계)\n");
+        sb.append("3. 다음 대운으로의 전환:\n");
+        sb.append("   - 다음 대운의 특성 미리보기\n");
+        sb.append("   - 전환 시 주의사항 및 준비할 것\n");
+        sb.append("4. 인생에서 가장 좋은 대운 시기와 이유\n");
+        sb.append("5. 인생에서 가장 주의해야 할 대운 시기와 대처법\n");
+        return sb.toString();
     }
 
     /**
@@ -399,6 +597,12 @@ public class SajuService {
                 .score(node.path("score").asInt(70))
                 .luckyNumber(node.path("luckyNumber").asInt(7))
                 .luckyColor(node.path("luckyColor").asText("파랑"))
+                .summary(node.path("summary").asText(""))
+                .timeAdvice(node.path("timeAdvice").asText(""))
+                .direction(node.path("direction").asText(""))
+                .food(node.path("food").asText(""))
+                .avoid(node.path("avoid").asText(""))
+                .emotion(node.path("emotion").asText(""))
                 .build();
         } catch (Exception e) {
             log.error("Failed to parse AI fortune JSON: {}", e.getMessage());

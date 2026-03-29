@@ -1,6 +1,7 @@
 package com.saju.server.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.entity.SpecialFortune;
 import com.saju.server.repository.SpecialFortuneRepository;
@@ -94,11 +95,35 @@ public class CompatibilityService {
         // AI 상세 분석
         if (claudeApiService.isAvailable()) {
             try {
-                String prompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation);
-                String aiResult = claudeApiService.generate(
-                    "당신은 40년 경력의 한국 사주 궁합 전문가입니다. 두 사람의 사주를 비교하여 궁합을 분석합니다. 3-4문장으로 핵심만 간결하게 한국어로 답변하세요.",
-                    prompt, 400);
-                if (aiResult != null && !aiResult.isBlank()) result.put("aiAnalysis", aiResult);
+                String systemPrompt = "당신은 40년 경력의 한국 사주 궁합 전문가입니다.\n"
+                        + "두 사람의 사주 명식과 오행 관계를 깊이 분석하여 궁합을 풀이합니다.\n"
+                        + "전통 역학의 격조를 유지하면서도 현대적이고 실용적인 조언을 제공합니다.\n\n"
+                        + "【규칙】\n"
+                        + "1. 반드시 JSON만 응답 (설명 텍스트 없이)\n"
+                        + "2. summary: 궁합을 한 줄로 요약 (1문장)\n"
+                        + "3. overall: 전반적 궁합 해석 3-4문장 (오행 관계의 의미, 두 사람의 기운 조화)\n"
+                        + "4. loveCompat: 연애/결혼 궁합 3-4문장 (감정적 교류, 가정 운영, 장기적 전망)\n"
+                        + "5. workCompat: 직장/업무 궁합 2-3문장 (협업 스타일, 비즈니스 관계)\n"
+                        + "6. conflictPoint: 갈등 포인트와 해결 방법 2-3문장 (어떤 상황에서 충돌, 극복법)\n"
+                        + "7. advice: 관계 개선을 위한 구체적 조언 2-3문장 (실천 가능한 행동 지침)\n"
+                        + "8. score: 궁합 점수 1-100 (계산된 점수를 참고하되 AI 판단으로 조정 가능)\n"
+                        + "9. grade: \"천생연분\",\"좋은 인연\",\"보통\",\"노력 필요\",\"상극\" 중 하나\n\n"
+                        + "응답 형식:\n"
+                        + "{\"summary\":\"한 줄 요약\","
+                        + "\"overall\":\"전반적 해석\","
+                        + "\"loveCompat\":\"연애/결혼 궁합\","
+                        + "\"workCompat\":\"직장/업무 궁합\","
+                        + "\"conflictPoint\":\"갈등 포인트\","
+                        + "\"advice\":\"구체적 조언\","
+                        + "\"score\":75,"
+                        + "\"grade\":\"좋은 인연\"}";
+
+                String userPrompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation);
+                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 1500);
+
+                if (aiResponse != null && !aiResponse.isBlank()) {
+                    parseAndApplyCompatAI(result, aiResponse, score, grade);
+                }
             } catch (Exception e) { log.warn("AI compat failed: {}", e.getMessage()); }
         }
 
@@ -142,6 +167,52 @@ public class CompatibilityService {
         } catch (Exception e) { /* ignore duplicate */ }
     }
 
+    /**
+     * AI 궁합 응답 JSON을 파싱하여 result에 적용
+     */
+    private void parseAndApplyCompatAI(Map<String, Object> result, String aiResponse, int calcScore, String calcGrade) {
+        try {
+            String cleanJson = ClaudeApiService.extractJson(aiResponse);
+            if (cleanJson == null) {
+                log.warn("Failed to extract JSON from AI compatibility response");
+                result.put("aiAnalysis", aiResponse);
+                return;
+            }
+
+            JsonNode root = objectMapper.readTree(cleanJson);
+
+            String summary = root.path("summary").asText(null);
+            if (summary != null && !summary.isBlank()) result.put("aiSummary", summary);
+
+            String overall = root.path("overall").asText(null);
+            if (overall != null && !overall.isBlank()) result.put("aiOverall", overall);
+
+            String loveCompat = root.path("loveCompat").asText(null);
+            if (loveCompat != null && !loveCompat.isBlank()) result.put("aiLoveCompat", loveCompat);
+
+            String workCompat = root.path("workCompat").asText(null);
+            if (workCompat != null && !workCompat.isBlank()) result.put("aiWorkCompat", workCompat);
+
+            String conflictPoint = root.path("conflictPoint").asText(null);
+            if (conflictPoint != null && !conflictPoint.isBlank()) result.put("aiConflictPoint", conflictPoint);
+
+            String advice = root.path("advice").asText(null);
+            if (advice != null && !advice.isBlank()) result.put("aiAdvice", advice);
+
+            // AI 점수/등급은 기존 계산값을 덮어쓰지 않고 별도 필드로 저장
+            int aiScore = root.path("score").asInt(0);
+            if (aiScore >= 1 && aiScore <= 100) result.put("aiScore", aiScore);
+
+            String aiGrade = root.path("grade").asText(null);
+            if (aiGrade != null && !aiGrade.isBlank()) result.put("aiGrade", aiGrade);
+
+            log.info("AI compatibility analysis applied successfully");
+        } catch (Exception e) {
+            log.warn("Failed to parse AI compatibility response, using raw text: {}", e.getMessage());
+            result.put("aiAnalysis", aiResponse);
+        }
+    }
+
     private Map<String, Object> buildPersonInfo(SajuResult r, LocalDate bd) {
         Map<String, Object> info = new LinkedHashMap<>();
         info.put("birthDate", bd.toString());
@@ -154,14 +225,22 @@ public class CompatibilityService {
     }
 
     private String buildCompatPrompt(SajuResult r1, SajuResult r2, int score, String elRel, String brRel) {
-        return "【사람1】일간: " + r1.getDayMasterHanja() + r1.getDayMaster() + "(" + r1.getDayMasterElement() + ")\n" +
-               "  사주: " + r1.getYearPillar().getFullHanja() + " " + r1.getMonthPillar().getFullHanja() + " " + r1.getDayPillar().getFullHanja() + (r1.getHourPillar() != null ? " " + r1.getHourPillar().getFullHanja() : "") + "\n" +
-               "【사람2】일간: " + r2.getDayMasterHanja() + r2.getDayMaster() + "(" + r2.getDayMasterElement() + ")\n" +
-               "  사주: " + r2.getYearPillar().getFullHanja() + " " + r2.getMonthPillar().getFullHanja() + " " + r2.getDayPillar().getFullHanja() + (r2.getHourPillar() != null ? " " + r2.getHourPillar().getFullHanja() : "") + "\n" +
-               "【오행 관계】" + elRel + "\n" +
-               "【일지 관계】" + brRel + "\n" +
-               "【점수】" + score + "점\n" +
-               "위 정보를 바탕으로 두 사람의 사주 궁합을 종합 분석해주세요.";
+        boolean yang1 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r1.getDayMaster())] == 0;
+        boolean yang2 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r2.getDayMaster())] == 0;
+        String yinyangInfo = (yang1 ? "양" : "음") + " / " + (yang2 ? "양" : "음") + (yang1 != yang2 ? " (음양 조화)" : " (같은 기운)");
+
+        return "【사람1】일간: " + r1.getDayMasterHanja() + r1.getDayMaster() + "(" + r1.getDayMasterElement() + ", " + (yang1 ? "양" : "음") + ")\n"
+               + "  사주: " + r1.getYearPillar().getFullHanja() + " " + r1.getMonthPillar().getFullHanja() + " " + r1.getDayPillar().getFullHanja() + (r1.getHourPillar() != null ? " " + r1.getHourPillar().getFullHanja() : "") + "\n"
+               + "  오행: " + r1.getDayMasterElement() + "\n\n"
+               + "【사람2】일간: " + r2.getDayMasterHanja() + r2.getDayMaster() + "(" + r2.getDayMasterElement() + ", " + (yang2 ? "양" : "음") + ")\n"
+               + "  사주: " + r2.getYearPillar().getFullHanja() + " " + r2.getMonthPillar().getFullHanja() + " " + r2.getDayPillar().getFullHanja() + (r2.getHourPillar() != null ? " " + r2.getHourPillar().getFullHanja() : "") + "\n"
+               + "  오행: " + r2.getDayMasterElement() + "\n\n"
+               + "【오행 관계】" + elRel + "\n"
+               + "【일지 관계】" + brRel + "\n"
+               + "【음양 조화】" + yinyangInfo + "\n"
+               + "【계산 점수】" + score + "점\n\n"
+               + "위 사주 정보를 바탕으로 두 사람의 궁합을 JSON 형식으로 상세히 분석해주세요.\n"
+               + "오행의 상생/상극 관계가 실제 관계에 어떤 영향을 미치는지 구체적으로 설명해주세요.";
     }
 
     private int getDayMasterIndex(String dayMaster) {

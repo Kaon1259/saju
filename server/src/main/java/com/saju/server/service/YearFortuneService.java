@@ -63,7 +63,7 @@ public class YearFortuneService {
             try {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, birthTime, gender, yearPillar, monthPillar, dayPillar, year2026Pillar, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 1200);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 2400);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {
@@ -129,19 +129,26 @@ public class YearFortuneService {
 - 대운 흐름에서 올해의 위치를 파악하고 종합적으로 해석합니다
 - 년주·월주·일주와 2026년 병오(丙午)년의 오행 상생/상극을 분석합니다
 - 분기별 운세 흐름을 세밀하게 읽어냅니다
+- 올해의 핵심 전환점과 기회의 시기를 정확히 짚어냅니다
+- 연간 감정/심리 에너지의 흐름과 성장 방향을 제시합니다
 
 【분석 방법】
 1. 의뢰인 일간(日干)과 2026년 세운 천간(丙)의 십성 관계 분석
 2. 의뢰인 일지(日支)와 2026년 세운 지지(午)의 합충형파해 관계 분석
 3. 사주 원국의 오행 균형과 2026년 오행이 미치는 영향 파악
 4. 분기별로 월운(月運)의 변화를 고려하여 세부 운세 도출
+5. 상반기/하반기 에너지 흐름의 차이 분석
+6. 올해 가장 중요한 전환점(월) 도출
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
 2. "~할 수 있습니다" 대신 "~하세요", "~입니다" 단정적 표현 사용
 3. 구체적 시기·방위·색상·숫자 포함
 4. 사주 용어는 알기 쉽게 풀어서 설명
-5. 점수는 사주와 세운의 조화도에 따라 30-95 사이로 책정""";
+5. 점수는 사주와 세운의 조화도에 따라 30-95 사이로 책정
+6. 각 카테고리(총운/연애/재물/직장/건강/대인관계)는 4-5문장으로 상세 작성
+7. 분기별 분석은 3-4문장으로 상세하게, 핵심 행동 지침 포함
+8. 올해 핵심 키워드 3개와 최고/주의 분기를 반드시 포함""";
     }
 
     private String buildUserPrompt(LocalDate birthDate, String birthTime, String gender,
@@ -166,28 +173,36 @@ public class YearFortuneService {
         sb.append("일간 오행: ").append(dayPillar.getStemElementName()).append("(").append(SajuConstants.OHENG_HANJA[dayPillar.getStemElement()]).append(") — ").append(dayPillar.isStemYang() ? "양" : "음").append("\n\n");
 
         sb.append("위 사주 정보와 2026년 세운의 상호작용을 분석하여 신년 운세를 작성하세요.\n");
+        sb.append("각 카테고리는 4-5문장, 분기별 분석은 3-4문장으로 상세하게 작성하세요.\n");
         sb.append("반드시 아래 JSON 형식으로만 응답:\n");
         sb.append("{\"yearTheme\":\"올해의 핵심 키워드 (4글자)\",")
           .append("\"yearEmoji\":\"대표 이모지\",")
           .append("\"overallScore\":0-100,")
           .append("\"overallGrade\":\"대길/길/보통/소흉/흉\",")
-          .append("\"summary\":\"올해 총운 요약 (5-6문장)\",")
-          .append("\"love\":\"연애/결혼운 (4문장)\",")
-          .append("\"money\":\"재물/사업운 (4문장)\",")
-          .append("\"career\":\"직장/학업운 (4문장)\",")
-          .append("\"health\":\"건강운 (3문장)\",")
-          .append("\"relationship\":\"대인관계운 (3문장)\",")
+          .append("\"summary\":\"올해 총운 요약 (6-8문장, 상반기/하반기 흐름 차이 포함)\",")
+          .append("\"yearSlogan\":\"올해의 한 줄 슬로건 (15자 이내)\",")
+          .append("\"yearKeywords\":\"올해 핵심 키워드 3개 (쉼표 구분)\",")
+          .append("\"bestQuarter\":\"가장 좋은 분기 (예: 2분기)\",")
+          .append("\"cautionQuarter\":\"주의할 분기 (예: 4분기)\",")
+          .append("\"love\":\"연애/결혼운 (4-5문장, 시기별 연애 흐름과 구체적 조언)\",")
+          .append("\"money\":\"재물/사업운 (4-5문장, 투자 시기/방법과 주의사항)\",")
+          .append("\"career\":\"직장/학업운 (4-5문장, 승진/이직 시기와 전략)\",")
+          .append("\"health\":\"건강운 (3-4문장, 계절별 주의사항과 운동/식이 조언)\",")
+          .append("\"relationship\":\"대인관계운 (3-4문장, 귀인 방향과 관계 전략)\",")
+          .append("\"mentalGrowth\":\"올해 성장/심리 조언 (3문장, 내면 성장 방향과 마인드셋)\",")
           .append("\"luckyMonths\":\"가장 좋은 달 (예: 3월, 8월)\",")
           .append("\"cautionMonths\":\"주의할 달 (예: 6월, 11월)\",")
+          .append("\"turningPoint\":\"올해 가장 중요한 전환점 월과 이유 (1-2문장)\",")
           .append("\"luckyColor\":\"행운 색\",")
           .append("\"luckyNumber\":숫자,")
           .append("\"luckyDirection\":\"행운 방위\",")
-          .append("\"yearAdvice\":\"올해를 위한 핵심 조언 (3문장)\",")
+          .append("\"luckyFood\":\"올해 행운 음식\",")
+          .append("\"yearAdvice\":\"올해를 위한 핵심 조언 (4문장, 구체적 행동 지침)\",")
           .append("\"quarterly\":[")
-          .append("{\"quarter\":\"1분기 (1~3월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"2문장\"},")
-          .append("{\"quarter\":\"2분기 (4~6월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"2문장\"},")
-          .append("{\"quarter\":\"3분기 (7~9월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"2문장\"},")
-          .append("{\"quarter\":\"4분기 (10~12월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"2문장\"}")
+          .append("{\"quarter\":\"1분기 (1~3월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"3-4문장 (핵심 이벤트와 행동 지침 포함)\",\"tip\":\"이 분기 핵심 한마디\"},")
+          .append("{\"quarter\":\"2분기 (4~6월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"3-4문장\",\"tip\":\"핵심 한마디\"},")
+          .append("{\"quarter\":\"3분기 (7~9월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"3-4문장\",\"tip\":\"핵심 한마디\"},")
+          .append("{\"quarter\":\"4분기 (10~12월)\",\"score\":0-100,\"keyword\":\"키워드\",\"summary\":\"3-4문장\",\"tip\":\"핵심 한마디\"}")
           .append("]}");
 
         return sb.toString();

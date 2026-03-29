@@ -114,7 +114,7 @@ public class BloodTypeFortuneService {
         try {
             String system = promptBuilder.bloodTypeSystemPrompt();
             String user = promptBuilder.bloodTypeUserPrompt(bloodType, zodiac, date);
-            String response = claudeApiService.generate(system, user, 1200);
+            String response = claudeApiService.generate(system, user, 2000);
             String json = ClaudeApiService.extractJson(response);
             if (json == null) {
                 log.warn("Failed to extract JSON from Claude response for {}형/{}띠", bloodType, zodiac);

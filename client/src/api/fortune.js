@@ -220,7 +220,9 @@ export const interpretDream = async (dreamText, birthDate, gender) => {
   params.append('dreamText', dreamText);
   if (birthDate) params.append('birthDate', birthDate);
   if (gender) params.append('gender', gender);
-  const response = await api.post('/dream/interpret', params);
+  const response = await api.post('/dream/interpret', params, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  });
   return response.data;
 };
 
@@ -234,7 +236,9 @@ export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthSh
   params.append('foreheadShape', foreheadShape);
   if (birthDate) params.append('birthDate', birthDate);
   if (gender) params.append('gender', gender);
-  const response = await api.post('/face-reading/analyze', params);
+  const response = await api.post('/face-reading/analyze', params, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  });
   return response.data;
 };
 
@@ -250,7 +254,9 @@ export const analyzePsychTest = async (testId, answers, birthDate, gender) => {
   params.append('answers', answers);
   if (birthDate) params.append('birthDate', birthDate);
   if (gender) params.append('gender', gender);
-  const response = await api.post('/psych/analyze', params);
+  const response = await api.post('/psych/analyze', params, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  });
   return response.data;
 };
 

@@ -97,6 +97,13 @@ public class SajuResult {
         private int score;
         private int luckyNumber;
         private String luckyColor;
+        // 신규 필드
+        private String summary;      // 한 줄 핵심 메시지 (운세 슬로건)
+        private String timeAdvice;   // 시간대별 조언
+        private String direction;    // 오늘 길한 방위
+        private String food;         // 오행 기반 추천 음식/차
+        private String avoid;        // 오늘 피해야 할 것
+        private String emotion;      // 감정/심리 상태 진단과 조언
     }
 
     @Getter

@@ -66,7 +66,7 @@ public class MonthlyFortuneService {
             try {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, month, birthTime, gender, yearPillar, dayPillar, targetMonthPillar, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 800);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {
@@ -123,7 +123,7 @@ public class MonthlyFortuneService {
 
     private String buildSystemPrompt() {
         return """
-당신은 40년 경력의 월운(月運) 전문가입니다.
+당신은 40년 경력의 월운(月運) 전문 대가 '월명(月命) 선생'입니다.
 사주명리학에서 월운 분석의 최고 권위자로, 월주(月柱)의 천간지지가
 의뢰인의 일간(日干)과 어떻게 상호작용하는지 정밀하게 분석합니다.
 
@@ -132,19 +132,26 @@ public class MonthlyFortuneService {
 - 월지(月支)와 의뢰인 일지(日支)의 합충형파해를 파악합니다
 - 해당 월의 계절 기운과 오행 에너지 흐름을 종합합니다
 - 주별 기운 변화를 세밀하게 읽어냅니다
+- 이 달의 전체 흐름(상승기/안정기/하강기)을 파악합니다
+- 월간 감정/심리 에너지의 리듬을 분석합니다
 
 【분석 방법】
 1. 월간(月干)과 의뢰인 일간의 오행 상생/상극 관계
 2. 월지(月支)와 의뢰인 일지의 지지 관계 (합/충/형)
 3. 해당 월의 계절 기운이 의뢰인 오행 균형에 미치는 영향
 4. 주별로 일진 흐름을 고려한 길흉 판단
+5. 월초/월중/월말의 에너지 흐름 변화 분석
+6. 이 달의 오행 보충 음식, 방위, 색상 도출
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
 2. "~할 수 있습니다" 대신 "~하세요", "~입니다" 단정적 표현 사용
 3. 구체적 날짜·주차·행동 포함
 4. 사주 용어는 알기 쉽게 풀어서 설명
-5. 점수는 월주와 일간의 조화도에 따라 30-95 사이로 책정""";
+5. 점수는 월주와 일간의 조화도에 따라 30-95 사이로 책정
+6. 각 카테고리(총운/연애/재물/직장/건강)는 3-4문장으로 상세하게 작성
+7. 주차별 조언은 구체적 행동 지침 포함
+8. 이 달의 행운 키워드와 주의사항을 반드시 포함""";
     }
 
     private String buildUserPrompt(LocalDate birthDate, int month, String birthTime, String gender,
@@ -168,6 +175,7 @@ public class MonthlyFortuneService {
         sb.append("일간 오행: ").append(dayPillar.getStemElementName()).append("(").append(SajuConstants.OHENG_HANJA[dayPillar.getStemElement()]).append(") — ").append(dayPillar.isStemYang() ? "양" : "음").append("\n\n");
 
         sb.append(month).append("월 월주와 의뢰인 사주의 상호작용을 분석하여 월별 운세를 작성하세요.\n");
+        sb.append("각 카테고리는 3-4문장으로 상세하게 작성하세요.\n");
         sb.append("반드시 아래 JSON 형식으로만 응답:\n");
         sb.append("{\"month\":").append(month).append(",")
           .append("\"monthName\":\"").append(month).append("월\",")
@@ -176,15 +184,27 @@ public class MonthlyFortuneService {
           .append("\"themeEmoji\":\"이모지\",")
           .append("\"score\":0-100,")
           .append("\"grade\":\"대길/길/보통/소흉\",")
-          .append("\"overall\":\"이 달의 총운 (4-5문장)\",")
-          .append("\"love\":\"연애운 (3문장)\",")
-          .append("\"money\":\"재물운 (3문장)\",")
-          .append("\"career\":\"직장운 (3문장)\",")
-          .append("\"health\":\"건강운 (2문장)\",")
+          .append("\"overall\":\"이 달의 총운 (5-6문장, 월초/월중/월말 흐름 변화 포함)\",")
+          .append("\"monthKeyword\":\"이 달의 행운 키워드 3개 (쉼표 구분)\",")
+          .append("\"monthSlogan\":\"이 달의 한 줄 슬로건 (15자 이내)\",")
+          .append("\"love\":\"연애운 (3-4문장, 시기별 연애 흐름과 구체적 행동 조언)\",")
+          .append("\"money\":\"재물운 (3-4문장, 수입/지출/투자 방향과 시기별 조언)\",")
+          .append("\"career\":\"직장운 (3-4문장, 업무 전략과 대인관계/승진 조언)\",")
+          .append("\"health\":\"건강운 (3문장, 주의 부위/운동/식이 구체적 조언)\",")
+          .append("\"mentalAdvice\":\"감정/심리 조언 (2-3문장, 이 달의 스트레스 관리법)\",")
           .append("\"bestWeek\":\"가장 좋은 주 (예: 둘째 주)\",")
           .append("\"cautionWeek\":\"주의할 주\",")
           .append("\"luckyDay\":\"행운의 날짜\",")
-          .append("\"advice\":\"이 달의 핵심 조언 (2문장)\"}");
+          .append("\"luckyColor\":\"이 달의 행운 색상\",")
+          .append("\"luckyDirection\":\"이 달의 행운 방위\",")
+          .append("\"weeklyAdvice\":[")
+          .append("{\"week\":\"첫째 주\",\"summary\":\"1-2문장 조언\"},")
+          .append("{\"week\":\"둘째 주\",\"summary\":\"1-2문장 조언\"},")
+          .append("{\"week\":\"셋째 주\",\"summary\":\"1-2문장 조언\"},")
+          .append("{\"week\":\"넷째 주\",\"summary\":\"1-2문장 조언\"}")
+          .append("],")
+          .append("\"caution\":\"이 달의 주의사항 (2문장)\",")
+          .append("\"advice\":\"이 달의 핵심 조언 (3문장, 구체적 행동 지침)\"}");
 
         return sb.toString();
     }

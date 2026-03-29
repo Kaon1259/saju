@@ -73,7 +73,7 @@ public class WeeklyFortuneService {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, birthTime, gender, yearPillar, dayPillar,
                     weekStart, weekEnd, weekDayPillars, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 800);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {
@@ -130,7 +130,7 @@ public class WeeklyFortuneService {
 
     private String buildSystemPrompt() {
         return """
-당신은 주운(週運) 분석 전문가입니다.
+당신은 40년 경력의 주운(週運) 분석 대가 '주명(週命) 선생'입니다.
 매주 7일간의 일진(日辰) 흐름을 정밀 분석하여
 의뢰인에게 가장 적확한 주간 운세를 제공합니다.
 
@@ -139,19 +139,26 @@ public class WeeklyFortuneService {
 - 각 요일별 기운의 강약과 길흉을 판단합니다
 - 한 주의 전체 흐름과 리듬을 읽어 종합적 조언을 제공합니다
 - 가장 좋은 날과 주의할 날을 정확히 짚어냅니다
+- 시간대별(오전/오후/저녁) 기운 변화를 세밀하게 파악합니다
+- 주간 감정/심리 흐름과 대인관계 조언을 함께 제공합니다
 
 【분석 방법】
 1. 의뢰인 일간과 각 날의 일간 오행 상생/상극 관계
 2. 의뢰인 일지와 각 날의 일지 합충형 관계
 3. 7일간의 오행 기운 흐름 변화 패턴
 4. 주 초·중·후반의 에너지 리듬 분석
+5. 각 요일의 시간대별 길흉 변화 분석
+6. 주간 전체 감정/심리 에너지의 흐름 파악
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
 2. "~할 수 있습니다" 대신 "~하세요", "~입니다" 단정적 표현 사용
-3. 각 요일별 구체적 행동 조언(tip) 포함
+3. 각 요일별 구체적 행동 조언(tip)과 핵심 조언(advice) 포함
 4. 사주 용어는 알기 쉽게 풀어서 설명
-5. 점수는 일진과 의뢰인 사주의 조화도에 따라 30-95 사이로 책정""";
+5. 점수는 일진과 의뢰인 사주의 조화도에 따라 30-95 사이로 책정
+6. 각 카테고리(총운/연애/재물/직장)는 3-4문장으로 상세하게 작성
+7. 요일별 tip은 2문장 이상, 시간대 조언 포함
+8. 주간 종합 메시지와 핵심 키워드를 반드시 포함""";
     }
 
     private String buildUserPrompt(LocalDate birthDate, String birthTime, String gender,
@@ -182,19 +189,24 @@ public class WeeklyFortuneService {
         sb.append("일간 오행: ").append(dayPillar.getStemElementName()).append("(").append(SajuConstants.OHENG_HANJA[dayPillar.getStemElement()]).append(") — ").append(dayPillar.isStemYang() ? "양" : "음").append("\n\n");
 
         sb.append("이번 주 7일간의 일진과 의뢰인 사주의 상호작용을 분석하여 주간 운세를 작성하세요.\n");
+        sb.append("각 카테고리는 3-4문장으로 상세하게, 요일별 tip은 2문장 이상으로 작성하세요.\n");
         sb.append("반드시 아래 JSON 형식으로만 응답:\n");
         sb.append("{\"weekStart\":\"").append(weekStart).append("\",");
         sb.append("\"weekEnd\":\"").append(weekEnd).append("\",");
         sb.append("\"weekTheme\":\"이번 주 키워드\",")
           .append("\"weekEmoji\":\"이모지\",")
           .append("\"overallScore\":0-100,")
-          .append("\"summary\":\"이번 주 총운 (3-4문장)\",")
+          .append("\"summary\":\"이번 주 총운 (4-5문장, 주 초/중/후반 흐름 포함)\",")
+          .append("\"weekSummary\":\"이번 주 한 줄 요약 슬로건 (15자 이내)\",")
+          .append("\"weekKeyword\":\"이번 주를 관통하는 핵심 키워드 3개 (쉼표 구분)\",")
           .append("\"bestDay\":\"가장 좋은 요일\",")
           .append("\"cautionDay\":\"주의할 요일\",")
-          .append("\"love\":\"이번 주 연애운 (2문장)\",")
-          .append("\"money\":\"이번 주 재물운 (2문장)\",")
-          .append("\"career\":\"이번 주 직장운 (2문장)\",")
-          .append("\"advice\":\"이번 주 핵심 조언 (2문장)\",")
+          .append("\"love\":\"이번 주 연애운 (3-4문장, 구체적 행동 조언과 시간대 포함)\",")
+          .append("\"money\":\"이번 주 재물운 (3-4문장, 지출/수입/투자 방향 포함)\",")
+          .append("\"career\":\"이번 주 직장운 (3-4문장, 업무 전략과 대인관계 조언 포함)\",")
+          .append("\"health\":\"이번 주 건강운 (2-3문장, 주의 부위와 운동/식이 조언)\",")
+          .append("\"mentalAdvice\":\"이번 주 감정/심리 조언 (2-3문장, 스트레스 관리법 포함)\",")
+          .append("\"advice\":\"이번 주 핵심 조언 (3문장, 구체적 행동 지침)\",")
           .append("\"days\":[");
 
         for (int i = 0; i < 7; i++) {
@@ -202,7 +214,7 @@ public class WeeklyFortuneService {
             if (i > 0) sb.append(",");
             sb.append("{\"day\":\"").append(DAY_NAMES[i]).append("\",");
             sb.append("\"date\":\"").append(d.format(mmdd)).append("\",");
-            sb.append("\"score\":0-100,\"keyword\":\"키워드\",\"tip\":\"한마디\"}");
+            sb.append("\"score\":0-100,\"keyword\":\"키워드\",\"tip\":\"구체적 조언 2문장 (시간대별 행동 포함)\",\"advice\":\"이 날의 핵심 한마디\"}");
         }
         sb.append("]}");
 

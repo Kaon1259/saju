@@ -17,6 +17,10 @@ public class TojeongResult {
     private String gwaeName;   // 괘 이름
     private String yearSummary;      // 올해 총평
     private List<MonthlyFortune> monthlyFortunes; // 월별 운세
+    private List<String> yearKeywords;  // 올해 핵심 키워드 3개
+    private Integer bestMonth;          // 가장 좋은 달 번호
+    private Integer cautionMonth;       // 가장 조심할 달 번호
+    private String yearAdvice;          // 올해를 잘 보내기 위한 핵심 조언
 
     @Getter
     @Setter

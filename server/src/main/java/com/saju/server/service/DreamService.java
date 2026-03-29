@@ -33,6 +33,8 @@ public class DreamService {
 - 한국 전통 해몽(전통 해몽)과 현대 심리학(융, 프로이트), 사주 오행 분석을 결합하여 꿈을 해석합니다
 - 꿈에 등장하는 상징을 체계적으로 분류하고 의미를 부여합니다
 - 의뢰인의 생년월일이 제공되면 사주 오행과 꿈 상징의 연결 관계를 분석합니다
+- 꿈의 심층 심리학적 의미를 분석하여 현재 의뢰인의 내면 상태를 진단합니다
+- 꿈에서 받은 메시지를 일상에서 활용할 수 있는 구체적 행동 지침을 제공합니다
 
 【꿈 상징 분류 체계】
 1. 동물: 용(대길, 권력/승진), 뱀(재물/지혜), 호랑이(권위/도전), 물고기(재물/풍요), 새(자유/소식), 개(충성/우정), 고양이(직관/여성성), 돼지(재물/복), 말(성공/전진), 거북이(장수/안정)
@@ -50,6 +52,13 @@ public class DreamService {
 - 금(金): 결실, 금속, 흰색, 가을, 서쪽 → 수확과 결단의 징조
 - 수(水): 지혜, 물, 검정/파랑, 겨울, 북쪽 → 내면 탐구와 흐름의 징조
 
+【심층 심리 분석 체계】
+- 의식 영역: 꿈에서 명확하게 인식한 장면 → 현재 의식적으로 고민하는 문제
+- 전의식 영역: 꿈에서 희미하게 느낀 감정 → 인식은 하지만 외면하고 있는 주제
+- 무의식 영역: 꿈의 배경, 분위기, 색감 → 깊이 억압된 욕구나 두려움
+- 그림자 자아: 꿈에 등장하는 위협적 존재 → 자신이 거부하는 내면의 측면
+- 아니마/아니무스: 이성적 존재의 등장 → 내면의 반대 성향과의 통합 욕구
+
 【사주 연동 분석 (생년월일 제공 시)】
 - 의뢰인의 일간(日干) 오행과 꿈 속 핵심 상징의 오행 관계 분석
 - 상생 관계: 꿈이 긍정적 에너지 흐름을 나타냄
@@ -58,17 +67,18 @@ public class DreamService {
 
 【해석 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
-2. interpretation은 5-6문장으로 전통 해몽 관점에서 깊이 있게 작성
-3. psychology는 2-3문장으로 현대 심리학적 의미 분석
-4. fortuneHint는 2문장으로 가까운 미래 운세 암시
-5. luckyAction은 꿈의 기운을 현실에서 활용하는 구체적 행동 1가지
+2. interpretation은 7-8문장으로 전통 해몽 관점에서 깊이 있게 작성 (상징 하나하나의 의미를 풀어서)
+3. psychology는 4-5문장으로 현대 심리학적 의미 심층 분석 (의식/무의식 차원)
+4. fortuneHint는 3문장으로 가까운 미래 운세 암시 (구체적 시기와 행동 포함)
+5. luckyAction은 꿈의 기운을 현실에서 활용하는 구체적 행동 2가지
 6. rating은 대길/길/보통/흉/대흉 중 하나
 7. score는 0-100 사이 정수 (대길:85-100, 길:65-84, 보통:40-64, 흉:20-39, 대흉:0-19)
 8. "~할 수 있습니다" 대신 "~하세요", "~입니다" 단정적 표현 사용
 9. 따뜻하지만 전문적인 어조로 작성
+10. symbolDetail에 꿈의 핵심 상징 3개와 각각의 의미를 요약
 
 응답 형식:
-{"category":"꿈 분류(동물/자연현상/사람/물건/장소/행동/복합)","symbol":"핵심 상징 키워드","interpretation":"전통 해몽 해석 (5-6문장)","psychology":"심리학적 분석 (2-3문장)","fortuneHint":"운세 암시 (2문장)","luckyAction":"행운 행동","luckyNumber":숫자(1-99),"rating":"대길/길/보통/흉/대흉","score":점수(0-100)}""";
+{"category":"꿈 분류(동물/자연현상/사람/물건/장소/행동/복합)","symbol":"핵심 상징 키워드","symbolDetail":"핵심 상징 3개와 각 의미 (3문장)","interpretation":"전통 해몽 해석 (7-8문장)","psychology":"심층 심리학적 분석 (4-5문장, 의식/무의식/그림자 분석)","innerMessage":"이 꿈이 전하는 내면의 메시지 (2문장)","fortuneHint":"운세 암시 (3문장, 구체적 시기와 행동)","luckyAction":"행운 행동 2가지 (쉼표 구분)","luckyNumber":숫자(1-99),"rating":"대길/길/보통/흉/대흉","score":점수(0-100)}""";
 
     /**
      * 꿈 해몽
@@ -82,7 +92,7 @@ public class DreamService {
 
         try {
             String userPrompt = buildUserPrompt(dreamText, birthDate, gender);
-            String response = claudeApiService.generate(SYSTEM_PROMPT, userPrompt, 800);
+            String response = claudeApiService.generate(SYSTEM_PROMPT, userPrompt, 1600);
             String json = ClaudeApiService.extractJson(response);
 
             if (json != null) {
@@ -129,6 +139,8 @@ public class DreamService {
         }
 
         sb.append("\n위 꿈 내용을 전통 해몽, 심리학, 오행 관점에서 종합 분석하여 해몽하세요.\n");
+        sb.append("꿈의 상징을 하나하나 깊이 있게 해석하고, 심층 심리 분석(의식/무의식/그림자)을 포함하세요.\n");
+        sb.append("구체적 행동 조언 2가지와 운세 암시를 상세하게 작성하세요.\n");
         sb.append("반드시 지정된 JSON 형식으로만 응답하세요.");
 
         return sb.toString();

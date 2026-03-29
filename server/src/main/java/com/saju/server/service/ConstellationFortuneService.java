@@ -112,9 +112,18 @@ public class ConstellationFortuneService {
             String prompt = todayCtx + "\n【의뢰인】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
                 "성격: " + PERSONALITY.get(sign) + "\n\n" +
                 "위 천기와 별자리 특성을 종합하여 오늘의 운세를 작성하세요.\n" +
-                "반드시 JSON만: {\"overall\":\"총운 3문장\",\"love\":\"애정운 2문장\",\"money\":\"재물운 2문장\",\"health\":\"건강운 2문장\",\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
+                "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
+                "반드시 JSON만: {\"overall\":\"총운 (시간대별 기운 변화 포함, 4-5문장)\"," +
+                "\"love\":\"애정운 (구체적 행동 조언, 3-4문장)\"," +
+                "\"money\":\"재물운 (금전 방향과 시기별 조언, 3-4문장)\"," +
+                "\"health\":\"건강운 (주의 부위와 운동/식이 조언, 3문장)\"," +
+                "\"summary\":\"오늘의 한 줄 슬로건 (15자 이내)\"," +
+                "\"planetInfluence\":\"오늘 행성 영향 분석 (수호성과 오늘 기운의 상호작용, 2-3문장)\"," +
+                "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
             String resp = claudeApiService.generate(
-                "당신은 40년 경력의 점성술 대가 '천명 선생'입니다. 서양 별자리와 동양 역학을 융합합니다. 반드시 JSON만 응답.", prompt, 600);
+                "당신은 40년 경력의 점성술 대가 '천명 선생'입니다. 서양 별자리와 동양 역학을 융합합니다. " +
+                "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 분석합니다. " +
+                "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성하세요.", prompt, 1200);
 
             String json = ClaudeApiService.extractJson(resp);
             if (json == null) return null;

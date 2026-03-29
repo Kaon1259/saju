@@ -130,18 +130,38 @@ public class TojeongService {
             SajuPillar yearPillar = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(LocalDate.now()));
             String currentGanji = yearPillar.getFullHanja() + "(" + yearPillar.getFullName() + ")";
 
-            String systemPrompt = "당신은 조선시대 토정 이지함의 토정비결을 계승한 대한민국 최고의 역술가입니다.\n"
-                    + "괘 번호와 올해 간지를 기반으로 월별 운세를 해석합니다.\n\n"
+            String systemPrompt = "당신은 조선시대 토정 이지함 선생의 깊은 통찰력으로 토정비결을 풀이하는 대한민국 최고의 역술가입니다.\n"
+                    + "괘의 상징적 의미를 깊이 있게 풀어내며, 전통 역학의 무게감과 현대적 실용성을 조화롭게 전달합니다.\n"
+                    + "단순히 '좋다/나쁘다'가 아닌, 구체적인 상황과 이유를 설명하여 실생활에 도움이 되는 조언을 합니다.\n\n"
                     + "【규칙】\n"
                     + "1. 반드시 JSON만 응답 (설명 텍스트 없이)\n"
-                    + "2. yearSummary는 4-5문장으로 올해 전체 흐름을 상세히\n"
-                    + "3. 각 월의 fortune은 3-4문장으로 구체적 조언 포함\n"
-                    + "4. rating은 반드시 \"대길\",\"길\",\"보통\",\"흉\",\"대흉\" 중 하나\n"
-                    + "5. 12개월 모두 빠짐없이 작성\n"
-                    + "6. 월별로 재물운, 건강운, 인간관계를 골고루 반영\n"
-                    + "7. 전통 역학 어투를 유지하되 현대적 조언도 포함\n\n"
+                    + "2. yearSummary는 6-8문장으로 작성:\n"
+                    + "   - 올해 전반적 기운의 흐름과 괘의 상징적 의미\n"
+                    + "   - 상반기와 하반기의 구분된 운세 흐름\n"
+                    + "   - 특별히 주의해야 할 점\n"
+                    + "   - 올해 행운을 가져올 활동이나 방향\n"
+                    + "3. yearKeywords는 올해를 대표하는 핵심 키워드 3개 (예: [\"새로운 시작\", \"재물 성장\", \"건강 관리\"])\n"
+                    + "4. bestMonth는 12개월 중 가장 운이 좋은 달 번호 (1-12)\n"
+                    + "5. cautionMonth는 12개월 중 가장 조심해야 할 달 번호 (1-12)\n"
+                    + "6. yearAdvice는 올해를 잘 보내기 위한 핵심 조언 2-3문장\n"
+                    + "7. 각 월의 fortune은 5-6문장으로 구체적으로 작성:\n"
+                    + "   - 해당 월의 기운과 분위기 설명\n"
+                    + "   - 재물운에 대한 구체적 조언 (투자, 저축, 소비 등)\n"
+                    + "   - 건강 주의사항 (어떤 부분을 조심할지)\n"
+                    + "   - 대인관계 또는 직장/학업 관련 조언\n"
+                    + "   - 그 달에 실천할 행동 지침\n"
+                    + "   - rating 등급에 맞는 구체적 이유\n"
+                    + "8. rating은 반드시 \"대길\",\"길\",\"보통\",\"흉\",\"대흉\" 중 하나\n"
+                    + "9. 12개월 모두 빠짐없이 작성\n"
+                    + "10. 괘의 상징적 의미를 각 월에 연결하여 풀이\n"
+                    + "11. 전통 역학의 격조 있는 어투를 유지하되 현대인이 바로 실천할 수 있는 조언 포함\n\n"
                     + "응답 형식:\n"
-                    + "{\"yearSummary\":\"올해 총평\",\"months\":[{\"month\":1,\"fortune\":\"1월 운세\",\"rating\":\"길\"},{\"month\":2,\"fortune\":\"2월 운세\",\"rating\":\"보통\"},...]}";
+                    + "{\"yearSummary\":\"올해 총평 6-8문장\","
+                    + "\"yearKeywords\":[\"키워드1\",\"키워드2\",\"키워드3\"],"
+                    + "\"bestMonth\":1,"
+                    + "\"cautionMonth\":7,"
+                    + "\"yearAdvice\":\"올해 핵심 조언 2-3문장\","
+                    + "\"months\":[{\"month\":1,\"fortune\":\"1월 운세 5-6문장\",\"rating\":\"길\"},...12개월 모두]}";
 
 
             String userPrompt = String.format(
@@ -158,7 +178,7 @@ public class TojeongService {
                     currentGanji
             );
 
-            String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 2000);
+            String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 2500);
 
             if (aiResponse != null && !aiResponse.isBlank()) {
                 parseAndApplyAIResponse(result, aiResponse);
@@ -185,6 +205,30 @@ public class TojeongService {
             String yearSummary = root.path("yearSummary").asText(null);
             if (yearSummary != null && !yearSummary.isBlank()) {
                 result.setYearSummary(yearSummary);
+            }
+
+            // 올해 핵심 키워드 적용
+            JsonNode keywordsNode = root.path("yearKeywords");
+            if (keywordsNode.isArray() && keywordsNode.size() > 0) {
+                List<String> keywords = new ArrayList<>();
+                for (JsonNode kw : keywordsNode) {
+                    String text = kw.asText(null);
+                    if (text != null && !text.isBlank()) keywords.add(text);
+                }
+                if (!keywords.isEmpty()) result.setYearKeywords(keywords);
+            }
+
+            // 가장 좋은 달 / 조심할 달 적용
+            int bestMonth = root.path("bestMonth").asInt(0);
+            if (bestMonth >= 1 && bestMonth <= 12) result.setBestMonth(bestMonth);
+
+            int cautionMonth = root.path("cautionMonth").asInt(0);
+            if (cautionMonth >= 1 && cautionMonth <= 12) result.setCautionMonth(cautionMonth);
+
+            // 올해 핵심 조언 적용
+            String yearAdvice = root.path("yearAdvice").asText(null);
+            if (yearAdvice != null && !yearAdvice.isBlank()) {
+                result.setYearAdvice(yearAdvice);
             }
 
             // 월별 운세 적용

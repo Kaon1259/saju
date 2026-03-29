@@ -128,7 +128,7 @@ public class MbtiFortuneService {
         try {
             String system = promptBuilder.mbtiSystemPrompt();
             String user = promptBuilder.mbtiUserPrompt(type, zodiac, date);
-            String response = claudeApiService.generate(system, user, 700);
+            String response = claudeApiService.generate(system, user, 1500);
             String json = ClaudeApiService.extractJson(response);
             if (json == null) return null;
 

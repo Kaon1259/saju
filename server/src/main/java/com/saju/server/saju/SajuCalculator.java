@@ -34,9 +34,12 @@ public class SajuCalculator {
         SajuPillar yearPillar = calculateYearPillar(sajuYear);
         SajuPillar monthPillar = calculateMonthPillar(birthDate, yearPillar.getStemIndex());
         SajuPillar dayPillar = calculateDayPillar(birthDate);
-        SajuPillar hourPillar = null;
+        SajuPillar hourPillar;
         if (birthTime != null && !birthTime.isEmpty()) {
             hourPillar = calculateHourPillar(birthTime, dayPillar.getStemIndex());
+        } else {
+            // 시간 미입력 시 오시(午時, 11:00~13:00)로 추정
+            hourPillar = calculateHourPillar("오시", dayPillar.getStemIndex());
         }
 
         // Build result (interpretation will be added by SajuInterpreter)
