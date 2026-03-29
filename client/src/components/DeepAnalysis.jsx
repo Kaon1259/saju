@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getDeepAnalysis } from '../api/fortune';
 import './DeepAnalysis.css';
 
@@ -6,9 +6,11 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(autoOpen);
+  const calledRef = useRef(false);
 
   const loadData = async () => {
-    if (data || loading || !birthDate) return;
+    if (calledRef.current || !birthDate) return;
+    calledRef.current = true;
     setLoading(true);
     try {
       const result = await getDeepAnalysis(type, birthDate, birthTime, gender, calendarType, extra);
@@ -21,7 +23,7 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
   };
 
   useEffect(() => {
-    if (autoOpen && birthDate && !data && !loading) {
+    if (autoOpen && birthDate && !calledRef.current) {
       loadData();
     }
   }, [autoOpen, birthDate]);

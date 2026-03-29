@@ -44,17 +44,20 @@ public class DeepAnalysisService {
         try {
             String response = claudeApiService.generate(systemPrompt, userPrompt, 8000);
             String json = ClaudeApiService.extractJson(response);
+            if (json == null && response != null) {
+                json = response.replaceAll("```json|```", "").trim();
+            }
             if (json != null) {
+                // 잘린 JSON 복구 시도
+                json = repairJson(json);
                 try {
                     Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<>() {});
                     result.putAll(aiResult);
                 } catch (Exception parseErr) {
-                    // JSON 파싱 실패 시 원본 텍스트 사용
-                    log.warn("심화분석 JSON 파싱 실패, 원본 텍스트 사용: {}", parseErr.getMessage());
-                    result.put("detailAnalysis", response.replaceAll("```json|```", "").trim());
+                    log.warn("심화분석 JSON 파싱 실패: {}", parseErr.getMessage());
+                    // 잘린 JSON에서 파싱 가능한 부분 추출
+                    extractPartialJson(json, result);
                 }
-            } else if (response != null && !response.isEmpty()) {
-                result.put("detailAnalysis", response);
             } else {
                 result.put("detailAnalysis", buildFallback(type));
             }
@@ -231,112 +234,70 @@ public class DeepAnalysisService {
         String jsonTemplate = switch (type) {
             case "today" -> """
                 {
-                  "deepSummary": "프리미엄 심화 분석 핵심 메시지 (2문장)",
-                  "timeAnalysis": {
-                    "dawn": "새벽 01~06시 운세 (3문장, 구체적 행동 포함)",
-                    "morning": "오전 06~12시 운세 (5문장, 업무/학습/대인관계 구체적)",
-                    "afternoon": "오후 12~18시 운세 (5문장, 재물/미팅/활동 구체적)",
-                    "evening": "저녁 18~24시 운세 (5문장, 휴식/연애/자기계발 구체적)"
-                  },
-                  "elementAdvice": {
-                    "direction": "길한 방위 + 이유 + 구체적 활용법 (3문장)",
-                    "food": "추천 음식 5가지 (각각 오행 근거와 효능 설명)",
-                    "color": "행운 색상 3가지 (각각 의미와 활용법)",
-                    "aroma": "추천 향기/아로마 (오행 근거)",
-                    "activity": "추천 활동 3가지 (시간대별)"
-                  },
-                  "emotionAnalysis": "오늘의 감정/심리 상태 심층 분석 — 무의식 패턴, 감정 트리거, 대처법, 명상 키워드 (8문장 이상)",
-                  "relationshipAdvice": {
-                    "boss": "직장 상사와의 관계 (3문장)",
-                    "colleague": "동료와의 관계 (3문장)",
-                    "lover": "연인/배우자 관계 (3문장)",
-                    "family": "가족 관계 (3문장)",
-                    "friend": "친구 관계 (3문장)"
-                  },
-                  "wealthFlow": "오늘의 재물 에너지 흐름 — 소비/투자/저축 각각의 적합도와 구체적 조언 (5문장)",
-                  "healthGuide": "건강 주의 부위와 오행 기반 보양법 (5문장)",
-                  "actionGuide": ["구체적 행동 지침 1 (시간+장소+행동)", "행동 지침 2", "행동 지침 3", "행동 지침 4", "행동 지침 5"],
-                  "avoidList": ["피해야 할 것 1 (구체적 이유 포함)", "피해야 할 것 2", "피해야 할 것 3"],
-                  "hiddenMessage": "오늘 숨겨진 우주의 메시지 — 천기누설 (4문장)"
+                  "deepSummary": "핵심 메시지 2문장",
+                  "morningFortune": "오전 운세 — 업무/대인관계/행동지침 구체적으로 5문장",
+                  "afternoonFortune": "오후 운세 — 재물/미팅/활동 구체적으로 5문장",
+                  "eveningFortune": "저녁 운세 — 휴식/연애/자기계발 구체적으로 5문장",
+                  "elementAdvice": "오행 조언 — 길한 방위, 추천 음식 3가지, 행운 색상, 추천 활동 (각각 오행 근거 포함, 8문장)",
+                  "emotionAnalysis": "감정/심리 심층 분석 — 무의식 패턴, 감정 트리거, 대처법, 명상 키워드 (6문장)",
+                  "relationshipAdvice": "대인관계 조언 — 상사/동료/연인/가족/친구 각각 구체적 전략 (8문장)",
+                  "wealthFlow": "재물 에너지 — 소비/투자/저축 적합도와 구체적 조언 (5문장)",
+                  "healthGuide": "건강 — 주의 부위와 오행 보양법, 추천 식단과 운동 (5문장)",
+                  "actionGuide": "오늘 꼭 해야 할 행동 5가지 (시간+장소+행동 구체적)",
+                  "avoidList": "오늘 피해야 할 것 3가지 (구체적 이유 포함)",
+                  "hiddenMessage": "천기누설 — 숨겨진 우주의 메시지 (4문장)"
                 }""";
             case "love", "reunion", "remarriage", "blind_date" -> """
                 {
-                  "deepSummary": "프리미엄 심화 분석 핵심 메시지 (2문장)",
-                  "energyDiagnosis": "현재 연애/인연 에너지 진단 — 도화살·홍염살·천을귀인 분석 (6문장 이상)",
-                  "timingAnalysis": "최적 시기 분석 — 월/주/요일/시간대 구체적 명시, 왜 그 시기인지 오행 근거 (6문장 이상)",
-                  "partnerProfile": "이상적 파트너 상세 프로필 — 띠, 오행 유형, 성격, 직업군, 외형 특성, 만날 수 있는 장소 (8문장 이상)",
-                  "psychAnalysis": "심리/감정 패턴 심층 분석 — 무의식적 끌림/회피 패턴, 애착 유형, 연애 방어기제 (6문장 이상)",
-                  "strategy": ["구체적 행동 전략 1 (시기+방법+주의점)", "전략 2", "전략 3", "전략 4", "전략 5"],
-                  "stageGuide": {
-                    "stage1": "1단계: 관심 표현 (3문장)",
-                    "stage2": "2단계: 호감 확인 (3문장)",
-                    "stage3": "3단계: 관계 발전 (3문장)",
-                    "stage4": "4단계: 관계 안정화 (3문장)"
-                  },
-                  "caution": ["주의사항 1 (구체적 상황과 대처법)", "주의사항 2", "주의사항 3"],
-                  "forecast": "향후 6개월 관계 전망 (6문장 이상)",
-                  "hiddenMessage": "숨겨진 인연의 천기누설 (4문장)"
+                  "deepSummary": "핵심 메시지 2문장",
+                  "energyDiagnosis": "연애 에너지 진단 — 도화살·홍염살·천을귀인 분석 (6문장)",
+                  "timingAnalysis": "최적 시기 — 월/주/요일 구체적, 오행 근거 (6문장)",
+                  "partnerProfile": "이상적 파트너 — 띠, 오행, 성격, 직업군, 만남 장소 (6문장)",
+                  "psychAnalysis": "심리 패턴 — 끌림/회피 패턴, 애착 유형 (5문장)",
+                  "strategy": "행동 전략 5가지 (시기+방법+주의점 각각 구체적)",
+                  "forecast": "향후 6개월 전망 (5문장)",
+                  "caution": "주의사항 3가지 (구체적 상황과 대처법)",
+                  "hiddenMessage": "천기누설 — 숨겨진 인연의 메시지 (3문장)"
                 }""";
             case "yearly" -> """
                 {
-                  "deepSummary": "프리미엄 심화 분석 핵심 메시지 (2문장)",
-                  "quarterAnalysis": {
-                    "q1": "1-3월 상세 분석 — 재물/건강/인연/직업 각각 (8문장 이상)",
-                    "q2": "4-6월 상세 분석 (8문장 이상)",
-                    "q3": "7-9월 상세 분석 (8문장 이상)",
-                    "q4": "10-12월 상세 분석 (8문장 이상)"
-                  },
-                  "monthlyWealth": "월별 재물운 등급표와 투자/사업 전략 (12개월 각 2문장)",
-                  "monthlyHealth": "월별 건강 주의사항과 오행 보양법 (12개월 각 1문장)",
-                  "turningPoints": ["전환점 1 (구체적 시기+내용+대응법)", "전환점 2", "전환점 3"],
-                  "noblePersons": "올해 귀인의 특성과 만나는 시기 (5문장)",
-                  "careerAdvice": "직업/사업운 — 이직/창업/승진 최적 시기와 전략 (6문장)",
-                  "wealthTiming": "재물운 핵심 시기와 전략 — 월별 등급, 투자 적기 (6문장)",
-                  "healthWarning": "건강 주의 — 계절별 질환, 오행 부위별 관리법 (6문장)",
-                  "relationshipFlow": "대인관계 연간 흐름 — 갈등 시기, 귀인 시기 (6문장)",
-                  "yearStrategy": ["올해 핵심 전략 1", "전략 2", "전략 3", "전략 4", "전략 5"],
-                  "avoidList": ["올해 피해야 할 함정 1", "함정 2", "함정 3"],
-                  "lifestyleGuide": ["행운 극대화 생활 습관 1", "습관 2", "습관 3", "습관 4", "습관 5"],
-                  "hiddenMessage": "올해 천기누설 (4문장)"
+                  "deepSummary": "핵심 메시지 2문장",
+                  "q1Analysis": "1-3월 상세 — 재물/건강/인연/직업 (6문장)",
+                  "q2Analysis": "4-6월 상세 (6문장)",
+                  "q3Analysis": "7-9월 상세 (6문장)",
+                  "q4Analysis": "10-12월 상세 (6문장)",
+                  "wealthTiming": "재물운 핵심 시기와 투자 전략 (6문장)",
+                  "healthWarning": "건강 — 계절별 질환, 오행 부위별 관리 (5문장)",
+                  "careerAdvice": "직업운 — 이직/승진 최적 시기 (5문장)",
+                  "relationshipFlow": "대인관계 흐름 — 귀인 시기, 갈등 시기 (5문장)",
+                  "yearStrategy": "올해 핵심 전략 5가지 구체적으로",
+                  "hiddenMessage": "천기누설 (3문장)"
                 }""";
             case "monthly" -> """
                 {
-                  "deepSummary": "프리미엄 심화 분석 핵심 메시지 (2문장)",
-                  "weeklyFlow": {
-                    "week1": "1주차 상세 — 재물/건강/인간관계/업무 (6문장 이상)",
-                    "week2": "2주차 상세 (6문장 이상)",
-                    "week3": "3주차 상세 (6문장 이상)",
-                    "week4": "4주차 상세 (6문장 이상)"
-                  },
-                  "keyDates": ["길일: O일 — 이유와 활용법", "길일: O일", "흉일: O일 — 이유와 주의법", "흉일: O일", "특별일: O일 — 이유"],
-                  "wealthAdvice": "이 달 재물운 심층 분석 — 수입/지출/투자 시기별 전략 (6문장 이상)",
-                  "healthAdvice": "이 달 건강운 — 주의 부위, 식이요법, 운동 구체적 추천 (6문장 이상)",
-                  "socialAdvice": "이 달 대인관계 — 갈등 시기, 새 인연 시기, 관계 전략 (6문장 이상)",
-                  "careerAdvice": "이 달 직장/업무운 — 주차별 흐름, 중요 미팅 시기 (5문장)",
-                  "directionAdvice": "이 달 방위별 길흉 (동서남북+중앙 각각 2문장)",
-                  "monthStrategy": ["핵심 전략 1", "전략 2", "전략 3", "전략 4"],
-                  "luckyItems": {"food": "행운 음식 3가지", "color": "행운 색상", "number": "행운 숫자", "activity": "행운 활동"},
-                  "hiddenMessage": "이 달의 천기누설 (3문장)"
+                  "deepSummary": "핵심 메시지 2문장",
+                  "week1": "1주차 — 재물/건강/관계/업무 (5문장)",
+                  "week2": "2주차 (5문장)",
+                  "week3": "3주차 (5문장)",
+                  "week4": "4주차 (5문장)",
+                  "wealthAdvice": "재물운 — 수입/지출/투자 전략 (5문장)",
+                  "healthAdvice": "건강운 — 주의 부위, 식이, 운동 (5문장)",
+                  "socialAdvice": "대인관계 — 갈등 시기, 인연 시기 (5문장)",
+                  "directionAdvice": "방위 길흉과 행운 음식/색상/숫자 (5문장)",
+                  "hiddenMessage": "천기누설 (3문장)"
                 }""";
             case "weekly" -> """
                 {
-                  "deepSummary": "프리미엄 심화 분석 핵심 메시지 (2문장)",
-                  "dailyEnergy": {
-                    "mon": "월요일 — 오행 에너지, 행운 시간대, 색상, 조언 (5문장)",
-                    "tue": "화요일 상세 (5문장)",
-                    "wed": "수요일 상세 (5문장)",
-                    "thu": "목요일 상세 (5문장)",
-                    "fri": "금요일 상세 (5문장)",
-                    "sat": "토요일 상세 (5문장)",
-                    "sun": "일요일 상세 (5문장)"
-                  },
-                  "peakTime": "이번 주 최고 행운 시점 — 요일+시간+활동 (3문장)",
-                  "socialStrategy": "대인관계 전략 — 만나면 좋은/피할 사람 유형, 갈등 예방법 (6문장)",
-                  "emotionalRhythm": "감정 리듬 분석 — 에너지 상승기/하강기, 감정 관리법 (6문장)",
-                  "wealthFlow": "이번 주 재물 흐름과 소비 가이드 (5문장)",
-                  "healthGuide": "요일별 건강 관리 — 추천 활동과 식단 (5문장)",
-                  "weekStrategy": ["핵심 전략 1", "전략 2", "전략 3"],
-                  "hiddenMessage": "이번 주 천기누설 (3문장)"
+                  "deepSummary": "핵심 메시지 2문장",
+                  "monTue": "월요일~화요일 운세 — 에너지, 행운시간, 조언 (5문장)",
+                  "wedThu": "수요일~목요일 (5문장)",
+                  "friSatSun": "금~일요일 (5문장)",
+                  "peakTime": "이번 주 최고 행운 시점 (3문장)",
+                  "socialStrategy": "대인관계 전략 (5문장)",
+                  "emotionalRhythm": "감정 리듬과 에너지 관리 (5문장)",
+                  "wealthFlow": "재물 흐름과 소비 가이드 (4문장)",
+                  "healthGuide": "건강 관리 — 추천 활동과 식단 (4문장)",
+                  "hiddenMessage": "천기누설 (3문장)"
                 }""";
             default -> """
                 {
@@ -352,6 +313,48 @@ public class DeepAnalysisService {
 
         sb.append(jsonTemplate);
         return sb.toString();
+    }
+
+    private String repairJson(String json) {
+        // 잘린 JSON 복구: 열린 괄호/따옴표 닫기
+        int braces = 0, brackets = 0;
+        boolean inString = false;
+        for (int i = 0; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (c == '\\' && inString) { i++; continue; }
+            if (c == '"') inString = !inString;
+            if (!inString) {
+                if (c == '{') braces++;
+                if (c == '}') braces--;
+                if (c == '[') brackets++;
+                if (c == ']') brackets--;
+            }
+        }
+        StringBuilder sb = new StringBuilder(json);
+        if (inString) sb.append("\"");
+        while (brackets > 0) { sb.append("]"); brackets--; }
+        while (braces > 0) { sb.append("}"); braces--; }
+        return sb.toString();
+    }
+
+    private void extractPartialJson(String json, Map<String, Object> result) {
+        // 완전한 key-value 쌍을 정규식으로 추출
+        try {
+            var pattern = java.util.regex.Pattern.compile("\"(\\w+)\"\\s*:\\s*\"([^\"]+)\"");
+            var matcher = pattern.matcher(json);
+            while (matcher.find()) {
+                String key = matcher.group(1);
+                String value = matcher.group(2);
+                if (!key.equals("type") && !key.equals("birthDate") && !key.equals("analysisDate")) {
+                    result.put(key, value);
+                }
+            }
+            if (result.size() <= 3) {
+                result.put("detailAnalysis", json.replaceAll("[{}\"\\[\\]]", "").replaceAll("\\w+:", "\n").trim());
+            }
+        } catch (Exception e) {
+            result.put("detailAnalysis", buildFallback(""));
+        }
     }
 
     private String buildFallback(String type) {
