@@ -65,10 +65,12 @@ public class DeepAnalysisService {
             } else {
                 log.warn("심화분석 AI 응답 null 또는 JSON 추출 실패");
                 result.put("detailAnalysis", buildFallback(type));
+                result.put("_debug", "AI response was null - API key available: " + claudeApiService.isAvailable());
             }
         } catch (Exception e) {
             log.error("심화분석 AI 호출 실패: {}", e.getMessage(), e);
             result.put("detailAnalysis", buildFallback(type));
+            result.put("_debug", "Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
 
         // 성공한 경우에만 DB 캐시 저장 (실패 결과는 캐시하지 않음)
