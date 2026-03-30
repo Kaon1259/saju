@@ -1,6 +1,7 @@
 package com.saju.server.controller;
 
 import com.saju.server.saju.*;
+import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.LunarCalendarService;
 import com.saju.server.service.SajuService;
 import com.saju.server.service.UserService;
@@ -22,6 +23,7 @@ public class SajuController {
     private final UserService userService;
     private final SajuService sajuService;
     private final LunarCalendarService lunarCalendarService;
+    private final ClaudeApiService claudeApiService;
 
     /**
      * Analyze saju by birth date and optional time
@@ -97,6 +99,35 @@ public class SajuController {
 
         // 띠 정보
         result.put("zodiacAnimal", yearPillar.getAnimal());
+
+        // AI 해석
+        if (claudeApiService.isAvailable()) {
+            try {
+                String pillarInfo = String.format(
+                    "날짜: %s, 년주: %s%s(%s/%s), 월주: %s%s(%s/%s), 일주: %s%s(%s/%s), 띠: %s",
+                    date, yearPillar.getStemHanja(), yearPillar.getBranchHanja(), yearPillar.getStemElement(), yearPillar.getBranchElement(),
+                    monthPillar.getStemHanja(), monthPillar.getBranchHanja(), monthPillar.getStemElement(), monthPillar.getBranchElement(),
+                    dayPillar.getStemHanja(), dayPillar.getBranchHanja(), dayPillar.getStemElement(), dayPillar.getBranchElement(),
+                    yearPillar.getAnimal());
+
+                String systemPrompt = "당신은 40년 경력의 사주명리학 전문가입니다. 만세력 데이터를 해석합니다. 반드시 JSON만 응답하세요.";
+                String userPrompt = pillarInfo + "\n\n위 만세력 정보를 해석하세요. JSON 형식:\n" +
+                    "{\"dayAnalysis\":\"일간 특성과 오늘의 기운 (3문장)\"," +
+                    "\"elementBalance\":\"오행 분포와 상생/상극 관계 (3문장)\"," +
+                    "\"luckyTime\":\"길한 시간대 2~3개와 이유 (3문장)\"," +
+                    "\"advice\":\"이 날의 총평과 조언 (3문장)\"}";
+
+                String resp = claudeApiService.generate(systemPrompt, userPrompt, 800);
+                String json = ClaudeApiService.extractJson(resp);
+                if (json != null) {
+                    var aiResult = new com.fasterxml.jackson.databind.ObjectMapper().readValue(
+                        json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+                    result.put("interpretation", aiResult);
+                }
+            } catch (Exception e) {
+                // AI 해석 실패해도 기본 데이터는 반환
+            }
+        }
 
         return ResponseEntity.ok(result);
     }

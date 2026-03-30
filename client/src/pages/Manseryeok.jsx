@@ -98,6 +98,37 @@ function Manseryeok() {
             </div>
           </section>
 
+          {/* AI 해석 */}
+          {data.interpretation && (
+            <section className="ms-interp glass-card">
+              <h2 className="ms-section-title">📖 만세력 해석</h2>
+              {data.interpretation.dayAnalysis && (
+                <div className="ms-interp-item">
+                  <span className="ms-interp-icon">☯️</span>
+                  <div><h4 className="ms-interp-label">일간 특성</h4><p>{data.interpretation.dayAnalysis}</p></div>
+                </div>
+              )}
+              {data.interpretation.elementBalance && (
+                <div className="ms-interp-item">
+                  <span className="ms-interp-icon">🔄</span>
+                  <div><h4 className="ms-interp-label">오행 분석</h4><p>{data.interpretation.elementBalance}</p></div>
+                </div>
+              )}
+              {data.interpretation.luckyTime && (
+                <div className="ms-interp-item">
+                  <span className="ms-interp-icon">🕐</span>
+                  <div><h4 className="ms-interp-label">길한 시간대</h4><p>{data.interpretation.luckyTime}</p></div>
+                </div>
+              )}
+              {data.interpretation.advice && (
+                <div className="ms-interp-item">
+                  <span className="ms-interp-icon">💡</span>
+                  <div><h4 className="ms-interp-label">총평 및 조언</h4><p>{data.interpretation.advice}</p></div>
+                </div>
+              )}
+            </section>
+          )}
+
           <section className="ms-hours glass-card">
             <h2 className="ms-section-title">🕐 시주 (12시진)</h2>
             <div className="ms-hours-grid">

@@ -23,6 +23,17 @@
 .ms-pillar-element { font-size: 11px; color: var(--color-text-muted); font-weight: 600; }
 .ms-pillar-animal { font-size: 11px; color: var(--color-accent-gold); font-weight: 700; }
 
+/* Interpretation */
+.ms-interp { padding: 16px; }
+.ms-interp-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.ms-interp-item:last-child { border-bottom: none; }
+.ms-interp-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.ms-interp-label { font-size: 13px; font-weight: 800; color: var(--color-accent-gold); margin-bottom: 4px; }
+.ms-interp-item p { font-size: 13px; line-height: 1.7; color: var(--color-text-muted); margin: 0; }
+[data-theme="light"] .ms-interp-item { border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .ms-interp-label { color: #96700a; }
+[data-theme="light"] .ms-interp-item p { color: #444; }
+
 /* Hours */
 .ms-hours { padding: 16px; }
 .ms-hours-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
