@@ -57,9 +57,12 @@ function Manseryeok() {
             <button type="button" className={`form-toggle__btn ${calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
           </div>
         </div>
-        <BirthDatePicker value={date} onChange={setDate} calendarType={calendarType} />
+        <div className="form-group">
+          <label className="form-label">조회할 날짜</label>
+          <BirthDatePicker value={date} onChange={setDate} calendarType={calendarType} />
+        </div>
         <button className="ms-search-btn" onClick={handleSearch} disabled={loading}>
-          {loading ? '조회 중...' : '조회'}
+          {loading ? '조회 중...' : '만세력 조회'}
         </button>
       </div>
 
