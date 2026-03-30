@@ -308,18 +308,17 @@ function MyFortune() {
       )}
 
       {/* 심화분석 탭 */}
-      {activeTab === 'deep' && (
-        <div className="myf-content fade-in">
-          {(() => {
-            try {
-              const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-              return profile.birthDate ? (
-                <DeepAnalysis type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} autoOpen={true} />
-              ) : <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>프로필에 생년월일을 등록해주세요</p>;
-            } catch { return null; }
-          })()}
-        </div>
-      )}
+      {activeTab === 'deep' && (() => {
+        try {
+          const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+          if (!profile.birthDate) return <div className="myf-content"><p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>프로필에 생년월일을 등록해주세요</p></div>;
+          return (
+            <div className="myf-content fade-in" key="deep-tab">
+              <DeepAnalysis type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} autoOpen={true} />
+            </div>
+          );
+        } catch { return null; }
+      })()}
 
       {/* 점수 원형 */}
       {f && activeTab !== 'deep' && (

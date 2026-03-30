@@ -336,8 +336,16 @@ function Home() {
     const cards = [];
     const user = myData.user || {};
     if (myData.saju) cards.push({ id: 'saju', label: '사주 오늘의 운세', icon: '☯️', data: myData.saju, color: '#FBBF24' });
-    if (myData.bloodType && user.bloodType) cards.push({ id: 'blood', label: `${user.bloodType}형 혈액형 운세`, icon: '🩸', data: myData.bloodType, color: '#F472B6' });
-    if (myData.mbti && user.mbtiType) cards.push({ id: 'mbti', label: `${user.mbtiType} MBTI 운세`, icon: '🧬', data: myData.mbti, color: '#34D399' });
+    if (myData.bloodType && user.bloodType) {
+      cards.push({ id: 'blood', label: `${user.bloodType}형 혈액형 운세`, icon: '🩸', data: myData.bloodType, color: '#F472B6' });
+    } else {
+      cards.push({ id: 'blood', label: '혈액형 운세', icon: '🩸', data: null, color: '#F472B6', needSetup: true });
+    }
+    if (myData.mbti && user.mbtiType) {
+      cards.push({ id: 'mbti', label: `${user.mbtiType} MBTI 운세`, icon: '🧬', data: myData.mbti, color: '#34D399' });
+    } else {
+      cards.push({ id: 'mbti', label: 'MBTI 운세', icon: '🧬', data: null, color: '#34D399', needSetup: true });
+    }
     return cards;
   };
   const swipeCards = userId ? buildSwipeCards() : [];
@@ -559,14 +567,18 @@ function Home() {
               {swipeCards.map((card) => {
                 const score = card.data?.score;
                 const summary = card.data?.overall?.split('.').slice(0, 1).join('.') || '';
-                const link = card.id === 'saju' ? '/my' : card.id === 'blood' ? '/bloodtype' : '/mbti';
+                const link = card.needSetup ? '/profile' : card.id === 'saju' ? '/my' : card.id === 'blood' ? '/bloodtype' : '/mbti';
                 return (
-                  <button key={card.id} className="home-menu-card glass-card" onClick={() => navigate(link, { state: { autoLoad: true } })} style={{ '--menu-accent': card.color }}>
+                  <button key={card.id} className="home-menu-card glass-card" onClick={() => navigate(link, { state: { autoLoad: !card.needSetup } })} style={{ '--menu-accent': card.color }}>
                     <div className="home-menu-left">
                       <span className="home-menu-icon">{card.icon}</span>
                       <div className="home-menu-info">
                         <span className="home-menu-label">{card.label}</span>
-                        {summary && <p className="home-menu-summary">{summary}.</p>}
+                        {card.needSetup ? (
+                          <p className="home-menu-summary" style={{ color: 'rgba(255,255,255,0.4)' }}>마이페이지에서 설정하기</p>
+                        ) : summary ? (
+                          <p className="home-menu-summary">{summary}.</p>
+                        ) : null}
                       </div>
                     </div>
                     <div className="home-menu-right">

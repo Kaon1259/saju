@@ -42,7 +42,7 @@ public class DeepAnalysisService {
         result.put("analysisDate", LocalDate.now().toString());
 
         try {
-            String response = claudeApiService.generate(systemPrompt, userPrompt, 8000);
+            String response = claudeApiService.generate(systemPrompt, userPrompt, 4000);
             String json = ClaudeApiService.extractJson(response);
             if (json == null && response != null) {
                 json = response.replaceAll("```json|```", "").trim();
@@ -77,12 +77,11 @@ public class DeepAnalysisService {
             수만 명의 상담 경험을 바탕으로 유료 프리미엄 심화 분석을 제공합니다.
 
             [분석 원칙]
-            1. 모든 분석은 천간지지·오행·십성·12운성의 이론적 근거를 반드시 제시합니다
+            1. 모든 분석은 오행·십성의 이론적 근거를 제시합니다
             2. 추상적 표현 금지 — 구체적 시기, 방위, 색상, 숫자, 행동을 명시합니다
-            3. 각 항목은 충분히 길고 상세하게 작성합니다 (최소 5문장 이상)
-            4. 전문 역술인이 1:1 대면 상담하는 수준의 깊이와 구체성을 유지합니다
-            5. 긍정적 조언과 현실적 주의사항을 균형 있게 제시합니다
-            6. 반드시 JSON 형식으로만 응답하세요 (마크다운 코드블록 사용 가능)
+            3. 각 항목은 핵심만 간결하게 작성합니다 (2-3문장)
+            4. 긍정적 조언과 현실적 주의사항을 균형 있게 제시합니다
+            5. 반드시 JSON 형식으로만 응답하세요 (마크다운 코드블록 사용 가능)
             """;
 
         return switch (type) {
@@ -229,85 +228,85 @@ public class DeepAnalysisService {
         if (extra != null && !extra.isEmpty()) sb.append(", 추가정보: ").append(extra);
         sb.append(", 오늘 날짜: ").append(LocalDate.now());
 
-        sb.append("\n\n[중요] 유료 프리미엄 분석입니다. 각 항목을 최대한 길고 구체적으로 작성해주세요. 추상적 표현은 금지합니다.\n다음 JSON 형식으로 응답하세요:\n");
+        sb.append("\n\n[중요] 프리미엄 분석입니다. 각 항목을 간결하되 구체적으로 작성하세요. 추상적 표현 금지.\n다음 JSON 형식으로 응답하세요:\n");
 
         String jsonTemplate = switch (type) {
             case "today" -> """
                 {
-                  "deepSummary": "핵심 메시지 2문장",
-                  "morningFortune": "오전 운세 — 업무/대인관계/행동지침 구체적으로 5문장",
-                  "afternoonFortune": "오후 운세 — 재물/미팅/활동 구체적으로 5문장",
-                  "eveningFortune": "저녁 운세 — 휴식/연애/자기계발 구체적으로 5문장",
-                  "elementAdvice": "오행 조언 — 길한 방위, 추천 음식 3가지, 행운 색상, 추천 활동 (각각 오행 근거 포함, 8문장)",
-                  "emotionAnalysis": "감정/심리 심층 분석 — 무의식 패턴, 감정 트리거, 대처법, 명상 키워드 (6문장)",
-                  "relationshipAdvice": "대인관계 조언 — 상사/동료/연인/가족/친구 각각 구체적 전략 (8문장)",
-                  "wealthFlow": "재물 에너지 — 소비/투자/저축 적합도와 구체적 조언 (5문장)",
-                  "healthGuide": "건강 — 주의 부위와 오행 보양법, 추천 식단과 운동 (5문장)",
-                  "actionGuide": "오늘 꼭 해야 할 행동 5가지 (시간+장소+행동 구체적)",
-                  "avoidList": "오늘 피해야 할 것 3가지 (구체적 이유 포함)",
-                  "hiddenMessage": "천기누설 — 숨겨진 우주의 메시지 (4문장)"
+                  "deepSummary": "핵심 메시지 1-2문장",
+                  "morningFortune": "오전 운세 — 업무/대인관계/행동지침 (3문장)",
+                  "afternoonFortune": "오후 운세 — 재물/미팅/활동 (3문장)",
+                  "eveningFortune": "저녁 운세 — 휴식/연애/자기계발 (3문장)",
+                  "elementAdvice": "오행 조언 — 방위, 음식, 색상, 활동 추천 (3문장)",
+                  "emotionAnalysis": "감정/심리 분석 — 대처법, 명상 키워드 (3문장)",
+                  "relationshipAdvice": "대인관계 핵심 조언 (3문장)",
+                  "wealthFlow": "재물 에너지 — 소비/투자/저축 조언 (3문장)",
+                  "healthGuide": "건강 — 주의 부위와 보양법 (2문장)",
+                  "actionGuide": "오늘 꼭 해야 할 행동 3가지",
+                  "avoidList": "오늘 피해야 할 것 2가지",
+                  "hiddenMessage": "천기누설 메시지 (2문장)"
                 }""";
             case "love", "reunion", "remarriage", "blind_date" -> """
                 {
-                  "deepSummary": "핵심 메시지 2문장",
-                  "energyDiagnosis": "연애 에너지 진단 — 도화살·홍염살·천을귀인 분석 (6문장)",
-                  "timingAnalysis": "최적 시기 — 월/주/요일 구체적, 오행 근거 (6문장)",
-                  "partnerProfile": "이상적 파트너 — 띠, 오행, 성격, 직업군, 만남 장소 (6문장)",
-                  "psychAnalysis": "심리 패턴 — 끌림/회피 패턴, 애착 유형 (5문장)",
-                  "strategy": "행동 전략 5가지 (시기+방법+주의점 각각 구체적)",
-                  "forecast": "향후 6개월 전망 (5문장)",
-                  "caution": "주의사항 3가지 (구체적 상황과 대처법)",
-                  "hiddenMessage": "천기누설 — 숨겨진 인연의 메시지 (3문장)"
+                  "deepSummary": "핵심 메시지 1-2문장",
+                  "energyDiagnosis": "연애 에너지 진단 — 도화살·홍염살 분석 (3문장)",
+                  "timingAnalysis": "최적 시기 — 월/주/요일 구체적 (3문장)",
+                  "partnerProfile": "이상적 파트너 — 띠, 성격, 직업군 (3문장)",
+                  "psychAnalysis": "심리 패턴 — 끌림/회피 패턴 (3문장)",
+                  "strategy": "행동 전략 3가지",
+                  "forecast": "향후 전망 (3문장)",
+                  "caution": "주의사항 2가지",
+                  "hiddenMessage": "천기누설 메시지 (2문장)"
                 }""";
             case "yearly" -> """
                 {
-                  "deepSummary": "핵심 메시지 2문장",
-                  "q1Analysis": "1-3월 상세 — 재물/건강/인연/직업 (6문장)",
-                  "q2Analysis": "4-6월 상세 (6문장)",
-                  "q3Analysis": "7-9월 상세 (6문장)",
-                  "q4Analysis": "10-12월 상세 (6문장)",
-                  "wealthTiming": "재물운 핵심 시기와 투자 전략 (6문장)",
-                  "healthWarning": "건강 — 계절별 질환, 오행 부위별 관리 (5문장)",
-                  "careerAdvice": "직업운 — 이직/승진 최적 시기 (5문장)",
-                  "relationshipFlow": "대인관계 흐름 — 귀인 시기, 갈등 시기 (5문장)",
-                  "yearStrategy": "올해 핵심 전략 5가지 구체적으로",
-                  "hiddenMessage": "천기누설 (3문장)"
+                  "deepSummary": "핵심 메시지 1-2문장",
+                  "q1Analysis": "1-3월 — 재물/건강/인연/직업 (3문장)",
+                  "q2Analysis": "4-6월 (3문장)",
+                  "q3Analysis": "7-9월 (3문장)",
+                  "q4Analysis": "10-12월 (3문장)",
+                  "wealthTiming": "재물운 핵심 시기와 전략 (3문장)",
+                  "healthWarning": "건강 — 계절별 주의사항 (3문장)",
+                  "careerAdvice": "직업운 — 이직/승진 시기 (3문장)",
+                  "relationshipFlow": "대인관계 — 귀인/갈등 시기 (3문장)",
+                  "yearStrategy": "올해 핵심 전략 3가지",
+                  "hiddenMessage": "천기누설 (2문장)"
                 }""";
             case "monthly" -> """
                 {
-                  "deepSummary": "핵심 메시지 2문장",
-                  "week1": "1주차 — 재물/건강/관계/업무 (5문장)",
-                  "week2": "2주차 (5문장)",
-                  "week3": "3주차 (5문장)",
-                  "week4": "4주차 (5문장)",
-                  "wealthAdvice": "재물운 — 수입/지출/투자 전략 (5문장)",
-                  "healthAdvice": "건강운 — 주의 부위, 식이, 운동 (5문장)",
-                  "socialAdvice": "대인관계 — 갈등 시기, 인연 시기 (5문장)",
-                  "directionAdvice": "방위 길흉과 행운 음식/색상/숫자 (5문장)",
-                  "hiddenMessage": "천기누설 (3문장)"
+                  "deepSummary": "핵심 메시지 1-2문장",
+                  "week1": "1주차 — 재물/건강/관계/업무 (3문장)",
+                  "week2": "2주차 (3문장)",
+                  "week3": "3주차 (3문장)",
+                  "week4": "4주차 (3문장)",
+                  "wealthAdvice": "재물운 — 수입/지출/투자 (3문장)",
+                  "healthAdvice": "건강운 — 주의 부위, 운동 (3문장)",
+                  "socialAdvice": "대인관계 — 핵심 조언 (3문장)",
+                  "directionAdvice": "행운 방위/음식/색상/숫자 (2문장)",
+                  "hiddenMessage": "천기누설 (2문장)"
                 }""";
             case "weekly" -> """
                 {
-                  "deepSummary": "핵심 메시지 2문장",
-                  "monTue": "월요일~화요일 운세 — 에너지, 행운시간, 조언 (5문장)",
-                  "wedThu": "수요일~목요일 (5문장)",
-                  "friSatSun": "금~일요일 (5문장)",
-                  "peakTime": "이번 주 최고 행운 시점 (3문장)",
-                  "socialStrategy": "대인관계 전략 (5문장)",
-                  "emotionalRhythm": "감정 리듬과 에너지 관리 (5문장)",
-                  "wealthFlow": "재물 흐름과 소비 가이드 (4문장)",
-                  "healthGuide": "건강 관리 — 추천 활동과 식단 (4문장)",
-                  "hiddenMessage": "천기누설 (3문장)"
+                  "deepSummary": "핵심 메시지 1-2문장",
+                  "monTue": "월~화 운세 — 에너지, 행운시간 (3문장)",
+                  "wedThu": "수~목 (3문장)",
+                  "friSatSun": "금~일 (3문장)",
+                  "peakTime": "이번 주 최고 행운 시점 (2문장)",
+                  "socialStrategy": "대인관계 핵심 전략 (3문장)",
+                  "emotionalRhythm": "감정 리듬과 에너지 관리 (3문장)",
+                  "wealthFlow": "재물 흐름과 소비 가이드 (2문장)",
+                  "healthGuide": "건강 — 추천 활동과 식단 (2문장)",
+                  "hiddenMessage": "천기누설 (2문장)"
                 }""";
             default -> """
                 {
-                  "deepSummary": "프리미엄 심화 분석 핵심 메시지 (2문장)",
-                  "detailAnalysis": "상세 분석 (10문장 이상, 오행 근거 필수)",
-                  "elementAdvice": {"direction": "방위 (3문장)", "food": "음식 5가지", "color": "색상 3가지", "activity": "활동 3가지"},
-                  "psychAnalysis": "심리/감정 심층 분석 (6문장 이상)",
-                  "actionGuide": ["행동 지침 1", "행동 지침 2", "행동 지침 3", "행동 지침 4", "행동 지침 5"],
-                  "caution": ["주의사항 1", "주의사항 2", "주의사항 3"],
-                  "hiddenMessage": "천기누설 (4문장)"
+                  "deepSummary": "핵심 메시지 (1-2문장)",
+                  "detailAnalysis": "상세 분석 (5문장, 오행 근거)",
+                  "elementAdvice": "방위/음식/색상/활동 추천 (3문장)",
+                  "psychAnalysis": "심리/감정 분석 (3문장)",
+                  "actionGuide": "행동 지침 3가지",
+                  "caution": "주의사항 2가지",
+                  "hiddenMessage": "천기누설 (2문장)"
                 }""";
         };
 
