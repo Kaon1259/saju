@@ -1,11 +1,12 @@
 package com.saju.server.controller;
 
-import com.saju.server.repository.SpecialFortuneRepository;
+import com.saju.server.repository.*;
 import com.saju.server.service.DeepAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -15,6 +16,10 @@ public class DeepAnalysisController {
 
     private final DeepAnalysisService deepAnalysisService;
     private final SpecialFortuneRepository specialFortuneRepository;
+    private final DailyFortuneRepository dailyFortuneRepository;
+    private final BloodTypeFortuneRepository bloodTypeFortuneRepository;
+    private final MbtiFortuneRepository mbtiFortuneRepository;
+    private final ConstellationFortuneRepository constellationFortuneRepository;
 
     @GetMapping("/fortune")
     public ResponseEntity<Map<String, Object>> deepFortune(
@@ -37,9 +42,37 @@ public class DeepAnalysisController {
     @DeleteMapping("/cache/all")
     @Transactional
     public ResponseEntity<Map<String, Object>> clearAllCache() {
-        long count = specialFortuneRepository.count();
-        specialFortuneRepository.deleteAll();
-        return ResponseEntity.ok(Map.of("status", "ok", "deleted", count, "message", "전체 캐시 " + count + "건 삭제 완료"));
-    }
+        Map<String, Object> result = new LinkedHashMap<>();
+        long total = 0;
 
+        long c1 = specialFortuneRepository.count();
+        specialFortuneRepository.deleteAll();
+        total += c1;
+
+        long c2 = dailyFortuneRepository.count();
+        dailyFortuneRepository.deleteAll();
+        total += c2;
+
+        long c3 = bloodTypeFortuneRepository.count();
+        bloodTypeFortuneRepository.deleteAll();
+        total += c3;
+
+        long c4 = mbtiFortuneRepository.count();
+        mbtiFortuneRepository.deleteAll();
+        total += c4;
+
+        long c5 = constellationFortuneRepository.count();
+        constellationFortuneRepository.deleteAll();
+        total += c5;
+
+        result.put("status", "ok");
+        result.put("special", c1);
+        result.put("daily", c2);
+        result.put("bloodType", c3);
+        result.put("mbti", c4);
+        result.put("constellation", c5);
+        result.put("total", total);
+        result.put("message", "전체 캐시 " + total + "건 삭제 완료");
+        return ResponseEntity.ok(result);
+    }
 }
