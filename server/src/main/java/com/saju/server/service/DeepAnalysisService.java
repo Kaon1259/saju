@@ -43,9 +43,9 @@ public class DeepAnalysisService {
 
         boolean aiSuccess = false;
         try {
-            log.info("심화분석 AI 호출 시작: type={}, birthDate={}", type, birthDate);
+            log.info("심화분석 AI 호출 시작: type={}, birthDate={}, promptLen=sys:{}/user:{}", type, birthDate, systemPrompt.length(), userPrompt.length());
             String response = claudeApiService.generate(systemPrompt, userPrompt, 4000);
-            log.info("심화분석 AI 응답: {}", response != null ? response.substring(0, Math.min(200, response.length())) : "null");
+            log.info("심화분석 AI 응답 길이: {}", response != null ? response.length() : "null");
             String json = ClaudeApiService.extractJson(response);
             if (json == null && response != null) {
                 json = response.replaceAll("```json|```", "").trim();

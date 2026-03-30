@@ -74,10 +74,19 @@ public class ClaudeApiService {
                 if (content.isArray() && content.size() > 0) {
                     return content.get(0).path("text").asText();
                 }
+                log.warn("Claude API: content array empty or missing. Response: {}",
+                    response.getBody().substring(0, Math.min(500, response.getBody().length())));
+            } else {
+                log.warn("Claude API: status={}, body={}", response.getStatusCode(),
+                    response.getBody() != null ? response.getBody().substring(0, Math.min(500, response.getBody().length())) : "null");
             }
             return null;
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            log.error("Claude API HTTP error: status={}, body={}", e.getStatusCode(),
+                e.getResponseBodyAsString().substring(0, Math.min(500, e.getResponseBodyAsString().length())));
+            return null;
         } catch (Exception e) {
-            log.error("Claude API call failed: {}", e.getMessage());
+            log.error("Claude API call failed: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             return null;
         }
     }
