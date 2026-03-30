@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface SpecialFortuneRepository extends JpaRepository<SpecialFortune, Long> {
     Optional<SpecialFortune> findByFortuneTypeAndCacheKeyAndFortuneDate(
         String fortuneType, String cacheKey, LocalDate fortuneDate);
+
+    void deleteByFortuneTypeStartingWith(String prefix);
 }

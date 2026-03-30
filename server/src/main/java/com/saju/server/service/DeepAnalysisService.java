@@ -41,8 +41,11 @@ public class DeepAnalysisService {
         result.put("birthDate", birthDate);
         result.put("analysisDate", LocalDate.now().toString());
 
+        boolean aiSuccess = false;
         try {
+            log.info("심화분석 AI 호출 시작: type={}, birthDate={}", type, birthDate);
             String response = claudeApiService.generate(systemPrompt, userPrompt, 4000);
+            log.info("심화분석 AI 응답: {}", response != null ? response.substring(0, Math.min(200, response.length())) : "null");
             String json = ClaudeApiService.extractJson(response);
             if (json == null && response != null) {
                 json = response.replaceAll("```json|```", "").trim();
@@ -53,21 +56,25 @@ public class DeepAnalysisService {
                 try {
                     Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<>() {});
                     result.putAll(aiResult);
+                    aiSuccess = true;
                 } catch (Exception parseErr) {
                     log.warn("심화분석 JSON 파싱 실패: {}", parseErr.getMessage());
-                    // 잘린 JSON에서 파싱 가능한 부분 추출
                     extractPartialJson(json, result);
+                    aiSuccess = result.size() > 3; // 메타 필드 외에 뭔가 있으면 성공
                 }
             } else {
+                log.warn("심화분석 AI 응답 null 또는 JSON 추출 실패");
                 result.put("detailAnalysis", buildFallback(type));
             }
         } catch (Exception e) {
-            log.warn("심화분석 AI 호출 실패: {}", e.getMessage());
+            log.error("심화분석 AI 호출 실패: {}", e.getMessage(), e);
             result.put("detailAnalysis", buildFallback(type));
         }
 
-        // DB 캐시 저장
-        saveToCache(fortuneType, cacheKey, result);
+        // 성공한 경우에만 DB 캐시 저장 (실패 결과는 캐시하지 않음)
+        if (aiSuccess) {
+            saveToCache(fortuneType, cacheKey, result);
+        }
         return result;
     }
 
