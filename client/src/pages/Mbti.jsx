@@ -187,7 +187,9 @@ function Mbti() {
               <div className="mbti-fortunes">
                 <FortuneCard icon="🌟" title="총운" description={fortune.overall} delay={0} />
                 <FortuneCard icon="💕" title="애정운" description={fortune.love} delay={80} />
-                <FortuneCard icon="💼" title="직장운" description={fortune.work} delay={160} />
+                <FortuneCard icon="💰" title="재물운" description={fortune.money} delay={160} />
+                <FortuneCard icon="💪" title="건강운" description={fortune.health} delay={240} />
+                <FortuneCard icon="💼" title="직장운" description={fortune.work} delay={320} />
               </div>
 
               {fortune.tip && (

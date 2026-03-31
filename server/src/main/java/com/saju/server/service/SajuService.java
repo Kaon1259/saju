@@ -32,7 +32,6 @@ public class SajuService {
     /**
      * 사주 분석 수행 (gender 없는 버전 - 하위 호환)
      */
-    @Transactional
     public SajuResult analyze(LocalDate birthDate, String birthTime) {
         return analyze(birthDate, birthTime, null);
     }
@@ -40,7 +39,6 @@ public class SajuService {
     /**
      * 사주 분석 수행 (Claude API 사용 가능하면 AI 해석, 아니면 기본 해석)
      */
-    @Transactional
     public SajuResult analyze(LocalDate birthDate, String birthTime, String gender) {
         LocalDate today = LocalDate.now();
 
@@ -209,10 +207,15 @@ public class SajuService {
 
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
+            // 이미 존재하면 저장하지 않음
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (existing.isPresent()) return;
             specialFortuneRepository.save(SpecialFortune.builder()
                 .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
                 .resultJson(objectMapper.writeValueAsString(result)).build());
-        } catch (Exception e) { /* ignore duplicate */ }
+        } catch (Exception e) {
+            log.debug("Cache save skipped (duplicate): {}", cacheKey);
+        }
     }
 
     /**

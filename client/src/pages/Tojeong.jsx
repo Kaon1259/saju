@@ -32,6 +32,12 @@ function Tojeong() {
     if (!userId) return;
     setShowInput(false);
     setLoading(true);
+    // 유저 프로필에서 birthDate 설정 (심화분석용)
+    try {
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (profile.birthDate) setBirthDate(profile.birthDate);
+      if (profile.calendarType) setCalendarType(profile.calendarType);
+    } catch {}
     getUserTojeong(userId)
       .then(setResult)
       .catch(() => setShowInput(true))

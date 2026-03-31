@@ -114,31 +114,20 @@ function BloodType() {
 
           {fortune && !loading && (
             <div className="bt-result fade-in" ref={resultRef}>
-              <div className="bt-personality glass-card">
-                <div className="bt-personality-header">
-                  <div className="bt-personality-badge" style={{ background: getTypeInfo(fortune.bloodType).bg }}>
-                    <span>{getTypeInfo(fortune.bloodType).icon}</span>
-                    <span>{fortune.bloodType}형</span>
-                  </div>
-                  <p className="bt-personality-label">성격 분석</p>
-                </div>
-                <p className="bt-personality-text">{fortune.personality}</p>
-              </div>
-
               {/* Speech Button */}
               <div style={{ margin: '12px 0' }}>
                 <SpeechButton
                   label="운세 읽어주기"
                   text={[
                     fortune.bloodType ? `${fortune.bloodType}형 오늘의 운세입니다.` : '',
-                    fortune.personality ? `성격 분석입니다. ${fortune.personality}` : '',
-                    fortune.dayAnalysis ? `오늘의 분석입니다. ${fortune.dayAnalysis}` : '',
                     fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
                     fortune.overall ? `총운입니다. ${fortune.overall}` : '',
                     fortune.love ? `애정운입니다. ${fortune.love}` : '',
                     fortune.money ? `재물운입니다. ${fortune.money}` : '',
                     fortune.health ? `건강운입니다. ${fortune.health}` : '',
                     fortune.work ? `직장운입니다. ${fortune.work}` : '',
+                    fortune.personality ? `성격 분석입니다. ${fortune.personality}` : '',
+                    fortune.dayAnalysis ? `오늘의 분석입니다. ${fortune.dayAnalysis}` : '',
                     fortune.luckyNumber ? `행운의 숫자는 ${fortune.luckyNumber}입니다.` : '',
                     fortune.luckyColor ? `행운의 색상은 ${fortune.luckyColor}입니다.` : '',
                   ].filter(Boolean).join(' ')}
@@ -151,12 +140,6 @@ function BloodType() {
                   ].filter(Boolean).join(' ')}
                 />
               </div>
-
-              {fortune.dayAnalysis && (
-                <div className="bt-day-analysis glass-card">
-                  <span>☯️</span><p>{fortune.dayAnalysis}</p>
-                </div>
-              )}
 
               <div className="bt-score-wrap">
                 <svg viewBox="0 0 120 120" className="bt-score-circle">
@@ -177,6 +160,23 @@ function BloodType() {
                 <FortuneCard icon="💪" title="건강운" description={fortune.health} delay={240} />
                 <FortuneCard icon="💼" title="직장운" description={fortune.work} delay={320} />
               </div>
+
+              <div className="bt-personality glass-card">
+                <div className="bt-personality-header">
+                  <div className="bt-personality-badge" style={{ background: getTypeInfo(fortune.bloodType).bg }}>
+                    <span>{getTypeInfo(fortune.bloodType).icon}</span>
+                    <span>{fortune.bloodType}형</span>
+                  </div>
+                  <p className="bt-personality-label">성격 분석</p>
+                </div>
+                <p className="bt-personality-text">{fortune.personality}</p>
+              </div>
+
+              {fortune.dayAnalysis && (
+                <div className="bt-day-analysis glass-card">
+                  <span>☯️</span><p>{fortune.dayAnalysis}</p>
+                </div>
+              )}
 
               <div className="bt-lucky glass-card">
                 <div className="bt-lucky-item">

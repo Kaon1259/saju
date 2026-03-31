@@ -24,6 +24,7 @@ import Biorhythm from './pages/Biorhythm';
 import YearFortune from './pages/YearFortune';
 import MonthlyFortune from './pages/MonthlyFortune';
 import WeeklyFortune from './pages/WeeklyFortune';
+import FloatingMenu from './components/FloatingMenu';
 import './App.css';
 
 function Splash({ onDone }) {
@@ -177,6 +178,7 @@ function App() {
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
             </Routes>
           </main>
+          <FloatingMenu />
         </TransitionProvider>
       </div>
     </>

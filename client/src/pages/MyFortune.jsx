@@ -113,14 +113,10 @@ function MyFortune() {
 
   const user = data.user || {};
   const saju = data.saju;
-  const bt = data.bloodType;
-  const mbti = data.mbti;
 
   const tabs = [
     { id: 'saju', label: '사주운세', icon: '☯️', data: saju },
   ];
-  if (bt) tabs.push({ id: 'blood', label: `${user.bloodType}형`, icon: '🩸', data: bt });
-  if (mbti) tabs.push({ id: 'mbti', label: user.mbtiType, icon: '🧬', data: mbti });
 
   const active = tabs.find(t => t.id === activeTab) || tabs[0];
   const f = active?.data;
@@ -321,23 +317,6 @@ function MyFortune() {
             </div>
           </div>
 
-          {/* 사주 탭: 성격/년운 요약 */}
-          {activeTab === 'saju' && saju?.personalityReading && (
-            <div className="myf-analysis glass-card">
-              <span className="myf-analysis-icon">☯️</span>
-              <h4 className="myf-analysis-title">사주 성격 분석</h4>
-              <p>{saju.personalityReading}</p>
-            </div>
-          )}
-
-          {activeTab === 'saju' && saju?.yearFortune && (
-            <div className="myf-analysis glass-card">
-              <span className="myf-analysis-icon">📅</span>
-              <h4 className="myf-analysis-title">2026년 운세</h4>
-              <p>{saju.yearFortune}</p>
-            </div>
-          )}
-
           {/* 일진 분석 (혈액형) */}
           {activeTab === 'blood' && f.dayAnalysis && (
             <div className="myf-analysis glass-card">
@@ -354,6 +333,15 @@ function MyFortune() {
             {f.health && <FortuneCard icon="💪" title="건강운" description={f.health} delay={240} />}
             {f.work && <FortuneCard icon="💼" title="직장운" description={f.work} delay={320} />}
           </div>
+
+          {/* 사주 성격 분석 */}
+          {activeTab === 'saju' && saju?.personalityReading && (
+            <div className="myf-analysis glass-card">
+              <span className="myf-analysis-icon">☯️</span>
+              <h4 className="myf-analysis-title">사주 성격 분석</h4>
+              <p>{saju.personalityReading}</p>
+            </div>
+          )}
 
           {/* 팁 (MBTI) */}
           {f.tip && (

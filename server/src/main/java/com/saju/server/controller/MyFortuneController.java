@@ -70,17 +70,7 @@ public class MyFortuneController {
         sajuFortune.put("fortuneDate", LocalDate.now().toString());
         result.put("saju", sajuFortune);
 
-        // 2. 혈액형 운세 (있으면)
-        if (user.getBloodType() != null && !user.getBloodType().isBlank()) {
-            var btFortune = bloodTypeFortuneService.getTodayFortune(user.getBloodType(), user.getZodiacAnimal());
-            result.put("bloodType", btFortune);
-        }
-
-        // 3. MBTI 운세 (있으면)
-        if (user.getMbtiType() != null && !user.getMbtiType().isBlank()) {
-            var mbtiFortune = mbtiFortuneService.getTodayFortune(user.getMbtiType(), user.getZodiacAnimal());
-            result.put("mbti", mbtiFortune);
-        }
+        // 2. 혈액형/MBTI는 각 페이지에서 개별 호출 (홈 로딩 속도 개선)
 
         return ResponseEntity.ok(result);
     }

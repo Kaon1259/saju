@@ -28,6 +28,10 @@ public class MbtiFortune {
     @Column(columnDefinition = "TEXT")
     private String love;
     @Column(columnDefinition = "TEXT")
+    private String money;
+    @Column(columnDefinition = "TEXT")
+    private String health;
+    @Column(columnDefinition = "TEXT")
     private String work;
     @Column(columnDefinition = "TEXT")
     private String tip;

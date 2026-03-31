@@ -1,0 +1,107 @@
+.floating-menu {
+  position: fixed;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.floating-toggle {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 10px; border-radius: 14px;
+  border: 1.5px solid rgba(251,191,36,0.35);
+  background: linear-gradient(135deg, rgba(30,10,50,0.92), rgba(50,20,80,0.92));
+  cursor: pointer; backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  transition: all 0.2s;
+}
+.floating-toggle-icon { font-size: 13px; color: #fbbf24; }
+.floating-toggle-text { font-size: 10px; font-weight: 800; color: #fbbf24; white-space: nowrap; }
+.floating-toggle:active { transform: scale(0.92); }
+/* 감추기 (열린 상태) - 붉은 톤 */
+.floating-menu:not(.collapsed) .floating-toggle {
+  border-color: rgba(239,68,68,0.4);
+  background: linear-gradient(135deg, rgba(60,15,20,0.92), rgba(80,20,30,0.92));
+  box-shadow: 0 2px 12px rgba(239,68,68,0.15);
+}
+.floating-menu:not(.collapsed) .floating-toggle-text { color: #fca5a5; }
+[data-theme="light"] .floating-menu:not(.collapsed) .floating-toggle {
+  border-color: rgba(239,68,68,0.3);
+  background: linear-gradient(135deg, #fff0f0, #ffe4e6);
+  box-shadow: 0 2px 12px rgba(239,68,68,0.1);
+}
+[data-theme="light"] .floating-menu:not(.collapsed) .floating-toggle-text { color: #dc2626; }
+
+/* 메뉴 (닫힌 상태) - 골드 톤 + 펄스 */
+.floating-menu.collapsed { gap: 0; }
+.floating-menu.collapsed .floating-toggle {
+  border-color: rgba(251,191,36,0.5);
+  background: linear-gradient(135deg, rgba(50,30,10,0.92), rgba(70,40,15,0.92));
+  box-shadow: 0 2px 12px rgba(251,191,36,0.2);
+  animation: togglePulse 2.5s ease-in-out infinite;
+}
+[data-theme="light"] .floating-menu.collapsed .floating-toggle {
+  border-color: rgba(251,191,36,0.4);
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  box-shadow: 0 2px 12px rgba(251,191,36,0.15);
+}
+@keyframes togglePulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(251,191,36,0.2); }
+  50% { box-shadow: 0 2px 18px rgba(251,191,36,0.4); }
+}
+[data-theme="light"] .floating-toggle {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(250,245,235,0.95));
+  border-color: rgba(180,130,20,0.25);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+[data-theme="light"] .floating-toggle-icon { color: #92400e; }
+[data-theme="light"] .floating-toggle-text { color: #92400e; }
+.floating-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: linear-gradient(135deg, rgba(30,10,50,0.92), rgba(50,20,80,0.92));
+  box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  animation: floatingBob 4s ease-in-out infinite;
+}
+.floating-btn:nth-child(2) { animation-delay: 0.5s; }
+.floating-btn:nth-child(3) { animation-delay: 1.0s; }
+.floating-icon { font-size: 18px; line-height: 1; }
+.floating-label { font-size: 11px; font-weight: 800; line-height: 1.2; white-space: nowrap; }
+.floating-btn:active { transform: scale(0.92); }
+
+.floating--saju { border-color: rgba(251,191,36,0.5); }
+.floating--saju .floating-label { color: #fbbf24; }
+.floating--fortune { border-color: rgba(251,191,36,0.4); }
+.floating--fortune .floating-label { color: #fbbf24; }
+.floating--love { border-color: rgba(244,63,94,0.4); }
+.floating--love .floating-label { color: #fb7185; }
+.floating--blood { border-color: rgba(244,114,182,0.4); }
+.floating--blood .floating-label { color: #f472b6; }
+.floating--mbti { border-color: rgba(52,211,153,0.4); }
+.floating--mbti .floating-label { color: #34d399; }
+.floating--dream { border-color: rgba(167,139,250,0.4); }
+.floating--dream .floating-label { color: #a78bfa; }
+
+@keyframes floatingBob {
+  0%   { transform: translateY(0px); }
+  33%  { transform: translateY(-5px); }
+  66%  { transform: translateY(3px); }
+  100% { transform: translateY(0px); }
+}
+
+/* 라이트 모드 */
+[data-theme="light"] .floating-btn {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(245,240,230,0.95));
+  box-shadow: 0 3px 14px rgba(0,0,0,0.1);
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .floating--saju .floating-label { color: #92400e; }
+[data-theme="light"] .floating--fortune .floating-label { color: #92400e; }
+[data-theme="light"] .floating--love .floating-label { color: #e11d48; }
+[data-theme="light"] .floating--blood .floating-label { color: #be185d; }
+[data-theme="light"] .floating--mbti .floating-label { color: #047857; }
+[data-theme="light"] .floating--dream .floating-label { color: #6d28d9; }

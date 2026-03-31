@@ -124,13 +124,21 @@ public class MbtiFortuneService {
     }
 
     private MbtiFortune generateWithAI(String type, String zodiac, LocalDate date) {
-        if (!claudeApiService.isAvailable()) return null;
+        if (!claudeApiService.isAvailable()) {
+            log.warn("MBTI AI skipped: Claude API not available");
+            return null;
+        }
         try {
             String system = promptBuilder.mbtiSystemPrompt();
             String user = promptBuilder.mbtiUserPrompt(type, zodiac, date);
-            String response = claudeApiService.generate(system, user, 1500);
+            log.info("MBTI AI call for {}/{}", type, zodiac);
+            String response = claudeApiService.generate(system, user, 2500);
+            log.info("MBTI AI response length: {}", response != null ? response.length() : 0);
             String json = ClaudeApiService.extractJson(response);
-            if (json == null) return null;
+            if (json == null) {
+                log.warn("MBTI AI: extractJson returned null. Raw response: {}", response != null ? response.substring(0, Math.min(200, response.length())) : "null");
+                return null;
+            }
 
             var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
 
@@ -138,6 +146,8 @@ public class MbtiFortuneService {
                 .mbtiType(type).zodiacAnimal(zodiac).fortuneDate(date)
                 .overall(node.path("overall").asText(""))
                 .love(node.path("love").asText(""))
+                .money(node.path("money").asText(""))
+                .health(node.path("health").asText(""))
                 .work(node.path("work").asText(""))
                 .tip(node.path("tip").asText(""))
                 .score(node.path("score").asInt(70))
@@ -159,6 +169,8 @@ public class MbtiFortuneService {
             .mbtiType(type).zodiacAnimal(zodiac).fortuneDate(date)
             .overall(FB_O.getOrDefault(type, FB_O.get("INTJ"))[r.nextInt(3)])
             .love(FB_L.getOrDefault(type, FB_L.get("INTJ"))[r.nextInt(3)])
+            .money("재물 운이 안정적인 흐름을 보이는 하루입니다. 계획에 없던 충동 소비를 주의하세요.")
+            .health("전반적인 컨디션은 양호합니다. 충분한 수분 섭취와 스트레칭으로 활력을 유지하세요.")
             .work(FB_W.getOrDefault(type, FB_W.get("INTJ"))[r.nextInt(3)])
             .tip("오늘 하루도 당신답게 빛나세요!")
             .score(r.nextInt(41) + 55).luckyNumber(r.nextInt(99) + 1)
@@ -226,6 +238,7 @@ public class MbtiFortuneService {
         m.put("date", f.getFortuneDate().toString());
         m.put("personality", f.getPersonality());
         m.put("overall", f.getOverall()); m.put("love", f.getLove());
+        m.put("money", f.getMoney()); m.put("health", f.getHealth());
         m.put("work", f.getWork()); m.put("tip", f.getTip());
         m.put("score", f.getScore()); m.put("luckyNumber", f.getLuckyNumber()); m.put("luckyColor", f.getLuckyColor());
         return m;
