@@ -309,4 +309,12 @@ export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calend
   return response.data;
 };
 
+// ─── YouTube Shorts ───
+export const getFortuneShorts = async (context) => {
+  const params = {};
+  if (context) params.context = context;
+  const response = await api.get('/shorts', { params });
+  return response.data;
+};
+
 export default api;
