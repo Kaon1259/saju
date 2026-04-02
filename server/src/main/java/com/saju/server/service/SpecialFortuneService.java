@@ -65,10 +65,7 @@ public class SpecialFortuneService {
     };
 
     /**
-     * 특수 연애 운세 (재회/재혼/소개팅)
-     */
-    /**
-     * 오늘의 연애 온도 (만20세 기준 일진 분석)
+     * 오늘의 연애 날씨 (비로그인용 - 실제 날씨 기반)
      */
     public Map<String, Object> getLoveTemperature() {
         LocalDate today = LocalDate.now();
@@ -78,43 +75,119 @@ public class SpecialFortuneService {
         Map<String, Object> cached = getFromCache("love-temp", cacheKey);
         if (cached != null) return cached;
 
-        // 만20세 기준 생년월일
-        LocalDate birth20 = today.minusYears(20);
-        int sajuYear = SajuCalculator.getSajuYear(birth20);
-        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
-        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(birth20);
-        SajuPillar todayPillar = SajuCalculator.calculateDayPillar(today);
-
-        // 오행 상호작용으로 연애 온도 계산
-        int dayStemEl = com.saju.server.saju.SajuConstants.CHEONGAN_OHENG[todayPillar.getStemIndex()];
-        int dayBranchEl = com.saju.server.saju.SajuConstants.JIJI_OHENG[todayPillar.getBranchIndex()];
-        // 화(火)=열정, 수(水)=감성, 목(木)=성장 → 연애에 유리
-        int baseScore = 55;
-        if (dayStemEl == 1 || dayBranchEl == 1) baseScore += 15; // 화
-        if (dayStemEl == 4 || dayBranchEl == 4) baseScore += 10; // 수
-        if (dayStemEl == 0 || dayBranchEl == 0) baseScore += 8;  // 목
-        if (dayStemEl == 2) baseScore -= 5; // 토 (안정, 연애보다 현실)
-        if (dayStemEl == 3) baseScore -= 8; // 금 (냉정)
-        // 날짜 변동 추가
-        long seed = today.toEpochDay();
-        Random r = new Random(seed);
-        baseScore += r.nextInt(11) - 5;
-        int temperature = Math.max(20, Math.min(99, baseScore));
-
-        String message;
-        String mood;
-        if (temperature >= 85) { message = "사랑의 기운이 폭발하는 날! 고백하기 딱 좋은 날이에요."; mood = "hot"; }
-        else if (temperature >= 70) { message = "따뜻한 사랑의 기운이 감도는 하루입니다."; mood = "warm"; }
-        else if (temperature >= 55) { message = "잔잔한 설렘이 있는 평화로운 하루예요."; mood = "mild"; }
-        else if (temperature >= 40) { message = "차분하게 마음을 다스리며 내면을 돌아보는 날."; mood = "cool"; }
-        else { message = "혼자만의 시간이 소중한 날. 자기 사랑에 집중하세요."; mood = "cold"; }
-
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("temperature", temperature);
-        result.put("message", message);
-        result.put("mood", mood);
         result.put("date", today.toString());
-        result.put("todayPillar", todayPillar.getFullName());
+        result.put("personalized", false);
+
+        try {
+            // Open-Meteo API (서울 기준, 키 불필요)
+            String url = "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&timezone=Asia/Seoul";
+            var restTemplate = new org.springframework.web.client.RestTemplate();
+            String body = restTemplate.getForObject(url, String.class);
+            JsonNode root = objectMapper.readTree(body);
+            JsonNode current = root.path("current");
+
+            double realTemp = current.path("temperature_2m").asDouble(18);
+            int weatherCode = current.path("weather_code").asInt(0);
+            double humidity = current.path("relative_humidity_2m").asDouble(50);
+            double wind = current.path("wind_speed_10m").asDouble(5);
+
+            // 날씨 코드 → 연애 점수 & 메시지
+            int loveScore = 55;
+            String weatherDesc;
+            String loveMsg;
+            String weatherEmoji;
+
+            if (weatherCode == 0 || weatherCode == 1) {
+                // 맑음
+                weatherDesc = "맑음";
+                weatherEmoji = "☀️";
+                loveScore += 15;
+                loveMsg = "화창한 날씨에 마음도 활짝! 데이트하기 완벽한 날이에요.";
+            } else if (weatherCode == 2) {
+                weatherDesc = "구름 조금";
+                weatherEmoji = "⛅";
+                loveScore += 10;
+                loveMsg = "살짝 구름 낀 하늘이 오히려 로맨틱해요. 산책 데이트 추천!";
+            } else if (weatherCode == 3) {
+                weatherDesc = "흐림";
+                weatherEmoji = "☁️";
+                loveScore += 3;
+                loveMsg = "흐린 날은 감성이 깊어지는 날. 진솔한 대화를 나눠보세요.";
+            } else if (weatherCode >= 51 && weatherCode <= 57) {
+                // 이슬비
+                weatherDesc = "이슬비";
+                weatherEmoji = "🌦️";
+                loveScore += 12;
+                loveMsg = "보슬보슬 내리는 비에 우산 하나 나눠 쓰기 딱 좋은 날!";
+            } else if (weatherCode >= 61 && weatherCode <= 67) {
+                // 비
+                weatherDesc = "비";
+                weatherEmoji = "🌧️";
+                loveScore += 8;
+                loveMsg = "비 오는 날 카페에서 따뜻한 음료 한 잔, 은밀한 분위기가 좋아요.";
+            } else if (weatherCode >= 71 && weatherCode <= 77) {
+                // 눈
+                weatherDesc = "눈";
+                weatherEmoji = "❄️";
+                loveScore += 18;
+                loveMsg = "첫눈 오는 날 함께라면... 로맨스 영화 주인공이 될 수 있어요!";
+            } else if (weatherCode >= 80 && weatherCode <= 82) {
+                // 소나기
+                weatherDesc = "소나기";
+                weatherEmoji = "🌧️";
+                loveScore += 5;
+                loveMsg = "갑작스런 소나기처럼 예상 못한 설렘이 찾아올지도?";
+            } else if (weatherCode >= 95) {
+                // 뇌우
+                weatherDesc = "뇌우";
+                weatherEmoji = "⛈️";
+                loveScore -= 5;
+                loveMsg = "폭풍 같은 날씨엔 집에서 영화 보며 쉬는 게 최고예요.";
+            } else {
+                weatherDesc = "변덕스러운 날씨";
+                weatherEmoji = "🌤️";
+                loveScore += 5;
+                loveMsg = "날씨처럼 마음도 변덕스러운 날, 새로운 만남에 열린 마음을!";
+            }
+
+            // 기온 보정
+            if (realTemp >= 20 && realTemp <= 25) loveScore += 8; // 완벽한 날씨
+            else if (realTemp >= 15 && realTemp < 20) loveScore += 5; // 선선
+            else if (realTemp >= 25 && realTemp <= 30) loveScore += 3; // 따뜻
+            else if (realTemp > 30) loveScore -= 5; // 너무 더움
+            else if (realTemp < 5) loveScore += 4; // 추우면 오히려 밀착
+
+            // 바람 보정
+            if (wind > 20) loveScore -= 5; // 강풍
+
+            int temperature = Math.max(20, Math.min(99, loveScore));
+            String mood;
+            if (temperature >= 85) mood = "hot";
+            else if (temperature >= 70) mood = "warm";
+            else if (temperature >= 55) mood = "mild";
+            else if (temperature >= 40) mood = "cool";
+            else mood = "cold";
+
+            result.put("temperature", temperature);
+            result.put("message", loveMsg);
+            result.put("mood", mood);
+            result.put("weatherDesc", weatherDesc);
+            result.put("weatherEmoji", weatherEmoji);
+            result.put("realTemp", Math.round(realTemp));
+            result.put("weatherBased", true);
+
+        } catch (Exception e) {
+            log.warn("날씨 API 호출 실패, 기본값 사용: {}", e.getMessage());
+            // 폴백: 기본 연애 온도
+            long seed = today.toEpochDay();
+            Random r = new Random(seed);
+            int temperature = 50 + r.nextInt(20);
+            result.put("temperature", temperature);
+            result.put("message", "오늘 하루도 사랑의 기운을 느껴보세요.");
+            result.put("mood", temperature >= 60 ? "warm" : "mild");
+            result.put("weatherBased", false);
+        }
 
         saveToCache("love-temp", cacheKey, result);
         return result;
@@ -202,7 +275,8 @@ public class SpecialFortuneService {
     public Map<String, Object> getLoveFortune(String type, String birthDate,
                                                String birthTime, String gender, String calendarType,
                                                String partnerDate, String partnerGender,
-                                               String breakupDate, String meetDate) {
+                                               String breakupDate, String meetDate,
+                                               String relationshipStatus) {
         LocalDate date = LocalDate.parse(birthDate);
         LocalDate today = LocalDate.now();
         String typeKr = LOVE_TYPE_KR.getOrDefault(type, "연애운");
@@ -255,11 +329,25 @@ public class SpecialFortuneService {
                     } catch (Exception ignored) {}
                 }
 
+                // 연애 상태 매핑
+                String statusKr = "";
+                if (relationshipStatus != null) {
+                    switch (relationshipStatus) {
+                        case "SINGLE": statusKr = "솔로(짝 없음)"; break;
+                        case "SOME": statusKr = "썸 타는 중"; break;
+                        case "IN_RELATIONSHIP": statusKr = "연애 중"; break;
+                        case "COMPLICATED": statusKr = "복잡한 관계"; break;
+                        default: statusKr = ""; break;
+                    }
+                }
+
                 String user = todayCtx + "\n" +
                     "【의뢰인】" + yearPillar.getAnimal() + "띠 / 일간: " + dayPillar.getFullName() +
                     (gender != null ? " / 성별: " + ("M".equals(gender) ? "남" : "여") : "") +
+                    (!statusKr.isEmpty() ? " / 연애상태: " + statusKr : "") +
                     extra + "\n\n" +
-                    "위 정보를 바탕으로 '" + typeKr + "'을 분석하세요.\n" +
+                    "위 정보를 바탕으로 '" + typeKr + "'을 분석하세요." +
+                    (!statusKr.isEmpty() ? " 현재 연애 상태('" + statusKr + "')에 맞춰서 오늘 하루 연애 기운과 조언을 해주세요." : "") + "\n" +
                     "반드시 아래 JSON 형식으로만 응답:\n" +
                     "{\"score\":점수(0-100),\"grade\":\"등급(대길/길/보통/흉)\",\"overall\":\"종합 분석 (4-5문장)\"," +
                     "\"timing\":\"최적 시기 (2문장)\",\"advice\":\"구체적 행동 조언 (3문장)\"," +

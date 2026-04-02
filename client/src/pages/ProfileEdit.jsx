@@ -18,9 +18,10 @@ const BIRTH_TIMES = [
 const MBTI_TYPES = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
 
 const REL_STATUS = [
+  { id: 'SINGLE', label: '솔로', icon: '💫', color: '#FFB020' },
+  { id: 'SOME', label: '썸', icon: '💗', color: '#FF6B6B' },
   { id: 'IN_RELATIONSHIP', label: '연애중', icon: '💕', color: '#E91E63' },
-  { id: 'SOME', label: '썸타는 중', icon: '💗', color: '#FF6B6B' },
-  { id: 'SINGLE', label: '화려한 솔로', icon: '✨', color: '#FFB020' },
+  { id: 'COMPLICATED', label: '복잡', icon: '💔', color: '#94A3B8' },
 ];
 
 const CONSTELLATIONS = [

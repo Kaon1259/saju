@@ -121,13 +121,23 @@ public class TarotService {
     };
 
     // 카테고리별 한글명
-    private static final Map<String, String> CATEGORY_KR = Map.of(
-        "general", "종합운",
-        "love", "연애운",
-        "money", "재물운",
-        "career", "직업운",
-        "health", "건강운",
-        "study", "학업운"
+    private static final Map<String, String> CATEGORY_KR = Map.ofEntries(
+        Map.entry("general", "종합운"),
+        Map.entry("relationship", "연애운"),
+        Map.entry("crush", "짝사랑운"),
+        Map.entry("blind_date", "소개팅운"),
+        Map.entry("meeting_timing", "만남의 시기"),
+        Map.entry("ideal_type", "이상형 분석"),
+        Map.entry("confession_timing", "고백 타이밍"),
+        Map.entry("mind_reading", "속마음 읽기"),
+        Map.entry("couple_fortune", "커플 운세"),
+        Map.entry("marriage", "결혼운"),
+        Map.entry("remarriage", "재혼운"),
+        Map.entry("reunion", "재회운"),
+        Map.entry("past_life", "전생 인연"),
+        Map.entry("money", "재물운"),
+        Map.entry("career", "직업운"),
+        Map.entry("health", "건강운")
     );
 
     // 스프레드별 포지션 이름
@@ -322,9 +332,42 @@ public class TarotService {
         boolean firstReversed = (Boolean) cards.get(0).get("reversed");
 
         return switch (category) {
-            case "love" -> firstReversed
+            case "relationship" -> firstReversed
                 ? "관계에서 한 발 물러나 상대방의 시각으로 바라보는 시간이 필요합니다."
                 : "진심을 표현하세요. " + firstCardName + "의 기운이 당신의 사랑을 응원합니다.";
+            case "crush" -> firstReversed
+                ? "지금은 거리를 두고 지켜보세요. 서두르면 오히려 멀어질 수 있어요."
+                : "용기를 내세요! " + firstCardName + "이(가) 당신의 마음이 닿을 거라 말하고 있어요.";
+            case "blind_date" -> firstReversed
+                ? "너무 기대하지 말고 자연스럽게 다가가세요. 힘을 빼면 오히려 좋은 인연이 와요."
+                : "좋은 만남의 기운이 보여요! 밝은 에너지로 나가면 좋은 결과가 있을 거예요.";
+            case "meeting_timing" -> firstReversed
+                ? "아직은 때가 아닐 수 있어요. 자신을 가꾸는 시간을 가져보세요."
+                : "인연이 가까이 다가오고 있어요. 새로운 만남에 마음을 열어보세요.";
+            case "ideal_type" -> firstReversed
+                ? "외면보다 내면의 끌림에 집중해보세요. 진짜 인연은 예상과 다를 수 있어요."
+                : firstCardName + "이(가) 당신의 이상형에 대한 힌트를 주고 있어요.";
+            case "confession_timing" -> firstReversed
+                ? "타이밍을 조금 더 기다려보세요. 준비가 덜 된 고백은 후회를 남겨요."
+                : "지금이 바로 그때예요! 솔직한 마음을 전하면 좋은 결과가 기다리고 있어요.";
+            case "mind_reading" -> firstReversed
+                ? "상대방도 혼란스러운 시기일 수 있어요. 조급해하지 말고 지켜봐주세요."
+                : "상대방의 마음에 당신이 자리잡고 있어요. 자신감을 가져도 좋아요!";
+            case "couple_fortune" -> firstReversed
+                ? "작은 오해가 쌓이고 있어요. 대화로 풀어야 할 시간입니다."
+                : "둘의 사랑이 더 깊어지는 시기예요. 함께하는 시간을 소중히 하세요.";
+            case "marriage" -> firstReversed
+                ? "결혼에 대한 고민이 있다면, 서두르지 말고 천천히 준비하세요."
+                : "좋은 인연의 기운이 무르익고 있어요. 운명의 파트너가 다가오고 있어요.";
+            case "remarriage" -> firstReversed
+                ? "과거의 상처를 완전히 치유한 후에 새 시작��� 준비하세요."
+                : "새로운 사랑의 문이 열리고 있어요. 두려워하지 말고 한 걸음 내딛어보세요.";
+            case "reunion" -> firstReversed
+                ? "아직은 상처가 아물지 않았어요. 자기 자신을 먼저 돌봐주세요."
+                : "새로운 시작의 기운이 보여요. 과거를 놓아주면 더 좋은 인연이 찾아와요.";
+            case "past_life" -> firstReversed
+                ? "전생의 인연에 너무 집착하지 마세요. 현재의 만남이 더 소중해요."
+                : "깊은 인연의 끈이 느껴져요. 운명적인 만남을 믿어보세요.";
             case "money" -> firstReversed
                 ? "지출을 점검하고 불필요한 소비를 줄이세요. 절약이 곧 수입입니다."
                 : "재물의 흐름이 좋습니다. 적극적인 투자보다 안정적인 관리를 추천합니다.";
@@ -334,9 +377,6 @@ public class TarotService {
             case "health" -> firstReversed
                 ? "무리하지 마세요. 충분한 휴식과 규칙적인 생활이 최우선입니다."
                 : "건강 에너지가 충만합니다. 새로운 운동이나 건강 습관을 시작하기 좋은 때입니다.";
-            case "study" -> firstReversed
-                ? "학습 방법을 바꿔보세요. 효율이 떨어졌다면 새로운 접근이 필요합니다."
-                : "집중력이 높아지는 시기입니다. 목표를 세우고 꾸준히 나아가세요.";
             default -> firstReversed
                 ? firstCardName + "이(가) 내면의 성찰을 권하고 있습니다. 잠시 멈추고 돌아보세요."
                 : firstCardName + "의 긍정적 기운을 받아 오늘도 힘차게 나아가세요!";

@@ -7,6 +7,9 @@ const NAV_ITEMS = [
   { path: '/', label: '홈', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><path d="M3 12.5L12 3l9 9.5V21a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1v-8.5z" /></svg>
   ), color: '#FF6B6B' },
+  { path: '/love-fortune', label: '1:1연애', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /><text x="12" y="13" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="900" stroke="none">1:1</text></svg>
+  ), color: '#F472B6' },
   { path: '/my', label: '오늘운세', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" /><path d="M15 4l2 2-2 2M17 2l2 2-2 2" strokeWidth="1.5" /></svg>
   ), color: '#FBBF24' },
@@ -44,6 +47,7 @@ const PATH_EFFECTS = {
   '/manseryeok': 'saju',
   '/tarot': 'tarot',
   '/special': 'compatibility',
+  '/love-fortune': 'compatibility',
 };
 
 function Header({ onHomeSplash }) {

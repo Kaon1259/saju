@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  timeout: 90000,
+  timeout: 180000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -177,7 +177,7 @@ export const getLoveTemperature = async (userId) => {
 };
 
 // ─── 특수 운세 (연애/재회/재혼/소개팅) ───
-export const getSpecialLoveFortune = async (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate) => {
+export const getSpecialLoveFortune = async (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus) => {
   const params = { type, birthDate };
   if (birthTime) params.birthTime = birthTime;
   if (gender) params.gender = gender;
@@ -186,6 +186,7 @@ export const getSpecialLoveFortune = async (type, birthDate, birthTime, gender, 
   if (partnerGender) params.partnerGender = partnerGender;
   if (breakupDate) params.breakupDate = breakupDate;
   if (meetDate) params.meetDate = meetDate;
+  if (relationshipStatus) params.relationshipStatus = relationshipStatus;
   const response = await api.get('/special/love', { params });
   return response.data;
 };

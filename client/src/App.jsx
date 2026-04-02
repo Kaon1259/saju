@@ -25,6 +25,7 @@ import TraditionalSaju from './pages/TraditionalSaju';
 import YearFortune from './pages/YearFortune';
 import MonthlyFortune from './pages/MonthlyFortune';
 import WeeklyFortune from './pages/WeeklyFortune';
+import LoveFortune from './pages/LoveFortune';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
 
@@ -138,9 +139,30 @@ function Splash({ onDone }) {
   );
 }
 
+// 시간대별 배경 테마
+function useTimeTheme() {
+  useEffect(() => {
+    const apply = () => {
+      const h = new Date().getHours();
+      let period;
+      if (h >= 5 && h < 8) period = 'dawn';       // 새벽~아침
+      else if (h >= 8 && h < 12) period = 'morning'; // 오전
+      else if (h >= 12 && h < 15) period = 'noon';   // 한낮
+      else if (h >= 15 && h < 18) period = 'afternoon'; // 오후
+      else if (h >= 18 && h < 21) period = 'evening'; // 저녁
+      else period = 'night'; // 밤
+      document.documentElement.setAttribute('data-time', period);
+    };
+    apply();
+    const timer = setInterval(apply, 60000); // 1분마다 갱신
+    return () => clearInterval(timer);
+  }, []);
+}
+
 function App() {
   const [splashKey, setSplashKey] = useState(Date.now());
   const [showSplash, setShowSplash] = useState(true);
+  useTimeTheme();
 
   const triggerSplash = () => {
     setSplashKey(Date.now());
@@ -178,6 +200,7 @@ function App() {
               <Route path="/year-fortune" element={<YearFortune />} />
               <Route path="/monthly-fortune" element={<MonthlyFortune />} />
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
+              <Route path="/love-fortune" element={<LoveFortune />} />
             </Routes>
           </main>
           {/* <FloatingMenu /> */}

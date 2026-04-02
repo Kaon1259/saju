@@ -34,18 +34,40 @@ const MAJOR_ARCANA = [
 ];
 
 const SPREADS = [
-  { id: 'one',   label: '원카드',   count: 1, icon: '🎴', desc: '핵심 메시지 한 장' },
-  { id: 'three', label: '쓰리카드', count: 3, icon: '🃏', desc: '과거 · 현재 · 미래' },
-  { id: 'five',  label: '켈틱',     count: 5, icon: '✨', desc: '상황 · 장애 · 잠재 · 조언 · 결과' },
+  { id: 'one',   label: '원카드',   count: 1, icon: '🎴', desc: '핵심 한 장', color: '#FF9800' },
+  { id: 'three', label: '쓰리카드', count: 3, icon: '🃏', desc: '과거·현재·미래', color: '#9B59B6' },
+  { id: 'five',  label: '켈틱',     count: 5, icon: '✨', desc: '상황·장애·조언·결과', color: '#E91E63' },
 ];
 
-const CATEGORIES = [
-  { id: 'general', label: '종합운', icon: '🔮', color: '#9B59B6' },
-  { id: 'love',    label: '연애운', icon: '💕', color: '#E91E63' },
-  { id: 'money',   label: '재물운', icon: '💰', color: '#F4D03F' },
-  { id: 'career',  label: '직업운', icon: '💼', color: '#3498DB' },
-  { id: 'health',  label: '건강운', icon: '💚', color: '#2ECC71' },
-  { id: 'study',   label: '학업운', icon: '📚', color: '#FF9800' },
+const TAROT_LOVE_TYPES = [
+  // 솔로
+  { id: 'crush',              label: '짝사랑운',   icon: '💘', group: 'solo' },
+  { id: 'blind_date',         label: '소개팅운',   icon: '🤝', group: 'solo' },
+  { id: 'meeting_timing',     label: '만남의 시기', icon: '🔮', group: 'solo' },
+  { id: 'ideal_type',         label: '이상형 분석', icon: '👩‍❤️‍👨', group: 'solo' },
+  // 썸/연애
+  { id: 'relationship',       label: '연애운',     icon: '💕', group: 'love' },
+  { id: 'confession_timing',  label: '고백 타이밍', icon: '💌', group: 'love' },
+  { id: 'mind_reading',       label: '속마음 타로', icon: '🔍', group: 'love' },
+  { id: 'couple_fortune',     label: '커플 운세',   icon: 'couple', group: 'love' },
+  // 결혼/인연
+  { id: 'marriage',           label: '결혼운',     icon: '💒', group: 'marriage' },
+  { id: 'remarriage',         label: '재혼운',     icon: '💍', group: 'marriage' },
+  { id: 'reunion',            label: '재회운',     icon: '💔', group: 'marriage' },
+  { id: 'past_life',          label: '전생 인연',   icon: '🌌', group: 'marriage' },
+];
+
+const TAROT_LOVE_GROUPS = [
+  { key: 'solo', label: '솔로를 위한', emoji: '✨' },
+  { key: 'love', label: '썸/연애 중', emoji: '💗' },
+  { key: 'marriage', label: '결혼/인연', emoji: '💒' },
+];
+
+const OTHER_CATEGORIES = [
+  { id: 'general',    label: '종합운',    icon: '🔮', color: '#9B59B6' },
+  { id: 'money',      label: '재물운',    icon: '💰', color: '#F4D03F' },
+  { id: 'career',     label: '직업운',    icon: '💼', color: '#3498DB' },
+  { id: 'health',     label: '건강운',    icon: '💚', color: '#2ECC71' },
 ];
 
 const POSITION_LABELS = {
@@ -89,9 +111,9 @@ function Tarot() {
   const [heroCardId] = useState(() => Math.floor(Math.random() * 22));
   const [showIntro, setShowIntro] = useState(true);
   const [step, setStep] = useState('setup');
-  const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'classic');
+  const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'love');
   const [spread, setSpread] = useState('three');
-  const [category, setCategory] = useState('general');
+  const [category, setCategory] = useState('relationship');
   const [question, setQuestion] = useState('');
   const [shuffledCards, setShuffledCards] = useState([]);
   const [selectedIndices, setSelectedIndices] = useState([]);
@@ -101,6 +123,7 @@ function Tarot() {
   const [shuffleAnim, setShuffleAnim] = useState(false);
   const [flipIndex, setFlipIndex] = useState(-1);
   const [focusCard, setFocusCard] = useState(null); // 클릭한 카드 인덱스
+  const [showDeckModal, setShowDeckModal] = useState(false);
   const resultRef = useRef(null);
 
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
@@ -163,7 +186,7 @@ function Tarot() {
       const data = await getTarotReading(cardIds, reversals, spread, category, question);
       setReading(data);
       setStep('result');
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
     } catch (e) {
       console.error('타로 리딩 실패:', e);
       setReading({
@@ -193,7 +216,7 @@ function Tarot() {
   const resetAll = () => {
     setStep('setup');
     setSpread('three');
-    setCategory('general');
+    setCategory('relationship');
     setQuestion('');
     setShuffledCards([]);
     setSelectedIndices([]);
@@ -261,8 +284,11 @@ function Tarot() {
       {step === 'setup' && (
         <div className="tarot-hero">
           <div className="tarot-hero-glow" />
+          <button className="tarot-deck-change-btn" onClick={() => setShowDeckModal(true)}>
+            🃏 덱 변경
+          </button>
           <p className="tarot-hero-badge">Today's Card</p>
-          <div className="tarot-hero-card">
+          <div className="tarot-hero-card" onClick={() => setFocusCard('hero')} style={{ cursor: 'pointer' }}>
             <div className="tarot-hero-card-inner">
               <TarotCardArt cardId={heroCardId} deck={deck} />
             </div>
@@ -278,36 +304,61 @@ function Tarot() {
       {/* ═══ STEP 1: 설정 ═══ */}
       {step === 'setup' && (
         <div className="tarot-setup fade-in">
-          {/* 덱 선택 */}
+          {/* 궁금한 분야 */}
           <section className="tarot-section">
             <h2 className="tarot-section-title">
-              <span className="tarot-section-icon">🃏</span>
-              덱 선택
+              <span className="tarot-section-icon">✨</span>
+              궁금한 분야
             </h2>
-            <div className="tarot-deck-grid">
-              <button
-                className={`tarot-deck-btn ${deck === 'classic' ? 'active' : ''}`}
-                onClick={() => handleDeckChange('classic')}
-              >
-                <div className="tarot-deck-preview">
-                  <img src="/tarot/m01.jpg" alt="Classic" className="tarot-deck-thumb" />
+
+            {/* 연애 3그룹 (홈과 동일) */}
+            <div className="tarot-cat-love-wrap">
+              <div className="tarot-cat-love-hearts">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <span key={i} className="tarot-cat-float-heart" style={{
+                    left: `${8 + i * 12}%`,
+                    animationDelay: `${i * 0.5}s`,
+                    animationDuration: `${3 + Math.random() * 2}s`,
+                    fontSize: `${10 + Math.random() * 8}px`,
+                  }}>♥</span>
+                ))}
+              </div>
+              {TAROT_LOVE_GROUPS.map(group => (
+                <div key={group.key} className="tarot-love-group">
+                  <h3 className="tarot-love-group-title">
+                    <span>{group.emoji}</span> {group.label}
+                  </h3>
+                  <div className="tarot-love-cards">
+                    {TAROT_LOVE_TYPES.filter(l => l.group === group.key).map(lt => (
+                      <button key={lt.id}
+                        className={`tarot-love-card ${category === lt.id ? 'active' : ''}`}
+                        onClick={() => setCategory(lt.id)}>
+                        <span className="tarot-love-icon">{lt.icon === 'couple'
+                          ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span>
+                          : lt.icon}</span>
+                        <span className="tarot-love-label">{lt.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <span className="tarot-deck-name">클래식</span>
-                <span className="tarot-deck-sub">Rider-Waite</span>
-              </button>
-              <button
-                className={`tarot-deck-btn ${deck === 'skt' ? 'active' : ''}`}
-                onClick={() => handleDeckChange('skt')}
-              >
-                <div className="tarot-deck-preview">
-                  <img src="/tarot-skt/m01.jpg" alt="SKT" className="tarot-deck-thumb" />
-                </div>
-                <span className="tarot-deck-name">비트루비안</span>
-                <span className="tarot-deck-sub">SKT Vitruvian</span>
-              </button>
+              ))}
+            </div>
+
+            {/* 기타 카테고리 */}
+            <div className="tarot-cat-grid" style={{ marginTop: '10px' }}>
+              {OTHER_CATEGORIES.map(cat => (
+                <button key={cat.id}
+                  className={`tarot-cat-btn ${category === cat.id ? 'active' : ''}`}
+                  style={{ '--cat-color': cat.color }}
+                  onClick={() => setCategory(cat.id)}>
+                  <span className="tarot-cat-icon">{cat.icon}</span>
+                  <span className="tarot-cat-label">{cat.label}</span>
+                </button>
+              ))}
             </div>
           </section>
 
+          {/* 스프레드 선택 */}
           <section className="tarot-section">
             <h2 className="tarot-section-title">
               <span className="tarot-section-icon">🎴</span>
@@ -316,30 +367,13 @@ function Tarot() {
             <div className="tarot-spread-grid">
               {SPREADS.map(s => (
                 <button key={s.id}
-                  className={`tarot-spread-card glass-card ${spread === s.id ? 'active' : ''}`}
+                  className={`tarot-spread-card ${spread === s.id ? 'active' : ''}`}
+                  style={{ '--spread-color': s.color }}
                   onClick={() => setSpread(s.id)}>
                   <span className="tarot-spread-icon">{s.icon}</span>
                   <span className="tarot-spread-label">{s.label}</span>
                   <span className="tarot-spread-count">{s.count}장</span>
                   <span className="tarot-spread-desc">{s.desc}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="tarot-section">
-            <h2 className="tarot-section-title">
-              <span className="tarot-section-icon">✨</span>
-              궁금한 분야
-            </h2>
-            <div className="tarot-cat-grid">
-              {CATEGORIES.map(cat => (
-                <button key={cat.id}
-                  className={`tarot-cat-btn ${category === cat.id ? 'active' : ''}`}
-                  style={{ '--cat-color': cat.color }}
-                  onClick={() => setCategory(cat.id)}>
-                  <span className="tarot-cat-icon">{cat.icon}</span>
-                  <span className="tarot-cat-label">{cat.label}</span>
                 </button>
               ))}
             </div>
@@ -389,6 +423,7 @@ function Tarot() {
           </div>
           <p className="tarot-shuffle-text">카드를 섞고 있습니다<span className="tarot-dots" /></p>
           <p className="tarot-shuffle-hint">마음을 가라앉히고 질문에 집중하세요</p>
+          <button className="tarot-back-btn" onClick={resetAll}>🔄 다시 뽑기</button>
         </div>
       )}
 
@@ -429,6 +464,7 @@ function Tarot() {
           </div>
 
           <p className="tarot-pick-hint">직감을 믿으세요. 당신의 무의식이 올바른 카드로 인도합니다.</p>
+          <button className="tarot-back-btn" onClick={resetAll}>🔄 다시 뽑기</button>
         </div>
       )}
 
@@ -461,7 +497,10 @@ function Tarot() {
                     </div>
                   </div>
                   {isFlipped && step === 'result' && (
-                    <div className="tarot-card-name-tag fade-in">{card.nameKr}{card.reversed ? ' (역)' : ''}</div>
+                    <>
+                      <div className="tarot-card-name-tag fade-in">{card.nameKr}{card.reversed ? ' (역)' : ''}</div>
+                      <div className="tarot-card-tap-hint fade-in">터치하여 상세보기</div>
+                    </>
                   )}
                 </div>
               );
@@ -543,6 +582,29 @@ function Tarot() {
 
       {/* ═══ 카드 포커스 모달 ═══ */}
       {focusCard !== null && (() => {
+        // 히어로 카드 상세보기
+        if (focusCard === 'hero') {
+          const heroCard = MAJOR_ARCANA[heroCardId];
+          return (
+            <div className="tarot-focus-overlay" onClick={() => setFocusCard(null)}>
+              <div className="tarot-focus-content" onClick={e => e.stopPropagation()}>
+                <div className="tarot-focus-card-wrap">
+                  <div className="tarot-focus-card">
+                    <TarotCardArt cardId={heroCardId} deck={deck} />
+                  </div>
+                </div>
+                <div className="tarot-focus-info">
+                  <span className="tarot-focus-pos">오늘의 카드</span>
+                  <h3 className="tarot-focus-name">{heroCard.nameKr}</h3>
+                  <p className="tarot-focus-name-en">{heroCard.nameEn}</p>
+                  <p className="tarot-focus-meaning">{heroCard.msg}</p>
+                </div>
+                <button className="tarot-focus-close" onClick={() => setFocusCard(null)}>닫기</button>
+              </div>
+            </div>
+          );
+        }
+        // 리딩 결과 카드 상세보기
         const card = revealedCards[focusCard];
         const readingCard = reading?.cards?.[focusCard];
         const posLabel = POSITION_LABELS[spread]?.[focusCard] || '';
@@ -572,6 +634,33 @@ function Tarot() {
           </div>
         );
       })()}
+
+      {/* ═══ 덱 변경 팝업 ═══ */}
+      {showDeckModal && (
+        <div className="tarot-deck-modal-overlay" onClick={() => setShowDeckModal(false)}>
+          <div className="tarot-deck-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="tarot-deck-modal-title">🃏 덱 선택</h3>
+            <div className="tarot-deck-modal-grid">
+              {[
+                { id: 'love', name: '러브', sub: '1:1연애 오리지널', preview: <TarotCardArt cardId={6} deck="love" />, loveStyle: true },
+                { id: 'classic', name: '클래식', sub: 'Rider-Waite', preview: <img src="/tarot/m01.jpg" alt="Classic" className="tarot-deck-thumb" /> },
+                { id: 'skt', name: '비트루비안', sub: 'SKT Vitruvian', preview: <img src="/tarot-skt/m01.jpg" alt="SKT" className="tarot-deck-thumb" /> },
+              ].map(d => (
+                <button key={d.id}
+                  className={`tarot-deck-modal-item ${deck === d.id ? 'active' : ''}`}
+                  onClick={() => { handleDeckChange(d.id); setShowDeckModal(false); }}>
+                  <div className={`tarot-deck-modal-preview ${d.loveStyle ? 'tarot-deck-preview--love' : ''}`}>
+                    {d.preview}
+                  </div>
+                  <span className="tarot-deck-modal-name">{d.name}</span>
+                  <span className="tarot-deck-modal-sub">{d.sub}</span>
+                </button>
+              ))}
+            </div>
+            <button className="tarot-deck-modal-close" onClick={() => setShowDeckModal(false)}>닫기</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

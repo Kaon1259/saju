@@ -1,0 +1,143 @@
+.lf-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 100px; }
+
+/* ═══ 히어로 ═══ */
+.lf-hero { text-align: center; padding: 20px 0 16px; position: relative; }
+.lf-hero-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 60%, rgba(233,30,99,0.08), transparent 70%); pointer-events: none; }
+.lf-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #E91E63, #FF6B6B, #FF9800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; position: relative; }
+.lf-subtitle { color: var(--color-text-secondary); font-size: 13px; margin: 6px 0 0; position: relative; }
+
+/* ═══ 입력 폼 ═══ */
+.lf-form { padding: 20px; display: flex; flex-direction: column; gap: 16px; background: #1e1e2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
+[data-theme="light"] .lf-form { background: #fff; border-color: rgba(0,0,0,0.1); }
+
+.lf-form-group { display: flex; flex-direction: column; gap: 8px; }
+.lf-label { font-size: 14px; font-weight: 700; color: var(--color-text); }
+[data-theme="light"] .lf-label { color: #222; }
+
+/* 연애 상태 칩 */
+.lf-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lf-status-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 14px 8px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.3s; position: relative;
+}
+.lf-status-chip:hover { border-color: rgba(233,30,99,0.3); }
+.lf-status-chip.active {
+  border-color: #E91E63; background: rgba(233,30,99,0.1);
+  transform: translateY(-2px); box-shadow: 0 4px 16px rgba(233,30,99,0.2);
+}
+.lf-status-icon { font-size: 24px; }
+.lf-status-label { font-size: 14px; font-weight: 800; color: var(--color-text); }
+.lf-status-desc { font-size: 10px; color: var(--color-text-muted); text-align: center; line-height: 1.3; }
+
+[data-theme="light"] .lf-status-chip { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .lf-status-chip.active { border-color: #E91E63; background: rgba(233,30,99,0.06); }
+[data-theme="light"] .lf-status-label { color: #222; }
+[data-theme="light"] .lf-status-desc { color: #888; }
+
+/* 토글 */
+.lf-toggle { display: flex; gap: 8px; }
+.lf-toggle-btn {
+  flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04); color: var(--color-text-secondary); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.lf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.15); color: var(--color-text); }
+[data-theme="light"] .lf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #555; }
+[data-theme="light"] .lf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.08); color: #111; }
+
+.lf-autofill-btn {
+  width: 100%; padding: 11px; border-radius: 12px;
+  border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
+  color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.lf-autofill-btn:hover { background: rgba(155,89,182,0.15); border-color: rgba(155,89,182,0.6); }
+[data-theme="light"] .lf-autofill-btn { color: #7c3aed; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.3); }
+
+.lf-submit {
+  padding: 16px; border-radius: 14px; border: none; color: #fff;
+  font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s;
+  background: linear-gradient(135deg, #E91E63, #FF6B6B);
+}
+.lf-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233,30,99,0.3); }
+.lf-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ═══ 로딩 ═══ */
+.lf-loading { text-align: center; padding: 40px 0; color: var(--color-text-secondary); }
+.lf-loading-hearts { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+.lf-loading-heart { font-size: 24px; animation: lfHeartBeat 1.2s ease-in-out infinite; }
+@keyframes lfHeartBeat { 0%,100% { transform: scale(1); } 30% { transform: scale(1.3); } }
+.lf-loading-hint { font-size: 12px; color: var(--color-text-muted); margin-top: 8px; }
+
+/* ═══ 결과 ═══ */
+.lf-result { display: flex; flex-direction: column; gap: 12px; }
+.lf-speech-area { margin-bottom: 4px; }
+
+.lf-heart-score-card {
+  position: relative; text-align: center; padding: 40px 20px 24px;
+  border-radius: 20px; overflow: hidden;
+  background: var(--color-glass); border: 1px solid var(--color-glass-border);
+}
+[data-theme="light"] .lf-heart-score-card { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); }
+
+.lf-heart-aura {
+  position: absolute; inset: -20px; opacity: 0.2;
+  animation: lfAuraPulse 2.5s ease-in-out infinite;
+}
+@keyframes lfAuraPulse {
+  0%, 100% { transform: scale(1); opacity: 0.15; }
+  50% { transform: scale(1.1); opacity: 0.25; }
+}
+
+.lf-hearts-container { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.lf-floating-heart {
+  position: absolute; bottom: -10px; left: var(--heart-x);
+  font-size: var(--heart-size); color: var(--heart-color);
+  animation: lfHeartFloat var(--float-duration) ease-out infinite;
+  animation-delay: var(--float-delay); opacity: 0;
+}
+@keyframes lfHeartFloat {
+  0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.7; }
+  70% { opacity: 0.3; }
+  100% { transform: translateY(-180px) scale(1.2) rotate(20deg); opacity: 0; }
+}
+
+.lf-heart-center { position: relative; z-index: 1; margin-bottom: 8px; }
+.lf-heart-big {
+  font-size: 72px; display: block; line-height: 1;
+  filter: drop-shadow(0 0 20px var(--heart-color, #ffc0cb));
+  animation: lfHeartPump 1.5s ease-in-out infinite;
+}
+@keyframes lfHeartPump {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+}
+.lf-heart-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%); font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.lf-heart-unit { position: absolute; top: 50%; left: 50%; transform: translate(32px, -20%); font-size: 12px; color: rgba(255,255,255,0.7); }
+.lf-heart-grade { position: relative; z-index: 1; font-size: 18px; font-weight: 900; display: block; }
+.lf-heart-status { position: relative; z-index: 1; font-size: 13px; color: var(--color-text-muted); margin-top: 4px; display: block; }
+
+/* ═══ 럭키 ═══ */
+.lf-lucky {
+  display: flex; justify-content: space-around; padding: 16px; flex-wrap: wrap; gap: 8px;
+  border-radius: 16px; background: var(--color-glass); border: 1px solid var(--color-glass-border);
+}
+[data-theme="light"] .lf-lucky { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); }
+.lf-lucky-item { text-align: center; }
+.lf-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
+.lf-lucky-value { font-size: 15px; font-weight: 800; color: var(--color-accent-gold); }
+[data-theme="light"] .lf-lucky-value { color: #96700a; }
+
+/* ═══ 리셋 ═══ */
+.lf-reset {
+  padding: 14px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15);
+  background: var(--color-glass); color: var(--color-text); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; width: 100%;
+}
+.lf-reset:hover { border-color: #E91E63; }
+[data-theme="light"] .lf-reset { background: #fff; border-color: rgba(0,0,0,0.12); color: #333; }
+
+.fade-in { animation: lfFadeIn 0.4s ease; }
+@keyframes lfFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }

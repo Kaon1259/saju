@@ -75,6 +75,58 @@
   display: none;
 }
 
+/* 라이트모드 밤 - 은은한 빛 효과 */
+[data-theme="light"][data-time="night"] body::before {
+  display: block;
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image:
+    radial-gradient(3px 3px at 15% 20%, rgba(251,191,36,0.5), transparent),
+    radial-gradient(2px 2px at 75% 15%, rgba(251,191,36,0.35), transparent),
+    radial-gradient(4px 4px at 40% 55%, rgba(244,114,182,0.3), transparent),
+    radial-gradient(2px 2px at 85% 45%, rgba(251,191,36,0.4), transparent),
+    radial-gradient(3px 3px at 25% 80%, rgba(244,114,182,0.35), transparent),
+    radial-gradient(2px 2px at 60% 75%, rgba(251,191,36,0.3), transparent),
+    radial-gradient(3px 3px at 90% 85%, rgba(167,139,250,0.35), transparent),
+    radial-gradient(2px 2px at 50% 30%, rgba(167,139,250,0.3), transparent),
+    radial-gradient(4px 4px at 10% 50%, rgba(251,191,36,0.25), transparent),
+    radial-gradient(2px 2px at 70% 60%, rgba(244,114,182,0.3), transparent),
+    radial-gradient(3px 3px at 35% 10%, rgba(167,139,250,0.4), transparent),
+    radial-gradient(2px 2px at 55% 90%, rgba(251,191,36,0.35), transparent);
+  background-size: 100% 100%;
+  animation: nightLights 6s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 라이트모드 저녁 - 약한 빛 */
+[data-theme="light"][data-time="evening"] body::before {
+  display: block;
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image:
+    radial-gradient(3px 3px at 20% 25%, rgba(244,114,182,0.25), transparent),
+    radial-gradient(2px 2px at 70% 20%, rgba(244,114,182,0.2), transparent),
+    radial-gradient(3px 3px at 45% 60%, rgba(251,191,36,0.2), transparent),
+    radial-gradient(2px 2px at 80% 50%, rgba(167,139,250,0.2), transparent),
+    radial-gradient(2px 2px at 30% 85%, rgba(244,114,182,0.2), transparent),
+    radial-gradient(3px 3px at 60% 80%, rgba(251,191,36,0.15), transparent);
+  background-size: 100% 100%;
+  animation: nightLights 8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes nightLights {
+  0%   { opacity: 0.6; filter: blur(0px); }
+  50%  { opacity: 1;   filter: blur(0.5px); }
+  100% { opacity: 0.7; filter: blur(0px); }
+}
+
 /* 라이트 테마 상단/하단바 */
 [data-theme="light"] .top-bar {
   background: rgba(255, 255, 255, 0.9);
@@ -423,14 +475,31 @@ html {
 
 body {
   font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: linear-gradient(165deg, var(--color-bg-start) 0%, var(--color-bg-end) 50%, #1a0a3e 100%);
+  background: linear-gradient(165deg, var(--color-bg-start) 0%, var(--color-bg-end) 50%, var(--color-bg-deep, #1a0a3e) 100%);
   color: var(--color-text);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
+  transition: background 1.5s ease;
 }
+
+/* ─── 시간대별 배경 (다크모드) ─── */
+[data-time="dawn"]   { --color-bg-start: #1a0a2e; --color-bg-end: #2d1b4e; --color-bg-deep: #1e1040; }
+[data-time="morning"]{ --color-bg-start: #14082a; --color-bg-end: #1e1045; --color-bg-deep: #170a38; }
+[data-time="noon"]   { --color-bg-start: #10061f; --color-bg-end: #1a0c3a; --color-bg-deep: #130830; }
+[data-time="afternoon"]{ --color-bg-start: #12072a; --color-bg-end: #1c0e40; --color-bg-deep: #150935; }
+[data-time="evening"]{ --color-bg-start: #0e0520; --color-bg-end: #150835; --color-bg-deep: #0a0318; }
+[data-time="night"]  { --color-bg-start: #080115; --color-bg-end: #0d0221; --color-bg-deep: #050010; }
+
+/* ─── 시간대별 배경 (라이트모드) ─── */
+[data-theme="light"][data-time="dawn"]   { --color-bg-start: #fde6c4; --color-bg-end: #f8c9a0; }
+[data-theme="light"][data-time="morning"]{ --color-bg-start: #fef08a; --color-bg-end: #fde047; }
+[data-theme="light"][data-time="noon"]   { --color-bg-start: #fef3c7; --color-bg-end: #fde68a; }
+[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #fed7aa; --color-bg-end: #fdba74; }
+[data-theme="light"][data-time="evening"]{ --color-bg-start: #fbcfe8; --color-bg-end: #f9a8d4; }
+[data-theme="light"][data-time="night"]  { --color-bg-start: #d4d4e0; --color-bg-end: #b8b8cc; }
 
 /* Starfield background effect */
 body::before {

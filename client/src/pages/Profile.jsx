@@ -143,8 +143,9 @@ function Profile() {
         <div className="pf-info-row">
           <span className="pf-info-label">💕 연애 상태</span>
           <span className="pf-info-value">
-            {user.relationshipStatus === 'IN_RELATIONSHIP' ? '❤️ 연애중' :
-             user.relationshipStatus === 'SOME' ? '💗 썸타는 중' : '✨ 화려한 솔로'}
+            {user.relationshipStatus === 'IN_RELATIONSHIP' ? '💕 연애중' :
+             user.relationshipStatus === 'SOME' ? '💗 썸' :
+             user.relationshipStatus === 'COMPLICATED' ? '💔 복잡' : '💫 솔로'}
           </span>
         </div>
       </section>

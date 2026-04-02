@@ -366,10 +366,15 @@ function Home() {
             <div className="home-love-temp-display">
               <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
               <div className="home-love-temp-info">
-                <span className="home-love-temp-label">오늘의 연애 온도</span>
+                <span className="home-love-temp-label">
+                  {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
+                </span>
                 <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
               </div>
             </div>
+            {loveTemp?.weatherBased && !userId && loveTemp?.weatherEmoji && (
+              <p className="home-love-weather-tag">{loveTemp.weatherEmoji} {loveTemp.weatherDesc} · 체감 {loveTemp.realTemp}°C</p>
+            )}
             <p className="home-love-temp-msg">{msg}</p>
 
             {LOVE_GROUPS.map(group => (

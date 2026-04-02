@@ -39,10 +39,11 @@ public class SpecialFortuneController {
             @RequestParam(required = false) String partnerDate,
             @RequestParam(required = false) String partnerGender,
             @RequestParam(required = false) String breakupDate,
-            @RequestParam(required = false) String meetDate) {
+            @RequestParam(required = false) String meetDate,
+            @RequestParam(required = false) String relationshipStatus) {
         return ResponseEntity.ok(
             specialFortuneService.getLoveFortune(type, birthDate, birthTime, gender, calendarType,
-                partnerDate, partnerGender, breakupDate, meetDate)
+                partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus)
         );
     }
 

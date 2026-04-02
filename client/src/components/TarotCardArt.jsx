@@ -2,7 +2,10 @@
  * 메이저 아르카나 22장 — 덱 선택 지원
  * - classic: Rider-Waite-Smith (1909, 퍼블릭 도메인)
  * - skt: SKT Vitruvian (CC-BY, Benebell Wen)
+ * - love: 1:1연애 오리지널 (SVG, 핑크/로맨틱)
  */
+
+import LoveTarotSVG from './LoveTarotSVG';
 
 const DECK_PATHS = {
   classic: '/tarot',
@@ -19,6 +22,18 @@ const CARD_NAMES = [
 
 function TarotCardArt({ cardId, deck = 'classic' }) {
   const id = Math.min(Math.max(cardId || 0, 0), 21);
+
+  // love 덱은 SVG 렌더링
+  if (deck === 'love') {
+    return (
+      <div className="tarot-card-art">
+        <LoveTarotSVG cardId={id} />
+        <div className="tarot-card-art-frame" />
+        <div className="tarot-card-art-shine" />
+      </div>
+    );
+  }
+
   const num = String(id).padStart(2, '0');
   const basePath = DECK_PATHS[deck] || DECK_PATHS.classic;
 

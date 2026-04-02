@@ -323,7 +323,7 @@
 
 /* ─── 동양풍 메뉴 카드 ─── */
 .home-landing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.home-landing-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 12px 16px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); text-align: center; overflow: hidden; }
+.home-landing-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 12px 16px; border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); text-align: center; overflow: hidden; }
 .home-landing-card:hover { transform: translateY(-4px); }
 .home-landing-card:active { transform: scale(0.96); }
 
@@ -1107,6 +1107,17 @@
   line-height: 1;
 }
 
+.home-love-weather-tag {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: -2px 0 6px;
+  position: relative;
+  z-index: 1;
+}
+[data-theme="light"] .home-love-weather-tag { color: #888; }
+
 .home-love-temp-msg {
   text-align: center;
   font-size: 13px;
@@ -1571,7 +1582,7 @@
   gap: 14px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.18);
   background: var(--color-card-bg, rgba(255,255,255,0.04));
   cursor: pointer;
   transition: transform 0.15s, background 0.15s;
@@ -1645,7 +1656,7 @@
   gap: 8px;
   padding: 18px 8px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.18);
   background: var(--color-card-bg, rgba(255,255,255,0.04));
   cursor: pointer;
   transition: transform 0.15s, background 0.15s;
@@ -1668,7 +1679,7 @@
 
 /* Light theme - 새 섹션 */
 [data-theme="light"] .home-love-quick-card {
-  border-color: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.15);
   background: rgba(0,0,0,0.02);
 }
 
@@ -1681,10 +1692,19 @@
 }
 
 [data-theme="light"] .home-quick-item {
-  border-color: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.15);
   background: rgba(0,0,0,0.02);
 }
 
 [data-theme="light"] .home-quick-item:active {
   background: rgba(0,0,0,0.05);
 }
+
+[data-theme="light"] .home-lq-label { color: #222; }
+[data-theme="light"] .home-lq-desc { color: #666; }
+[data-theme="light"] .home-lq-arrow { color: rgba(0,0,0,0.3); }
+[data-theme="light"] .home-section-title { color: #222; }
+[data-theme="light"] .home-quick-label { color: #222; }
+[data-theme="light"] .home-landing-card { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .home-landing-card-title { color: #222; }
+[data-theme="light"] .home-landing-card-desc { color: #666; }
