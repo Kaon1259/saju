@@ -178,8 +178,8 @@ function SpecialFortune() {
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
                 <div className="sf-toggle">
-                  <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>♂ 남성</button>
-                  <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>♀ 여성</button>
+                  <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
+                  <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
                 </div>
               </div>
               <div className="sf-form-group">
@@ -220,8 +220,8 @@ function SpecialFortune() {
                   <div className="sf-form-group">
                     <label className="sf-label">상대방 성별</label>
                     <div className="sf-toggle">
-                      <button className={`sf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}>♂ 남성</button>
-                      <button className={`sf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}>♀ 여성</button>
+                      <button className={`sf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}><span className="g-circle g-male">♂</span></button>
+                      <button className={`sf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}><span className="g-circle g-female">♀</span></button>
                     </div>
                   </div>
                 </div>
@@ -328,8 +328,8 @@ function SpecialFortune() {
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
                 <div className="sf-toggle">
-                  <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>♂ 남성</button>
-                  <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>♀ 여성</button>
+                  <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
+                  <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
                 </div>
               </div>
               <div className="sf-form-group">

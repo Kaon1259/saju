@@ -103,7 +103,7 @@ function Dream() {
       `분류: ${result.symbol || '🌙'} ${result.category}\n` +
       `등급: ${rating.label} (${result.score}점)\n\n` +
       `${result.interpretation}\n\n` +
-      `사주운세 앱에서 나만의 꿈을 해석해보세요!`;
+      `연애 앱에서 나만의 꿈을 해석해보세요!`;
     if (navigator.share) {
       navigator.share({ title: '꿈해몽 결과', text }).catch(() => {});
     } else {
@@ -217,12 +217,12 @@ function Dream() {
                     <button
                       className={`dream-toggle-btn ${gender === 'M' ? 'active' : ''}`}
                       onClick={() => setGender(gender === 'M' ? '' : 'M')}>
-                      남성
+                      <span className="g-circle g-male">♂</span>
                     </button>
                     <button
                       className={`dream-toggle-btn ${gender === 'F' ? 'active' : ''}`}
                       onClick={() => setGender(gender === 'F' ? '' : 'F')}>
-                      여성
+                      <span className="g-circle g-female">♀</span>
                     </button>
                   </div>
                 </div>

@@ -173,7 +173,7 @@ function FaceReading() {
       `유형: ${result.emoji} ${result.overallType}\n` +
       `점수: ${result.score}점 (${result.grade}등급)\n\n` +
       `${result.personality}\n\n` +
-      `사주운세 앱에서 나만의 관상을 분석해보세요!`;
+      `연애 앱에서 나만의 관상을 분석해보세요!`;
     if (navigator.share) {
       navigator.share({ title: 'AI 관상 분석 결과', text }).catch(() => {});
     } else {
@@ -300,11 +300,11 @@ function FaceReading() {
                     <button
                       className={`fr-toggle-btn ${gender === 'male' ? 'active' : ''}`}
                       onClick={() => setGender(gender === 'male' ? '' : 'male')}
-                    >남성</button>
+                    ><span className="g-circle g-male">♂</span></button>
                     <button
                       className={`fr-toggle-btn ${gender === 'female' ? 'active' : ''}`}
                       onClick={() => setGender(gender === 'female' ? '' : 'female')}
-                    >여성</button>
+                    ><span className="g-circle g-female">♀</span></button>
                   </div>
                 </div>
               </div>

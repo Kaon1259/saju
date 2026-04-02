@@ -39,7 +39,7 @@ function MyFortune() {
       `🍀 행운의 숫자: ${saju.luckyNumber || '-'}`,
       `🎨 행운의 색상: ${saju.luckyColor || '-'}`,
       '',
-      '- 사주운세 앱에서 확인하세요 -',
+      '- 연애 앱에서 확인하세요 -',
     ].join('\n');
 
     try {
@@ -115,7 +115,7 @@ function MyFortune() {
   const saju = data.saju;
 
   const tabs = [
-    { id: 'saju', label: '사주운세', icon: '☯️', data: saju },
+    { id: 'saju', label: '사주 운세', icon: '☯️', data: saju },
   ];
 
   const active = tabs.find(t => t.id === activeTab) || tabs[0];
@@ -171,8 +171,8 @@ function MyFortune() {
               <div className="form-group">
                 <label className="form-label">성별</label>
                 <div className="form-toggle">
-                  <button type="button" className={`form-toggle__btn ${otherGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('M')}>남성</button>
-                  <button type="button" className={`form-toggle__btn ${otherGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('F')}>여성</button>
+                  <button type="button" className={`form-toggle__btn ${otherGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('M')}><span className="g-circle g-male">♂</span></button>
+                  <button type="button" className={`form-toggle__btn ${otherGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('F')}><span className="g-circle g-female">♀</span></button>
                 </div>
               </div>
               <button className="btn-gold" style={{ width: '100%' }} disabled={!otherBirthDate || otherLoading}

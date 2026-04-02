@@ -155,7 +155,7 @@ function PsychTest() {
       `테스트: ${selectedTest?.title}\n` +
       `유형: ${result.emoji || ''} ${result.type}\n\n` +
       `${result.description}\n\n` +
-      `사주운세 앱에서 나도 테스트해보세요!`;
+      `연애 앱에서 나도 테스트해보세요!`;
     if (navigator.share) {
       navigator.share({ title: '심리테스트 결과', text }).catch(() => {});
     } else {

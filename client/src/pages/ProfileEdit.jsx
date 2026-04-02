@@ -165,9 +165,9 @@ function ProfileEdit() {
           <label className="form-label">성별</label>
           <div className="form-toggle">
             <button type="button" className={`form-toggle__btn ${form.gender === 'M' ? 'form-toggle__btn--active' : ''}`}
-              onClick={() => handleChange('gender', 'M')}>♂️ 남성</button>
+              onClick={() => handleChange('gender', 'M')}><span className="g-circle g-male">♂</span></button>
             <button type="button" className={`form-toggle__btn ${form.gender === 'F' ? 'form-toggle__btn--active' : ''}`}
-              onClick={() => handleChange('gender', 'F')}>♀️ 여성</button>
+              onClick={() => handleChange('gender', 'F')}><span className="g-circle g-female">♀</span></button>
           </div>
         </div>
 

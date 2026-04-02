@@ -79,7 +79,7 @@ function YearFortune() {
 
   const handleShare = () => {
     if (!result) return;
-    const text = `🎊 2026 신년운세\n\n종합 점수: ${rScore}점 (${rGrade})\n${rTheme}\n\n${result.summary || ''}\n\n사주운세 앱에서 나의 2026 운세를 확인해보세요!`;
+    const text = `🎊 2026 신년운세\n\n종합 점수: ${rScore}점 (${rGrade})\n${rTheme}\n\n${result.summary || ''}\n\n연애 앱에서 나의 2026 운세를 확인해보세요!`;
     if (navigator.share) {
       navigator.share({ title: '2026 신년운세', text }).catch(() => {});
     } else {
@@ -171,10 +171,10 @@ function YearFortune() {
             <label className="yf-label">성별</label>
             <div className="yf-toggle">
               <button className={`yf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                &#9794; 남성
+                <span className="g-circle g-male">♂</span>
               </button>
               <button className={`yf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                &#9792; 여성
+                <span className="g-circle g-female">♀</span>
               </button>
             </div>
           </div>

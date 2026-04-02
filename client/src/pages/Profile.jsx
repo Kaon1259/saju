@@ -115,7 +115,7 @@ function Profile() {
         </div>
         <div className="pf-info-divider" />
         <div className="pf-info-row">
-          <span className="pf-info-label">{user.gender === 'M' ? '♂' : '♀'} 성별</span>
+          <span className="pf-info-label">{user.gender === 'M' ? <span className="g-circle g-male">♂</span> : <span className="g-circle g-female">♀</span>} 성별</span>
           <span className="pf-info-value">{user.gender === 'M' ? '남성' : '여성'}</span>
         </div>
         {user.birthTime && (<>

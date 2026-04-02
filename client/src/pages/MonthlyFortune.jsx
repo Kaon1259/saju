@@ -168,10 +168,10 @@ function MonthlyFortune() {
               <label className="mf-label">성별</label>
               <div className="mf-toggle">
                 <button className={`mf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                  &#9794; 남성
+                  <span className="g-circle g-male">♂</span>
                 </button>
                 <button className={`mf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                  &#9792; 여성
+                  <span className="g-circle g-female">♀</span>
                 </button>
               </div>
             </div>

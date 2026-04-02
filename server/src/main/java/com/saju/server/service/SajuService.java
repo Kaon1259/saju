@@ -136,7 +136,7 @@ public class SajuService {
                 monthPrompt.append("반드시 JSON 배열로만 응답: [{\"month\":1,\"summary\":\"1월 운세\"},{\"month\":2,\"summary\":\"2월 운세\"},...]\n");
 
                 String aiMonthly = claudeApiService.generate(
-                    "당신은 한국 전통 사주명리학 전문가입니다. 십성과 12운성의 조합으로 월별 운세를 해석합니다. 반드시 JSON 배열로만 응답하세요.",
+                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. 십성과 12운성의 조합으로 월별 운세를 해석해줘. 친근한 반말 구어체로 작성하고, 고전적 표현은 절대 쓰지 마. 반드시 JSON 배열로만 응답해.",
                     monthPrompt.toString(), 1500);
 
                 String json = ClaudeApiService.extractJson(aiMonthly);
@@ -262,9 +262,10 @@ public class SajuService {
             String elementPrompt = buildElementAnalysisPrompt(result);
             if (elementPrompt != null) {
                 String aiElement = claudeApiService.generate(
-                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
-                    + "오행(五行)의 균형과 보충 방법에 대해 깊이 있는 지식을 가지고 있습니다. "
-                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    + "오행(五行)의 균형과 보충 방법을 친근한 반말 구어체로 설명해줘. "
+                    + "\"~거든!\", \"~인 거야\", \"~해봐!\" 같은 표현을 쓰고, 고전적 표현은 절대 금지. "
+                    + "JSON이 아닌 일반 텍스트로 응답해.",
                     elementPrompt, 800);
                 if (aiElement != null && !aiElement.isBlank()) {
                     result.setElementAnalysis(aiElement);
@@ -279,10 +280,10 @@ public class SajuService {
             if (result.getSinsalList() != null && !result.getSinsalList().isEmpty()) {
                 String sinsalPrompt = buildSinsalPrompt(result);
                 String aiSinsal = claudeApiService.generate(
-                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
-                    + "신살(神殺)의 의미와 일상생활에서의 구체적 영향을 해석합니다. "
-                    + "단순 목록이 아닌, 각 신살이 실생활에 미치는 영향과 주의사항을 설명합니다. "
-                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    + "신살(神殺)의 의미와 일상생활에서의 구체적 영향을 친근하게 해석해줘. "
+                    + "각 신살이 실생활에 미치는 영향과 주의사항을 \"~거든!\", \"~인 거야\" 같은 반말 구어체로 설명해. "
+                    + "고전적 표현 절대 금지. JSON이 아닌 일반 텍스트로 응답해.",
                     sinsalPrompt, 800);
                 if (aiSinsal != null && !aiSinsal.isBlank()) {
                     result.setSinsalAnalysis(aiSinsal);
@@ -297,10 +298,10 @@ public class SajuService {
             if (result.getGyeokguk() != null && !result.getGyeokguk().isBlank()) {
                 String gyeokgukPrompt = buildGyeokgukPrompt(result);
                 String aiGyeokguk = claudeApiService.generate(
-                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
-                    + "격국(格局)의 의미를 깊이 있게 해석하며, 격국과 오행의 조합에 따른 "
-                    + "직업 추천, 결혼운, 재물운 성향을 분석합니다. "
-                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    + "격국(格局)의 의미를 친근하게 해석해주고, 격국과 오행의 조합에 따른 "
+                    + "직업 추천, 결혼운, 재물운 성향을 \"~거든!\", \"~인 거야\" 같은 반말로 분석해줘. "
+                    + "고전적 표현 절대 금지. JSON이 아닌 일반 텍스트로 응답해.",
                     gyeokgukPrompt, 800);
                 if (aiGyeokguk != null && !aiGyeokguk.isBlank()) {
                     result.setGyeokgukAnalysis(aiGyeokguk);
@@ -315,10 +316,10 @@ public class SajuService {
             if (result.getDaeunList() != null && !result.getDaeunList().isEmpty()) {
                 String daeunPrompt = buildDaeunPrompt(result);
                 String aiDaeun = claudeApiService.generate(
-                    "당신은 40년 경력의 한국 전통 사주팔자 전문 역술가입니다. "
-                    + "대운(大運)의 흐름을 깊이 있게 해석하며, 현재 대운의 기회와 위기, "
-                    + "구체적 행동 지침을 제시합니다. "
-                    + "JSON이 아닌 일반 텍스트로 응답하세요.",
+                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    + "대운(大運)의 흐름을 친근하게 해석해주고, 현재 대운의 기회와 위기, "
+                    + "구체적 행동 지침을 \"~거든!\", \"~인 거야\", \"~해봐!\" 같은 반말 구어체로 알려줘. "
+                    + "고전적 표현 절대 금지. JSON이 아닌 일반 텍스트로 응답해.",
                     daeunPrompt, 1200);
                 if (aiDaeun != null && !aiDaeun.isBlank()) {
                     result.setDaeunAnalysis(aiDaeun);

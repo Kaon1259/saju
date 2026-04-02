@@ -191,8 +191,8 @@ function Compatibility() {
         <div className="compat-form-section">
           <div className="compat-form-top">
             <div className="compat-form-gender-toggle">
-              <button className={`compat-g-btn compat-g-male ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>♂ 남</button>
-              <button className={`compat-g-btn compat-g-female ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>♀ 여</button>
+              <button className={`compat-g-btn compat-g-male ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}><span className="g-circle g-male">♂</span></button>
+              <button className={`compat-g-btn compat-g-female ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}><span className="g-circle g-female">♀</span></button>
             </div>
             {localStorage.getItem('userId') && (
               <button className="sf-autofill-btn" style={{ marginTop: 8, fontSize: 12, padding: '8px 12px' }} onClick={() => {
@@ -226,8 +226,8 @@ function Compatibility() {
         <div className="compat-form-section">
           <div className="compat-form-top">
             <div className="compat-form-gender-toggle">
-              <button className={`compat-g-btn compat-g-male ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>♂ 남</button>
-              <button className={`compat-g-btn compat-g-female ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>♀ 여</button>
+              <button className={`compat-g-btn compat-g-male ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}><span className="g-circle g-male">♂</span></button>
+              <button className={`compat-g-btn compat-g-female ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}><span className="g-circle g-female">♀</span></button>
             </div>
           </div>
           <div className="form-group">

@@ -252,3 +252,13 @@
 }
 [data-theme="light"] .splash-ring--love { border-top-color: #c2185b; border-right-color: rgba(194,24,91,0.3); }
 [data-theme="light"] .splash-yin--love { filter: drop-shadow(0 0 20px rgba(194,24,91,0.3)); }
+
+/* ─── 성별 아이콘 (공통) ─── */
+.g-circle {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: bold; line-height: 1;
+}
+.g-male { color: #64B5F6; }
+.g-female { color: #F48FB1; }
+[data-theme="light"] .g-male { color: #42A5F5; }
+[data-theme="light"] .g-female { color: #EC407A; }

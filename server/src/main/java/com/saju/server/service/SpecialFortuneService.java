@@ -29,13 +29,25 @@ public class SpecialFortuneService {
     private final com.saju.server.repository.UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String[] LOVE_TYPES = {"relationship", "reunion", "remarriage", "blind_date"};
-    private static final Map<String, String> LOVE_TYPE_KR = Map.of(
-        "relationship", "연애운",
-        "reunion", "재회운",
-        "remarriage", "재혼운",
-        "blind_date", "소개팅운"
-    );
+    private static final String[] LOVE_TYPES = {
+        "relationship", "reunion", "remarriage", "blind_date",
+        "crush", "marriage", "confession_timing", "ideal_type",
+        "past_life", "mind_reading", "couple_fortune", "meeting_timing"
+    };
+    private static final Map<String, String> LOVE_TYPE_KR = new LinkedHashMap<>() {{
+        put("relationship", "연애운");
+        put("reunion", "재회운");
+        put("remarriage", "재혼운");
+        put("blind_date", "소개팅운");
+        put("crush", "짝사랑운");
+        put("marriage", "결혼운");
+        put("confession_timing", "고백 타이밍");
+        put("ideal_type", "이상형 분석");
+        put("past_life", "전생 인연");
+        put("mind_reading", "속마음 타로");
+        put("couple_fortune", "커플 운세");
+        put("meeting_timing", "만남의 시기");
+    }};
 
     private static final String[][] SIJIN = {
         {"자시", "23:00~01:00", "쥐"},
@@ -218,7 +230,7 @@ public class SpecialFortuneService {
         // AI 생성
         if (claudeApiService.isAvailable()) {
             try {
-                String system = buildLoveSystemPrompt(type);
+                String system = buildLoveSystemPrompt(type, gender);
                 // 추가 정보 구성
                 StringBuilder extra = new StringBuilder();
                 if (partnerDate != null && !partnerDate.isBlank()) {
@@ -482,7 +494,7 @@ public class SpecialFortuneService {
         return result;
     }
 
-    private String buildLoveSystemPrompt(String type) {
+    private String buildLoveSystemPrompt(String type, String gender) {
         String typeSpecific = switch (type) {
             case "relationship" -> """
 【연애운 전문 분석 프레임워크】
@@ -523,29 +535,130 @@ public class SpecialFortuneService {
 - 상대방 사주가 있으면: 상대 기질 예측 → 호감 공략법
 - 인연 발전 가능성 (소개팅→연인) 단계별 타임라인""";
 
+            case "crush" -> """
+【짝사랑운 전문 분석 프레임워크】
+- 일간(日干) 오행으로 짝사랑 감정의 심도와 패턴 분석 (목=은은한 동경, 화=불타는 열정, 토=묵묵한 헌신, 금=쿨한 관심, 수=깊은 그리움)
+- 오늘 일진이 짝사랑 에너지에 미치는 영향 (고백 기운 vs 관망 기운)
+- 상대방에게 호감을 전달하는 최적 방법과 타이밍
+- 짝사랑이 이루어질 가능성을 사주 오행 상생/상극으로 분석
+- 상대가 나를 어떻게 인식하고 있는지 기운 흐름 분석
+- 짝사랑에서 벗어나야 할 때의 신호도 솔직히 조언
+- 감정을 키워나가는 단계별 전략 (1주/2주/1개월)""";
+
+            case "marriage" -> """
+【결혼운 전문 분석 프레임워크】
+- 일간(日干)과 일지(日支)로 결혼 적합도와 결혼 기질 분석
+- 정재(正財)/정관(正官)/편관(偏官) 등 십성 관점의 배우자 인연 분석
+- 결혼 최적 시기: 대운/세운/월운 흐름에서 인연이 강한 연도와 월 구체적 제시
+- 이상적인 배우자의 오행 기질과 성격 특성 예측
+- 결혼 전 점검할 사항: 재정운, 가족관계운 연계 분석
+- 결혼 생활에서 주의해야 할 갈등 요소와 극복 방법
+- 올해/내년 결혼 기운의 강도 0-100 평가""";
+
+            case "confession_timing" -> """
+【고백 타이밍 전문 분석 프레임워크】
+- 일간(日干) 오행으로 고백 스타일 분석 (목=편지/진심고백, 화=즉흥/분위기, 토=안정적/계획적, 금=세련된/특별한, 수=감성적/로맨틱)
+- 이번 주/이번 달 일진 중 고백하기 가장 좋은 날짜와 시간대 구체 제시
+- 고백 장소·분위기·방법 맞춤 추천
+- 피해야 할 날짜와 그 이유 (충·형이 있는 날)
+- 고백 성공 확률을 높이는 사전 준비 행동
+- 고백 후 관계 발전 시나리오 (성공/보류/거절 각각)
+- D-day 카운트다운: 최적의 고백일까지 남은 일수""";
+
+            case "ideal_type" -> """
+【이상형 분석 전문 프레임워크】
+- 일간(日干) 오행으로 무의식적으로 끌리는 이상형 유형 분석
+- 정재/편재(남성), 정관/편관(여성) 십성으로 배우자 기질 구체 분석
+- 이상형의 외모 특징 (체형, 분위기, 패션 스타일)
+- 이상형의 성격 특성 (MBTI 성향, 가치관, 라이프스타일)
+- 나와 상성이 좋은 오행 (상생 관계) → 잘 맞는 띠/혈액형/직업군
+- 나와 상성이 어려운 오행 (상극 관계) → 갈등 예상 유형
+- 이상형을 만날 수 있는 장소·활동·모임 추천
+- 연애운이 강한 나이대/시기 제시""";
+
+            case "past_life" -> """
+【전생 인연 분석 프레임워크】
+- 일간(日干)과 일지(日支)의 조합으로 전생의 인연 유형 분석
+- 전생에서 의뢰인의 신분/역할 상상적 해석 (오행 기반 스토리텔링)
+- 현생에서 반복되는 연애 패턴과 전생 카르마의 연결
+- 전생의 인연이 현생에 미치는 영향: 끌림/거부감/데자뷰 설명
+- 인연의 빚(전생에서 못 다한 사랑)이 있는 상대의 특징
+- 전생 카르마를 해소하고 더 나은 인연을 만드는 방법
+- 창의적이고 흥미로운 스토리텔링으로 감성적으로 작성
+- overall은 전생 이야기를 서술형으로 6-8문장""";
+
+            case "mind_reading" -> """
+【속마음 분석 프레임워크】
+- 의뢰인의 일간(日干) 오행으로 감정 수신 능력 분석
+- 오늘의 일진 기운으로 상대방의 감정 에너지 흐름 해석
+- 상대방이 나를 어떻게 생각하는지 5가지 관점 분석 (호감도/관심도/신뢰도/설렘/미래전망)
+- 상대방의 숨겨진 감정 신호 (행동/말투/태도에서 읽는 법)
+- 상대방이 마음을 열 수 있는 키포인트 제시
+- 지금 상대방이 원하는 것 vs 두려워하는 것 분석
+- 상대방 사주가 있으면: 일간 오행으로 상대 성격과 연애관 구체 분석
+- overall은 '상대방의 마음을 읽어드릴게요'라는 톤으로 5-6문장""";
+
+            case "couple_fortune" -> """
+【커플 운세 전문 분석 프레임워크】
+- 의뢰인 일간의 오행으로 오늘 연인과의 관계 에너지 분석
+- 오늘 일진이 커플 관계에 미치는 영향 (화합/갈등/설렘/안정)
+- 오늘 커플이 함께 하면 좋은 활동 3가지 구체 추천
+- 오늘 피해야 할 대화 주제/행동 경고
+- 연인에게 전하면 좋은 말/메시지 추천
+- 상대방 사주가 있으면: 두 사람의 오늘 에너지 조합 분석
+- 이번 주 커플 럭키데이 제시
+- 권태기 예방/극복 팁 (사주 기반)""";
+
+            case "meeting_timing" -> """
+【만남의 시기 전문 분석 프레임워크】
+- 일간(日干)과 사주 전체 구조로 인연의 시기 분석
+- 정재/편재(남), 정관/편관(여) 십성이 들어오는 대운/세운 시기 분석
+- 올해 남은 기간 중 인연이 강한 월(月) 구체 제시
+- 내년/향후 2-3년 인연 기운 타임라인
+- 인연을 만날 가능성이 높은 장소/상황/활동 유형
+- 인연을 앞당기기 위해 지금 해야 할 행동 3가지
+- 이 시기에 만날 인연의 특징 (오행 기질, 직업군, 성격)
+- 급하게 인연을 찾기보다 준비할 것들 조언""";
+
             default -> "연애 운세를 분석합니다.";
         };
 
-        return """
-당신은 40년 경력의 사주명리학 대가이며 연애·궁합 전문 역술인 '연화(緣華) 선생'입니다.
-수천 쌍의 커플을 상담한 경험으로, 사주팔자와 일진의 기운으로 인연의 흐름을 정확히 읽습니다.
+        // 성별에 따라 톤 변경: 남자 → 여자친구 톤, 여자 → 남자친구 톤
+        boolean isMale = "M".equals(gender);
+        String persona = isMale
+            ? """
+당신은 20대 초반 여자 친구처럼 다정하게 연애 상담해주는 사주 전문가야.
+남자에게 여자친구가 얘기해주듯 따뜻하고 귀여운 말투로 답변해.
+"오빠 오늘 진짜 좋은 날이야!", "이거 해봐!", "걱정 마 오빠!" 같은 톤.
 
-【핵심 역량】
-- 일간(日干) 오행의 연애 기질 분석
-- 두 사람의 일간 오행 상생/상극 궁합
-- 일지(日支)의 육합·삼합·충·형 관계로 인연의 깊이 판단
-- 오늘의 천기가 연애 에너지에 미치는 영향 분석
-- 사주에 없는 오행을 보충하는 인연 매칭
+【말투 스타일】
+- 다정하고 귀여운 여자친구 말투 ("~인 거야!", "~해봐!", "~거든!", "진짜 좋아!")
+- 공감과 응원이 담긴 톤, 살짝 애교 섞인 느낌
+- 이모지 사용 OK (하트, 반짝임 등)
+- 반말 사용, 존댓말/경어 금지
+- "~하옵소서", "~이로다" 같은 고전 표현 절대 금지"""
+            : """
+당신은 20대 초반 남자 친구처럼 든든하게 연애 상담해주는 사주 전문가야.
+여자에게 남자친구가 얘기해주듯 따뜻하고 믿음직한 말투로 답변해.
+"야 오늘 진짜 좋은 날이거든!", "이렇게 해봐!", "걱정 마 내가 봤을 때" 같은 톤.
 
-""" + typeSpecific + """
+【말투 스타일】
+- 든든하고 따뜻한 남자친구 말투 ("~거든!", "~인 거야", "~해봐!", "내가 봤을 때")
+- 공감하면서도 자신감 있는 톤, 살짝 장난스러운 느낌
+- 이모지 사용 OK (하트, 반짝임 등)
+- 반말 사용, 존댓말/경어 금지
+- "~하옵소서", "~이로다" 같은 고전 표현 절대 금지""";
+
+        return persona + "\n\n사주 용어는 최대한 쉽게 풀어서 설명하고, 딱딱하거나 고전적인 표현은 절대 쓰지 않아.\n\n"
+            + typeSpecific + """
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
-2. overall: 4-5문장, 사주 용어를 알기 쉽게 풀어서 설명
+2. overall: 4-5문장, 친구한테 얘기하듯 편하게
 3. timing: 구체적 날짜/요일/시간대 포함
-4. advice: 바로 실천 가능한 행동 3가지
-5. caution: 피해야 할 구체적 상황 2가지
-6. "~할 수 있습니다" 대신 "~하세요", "~입니다" 단정적 표현
+4. advice: 바로 해볼 수 있는 행동 3가지 (친구 조언처럼)
+5. caution: 피해야 할 상황 2가지 (걱정해주는 톤으로)
+6. 반말 구어체 사용 ("~해!", "~거든", "~인 거야")
 7. 점수는 사주 궁합도와 일진 기운을 종합하여 0-100 책정""";
     }
 
@@ -559,12 +672,12 @@ public class SpecialFortuneService {
         m.put("grade", grade);
 
         String typeKr = LOVE_TYPE_KR.getOrDefault(type, "연애운");
-        m.put("overall", "오늘 " + typeKr + " 점수는 " + score + "점입니다. " +
-            "일간 " + dayPillar.getFullName() + "의 기운이 " + typeKr + "에 영향을 미치고 있습니다. " +
-            "차분하게 마음을 정리하고 자신의 감정에 솔직해지세요.");
-        m.put("timing", "이번 달 중순 이후가 좋은 기운이 들어오는 시기입니다.");
-        m.put("advice", "자신을 먼저 사랑하세요. 진심 어린 마음은 반드시 전달됩니다.");
-        m.put("caution", "조급함은 금물입니다. 자연스러운 흐름을 따르세요.");
+        m.put("overall", "오늘 " + typeKr + " 점수는 " + score + "점이야! " +
+            dayPillar.getFullName() + " 기운이 " + typeKr + "에 영향을 주고 있거든! " +
+            "마음 정리 좀 하고 네 감정에 솔직해져봐 💕");
+        m.put("timing", "이번 달 중순 이후부터 좋은 기운이 들어오기 시작해! 기대해도 돼 ✨");
+        m.put("advice", "너 자신을 먼저 사랑해! 진심은 반드시 전달되거든 💗");
+        m.put("caution", "조급하면 안 돼! 자연스러운 흐름을 따라가봐 🍀");
         m.put("luckyDay", today.plusDays(r.nextInt(14) + 3).format(DateTimeFormatter.ofPattern("M월 d일")));
         m.put("luckyPlace", new String[]{"카페", "공원", "서점", "미술관", "영화관"}[r.nextInt(5)]);
         m.put("luckyColor", new String[]{"핑크", "하늘색", "화이트", "라벤더", "코랄"}[r.nextInt(5)]);

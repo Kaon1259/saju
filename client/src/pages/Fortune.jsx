@@ -76,7 +76,7 @@ function Fortune() {
       `🍀 행운의 숫자: ${fortune.luckyNumber || '-'}`,
       `🎨 행운의 색상: ${fortune.luckyColor || '-'}`,
       '',
-      '- 사주운세 앱에서 확인하세요 -',
+      '- 연애 앱에서 확인하세요 -',
     ].join('\n');
 
     try {

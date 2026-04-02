@@ -211,7 +211,7 @@ function Tarot() {
         const pos = POSITION_LABELS[spread]?.[i] || '';
         return `${pos}: ${c.nameKr} ${c.reversed ? '(역)' : '(정)'}`;
       }).join('\n') +
-      `\n\n${reading.overallMessage}\n\n사주운세 앱에서 나만의 타로를 뽑아보세요!`;
+      `\n\n${reading.overallMessage}\n\n연애 앱에서 나만의 타로를 뽑아보세요!`;
     if (navigator.share) {
       navigator.share({ title: '타로 리딩 결과', text }).catch(() => {});
     } else {

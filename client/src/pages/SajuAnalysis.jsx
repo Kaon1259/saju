@@ -198,8 +198,8 @@ function SajuAnalysis() {
           <div className="form-group">
             <label className="form-label">성별 (대운 분석용)</label>
             <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${gender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setGender('M')}>♂ 남성</button>
-              <button type="button" className={`form-toggle__btn ${gender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setGender('F')}>♀ 여성</button>
+              <button type="button" className={`form-toggle__btn ${gender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
+              <button type="button" className={`form-toggle__btn ${gender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
             </div>
           </div>
           <button

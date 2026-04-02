@@ -10,33 +10,35 @@ const NAV_ITEMS = [
   { path: '/my', label: '오늘운세', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" /><path d="M15 4l2 2-2 2M17 2l2 2-2 2" strokeWidth="1.5" /></svg>
   ), color: '#FBBF24' },
-  { path: '/saju', label: '사주', icon: (
-    <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="12" r="10" /><path d="M12 2v20M2 12h20" /></svg>
-  ), color: '#E879F9' },
-  { path: '/tojeong', label: '토정비결', icon: (
-    <svg viewBox="0 0 24 24" className="tab-svg"><path d="M4 4h16v16H4z" rx="2" /><path d="M8 2v4M16 2v4M4 10h16" /><path d="M8 14h2M14 14h2M8 18h2" /></svg>
+  { path: '/compatibility', label: '궁합', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
   ), color: '#F472B6' },
-  { path: '/mbti', label: 'MBTI', icon: (
-    <svg viewBox="0 0 24 24" className="tab-svg"><rect x="2" y="2" width="9" height="9" rx="2" /><rect x="13" y="2" width="9" height="9" rx="2" /><rect x="2" y="13" width="9" height="9" rx="2" /><rect x="13" y="13" width="9" height="9" rx="2" /></svg>
+  { path: '/traditional', label: '정통사주', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="12" r="10" /><path d="M12 2c0 5.5-5 10-5 10s5 4.5 5 10" /><circle cx="10" cy="7" r="1.5" fill="var(--color-bg, #1a0533)" stroke="none" /><circle cx="14" cy="17" r="1.5" /></svg>
+  ), color: '#E879F9' },
+  { path: '/profile', label: '마이', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="8" r="5" /><path d="M3 21c0-4.4 3.6-8 8-8h2c4.4 0 8 3.6 8 8" /></svg>
   ), color: '#34D399' },
 ];
 
 const MORE_ITEMS = [
   { path: '/tarot', label: '타로 카드', icon: '🔮', effect: 'tarot' },
-  { path: '/special', label: '특수 운세', icon: '💘', effect: 'compatibility' },
-  { path: '/compatibility', label: '궁합', icon: '💕', effect: 'compatibility' },
-  { path: '/bloodtype', label: '혈액형 운세', icon: '🩸', effect: 'bloodtype' },
   { path: '/constellation', label: '별자리 운세', icon: '⭐', effect: 'star' },
-  { path: '/manseryeok', label: '만세력', icon: '📅', effect: 'saju' },
+  { path: '/bloodtype', label: '혈액형 운세', icon: '🩸', effect: 'bloodtype' },
+  { path: '/mbti', label: 'MBTI', icon: '🧬', effect: 'mbti' },
+  { path: '/dream', label: '꿈해몽', icon: '🌙', effect: 'fortune' },
+  { path: '/psych-test', label: '심리테스트', icon: '🎭', effect: 'fortune' },
 ];
 
 const PATH_EFFECTS = {
   '/': 'fortune',
   '/my': 'fortune',
+  '/compatibility': 'compatibility',
+  '/traditional': 'saju',
+  '/profile': 'profile',
   '/saju': 'saju',
   '/tojeong': 'tojeong',
   '/mbti': 'mbti',
-  '/compatibility': 'compatibility',
   '/bloodtype': 'bloodtype',
   '/constellation': 'star',
   '/manseryeok': 'saju',
@@ -67,6 +69,12 @@ function Header({ onHomeSplash }) {
       : location.pathname.startsWith(item.path);
     if (isActive) return;
 
+    // 마이 탭: 비로그인 시 회원가입으로
+    if (item.path === '/profile' && !userId) {
+      navigate('/register', { state: { from: location.pathname } });
+      return;
+    }
+
     if (item.path === '/' && onHomeSplash) {
       onHomeSplash();
       navigate('/');
@@ -93,48 +101,17 @@ function Header({ onHomeSplash }) {
           if (onHomeSplash) onHomeSplash();
           navigate('/');
         }}>
-          <div className="logo-icon-wrap">
-            <svg viewBox="0 0 28 28" className="logo-svg">
-              <defs>
-                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FBBF24" />
-                  <stop offset="100%" stopColor="#F59E0B" />
-                </linearGradient>
-              </defs>
-              <circle cx="14" cy="14" r="12" fill="url(#logoGrad)" />
-              <text x="14" y="19" textAnchor="middle" fontSize="14" fontWeight="900" fill="#1a0533">운</text>
-            </svg>
-          </div>
-          <span className="top-bar-text">사주운세</span>
+          <span className="top-bar-heart">♥</span>
+          <span className="top-bar-text">1:1연애 <span style={{color:'#F472B6'}}>💕</span></span>
         </button>
 
         <div className="top-bar-right">
-          {/* 더보기 버튼 */}
           <button
             className={`top-bar-more-btn ${showMore ? 'active' : ''}`}
             onClick={() => setShowMore(!showMore)}
           >
             <span className="top-bar-more-dots">⋯</span>
             <span>더보기</span>
-          </button>
-
-          {/* 프로필 */}
-          <button
-            className={`top-bar-profile-btn ${location.pathname === '/profile' || location.pathname === '/register' ? 'active' : ''}`}
-            onClick={() => {
-              if (userId) {
-                if (location.pathname === '/profile') return;
-                triggerTransition('profile', '/profile');
-              } else {
-                if (location.pathname === '/register') return;
-                navigate('/register', { state: { from: location.pathname } });
-              }
-            }}
-          >
-            <svg viewBox="0 0 24 24" className="top-bar-profile-svg">
-              <circle cx="12" cy="8" r="5" />
-              <path d="M3 21c0-4.4 3.6-8 8-8h2c4.4 0 8 3.6 8 8" />
-            </svg>
           </button>
         </div>
       </header>

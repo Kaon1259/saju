@@ -44,10 +44,17 @@
   75% { transform: translateY(-1px) rotate(3deg); }
 }
 
+.top-bar-heart {
+  font-size: 22px;
+  color: #F472B6;
+  filter: drop-shadow(0 2px 4px rgba(244,114,182,0.4));
+  animation: logoBounce 3s ease-in-out infinite;
+}
+
 .top-bar-text {
   font-size: 1.1rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  background: linear-gradient(135deg, #F472B6, #E91E63);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
