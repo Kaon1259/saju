@@ -332,15 +332,11 @@ function Home() {
 
       {/* Hero - 연애 특화 */}
       <section className="home-hero">
-        <div className="home-hero__row">
-          <div className="home-hero__left">
-            <h1 className="home-hero__title">연애 운세</h1>
-            <p className="home-hero__sub">{userId && userName ? `${userName}님, 오늘의 사랑 운은?` : '사주팔자로 보는 당신의 사랑'}</p>
-          </div>
-          <div className="home-hero__date-badge">
-            <span className="home-hero__day">{dayStr}</span>
-            <span className="home-hero__date">{dateStr}</span>
-          </div>
+        <div className="home-hero__inline">
+          <h1 className="home-hero__title">연애 운세</h1>
+          <span className="home-hero__sep">·</span>
+          <p className="home-hero__sub">{userId && userName ? `${userName}님의 사랑` : '사주로 보는 사랑'}</p>
+          <span className="home-hero__date-inline">{dayStr} {dateStr}</span>
         </div>
       </section>
 

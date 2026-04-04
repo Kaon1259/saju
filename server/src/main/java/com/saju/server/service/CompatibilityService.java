@@ -24,7 +24,6 @@ public class CompatibilityService {
     private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper;
 
-    @Transactional
     public Map<String, Object> analyzeSaju(LocalDate bd1, String bt1, LocalDate bd2, String bt2) {
         // DB 캐시 체크
         String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2);
@@ -95,30 +94,19 @@ public class CompatibilityService {
         // AI 상세 분석
         if (claudeApiService.isAvailable()) {
             try {
-                String systemPrompt = "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 궁합 전문가야.\n"
-                        + "두 사람의 사주 명식과 오행 관계를 깊이 분석해서 궁합을 재밌게, 자세하게 풀어줘!\n"
-                        + "마치 친한 친구한테 연애 상담해주듯이 구체적이고 실감나게 이야기해줘.\n\n"
-                        + "【말투 규칙】\n"
-                        + "- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체\n"
-                        + "- \"~거든!\", \"~인 거야\", \"~해봐!\", \"~느낌이야\" 같은 표현 사용\n"
-                        + "- 공감과 응원이 담긴 톤\n"
-                        + "- \"~하옵소서\", \"~이로다\" 같은 고전적/격식체 표현 절대 금지\n\n"
-                        + "【규칙】\n"
-                        + "1. 반드시 JSON만 응답 (설명 텍스트 없이)\n"
-                        + "2. summary: 궁합을 한 줄로 요약 (재미있고 임팩트 있게, 1문장)\n"
-                        + "3. overall: 전반적 궁합 해석 6-8문장 (오행 관계의 의미, 두 사람의 기운이 만났을 때 어떤 시너지가 나는지, 서로에게 어떤 영향을 주는지 구체적으로)\n"
-                        + "4. loveCompat: 연애/결혼 궁합 6-8문장 (첫 만남의 느낌, 데이트 스타일, 감정 표현 방식, 싸울 때 패턴, 장기적 미래 전망까지 디테일하게)\n"
-                        + "5. workCompat: 직장/업무 궁합 4-5문장 (협업 스타일, 서로의 강약점 보완 관계, 함께 사업하면 어떤지)\n"
-                        + "6. conflictPoint: 갈등 포인트와 해결 방법 5-6문장 (구체적으로 어떤 상황에서 부딪히는지 예시와 함께, 실질적 해결 방법 제시)\n"
-                        + "7. advice: 관계 개선을 위한 구체적 조언 5-6문장 (날짜/계절/상황별 실천 가능한 팁, 행운의 데이트 장소, 피해야 할 행동 등)\n"
-                        + "8. score: 궁합 점수 1-100 (계산된 점수를 참고하되 AI 판단으로 조정 가능)\n"
-                        + "9. grade: \"천생연분\",\"좋은 인연\",\"보통\",\"노력 필요\",\"상극\" 중 하나\n\n"
-                        + "⚠️ 각 항목을 충분히 길고 구체적으로 작성해! 템플릿처럼 짧게 쓰지 마!\n\n"
-                        + "응답 형식:\n"
-                        + "{\"summary\":\"...\",\"overall\":\"...\",\"loveCompat\":\"...\",\"workCompat\":\"...\",\"conflictPoint\":\"...\",\"advice\":\"...\",\"score\":75,\"grade\":\"좋은 인연\"}";
+                String systemPrompt = "사주 궁합 전문가. 친한 친구처럼 반말 구어체(~거든!, ~인 거야, ~해봐!). 고전적 표현 금지.\n"
+                        + "JSON만 응답:\n"
+                        + "- summary: 한 줄 요약\n"
+                        + "- overall: 전반적 궁합 3-4문장\n"
+                        + "- loveCompat: 연애 궁합 3-4문장\n"
+                        + "- workCompat: 업무 궁합 2-3문장\n"
+                        + "- conflictPoint: 갈등+해결 3-4문장\n"
+                        + "- advice: 실천 조언 3-4문장\n"
+                        + "- score: 1-100, grade: 천생연분/좋은 인연/보통/노력 필요/상극\n"
+                        + "{\"summary\":\"\",\"overall\":\"\",\"loveCompat\":\"\",\"workCompat\":\"\",\"conflictPoint\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
 
                 String userPrompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation);
-                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 3000);
+                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 1500);
 
                 if (aiResponse != null && !aiResponse.isBlank()) {
                     parseAndApplyCompatAI(result, aiResponse, score, grade);
@@ -165,6 +153,8 @@ public class CompatibilityService {
 
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (existing.isPresent()) return;
             specialFortuneRepository.save(SpecialFortune.builder()
                 .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
                 .resultJson(objectMapper.writeValueAsString(result)).build());

@@ -94,3 +94,7 @@
 [data-theme="light"] .cm-results-count { color: rgba(0,0,0,0.35); }
 [data-theme="light"] .cm-star-btn { border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .cm-summary-top { border-bottom-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .cm-threshold-btn { border-color: rgba(0,0,0,0.12); color: #555; background: rgba(0,0,0,0.02); }
+[data-theme="light"] .cm-threshold-btn.active { background: rgba(255,61,127,0.1); border-color: rgba(255,61,127,0.5); color: #e91e63; }
+[data-theme="light"] .cm-cat-btn { border-color: rgba(0,0,0,0.12); color: #555; background: rgba(0,0,0,0.02); }
+[data-theme="light"] .cm-cat-btn.active { background: rgba(255,61,127,0.1); border-color: rgba(255,61,127,0.5); color: #e91e63; }

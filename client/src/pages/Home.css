@@ -370,21 +370,19 @@
 /* ─── Hero ─── */
 .home-hero {
   padding: 4px 4px 0;
-  margin-bottom: -10px;
+  margin-bottom: 0;
 }
 
-.home-hero__row {
+.home-hero__inline {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.home-hero__left {
-  flex: 1;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .home-hero__title {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 900;
   background: linear-gradient(135deg, var(--color-accent-gold) 0%, #fff 50%, var(--color-accent-gold) 100%);
   background-size: 200% auto;
@@ -392,48 +390,38 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmer 4s linear infinite;
-  letter-spacing: 1px;
-  line-height: 1.2;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.home-hero__heart {
-  -webkit-text-fill-color: #F472B6;
-  font-size: 1.1em;
-  position: relative;
-  top: 1px;
+.home-hero__sep {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 .home-hero__sub {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-primary, #fff);
   font-weight: 600;
-  margin-top: 2px;
-  opacity: 0.85;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
 }
 
-.home-hero__date-badge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 8px 14px;
-  min-width: 70px;
-}
-
-.home-hero__day {
-  font-size: 18px;
-  font-weight: 900;
+.home-hero__date-inline {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--color-accent-gold, #fbbf24);
-  line-height: 1;
-}
-
-.home-hero__date {
-  font-size: 10px;
-  color: var(--color-text-muted);
-  margin-top: 2px;
-  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
 /* ─── 읽어주기 바 ─── */
@@ -1030,7 +1018,7 @@
 .home-special-title { font-size: 17px; font-weight: 800; color: var(--color-text); margin: 0 0 12px; }
 /* ═══ 오늘의 연애 온도 ═══ */
 .home-love-section {
-  margin: -8px 16px 16px;
+  margin: -8px 0 16px;
   padding: 2px 14px 14px;
   border-radius: 20px;
   background: linear-gradient(160deg, rgba(233,30,99,0.1), rgba(255,107,107,0.04), rgba(224,64,251,0.07));
@@ -1148,26 +1136,26 @@
 }
 
 /* 연애 카드 그룹 */
-.home-love-group { position: relative; z-index: 1; margin-bottom: 12px; padding: 10px; border-radius: 16px; }
+.home-love-group { position: relative; z-index: 1; margin-bottom: 4px; padding: 6px 8px; border-radius: 12px; }
 .home-love-group--active { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); }
 .home-love-group-title {
-  font-size: 13px; font-weight: 700; color: var(--color-text-secondary, rgba(255,255,255,0.6));
-  margin: 0 0 8px 2px; display: flex; align-items: center; gap: 4px;
+  font-size: 11px !important; font-weight: 700; color: var(--color-text-secondary, rgba(255,255,255,0.6));
+  margin: 0 0 4px 2px; display: flex; align-items: center; gap: 4px;
 }
 .home-love-group--active .home-love-group-title { color: #F472B6; font-weight: 900; }
 .home-love-group-my { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 6px; background: rgba(244,114,182,0.2); color: #F472B6; letter-spacing: 0.5px; margin-left: 4px; }
 [data-theme="light"] .home-love-group--active { background: rgba(233,30,99,0.04); border-color: rgba(233,30,99,0.15); }
 [data-theme="light"] .home-love-group--active .home-love-group-title { color: #E91E63; }
-.home-love-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; position: relative; z-index: 1; }
+.home-love-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; position: relative; z-index: 1; }
 .home-love-card {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 14px 4px; border-radius: 14px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 2px; border-radius: 10px; cursor: pointer;
   background: linear-gradient(160deg, rgba(233,30,99,0.12), rgba(233,30,99,0.03));
-  border: 1.5px solid rgba(233,30,99,0.15);
+  border: 1px solid rgba(233,30,99,0.15);
   transition: all 0.2s ease; position: relative; overflow: hidden;
 }
 .home-love-card:active { transform: scale(0.95); }
-.home-love-icon { font-size: 22px; }
+.home-love-icon { font-size: 18px; }
 
 /* 커플 운세 커스텀 아이콘: ♂♡♀ */
 .couple-icon { display: inline-flex; align-items: center; gap: 2px; font-weight: 900; }
@@ -1729,7 +1717,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 0 16px 20px;
+  padding: 0 0 20px;
 }
 
 .home-love-quick-card {
@@ -1796,7 +1784,7 @@
 
 /* ─── 빠른 메뉴 ─── */
 .home-quick-section {
-  padding: 8px 16px 100px;
+  padding: 8px 0 100px;
 }
 
 .home-quick-grid {

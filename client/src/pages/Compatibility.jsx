@@ -246,7 +246,7 @@ function Compatibility() {
             <button type="button" className={`form-toggle__btn ${g1 === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => { setG1('F'); setG2('M'); }}><span className="g-circle g-female">♀</span></button>
           </div>
         </div>
-        {localStorage.getItem('userId') && (
+        {(() => { try { const p = JSON.parse(localStorage.getItem('userProfile') || '{}'); return !!p.birthDate; } catch { return false; } })() && (
           <button className="sf-autofill-btn" onClick={() => {
             try {
               const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
@@ -277,9 +277,9 @@ function Compatibility() {
 
         <div className="compat-form-divider">
           {[...Array(5)].map((_, i) => (
-            <span key={i} className="compat-bubble-heart" style={{ '--bh-i': i }}>♥</span>
+            <span key={i} className="compat-bubble-heart" style={{ '--bh-i': i }}>💗</span>
           ))}
-          <span className="compat-divider-heart">♥</span>
+          <span className="compat-divider-heart">💗</span>
         </div>
 
         {/* Person 2 */}
@@ -292,6 +292,7 @@ function Compatibility() {
               {hasPartner && (
                 <button className="sf-autofill-btn" onClick={() => {
                   setBd2(profile.partnerBirthDate);
+                  if (profile.partnerBirthTime) setBt2(profile.partnerBirthTime);
                   if (profile.gender === 'M') setG2('F'); else setG2('M');
                 }}>💕 연인 정보로 채우기</button>
               )}

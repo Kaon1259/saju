@@ -109,3 +109,8 @@
 [data-theme="light"] .gf-member-result-name { color: #1e293b; }
 [data-theme="light"] .gf-member-result-text { color: #475569; }
 [data-theme="light"] .gf-hero-title { background: linear-gradient(135deg, #7c3aed, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .gf-type-btn { border-color: rgba(0,0,0,0.12); color: #555; background: rgba(0,0,0,0.02); }
+[data-theme="light"] .gf-type-btn.active { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.5); color: #7c3aed; }
+[data-theme="light"] .gf-member-chip { border-color: rgba(0,0,0,0.12); color: #555; background: rgba(0,0,0,0.02); }
+[data-theme="light"] .gf-member-chip.active { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.5); color: #7c3aed; }
+[data-theme="light"] .gf-chip--group.active { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.5); color: #7c3aed; }

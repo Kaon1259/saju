@@ -275,7 +275,6 @@ public class SpecialFortuneService {
         return result;
     }
 
-    @Transactional
     public Map<String, Object> getLoveFortune(String type, String birthDate,
                                                String birthTime, String gender, String calendarType,
                                                String partnerDate, String partnerGender,
@@ -350,16 +349,14 @@ public class SpecialFortuneService {
                     (gender != null ? " / 성별: " + ("M".equals(gender) ? "남" : "여") : "") +
                     (!statusKr.isEmpty() ? " / 연애상태: " + statusKr : "") +
                     extra + "\n\n" +
-                    "위 정보를 바탕으로 '" + typeKr + "'을 분석하세요." +
-                    (!statusKr.isEmpty() ? " 현재 연애 상태('" + statusKr + "')에 맞춰서 오늘 하루 연애 기운과 조언을 해주세요." : "") + "\n" +
-                    "반드시 아래 JSON 형식으로만 응답:\n" +
-                    "{\"score\":점수(0-100),\"grade\":\"등급(대길/길/보통/흉)\",\"overall\":\"종합 분석 (8-10문장, 구체적이고 재미있게 길게 작성!)\"," +
-                    "\"timing\":\"최적 시기 (3-4문장, 날짜/시간 구체적으로)\",\"advice\":\"구체적 행동 조언 (5-6문장, 실천 가능한 팁 상세히)\"," +
-                    "\"caution\":\"주의사항 (3-4문장)\",\"luckyDay\":\"이번 달 행운의 날짜\"," +
-                    "\"luckyPlace\":\"행운의 장소\",\"luckyColor\":\"행운의 색\"}\n" +
-                    "⚠️ 각 항목을 충분히 길고 구체적으로 작성해! 짧게 쓰지 마!";
+                    "'" + typeKr + "' 분석." +
+                    (!statusKr.isEmpty() ? " 연애상태: " + statusKr : "") + "\n" +
+                    "JSON만 응답:\n" +
+                    "{\"score\":0-100,\"grade\":\"대길/길/보통/흉\",\"overall\":\"종합 3-4문장\"," +
+                    "\"timing\":\"최적시기 2문장\",\"advice\":\"행동조언 3문장\"," +
+                    "\"caution\":\"주의 2문장\",\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}";
 
-                String response = claudeApiService.generate(system, user, 2000);
+                String response = claudeApiService.generate(system, user, 1200);
                 String json = ClaudeApiService.extractJson(response);
                 if (json != null) {
                     JsonNode node = objectMapper.readTree(json);
@@ -389,7 +386,6 @@ public class SpecialFortuneService {
     /**
      * 아침/점심/저녁 운세 (3블록)
      */
-    @Transactional
     public Map<String, Object> getTimeblockFortune(String birthDate, String birthTime,
                                                      String gender, String calendarType) {
         LocalDate date = LocalDate.parse(birthDate);
@@ -498,7 +494,6 @@ public class SpecialFortuneService {
     /**
      * 시간대별 운세 (12시진)
      */
-    @Transactional
     public Map<String, Object> getHourlyFortune(String birthDate, String birthTime,
                                                   String gender, String calendarType) {
         LocalDate date = LocalDate.parse(birthDate);
@@ -869,6 +864,12 @@ public class SpecialFortuneService {
 
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
+            // 중복 키 방지: 이미 존재하면 저장 안 함
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            if (existing.isPresent()) {
+                log.info("캐시 이미 존재: {} / {}", type, cacheKey);
+                return;
+            }
             String json = objectMapper.writeValueAsString(result);
             SpecialFortune entity = SpecialFortune.builder()
                 .fortuneType(type)
