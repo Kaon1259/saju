@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { TransitionProvider } from './components/PageTransition';
 import Header from './components/Header';
 import Home from './pages/Home';
@@ -181,11 +181,33 @@ function useFontSize() {
   }, []);
 }
 
+// 프로필 미완성 사용자 리다이렉트
+function useProfileGuard() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const allowedPaths = ['/register', '/auth/kakao/callback', '/settings'];
+    if (allowedPaths.some(p => location.pathname.startsWith(p))) return;
+
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    try {
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (!profile.birthDate) {
+        navigate('/register?needProfile=true', { replace: true });
+      }
+    } catch {}
+  }, [location.pathname]);
+}
+
 function App() {
   const [splashKey, setSplashKey] = useState(Date.now());
   const [showSplash, setShowSplash] = useState(true);
   useTimeTheme();
   useFontSize();
+  useProfileGuard();
 
   // 자동 로그인 off면 앱 시작 시 로그인 정보 제거
   useEffect(() => {

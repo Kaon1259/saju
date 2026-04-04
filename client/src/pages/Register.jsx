@@ -62,8 +62,9 @@ function Register() {
   const [searchParams] = useSearchParams();
   const redirectTo = location.state?.from || '/';
 
-  const [step, setStep] = useState('kakao'); // 'kakao' | 'profile' | 'loading'
-  const [userId, setUserId] = useState(null);
+  const needProfile = searchParams.get('needProfile') === 'true';
+  const [step, setStep] = useState(needProfile ? 'profile' : 'kakao'); // 'kakao' | 'profile' | 'loading'
+  const [userId, setUserId] = useState(needProfile ? localStorage.getItem('userId') : null);
   const [form, setForm] = useState({
     name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
     birthTime: '', bloodType: '', mbtiType: '',
