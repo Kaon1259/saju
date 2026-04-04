@@ -4,8 +4,10 @@ import com.saju.server.dto.UserResponse;
 import com.saju.server.saju.SajuResult;
 import com.saju.server.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -21,6 +23,9 @@ public class MyFortuneController {
     private final LunarCalendarService lunarCalendarService;
     private final BloodTypeFortuneService bloodTypeFortuneService;
     private final MbtiFortuneService mbtiFortuneService;
+    private final FortuneService fortuneService;
+    private final ClaudeApiService claudeApiService;
+    private final FortunePromptBuilder promptBuilder;
 
     /**
      * 나의 통합 운세 (사주 AI + 혈액형 + MBTI)
@@ -77,5 +82,69 @@ public class MyFortuneController {
         // 2. 혈액형/MBTI는 각 페이지에서 개별 호출 (홈 로딩 속도 개선)
 
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 나의 운세 스트리밍 (사주 AI 부분)
+     */
+    @GetMapping(value = "/fortune/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamMyFortune(@PathVariable Long userId) {
+        UserResponse user = userService.getUser(userId);
+        if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try { emitter.send(SseEmitter.event().name("error").data("프로필을 먼저 완성해주세요.")); emitter.complete(); }
+                catch (Exception ignored) {}
+            }).start();
+            return emitter;
+        }
+
+        // 캐시 체크
+        var cached = fortuneService.getCachedFortune(user.getZodiacAnimal());
+        if (cached != null && cached.getOverall() != null && !cached.getOverall().isBlank()) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try {
+                    Map<String, Object> data = buildMyFortuneData(user, cached);
+                    emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(data)));
+                    emitter.complete();
+                } catch (Exception ignored) {}
+            }).start();
+            return emitter;
+        }
+
+        // AI 스트리밍
+        String systemPrompt = promptBuilder.fortuneStreamSystemPrompt();
+        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), LocalDate.now());
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
+            fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText);
+        });
+    }
+
+    private Map<String, Object> buildMyFortuneData(UserResponse user, com.saju.server.dto.FortuneResponse fortune) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        var userMap = new LinkedHashMap<String, Object>();
+        userMap.put("name", user.getName());
+        userMap.put("zodiacAnimal", user.getZodiacAnimal() != null ? user.getZodiacAnimal() : "");
+        userMap.put("bloodType", user.getBloodType() != null ? user.getBloodType() : "");
+        userMap.put("mbtiType", user.getMbtiType() != null ? user.getMbtiType() : "");
+        userMap.put("birthDate", user.getBirthDate().toString());
+        userMap.put("birthTime", user.getBirthTime() != null ? user.getBirthTime() : "");
+        userMap.put("gender", user.getGender() != null ? user.getGender() : "");
+        userMap.put("calendarType", user.getCalendarType() != null ? user.getCalendarType() : "SOLAR");
+        result.put("user", userMap);
+
+        Map<String, Object> saju = new LinkedHashMap<>();
+        saju.put("overall", fortune.getOverall());
+        saju.put("love", fortune.getLove());
+        saju.put("money", fortune.getMoney());
+        saju.put("health", fortune.getHealth());
+        saju.put("work", fortune.getWork());
+        saju.put("score", fortune.getScore());
+        saju.put("luckyNumber", fortune.getLuckyNumber());
+        saju.put("luckyColor", fortune.getLuckyColor());
+        saju.put("zodiacAnimal", user.getZodiacAnimal());
+        result.put("saju", saju);
+        return result;
     }
 }

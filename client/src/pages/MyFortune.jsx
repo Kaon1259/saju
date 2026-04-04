@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyFortune, analyzeSaju } from '../api/fortune';
+import { getMyFortune, getMyFortuneStream, analyzeSaju } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
+import StreamText from '../components/StreamText';
+import FortuneLoading from '../components/FortuneLoading';
 import './MyFortune.css';
 
 function MyFortune() {
@@ -13,6 +15,9 @@ function MyFortune() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('saju');
   const [copied, setCopied] = useState(false);
+  const [streamText, setStreamText] = useState('');
+  const [streaming, setStreaming] = useState(false);
+  const cleanupRef = useRef(null);
   const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'other'
   const [otherBirthDate, setOtherBirthDate] = useState('');
   const [otherBirthTime, setOtherBirthTime] = useState('');
@@ -64,13 +69,46 @@ function MyFortune() {
   const userName = localStorage.getItem('userName');
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
-    (async () => {
-      try {
-        const result = await getMyFortune(userId);
-        setData(result);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    })();
+
+    setStreamText('');
+    setStreaming(false);
+
+    cleanupRef.current = getMyFortuneStream(userId, {
+      onCached: (cachedData) => {
+        setData(cachedData);
+        setLoading(false);
+      },
+      onChunk: (text) => {
+        setStreaming(true);
+        setStreamText(prev => prev + text);
+      },
+      onDone: (fullText) => {
+        setStreaming(false);
+        setStreamText('');
+        // 스트리밍 완료 → full API로 데이터 가져오기 (서버에서 캐시 저장됨)
+        (async () => {
+          try {
+            const result = await getMyFortune(userId);
+            setData(result);
+          } catch (e) { console.error(e); }
+          finally { setLoading(false); }
+        })();
+      },
+      onError: () => {
+        setStreaming(false);
+        setStreamText('');
+        // 폴백: 기존 방식
+        (async () => {
+          try {
+            const result = await getMyFortune(userId);
+            setData(result);
+          } catch (e) { console.error(e); }
+          finally { setLoading(false); }
+        })();
+      },
+    });
+
+    return () => cleanupRef.current?.();
   }, [userId]);
 
   if (!userId) {
@@ -88,13 +126,13 @@ function MyFortune() {
     );
   }
 
-  if (loading) {
+  if (loading || streaming) {
     return (
       <div className="myf-page">
-        <div className="myf-loading">
-          <div className="myf-spinner" />
-          <p>AI가 사주를 분석하고 있습니다...</p>
-        </div>
+        {!streamText && <FortuneLoading type="default" />}
+        {streamText && (
+          <StreamText text={streamText} icon="🔮" label="AI가 사주를 분석하고 있어요..." color="#FBBF24" />
+        )}
       </div>
     );
   }

@@ -155,6 +155,23 @@ export const getMyFortune = async (userId) => {
   return response.data;
 };
 
+export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError }) => {
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/my/fortune/${userId}/stream`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 // ─── 혈액형 운세 ───
 export const getBloodTypeFortune = async (type) => {
   const response = await api.get('/bloodtype/fortune', { params: { type } });
