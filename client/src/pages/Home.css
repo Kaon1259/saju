@@ -1029,7 +1029,7 @@
 .home-special-title { font-size: 17px; font-weight: 800; color: var(--color-text); margin: 0 0 12px; }
 /* ═══ 오늘의 연애 온도 ═══ */
 .home-love-section {
-  margin: 0 16px 16px;
+  margin: -8px 16px 16px;
   padding: 2px 14px 14px;
   border-radius: 20px;
   background: linear-gradient(160deg, rgba(233,30,99,0.1), rgba(255,107,107,0.04), rgba(224,64,251,0.07));
