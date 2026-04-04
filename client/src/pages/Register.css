@@ -330,29 +330,44 @@
 
 /* ── 라이트 모드 ── */
 [data-theme="light"] .form-input {
-  border-color: #ddd;
-  background: #f8f6ff;
+  border-color: #c5b8d9;
+  background: #fff;
   color: #1a1a2e;
 }
 [data-theme="light"] .form-input:focus {
   border-color: #7c3aed;
   background: #fff;
 }
-[data-theme="light"] .form-input::placeholder { color: #999; }
+[data-theme="light"] .form-input::placeholder { color: #888; }
+[data-theme="light"] .form-input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
 [data-theme="light"] .form-toggle__btn {
-  border-color: #ddd;
-  background: #f8f6ff;
-  color: #666;
+  border-color: #c5b8d9;
+  background: #fff;
+  color: #2e2e45;
 }
 [data-theme="light"] .form-toggle__btn--active {
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(124, 58, 237, 0.15);
   border-color: #7c3aed;
   color: #4a2d8e;
+  font-weight: 800;
 }
-[data-theme="light"] .form-label { color: #3a3a50; }
-[data-theme="light"] .register-mode-tab { color: #999; }
-[data-theme="light"] .register-mode-tab--active { color: #fff; }
+[data-theme="light"] .form-label { color: #2e2e45; font-weight: 700; }
 [data-theme="light"] .register-header__title { color: #1a1a2e; }
+[data-theme="light"] .register-header__subtitle { color: #4a4a60; }
+[data-theme="light"] .register-mode-tab { color: #888; }
+[data-theme="light"] .register-mode-tab--active { color: #fff; }
+[data-theme="light"] .register-step { background: #e8e0f0; border-color: #c5b8d9; color: #666; }
+[data-theme="light"] .register-step--active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+[data-theme="light"] .register-step__line { background: #c5b8d9; }
+[data-theme="light"] .register-zodiac { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); }
+[data-theme="light"] .register-zodiac__text { color: #b8860b; }
+[data-theme="light"] .register-constellation { background: rgba(147,51,234,0.1); border-color: rgba(147,51,234,0.25); }
+[data-theme="light"] .register-constellation__text { color: #6b21a8; }
+[data-theme="light"] .form-error { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); color: #dc2626; }
+[data-theme="light"] .register-kakao-notice { color: rgba(0,0,0,0.5); }
+[data-theme="light"] .register-kakao-welcome { background: rgba(254,229,0,0.12); border-color: rgba(254,229,0,0.4); color: #8a7400; }
+[data-theme="light"] .form-select { color: #1a1a2e; }
+[data-theme="light"] .pe-partner-section { background: rgba(233,30,99,0.06); border-color: rgba(233,30,99,0.2); }
 
 /* 상대방 정보 섹션 */
 .pe-partner-section {
