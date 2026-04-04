@@ -367,17 +367,19 @@ function Home() {
               ))}
             </div>
 
-            <div className="home-love-temp-center">
-              <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
-              <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
+            <div className="home-love-top-row">
+              <div className="home-love-temp-center">
+                <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
+                <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
+              </div>
+              <button className="home-love-fortune-btn" onClick={() => navigate('/love-fortune')}>
+                💕 연애운
+              </button>
             </div>
             <p className="home-love-temp-label">
               {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
             </p>
             <p className="home-love-temp-msg">{msg}</p>
-            <button className="home-love-fortune-btn" onClick={() => navigate('/love-fortune')}>
-              <span>💕</span> 연애운 보기
-            </button>
 
             {LOVE_GROUPS.map(group => {
               const myStatus = (() => { try { return JSON.parse(localStorage.getItem('userProfile')||'{}').relationshipStatus; } catch { return null; } })();

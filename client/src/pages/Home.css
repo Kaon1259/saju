@@ -1066,11 +1066,14 @@
 }
 
 /* 온도 + 연애운 상단 행 */
-.home-love-temp-center {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  position: relative; z-index: 1; margin-bottom: 4px;
+.home-love-top-row {
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 1; margin-bottom: 4px; padding: 0 4px;
 }
-.home-love-fortune-btn { padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 11px !important; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; margin: 4px auto 10px; }
+.home-love-temp-center {
+  display: flex; align-items: center; gap: 6px;
+}
+.home-love-fortune-btn { padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 10px !important; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
 .home-love-fortune-btn:hover { background: rgba(244,114,182,0.2); }
 
 /* 커플 운세 */
@@ -1089,8 +1092,8 @@
 
 /* 온도 표시 */
 .home-love-temp-heart {
-  font-size: 44px;
-  filter: drop-shadow(0 0 16px var(--love-temp-color, #E91E63));
+  font-size: 52px;
+  filter: drop-shadow(0 0 18px var(--love-temp-color, #E91E63));
   animation: loveTempPump 1.8s ease-in-out infinite;
 }
 
@@ -1113,7 +1116,7 @@
 }
 
 .home-love-temp-num {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 900;
   line-height: 1;
 }
