@@ -1093,8 +1093,8 @@
 
 /* 온도 표시 */
 .home-love-temp-heart {
-  font-size: 160px;
-  filter: drop-shadow(0 0 30px var(--love-temp-color, #E91E63));
+  font-size: 64px;
+  filter: drop-shadow(0 0 20px var(--love-temp-color, #E91E63));
   animation: loveTempPump 1.8s ease-in-out infinite;
 }
 
@@ -1117,7 +1117,7 @@
 }
 
 .home-love-temp-num {
-  font-size: 144px;
+  font-size: 56px;
   font-weight: 900;
   line-height: 1;
 }
