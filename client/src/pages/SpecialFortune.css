@@ -196,7 +196,7 @@
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); z-index: 1;
 }
-.sf-block-fortune { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin: 0 0 6px; }
+.sf-block-fortune { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin: 0 0 6px; }
 .sf-block-advice { font-size: 12px; color: var(--color-primary-light); margin: 0 0 4px; }
 .sf-block-action { font-size: 11px; color: var(--color-text-muted); background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 8px; display: inline-block; }
 
@@ -216,7 +216,7 @@
 .sf-hour-score.high { background: rgba(74,222,128,0.15); color: #4ade80; }
 .sf-hour-score.mid { background: rgba(251,191,36,0.15); color: #fbbf24; }
 .sf-hour-score.low { background: rgba(248,113,113,0.15); color: #f87171; }
-.sf-hour-fortune { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
+.sf-hour-fortune { font-size: 14px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
 .sf-hour-action { font-size: 12px; color: var(--color-primary-light); margin: 4px 0 0; }
 
 /* ═══ 공통 ═══ */
@@ -242,11 +242,11 @@
 [data-theme="light"] .sf-label { color: #333; }
 [data-theme="light"] .sf-input { background: #fff; border-color: rgba(0,0,0,0.15); color: #111; }
 [data-theme="light"] .sf-input:focus { border-color: #9B59B6; }
-[data-theme="light"] .sf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #555; }
+[data-theme="light"] .sf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #3a3a50; }
 [data-theme="light"] .sf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.08); color: #111; }
 [data-theme="light"] .sf-partner-section { background: rgba(233,30,99,0.03); border-color: rgba(233,30,99,0.12); }
 [data-theme="light"] .sf-block-score-bar { background: rgba(0,0,0,0.06); }
-[data-theme="light"] .sf-block-action { background: rgba(0,0,0,0.03); color: #555; }
+[data-theme="light"] .sf-block-action { background: rgba(0,0,0,0.03); color: #3a3a50; }
 [data-theme="light"] .sf-hour-score.high { background: rgba(22,163,74,0.08); color: #16a34a; }
 [data-theme="light"] .sf-hour-score.mid { background: rgba(184,134,11,0.08); color: #92710a; }
 [data-theme="light"] .sf-hour-score.low { background: rgba(220,38,38,0.08); color: #dc2626; }

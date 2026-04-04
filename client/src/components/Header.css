@@ -148,6 +148,7 @@
   border-radius: 14px;
   padding: 6px;
   min-width: 160px;
+  max-width: calc(100vw - 24px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   animation: dropdownIn 0.2s ease;
 }

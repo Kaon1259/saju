@@ -321,6 +321,39 @@ export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calend
   return response.data;
 };
 
+// ─── 심화분석 스트리밍 ───
+export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ type, birthDate });
+  if (birthTime) params.set('birthTime', birthTime);
+  if (gender) params.set('gender', gender);
+  if (calendarType) params.set('calendarType', calendarType);
+  if (extra) params.set('extra', extra);
+
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/deep/fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => {
+    onDone?.(e.data);
+    eventSource.close();
+  });
+  eventSource.addEventListener('error', (e) => {
+    onError?.(e.data || 'Stream error');
+    eventSource.close();
+  });
+  eventSource.onerror = () => {
+    onError?.('Connection lost');
+    eventSource.close();
+  };
+
+  return () => eventSource.close(); // cleanup function
+};
+
 // ─── YouTube Shorts ───
 export const getFortuneShorts = async (context) => {
   const params = {};

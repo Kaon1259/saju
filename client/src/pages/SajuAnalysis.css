@@ -300,7 +300,7 @@
 /* ─── 심화분석: 격국 ─── */
 .saju-gyeokguk { text-align: center; }
 .saju-gyeokguk__name { display: inline-block; font-size: 22px; font-weight: 900; color: var(--color-accent-gold); padding: 8px 24px; border: 2px solid rgba(251,191,36,0.3); border-radius: 12px; background: rgba(251,191,36,0.08); margin-bottom: 8px; }
-.saju-gyeokguk__desc { font-size: 13px; color: var(--color-text-muted); margin-top: 8px; }
+.saju-gyeokguk__desc { font-size: 14px; color: var(--color-text-muted); margin-top: 8px; }
 
 /* ─── 심화분석: 12운성 ─── */
 .saju-twelve-stages { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -319,7 +319,7 @@
 .saju-inter--hae { background: rgba(168,85,247,0.06); border-left-color: #a855f7; }
 .saju-inter-type { font-size: 14px; font-weight: 900; min-width: 24px; }
 .saju-inter-detail { font-size: 12px; color: var(--color-text-muted); font-weight: 600; min-width: 80px; }
-.saju-inter-desc { font-size: 13px; color: rgba(255,255,255,0.8); }
+.saju-inter-desc { font-size: 15px; color: rgba(255,255,255,0.8); }
 
 /* ─── 심화분석: 신살 ─── */
 .saju-sinsal-list { display: flex; flex-direction: column; gap: 8px; }
@@ -390,21 +390,21 @@
 [data-theme="light"] .pillar-stem { background: rgba(0,0,0,0.03); }
 [data-theme="light"] .pillar-branch { background: rgba(0,0,0,0.02); }
 [data-theme="light"] .pillar-hanja { color: #111; }
-[data-theme="light"] .pillar-daymaster { color: #555; border-top-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .pillar-daymaster { color: #3a3a50; border-top-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .saju-section-title { color: #96700a; }
 [data-theme="light"] .saju-stage-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .saju-stage-name { color: #222; }
-[data-theme="light"] .saju-inter-desc { color: #444; }
+[data-theme="light"] .saju-inter-desc { color: #2e2e45; }
 [data-theme="light"] .saju-sinsal-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .saju-sinsal-name { color: #111; }
 [data-theme="light"] .saju-daeun-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .saju-daeun--current { background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,191,36,0.05)); border-color: rgba(124,58,237,0.3); }
 [data-theme="light"] .saju-daeun-hanja { color: #111; }
-[data-theme="light"] .saju-daeun-name { color: #666; }
+[data-theme="light"] .saju-daeun-name { color: #4a4a5a; }
 [data-theme="light"] .saju-month-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .saju-month--now { background: rgba(124,58,237,0.04); border-color: rgba(124,58,237,0.3); }
 [data-theme="light"] .saju-month-num { color: #111; }
-[data-theme="light"] .saju-month-summary { color: #444; }
+[data-theme="light"] .saju-month-summary { color: #2e2e45; }
 [data-theme="light"] .saju-month-now-tag { color: #fff; }
 [data-theme="light"] .saju-month-stage { background: rgba(0,0,0,0.04); color: #666; }
 [data-theme="light"] .saju-daily-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }

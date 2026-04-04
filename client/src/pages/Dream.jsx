@@ -3,6 +3,7 @@ import { interpretDream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import FortuneLoading from '../components/FortuneLoading';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -245,18 +246,7 @@ function Dream() {
 
       {/* ═══ STEP: 로딩 ═══ */}
       {step === 'loading' && (
-        <div className="dream-loading fade-in">
-          <div className="dream-loading-scene">
-            <div className="dream-loading-moon">🌙</div>
-            <div className="dream-loading-sparkle dream-loading-sparkle--1">✨</div>
-            <div className="dream-loading-sparkle dream-loading-sparkle--2">✨</div>
-            <div className="dream-loading-sparkle dream-loading-sparkle--3">✨</div>
-            <div className="dream-loading-cloud dream-loading-cloud--1" />
-            <div className="dream-loading-cloud dream-loading-cloud--2" />
-          </div>
-          <p className="dream-loading-text">AI가 꿈의 의미를 해석하고 있어요<span className="dream-dots" /></p>
-          <p className="dream-loading-hint">당신의 무의식이 전하는 메시지를 풀어봅니다</p>
-        </div>
+        <FortuneLoading type="dream" />
       )}
 
       {/* ═══ STEP: 결과 ═══ */}

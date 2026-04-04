@@ -7,7 +7,7 @@
 .mystar-hero { text-align: center; padding: 16px 0 8px; }
 .mystar-hero-icon { font-size: 40px; display: block; margin-bottom: 8px; }
 .mystar-hero-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #FF9800, #FBBF24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-.mystar-hero-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
+.mystar-hero-desc { font-size: 15px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
 
 /* Section Title */
 .mystar-section-title { font-size: 15px; font-weight: 800; color: var(--color-text); margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
@@ -50,7 +50,7 @@
 .mystar-empty { text-align: center; padding: 32px 20px; }
 .mystar-empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
 .mystar-empty-text { font-size: 16px; font-weight: 800; color: var(--color-text); margin: 0; }
-.mystar-empty-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin: 6px 0 0; }
+.mystar-empty-sub { font-size: 15px; color: rgba(255,255,255,0.45); margin: 6px 0 0; }
 
 /* Add Toggle */
 .mystar-add-toggle { padding: 12px; border-radius: 14px; border: 1px dashed rgba(255,152,0,0.3); background: rgba(255,152,0,0.05); color: #FFB74D; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s; }

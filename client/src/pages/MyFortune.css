@@ -39,20 +39,20 @@
 .myf-score-fill { fill: none; stroke: var(--color-accent-gold, #fbbf24); stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
 .myf-score-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
 .myf-score-num { font-size: 34px; font-weight: 900; color: #fff; display: block; }
-.myf-score-unit { font-size: 13px; color: var(--color-text-muted); }
+.myf-score-unit { font-size: 14px; color: var(--color-text-muted); }
 
 /* 일진/사주 분석 */
 .myf-analysis { display: flex; flex-direction: column; gap: 8px; padding: 14px; margin-bottom: 16px; }
 .myf-analysis-icon { font-size: 20px; }
 .myf-analysis-title { font-size: 14px; font-weight: 800; color: var(--color-accent-gold, #fbbf24); margin: 0; }
-.myf-analysis p { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.8); margin: 0; }
+.myf-analysis p { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8); margin: 0; }
 
 /* 카드 */
 .myf-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 
 /* 팁 */
 .myf-tip { display: flex; align-items: flex-start; gap: 10px; padding: 14px; margin-bottom: 16px; }
-.myf-tip p { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.85); }
+.myf-tip p { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.85); }
 
 /* 럭키 */
 .myf-lucky { display: flex; align-items: center; padding: 16px; }
@@ -86,13 +86,13 @@
 
 /* ── 라이트 모드 ── */
 [data-theme="light"] .myf-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-[data-theme="light"] .myf-badge { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #555; }
+[data-theme="light"] .myf-badge { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #3a3a50; }
 [data-theme="light"] .myf-badge--saju { border-color: rgba(184,134,11,0.3); color: #96700a; background: rgba(251,191,36,0.06); }
 [data-theme="light"] .myf-badge--bt { border-color: rgba(194,24,91,0.3); color: #c2185b; background: rgba(194,24,91,0.06); }
 [data-theme="light"] .myf-badge--mbti { border-color: rgba(13,121,82,0.3); color: #0d7952; background: rgba(13,121,82,0.06); }
 [data-theme="light"] .myf-tab { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .myf-tab.active { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(251,191,36,0.06)); border-color: rgba(124,58,237,0.35); }
-[data-theme="light"] .myf-tab-label { color: #666; }
+[data-theme="light"] .myf-tab-label { color: #4a4a5a; }
 [data-theme="light"] .myf-tab.active .myf-tab-label { color: #111; }
 [data-theme="light"] .myf-score-bg { stroke: rgba(0,0,0,0.06); }
 [data-theme="light"] .myf-score-num { color: #111; }

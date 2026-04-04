@@ -709,7 +709,7 @@
 .tarot-question {
   width: 100%; padding: 14px 16px; border-radius: 14px;
   border: 1.5px solid var(--color-glass-border); background: var(--color-glass);
-  color: var(--color-text); font-size: 14px; line-height: 1.5;
+  color: var(--color-text); font-size: 15px; line-height: 1.5;
   resize: none; font-family: inherit; transition: border-color 0.3s; box-sizing: border-box;
 }
 .tarot-question:focus { outline: none; border-color: #9B59B6; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15); }
@@ -767,7 +767,7 @@
 }
 
 .tarot-shuffle-text { font-size: 18px; font-weight: 700; color: #BB8FCE; }
-.tarot-shuffle-hint { font-size: 13px; color: var(--color-text-muted); margin-top: 8px; }
+.tarot-shuffle-hint { font-size: 14px; color: var(--color-text-muted); margin-top: 8px; }
 
 .tarot-dots::after { content: ''; animation: dotsAnim 1.5s steps(4) infinite; }
 @keyframes dotsAnim { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
@@ -859,7 +859,7 @@
 }
 @keyframes badgePop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
-.tarot-pick-hint { text-align: center; font-size: 13px; color: var(--color-text-muted); font-style: italic; }
+.tarot-pick-hint { text-align: center; font-size: 14px; color: var(--color-text-muted); font-style: italic; }
 
 /* 처음으로 버튼 */
 .tarot-back-btn {
@@ -1023,12 +1023,12 @@
 }
 .tarot-overall-icon { font-size: 28px; margin-bottom: 8px; }
 .tarot-overall-text { font-size: 16px; font-weight: 700; color: var(--color-text); line-height: 1.5; margin: 0; }
-.tarot-lucky-element { margin-top: 12px; font-size: 13px; color: var(--color-text-secondary); }
+.tarot-lucky-element { margin-top: 12px; font-size: 14px; color: var(--color-text-secondary); }
 .tarot-lucky-element strong { color: #BB8FCE; }
 
 .tarot-interpretation { padding: 20px; border-radius: 16px; border: 1px solid var(--color-glass-border); }
 .tarot-interp-title { font-size: 16px; font-weight: 700; margin: 0 0 14px; color: var(--color-text); display: flex; align-items: center; gap: 8px; }
-.tarot-interp-body { font-size: 14px; line-height: 1.8; color: var(--color-text-secondary); }
+.tarot-interp-body { font-size: 15px; line-height: 1.8; color: var(--color-text-secondary); }
 .tarot-interp-body p { margin: 0 0 10px; }
 .tarot-interp-body p:last-child { margin-bottom: 0; }
 
@@ -1121,7 +1121,7 @@
   font-size: 22px; font-weight: 900; color: #fff; margin: 4px 0 2px;
 }
 .tarot-focus-name-en {
-  font-size: 13px; color: rgba(255,255,255,0.5); margin: 0 0 12px;
+  font-size: 15px; color: rgba(255,255,255,0.5); margin: 0 0 12px;
 }
 .tarot-focus-meaning {
   font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.85);

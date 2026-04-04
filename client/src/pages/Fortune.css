@@ -274,7 +274,7 @@
 }
 
 /* ── 라이트 모��� ── */
-[data-theme="light"] .fortune-score__label { color: #555; }
+[data-theme="light"] .fortune-score__label { color: #3a3a50; }
 [data-theme="light"] .fortune-score__zodiac { color: #111; }
 [data-theme="light"] .fortune-score__date { color: #888; }
 [data-theme="light"] .fortune-lucky__item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
@@ -283,7 +283,7 @@
 [data-theme="light"] .fortune-lucky__number { color: #b8860b; }
 [data-theme="light"] .fortune-lucky__color { color: #5b21b6; }
 [data-theme="light"] .fortune-lucky__title { color: #b8860b; }
-[data-theme="light"] .fortune-loading-text { color: #555; }
+[data-theme="light"] .fortune-loading-text { color: #3a3a50; }
 [data-theme="light"] .fortune-animal-circle { background: radial-gradient(circle, rgba(251,191,36,0.1), rgba(124,58,237,0.06)); }
 [data-theme="light"] .fortune-score__svg { filter: drop-shadow(0 0 12px rgba(124,58,237,0.15)); }
-[data-theme="light"] .fortune-error { color: #666; }
+[data-theme="light"] .fortune-error { color: #4a4a5a; }

@@ -74,7 +74,7 @@
   background: rgba(255,255,255,0.04); color: var(--color-text-secondary); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 .lf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.15); color: var(--color-text); }
-[data-theme="light"] .lf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #555; }
+[data-theme="light"] .lf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #3a3a50; }
 [data-theme="light"] .lf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.08); color: #111; }
 
 .lf-autofill-btn {
@@ -149,7 +149,7 @@
 .lf-heart-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%); font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 .lf-heart-unit { position: absolute; top: 50%; left: 50%; transform: translate(32px, -20%); font-size: 12px; color: rgba(255,255,255,0.7); }
 .lf-heart-grade { position: relative; z-index: 1; font-size: 18px; font-weight: 900; display: block; }
-.lf-heart-status { position: relative; z-index: 1; font-size: 13px; color: var(--color-text-muted); margin-top: 4px; display: block; }
+.lf-heart-status { position: relative; z-index: 1; font-size: 14px; color: var(--color-text-muted); margin-top: 4px; display: block; }
 
 /* ═══ 럭키 ═══ */
 .lf-lucky {

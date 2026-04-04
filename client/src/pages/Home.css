@@ -80,7 +80,7 @@
   font-size: 11px; font-weight: 800; color: var(--med-color, #fbbf24);
   text-transform: uppercase; letter-spacing: 0.5px;
 }
-.home-med-step-action { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.5; margin: 3px 0 0; }
+.home-med-step-action { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.5; margin: 3px 0 0; }
 .home-med-footer {
   margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
   display: flex; justify-content: space-between; align-items: center;
@@ -114,7 +114,7 @@
   box-shadow: 0 2px 12px rgba(22,163,74,0.1);
 }
 [data-theme="light"] .home-med-title { color: #111; }
-[data-theme="light"] .home-med-scene { color: #444; }
+[data-theme="light"] .home-med-scene { color: #2e2e45; }
 [data-theme="light"] .home-med-breath-ring { border-color: #16a34a; }
 [data-theme="light"] .home-med-breath-inner { background: linear-gradient(135deg, #16a34a, #0284c7); }
 [data-theme="light"] .home-med-step { background: rgba(255,255,255,0.7); border: 1px solid rgba(22,163,74,0.15); }
@@ -135,7 +135,7 @@
 [data-theme="light"] .home-med-step-action { color: #222; }
 [data-theme="light"] .home-med-footer { border-top-color: rgba(22,163,74,0.15); }
 [data-theme="light"] .home-med-tag { color: #15803d !important; }
-[data-theme="light"] .home-med-sound-btn { background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.2); color: #555; }
+[data-theme="light"] .home-med-sound-btn { background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.2); color: #3a3a50; }
 [data-theme="light"] .home-med-sound-btn.on {
   background: rgba(22,163,74,0.12); border-color: rgba(22,163,74,0.3); color: #15803d;
 }
@@ -179,7 +179,7 @@
   padding: 12px; border-radius: 12px;
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
 }
-.home-color-tip-text { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.6; margin: 0 0 6px; }
+.home-color-tip-text { font-size: 15px; color: rgba(255,255,255,0.9); line-height: 1.6; margin: 0 0 6px; }
 .home-color-food { font-size: 12px; color: rgba(255,255,255,0.65); margin: 0; }
 
 /* 컬러테라피 라이트 모드 */
@@ -191,14 +191,14 @@
 [data-theme="light"] .home-color-main-name { filter: brightness(0.7); }
 [data-theme="light"] .home-color-chip { background: #f8f7fc; border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .home-color-chip-name { color: #111; }
-[data-theme="light"] .home-color-chip-effect { color: #555; }
+[data-theme="light"] .home-color-chip-effect { color: #3a3a50; }
 [data-theme="light"] .home-color-avoid { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.18); }
 [data-theme="light"] .home-color-avoid-label { color: #dc2626; }
 [data-theme="light"] .home-color-avoid-name { color: #222; }
-[data-theme="light"] .home-color-avoid-reason { color: #666; }
+[data-theme="light"] .home-color-avoid-reason { color: #4a4a5a; }
 [data-theme="light"] .home-color-tip { background: #f5f3fa; border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .home-color-tip-text { color: #222; }
-[data-theme="light"] .home-color-food { color: #555; }
+[data-theme="light"] .home-color-food { color: #3a3a50; }
 
 /* Shorts */
 .home-shorts-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 0 0 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-snap-type: x mandatory; }
@@ -361,7 +361,7 @@
 .home-real-weather-icon { font-size: 36px; }
 .home-real-weather-info { display: flex; flex-direction: column; }
 .home-real-weather-temp { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
-.home-real-weather-desc { font-size: 13px; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
+.home-real-weather-desc { font-size: 14px; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
 .home-real-weather-label { margin-left: auto; font-size: 11px; color: var(--color-text-muted); font-weight: 600; padding: 4px 10px; background: rgba(255,255,255,0.06); border-radius: 8px; }
 
 /* Guest result - relative for weather bg */
@@ -471,7 +471,7 @@
 .home-menu-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .home-menu-label { font-size: 15px; font-weight: 800; color: var(--color-text); }
 .home-menu-summary {
-  font-size: 13px; color: var(--color-text-secondary); line-height: 1.4;
+  font-size: 14px; color: var(--color-text-secondary); line-height: 1.4;
   margin: 0; overflow: hidden; text-overflow: ellipsis;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
@@ -536,7 +536,7 @@
 
 /* 라이트 모드 */
 [data-theme="light"] .home-menu-label { color: #111; }
-[data-theme="light"] .home-menu-summary { color: #555; }
+[data-theme="light"] .home-menu-summary { color: #3a3a50; }
 [data-theme="light"] .home-menu-arrow { color: #aaa; }
 
 .swipe-container {
@@ -1276,7 +1276,7 @@
 }
 .home-star-card-sub {
   position: absolute; bottom: -2px; right: -2px;
-  font-size: 14px; line-height: 1; color: #F472B6;
+  font-size: 15px; line-height: 1; color: #F472B6;
 }
 .home-star-card-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .home-star-card-label { font-size: 15px; font-weight: 800; color: var(--color-text); }
@@ -1306,15 +1306,15 @@
 
 /* 연애 온도 라이트 모드 */
 [data-theme="light"] .home-love-section { background: linear-gradient(180deg, rgba(233,30,99,0.04), transparent 80%); }
-[data-theme="light"] .home-love-temp-label { color: #444; }
-[data-theme="light"] .home-love-temp-msg { color: #444; }
+[data-theme="light"] .home-love-temp-label { color: #2e2e45; }
+[data-theme="light"] .home-love-temp-msg { color: #2e2e45; }
 [data-theme="light"] .home-love-card {
   background: linear-gradient(160deg, rgba(233,30,99,0.08), rgba(233,30,99,0.02));
   border-color: rgba(233,30,99,0.12);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .home-love-label { color: #222; }
-[data-theme="light"] .home-love-group-title { color: #666; }
+[data-theme="light"] .home-love-group-title { color: #4a4a5a; }
 [data-theme="light"] .home-love--blind { background: linear-gradient(160deg, rgba(224,64,251,0.12), rgba(224,64,251,0.03)); border-color: rgba(224,64,251,0.2); }
 
 .home-special-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1518,9 +1518,9 @@
 
 /* 라이트 모드 */
 [data-theme="light"] .home-iljin-bar-track { background: rgba(0,0,0,0.06); }
-[data-theme="light"] .home-iljin-msg { color: #555; border-top-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .home-iljin-msg { color: #3a3a50; border-top-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .home-iljin-badge { color: #888; }
-[data-theme="light"] .home-hero-iljin { background: rgba(0,0,0,0.05); color: #555; }
+[data-theme="light"] .home-hero-iljin { background: rgba(0,0,0,0.05); color: #3a3a50; }
 [data-theme="light"] .home-iljin-bar-row.home-iljin-bar--dominant .home-iljin-bar-label { color: #222; }
 
 /* ═══════════════════════════════════════════ */
@@ -1695,10 +1695,10 @@
 [data-theme="light"] .love-modal-overlay { background: rgba(0,0,0,0.4); }
 [data-theme="light"] .love-modal-sheet { background: #fafafa; }
 [data-theme="light"] .love-modal-handle { background: rgba(0,0,0,0.18); }
-[data-theme="light"] .love-modal-close { background: rgba(0,0,0,0.08); color: #444; }
+[data-theme="light"] .love-modal-close { background: rgba(0,0,0,0.08); color: #2e2e45; }
 [data-theme="light"] .love-modal-title { color: #111; }
 [data-theme="light"] .love-modal-label { color: #111; font-weight: 800; }
-[data-theme="light"] .love-modal-desc { color: #444; }
+[data-theme="light"] .love-modal-desc { color: #2e2e45; }
 [data-theme="light"] .love-modal-opt { color: #888; }
 [data-theme="light"] .love-modal-input {
   border-color: rgba(0,0,0,0.2); background: #fff; color: #111;
@@ -1713,12 +1713,12 @@
   border-color: #9B59B6; background: rgba(147,51,234,0.1); color: #111;
   box-shadow: 0 0 0 3px rgba(155,89,182,0.1);
 }
-[data-theme="light"] .love-modal-partner-btn { color: #444; }
+[data-theme="light"] .love-modal-partner-btn { color: #2e2e45; }
 [data-theme="light"] .love-modal-partner { border-left-color: rgba(147,51,234,0.3); }
 [data-theme="light"] .love-modal-loading { color: #222; }
 [data-theme="light"] .love-modal-score-card { background: rgba(0,0,0,0.02); }
 [data-theme="light"] .love-modal-heart-num { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
-[data-theme="light"] .love-modal-lucky-label { color: #555; }
+[data-theme="light"] .love-modal-lucky-label { color: #3a3a50; }
 [data-theme="light"] .love-modal-lucky-value { color: #b8860b; }
 [data-theme="light"] .love-modal-reset { border-color: rgba(0,0,0,0.15); background: #fff; color: #222; }
 
@@ -1855,10 +1855,10 @@
 }
 
 [data-theme="light"] .home-lq-label { color: #222; }
-[data-theme="light"] .home-lq-desc { color: #666; }
+[data-theme="light"] .home-lq-desc { color: #4a4a5a; }
 [data-theme="light"] .home-lq-arrow { color: rgba(0,0,0,0.3); }
 [data-theme="light"] .home-section-title { color: #222; }
 [data-theme="light"] .home-quick-label { color: #222; }
 [data-theme="light"] .home-landing-card { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .home-landing-card-title { color: #222; }
-[data-theme="light"] .home-landing-card-desc { color: #666; }
+[data-theme="light"] .home-landing-card-desc { color: #4a4a5a; }

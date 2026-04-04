@@ -25,14 +25,14 @@
 }
 
 .fortune-card__title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
 .fortune-card__desc {
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-size: 1.05rem;
+  line-height: 1.8;
   color: var(--color-text-secondary);
   word-break: keep-all;
 }
@@ -46,4 +46,4 @@
 
 /* ── 라이트 모드 ── */
 [data-theme="light"] .fortune-card__title { color: #111; }
-[data-theme="light"] .fortune-card__desc { color: #444; }
+[data-theme="light"] .fortune-card__desc { color: #2e2e45; }

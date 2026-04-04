@@ -21,6 +21,7 @@ public class UserResponse {
     private String birthTime;
     private String gender;
     private String zodiacAnimal;
+    private String profileImage;
     private String bloodType;
     private String mbtiType;
     private String relationshipStatus;
@@ -40,6 +41,7 @@ public class UserResponse {
                 .birthTime(user.getBirthTime())
                 .gender(user.getGender())
                 .zodiacAnimal(user.getZodiacAnimal())
+                .profileImage(user.getProfileImage())
                 .bloodType(user.getBloodType())
                 .mbtiType(user.getMbtiType())
                 .relationshipStatus(user.getRelationshipStatus())

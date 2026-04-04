@@ -6,7 +6,7 @@
 .cm-hero { text-align: center; padding: 16px 0 8px; }
 .cm-hero-icon { font-size: 40px; display: block; margin-bottom: 8px; }
 .cm-hero-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #FF6B6B, #F472B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-.cm-hero-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
+.cm-hero-desc { font-size: 15px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
 
 /* AI Badge */
 .cm-ai-badge { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: rgba(192,132,252,0.08); border: 1px solid rgba(192,132,252,0.25); color: #C084FC; font-size: 13px; font-weight: 700; }
@@ -18,7 +18,7 @@
 .cm-no-birth { text-align: center; padding: 32px 20px; }
 .cm-no-birth-icon { font-size: 40px; display: block; margin-bottom: 10px; }
 .cm-no-birth-text { font-size: 16px; font-weight: 800; color: var(--color-text); margin: 0 0 6px; }
-.cm-no-birth-sub { font-size: 13px; color: rgba(255,255,255,0.5); margin: 0 0 16px; }
+.cm-no-birth-sub { font-size: 15px; color: rgba(255,255,255,0.5); margin: 0 0 16px; }
 
 /* Summary */
 .cm-summary { padding: 16px; }

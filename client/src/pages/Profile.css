@@ -96,6 +96,13 @@
   box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 .pf-btn--primary:hover { transform: translateY(-2px); }
+.pf-btn--secondary {
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(124,58,237,0.3);
+  color: #a78bfa;
+}
+.pf-btn--secondary:hover { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.1); }
+[data-theme="light"] .pf-btn--secondary { background: #f5f0ff; border-color: rgba(124,58,237,0.2); color: #6d28d9; }
 .pf-btn--logout {
   background: rgba(255,255,255,0.05);
   border: 1.5px solid rgba(255,255,255,0.1);
@@ -107,7 +114,7 @@
 .pf-partner { padding: 16px; }
 .pf-partner-info { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .pf-partner-row { display: flex; align-items: center; justify-content: space-between; }
-.pf-partner-label { font-size: 13px; color: rgba(255,255,255,0.5); }
+.pf-partner-label { font-size: 15px; color: rgba(255,255,255,0.5); }
 .pf-partner-value { font-size: 14px; font-weight: 700; color: var(--color-text); }
 .pf-partner-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .pf-partner-compat-btn { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); color: #F472B6; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
@@ -143,7 +150,36 @@
 /* ─── 설정 토글 ─── */
 .pf-settings { padding: 16px 20px; margin-bottom: 16px; }
 .pf-settings .pf-info-row { display: flex; align-items: center; justify-content: space-between; }
-.pf-settings-desc { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+.pf-settings-desc { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 6px; margin-bottom: 4px; }
+.pf-settings-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; }
+
+/* 글자 크기 선택 */
+.pf-fontsize-picker {
+  display: flex; gap: 10px; margin-top: 10px;
+}
+.pf-fontsize-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; border-radius: 12px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer; transition: all 0.2s;
+}
+.pf-fontsize-btn--active {
+  border-color: #7C3AED;
+  background: rgba(124,58,237,0.15);
+}
+.pf-fontsize-sample { font-weight: 900; color: var(--color-text); }
+.pf-fontsize-sample--small { font-size: 14px; }
+.pf-fontsize-sample--normal { font-size: 18px; }
+.pf-fontsize-sample--large { font-size: 24px; }
+.pf-fontsize-label { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 600; }
+.pf-fontsize-btn--active .pf-fontsize-label { color: #a78bfa; }
+
+[data-theme="light"] .pf-fontsize-btn { border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .pf-fontsize-btn--active { border-color: #7C3AED; background: rgba(124,58,237,0.08); }
+[data-theme="light"] .pf-fontsize-label { color: rgba(0,0,0,0.45); }
+[data-theme="light"] .pf-fontsize-btn--active .pf-fontsize-label { color: #6d28d9; }
+[data-theme="light"] .pf-settings-divider { background: rgba(0,0,0,0.08); }
 .pf-toggle { position: relative; display: inline-block; width: 48px; height: 26px; }
 .pf-toggle input { opacity: 0; width: 0; height: 0; }
 .pf-toggle-slider {
@@ -170,7 +206,7 @@
 [data-theme="light"] .pf-badge--zodiac { color: #b8860b; border-color: rgba(184,134,11,0.3); background: rgba(184,134,11,0.06); }
 [data-theme="light"] .pf-info { background: #f8f6ff; border: 1px solid #e8e0f0; border-radius: 16px; }
 [data-theme="light"] .pf-info-card { background: #f8f6ff; border-color: #e8e0f0; }
-[data-theme="light"] .pf-info-label { color: #666; }
+[data-theme="light"] .pf-info-label { color: #4a4a5a; }
 [data-theme="light"] .pf-info-value { color: #111; }
 [data-theme="light"] .pf-info-tag { background: rgba(124,58,237,0.1); color: #5b21b6; }
 [data-theme="light"] .pf-info-divider { background: rgba(0,0,0,0.06); }
@@ -179,10 +215,10 @@
 [data-theme="light"] .pf-btn--logout:hover { border-color: #EF4444; color: #EF4444; }
 [data-theme="light"] .profile-daily-item { background: #f8f6ff; border-color: #e8e0f0; }
 [data-theme="light"] .profile-daily--today { border-color: rgba(184,134,11,0.4); background: rgba(251,191,36,0.08); }
-[data-theme="light"] .profile-daily-date { color: #444; }
+[data-theme="light"] .profile-daily-date { color: #2e2e45; }
 [data-theme="light"] .profile-daily-pillar { color: #222; }
 [data-theme="light"] .profile-daily-sipsung { color: #96700a; }
 [data-theme="light"] .profile-daily-now { background: #d4a017; }
-[data-theme="light"] .profile-loading { color: #666; }
+[data-theme="light"] .profile-loading { color: #4a4a5a; }
 [data-theme="light"] .pf-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #b8860b; }
 [data-theme="light"] .pf-star { color: rgba(0,0,0,0.12); }

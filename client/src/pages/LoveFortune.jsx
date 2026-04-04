@@ -3,6 +3,7 @@ import { getSpecialLoveFortune } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import FortuneLoading from '../components/FortuneLoading';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
@@ -148,13 +149,7 @@ function LoveFortune() {
 
       {/* 로딩 */}
       {loading && (
-        <div className="lf-loading fade-in">
-          <div className="lf-loading-hearts">
-            {[0,1,2].map(i => <span key={i} className="lf-loading-heart" style={{ animationDelay: `${i * 0.3}s` }}>💗</span>)}
-          </div>
-          <p>AI가 오늘의 연애운을 분석하고 있어요...</p>
-          <p className="lf-loading-hint">10~30초 정도 걸려요</p>
-        </div>
+        <FortuneLoading type="love" />
       )}
 
       {/* 결과 */}

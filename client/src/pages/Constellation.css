@@ -176,7 +176,7 @@
 
 /* 성격 */
 .cs-personality { padding: 16px; margin-bottom: 16px; }
-.cs-personality p { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); }
+.cs-personality p { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); }
 
 /* 점수 */
 .cs-score-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 20px; }
@@ -185,7 +185,7 @@
 .cs-score-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
 .cs-score-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
 .cs-score-num { font-size: 34px; font-weight: 900; color: #fff; display: block; }
-.cs-score-unit { font-size: 13px; color: var(--color-text-muted); }
+.cs-score-unit { font-size: 14px; color: var(--color-text-muted); }
 
 .cs-fortunes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 
@@ -203,10 +203,10 @@
 /* ── 라이트 모드 ── */
 [data-theme="light"] .cs-card { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .cs-card.active { background: color-mix(in srgb, var(--cs-color) 8%, transparent); }
-[data-theme="light"] .cs-card-name { color: #444; }
+[data-theme="light"] .cs-card-name { color: #2e2e45; }
 [data-theme="light"] .cs-card.active .cs-card-name { color: #111; }
 [data-theme="light"] .cs-tiny-star { color: rgba(0,0,0,0.15); }
-[data-theme="light"] .cs-result-meta { color: #666; }
+[data-theme="light"] .cs-result-meta { color: #4a4a5a; }
 [data-theme="light"] .cs-result-hero { background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--cs-color) 8%, transparent), transparent 70%); }
 [data-theme="light"] .cs-personality p { color: #333; }
 [data-theme="light"] .cs-score-bg { stroke: rgba(0,0,0,0.06); }

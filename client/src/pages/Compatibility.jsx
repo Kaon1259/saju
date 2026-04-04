@@ -3,6 +3,7 @@ import { getSajuCompatibility } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
+import FortuneLoading from '../components/FortuneLoading';
 import './Compatibility.css';
 
 const MY_STAR_KEY = 'myStarList';
@@ -50,24 +51,7 @@ function Compatibility() {
   if (loading) {
     return (
       <div className="compat-page">
-        <div className="compat-loading">
-          <div className="compat-loading-rings">
-            <div className="compat-ring compat-ring--1" />
-            <div className="compat-ring compat-ring--2" />
-          </div>
-          <div className="compat-loading-anim">
-            <span className="compat-load-male">♂</span>
-            <div className="compat-load-hearts">
-              {[0,1,2].map(i => <span key={i} className="compat-load-heart" style={{ animationDelay: `${i * 0.25}s` }}>❤️</span>)}
-            </div>
-            <span className="compat-load-female">♀</span>
-          </div>
-          <p className="compat-loading-text">AI가 두 사람의 운명을 분석하고 있어요</p>
-          <p className="compat-loading-hint">10~30초 정도 소요됩니다</p>
-          <div className="compat-loading-dots">
-            {[0,1,2,3,4].map(i => <span key={i} className="compat-loading-dot" style={{ animationDelay: `${i * 0.15}s` }} />)}
-          </div>
-        </div>
+        <FortuneLoading type="compatibility" />
       </div>
     );
   }

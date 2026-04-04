@@ -27,19 +27,16 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private LocalDate birthDate;
 
-    @Column(nullable = false, length = 10)
+    @Column(length = 10)
     private String calendarType; // SOLAR or LUNAR
 
-    @Column(nullable = true)
     private String birthTime;
 
-    @Column(nullable = false, length = 1)
+    @Column(length = 1)
     private String gender;
 
-    @Column(nullable = false)
     private String zodiacAnimal;
 
     @Column(length = 4)
@@ -47,6 +44,9 @@ public class User {
 
     @Column(length = 4)
     private String mbtiType;
+
+    @Column(length = 500)
+    private String profileImage;
 
     @Column(length = 20)
     private String relationshipStatus; // IN_RELATIONSHIP, SOME, SINGLE

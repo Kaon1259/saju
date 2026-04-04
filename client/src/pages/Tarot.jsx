@@ -4,6 +4,7 @@ import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import TarotCardArt from '../components/TarotCardArt';
 import { playTarotReveal, playCardShuffle } from '../utils/sounds';
+import FortuneLoading from '../components/FortuneLoading';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
@@ -513,21 +514,7 @@ function Tarot() {
           </div>
 
           {loading && (
-            <div className="tarot-loading">
-              <div className="tarot-loading-orb">
-                <div className="tarot-loading-ring" />
-                <svg viewBox="0 0 80 80" width="50" height="50">
-                  <defs>
-                    <radialGradient id="loadCrystal" cx="40%" cy="35%">
-                      <stop offset="0%" stopColor="#E8D5F5" stopOpacity="0.8" />
-                      <stop offset="100%" stopColor="#9B59B6" stopOpacity="0.4" />
-                    </radialGradient>
-                  </defs>
-                  <circle cx="40" cy="40" r="30" fill="url(#loadCrystal)" />
-                </svg>
-              </div>
-              <p className="tarot-loading-text">AI가 카드의 메시지를 해석하고 있어요<span className="tarot-dots" /></p>
-            </div>
+            <FortuneLoading type="tarot" />
           )}
 
           {reading && step === 'result' && (

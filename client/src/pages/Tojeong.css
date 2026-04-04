@@ -78,7 +78,7 @@
 /* Summary */
 .tj-section-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 10px; }
 .tj-summary { padding: 16px; }
-.tj-summary-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); }
+.tj-summary-text { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); }
 
 /* Month Grid */
 .tj-month-grid { display: flex; flex-direction: column; gap: 10px; }
@@ -88,7 +88,7 @@
 .tj-month-name { font-size: 15px; font-weight: 800; color: #fff; min-width: 36px; }
 .tj-month-rating { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 8px; border: 1px solid; }
 .tj-month-now { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--color-primary, #7c3aed); color: #fff; margin-left: auto; }
-.tj-month-text { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+.tj-month-text { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8); }
 
 /* Actions */
 .tj-actions { padding: 24px 4px 40px; }
@@ -98,14 +98,14 @@
 /* ── 라이트 모드 ── */
 [data-theme="light"] .tj-intro-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 [data-theme="light"] .tj-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-[data-theme="light"] .tj-loading-text { color: #555; }
+[data-theme="light"] .tj-loading-text { color: #3a3a50; }
 [data-theme="light"] .tj-num-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.1); }
 [data-theme="light"] .tj-num-value { color: #111; }
 [data-theme="light"] .tj-num-total .tj-num-value { color: #b8860b; }
 [data-theme="light"] .tj-section-title { color: #111; }
 [data-theme="light"] .tj-summary-text { color: #333; }
 [data-theme="light"] .tj-month-name { color: #111; }
-[data-theme="light"] .tj-month-text { color: #444; }
+[data-theme="light"] .tj-month-text { color: #2e2e45; }
 [data-theme="light"] .tj-month-now { color: #fff; }
 [data-theme="light"] .tj-month-card { background: rgba(0,0,0,0.01); }
 [data-theme="light"] .tj-month--current { border-color: rgba(124,58,237,0.4) !important; box-shadow: 0 4px 12px rgba(124,58,237,0.1); }

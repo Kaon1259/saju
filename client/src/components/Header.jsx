@@ -175,6 +175,10 @@ function Header({ onHomeSplash }) {
               <span className="top-bar-dropdown-icon">{isDark ? '☀️' : '🌙'}</span>
               <span className="top-bar-dropdown-label">{isDark ? '라이트 모드' : '다크 모드'}</span>
             </button>
+            <button className="top-bar-dropdown-item" onClick={() => { navigate('/settings'); setShowMore(false); }}>
+              <span className="top-bar-dropdown-icon">⚙️</span>
+              <span className="top-bar-dropdown-label">설정</span>
+            </button>
           </div>
         </>
       )}

@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
+import FortuneLoading from '../components/FortuneLoading';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -113,10 +114,7 @@ function SajuAnalysis() {
   if (loading) {
     return (
       <div className="saju-page">
-        <div className="saju-loading">
-          <div className="saju-loading__symbol">☯</div>
-          <p>사주를 분석하고 있습니다...</p>
-        </div>
+        <FortuneLoading type="default" />
       </div>
     );
   }

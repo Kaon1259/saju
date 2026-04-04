@@ -117,7 +117,7 @@
 .compat-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .compat-card-icon { font-size: 18px; }
 .compat-card-header h3 { font-size: 15px; font-weight: 800; color: var(--color-accent-gold); margin: 0; }
-.compat-card-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); margin: 0; }
+.compat-card-text { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); margin: 0; }
 .compat-card--summary { text-align: center; border: 1.5px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
 .compat-summary-text { font-size: 16px; font-weight: 800; color: #F472B6; margin: 0; line-height: 1.6; }
 [data-theme="light"] .compat-summary-text { color: #db2777; }
@@ -141,5 +141,5 @@
 [data-theme="light"] .compat-intro-title { background: linear-gradient(135deg, #b45309, #c2185b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 [data-theme="light"] .compat-reset-btn { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); color: #666; }
 [data-theme="light"] .compat-score-bar-bg { background: rgba(0,0,0,0.06); }
-[data-theme="light"] .compat-person-label { color: #666; }
+[data-theme="light"] .compat-person-label { color: #4a4a5a; }
 [data-theme="light"] .compat-person-name { color: #222; }

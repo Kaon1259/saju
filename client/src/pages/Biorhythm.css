@@ -461,7 +461,7 @@
 [data-theme="light"] .bio-chart-svg text { fill: rgba(0, 0, 0, 0.4) !important; }
 [data-theme="light"] .bio-chart-svg text[fill="#FBBF24"] { fill: #d97706 !important; }
 [data-theme="light"] .bio-chart-svg line[stroke="rgba(251,191,36,0.4)"] { stroke: rgba(217, 119, 6, 0.3) !important; }
-[data-theme="light"] .bio-legend-label { color: #666; }
+[data-theme="light"] .bio-legend-label { color: #4a4a5a; }
 [data-theme="light"] .bio-criticals { background: rgba(255, 255, 255, 0.85); }
 [data-theme="light"] .bio-critical-title { color: #111; }
 [data-theme="light"] .bio-critical-item { background: rgba(0, 0, 0, 0.02); }
@@ -469,9 +469,9 @@
 [data-theme="light"] .bio-critical-today { background: rgba(217, 119, 6, 0.08); color: #d97706; }
 [data-theme="light"] .bio-advice { background: rgba(255, 255, 255, 0.85); }
 [data-theme="light"] .bio-advice-title { color: #111; }
-[data-theme="light"] .bio-advice-text { color: #444; }
+[data-theme="light"] .bio-advice-text { color: #2e2e45; }
 [data-theme="light"] .bio-reset-btn { background: #fff; border-color: rgba(0, 0, 0, 0.12); color: #333; }
-[data-theme="light"] .bio-subtitle { color: #666; }
+[data-theme="light"] .bio-subtitle { color: #4a4a5a; }
 [data-theme="light"] .bio-phase--up { background: rgba(46, 204, 113, 0.08); color: #1a9e4a; }
 [data-theme="light"] .bio-phase--down { background: rgba(231, 76, 60, 0.08); color: #c0392b; }
 [data-theme="light"] .bio-phase--critical { background: rgba(241, 196, 15, 0.08); color: #b7950b; }

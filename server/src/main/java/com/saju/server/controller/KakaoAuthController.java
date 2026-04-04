@@ -42,13 +42,26 @@ public class KakaoAuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "인가 코드가 필요합니다."));
         }
 
-        // 1) 토큰 획득
-        String accessToken = kakaoAuthService.getAccessToken(code);
+        String accessToken;
+        Map<String, Object> kakaoUser;
+        try {
+            // 1) 토큰 획득
+            accessToken = kakaoAuthService.getAccessToken(code);
+        } catch (Exception e) {
+            log.error("카카오 토큰 획득 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "카카오 토큰 획득 실패: " + e.getMessage()));
+        }
 
-        // 2) 사용자 정보 조회
-        Map<String, Object> kakaoUser = kakaoAuthService.getUserInfo(accessToken);
+        try {
+            // 2) 사용자 정보 조회
+            kakaoUser = kakaoAuthService.getUserInfo(accessToken);
+        } catch (Exception e) {
+            log.error("카카오 사용자 정보 조회 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "카카오 사용자 정보 조회 실패: " + e.getMessage()));
+        }
         String kakaoId = (String) kakaoUser.get("kakaoId");
         String nickname = (String) kakaoUser.getOrDefault("nickname", "");
+        String profileImage = (String) kakaoUser.getOrDefault("profileImage", null);
         String gender = (String) kakaoUser.getOrDefault("gender", null);
         String birthyear = (String) kakaoUser.getOrDefault("birthyear", null);
         String birthday = (String) kakaoUser.getOrDefault("birthday", null); // MMDD
@@ -58,32 +71,39 @@ public class KakaoAuthController {
 
         Map<String, Object> result = new HashMap<>();
 
+        User user;
         if (existingUser.isPresent()) {
-            // 기존 회원 → 로그인
-            User user = existingUser.get();
-            result.put("status", "login");
-            result.put("user", UserResponse.from(user));
-        } else {
-            // 신규 → 프로필 입력 필요 (kakaoId, 카카오에서 받은 정보 전달)
-            result.put("status", "new");
-            result.put("kakaoId", kakaoId);
-            result.put("nickname", nickname);
-            if (gender != null) result.put("gender", gender);
-            if (birthyear != null && birthday != null && birthday.length() == 4) {
-                result.put("birthDate", birthyear + "-" + birthday.substring(0, 2) + "-" + birthday.substring(2, 4));
+            user = existingUser.get();
+            // 프로필 이미지 업데이트
+            if (profileImage != null) {
+                user.setProfileImage(profileImage);
+                userRepository.save(user);
             }
+        } else {
+            // 신규 → 최소 정보로 회원 자동 생성
+            user = User.builder()
+                    .kakaoId(kakaoId)
+                    .name(nickname.isBlank() ? "사용자" : nickname)
+                    .profileImage(profileImage)
+                    .build();
+            user = userRepository.save(user);
         }
+
+        boolean profileComplete = user.getBirthDate() != null && user.getGender() != null;
+        result.put("status", profileComplete ? "login" : "needProfile");
+        result.put("user", UserResponse.from(user));
+        result.put("profileComplete", profileComplete);
 
         return ResponseEntity.ok(result);
     }
 
     /**
-     * 카카오 회원가입 (프로필 정보 입력 완료 시)
+     * 프로필 완성 (카카오 로그인 후 추가 정보 입력)
      * POST /api/auth/kakao/register
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> kakaoRegister(@RequestBody Map<String, Object> body) {
-        String kakaoId = (String) body.get("kakaoId");
+        Long userId = Long.valueOf(body.get("userId").toString());
         String name = (String) body.get("name");
         String birthDateStr = (String) body.get("birthDate");
         String calendarType = (String) body.getOrDefault("calendarType", "SOLAR");
@@ -92,29 +112,23 @@ public class KakaoAuthController {
         String bloodType = (String) body.getOrDefault("bloodType", null);
         String mbtiType = (String) body.getOrDefault("mbtiType", null);
 
-        if (kakaoId == null || name == null || birthDateStr == null) {
+        if (name == null || birthDateStr == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "필수 정보가 누락되었습니다."));
         }
 
-        // 이미 등록된 kakaoId 체크
-        if (userRepository.findByKakaoId(kakaoId).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "이미 등록된 카카오 계정입니다."));
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
-        String zodiacAnimal = userService.calculateZodiac(birthDate.getYear());
 
-        User user = User.builder()
-                .kakaoId(kakaoId)
-                .name(name)
-                .birthDate(birthDate)
-                .calendarType(calendarType)
-                .gender(gender)
-                .birthTime(birthTime)
-                .zodiacAnimal(zodiacAnimal)
-                .bloodType(bloodType)
-                .mbtiType(mbtiType)
-                .build();
+        user.setName(name);
+        user.setBirthDate(birthDate);
+        user.setCalendarType(calendarType);
+        user.setGender(gender);
+        user.setBirthTime(birthTime);
+        user.setZodiacAnimal(userService.calculateZodiac(birthDate.getYear()));
+        user.setBloodType(bloodType);
+        user.setMbtiType(mbtiType);
 
         User saved = userRepository.save(user);
 

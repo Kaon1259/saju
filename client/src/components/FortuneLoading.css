@@ -1,0 +1,147 @@
+.fortune-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  min-height: 300px;
+  gap: 24px;
+}
+
+/* ─── 오브 (메인 아이콘 영역) ─── */
+.fortune-loading__orb {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fortune-loading__orb-inner {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(168,85,247,0.4), rgba(99,42,173,0.8));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: orbPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(168,85,247,0.5), 0 0 60px rgba(168,85,247,0.2);
+}
+
+.fortune-loading__icon {
+  font-size: 32px;
+  animation: iconFloat 2.5s ease-in-out infinite;
+}
+
+.fortune-loading__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(168,85,247,0.6);
+  border-right-color: rgba(236,72,153,0.4);
+  animation: ringRotate 3s linear infinite;
+}
+
+.fortune-loading__ring--2 {
+  inset: -8px;
+  border-top-color: rgba(236,72,153,0.4);
+  border-right-color: rgba(168,85,247,0.3);
+  animation-duration: 4s;
+  animation-direction: reverse;
+}
+
+/* ─── 메시지 ─── */
+.fortune-loading__msg {
+  font-size: 15px;
+  color: rgba(255,255,255,0.9);
+  text-align: center;
+  animation: msgFadeIn 0.5s ease-out;
+  min-height: 1.5em;
+  font-weight: 500;
+}
+
+[data-theme="light"] .fortune-loading__msg {
+  color: rgba(80,40,120,0.9);
+}
+
+/* ─── 진행 점 ─── */
+.fortune-loading__dots {
+  display: flex;
+  gap: 8px;
+}
+
+.fortune-loading__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(168,85,247,0.3);
+  transition: all 0.4s ease;
+}
+
+.fortune-loading__dot--active {
+  background: rgba(168,85,247,1);
+  box-shadow: 0 0 8px rgba(168,85,247,0.6);
+  transform: scale(1.4);
+}
+
+/* ─── 스트리밍 텍스트 ─── */
+.fortune-loading__stream {
+  width: 100%;
+  max-width: 500px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(168,85,247,0.08);
+  border: 1px solid rgba(168,85,247,0.15);
+}
+
+.fortune-loading__stream-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.8);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+[data-theme="light"] .fortune-loading__stream-text {
+  color: rgba(60,30,90,0.8);
+}
+
+.fortune-loading__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: rgba(168,85,247,0.8);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s step-end infinite;
+}
+
+/* ─── 애니메이션 ─── */
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes ringRotate {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes msgFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cursorBlink {
+  50% { opacity: 0; }
+}

@@ -349,7 +349,7 @@
   border-color: #7c3aed;
   color: #4a2d8e;
 }
-[data-theme="light"] .form-label { color: #555; }
+[data-theme="light"] .form-label { color: #3a3a50; }
 [data-theme="light"] .register-mode-tab { color: #999; }
 [data-theme="light"] .register-mode-tab--active { color: #fff; }
 [data-theme="light"] .register-header__title { color: #1a1a2e; }
@@ -404,5 +404,5 @@
   background: rgba(124,58,237,0.3); border-color: rgba(124,58,237,0.7);
   color: #fff; box-shadow: 0 0 12px rgba(124,58,237,0.3);
 }
-[data-theme="light"] .form-mbti-btn { border-color: #ddd; background: #f5f0ff; color: #555; }
+[data-theme="light"] .form-mbti-btn { border-color: #ddd; background: #f5f0ff; color: #3a3a50; }
 [data-theme="light"] .form-mbti-btn--active { background: #7c3aed; border-color: #7c3aed; color: #fff; }

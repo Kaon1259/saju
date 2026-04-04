@@ -30,6 +30,7 @@ import WeeklyFortune from './pages/WeeklyFortune';
 import LoveFortune from './pages/LoveFortune';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
+import Settings from './pages/Settings';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
 
@@ -163,10 +164,37 @@ function useTimeTheme() {
   }, []);
 }
 
+// 글자 크기 설정 적용
+function useFontSize() {
+  useEffect(() => {
+    const apply = () => {
+      const size = localStorage.getItem('fontSize') || 'normal';
+      document.documentElement.setAttribute('data-fontsize', size);
+    };
+    apply();
+    window.addEventListener('storage', apply);
+    window.addEventListener('fontSizeChange', apply);
+    return () => {
+      window.removeEventListener('storage', apply);
+      window.removeEventListener('fontSizeChange', apply);
+    };
+  }, []);
+}
+
 function App() {
   const [splashKey, setSplashKey] = useState(Date.now());
   const [showSplash, setShowSplash] = useState(true);
   useTimeTheme();
+  useFontSize();
+
+  // 자동 로그인 off면 앱 시작 시 로그인 정보 제거
+  useEffect(() => {
+    if (localStorage.getItem('autoLogin') === 'off') {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userProfile');
+    }
+  }, []);
 
   const triggerSplash = () => {
     setSplashKey(Date.now());
@@ -210,6 +238,7 @@ function App() {
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
               <Route path="/love-fortune" element={<LoveFortune />} />
               <Route path="/my-star" element={<MyStar />} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>
           {/* <FloatingMenu /> */}

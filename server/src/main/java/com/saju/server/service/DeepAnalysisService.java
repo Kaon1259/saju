@@ -80,6 +80,23 @@ public class DeepAnalysisService {
         return result;
     }
 
+    /** 캐시 조회 (스트리밍 엔드포인트용) */
+    public Map<String, Object> getCached(String type, String birthDate, String birthTime, String gender, String calendarType, String extra) {
+        String fortuneType = "deep-" + type;
+        String cacheKey = buildCacheKey(type, birthDate, birthTime, gender, calendarType, extra);
+        return getFromCache(fortuneType, cacheKey);
+    }
+
+    /** 시스템 프롬프트 외부 접근 */
+    public String getSystemPrompt(String type) {
+        return buildSystemPrompt(type);
+    }
+
+    /** 사용자 프롬프트 외부 접근 */
+    public String getUserPrompt(String type, String birthDate, String birthTime, String gender, String calendarType, String extra) {
+        return buildUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
+    }
+
     private String buildSystemPrompt(String type) {
         String base = """
             당신은 사주명리학과 동양 역학에 빠삭한 심화 분석 전문가야!

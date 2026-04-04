@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { getDeepAnalysis } from '../api/fortune';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { getDeepAnalysis, getDeepAnalysisStream } from '../api/fortune';
+import FortuneLoading from './FortuneLoading';
 import './DeepAnalysis.css';
 
 // 필드별 표시 설정
@@ -62,6 +63,11 @@ const FIELD_CONFIG = {
   detailAnalysis: { icon: '📋', title: '상세 분석' },
 };
 
+const TYPE_TO_LOADING = {
+  love: 'love', reunion: 'love', remarriage: 'love', blind_date: 'love',
+  today: 'default', yearly: 'default', monthly: 'default', weekly: 'default',
+};
+
 function renderValue(val) {
   if (val == null) return null;
   if (typeof val === 'string') return <p>{val}</p>;
@@ -82,33 +88,100 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(autoOpen);
+  const [streamText, setStreamText] = useState('');
+  const [visibleCards, setVisibleCards] = useState(0);
   const calledRef = useRef(false);
+  const cleanupRef = useRef(null);
 
-  const loadData = async () => {
+  // 결과 카드 순차 노출
+  useEffect(() => {
+    if (!data) return;
+    const entries = Object.entries(data).filter(([key, val]) => {
+      const config = FIELD_CONFIG[key];
+      return val && config !== null && config !== undefined;
+    });
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setVisibleCards(i);
+      if (i >= entries.length) clearInterval(interval);
+    }, 150);
+    return () => clearInterval(interval);
+  }, [data]);
+
+  const loadData = useCallback(() => {
     if (calledRef.current || !birthDate) return;
     calledRef.current = true;
     setLoading(true);
-    try {
-      const result = await getDeepAnalysis(type, birthDate, birthTime, gender, calendarType, extra);
-      setData(result);
-    } catch (e) {
-      console.error('심화분석 실패:', e);
-      setData({ detailAnalysis: '심화분석을 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.' });
-    }
-    finally { setLoading(false); }
-  };
+    setStreamText('');
+
+    // 스트리밍으로 시도
+    cleanupRef.current = getDeepAnalysisStream(
+      type, birthDate, birthTime, gender, calendarType, extra,
+      {
+        onChunk: (text) => {
+          setStreamText(prev => prev + text);
+        },
+        onCached: (cachedData) => {
+          setData(cachedData);
+          setLoading(false);
+        },
+        onDone: (fullText) => {
+          // 스트리밍 완료 → JSON 파싱 시도
+          try {
+            let json = fullText;
+            if (json.includes('```')) {
+              const start = json.indexOf('\n', json.indexOf('```'));
+              const end = json.lastIndexOf('```');
+              if (start > 0 && end > start) json = json.substring(start + 1, end);
+            }
+            const braceStart = json.indexOf('{');
+            const braceEnd = json.lastIndexOf('}');
+            if (braceStart >= 0 && braceEnd > braceStart) {
+              json = json.substring(braceStart, braceEnd + 1);
+            }
+            const parsed = JSON.parse(json);
+            parsed.type = type;
+            parsed.birthDate = birthDate;
+            setData(parsed);
+          } catch {
+            // JSON 파싱 실패 → 일반 텍스트로 표시
+            setData({ type, birthDate, detailAnalysis: fullText });
+          }
+          setLoading(false);
+          setStreamText('');
+        },
+        onError: () => {
+          // 스트리밍 실패 → 기존 방식 fallback
+          setStreamText('');
+          (async () => {
+            try {
+              const result = await getDeepAnalysis(type, birthDate, birthTime, gender, calendarType, extra);
+              setData(result);
+            } catch {
+              setData({ detailAnalysis: '심화분석을 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.' });
+            }
+            setLoading(false);
+          })();
+        },
+      }
+    );
+  }, [type, birthDate, birthTime, gender, calendarType, extra]);
 
   useEffect(() => {
     if (autoOpen && birthDate && !calledRef.current) {
       loadData();
     }
-  }, [autoOpen, birthDate]);
+    return () => cleanupRef.current?.();
+  }, [autoOpen, birthDate, loadData]);
 
-  const handleLoad = async () => {
+  const handleLoad = () => {
     if (data) { setOpen(!open); return; }
     setOpen(true);
     loadData();
   };
+
+  const loadingType = TYPE_TO_LOADING[type] || 'default';
 
   return (
     <div className="deep-wrap">
@@ -120,27 +193,25 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
       {(open || autoOpen) && (
         <div className="deep-content glass-card fade-in">
           {loading && !data ? (
-            <div className="deep-loading">
-              <div className="deep-spinner" />
-              <p>AI가 프리미엄 심층 분석 중입니다...</p>
-              <p style={{ fontSize: '12px', marginTop: '8px', opacity: 0.5 }}>약 20~30초 소요됩니다</p>
-            </div>
+            <FortuneLoading type={loadingType} streaming={!!streamText} streamText={streamText} />
           ) : data ? (
             <div className="deep-result">
               {/* 핵심 요약 */}
               {data.deepSummary && (
-                <div className="deep-summary">{data.deepSummary}</div>
+                <div className="deep-summary deep-card-reveal">{data.deepSummary}</div>
               )}
 
-              {/* 모든 필드를 순서대로 렌더링 */}
-              {Object.entries(data).map(([key, val]) => {
+              {/* 모든 필드를 순서대로 렌더링 (순차 노출) */}
+              {Object.entries(data).map(([key, val], idx) => {
                 if (!val) return null;
                 const config = FIELD_CONFIG[key];
-                if (config === null) return null; // 제외 필드
-                if (config === undefined && key === 'hiddenMessage') return null; // 별도 렌더링
-                if (!config) return null; // 알 수 없는 필드 무시
+                if (config === null) return null;
+                if (config === undefined && key === 'hiddenMessage') return null;
+                if (!config) return null;
                 return (
-                  <div key={key} className="deep-section">
+                  <div key={key}
+                    className={`deep-section deep-card-reveal ${idx < visibleCards ? 'deep-card-visible' : ''}`}
+                    style={{ transitionDelay: `${idx * 80}ms` }}>
                     <h4 className="deep-section-title">{config.icon} {config.title}</h4>
                     {renderValue(val)}
                   </div>
@@ -149,7 +220,7 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
 
               {/* 숨겨진 메시지 (하단) */}
               {data.hiddenMessage && (
-                <div className="deep-hidden">
+                <div className="deep-hidden deep-card-reveal deep-card-visible">
                   <span>🔮</span>
                   <p>{data.hiddenMessage}</p>
                 </div>

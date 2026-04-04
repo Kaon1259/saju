@@ -29,10 +29,10 @@
 .ms-interp-item:last-child { border-bottom: none; }
 .ms-interp-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
 .ms-interp-label { font-size: 13px; font-weight: 800; color: var(--color-accent-gold); margin-bottom: 4px; }
-.ms-interp-item p { font-size: 13px; line-height: 1.7; color: var(--color-text-muted); margin: 0; }
+.ms-interp-item p { font-size: 15px; line-height: 1.7; color: var(--color-text-muted); margin: 0; }
 [data-theme="light"] .ms-interp-item { border-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .ms-interp-label { color: #96700a; }
-[data-theme="light"] .ms-interp-item p { color: #444; }
+[data-theme="light"] .ms-interp-item p { color: #2e2e45; }
 
 /* Hours */
 .ms-hours { padding: 16px; }
@@ -49,10 +49,10 @@
 [data-theme="light"] .ms-section-title { color: #1e293b; }
 [data-theme="light"] .ms-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 [data-theme="light"] .ms-pillar-hanja { color: #111; }
-[data-theme="light"] .ms-pillar-korean { color: #555; }
-[data-theme="light"] .ms-pillar-element { color: #666; }
+[data-theme="light"] .ms-pillar-korean { color: #3a3a50; }
+[data-theme="light"] .ms-pillar-element { color: #4a4a5a; }
 [data-theme="light"] .ms-pillar-animal { color: #96700a; }
-[data-theme="light"] .ms-hour-name { color: #555; }
+[data-theme="light"] .ms-hour-name { color: #3a3a50; }
 [data-theme="light"] .ms-hour-hanja { color: #111; }
-[data-theme="light"] .ms-hour-element { color: #666; }
+[data-theme="light"] .ms-hour-element { color: #4a4a5a; }
 [data-theme="light"] .ms-search-btn { color: #1a0533; }

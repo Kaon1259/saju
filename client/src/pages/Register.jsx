@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { kakaoLogin, kakaoRegister } from '../api/fortune';
+import { kakaoLogin, kakaoRegister, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './Register.css';
@@ -63,7 +63,7 @@ function Register() {
   const redirectTo = location.state?.from || '/';
 
   const [step, setStep] = useState('kakao'); // 'kakao' | 'profile' | 'loading'
-  const [kakaoData, setKakaoData] = useState(null); // { kakaoId, nickname, gender, birthDate }
+  const [userId, setUserId] = useState(null);
   const [form, setForm] = useState({
     name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
     birthTime: '', bloodType: '', mbtiType: '',
@@ -80,37 +80,49 @@ function Register() {
     setError('');
   };
 
+  // 로그인 완료 처리 (localStorage 저장 + 리다이렉트)
+  const completeLogin = (user) => {
+    localStorage.setItem('userId', user.id);
+    localStorage.setItem('userName', user.name);
+    localStorage.setItem('userProfile', JSON.stringify(user));
+    navigate(redirectTo, { replace: true });
+  };
+
   // 카카오 로그인 버튼 클릭
   const handleKakaoLogin = () => {
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_JS_KEY}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
     window.location.href = kakaoAuthUrl;
   };
 
-  // 카카오 콜백 처리 (URL에 code가 있으면)
+  // 카카오 콜백 처리 - ref로 중복 호출 방지
+  const kakaoProcessed = useRef(false);
   useEffect(() => {
     const code = searchParams.get('code');
-    if (!code) return;
+    if (!code || kakaoProcessed.current) return;
+    kakaoProcessed.current = true;
 
     setStep('loading');
     (async () => {
       try {
         const result = await kakaoLogin(code);
+        const user = result.user;
 
-        if (result.status === 'login') {
-          // 기존 회원 → 바로 로그인
-          const user = result.user;
-          localStorage.setItem('userId', user.id);
-          localStorage.setItem('userName', user.name);
-          localStorage.setItem('userProfile', JSON.stringify(user));
+        // localStorage에 기본 정보 저장
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('userName', user.name);
+        localStorage.setItem('userProfile', JSON.stringify(user));
+
+        if (result.profileComplete) {
+          // 프로필 완성됨 → 바로 이동
           navigate(redirectTo, { replace: true });
-        } else if (result.status === 'new') {
-          // 신규 → 프로필 입력 단계
-          setKakaoData(result);
+        } else {
+          // 프로필 미완성 → 프로필 입력 폼
+          setUserId(user.id);
           setForm(prev => ({
             ...prev,
-            name: result.nickname || '',
-            gender: result.gender || 'M',
-            birthDate: result.birthDate || '',
+            name: user.name || '',
+            gender: user.gender || 'M',
+            birthDate: user.birthDate || '',
           }));
           setStep('profile');
         }
@@ -122,7 +134,7 @@ function Register() {
     })();
   }, [searchParams]);
 
-  // 프로필 입력 완료 → 회원가입
+  // 프로필 입력 완료 → 프로필 업데이트
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) { setError('이름을 입력해주세요.'); return; }
@@ -132,7 +144,7 @@ function Register() {
     setError('');
     try {
       const result = await kakaoRegister({
-        kakaoId: kakaoData.kakaoId,
+        userId,
         name: form.name.trim(),
         birthDate: form.birthDate,
         calendarType: form.calendarType,
@@ -142,11 +154,7 @@ function Register() {
         mbtiType: form.mbtiType || null,
       });
 
-      const user = result.user;
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('userName', user.name);
-      localStorage.setItem('userProfile', JSON.stringify(user));
-      navigate(redirectTo, { replace: true });
+      completeLogin(result.user);
     } catch (err) {
       const msg = err.response?.data?.error || '';
       setError(msg || '등록에 실패했습니다. 다시 시도해주세요.');
@@ -200,7 +208,7 @@ function Register() {
         </div>
       )}
 
-      {/* ═══ 프로필 입력 (신규 회원) ═══ */}
+      {/* ═══ 프로필 입력 ═══ */}
       {step === 'profile' && (
         <form className="register-form glass-card animate-fade-in-up" onSubmit={handleSubmit} style={{ animationDelay: '100ms' }}>
           <div className="register-kakao-welcome">
@@ -278,7 +286,7 @@ function Register() {
           {error && <div className="form-error animate-fade-in"><span>&#x26A0;&#xFE0F;</span> {error}</div>}
 
           <button type="submit" className="btn-gold register-submit" disabled={submitting}>
-            {submitting ? '확인 중...' : '🔮 가입 완료'}
+            {submitting ? '확인 중...' : '🔮 프로필 저장'}
           </button>
         </form>
       )}

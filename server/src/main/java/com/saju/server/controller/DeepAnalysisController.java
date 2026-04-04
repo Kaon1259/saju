@@ -1,11 +1,14 @@
 package com.saju.server.controller;
 
 import com.saju.server.repository.*;
+import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.DeepAnalysisService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,6 +18,7 @@ import java.util.Map;
 public class DeepAnalysisController {
 
     private final DeepAnalysisService deepAnalysisService;
+    private final ClaudeApiService claudeApiService;
     private final SpecialFortuneRepository specialFortuneRepository;
     private final DailyFortuneRepository dailyFortuneRepository;
     private final BloodTypeFortuneRepository bloodTypeFortuneRepository;
@@ -30,6 +34,35 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String calendarType,
             @RequestParam(required = false) String extra) {
         return ResponseEntity.ok(deepAnalysisService.analyze(type, birthDate, birthTime, gender, calendarType, extra));
+    }
+
+    /**
+     * 스트리밍 심화분석 - SSE
+     */
+    @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter deepFortuneStream(
+            @RequestParam String type,
+            @RequestParam String birthDate,
+            @RequestParam(required = false) String birthTime,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String calendarType,
+            @RequestParam(required = false) String extra) {
+        // 캐시 확인 - 있으면 즉시 완료
+        Map<String, Object> cached = deepAnalysisService.getCached(type, birthDate, birthTime, gender, calendarType, extra);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            try {
+                emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        String systemPrompt = deepAnalysisService.getSystemPrompt(type);
+        String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 4000);
     }
 
     @DeleteMapping("/cache")

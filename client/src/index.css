@@ -46,24 +46,24 @@
 
 /* ─── Light Theme ─── */
 [data-theme="light"] {
-  --color-bg-start: #f8f5f0;
-  --color-bg-end: #ede8df;
+  --color-bg-start: #ede5db;
+  --color-bg-end: #e0d6ca;
   --color-primary: #6d28d9;
   --color-primary-light: #7c3aed;
   --color-primary-dark: #5b21b6;
   --color-secondary: #a78bfa;
-  --color-accent-gold: #d97706;
-  --color-accent-gold-light: #f59e0b;
-  --color-surface: rgba(0, 0, 0, 0.04);
-  --color-surface-hover: rgba(0, 0, 0, 0.08);
-  --color-glass: rgba(255, 255, 255, 0.7);
-  --color-glass-border: rgba(0, 0, 0, 0.1);
-  --color-text: #1e293b;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --color-accent-gold: #b8860b;
+  --color-accent-gold-light: #d4a017;
+  --color-surface: rgba(0, 0, 0, 0.06);
+  --color-surface-hover: rgba(0, 0, 0, 0.10);
+  --color-glass: rgba(255, 255, 255, 0.55);
+  --color-glass-border: rgba(0, 0, 0, 0.12);
+  --color-text: #1a1a2e;
+  --color-text-secondary: #3a3a5c;
+  --color-text-muted: #6b7280;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.10);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
   --shadow-glow: 0 0 20px rgba(109, 40, 217, 0.1);
 }
 
@@ -471,10 +471,150 @@
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  font-size: 16px;
+}
+
+/* ─── 글자 크기 설정 (4단계) ─── */
+[data-fontsize="small"]  { --fs-scale: 0.85; }
+[data-fontsize="normal"] { --fs-scale: 1; }
+[data-fontsize="large"]  { --fs-scale: 1.15; }
+[data-fontsize="xlarge"] { --fs-scale: 1.3; }
+
+/* 전체 앱에 scale 적용 — 모든 텍스트 자동 반영 */
+[data-fontsize] body {
+  font-size: calc(15px * var(--fs-scale));
+}
+[data-fontsize] * {
+  --_fs: var(--fs-scale, 1);
+}
+
+/* 본문 콘텐츠 */
+[data-fontsize] p,
+[data-fontsize] li,
+[data-fontsize] td,
+[data-fontsize] th,
+[data-fontsize] span:not([class*="icon"]):not([class*="emoji"]):not(.tab-label),
+[data-fontsize] .fortune-card__desc,
+[data-fontsize] .deep-section p,
+[data-fontsize] .deep-list li,
+[data-fontsize] .deep-hidden p,
+[data-fontsize] .glass-card p,
+[data-fontsize] .glass-card li {
+  font-size: calc(15px * var(--fs-scale)) !important;
+  line-height: 1.8;
+}
+
+/* 라벨, 부가 텍스트 */
+[data-fontsize] label,
+[data-fontsize] .form-label,
+[data-fontsize] .settings-desc,
+[data-fontsize] .pf-info-label,
+[data-fontsize] .pf-info-value {
+  font-size: calc(13px * var(--fs-scale)) !important;
+}
+
+/* 제목 */
+[data-fontsize] h1 { font-size: calc(24px * var(--fs-scale)) !important; }
+[data-fontsize] h2 { font-size: calc(20px * var(--fs-scale)) !important; }
+[data-fontsize] h3,
+[data-fontsize] h4,
+[data-fontsize] .deep-section-title,
+[data-fontsize] .profile-section-title,
+[data-fontsize] .settings-section-title {
+  font-size: calc(17px * var(--fs-scale)) !important;
+}
+
+/* 카드 */
+[data-fontsize] .fortune-card__title { font-size: calc(18px * var(--fs-scale)) !important; }
+[data-fontsize] .fortune-card__desc { font-size: calc(15px * var(--fs-scale)) !important; }
+
+/* 입력 폼 */
+[data-fontsize] input,
+[data-fontsize] select,
+[data-fontsize] textarea,
+[data-fontsize] .form-input,
+[data-fontsize] .form-select {
+  font-size: calc(15px * var(--fs-scale)) !important;
+}
+
+/* 버튼 텍스트 */
+[data-fontsize] button:not(.tab-item):not(.top-bar-more-btn):not(.top-bar-dropdown-item):not(.form-mbti-btn):not(.settings-fontsize-btn) {
+  font-size: calc(14px * var(--fs-scale));
+}
+
+/* ─── 네비게이션 요소: 글자 크기 설정에서 제외 ─── */
+[data-fontsize] .tab-label,
+[data-fontsize] .tab-item,
+[data-fontsize] .top-bar-text,
+[data-fontsize] .top-bar-more-dots,
+[data-fontsize] .top-bar-more-btn span,
+[data-fontsize] .bottom-tab-bar * {
+  font-size: revert !important;
+}
+
+/* 더보기 드롭다운: 최대 크기 제한 */
+[data-fontsize] .top-bar-dropdown-label {
+  font-size: clamp(13px, calc(14px * var(--fs-scale)), 16px) !important;
+}
+[data-fontsize] .top-bar-dropdown-icon {
+  font-size: 18px !important;
+}
+
+/* ─── 그리드 메뉴: 큰 글씨에서 레이아웃 보호 ─── */
+
+/* MBTI 4열 그리드: 글씨 크기 제한 */
+[data-fontsize] .form-mbti-btn {
+  font-size: clamp(11px, calc(12px * var(--fs-scale)), 14px) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 홈 그리드 카드 텍스트 보호 */
+[data-fontsize] .home-landing-card-title {
+  font-size: clamp(13px, calc(14px * var(--fs-scale)), 17px) !important;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+[data-fontsize] .home-landing-card-desc {
+  font-size: clamp(11px, calc(11px * var(--fs-scale)), 14px) !important;
+}
+[data-fontsize] .home-couple-label {
+  font-size: clamp(12px, calc(13px * var(--fs-scale)), 15px) !important;
+  overflow-wrap: break-word;
+}
+[data-fontsize] .home-love-card {
+  font-size: clamp(10px, calc(11px * var(--fs-scale)), 13px) !important;
+}
+
+/* 뱃지/태그: 크기 제한 */
+[data-fontsize] .pf-badge,
+[data-fontsize] .home-guest-badge {
+  font-size: clamp(11px, calc(12px * var(--fs-scale)), 14px) !important;
+  white-space: nowrap;
+}
+
+/* 토글 버튼: 크기 제한 */
+[data-fontsize] .form-toggle__btn {
+  font-size: clamp(13px, calc(15px * var(--fs-scale)), 18px) !important;
+}
+
+/* 더크게(xlarge)에서 그리드 컬럼 자동 축소 */
+[data-fontsize="xlarge"] .home-love-cards {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+[data-fontsize="xlarge"] .form-mbti-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 4px !important;
+}
+[data-fontsize="xlarge"] .home-couple-cards {
+  grid-template-columns: repeat(2, 1fr) !important;
 }
 
 body {
   font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
   background: linear-gradient(165deg, var(--color-bg-start) 0%, var(--color-bg-end) 50%, var(--color-bg-deep, #1a0a3e) 100%);
   color: var(--color-text);
   min-height: 100vh;
@@ -485,6 +625,21 @@ body {
   transition: background 1.5s ease;
 }
 
+/* ─── 글로벌 가독성: 본문 텍스트 최소 크기 보장 ─── */
+p, li, span, td, th, label, .form-input, .form-select, textarea {
+  font-size: max(var(--font-size-override, inherit), 13px);
+  line-height: 1.7;
+}
+
+/* 다크모드 본문 텍스트 밝기 상향 */
+p, li, span { color: inherit; }
+.glass-card p, .glass-card li, .glass-card span:not([class*="icon"]):not([class*="emoji"]) {
+  color: rgba(255, 255, 255, 0.85);
+}
+[data-theme="light"] .glass-card p, [data-theme="light"] .glass-card li, [data-theme="light"] .glass-card span:not([class*="icon"]):not([class*="emoji"]) {
+  color: #2a2a40;
+}
+
 /* ─── 시간대별 배경 (다크모드) ─── */
 [data-time="dawn"]   { --color-bg-start: #1a0a2e; --color-bg-end: #2d1b4e; --color-bg-deep: #1e1040; }
 [data-time="morning"]{ --color-bg-start: #14082a; --color-bg-end: #1e1045; --color-bg-deep: #170a38; }
@@ -493,13 +648,13 @@ body {
 [data-time="evening"]{ --color-bg-start: #1a0835; --color-bg-end: #2d1250; --color-bg-deep: #150630; }
 [data-time="night"]  { --color-bg-start: #1a0a30; --color-bg-end: #2a1048; --color-bg-deep: #120625; }
 
-/* ─── 시간대별 배경 (라이트모드) ─── */
-[data-theme="light"][data-time="dawn"]   { --color-bg-start: #fde6c4; --color-bg-end: #f8c9a0; }
-[data-theme="light"][data-time="morning"]{ --color-bg-start: #fef08a; --color-bg-end: #fde047; }
-[data-theme="light"][data-time="noon"]   { --color-bg-start: #fef3c7; --color-bg-end: #fde68a; }
-[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #fed7aa; --color-bg-end: #fdba74; }
-[data-theme="light"][data-time="evening"]{ --color-bg-start: #f5d0fe; --color-bg-end: #e9a8f0; }
-[data-theme="light"][data-time="night"]  { --color-bg-start: #e8d5f5; --color-bg-end: #d8b4fe; }
+/* ─── 시간대별 배경 (라이트모드) — 톤다운 ─── */
+[data-theme="light"][data-time="dawn"]   { --color-bg-start: #f0d8b5; --color-bg-end: #e8c49a; }
+[data-theme="light"][data-time="morning"]{ --color-bg-start: #efe0b0; --color-bg-end: #e5d090; }
+[data-theme="light"][data-time="noon"]   { --color-bg-start: #ede5c8; --color-bg-end: #e3d6a8; }
+[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #ecc8a0; --color-bg-end: #e0b888; }
+[data-theme="light"][data-time="evening"]{ --color-bg-start: #e0c0e8; --color-bg-end: #d0a8d8; }
+[data-theme="light"][data-time="night"]  { --color-bg-start: #d5c0e5; --color-bg-end: #c0a0d5; }
 
 /* Starfield background effect */
 body::before {

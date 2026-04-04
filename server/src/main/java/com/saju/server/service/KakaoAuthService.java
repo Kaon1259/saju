@@ -22,6 +22,9 @@ public class KakaoAuthService {
     @Value("${kakao.rest-api-key:}")
     private String restApiKey;
 
+    @Value("${kakao.client-secret:}")
+    private String clientSecret;
+
     @Value("${kakao.redirect-uri:}")
     private String redirectUri;
 
@@ -42,6 +45,9 @@ public class KakaoAuthService {
         params.add("client_id", restApiKey);
         params.add("redirect_uri", redirectUri);
         params.add("code", code);
+        if (clientSecret != null && !clientSecret.isBlank()) {
+            params.add("client_secret", clientSecret);
+        }
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
@@ -77,8 +83,13 @@ public class KakaoAuthService {
             JsonNode kakaoAccount = json.get("kakao_account");
             if (kakaoAccount != null) {
                 JsonNode profile = kakaoAccount.get("profile");
-                if (profile != null && profile.has("nickname")) {
-                    userInfo.put("nickname", profile.get("nickname").asText());
+                if (profile != null) {
+                    if (profile.has("nickname")) {
+                        userInfo.put("nickname", profile.get("nickname").asText());
+                    }
+                    if (profile.has("profile_image_url")) {
+                        userInfo.put("profileImage", profile.get("profile_image_url").asText());
+                    }
                 }
                 if (kakaoAccount.has("email")) {
                     userInfo.put("email", kakaoAccount.get("email").asText());

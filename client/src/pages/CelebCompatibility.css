@@ -7,7 +7,7 @@
 .celeb-hero { text-align: center; padding: 16px 0 8px; }
 .celeb-hero-icon { font-size: 40px; display: block; margin-bottom: 8px; }
 .celeb-hero-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #FBBF24, #F472B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-.celeb-hero-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
+.celeb-hero-desc { font-size: 15px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
 
 /* ─── Search ─── */
 .celeb-search-wrap { position: relative; }
@@ -59,7 +59,7 @@
 .celeb-star-fortune-result { display: flex; flex-direction: column; gap: 10px; }
 .celeb-sf-item { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
 .celeb-sf-item .celeb-sf-label { font-size: 13px; font-weight: 800; color: #FBBF24; display: block; margin-bottom: 4px; }
-.celeb-sf-item p { font-size: 13px; color: var(--color-text); margin: 0; line-height: 1.6; opacity: 0.85; }
+.celeb-sf-item p { font-size: 14px; color: var(--color-text); margin: 0; line-height: 1.6; opacity: 0.85; }
 .celeb-sf-lucky { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin: 0; }
 [data-theme="light"] .celeb-sf-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .celeb-sf-lucky { color: rgba(0,0,0,0.45); }
@@ -84,7 +84,7 @@
 .celeb-ai-detail { display: flex; flex-direction: column; gap: 3px; }
 .celeb-ai-name { font-size: 18px; font-weight: 900; color: var(--color-text); }
 .celeb-ai-sub { font-size: 12px; color: rgba(255,255,255,0.6); }
-.celeb-ai-notice { font-size: 13px; color: rgba(255,255,255,0.5); text-align: center; margin: 0; }
+.celeb-ai-notice { font-size: 15px; color: rgba(255,255,255,0.5); text-align: center; margin: 0; }
 .celeb-ai-btns { display: flex; gap: 10px; }
 .celeb-ai-btn { flex: 1; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; border: none; }
 .celeb-ai-btn--confirm { background: linear-gradient(135deg, #9B59B6, #E91E63); color: #fff; }
@@ -124,7 +124,7 @@
 /* ─── Result ─── */
 .celeb-result-hero { text-align: center; padding: 16px 0; }
 .celeb-result-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #FBBF24, #F472B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-.celeb-result-group { font-size: 13px; color: rgba(255,255,255,0.5); margin: 4px 0 0; }
+.celeb-result-group { font-size: 15px; color: rgba(255,255,255,0.5); margin: 4px 0 0; }
 
 .celeb-score-wrap { position: relative; width: 120px; height: 120px; margin: 16px auto; }
 .celeb-score-ring { width: 100%; height: 100%; }
@@ -145,7 +145,7 @@
 .celeb-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .celeb-card-header span { font-size: 18px; }
 .celeb-card-header h3 { font-size: 15px; font-weight: 800; color: var(--color-accent-gold); margin: 0; }
-.celeb-card-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); margin: 0; }
+.celeb-card-text { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); margin: 0; }
 .celeb-card--summary { text-align: center; border: 1.5px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
 .celeb-summary-text { font-size: 16px; font-weight: 800; color: #F472B6; margin: 0; line-height: 1.6; }
 .celeb-card--ai { border-left: 3px solid rgba(147,51,234,0.5); }

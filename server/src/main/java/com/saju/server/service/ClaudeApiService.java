@@ -7,9 +7,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
@@ -25,6 +33,7 @@ public class ClaudeApiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ExecutorService streamExecutor = Executors.newCachedThreadPool();
 
     /**
      * Claude API가 사용 가능한지 확인
@@ -89,6 +98,90 @@ public class ClaudeApiService {
             log.error("Claude API call failed: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Claude API 스트리밍 호출 - SSE로 텍스트 청크 전달
+     */
+    public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens) {
+        SseEmitter emitter = new SseEmitter(180000L); // 3분 타임아웃
+
+        if (!isAvailable()) {
+            streamExecutor.execute(() -> {
+                try {
+                    emitter.send(SseEmitter.event().name("error").data("API key not configured"));
+                    emitter.complete();
+                } catch (Exception ignored) {}
+            });
+            return emitter;
+        }
+
+        streamExecutor.execute(() -> {
+            HttpURLConnection conn = null;
+            try {
+                Map<String, Object> body = Map.of(
+                    "model", model,
+                    "max_tokens", maxTokens,
+                    "stream", true,
+                    "system", systemPrompt,
+                    "messages", List.of(Map.of("role", "user", "content", userPrompt))
+                );
+                String jsonBody = objectMapper.writeValueAsString(body);
+
+                conn = (HttpURLConnection) new URL(API_URL).openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("x-api-key", apiKey);
+                conn.setRequestProperty("anthropic-version", "2023-06-01");
+                conn.setConnectTimeout(10000);
+                conn.setReadTimeout(180000);
+
+                conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
+                conn.getOutputStream().flush();
+
+                BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+
+                StringBuilder fullText = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.startsWith("data: ")) continue;
+                    String data = line.substring(6).trim();
+                    if (data.equals("[DONE]")) break;
+
+                    try {
+                        JsonNode event = objectMapper.readTree(data);
+                        String eventType = event.path("type").asText();
+
+                        if ("content_block_delta".equals(eventType)) {
+                            String text = event.path("delta").path("text").asText("");
+                            if (!text.isEmpty()) {
+                                fullText.append(text);
+                                emitter.send(SseEmitter.event().name("chunk").data(text));
+                            }
+                        } else if ("message_stop".equals(eventType)) {
+                            break;
+                        }
+                    } catch (Exception ignored) {}
+                }
+
+                emitter.send(SseEmitter.event().name("done").data(fullText.toString()));
+                emitter.complete();
+                reader.close();
+
+            } catch (Exception e) {
+                log.error("스트리밍 실패: {}", e.getMessage());
+                try {
+                    emitter.send(SseEmitter.event().name("error").data(e.getMessage()));
+                    emitter.complete();
+                } catch (Exception ignored) {}
+            } finally {
+                if (conn != null) conn.disconnect();
+            }
+        });
+
+        return emitter;
     }
 
     /**
