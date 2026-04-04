@@ -78,11 +78,11 @@
 .fade-in { animation: fadeInUp 0.5s ease forwards; }
 
 /* ─── Light Theme ─── */
-[data-theme="light"] .bt-card { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .bt-card { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .bt-card-label { color: #1e293b; }
 [data-theme="light"] .bt-card-sub { color: #64748b; }
 [data-theme="light"] .bt-card.active .bt-card-sub { color: #334155; }
-[data-theme="light"] .bt-tab { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0.1); color: #64748b; }
+[data-theme="light"] .bt-tab { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); color: #64748b; }
 [data-theme="light"] .bt-tab.active { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(192,132,252,0.1)); border-color: rgba(192,132,252,0.4); color: #1e293b; }
 [data-theme="light"] .bt-personality-text { color: #334155; }
 [data-theme="light"] .bt-personality-label { color: #64748b; }
@@ -91,7 +91,7 @@
 [data-theme="light"] .bt-score-bg { stroke: rgba(0,0,0,0.06); }
 [data-theme="light"] .bt-lucky-value { color: #b45309; }
 [data-theme="light"] .bt-lucky-divider { background: rgba(0,0,0,0.1); }
-[data-theme="light"] .bt-compat-btn { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0.08); color: #475569; }
+[data-theme="light"] .bt-compat-btn { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); color: #475569; }
 [data-theme="light"] .bt-compat-btn.active { color: #1e293b; }
 [data-theme="light"] .bt-compat-desc { color: #334155; }
 [data-theme="light"] .bt-compat-grade { color: #b45309; }

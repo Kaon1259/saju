@@ -647,7 +647,7 @@
 [data-theme="light"] .pt-answer-btn:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); }
 [data-theme="light"] .pt-answer-text { color: #222; }
 [data-theme="light"] .pt-loading-text { color: #222; }
-[data-theme="light"] .pt-loading-sub { color: #777; }
+[data-theme="light"] .pt-loading-sub { color: #555; }
 [data-theme="light"] .pt-result-type { background: rgba(255, 255, 255, 0.85); }
 [data-theme="light"] .pt-result-name { color: #111; }
 [data-theme="light"] .pt-result-desc { color: #2e2e45; }

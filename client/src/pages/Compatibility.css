@@ -139,7 +139,7 @@
 [data-theme="light"] .compat-score-num { color: #1e293b; }
 [data-theme="light"] .compat-hero-title { color: #1e293b; }
 [data-theme="light"] .compat-intro-title { background: linear-gradient(135deg, #b45309, #c2185b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-[data-theme="light"] .compat-reset-btn { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); color: #666; }
+[data-theme="light"] .compat-reset-btn { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); color: #555; }
 [data-theme="light"] .compat-score-bar-bg { background: rgba(0,0,0,0.06); }
 [data-theme="light"] .compat-person-label { color: #4a4a5a; }
 [data-theme="light"] .compat-person-name { color: #222; }

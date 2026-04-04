@@ -537,7 +537,7 @@
 /* 라이트 모드 */
 [data-theme="light"] .home-menu-label { color: #111; }
 [data-theme="light"] .home-menu-summary { color: #3a3a50; }
-[data-theme="light"] .home-menu-arrow { color: #aaa; }
+[data-theme="light"] .home-menu-arrow { color: #888; }
 
 .swipe-container {
   display: flex;
@@ -1081,7 +1081,7 @@
 .home-couple-label { font-size: 13px; font-weight: 800; color: var(--color-text); }
 .home-couple-desc { font-size: 10px; color: rgba(255,255,255,0.4); }
 [data-theme="light"] .home-couple-card { border-color: rgba(0,0,0,0.06); background: rgba(0,0,0,0.02); }
-[data-theme="light"] .home-couple-desc { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .home-couple-desc { color: rgba(0,0,0,0.6); }
 [data-theme="light"] .home-love-fortune-btn { border-color: rgba(233,30,99,0.25); color: #E91E63; background: rgba(233,30,99,0.06); }
 
 /* 온도 표시 */
@@ -1856,7 +1856,7 @@
 
 [data-theme="light"] .home-lq-label { color: #222; }
 [data-theme="light"] .home-lq-desc { color: #4a4a5a; }
-[data-theme="light"] .home-lq-arrow { color: rgba(0,0,0,0.3); }
+[data-theme="light"] .home-lq-arrow { color: rgba(0,0,0,0.5); }
 [data-theme="light"] .home-section-title { color: #222; }
 [data-theme="light"] .home-quick-label { color: #222; }
 [data-theme="light"] .home-landing-card { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.02); }

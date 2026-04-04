@@ -406,7 +406,7 @@
 [data-theme="light"] .saju-month-num { color: #111; }
 [data-theme="light"] .saju-month-summary { color: #2e2e45; }
 [data-theme="light"] .saju-month-now-tag { color: #fff; }
-[data-theme="light"] .saju-month-stage { background: rgba(0,0,0,0.04); color: #666; }
+[data-theme="light"] .saju-month-stage { background: rgba(0,0,0,0.04); color: #555; }
 [data-theme="light"] .saju-daily-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .saju-daily--today { border-color: rgba(184,134,11,0.35); background: rgba(251,191,36,0.05); }
 [data-theme="light"] .saju-daily-day { color: #111; }

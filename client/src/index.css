@@ -46,25 +46,25 @@
 
 /* ─── Light Theme ─── */
 [data-theme="light"] {
-  --color-bg-start: #ede5db;
-  --color-bg-end: #e0d6ca;
+  --color-bg-start: #f8f9fc;
+  --color-bg-end: #f0f1f6;
   --color-primary: #6d28d9;
   --color-primary-light: #7c3aed;
   --color-primary-dark: #5b21b6;
   --color-secondary: #a78bfa;
-  --color-accent-gold: #b8860b;
-  --color-accent-gold-light: #d4a017;
-  --color-surface: rgba(0, 0, 0, 0.06);
-  --color-surface-hover: rgba(0, 0, 0, 0.10);
-  --color-glass: rgba(255, 255, 255, 0.55);
-  --color-glass-border: rgba(0, 0, 0, 0.12);
+  --color-accent-gold: #a16207;
+  --color-accent-gold-light: #b8860b;
+  --color-surface: rgba(0, 0, 0, 0.04);
+  --color-surface-hover: rgba(0, 0, 0, 0.07);
+  --color-glass: rgba(255, 255, 255, 0.88);
+  --color-glass-border: rgba(0, 0, 0, 0.10);
   --color-text: #1a1a2e;
-  --color-text-secondary: #3a3a5c;
-  --color-text-muted: #6b7280;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.10);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
-  --shadow-glow: 0 0 20px rgba(109, 40, 217, 0.1);
+  --color-text-secondary: #2e2e45;
+  --color-text-muted: #555;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px rgba(109, 40, 217, 0.08);
 }
 
 [data-theme="light"] body {
@@ -157,13 +157,13 @@
 
 /* 라이트 glass-card */
 [data-theme="light"] .glass-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.92);
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="light"] .glass-card:hover {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.96);
   border-color: rgba(0, 0, 0, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
@@ -648,13 +648,13 @@ p, li, span { color: inherit; }
 [data-time="evening"]{ --color-bg-start: #1a0835; --color-bg-end: #2d1250; --color-bg-deep: #150630; }
 [data-time="night"]  { --color-bg-start: #1a0a30; --color-bg-end: #2a1048; --color-bg-deep: #120625; }
 
-/* ─── 시간대별 배경 (라이트모드) — 톤다운 ─── */
-[data-theme="light"][data-time="dawn"]   { --color-bg-start: #f0d8b5; --color-bg-end: #e8c49a; }
-[data-theme="light"][data-time="morning"]{ --color-bg-start: #efe0b0; --color-bg-end: #e5d090; }
-[data-theme="light"][data-time="noon"]   { --color-bg-start: #ede5c8; --color-bg-end: #e3d6a8; }
-[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #ecc8a0; --color-bg-end: #e0b888; }
-[data-theme="light"][data-time="evening"]{ --color-bg-start: #e0c0e8; --color-bg-end: #d0a8d8; }
-[data-theme="light"][data-time="night"]  { --color-bg-start: #d5c0e5; --color-bg-end: #c0a0d5; }
+/* ─── 시간대별 배경 (라이트모드) — 흰색 기반 은은한 색감 ─── */
+[data-theme="light"][data-time="dawn"]   { --color-bg-start: #fdf6ef; --color-bg-end: #f5ece3; }
+[data-theme="light"][data-time="morning"]{ --color-bg-start: #fdfbf3; --color-bg-end: #f5f2e8; }
+[data-theme="light"][data-time="noon"]   { --color-bg-start: #f8f9fc; --color-bg-end: #f0f1f6; }
+[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #fdf5ef; --color-bg-end: #f5ece5; }
+[data-theme="light"][data-time="evening"]{ --color-bg-start: #f8f2fb; --color-bg-end: #f0e8f5; }
+[data-theme="light"][data-time="night"]  { --color-bg-start: #f3eef8; --color-bg-end: #ebe4f2; }
 
 /* Starfield background effect */
 body::before {

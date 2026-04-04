@@ -782,7 +782,7 @@
 [data-theme="light"] .fr-lucky-value { color: #b8860b; }
 [data-theme="light"] .fr-reset-btn { background: #fff; border-color: rgba(0, 0, 0, 0.12); color: #333; }
 [data-theme="light"] .fr-scan-progress { background: rgba(0, 0, 0, 0.06); }
-[data-theme="light"] .fr-feature-step { background: rgba(0, 0, 0, 0.04); color: #666; }
+[data-theme="light"] .fr-feature-step { background: rgba(0, 0, 0, 0.04); color: #555; }
 [data-theme="light"] .fr-subtitle { color: #4a4a5a; }
 [data-theme="light"] .fr-scan-text { color: #3a3a50; }
 [data-theme="light"] .fr-type-card { background: rgba(255, 255, 255, 0.85); }

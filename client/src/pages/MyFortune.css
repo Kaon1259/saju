@@ -6,7 +6,7 @@
 .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(124,58,237,0.15)); color: #FBBF24; }
 .myf-mode-tab:first-child { border-right: 1px solid rgba(255,255,255,0.08); }
 [data-theme="light"] .myf-mode-tabs { border-color: rgba(0,0,0,0.1); }
-[data-theme="light"] .myf-mode-tab { background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.4); }
+[data-theme="light"] .myf-mode-tab { background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.6); }
 [data-theme="light"] .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.08)); color: #b8860b; }
 
 /* 다른 사람 운세 */

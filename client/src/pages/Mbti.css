@@ -80,12 +80,12 @@
 .fade-in { animation: fadeInUp 0.4s ease; }
 
 /* ── 라이트 모드 ── */
-[data-theme="light"] .mbti-tab { border-color: rgba(0,0,0,0.1); color: #666; }
+[data-theme="light"] .mbti-tab { border-color: rgba(0,0,0,0.1); color: #555; }
 [data-theme="light"] .mbti-tab.active { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(52,211,153,0.08)); border-color: rgba(139,92,246,0.35); color: #111; }
 [data-theme="light"] .mbti-group-label { color: #fff; }
 [data-theme="light"] .mbti-card { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .mbti-card-code { color: #222; }
-[data-theme="light"] .mbti-card-nick { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .mbti-card-nick { color: rgba(0,0,0,0.6); }
 [data-theme="light"] .mbti-card.active .mbti-card-nick { color: rgba(0,0,0,0.65); }
 [data-theme="light"] .mbti-result-code { color: #111; }
 [data-theme="light"] .mbti-result-nick { color: #3a3a50; }
@@ -95,7 +95,7 @@
 [data-theme="light"] .mbti-tip p { color: #333; }
 [data-theme="light"] .mbti-lucky-divider { background: rgba(0,0,0,0.08); }
 [data-theme="light"] .mbti-lucky-value { color: #b8860b; }
-[data-theme="light"] .mbti-compat-btn { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); color: #666; }
+[data-theme="light"] .mbti-compat-btn { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); color: #555; }
 [data-theme="light"] .mbti-compat-btn.active { color: #111; }
 [data-theme="light"] .mbti-compat-advice { color: #333; }
 [data-theme="light"] .mbti-compat-bar { background: rgba(0,0,0,0.06); }

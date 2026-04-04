@@ -106,7 +106,7 @@
 [data-theme="light"] .ts-section-title { color: #222; }
 [data-theme="light"] .ts-menu-label { color: #222; }
 [data-theme="light"] .ts-menu-desc { color: #4a4a5a; }
-[data-theme="light"] .ts-menu-arrow { color: rgba(0,0,0,0.3); }
+[data-theme="light"] .ts-menu-arrow { color: rgba(0,0,0,0.55); }
 
 [data-theme="light"] .ts-menu-card {
   border-color: rgba(0,0,0,0.15);

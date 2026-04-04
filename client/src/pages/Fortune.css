@@ -276,9 +276,9 @@
 /* ── 라이트 모��� ── */
 [data-theme="light"] .fortune-score__label { color: #3a3a50; }
 [data-theme="light"] .fortune-score__zodiac { color: #111; }
-[data-theme="light"] .fortune-score__date { color: #888; }
+[data-theme="light"] .fortune-score__date { color: #555; }
 [data-theme="light"] .fortune-lucky__item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
-[data-theme="light"] .fortune-lucky__item-label { color: #888; }
+[data-theme="light"] .fortune-lucky__item-label { color: #555; }
 [data-theme="light"] .fortune-lucky__item-value { color: #222; }
 [data-theme="light"] .fortune-lucky__number { color: #b8860b; }
 [data-theme="light"] .fortune-lucky__color { color: #5b21b6; }

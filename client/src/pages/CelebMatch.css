@@ -1,7 +1,7 @@
 .cm-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 100px; display: flex; flex-direction: column; gap: 12px; }
 .cm-back-btn { align-self: flex-start; padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .cm-back-btn:hover { color: #ff3d7f; border-color: rgba(255,61,127,0.3); }
-[data-theme="light"] .cm-back-btn { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.5); }
+[data-theme="light"] .cm-back-btn { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.65); }
 
 .cm-hero { text-align: center; padding: 16px 0 8px; }
 .cm-hero-icon { font-size: 40px; display: block; margin-bottom: 8px; }
@@ -84,12 +84,12 @@
 
 /* Light */
 [data-theme="light"] .cm-hero-desc,
-[data-theme="light"] .cm-no-birth-sub { color: rgba(0,0,0,0.5); }
+[data-theme="light"] .cm-no-birth-sub { color: rgba(0,0,0,0.65); }
 [data-theme="light"] .cm-summary-top-label,
 [data-theme="light"] .cm-stat-label,
 [data-theme="light"] .cm-threshold-label { color: rgba(0,0,0,0.45); }
 [data-theme="light"] .cm-rank-num { color: rgba(0,0,0,0.15); }
-[data-theme="light"] .cm-result-detail { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .cm-result-detail { color: rgba(0,0,0,0.6); }
 [data-theme="light"] .cm-score-unit { color: rgba(0,0,0,0.35); }
 [data-theme="light"] .cm-results-count { color: rgba(0,0,0,0.35); }
 [data-theme="light"] .cm-star-btn { border-color: rgba(0,0,0,0.08); }
