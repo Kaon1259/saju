@@ -5,7 +5,7 @@ import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './Register.css';
 
-const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY || '';
+const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY || '';
 const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI || `${window.location.origin}/auth/kakao/callback`;
 
 const BIRTH_TIMES = [
@@ -90,7 +90,7 @@ function Register() {
 
   // 카카오 로그인 버튼 클릭
   const handleKakaoLogin = () => {
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_JS_KEY}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
     window.location.href = kakaoAuthUrl;
   };
 
