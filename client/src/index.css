@@ -493,7 +493,7 @@ html {
 [data-fontsize] li,
 [data-fontsize] td,
 [data-fontsize] th,
-[data-fontsize] span:not([class*="icon"]):not([class*="emoji"]):not(.tab-label),
+[data-fontsize] span:not([class*="icon"]):not([class*="emoji"]):not(.tab-label):not(.home-love-temp-heart):not(.home-love-temp-num),
 [data-fontsize] .fortune-card__desc,
 [data-fontsize] .deep-section p,
 [data-fontsize] .deep-list li,
