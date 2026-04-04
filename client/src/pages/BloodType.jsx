@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getBloodTypeFortune, getBloodTypeCompatibility, getUser } from '../api/fortune';
+import { getBloodTypeFortuneStream, getBloodTypeCompatibility, getUser } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 
+import StreamText from '../components/StreamText';
 import './BloodType.css';
 
 const TYPES = [
@@ -19,11 +20,13 @@ function BloodType() {
   const [selected, setSelected] = useState(null);
   const [fortune, setFortune] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [streamText, setStreamText] = useState('');
   const [type1, setType1] = useState(null);
   const [type2, setType2] = useState(null);
   const [compat, setCompat] = useState(null);
   const [compatLoading, setCompatLoading] = useState(false);
   const resultRef = useRef(null);
+  const streamCleanupRef = useRef(null);
 
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
@@ -39,18 +42,43 @@ function BloodType() {
         }
       }).catch(() => {});
     }
+    return () => { streamCleanupRef.current?.(); };
   }, []);
 
-  const handleSelect = async (type) => {
+  const handleSelect = (type) => {
     setSelected(type);
     setFortune(null);
+    setStreamText('');
     setLoading(true);
-    try {
-      const data = await getBloodTypeFortune(type);
-      setFortune(data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    streamCleanupRef.current?.();
+
+    const cleanup = getBloodTypeFortuneStream(type, {
+      onChunk: (chunk) => setStreamText((prev) => prev + chunk),
+      onCached: (data) => {
+        setFortune(data);
+        setStreamText('');
+        setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      },
+      onDone: (fullText) => {
+        try {
+          const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            setFortune({ bloodType: type, ...parsed });
+          }
+        } catch (e) { console.error('parse error', e); }
+        setStreamText('');
+        setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      },
+      onError: (err) => {
+        console.error('stream error', err);
+        setLoading(false);
+        setStreamText('');
+      },
+    });
+    streamCleanupRef.current = cleanup;
   };
 
   const handleCompat = async () => {
@@ -109,8 +137,12 @@ function BloodType() {
             </div>
           )}
 
-          {loading && (
+          {loading && !streamText && (
             <div className="bt-loading"><div className="bt-spinner" /><p>AI가 운세를 분석하고 있어요</p></div>
+          )}
+
+          {loading && streamText && (
+            <StreamText text={streamText} icon="🩸" label="AI가 혈액형 운세를 분석하고 있어요..." color="#F472B6" />
           )}
 
           {fortune && !loading && (

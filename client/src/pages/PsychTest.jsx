@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { getPsychTests, analyzePsychTest } from '../api/fortune';
+import { getPsychTests, analyzePsychTestStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 
+import StreamText from '../components/StreamText';
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -74,8 +75,15 @@ function PsychTest() {
   const [slideDir, setSlideDir] = useState('in');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [streamText, setStreamText] = useState('');
   const resultRef = useRef(null);
+  const cleanupRef = useRef(null);
 
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
 
   // 서버에서 테스트 목록 가져오기
   useEffect(() => {
@@ -113,33 +121,62 @@ function PsychTest() {
     }
   };
 
-  const handleSubmit = async (finalAnswers) => {
+  const handleSubmit = (finalAnswers) => {
     setStep('loading');
     setLoading(true);
+    setStreamText('');
 
-    try {
-      const answersStr = finalAnswers.join(',');
-      const data = await analyzePsychTest(selectedTest.id, answersStr);
-      setResult(data);
-      setStep('result');
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) {
-      console.error('심리테스트 분석 실패:', e);
-      // 폴백 결과
-      setResult({
-        type: selectedTest.id === 'love' ? '로맨틱 이상주의자' : selectedTest.id === 'hidden' ? '조용한 모험가' : '긍정 행운아',
-        emoji: selectedTest.id === 'love' ? '\uD83D\uDC96' : selectedTest.id === 'hidden' ? '\uD83C\uDF1F' : '\uD83C\uDF40',
-        description: '당신은 깊은 내면의 감성과 따뜻한 마음을 가진 사람입니다. 주변 사람들에게 편안한 에너지를 주며, 진심 어린 관계를 소중히 여깁니다.',
-        strengths: ['뛰어난 공감 능력', '따뜻한 배려심', '창의적인 사고', '강한 직관력'],
-        weaknesses: ['때때로 우유부단', '감정에 민감', '완벽주의 성향'],
-        advice: '자신의 감정을 솔직하게 표현하는 연습을 해보세요. 당신의 진심은 주변 사람들에게 큰 힘이 됩니다.',
-        compatibility: '감성적이고 진지한 사람과 잘 맞습니다. 서로의 감정을 존중하는 관계가 이상적입니다.',
-        score: 85,
-      });
-      setStep('result');
-    } finally {
-      setLoading(false);
-    }
+    const answersStr = finalAnswers.join(',');
+    const cleanup = analyzePsychTestStream(
+      selectedTest.id,
+      answersStr,
+      undefined,
+      undefined,
+      {
+        onChunk: (chunk) => {
+          setStreamText(prev => prev + chunk);
+          setStep('streaming');
+        },
+        onCached: (data) => {
+          setResult(data);
+          setStep('result');
+          setLoading(false);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onDone: (fullText) => {
+          try {
+            const match = fullText.match(/\{[\s\S]*\}/);
+            if (match) {
+              const parsed = JSON.parse(match[0]);
+              setResult(parsed);
+            } else {
+              setResult({ type: '분석 완료', description: fullText, score: 80 });
+            }
+          } catch {
+            setResult({ type: '분석 완료', description: fullText, score: 80 });
+          }
+          setStep('result');
+          setLoading(false);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onError: (err) => {
+          console.error('심리테스트 분석 실패:', err);
+          setResult({
+            type: selectedTest.id === 'love-style' ? '로맨틱 이상주의자' : selectedTest.id === 'hidden-self' ? '조용한 모험가' : '긍정 행운아',
+            typeEmoji: selectedTest.id === 'love-style' ? '\uD83D\uDC96' : selectedTest.id === 'hidden-self' ? '\uD83C\uDF1F' : '\uD83C\uDF40',
+            description: '당신은 깊은 내면의 감성과 따뜻한 마음을 가진 사람입니다. 주변 사람들에게 편안한 에너지를 주며, 진심 어린 관계를 소중히 여깁니다.',
+            strengths: ['뛰어난 공감 능력', '따뜻한 배려심', '창의적인 사고'],
+            weaknesses: ['때때로 우유부단', '감정에 민감'],
+            advice: '자신의 감정을 솔직하게 표현하는 연습을 해보세요.',
+            compatibility: '감성적이고 진지한 사람과 잘 맞습니다.',
+            score: 85,
+          });
+          setStep('result');
+          setLoading(false);
+        },
+      }
+    );
+    cleanupRef.current = cleanup;
   };
 
   const goToOtherTest = () => {
@@ -155,7 +192,7 @@ function PsychTest() {
     if (!result) return;
     const text = `${selectedTest?.icon || ''} 심리테스트 결과\n\n` +
       `테스트: ${selectedTest?.title}\n` +
-      `유형: ${result.emoji || ''} ${result.type}\n\n` +
+      `유형: ${result.typeEmoji || result.emoji || ''} ${result.type}\n\n` +
       `${result.description}\n\n` +
       `연애 앱에서 나도 테스트해보세요!`;
     if (navigator.share) {
@@ -279,13 +316,20 @@ function PsychTest() {
         </div>
       )}
 
+      {/* ═══ STEP 3-5: 스트리밍 중 ═══ */}
+      {step === 'streaming' && (
+        <div className="pt-streaming fade-in">
+          <StreamText text={streamText} icon="🎭" label="AI가 심리를 분석하고 있어요..." color="#E91E63" />
+        </div>
+      )}
+
       {/* ═══ STEP 4: 결과 ═══ */}
       {step === 'result' && result && (
         <div className="pt-result fade-in" ref={resultRef}>
           {/* 유형 배지 */}
           <div className="pt-result-type glass-card" style={{ '--result-color': selectedTest?.color || '#9B59B6' }}>
             <div className="pt-result-aura" />
-            <span className="pt-result-emoji">{result.emoji}</span>
+            <span className="pt-result-emoji">{result.typeEmoji || result.emoji}</span>
             <div className="pt-result-badge" style={{ background: `${selectedTest?.color || '#9B59B6'}22`, color: selectedTest?.color || '#9B59B6' }}>
               {selectedTest?.title}
             </div>

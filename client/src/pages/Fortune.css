@@ -273,6 +273,84 @@
   color: var(--color-text-secondary);
 }
 
+/* Streaming */
+.fortune-stream-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-lg) 0;
+}
+
+.fortune-stream-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.fortune-stream-emoji {
+  font-size: 3rem;
+  animation: fortune-bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes fortune-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.fortune-stream-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.fortune-stream-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.fortune-stream-dots::after {
+  content: '';
+  animation: fortune-dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes fortune-dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+.fortune-stream-card {
+  padding: var(--space-xl);
+  min-height: 160px;
+}
+
+.fortune-stream-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.8;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.fortune-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--color-accent-gold);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: fortune-cursor-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes fortune-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* ── 라이트 모��� ── */
 [data-theme="light"] .fortune-score__label { color: #3a3a50; }
 [data-theme="light"] .fortune-score__zodiac { color: #111; }
@@ -287,3 +365,7 @@
 [data-theme="light"] .fortune-animal-circle { background: radial-gradient(circle, rgba(251,191,36,0.1), rgba(124,58,237,0.06)); }
 [data-theme="light"] .fortune-score__svg { filter: drop-shadow(0 0 12px rgba(124,58,237,0.15)); }
 [data-theme="light"] .fortune-error { color: #4a4a5a; }
+[data-theme="light"] .fortune-stream-title { color: #111; }
+[data-theme="light"] .fortune-stream-subtitle { color: #555; }
+[data-theme="light"] .fortune-stream-text { color: #222; }
+[data-theme="light"] .fortune-cursor { background: #b8860b; }

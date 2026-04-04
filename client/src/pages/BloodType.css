@@ -101,3 +101,7 @@
 [data-theme="light"] .bt-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #dc2626; }
 [data-theme="light"] .bt-tip p { color: #334155; }
 [data-theme="light"] .bt-best-match { color: #92710a; background: rgba(0,0,0,0.03); }
+
+/* 스트리밍 커서 */
+.stream-cursor { display: inline-block; width: 2px; height: 1em; background: #C084FC; margin-left: 2px; vertical-align: text-bottom; animation: streamBlink 0.8s step-end infinite; }
+@keyframes streamBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }

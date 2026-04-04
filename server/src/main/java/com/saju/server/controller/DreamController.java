@@ -2,8 +2,10 @@ package com.saju.server.controller;
 
 import com.saju.server.service.DreamService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
 
@@ -15,10 +17,7 @@ public class DreamController {
     private final DreamService dreamService;
 
     /**
-     * 꿈 해몽 API
-     * @param dreamText 꿈 내용 (필수)
-     * @param birthDate 생년월일 (선택, yyyy-MM-dd)
-     * @param gender 성별 (선택, male/female)
+     * 꿈 해몽 API (기존 동기 방식)
      */
     @PostMapping("/interpret")
     public ResponseEntity<Map<String, Object>> interpretDream(
@@ -26,5 +25,17 @@ public class DreamController {
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender) {
         return ResponseEntity.ok(dreamService.interpretDream(dreamText, birthDate, gender));
+    }
+
+    /**
+     * 꿈 해몽 스트리밍 엔드포인트
+     * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamDream(
+            @RequestParam String dreamText,
+            @RequestParam(required = false) String birthDate,
+            @RequestParam(required = false) String gender) {
+        return dreamService.streamDream(dreamText, birthDate, gender);
     }
 }

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getAllConstellations, getConstellationFortune, getUser } from '../api/fortune';
+import { getAllConstellations, getConstellationFortuneStream, getUser } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 
+import StreamText from '../components/StreamText';
 import './Constellation.css';
 
 const SIGN_DATA = {
@@ -46,8 +47,10 @@ function Constellation() {
   const [selected, setSelected] = useState(null);
   const [fortune, setFortune] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [streamText, setStreamText] = useState('');
   const [mySign, setMySign] = useState(null);
   const resultRef = useRef(null);
+  const streamCleanupRef = useRef(null);
 
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
@@ -67,18 +70,43 @@ function Constellation() {
         }
       }).catch(() => {});
     }
+    return () => { streamCleanupRef.current?.(); };
   }, []);
 
-  const handleSelect = async (sign) => {
+  const handleSelect = (sign) => {
     setSelected(sign);
     setFortune(null);
+    setStreamText('');
     setLoading(true);
-    try {
-      const data = await getConstellationFortune(sign);
-      setFortune(data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    streamCleanupRef.current?.();
+
+    const cleanup = getConstellationFortuneStream(sign, {
+      onChunk: (chunk) => setStreamText((prev) => prev + chunk),
+      onCached: (data) => {
+        setFortune(data);
+        setStreamText('');
+        setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      },
+      onDone: (fullText) => {
+        try {
+          const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            setFortune({ sign, ...parsed });
+          }
+        } catch (e) { console.error('parse error', e); }
+        setStreamText('');
+        setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      },
+      onError: (err) => {
+        console.error('stream error', err);
+        setLoading(false);
+        setStreamText('');
+      },
+    });
+    streamCleanupRef.current = cleanup;
   };
 
   const getColor = (sign) => SIGN_DATA[sign]?.color || '#7C3AED';
@@ -121,8 +149,12 @@ function Constellation() {
         </div>
       )}
 
-      {loading && (
+      {loading && !streamText && (
         <div className="cs-loading"><div className="cs-spinner" /><p>별의 메시지를 읽는 중...</p></div>
+      )}
+
+      {loading && streamText && (
+        <StreamText text={streamText} icon="⭐" label="AI가 별자리 운세를 분석하고 있어요..." color="#FF9800" />
       )}
 
       {fortune && !loading && (

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.MessageDigest;
 import java.time.LocalDate;
@@ -254,6 +255,90 @@ public class TarotService {
         result.put("date", LocalDate.now().toString());
         saveToCache("tarot", cacheKey, result);
         return result;
+    }
+
+    /**
+     * 타로 리딩 스트리밍
+     * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버 캐시 저장
+     */
+    public SseEmitter streamReading(String cardIds, String reversals,
+                                    String spread, String category, String question) {
+        // 캐시 체크
+        String cacheKey = buildCacheKey(cardIds, reversals, spread, category, question != null ? question : "");
+        Map<String, Object> cached = getFromCache("tarot", cacheKey);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(30000L);
+            try {
+                String json = objectMapper.writeValueAsString(cached);
+                emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        // 카드 파싱 (스트리밍용 카드 정보 구성)
+        int[] ids = Arrays.stream(cardIds.split(","))
+            .mapToInt(s -> Integer.parseInt(s.trim()))
+            .toArray();
+        String[] revParts = reversals.split(",");
+        boolean[] reversed = new boolean[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            if (i < revParts.length) {
+                String v = revParts[i].trim();
+                reversed[i] = "1".equals(v) || "true".equals(v);
+            }
+        }
+        String[] positions = SPREAD_POSITIONS.getOrDefault(spread, SPREAD_POSITIONS.get("three"));
+        String categoryKr = CATEGORY_KR.getOrDefault(category, "종합운");
+
+        List<Map<String, Object>> cardDetails = new ArrayList<>();
+        for (int i = 0; i < ids.length; i++) {
+            int id = Math.min(Math.max(ids[i], 0), 21);
+            String[] card = MAJOR_ARCANA[id];
+            Map<String, Object> detail = new LinkedHashMap<>();
+            detail.put("id", id);
+            detail.put("position", i < positions.length ? positions[i] : "추가 카드");
+            detail.put("nameEn", card[1]);
+            detail.put("nameKr", card[2]);
+            detail.put("keywords", card[3]);
+            detail.put("reversed", reversed[i]);
+            detail.put("meaning", reversed[i] ? card[5] : card[4]);
+            detail.put("element", card[6]);
+            detail.put("planet", card[7]);
+            cardDetails.add(detail);
+        }
+
+        // AI 스트리밍
+        String systemPrompt = promptBuilder.tarotSystemPrompt();
+        String userPrompt = promptBuilder.tarotUserPrompt(cardDetails, spread, categoryKr, question, LocalDate.now());
+
+        final String finalCardIds = cardIds;
+        final String finalReversals = reversals;
+        final List<Map<String, Object>> finalCardDetails = cardDetails;
+        final String finalCacheKey = cacheKey;
+        final String finalCategoryKr = categoryKr;
+
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1200, (fullText) -> {
+            // 스트리밍 완료 → 결과 구성 후 서버에서 직접 캐시 저장
+            try {
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("spread", spread);
+                result.put("category", category);
+                result.put("categoryKr", finalCategoryKr);
+                result.put("question", question);
+                result.put("cards", finalCardDetails);
+                result.put("interpretation", fullText.trim());
+                result.put("overallMessage", generateOverallMessage(finalCardDetails));
+                result.put("advice", generateAdvice(finalCardDetails, category));
+                result.put("luckyElement", determineLuckyElement(finalCardDetails));
+                result.put("date", LocalDate.now().toString());
+                saveToCache("tarot", finalCacheKey, result);
+            } catch (Exception e) {
+                log.warn("Failed to save tarot stream cache: {}", e.getMessage());
+            }
+        });
     }
 
     /**

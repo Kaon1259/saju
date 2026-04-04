@@ -790,3 +790,64 @@
 [data-theme="light"] .fr-personality { background: rgba(255, 255, 255, 0.85); }
 [data-theme="light"] .fr-list-card { background: rgba(255, 255, 255, 0.85); }
 [data-theme="light"] .fr-lucky { background: rgba(255, 255, 255, 0.85); }
+
+/* ═══ 스트리밍 ═══ */
+.fr-streaming {
+  padding: 0 16px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.fr-stream-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.fr-stream-icon {
+  font-size: 1.3rem;
+}
+
+.fr-stream-title {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+}
+
+.fr-stream-box {
+  padding: 18px 20px;
+  border-radius: 16px;
+  min-height: 120px;
+}
+
+.fr-stream-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.88);
+  margin: 0;
+}
+
+.fr-stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #DAA520;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: fr-blink 1s step-end infinite;
+}
+
+@keyframes fr-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 라이트모드 */
+[data-theme="light"] .fr-stream-title { color: #92400e; }
+[data-theme="light"] .fr-stream-text { color: #333; }
+[data-theme="light"] .fr-stream-cursor { background: #b8860b; }

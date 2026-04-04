@@ -113,3 +113,20 @@
 [data-theme="light"] .tj-reset-btn { border-color: rgba(236,72,153,0.25); background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(251,191,36,0.06)); color: #DB2777; }
 [data-theme="light"] .tj-reset-btn:hover { background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(251,191,36,0.1)); border-color: rgba(236,72,153,0.4); color: #9D174D; }
 [data-theme="light"] .tj-seal { background: rgba(192,57,43,0.03); }
+
+/* ─── 스트리밍 ─── */
+.tj-streaming {
+  margin: 16px;
+  padding: 20px;
+  border-radius: 16px;
+}
+.stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #fbbf24;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: streamBlink 0.8s step-end infinite;
+}
+@keyframes streamBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }

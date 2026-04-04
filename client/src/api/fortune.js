@@ -15,6 +15,41 @@ export const getFortuneByZodiac = async (zodiac) => {
   return response.data;
 };
 
+export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ zodiac });
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/fortune/today/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
+export const getFortuneByUserStream = (userId, { onChunk, onCached, onDone, onError }) => {
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/fortune/user/${userId}/stream`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 export const getAllTodayFortunes = async () => {
   const response = await api.get('/fortune/today/all');
   return response.data;
@@ -86,6 +121,24 @@ export const getConstellationFortune = async (sign) => {
   return response.data;
 };
 
+export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ sign });
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/constellation/fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 export const getConstellationByDate = async (birthDate) => {
   const response = await api.get('/constellation/fortune/by-date', { params: { birthDate } });
   return response.data;
@@ -108,6 +161,24 @@ export const getBloodTypeFortune = async (type) => {
   return response.data;
 };
 
+export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ type });
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/bloodtype/fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 export const getAllBloodTypeFortunes = async () => {
   const response = await api.get('/bloodtype/fortune/all');
   return response.data;
@@ -127,6 +198,24 @@ export const getMbtiTypes = async () => {
 export const getMbtiFortune = async (type) => {
   const response = await api.get('/mbti/fortune', { params: { type } });
   return response.data;
+};
+
+export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ type });
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/mbti/fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
 };
 
 export const getMbtiCompatibility = async (type1, type2) => {
@@ -155,14 +244,80 @@ export const getUserTojeong = async (userId) => {
   return response.data;
 };
 
+export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ birthDate });
+  if (calendarType) params.set('calendarType', calendarType);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/tojeong/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
+};
+
 // ─── 사주 궁합 ───
-export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2) => {
+export const getSajuCompatibilityBasic = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2) => {
   const params = { birthDate1, birthDate2 };
   if (birthTime1) params.birthTime1 = birthTime1;
   if (birthTime2) params.birthTime2 = birthTime2;
   if (calendarType1) params.calendarType1 = calendarType1;
   if (calendarType2) params.calendarType2 = calendarType2;
+  if (gender1) params.gender1 = gender1;
+  if (gender2) params.gender2 = gender2;
+  const response = await api.get('/compatibility/saju/basic', { params });
+  return response.data;
+};
+
+export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2) => {
+  const params = { birthDate1, birthDate2 };
+  if (birthTime1) params.birthTime1 = birthTime1;
+  if (birthTime2) params.birthTime2 = birthTime2;
+  if (calendarType1) params.calendarType1 = calendarType1;
+  if (calendarType2) params.calendarType2 = calendarType2;
+  if (gender1) params.gender1 = gender1;
+  if (gender2) params.gender2 = gender2;
   const response = await api.get('/compatibility/saju', { params });
+  return response.data;
+};
+
+export const saveCompatCache = async (data) => {
+  await api.post('/compatibility/saju/cache', data);
+};
+
+export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError }) => {
+  const params = new URLSearchParams({ birthDate1, birthDate2 });
+  if (birthTime1) params.set('birthTime1', birthTime1);
+  if (birthTime2) params.set('birthTime2', birthTime2);
+  if (calendarType1) params.set('calendarType1', calendarType1);
+  if (calendarType2) params.set('calendarType2', calendarType2);
+  if (gender1) params.set('gender1', gender1);
+  if (gender2) params.set('gender2', gender2);
+  if (score) params.set('score', score);
+  if (elementRelation) params.set('elementRelation', elementRelation);
+  if (branchRelation) params.set('branchRelation', branchRelation);
+
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/compatibility/saju/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
+export const getCelebMatch = async (birthDate, birthTime, calendarType, celebrities) => {
+  const response = await api.post('/compatibility/celeb-match', {
+    birthDate, birthTime, calendarType, celebrities
+  });
   return response.data;
 };
 
@@ -177,6 +332,26 @@ export const getTarotReading = async (cardIds, reversals, spread, category, ques
   if (question) params.question = question;
   const response = await api.get('/tarot/reading', { params });
   return response.data;
+};
+
+export const getTarotReadingStream = (cardIds, reversals, spread, category, question, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ cardIds, reversals, spread, category });
+  if (question) params.set('question', question);
+
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/tarot/reading/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
 };
 
 // ─── 오늘의 연애 온도 ───
@@ -200,6 +375,53 @@ export const getSpecialLoveFortune = async (type, birthDate, birthTime, gender, 
   if (relationshipStatus) params.relationshipStatus = relationshipStatus;
   const response = await api.get('/special/love', { params });
   return response.data;
+};
+
+export const getLoveFortuneBasic = async (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus) => {
+  const params = { type, birthDate };
+  if (birthTime) params.birthTime = birthTime;
+  if (gender) params.gender = gender;
+  if (calendarType) params.calendarType = calendarType;
+  if (partnerDate) params.partnerDate = partnerDate;
+  if (partnerGender) params.partnerGender = partnerGender;
+  if (breakupDate) params.breakupDate = breakupDate;
+  if (meetDate) params.meetDate = meetDate;
+  if (relationshipStatus) params.relationshipStatus = relationshipStatus;
+  const response = await api.get('/special/love/basic', { params });
+  return response.data;
+};
+
+export const saveLoveFortuneCache = async (data) => {
+  await api.post('/special/love/cache', data);
+};
+
+export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams();
+  params.set('type', type);
+  params.set('birthDate', birthDate);
+  if (birthTime && birthTime !== 'null') params.set('birthTime', birthTime);
+  if (gender && gender !== 'null') params.set('gender', gender);
+  if (calendarType && calendarType !== 'null') params.set('calendarType', calendarType);
+  if (partnerDate && partnerDate !== 'null') params.set('partnerDate', partnerDate);
+  if (partnerGender && partnerGender !== 'null') params.set('partnerGender', partnerGender);
+  if (breakupDate && breakupDate !== 'null') params.set('breakupDate', breakupDate);
+  if (meetDate && meetDate !== 'null') params.set('meetDate', meetDate);
+  if (relationshipStatus && relationshipStatus !== 'null') params.set('relationshipStatus', relationshipStatus);
+
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/special/love/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
 };
 
 // ─── 아침/점심/저녁 운세 ───
@@ -242,6 +464,27 @@ export const interpretDream = async (dreamText, birthDate, gender) => {
   return response.data;
 };
 
+export const interpretDreamStream = (dreamText, birthDate, gender, { onChunk, onCached, onDone, onError }) => {
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const params = new URLSearchParams();
+  params.set('dreamText', dreamText);
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  const url = `${baseURL}/dream/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 // ─── AI 관상 ───
 export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender) => {
   const params = new URLSearchParams();
@@ -256,6 +499,26 @@ export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthSh
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
   return response.data;
+};
+
+export const analyzeFaceReadingStream = (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, { onChunk, onCached, onDone, onError }) => {
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const params = new URLSearchParams({ faceShape, eyeShape, noseShape, mouthShape, foreheadShape });
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  const url = `${baseURL}/face-reading/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
 };
 
 // ─── 심리테스트 ───
@@ -276,6 +539,26 @@ export const analyzePsychTest = async (testId, answers, birthDate, gender) => {
   return response.data;
 };
 
+export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onChunk, onCached, onDone, onError }) => {
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const params = new URLSearchParams({ testId, answers });
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  const url = `${baseURL}/psych/analyze/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 // ─── 바이오리듬 ───
 export const getBiorhythm = async (birthDate) => {
   const response = await api.get('/biorhythm', { params: { birthDate } });
@@ -292,6 +575,25 @@ export const getYearFortune = async (birthDate, birthTime, gender, calendarType)
   return response.data;
 };
 
+export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ birthDate });
+  if (birthTime) params.set('birthTime', birthTime);
+  if (gender) params.set('gender', gender);
+  if (calendarType) params.set('calendarType', calendarType);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/year-fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
+};
+
 // ─── 월별 운세 ───
 export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => {
   const params = { birthDate, month };
@@ -301,6 +603,24 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
   return response.data;
 };
 
+export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ birthDate, month });
+  if (birthTime) params.set('birthTime', birthTime);
+  if (gender) params.set('gender', gender);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/monthly-fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
+};
+
 // ─── 주간 운세 ───
 export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
   const params = { birthDate };
@@ -308,6 +628,24 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
   if (gender) params.gender = gender;
   const response = await api.get('/weekly-fortune', { params });
   return response.data;
+};
+
+export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ birthDate });
+  if (birthTime) params.set('birthTime', birthTime);
+  if (gender) params.set('gender', gender);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/weekly-fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
 };
 
 // ─── 심화분석 ───

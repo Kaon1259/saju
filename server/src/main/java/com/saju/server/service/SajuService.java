@@ -136,7 +136,7 @@ public class SajuService {
                 monthPrompt.append("반드시 JSON 배열로만 응답: [{\"month\":1,\"summary\":\"1월 운세\"},{\"month\":2,\"summary\":\"2월 운세\"},...]\n");
 
                 String aiMonthly = claudeApiService.generate(
-                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. 십성과 12운성의 조합으로 월별 운세를 해석해줘. 친근한 반말 구어체로 작성하고, 고전적 표현은 절대 쓰지 마. 반드시 JSON 배열로만 응답해.",
+                    "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 사주 전문가야. 십성과 12운성의 조합으로 월별 운세를 해석해줘. 자연스러운 대화체 반말로 작성하고, 딱딱한 보고서 톤이나 고전적 표현은 절대 쓰지 마. 반드시 JSON 배열로만 응답해.",
                     monthPrompt.toString(), 1500);
 
                 String json = ClaudeApiService.extractJson(aiMonthly);
@@ -262,9 +262,9 @@ public class SajuService {
             String elementPrompt = buildElementAnalysisPrompt(result);
             if (elementPrompt != null) {
                 String aiElement = claudeApiService.generate(
-                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
-                    + "오행(五行)의 균형과 보충 방법을 친근한 반말 구어체로 설명해줘. "
-                    + "\"~거든!\", \"~인 거야\", \"~해봐!\" 같은 표현을 쓰고, 고전적 표현은 절대 금지. "
+                    "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 사주 전문가야. "
+                    + "오행(五行)의 균형과 보충 방법을 자연스러운 대화체 반말로 설명해줘. "
+                    + "딱딱한 보고서 톤이나 고전적 표현은 절대 금지. "
                     + "JSON이 아닌 일반 텍스트로 응답해.",
                     elementPrompt, 800);
                 if (aiElement != null && !aiElement.isBlank()) {
@@ -280,9 +280,9 @@ public class SajuService {
             if (result.getSinsalList() != null && !result.getSinsalList().isEmpty()) {
                 String sinsalPrompt = buildSinsalPrompt(result);
                 String aiSinsal = claudeApiService.generate(
-                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 사주 전문가야. "
                     + "신살(神殺)의 의미와 일상생활에서의 구체적 영향을 친근하게 해석해줘. "
-                    + "각 신살이 실생활에 미치는 영향과 주의사항을 \"~거든!\", \"~인 거야\" 같은 반말 구어체로 설명해. "
+                    + "각 신살이 실생활에 미치는 영향과 주의사항을 자연스러운 대화체 반말로 설명해. "
                     + "고전적 표현 절대 금지. JSON이 아닌 일반 텍스트로 응답해.",
                     sinsalPrompt, 800);
                 if (aiSinsal != null && !aiSinsal.isBlank()) {
@@ -298,9 +298,9 @@ public class SajuService {
             if (result.getGyeokguk() != null && !result.getGyeokguk().isBlank()) {
                 String gyeokgukPrompt = buildGyeokgukPrompt(result);
                 String aiGyeokguk = claudeApiService.generate(
-                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 사주 전문가야. "
                     + "격국(格局)의 의미를 친근하게 해석해주고, 격국과 오행의 조합에 따른 "
-                    + "직업 추천, 결혼운, 재물운 성향을 \"~거든!\", \"~인 거야\" 같은 반말로 분석해줘. "
+                    + "직업 추천, 결혼운, 재물운 성향을 자연스러운 대화체 반말로 분석해줘. "
                     + "고전적 표현 절대 금지. JSON이 아닌 일반 텍스트로 응답해.",
                     gyeokgukPrompt, 800);
                 if (aiGyeokguk != null && !aiGyeokguk.isBlank()) {
@@ -316,9 +316,9 @@ public class SajuService {
             if (result.getDaeunList() != null && !result.getDaeunList().isEmpty()) {
                 String daeunPrompt = buildDaeunPrompt(result);
                 String aiDaeun = claudeApiService.generate(
-                    "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 사주 전문가야. "
+                    "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 사주 전문가야. "
                     + "대운(大運)의 흐름을 친근하게 해석해주고, 현재 대운의 기회와 위기, "
-                    + "구체적 행동 지침을 \"~거든!\", \"~인 거야\", \"~해봐!\" 같은 반말 구어체로 알려줘. "
+                    + "구체적 행동 지침을 자연스러운 대화체 반말로 알려줘. "
                     + "고전적 표현 절대 금지. JSON이 아닌 일반 텍스트로 응답해.",
                     daeunPrompt, 1200);
                 if (aiDaeun != null && !aiDaeun.isBlank()) {

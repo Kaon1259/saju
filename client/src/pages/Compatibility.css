@@ -128,6 +128,18 @@
 .compat-share-btn { padding: 8px 18px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); color: #F472B6; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .compat-share-btn:hover { background: rgba(244,114,182,0.15); }
 [data-theme="light"] .compat-share-btn { border-color: rgba(236,72,153,0.3); color: #db2777; background: rgba(236,72,153,0.06); }
+.compat-share-btn--bottom { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
+
+/* 스트리밍 */
+.compat-stream { padding: 20px; margin: 12px 0; }
+.compat-stream-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #FBBF24; }
+.compat-stream-icon { font-size: 20px; animation: compatPulse 1.5s ease-in-out infinite; }
+@keyframes compatPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+.compat-stream-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); white-space: pre-wrap; word-break: break-word; }
+[data-theme="light"] .compat-stream-text { color: #2e2e45; }
+[data-theme="light"] .compat-stream-header { color: #96700a; }
+.compat-stream-cursor { animation: compatBlink 0.8s step-end infinite; color: #FBBF24; }
+@keyframes compatBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 .compat-reset-btn { width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: var(--color-text-muted); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .compat-reset-btn:hover { border-color: var(--color-primary-light); color: var(--color-text); }
 

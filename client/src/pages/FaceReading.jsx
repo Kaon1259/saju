@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
-import { analyzeFaceReading } from '../api/fortune';
+import { useState, useRef, useEffect } from 'react';
+import { analyzeFaceReadingStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import StreamText from '../components/StreamText';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -86,7 +87,14 @@ function FaceReading() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [scanPhase, setScanPhase] = useState(0);
+  const [streamText, setStreamText] = useState('');
   const resultRef = useRef(null);
+  const cleanupRef = useRef(null);
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
 
   const allSelected = FACE_FEATURES.every(f => selections[f.id]);
 
@@ -99,61 +107,120 @@ function FaceReading() {
     }
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!allSelected) return;
     setStep('loading');
     setLoading(true);
     setScanPhase(0);
+    setStreamText('');
 
-    // 스캔 애니메이션 단계
-    const phases = [
-      '얼굴 윤곽을 분석하고 있습니다...',
-      '이목구비 조화를 측정합니다...',
-      '관상학적 의미를 해석합니다...',
-      '운세를 종합하고 있습니다...',
-    ];
-    for (let i = 0; i < phases.length; i++) {
-      await new Promise(r => setTimeout(r, 800));
-      setScanPhase(i);
-    }
+    // 스캔 애니메이션 단계 (로딩 중 표시)
+    let phaseIdx = 0;
+    const phaseTimer = setInterval(() => {
+      phaseIdx++;
+      if (phaseIdx < 4) setScanPhase(phaseIdx);
+      else clearInterval(phaseTimer);
+    }, 800);
 
-    try {
-      const data = await analyzeFaceReading(
-        selections.faceShape,
-        selections.eyeShape,
-        selections.noseShape,
-        selections.mouthShape,
-        selections.foreheadShape,
-        birthDate || null,
-        gender || null
-      );
-      setResult(data);
-      setStep('result');
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) {
-      console.error('관상 분석 실패:', e);
-      // 폴백 결과
-      setResult({
-        overallType: '복덕상',
-        emoji: '😊',
-        element: '목(木)',
-        score: 82,
-        grade: 'A',
-        personality: '타고난 인복이 있으며, 주변 사람들에게 편안한 인상을 줍니다. 따뜻한 성품과 강한 책임감이 조화를 이루고 있습니다.',
-        wealth: '안정적인 재물운을 가지고 있습니다. 꾸준한 노력이 큰 성과로 돌아옵니다.',
-        love: '매력적인 인상으로 좋은 인연을 만날 가능성이 높습니다. 진심 어린 대화가 관계를 깊게 합니다.',
-        career: '리더십과 협동심이 조화를 이루어 직장에서 인정받을 수 있습니다.',
-        health: '전반적으로 건강한 체질이지만, 스트레스 관리에 신경 쓰세요.',
-        strengths: ['타고난 인복', '안정적인 재운', '좋은 대인관계', '강한 의지력'],
-        improvements: ['때로 우유부단한 면', '과도한 걱정', '자기 주장 부족'],
-        luckyColor: '초록색',
-        luckyDirection: '동쪽',
-        luckyNumber: 7,
-      });
-      setStep('result');
-    } finally {
-      setLoading(false);
-    }
+    const cleanup = analyzeFaceReadingStream(
+      selections.faceShape,
+      selections.eyeShape,
+      selections.noseShape,
+      selections.mouthShape,
+      selections.foreheadShape,
+      birthDate || undefined,
+      gender || undefined,
+      {
+        onChunk: (chunk) => {
+          clearInterval(phaseTimer);
+          setStreamText(prev => prev + chunk);
+          setStep('streaming');
+        },
+        onCached: (data) => {
+          clearInterval(phaseTimer);
+          // 서버 필드명 → 프론트 필드명 매핑
+          const mapped = {
+            overallType: data.overallType,
+            emoji: data.overallEmoji || data.emoji,
+            element: data.faceElement || data.element,
+            score: data.score,
+            grade: data.grade,
+            personality: data.personality,
+            wealth: data.moneyFortune || data.wealth,
+            love: data.loveFortune || data.love,
+            career: data.careerFortune || data.career,
+            health: data.healthFortune || data.health,
+            strengths: data.strengths,
+            improvements: data.improvements,
+            luckyColor: data.luckyColor,
+            luckyDirection: data.luckyDirection,
+            luckyNumber: data.luckyNumber,
+          };
+          setResult(mapped);
+          setStep('result');
+          setLoading(false);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onDone: (fullText) => {
+          clearInterval(phaseTimer);
+          try {
+            const match = fullText.match(/\{[\s\S]*\}/);
+            if (match) {
+              const data = JSON.parse(match[0]);
+              const mapped = {
+                overallType: data.overallType,
+                emoji: data.overallEmoji || data.emoji,
+                element: data.faceElement || data.element,
+                score: data.score,
+                grade: data.grade,
+                personality: data.personality,
+                wealth: data.moneyFortune || data.wealth,
+                love: data.loveFortune || data.love,
+                career: data.careerFortune || data.career,
+                health: data.healthFortune || data.health,
+                strengths: data.strengths,
+                improvements: data.improvements,
+                luckyColor: data.luckyColor,
+                luckyDirection: data.luckyDirection,
+                luckyNumber: data.luckyNumber,
+              };
+              setResult(mapped);
+            } else {
+              setResult({ overallType: '분석 완료', personality: fullText, score: 75, grade: 'B' });
+            }
+          } catch {
+            setResult({ overallType: '분석 완료', personality: fullText, score: 75, grade: 'B' });
+          }
+          setStep('result');
+          setLoading(false);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onError: (err) => {
+          clearInterval(phaseTimer);
+          console.error('관상 분석 실패:', err);
+          setResult({
+            overallType: '복덕상',
+            emoji: '😊',
+            element: '목(木)',
+            score: 82,
+            grade: 'A',
+            personality: '타고난 인복이 있으며, 주변 사람들에게 편안한 인상을 줍니다. 따뜻한 성품과 강한 책임감이 조화를 이루고 있습니다.',
+            wealth: '안정적인 재물운을 가지고 있습니다. 꾸준한 노력이 큰 성과로 돌아옵니다.',
+            love: '매력적인 인상으로 좋은 인연을 만날 가능성이 높습니다. 진심 어린 대화가 관계를 깊게 합니다.',
+            career: '리더십과 협동심이 조화를 이루어 직장에서 인정받을 수 있습니다.',
+            health: '전반적으로 건강한 체질이지만, 스트레스 관리에 신경 쓰세요.',
+            strengths: ['타고난 인복', '안정적인 재운', '좋은 대인관계'],
+            improvements: ['때로 우유부단한 면', '과도한 걱정'],
+            luckyColor: '초록색',
+            luckyDirection: '동쪽',
+            luckyNumber: 7,
+          });
+          setStep('result');
+          setLoading(false);
+        },
+      }
+    );
+    cleanupRef.current = cleanup;
   };
 
   const resetAll = () => {
@@ -353,6 +420,13 @@ function FaceReading() {
           <div className="fr-scan-progress">
             <div className="fr-scan-progress-fill" style={{ width: `${((scanPhase + 1) / scanMessages.length) * 100}%` }} />
           </div>
+        </div>
+      )}
+
+      {/* ═══ STEP 2-5: 스트리밍 중 ═══ */}
+      {step === 'streaming' && (
+        <div className="fr-streaming fade-in">
+          <StreamText text={streamText} icon="👤" label="AI가 관상을 분석하고 있어요..." color="#DAA520" />
         </div>
       )}
 

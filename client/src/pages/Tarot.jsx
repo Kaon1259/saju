@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getTarotReading, drawTarotCards } from '../api/fortune';
+import { getTarotReadingStream, drawTarotCards } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import TarotCardArt from '../components/TarotCardArt';
 import { playTarotReveal, playCardShuffle } from '../utils/sounds';
 import FortuneLoading from '../components/FortuneLoading';
+import StreamText from '../components/StreamText';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
@@ -122,11 +123,16 @@ function Tarot() {
   const [revealedCards, setRevealedCards] = useState([]);
   const [reading, setReading] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [streamText, setStreamText] = useState('');
+  const [aiStreaming, setAiStreaming] = useState(false);
   const [shuffleAnim, setShuffleAnim] = useState(false);
   const [flipIndex, setFlipIndex] = useState(-1);
   const [focusCard, setFocusCard] = useState(null); // 클릭한 카드 인덱스
   const [showDeckModal, setShowDeckModal] = useState(false);
   const resultRef = useRef(null);
+  const cleanupRef = useRef(null);
+
+  useEffect(() => { return () => cleanupRef.current?.(); }, []);
 
 
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
@@ -184,32 +190,65 @@ function Tarot() {
 
     await new Promise(r => setTimeout(r, 800));
     setLoading(true);
-    try {
-      const cardIds = cards.map(c => c.id).join(',');
-      const reversals = cards.map(c => c.reversed ? '1' : '0').join(',');
-      const data = await getTarotReading(cardIds, reversals, spread, category, question);
-      setReading(data);
-      setStep('result');
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
-    } catch (e) {
-      console.error('타로 리딩 실패:', e);
-      setReading({
-        cards: cards.map((c, i) => ({
-          ...c,
-          position: POSITION_LABELS[spread]?.[i] || '카드',
-          meaning: c.reversed
-            ? '내면의 성찰이 필요한 시기입니다.'
-            : '긍정적인 에너지가 당신을 감싸고 있습니다.',
-        })),
-        interpretation: '카드가 당신에게 보내는 메시지를 깊이 느껴보세요.',
-        overallMessage: '카드의 지혜를 믿고 한 걸음 나아가세요.',
-        advice: '마음을 열고 카드의 메시지에 귀 기울이세요.',
-        luckyElement: '불(火)',
-      });
-      setStep('result');
-    } finally {
-      setLoading(false);
-    }
+    setStreamText('');
+    setAiStreaming(false);
+
+    const cardIds = cards.map(c => c.id).join(',');
+    const reversals = cards.map(c => c.reversed ? '1' : '0').join(',');
+
+    const fallbackReading = {
+      cards: cards.map((c, i) => ({
+        ...c,
+        position: POSITION_LABELS[spread]?.[i] || '카드',
+        meaning: c.reversed
+          ? '내면의 성찰이 필요한 시기입니다.'
+          : '긍정적인 에너지가 당신을 감싸고 있습니다.',
+      })),
+      interpretation: '카드가 당신에게 보내는 메시지를 깊이 느껴보세요.',
+      overallMessage: '카드의 지혜를 믿고 한 걸음 나아가세요.',
+      advice: '마음을 열고 카드의 메시지에 귀 기울이세요.',
+      luckyElement: '불(火)',
+    };
+
+    cleanupRef.current = getTarotReadingStream(cardIds, reversals, spread, category, question, {
+      onCached: (data) => {
+        setReading(data);
+        setLoading(false);
+        setStep('result');
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+      },
+      onChunk: (text) => {
+        setLoading(false);
+        setAiStreaming(true);
+        setStreamText(prev => prev + text);
+      },
+      onDone: (fullText) => {
+        setAiStreaming(false);
+        setStreamText('');
+        // 스트리밍 텍스트를 해석 텍스트로 읽딩에 저장
+        setReading({
+          ...fallbackReading,
+          cards: cards.map((c, i) => ({
+            ...c,
+            position: POSITION_LABELS[spread]?.[i] || '카드',
+            meaning: c.reversed
+              ? '내면의 성찰이 필요한 시기입니다.'
+              : '긍정적인 에너지가 당신을 감싸고 있습니다.',
+          })),
+          interpretation: fullText.trim(),
+        });
+        setLoading(false);
+        setStep('result');
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+      },
+      onError: () => {
+        setAiStreaming(false);
+        setStreamText('');
+        setReading(fallbackReading);
+        setLoading(false);
+        setStep('result');
+      },
+    });
   };
 
   const handleDeckChange = (d) => {
@@ -218,6 +257,7 @@ function Tarot() {
   };
 
   const resetAll = () => {
+    cleanupRef.current?.();
     setStep('setup');
     setSpread('three');
     setCategory('relationship');
@@ -228,6 +268,8 @@ function Tarot() {
     setReading(null);
     setFlipIndex(-1);
     setFocusCard(null);
+    setStreamText('');
+    setAiStreaming(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -513,8 +555,12 @@ function Tarot() {
             })}
           </div>
 
-          {loading && (
+          {loading && !aiStreaming && (
             <FortuneLoading type="tarot" />
+          )}
+
+          {aiStreaming && (
+            <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />
           )}
 
           {reading && step === 'result' && (

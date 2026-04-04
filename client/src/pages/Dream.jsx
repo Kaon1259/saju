@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
-import { interpretDream } from '../api/fortune';
+import { useState, useRef, useEffect } from 'react';
+import { interpretDreamStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneLoading from '../components/FortuneLoading';
+import StreamText from '../components/StreamText';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -46,14 +47,16 @@ function getScoreColor(score) {
 
 function Dream() {
   // ─── 상태 ───
-  const [step, setStep] = useState('input');     // 'input' | 'loading' | 'result'
+  const [step, setStep] = useState('input');     // 'input' | 'loading' | 'streaming' | 'result'
   const [dreamText, setDreamText] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
   const [showPersonal, setShowPersonal] = useState(false);
   const [result, setResult] = useState(null);
+  const [streamText, setStreamText] = useState('');
   const resultRef = useRef(null);
   const textareaRef = useRef(null);
+  const cleanupRef = useRef(null);
 
 
   // ── 키워드 클릭 ──
@@ -67,34 +70,64 @@ function Dream() {
     }
   };
 
-  // ── 꿈 해석 요청 ──
-  const handleSubmit = async () => {
+  // cleanup on unmount
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
+
+  // ── 꿈 해석 요청 (스트리밍) ──
+  const handleSubmit = () => {
     if (!dreamText.trim()) return;
     setStep('loading');
-    try {
-      const data = await interpretDream(
-        dreamText.trim(),
-        birthDate || undefined,
-        gender || undefined
-      );
-      setResult(data);
-      setStep('result');
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) {
-      console.error('꿈해몽 실패:', e);
-      // 폴백 결과
-      setResult({
-        category: '일반',
-        symbol: '🌙',
-        score: 65,
-        interpretation: '꿈은 당신의 내면을 반영하고 있습니다. 최근 마음속에 품고 있던 소망이나 걱정이 꿈으로 나타났을 수 있습니다. 깊이 생각해보시면 의미를 찾을 수 있을 것입니다.',
-        psychology: '무의식에서 보내는 메시지에 주의를 기울여보세요. 당신의 내면이 전하고 싶은 이야기가 있습니다.',
-        fortuneHint: '가까운 시일 내에 새로운 기회가 찾아올 수 있습니다. 마음을 열고 준비하세요.',
-        luckyAction: '명상이나 산책으로 마음을 정리해보세요',
-        luckyNumber: 7,
-      });
-      setStep('result');
-    }
+    setStreamText('');
+
+    const cleanup = interpretDreamStream(
+      dreamText.trim(),
+      birthDate || undefined,
+      gender || undefined,
+      {
+        onChunk: (chunk) => {
+          setStreamText(prev => prev + chunk);
+          setStep('streaming');
+        },
+        onCached: (data) => {
+          setResult(data);
+          setStep('result');
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onDone: (fullText) => {
+          // JSON 파싱 시도
+          try {
+            const match = fullText.match(/\{[\s\S]*\}/);
+            if (match) {
+              const parsed = JSON.parse(match[0]);
+              setResult(parsed);
+            } else {
+              setResult({ interpretation: fullText, score: 65, category: '일반', symbol: '🌙' });
+            }
+          } catch {
+            setResult({ interpretation: fullText, score: 65, category: '일반', symbol: '🌙' });
+          }
+          setStep('result');
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onError: (err) => {
+          console.error('꿈해몽 스트리밍 실패:', err);
+          setResult({
+            category: '일반',
+            symbol: '🌙',
+            score: 65,
+            interpretation: '꿈은 당신의 내면을 반영하고 있습니다. 최근 마음속에 품고 있던 소망이나 걱정이 꿈으로 나타났을 수 있습니다.',
+            psychology: '무의식에서 보내는 메시지에 주의를 기울여보세요.',
+            fortuneHint: '가까운 시일 내에 새로운 기회가 찾아올 수 있습니다.',
+            luckyAction: '명상이나 산책으로 마음을 정리해보세요',
+            luckyNumber: 7,
+          });
+          setStep('result');
+        },
+      }
+    );
+    cleanupRef.current = cleanup;
   };
 
   // ── 공유 ──
@@ -247,6 +280,13 @@ function Dream() {
       {/* ═══ STEP: 로딩 ═══ */}
       {step === 'loading' && (
         <FortuneLoading type="dream" />
+      )}
+
+      {/* ═══ STEP: 스트리밍 중 ═══ */}
+      {step === 'streaming' && (
+        <div className="dream-streaming fade-in">
+          <StreamText text={streamText} icon="🌙" label="AI가 꿈을 해몽하고 있어요..." color="#6C3483" />
+        </div>
       )}
 
       {/* ═══ STEP: 결과 ═══ */}

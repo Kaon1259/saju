@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getTojeongFortune, getUserTojeong } from '../api/fortune';
+import { getTojeongStream, getUserTojeong } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import StreamText from '../components/StreamText';
 import './Tojeong.css';
 
 const RATING_STYLE = {
@@ -21,13 +22,20 @@ function Tojeong() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const [streamText, setStreamText] = useState('');
   const [showInput, setShowInput] = useState(true);
   const [birthDate, setBirthDate] = useState('');
   const [calendarType, setCalendarType] = useState('SOLAR');
+  const cleanupRef = useRef(null);
 
   const userId = localStorage.getItem('userId');
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
+
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
 
   const loadUserTojeong = () => {
     if (!userId) return;
@@ -51,24 +59,62 @@ function Tojeong() {
     }
   }, [userId]);
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!birthDate) return;
     setLoading(true);
+    setStreaming(false);
+    setStreamText('');
     setShowInput(false);
-    try {
-      const data = await getTojeongFortune(birthDate, calendarType);
-      setResult(data);
-    } catch (err) {
-      console.error('Tojeong failed:', err);
-      setShowInput(true);
-    } finally {
-      setLoading(false);
-    }
+    cleanupRef.current?.();
+
+    let firstChunk = true;
+    cleanupRef.current = getTojeongStream(birthDate, calendarType, {
+      onCached: (data) => {
+        setResult(data);
+        setLoading(false);
+      },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: (fullText) => {
+        setStreaming(false);
+        setStreamText('');
+        try {
+          const json = fullText.match(/\{[\s\S]*\}/)?.[0];
+          if (json) {
+            // done 이벤트 시 서버가 이미 캐시 저장 완료
+            // 결과는 TojeongResult 형식이 아닌 AI JSON이므로 기본 구조로 매핑
+            const parsed = JSON.parse(json);
+            // yearSummary, monthlyFortunes 등이 months 배열로 올 수 있음
+            const mapped = {
+              yearSummary: parsed.yearSummary,
+              yearKeywords: parsed.yearKeywords,
+              bestMonth: parsed.bestMonth,
+              cautionMonth: parsed.cautionMonth,
+              yearAdvice: parsed.yearAdvice,
+              monthlyFortunes: parsed.months || parsed.monthlyFortunes || [],
+            };
+            setResult(mapped);
+          }
+        } catch (e) {
+          console.error('토정비결 파싱 실패:', e);
+          setShowInput(true);
+        }
+        setLoading(false);
+      },
+      onError: (err) => {
+        console.error('토정비결 스트림 실패:', err);
+        setLoading(false);
+        setStreaming(false);
+        setShowInput(true);
+      },
+    });
   };
 
   const currentMonth = new Date().getMonth(); // 0-indexed
 
-  if (loading) {
+  if (loading && !streaming) {
     return (
       <div className="tj-page">
         <div className="tj-loading">
@@ -85,6 +131,24 @@ function Tojeong() {
           <p className="tj-loading-text">AI가 고서를 펼쳐 운세를 풀이하고 있어요</p>
           <div className="tj-loading-dots"><span>.</span><span>.</span><span>.</span></div>
         </div>
+      </div>
+    );
+  }
+
+  if (streaming) {
+    return (
+      <div className="tj-page">
+        <div className="tj-loading">
+          <div className="tj-book">
+            <div className="tj-book-cover">
+              <span className="tj-book-title">土亭秘訣</span>
+            </div>
+            <div className="tj-book-page tj-book-page--1"><span>卦</span></div>
+            <div className="tj-book-page tj-book-page--2"><span>運</span></div>
+            <div className="tj-book-page tj-book-page--3"><span>命</span></div>
+          </div>
+        </div>
+        <StreamText text={streamText} icon="☯️" label="AI가 토정비결을 분석하고 있어요..." color="#E879F9" />
       </div>
     );
   }

@@ -1,9 +1,12 @@
 package com.saju.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.service.BloodTypeFortuneService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,7 @@ import java.util.Map;
 public class BloodTypeController {
 
     private final BloodTypeFortuneService bloodTypeFortuneService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/fortune")
     public ResponseEntity<Map<String, Object>> getFortune(
@@ -34,5 +38,34 @@ public class BloodTypeController {
             @RequestParam String type1,
             @RequestParam String type2) {
         return ResponseEntity.ok(bloodTypeFortuneService.getCompatibility(type1.toUpperCase(), type2.toUpperCase()));
+    }
+
+    /**
+     * 혈액형 운세 스트리밍 엔드포인트
+     * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamFortune(
+            @RequestParam String type,
+            @RequestParam(required = false) String zodiac) {
+        String bloodType = type.toUpperCase();
+        String zodiacAnimal = (zodiac != null && !zodiac.isBlank()) ? zodiac : "용";
+        SseEmitter emitter = new SseEmitter(180000L);
+
+        // 캐시 확인
+        Map<String, Object> cached = bloodTypeFortuneService.getCachedFortune(bloodType, zodiacAnimal);
+        if (cached != null) {
+            try {
+                String json = objectMapper.writeValueAsString(cached);
+                emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        // 캐시 없으면 AI 스트리밍
+        return bloodTypeFortuneService.streamFortune(bloodType, zodiacAnimal);
     }
 }

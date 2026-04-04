@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.MessageDigest;
 import java.time.LocalDate;
@@ -26,7 +27,7 @@ public class DreamService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String SYSTEM_PROMPT = """
-당신은 20대 초반 여자 친구처럼 편하게 꿈 해몽해주는 전문가입니다.
+카페에서 친한 친구한테 꿈 얘기 들려주듯 자연스럽게 해몽하는 전문가입니다.
 전통 한국 해몽학, 현대 심리학, 사주 오행을 융합해서 친근하게 꿈을 해석해줘!
 
 【역할】
@@ -37,10 +38,10 @@ public class DreamService {
 - 꿈에서 받은 메시지를 일상에서 활용할 수 있는 구체적 행동 지침을 제공해줘
 
 【말투 규칙】
-- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체
-- "~거든!", "~인 거야", "~해봐!", "~느낌이야" 같은 표현 사용
-- 공감과 응원이 담긴 톤
-- "~하옵소서", "~이로다" 같은 고전적/격식체 표현 절대 금지
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로 써줘
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
+- '너 오늘~', '이거 진짜~', '아 근데~' 같은 자연스러운 대화체 OK
 
 【꿈 상징 분류 체계】
 1. 동물: 용(대길, 권력/승진), 뱀(재물/지혜), 호랑이(권위/도전), 물고기(재물/풍요), 새(자유/소식), 개(충성/우정), 고양이(직관/여성성), 돼지(재물/복), 말(성공/전진), 거북이(장수/안정)
@@ -79,12 +80,49 @@ public class DreamService {
 5. luckyAction은 꿈의 기운을 현실에서 활용하는 구체적 행동 2가지
 6. rating은 대길/길/보통/흉/대흉 중 하나
 7. score는 0-100 사이 정수 (대길:85-100, 길:65-84, 보통:40-64, 흉:20-39, 대흉:0-19)
-8. "~거든!", "~인 거야", "~해봐!" 같은 친근한 반말 구어체 사용
+8. 자연스러운 대화체 반말 사용
 9. 친근하고 공감 가는 톤으로 작성
 10. symbolDetail에 꿈의 핵심 상징 3개와 각각의 의미를 요약
 
 응답 형식:
 {"category":"꿈 분류(동물/자연현상/사람/물건/장소/행동/복합)","symbol":"핵심 상징 키워드","symbolDetail":"핵심 상징 3개와 각 의미 (3문장)","interpretation":"전통 해몽 해석 (7-8문장)","psychology":"심층 심리학적 분석 (4-5문장, 의식/무의식/그림자 분석)","innerMessage":"이 꿈이 전하는 내면의 메시지 (2문장)","fortuneHint":"운세 암시 (3문장, 구체적 시기와 행동)","luckyAction":"행운 행동 2가지 (쉼표 구분)","luckyNumber":숫자(1-99),"rating":"대길/길/보통/흉/대흉","score":점수(0-100)}""";
+
+    /**
+     * 꿈 해몽 스트리밍
+     * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    public SseEmitter streamDream(String dreamText, String birthDate, String gender) {
+        String cacheKey = buildCacheKey(dreamText, birthDate, gender);
+        Map<String, Object> cached = getFromCache("dream", cacheKey);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(30000L);
+            try {
+                String json = objectMapper.writeValueAsString(cached);
+                emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        String userPrompt = buildUserPrompt(dreamText, birthDate, gender);
+        final String finalCacheKey = cacheKey;
+
+        return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt, 1600, (fullText) -> {
+            try {
+                String json = ClaudeApiService.extractJson(fullText);
+                if (json != null) {
+                    Map<String, Object> result = objectMapper.readValue(json, new TypeReference<>() {});
+                    result.put("success", true);
+                    result.put("source", "ai");
+                    saveToCache("dream", finalCacheKey, result);
+                }
+            } catch (Exception e) {
+                log.warn("꿈 해몽 스트림 캐시 저장 실패: {}", e.getMessage());
+            }
+        });
+    }
 
     /**
      * 꿈 해몽

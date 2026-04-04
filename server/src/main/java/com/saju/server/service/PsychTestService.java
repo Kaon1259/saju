@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.MessageDigest;
 import java.time.LocalDate;
@@ -356,6 +357,52 @@ public class PsychTestService {
     }
 
     /**
+     * 심리테스트 분석 스트리밍
+     * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    public SseEmitter streamAnalyze(String testId, String answers, String birthDate, String gender) {
+        String cacheKey = buildCacheKey(testId, answers, birthDate, gender);
+        Map<String, Object> cached = getFromCache("psych-test", cacheKey);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(30000L);
+            try {
+                String json = objectMapper.writeValueAsString(cached);
+                emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        // 점수 계산 및 우세 유형 결정
+        String[] answerArr = answers.toUpperCase().split(",");
+        Map<String, Integer> scores = calculateScores(answerArr);
+        String dominantType = getDominantType(scores);
+
+        String systemPrompt = buildSystemPrompt();
+        String userPrompt = buildUserPrompt(testId, answerArr, scores, dominantType, birthDate, gender);
+        final String finalCacheKey = cacheKey;
+        final String finalTestId = testId;
+        final Map<String, Integer> finalScores = scores;
+
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1000, (fullText) -> {
+            try {
+                String json = ClaudeApiService.extractJson(fullText);
+                if (json != null) {
+                    Map<String, Object> result = objectMapper.readValue(json, new TypeReference<>() {});
+                    result.put("testId", finalTestId);
+                    result.put("testName", TEST_NAMES.get(finalTestId));
+                    result.put("answerScores", finalScores);
+                    saveToCache("psych-test", finalCacheKey, result);
+                }
+            } catch (Exception e) {
+                log.warn("심리테스트 스트림 캐시 저장 실패: {}", e.getMessage());
+            }
+        });
+    }
+
+    /**
      * 심리테스트 분석
      */
     @Transactional
@@ -453,9 +500,9 @@ public class PsychTestService {
 심리테스트 응답 패턴을 분석해서 재밌고 공감 가는 유형 분석을 해주는 게 특기거든.
 
 【말투 규칙】
-- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체
-- "~거든!", "~인 거야", "~해봐!", "~느낌이야" 같은 표현 사용
-- 공감과 응원이 담긴 톤
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로 써줘
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
 - "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【역할】
@@ -469,8 +516,8 @@ public class PsychTestService {
 3. strengths는 정확히 3개, weaknesses는 정확히 2개
 4. advice는 3문장으로 따뜻하면서도 실질적인 조언
 5. score는 0-100 사이 정수 (유형 적합도)
-6. 친근한 반말 구어체로 자연스럽게 작성
-7. "~할 수 있습니다" 같은 격식체 대신 "~거든!", "~인 거야" 등 반말 사용
+6. 자연스러운 대화체 반말로 작성
+7. 격식체, 보고서 톤 대신 자연스러운 대화체 반말 사용
 
 응답 형식:
 {"type":"유형명","typeEmoji":"이모지","title":"유형 제목","description":"성격 설명(4-5문장)","strengths":["강점1","강점2","강점3"],"weaknesses":["약점1","약점2"],"advice":"조언(3문장)","compatibility":"잘 맞는 유형","score":0-100}""";

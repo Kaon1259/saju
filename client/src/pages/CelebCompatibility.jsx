@@ -236,11 +236,9 @@ function CelebCompatibility() {
   if (step === 'select') {
     return (
       <div className="celeb-page">
-        <button className="celeb-back-btn" onClick={() => navigate('/')}>← 홈으로</button>
-        <section className="celeb-hero">
+        <section className="celeb-hero celeb-hero--compact">
           <span className="celeb-hero-icon">💫</span>
           <h1 className="celeb-hero-title">스타와 나의 궁합</h1>
-          <p className="celeb-hero-desc">좋아하는 스타와 사주 궁합을 확인해보세요</p>
         </section>
 
         <div className="celeb-search-wrap">

@@ -1,0 +1,33 @@
+.stream-text-wrap { padding: 16px; }
+
+.stream-text-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; font-size: 14px; font-weight: 700;
+  color: var(--stream-color, #FBBF24);
+}
+.stream-text-icon { font-size: 18px; animation: streamPulse 1.5s ease-in-out infinite; }
+@keyframes streamPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+.stream-text-body {
+  max-height: 280px; overflow-y: auto; scroll-behavior: smooth;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.stream-text-body::-webkit-scrollbar { width: 4px; }
+.stream-text-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.stream-text-content {
+  font-size: 14px; line-height: 1.8; margin: 0;
+  color: rgba(255,255,255,0.8);
+  white-space: pre-wrap; word-break: break-word;
+}
+
+.stream-text-cursor {
+  animation: streamCursorBlink 0.8s step-end infinite;
+  color: var(--stream-color, #FBBF24); font-weight: 700;
+}
+@keyframes streamCursorBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* 라이트모드 */
+[data-theme="light"] .stream-text-header { color: var(--stream-color, #b8860b); }
+[data-theme="light"] .stream-text-content { color: #2e2e45; }
+[data-theme="light"] .stream-text-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }

@@ -1,9 +1,12 @@
 package com.saju.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.service.MbtiFortuneService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,7 @@ import java.util.Map;
 public class MbtiController {
 
     private final MbtiFortuneService mbtiFortuneService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/types")
     public ResponseEntity<List<Map<String, Object>>> getAllTypes() {
@@ -37,5 +41,34 @@ public class MbtiController {
             return ResponseEntity.badRequest().body(Map.of("error", "type1과 type2를 모두 선택해주세요."));
         }
         return ResponseEntity.ok(mbtiFortuneService.getCompatibility(type1, type2));
+    }
+
+    /**
+     * MBTI 운세 스트리밍 엔드포인트
+     * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamFortune(
+            @RequestParam String type,
+            @RequestParam(required = false) String zodiac) {
+        String mbtiType = type.toUpperCase();
+        String zodiacAnimal = (zodiac != null && !zodiac.isBlank()) ? zodiac : "용";
+        SseEmitter emitter = new SseEmitter(180000L);
+
+        // 캐시 확인
+        Map<String, Object> cached = mbtiFortuneService.getCachedFortune(mbtiType, zodiacAnimal);
+        if (cached != null) {
+            try {
+                String json = objectMapper.writeValueAsString(cached);
+                emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        // 캐시 없으면 AI 스트리밍
+        return mbtiFortuneService.streamFortune(mbtiType, zodiacAnimal);
     }
 }

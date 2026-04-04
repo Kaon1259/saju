@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from '../components/PageTransition';
 import FortuneCard from '../components/FortuneCard';
-import { getGuestFortune, getLoveTemperature, getSpecialLoveFortune, getUser } from '../api/fortune';
+import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { playHarmony, playTarotReveal, playStarTwinkle, playCrystalBall } from '../utils/sounds';
 import { shareResult } from '../utils/share';
+import StreamText from '../components/StreamText';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -205,7 +206,11 @@ function Home() {
   const [loveShowStarPicker, setLoveShowStarPicker] = useState(false);
   const [loveLoading, setLoveLoading] = useState(false);
   const [loveResult, setLoveResult] = useState(null);
+  const [loveStreamText, setLoveStreamText] = useState('');
+  const [loveStreaming, setLoveStreaming] = useState(false);
   const loveResultRef = useRef(null);
+  const loveCleanupRef = useRef(null);
+  const [showMoreLove, setShowMoreLove] = useState(false);
 
   const activeScore = useMemo(() => {
     if (guestResult?.todayFortune) return guestResult.todayFortune.score || 70;
@@ -258,23 +263,67 @@ function Home() {
     setLoveBreakupDate('');
     setLoveShowPartner(false);
   };
-  const closeLoveModal = () => { setLoveModal(null); setLoveResult(null); setLoveLoading(false); };
+  const closeLoveModal = () => { setLoveModal(null); setLoveResult(null); setLoveLoading(false); setLoveStreamText(''); setLoveStreaming(false); loveCleanupRef.current?.(); };
 
   const handleLoveAnalyze = async () => {
     if (!loveBirth || !loveModal) return;
-    setLoveLoading(true); setLoveResult(null);
+    setLoveLoading(true); setLoveResult(null); setLoveStreamText('');
+
+    const pDate = loveShowPartner && lovePartnerDate ? lovePartnerDate : null;
+    const pGender = loveShowPartner && lovePartnerGender ? lovePartnerGender : null;
+    const bDate = loveModal === 'reunion' && loveBreakupDate ? loveBreakupDate : null;
+    const mDate = loveModal === 'blind_date' && loveMeetDate ? loveMeetDate : null;
+
     try {
-      const data = await getSpecialLoveFortune(
-        loveModal, loveBirth, null, loveGender || null, null,
-        loveShowPartner && lovePartnerDate ? lovePartnerDate : null,
-        loveShowPartner && lovePartnerGender ? lovePartnerGender : null,
-        loveModal === 'reunion' && loveBreakupDate ? loveBreakupDate : null,
-        loveModal === 'blind_date' && loveMeetDate ? loveMeetDate : null
+      // 1단계: 캐시 체크
+      const basic = await getLoveFortuneBasic(loveModal, loveBirth, null, loveGender || null, null, pDate, pGender, bDate, mDate, null);
+      if (basic.score && basic.overall) {
+        setLoveResult(basic);
+        setLoveLoading(false);
+        return;
+      }
+
+      // 2단계: 스트리밍
+      setLoveLoading(false);
+      setLoveStreaming(true);
+
+      loveCleanupRef.current = getLoveFortuneStream(
+        loveModal, loveBirth, '', loveGender || '', '', pDate || '', pGender || '', bDate || '', mDate || '', '',
+        {
+          onCached: (cachedData) => {
+            setLoveStreaming(false);
+            setLoveStreamText('');
+            setLoveResult(cachedData);
+          },
+          onChunk: (text) => {
+            setLoveStreamText(prev => {
+              if (!prev) setTimeout(() => loveResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+              return prev + text;
+            });
+          },
+          onDone: (fullText) => {
+            setLoveStreaming(false);
+            setLoveStreamText('');
+            try {
+              let json = fullText;
+              if (json.includes('```')) { const s = json.indexOf('\n', json.indexOf('```')); const e = json.lastIndexOf('```'); if (s > 0 && e > s) json = json.substring(s + 1, e); }
+              const bs = json.indexOf('{'); const be = json.lastIndexOf('}');
+              if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
+              const parsed = JSON.parse(json);
+              const finalResult = {
+                ...basic, score: parsed.score || 65, grade: parsed.grade || '보통',
+                overall: parsed.overall || '', timing: parsed.timing || '',
+                advice: parsed.advice || '', caution: parsed.caution || '',
+                luckyDay: parsed.luckyDay || '', luckyPlace: parsed.luckyPlace || '', luckyColor: parsed.luckyColor || '',
+              };
+              setLoveResult(finalResult);
+              saveLoveFortuneCache({ ...finalResult, type: loveModal, birthDate: loveBirth, gender: loveGender }).catch(() => {});
+            } catch { setLoveResult({ ...basic, score: 65, grade: '보통', overall: fullText }); }
+          },
+          onError: () => { setLoveStreaming(false); setLoveStreamText(''); },
+        }
       );
-      setLoveResult(data);
-      setTimeout(() => loveResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) { console.error(e); }
-    finally { setLoveLoading(false); }
+    } catch (e) { console.error(e); setLoveLoading(false); }
   };
 
   const loveInfo = LOVE_TYPES.find(l => l.id === loveModal);
@@ -326,82 +375,116 @@ function Home() {
     );
   };
 
+  const POPULAR_LOVE_IDS = ['crush', 'blind_date', 'couple_fortune', 'confession_timing', 'marriage', 'past_life'];
+  const popularLoveTypes = LOVE_TYPES.filter(l => POPULAR_LOVE_IDS.includes(l.id));
+  const extraLoveTypes = LOVE_TYPES.filter(l => !POPULAR_LOVE_IDS.includes(l.id));
+
+  const UNIFIED_MENUS = [
+    { path: '/my', icon: '🔮', label: '오늘의 운세', color: '#FBBF24', onClick: () => userId ? navigate('/my', { state: { autoLoad: true } }) : triggerTransition('fortune', () => setShowForm(true)) },
+    { path: '/tarot', icon: '🃏', label: '타로카드', color: '#9B59B6', onClick: () => { playTarotReveal(); navigate('/tarot'); } },
+    { path: '/constellation', icon: '⭐', label: '별자리', color: '#FF9800', onClick: () => { playStarTwinkle(); navigate('/constellation'); } },
+    { path: '/dream', icon: '🌙', label: '꿈해몽', color: '#6C3483' },
+    { path: '/psych-test', icon: '🎭', label: '심리테스트', color: '#E91E63' },
+    { path: '/mbti', icon: '🧬', label: 'MBTI', color: '#34D399' },
+    { path: '/bloodtype', icon: '🩸', label: '혈액형', color: '#F472B6' },
+    { path: '/traditional', icon: '☯️', label: '정통사주', color: '#E879F9' },
+    { path: '/face-reading', icon: '👤', label: 'AI 관상', color: '#DAA520' },
+  ];
+
   return (
     <div className="home">
       {weather && <WeatherBg type={weather.type} />}
 
-      {/* Hero - 연애 특화 */}
-      <section className="home-hero">
-        <div className="home-hero__inline">
-          <h1 className="home-hero__title">연애 운세</h1>
-          <span className="home-hero__sep">·</span>
-          <p className="home-hero__sub">{userId && userName ? `${userName}님의 사랑` : '사주로 보는 사랑'}</p>
-          <span className="home-hero__date-inline">{dayStr} {dateStr}</span>
-        </div>
-      </section>
-
-      {/* 연애 온도 (메인 피쳐) */}
+      {/* 1. Hero + 연애온도 통합 */}
       {(() => {
         const temp = loveTemp?.temperature || 55;
-        const msg = loveTemp?.message || '사랑의 기운을 확인해보세요.';
+        const msg = loveTemp?.message || dailyMsg;
         const heartSat = 30 + temp * 0.7;
         const heartLight = 80 - temp * 0.35;
         const heartColor = `hsl(340, ${heartSat}%, ${heartLight}%)`;
         const heartCount = Math.max(5, Math.floor(temp / 6));
-
         return (
-          <section className="home-love-section" style={{ '--love-temp-color': heartColor }}>
+          <section className="home-hero-new" style={{ '--love-temp-color': heartColor }}>
             <div className="home-love-hearts-bg">
               {Array.from({ length: heartCount }).map((_, i) => (
                 <span key={i} className="home-love-float-heart" style={{
                   '--hf-x': `${5 + (i * 97 / heartCount) % 90}%`,
                   '--hf-delay': `${i * 0.35}s`,
-                  '--hf-dur': `${2.5 + Math.random() * 2}s`,
-                  '--hf-size': `${12 + Math.random() * 14}px`,
+                  '--hf-dur': `${2.5 + (i % 3) * 0.8}s`,
+                  '--hf-size': `${12 + (i % 5) * 3}px`,
                   color: heartColor,
                 }}>&#x2764;</span>
               ))}
             </div>
-
+            <div className="home-hero-new__top">
+              <h1 className="home-hero__title">연애 운세</h1>
+              <span className="home-hero__date-inline">{dayStr} {dateStr}</span>
+            </div>
+            {userId && userName && (
+              <p className="home-hero-new__greeting">{userName}님의 사랑운</p>
+            )}
             <div className="home-love-temp-center">
               <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
               <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
             </div>
-            <div className="home-love-sub-row">
-              <p className="home-love-temp-label">
-                {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
-              </p>
-              <button className="home-love-fortune-btn" onClick={() => navigate('/love-fortune')}>
-                💕 연애운
-              </button>
-            </div>
-            <p className="home-love-temp-msg">{msg}</p>
-
-            {LOVE_GROUPS.map(group => {
-              const myStatus = (() => { try { return JSON.parse(localStorage.getItem('userProfile')||'{}').relationshipStatus; } catch { return null; } })();
-              const isActive = userId && myStatus && group.status?.includes(myStatus);
-              return (
-              <div key={group.key} className={`home-love-group ${isActive ? 'home-love-group--active' : ''}`}>
-                <h3 className="home-love-group-title">
-                  <span>{group.emoji}</span> {group.label}
-                  {isActive && <span className="home-love-group-my">MY</span>}
-                </h3>
-                <div className="home-love-cards">
-                  {LOVE_TYPES.filter(l => l.group === group.key).map(lt => (
-                    <button key={lt.id} className="home-love-card" onClick={() => openLoveModal(lt.id)}>
-                      <span className="home-love-icon">{lt.icon}</span>
-                      <span className="home-love-label">{lt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              );
-            })}
+            <p className="home-love-temp-label">
+              {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
+            </p>
+            <p className="home-hero-new__msg">{msg}</p>
           </section>
         );
       })()}
 
-      {/* 스타 운세 */}
+      {/* 2. 비로그인 CTA */}
+      {!userId && !showForm && (
+        <section style={{ padding: '0 4px' }}>
+          <button className="home-cta-btn" onClick={() => navigate('/register', { state: { from: '/' } })}>
+            카카오 로그인하고 맞춤 운세 받기
+          </button>
+        </section>
+      )}
+
+      {/* 3. 핵심 동선 3개 */}
+      <section className="home-main-actions">
+        <button className="home-main-action-card" onClick={() => navigate('/love-fortune')} style={{ '--mac-color': '#E91E63' }}>
+          <span className="home-mac-icon">💕</span>
+          <span className="home-mac-label">1:1연애운</span>
+          <span className="home-mac-desc">오늘의 연애 AI 분석</span>
+        </button>
+        <button className="home-main-action-card" onClick={() => { playHarmony(); navigate('/compatibility'); }} style={{ '--mac-color': '#F472B6' }}>
+          <span className="home-mac-icon">💑</span>
+          <span className="home-mac-label">사주궁합</span>
+          <span className="home-mac-desc">나와 상대방의 궁합</span>
+        </button>
+        <button className="home-main-action-card" onClick={() => navigate('/celeb-compatibility')} style={{ '--mac-color': '#9B59B6' }}>
+          <span className="home-mac-icon">🌟</span>
+          <span className="home-mac-label">스타궁합</span>
+          <span className="home-mac-desc">최애와 사주 궁합</span>
+        </button>
+      </section>
+
+      {/* 4. 연애 카테고리 (축소 + 더보기) */}
+      <section className="home-love-cats-section">
+        <div className="home-love-cats-grid">
+          {popularLoveTypes.map(lt => (
+            <button key={lt.id} className="home-love-card" onClick={() => openLoveModal(lt.id)}>
+              <span className="home-love-icon">{lt.icon}</span>
+              <span className="home-love-label">{lt.label}</span>
+            </button>
+          ))}
+          {showMoreLove && extraLoveTypes.map(lt => (
+            <button key={lt.id} className="home-love-card" onClick={() => openLoveModal(lt.id)}>
+              <span className="home-love-icon">{lt.icon}</span>
+              <span className="home-love-label">{lt.label}</span>
+            </button>
+          ))}
+        </div>
+        <button className="home-love-more-btn" onClick={() => setShowMoreLove(v => !v)}>
+          {showMoreLove ? '접기 ▲' : '더보기 ▼'}
+        </button>
+      </section>
+
+      {/* 5. 스타 운세 (컴팩트) */}
       <section className="home-star-section">
         <div className="home-star-bubbles">
           {[...Array(8)].map((_, i) => <span key={i} className="home-star-bubble" style={{ '--sb-i': i }}>✦</span>)}
@@ -458,43 +541,25 @@ function Home() {
         </div>
       </section>
 
-      {/* 바로가기: 사주궁합 → 타로카드 → 별자리 → 오늘의 운세 */}
-      <section className="home-love-quick">
-        <button className="home-love-quick-card" onClick={() => { playHarmony(); navigate('/compatibility'); }} style={{ '--lq-color': '#F472B6' }}>
-          <span className="home-lq-icon">💑</span>
-          <div className="home-lq-info">
-            <span className="home-lq-label">사주 궁합</span>
-            <span className="home-lq-desc">나와 상대방의 궁합 분석</span>
-          </div>
-          <span className="home-lq-arrow">›</span>
-        </button>
-        <button className="home-love-quick-card" onClick={() => { playTarotReveal(); navigate('/tarot'); }} style={{ '--lq-color': '#9B59B6' }}>
-          <span className="home-lq-icon">🔮</span>
-          <div className="home-lq-info">
-            <span className="home-lq-label">타로 카드</span>
-            <span className="home-lq-desc">카드가 전하는 운명의 메시지</span>
-          </div>
-          <span className="home-lq-arrow">›</span>
-        </button>
-        <button className="home-love-quick-card" onClick={() => { playStarTwinkle(); navigate('/constellation'); }} style={{ '--lq-color': '#FF9800' }}>
-          <span className="home-lq-icon">⭐</span>
-          <div className="home-lq-info">
-            <span className="home-lq-label">별자리 운세</span>
-            <span className="home-lq-desc">12별자리 오늘의 운세</span>
-          </div>
-          <span className="home-lq-arrow">›</span>
-        </button>
-        <button className="home-love-quick-card" onClick={() => { playCrystalBall(); userId ? navigate('/my', { state: { autoLoad: true } }) : triggerTransition('fortune', () => setShowForm(true)); }} style={{ '--lq-color': '#FBBF24' }}>
-          <span className="home-lq-icon">🔮</span>
-          <div className="home-lq-info">
-            <span className="home-lq-label">오늘의 운세</span>
-            <span className="home-lq-desc">AI 맞춤 사주 운세</span>
-          </div>
-          <span className="home-lq-arrow">›</span>
-        </button>
+      {/* 6. 통합 메뉴 그리드 */}
+      <section className="home-quick-section">
+        <h2 className="home-section-title">바로가기</h2>
+        <div className="home-quick-grid">
+          {UNIFIED_MENUS.map((item) => (
+            <button
+              key={item.path}
+              className="home-quick-item"
+              onClick={item.onClick ? item.onClick : () => navigate(item.path)}
+              style={{ '--qi-color': item.color }}
+            >
+              <span className="home-quick-icon">{item.icon}</span>
+              <span className="home-quick-label">{item.label}</span>
+            </button>
+          ))}
+        </div>
       </section>
 
-      {/* 비로그인: 게스트 운세 입력폼 */}
+      {/* 7. 비로그인: 게스트 운세 입력폼 */}
       {!userId && showForm && (
         <section className="home-guest-section">
           {guestLoading ? (
@@ -644,12 +709,21 @@ function Home() {
                 </div>
               )}
 
-              {loveLoading && (
+              {(loveLoading || loveStreaming) && !loveResult && (
                 <div className="love-modal-loading fade-in">
-                  <div className="love-modal-loading-hearts">
-                    {[0,1,2].map(i => <span key={i} className="love-modal-loading-heart" style={{ animationDelay: `${i * 0.3}s` }}>💗</span>)}
-                  </div>
-                  <p>AI가 {loveInfo?.label}을 분석하고 있습니다...</p>
+                  {!loveStreamText && (
+                    <>
+                      <div className="love-modal-loading-hearts">
+                        {[0,1,2].map(i => <span key={i} className="love-modal-loading-heart" style={{ animationDelay: `${i * 0.3}s` }}>💗</span>)}
+                      </div>
+                      <p>AI가 {loveInfo?.label}을 분석하고 있습니다...</p>
+                    </>
+                  )}
+                  {loveStreamText && (
+                    <div ref={loveResultRef}>
+                      <StreamText text={loveStreamText} icon="💕" label="AI가 분석하고 있어요..." color="#F472B6" />
+                    </div>
+                  )}
                 </div>
               )}
 

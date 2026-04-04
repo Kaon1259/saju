@@ -2,8 +2,10 @@ package com.saju.server.controller;
 
 import com.saju.server.service.TarotService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -35,11 +37,6 @@ public class TarotController {
 
     /**
      * 타로 리딩 (AI 해석)
-     * @param cardIds 선택된 카드 ID 목록 (콤마 구분)
-     * @param reversals 각 카드의 정/역방향 (콤마 구분, 0=정방향, 1=역방향)
-     * @param spread 스프레드 타입 (one, three, five)
-     * @param category 카테고리 (general, love, money, career, health, study)
-     * @param question 질문 (선택)
      */
     @GetMapping("/reading")
     public ResponseEntity<Map<String, Object>> getReading(
@@ -51,5 +48,19 @@ public class TarotController {
         return ResponseEntity.ok(
             tarotService.getReading(cardIds, reversals, spread, category, question)
         );
+    }
+
+    /**
+     * 타로 리딩 스트리밍 엔드포인트
+     * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    @GetMapping(value = "/reading/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamReading(
+            @RequestParam String cardIds,
+            @RequestParam String reversals,
+            @RequestParam(defaultValue = "three") String spread,
+            @RequestParam(defaultValue = "general") String category,
+            @RequestParam(required = false) String question) {
+        return tarotService.streamReading(cardIds, reversals, spread, category, question);
     }
 }

@@ -26,6 +26,69 @@ public class MonthlyFortuneService {
     private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper;
 
+    /**
+     * 스트리밍용 컨텍스트 빌드
+     * [0]=systemPrompt, [1]=userPrompt, [2]=cacheKey, [3]=cached(있으면)
+     */
+    public Object[] buildStreamContext(String birthDate, int month, String birthTime, String gender) {
+        if (month < 1 || month > 12) month = LocalDate.now().getMonthValue();
+        String cacheKey = buildCacheKey("monthly", birthDate, birthTime, gender, String.valueOf(month));
+        Map<String, Object> cached = getFromCache("monthly", cacheKey);
+        if (cached != null) {
+            return new Object[]{ null, null, cacheKey, cached };
+        }
+        LocalDate date = LocalDate.parse(birthDate);
+        LocalDate today = LocalDate.now();
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+        LocalDate targetMonthDate = LocalDate.of(today.getYear(), month, 15);
+        int targetYearSaju = SajuCalculator.getSajuYear(targetMonthDate);
+        SajuPillar targetYearPillar = SajuCalculator.calculateYearPillar(targetYearSaju);
+        SajuPillar targetMonthPillar = SajuCalculator.calculateMonthPillar(targetMonthDate, targetYearPillar.getStemIndex());
+        String system = buildSystemPrompt();
+        String user = buildUserPrompt(date, month, birthTime, gender, yearPillar, dayPillar, targetMonthPillar, today);
+        return new Object[]{ system, user, cacheKey, null };
+    }
+
+    /**
+     * 스트리밍 완료 후 캐시 저장
+     */
+    @Transactional
+    public void saveStreamResult(String birthDate, int month, String birthTime, String gender, String fullText) {
+        try {
+            if (month < 1 || month > 12) month = LocalDate.now().getMonthValue();
+            String cacheKey = buildCacheKey("monthly", birthDate, birthTime, gender, String.valueOf(month));
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) return;
+            Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+
+            LocalDate date = LocalDate.parse(birthDate);
+            LocalDate today = LocalDate.now();
+            int sajuYear = SajuCalculator.getSajuYear(date);
+            SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+            SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+            LocalDate targetMonthDate = LocalDate.of(today.getYear(), month, 15);
+            int targetYearSaju = SajuCalculator.getSajuYear(targetMonthDate);
+            SajuPillar targetYearPillar = SajuCalculator.calculateYearPillar(targetYearSaju);
+            SajuPillar targetMonthPillar = SajuCalculator.calculateMonthPillar(targetMonthDate, targetYearPillar.getStemIndex());
+
+            Map<String, Object> full = new LinkedHashMap<>();
+            full.put("month", month);
+            full.put("monthName", month + "월");
+            full.put("monthPillar", targetMonthPillar.getFullName());
+            full.put("monthPillarHanja", targetMonthPillar.getFullHanja());
+            full.put("birthDate", birthDate);
+            full.put("dayMaster", dayPillar.getFullName());
+            full.put("zodiacAnimal", yearPillar.getAnimal());
+            full.putAll(aiResult);
+            full.put("source", "ai");
+            saveToCache("monthly", cacheKey, full);
+        } catch (Exception e) {
+            log.warn("MonthlyFortune stream cache save failed: {}", e.getMessage());
+        }
+    }
+
     @Transactional
     public Map<String, Object> getMonthlyFortune(String birthDate, int month, String birthTime, String gender) {
         // Validate month
@@ -127,9 +190,9 @@ public class MonthlyFortuneService {
 이번 달 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.
 
 【말투 규칙】
-- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체
-- "~거든!", "~인 거야", "~해봐!", "~느낌이야" 같은 표현 사용
-- 공감과 응원이 담긴 톤
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로 써줘
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
 - "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【역할】
@@ -150,7 +213,7 @@ public class MonthlyFortuneService {
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
-2. 친근한 반말 구어체로 작성
+2. 자연스러운 대화체 반말로 작성
 3. 구체적 날짜·주차·행동 포함
 4. 사주 용어는 알기 쉽게 풀어서 설명
 5. 점수는 월주와 일간의 조화도에 따라 30-95 사이로 책정

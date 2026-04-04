@@ -28,6 +28,62 @@ public class YearFortuneService {
 
     private static final int YEAR = 2026;
 
+    /**
+     * 스트리밍용: 캐시 체크 후 캐시 있으면 캐시 데이터 반환, 없으면 스트리밍 프롬프트 반환
+     * [0] = systemPrompt, [1] = userPrompt, [2] = cacheKey (캐시 있으면 null)
+     */
+    public Object[] buildStreamContext(String birthDate, String birthTime, String gender, String calendarType) {
+        String cacheKey = buildCacheKey("yearly", birthDate, birthTime, gender, calendarType);
+        Map<String, Object> cached = getFromCache("yearly", cacheKey);
+        if (cached != null) {
+            return new Object[]{ null, null, cacheKey, cached };
+        }
+        LocalDate date = LocalDate.parse(birthDate);
+        LocalDate today = LocalDate.now();
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar monthPillar = SajuCalculator.calculateMonthPillar(date, yearPillar.getStemIndex());
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+        int year2026Saju = SajuCalculator.getSajuYear(LocalDate.of(YEAR, 6, 1));
+        SajuPillar year2026Pillar = SajuCalculator.calculateYearPillar(year2026Saju);
+        String system = buildSystemPrompt();
+        String user = buildUserPrompt(date, birthTime, gender, yearPillar, monthPillar, dayPillar, year2026Pillar, today);
+        return new Object[]{ system, user, cacheKey, null };
+    }
+
+    /**
+     * 스트리밍 완료 후 캐시 저장
+     */
+    @Transactional
+    public void saveStreamResult(String birthDate, String birthTime, String gender, String calendarType, String fullText) {
+        try {
+            String cacheKey = buildCacheKey("yearly", birthDate, birthTime, gender, calendarType);
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) return;
+            Map<String, Object> result = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+
+            LocalDate date = LocalDate.parse(birthDate);
+            int sajuYear = SajuCalculator.getSajuYear(date);
+            SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+            SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+            int year2026Saju = SajuCalculator.getSajuYear(LocalDate.of(YEAR, 6, 1));
+            SajuPillar year2026Pillar = SajuCalculator.calculateYearPillar(year2026Saju);
+
+            Map<String, Object> full = new LinkedHashMap<>();
+            full.put("year", YEAR);
+            full.put("yearPillar", year2026Pillar.getFullName());
+            full.put("yearPillarHanja", year2026Pillar.getFullHanja());
+            full.put("birthDate", birthDate);
+            full.put("dayMaster", dayPillar.getFullName());
+            full.put("zodiacAnimal", yearPillar.getAnimal());
+            full.putAll(result);
+            full.put("source", "ai");
+            saveToCache("yearly", cacheKey, full);
+        } catch (Exception e) {
+            log.warn("YearFortune stream cache save failed: {}", e.getMessage());
+        }
+    }
+
     @Transactional
     public Map<String, Object> getYearFortune(String birthDate, String birthTime, String gender, String calendarType) {
         // DB cache check
@@ -124,9 +180,9 @@ public class YearFortuneService {
 올해 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.
 
 【말투 규칙】
-- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체
-- "~거든!", "~인 거야", "~해봐!", "~느낌이야" 같은 표현 사용
-- 공감과 응원이 담긴 톤
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로 써줘
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
 - "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【역할】
@@ -147,7 +203,7 @@ public class YearFortuneService {
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
-2. 친근한 반말 구어체로 작성
+2. 자연스러운 대화체 반말로 작성
 3. 구체적 시기·방위·색상·숫자 포함
 4. 사주 용어는 알기 쉽게 풀어서 설명
 5. 점수는 사주와 세운의 조화도에 따라 30-95 사이로 책정

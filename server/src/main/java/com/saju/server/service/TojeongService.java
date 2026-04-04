@@ -32,6 +32,100 @@ public class TojeongService {
     private volatile int cacheYear = 0;
 
     /**
+     * 스트리밍용 컨텍스트 빌드
+     * [0]=systemPrompt, [1]=userPrompt, [2]=cacheKey, [3]=cached(있으면)
+     */
+    public Object[] buildStreamContext(LocalDate birthDate) {
+        int currentYear = LocalDate.now().getYear();
+        String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear));
+        Map<String, Object> dbCached = getFromCache("tojeong", dbCacheKey);
+        if (dbCached != null) {
+            return new Object[]{ null, null, dbCacheKey, dbCached };
+        }
+        // 메모리 캐시 체크
+        String memKey = birthDate + "|" + currentYear;
+        TojeongResult memoryCached = cache.get(memKey);
+        if (memoryCached != null) {
+            try {
+                Map<String, Object> m = objectMapper.convertValue(memoryCached, new TypeReference<Map<String, Object>>() {});
+                return new Object[]{ null, null, dbCacheKey, m };
+            } catch (Exception ignored) {}
+        }
+
+        TojeongResult base = TojeongCalculator.calculate(birthDate);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(LocalDate.now()));
+        String currentGanji = yearPillar.getFullHanja() + "(" + yearPillar.getFullName() + ")";
+
+        String systemPrompt = "당신은 토정비결에 빠삭한 운세 전문가야. 괘의 의미를 쉽고 재밌게 풀어주는 게 특기거든!\n"
+            + "단순히 '좋다/나쁘다'가 아니라, 구체적인 상황이랑 이유를 설명해서 실생활에 바로 써먹을 수 있는 조언을 해줘.\n\n"
+            + "【말투 규칙】\n"
+            + "- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말\n"
+            + "- 자연스러운 대화체 반말 사용 (보고서 톤 금지)\n"
+            + "- 딱딱한 문장, 고전적 표현, 격식체 절대 금지\n"
+            + "- \"~하옵소서\", \"~이로다\", \"~하시오\" 같은 고전적/격식체 표현 절대 금지\n\n"
+            + "【규칙】\n"
+            + "1. 반드시 JSON만 응답 (설명 텍스트 없이)\n"
+            + "2. yearSummary는 6-8문장으로 작성\n"
+            + "3. yearKeywords는 올해를 대표하는 핵심 키워드 3개 배열\n"
+            + "4. bestMonth는 가장 운이 좋은 달 번호 (1-12)\n"
+            + "5. cautionMonth는 가장 조심해야 할 달 번호 (1-12)\n"
+            + "6. yearAdvice는 올해를 잘 보내기 위한 핵심 조언 2-3문장\n"
+            + "7. 각 월의 fortune은 5-6문장으로 구체적으로 작성\n"
+            + "8. rating은 반드시 \"대길\",\"길\",\"보통\",\"흉\",\"대흉\" 중 하나\n"
+            + "9. 12개월 모두 빠짐없이 작성\n\n"
+            + "응답 형식:\n"
+            + "{\"yearSummary\":\"올해 총평 6-8문장\","
+            + "\"yearKeywords\":[\"키워드1\",\"키워드2\",\"키워드3\"],"
+            + "\"bestMonth\":1,"
+            + "\"cautionMonth\":7,"
+            + "\"yearAdvice\":\"올해 핵심 조언 2-3문장\","
+            + "\"months\":[{\"month\":1,\"fortune\":\"1월 운세 5-6문장\",\"rating\":\"길\"},...12개월 모두]}";
+
+        String userPrompt = String.format(
+            "토정비결 괘 번호: %d (%s)\n"
+            + "상수(태세수): %d, 중수(월건수): %d, 하수(일진수): %d\n"
+            + "올해 간지: %d년 %s\n"
+            + "위 정보를 바탕으로 토정비결 월별 운세를 JSON으로 작성해주세요.",
+            base.getTotalGwae(), base.getGwaeName(),
+            base.getSangsu(), base.getJungsu(), base.getHasu(),
+            currentYear, currentGanji
+        );
+        return new Object[]{ systemPrompt, userPrompt, dbCacheKey, null, base };
+    }
+
+    /**
+     * 스트리밍 완료 후 캐시 저장
+     */
+    @Transactional
+    public Map<String, Object> saveStreamResult(LocalDate birthDate, String fullText) {
+        try {
+            int currentYear = LocalDate.now().getYear();
+            String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear));
+
+            // 기본 계산 결과
+            TojeongResult base = TojeongCalculator.calculate(birthDate);
+
+            // AI 결과 파싱 및 적용
+            String cleanJson = ClaudeApiService.extractJson(fullText);
+            if (cleanJson != null) {
+                parseAndApplyAIResponse(base, cleanJson);
+            }
+
+            // 메모리 캐시 저장
+            String memKey = birthDate + "|" + currentYear;
+            cache.put(memKey, base);
+
+            // DB 캐시 저장
+            Map<String, Object> resultMap = objectMapper.convertValue(base, new TypeReference<Map<String, Object>>() {});
+            saveToCache("tojeong", dbCacheKey, resultMap);
+            return resultMap;
+        } catch (Exception e) {
+            log.warn("Tojeong stream cache save failed: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * 토정비결 분석 수행 (Claude API 사용 가능하면 AI 해석, 아니면 기본 해석)
      */
     @Transactional
@@ -133,9 +227,9 @@ public class TojeongService {
             String systemPrompt = "당신은 토정비결에 빠삭한 운세 전문가야. 괘의 의미를 쉽고 재밌게 풀어주는 게 특기거든!\n"
                     + "단순히 '좋다/나쁘다'가 아니라, 구체적인 상황이랑 이유를 설명해서 실생활에 바로 써먹을 수 있는 조언을 해줘.\n\n"
                     + "【말투 규칙】\n"
-                    + "- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체\n"
-                    + "- \"~거든!\", \"~인 거야\", \"~해봐!\", \"~느낌이야\" 같은 표현 사용\n"
-                    + "- 공감과 응원이 담긴 톤\n"
+                    + "- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말\n"
+                    + "- 자연스러운 대화체 반말 사용 (보고서 톤 금지)\n"
+                    + "- 딱딱한 문장, 고전적 표현, 격식체 절대 금지\n"
                     + "- \"~하옵소서\", \"~이로다\", \"~하시오\" 같은 고전적/격식체 표현 절대 금지\n\n"
                     + "【규칙】\n"
                     + "1. 반드시 JSON만 응답 (설명 텍스트 없이)\n"
@@ -158,7 +252,7 @@ public class TojeongService {
                     + "8. rating은 반드시 \"대길\",\"길\",\"보통\",\"흉\",\"대흉\" 중 하나\n"
                     + "9. 12개월 모두 빠짐없이 작성\n"
                     + "10. 괘의 상징적 의미를 각 월에 연결하여 풀이\n"
-                    + "11. 친근한 반말 구어체로, 현대인이 바로 실천할 수 있는 조언 포함\n\n"
+                    + "11. 자연스러운 대화체 반말로, 현대인이 바로 실천할 수 있는 조언 포함\n\n"
                     + "응답 형식:\n"
                     + "{\"yearSummary\":\"올해 총평 6-8문장\","
                     + "\"yearKeywords\":[\"키워드1\",\"키워드2\",\"키워드3\"],"

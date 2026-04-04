@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -180,7 +181,7 @@ public class BloodTypeFortuneService {
         if (claudeApiService.isAvailable()) {
             try {
                 String prompt = promptBuilder.compatibilityPrompt("bloodtype", type1, type2, LocalDate.now());
-                String aiDesc = claudeApiService.generate("당신은 20대 초반 여자 친구처럼 편하게 상담해주는 혈액형 궁합 전문가야! 오행과 혈액형 기질을 융합해서 친근한 반말 구어체로 분석해줘. \"~거든!\", \"~인 거야\" 같은 표현 쓰고, 고전적 표현은 절대 금지!", prompt, 400);
+                String aiDesc = claudeApiService.generate("카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 혈액형 궁합 전문가야! 오행과 혈액형 기질을 융합해서 자연스러운 대화체 반말로 분석해줘. 딱딱한 보고서 톤이나 고전적 표현은 절대 금지!", prompt, 400);
                 if (aiDesc != null && !aiDesc.isBlank()) desc = aiDesc;
             } catch (Exception e) { log.warn("AI compat failed: {}", e.getMessage()); }
         }
@@ -208,5 +209,50 @@ public class BloodTypeFortuneService {
         m.put("money", f.getMoney()); m.put("health", f.getHealth()); m.put("work", f.getWork());
         m.put("score", f.getScore()); m.put("luckyNumber", f.getLuckyNumber()); m.put("luckyColor", f.getLuckyColor());
         return m;
+    }
+
+    /**
+     * 캐시된 혈액형 운세 조회 (캐시 없으면 null 반환)
+     */
+    public Map<String, Object> getCachedFortune(String bloodType, String zodiacAnimal) {
+        LocalDate today = LocalDate.now();
+        Optional<BloodTypeFortune> cached = repository.findByBloodTypeAndZodiacAnimalAndFortuneDate(bloodType, zodiacAnimal, today);
+        return cached.map(this::toMap).orElse(null);
+    }
+
+    /**
+     * 혈액형 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
+     */
+    public SseEmitter streamFortune(String bloodType, String zodiacAnimal) {
+        LocalDate today = LocalDate.now();
+        String system = promptBuilder.bloodTypeSystemPrompt();
+        String user = promptBuilder.bloodTypeUserPrompt(bloodType, zodiacAnimal, today);
+
+        return claudeApiService.generateStream(system, user, 2000, (fullText) -> {
+            try {
+                String json = ClaudeApiService.extractJson(fullText);
+                if (json == null) return;
+                var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+
+                BloodTypeFortune fortune = BloodTypeFortune.builder()
+                    .bloodType(bloodType)
+                    .zodiacAnimal(zodiacAnimal)
+                    .fortuneDate(today)
+                    .overall(node.path("overall").asText(""))
+                    .love(node.path("love").asText(""))
+                    .money(node.path("money").asText(""))
+                    .health(node.path("health").asText(""))
+                    .work(node.path("work").asText(""))
+                    .score(node.path("score").asInt(70))
+                    .luckyNumber(node.path("luckyNumber").asInt(7))
+                    .luckyColor(node.path("luckyColor").asText("파랑"))
+                    .personality(PERSONALITY.getOrDefault(bloodType, ""))
+                    .dayAnalysis(node.path("dayAnalysis").asText(""))
+                    .build();
+                repository.save(fortune);
+            } catch (Exception e) {
+                log.warn("bloodtype stream cache save failed for {}형/{}: {}", bloodType, zodiacAnimal, e.getMessage());
+            }
+        });
     }
 }

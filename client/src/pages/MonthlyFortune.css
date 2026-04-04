@@ -617,3 +617,35 @@
 [data-theme="light"] .mf-season--summer { --mf-accent: #dc2626; }
 [data-theme="light"] .mf-season--autumn { --mf-accent: #ea580c; }
 [data-theme="light"] .mf-season--winter { --mf-accent: #2563eb; }
+
+/* ─── 스트리밍 ─── */
+.mf-streaming {
+  margin: 16px;
+  padding: 20px;
+  border-radius: 16px;
+}
+.mf-streaming-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mf-streaming-icon { font-size: 20px; }
+.mf-streaming-label { font-size: 14px; color: var(--text-secondary); }
+.mf-streaming-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #60a5fa;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: streamBlink 0.8s step-end infinite;
+}
+@keyframes streamBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }

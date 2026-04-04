@@ -31,6 +31,64 @@ public class WeeklyFortuneService {
 
     private static final String[] DAY_NAMES = {"월", "화", "수", "목", "금", "토", "일"};
 
+    /**
+     * 스트리밍용 컨텍스트 빌드
+     */
+    public Object[] buildStreamContext(String birthDate, String birthTime, String gender) {
+        LocalDate today = LocalDate.now();
+        LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
+        Map<String, Object> cached = getFromCache("weekly", cacheKey);
+        if (cached != null) {
+            return new Object[]{ null, null, cacheKey, cached };
+        }
+        LocalDate date = LocalDate.parse(birthDate);
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+        List<SajuPillar> weekDayPillars = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            weekDayPillars.add(SajuCalculator.calculateDayPillar(weekStart.plusDays(i)));
+        }
+        String system = buildSystemPrompt();
+        String user = buildUserPrompt(date, birthTime, gender, yearPillar, dayPillar, weekStart, weekEnd, weekDayPillars, today);
+        return new Object[]{ system, user, cacheKey, null };
+    }
+
+    /**
+     * 스트리밍 완료 후 캐시 저장
+     */
+    @Transactional
+    public void saveStreamResult(String birthDate, String birthTime, String gender, String fullText) {
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+            String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) return;
+            Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+
+            LocalDate date = LocalDate.parse(birthDate);
+            int sajuYear = SajuCalculator.getSajuYear(date);
+            SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+            SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+
+            Map<String, Object> full = new LinkedHashMap<>();
+            full.put("weekStart", weekStart.toString());
+            full.put("weekEnd", weekEnd.toString());
+            full.put("birthDate", birthDate);
+            full.put("dayMaster", dayPillar.getFullName());
+            full.put("zodiacAnimal", yearPillar.getAnimal());
+            full.putAll(aiResult);
+            full.put("source", "ai");
+            saveToCache("weekly", cacheKey, full);
+        } catch (Exception e) {
+            log.warn("WeeklyFortune stream cache save failed: {}", e.getMessage());
+        }
+    }
+
     @Transactional
     public Map<String, Object> getWeeklyFortune(String birthDate, String birthTime, String gender) {
         LocalDate today = LocalDate.now();
@@ -134,9 +192,9 @@ public class WeeklyFortuneService {
 이번 주 7일간의 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.
 
 【말투 규칙】
-- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체
-- "~거든!", "~인 거야", "~해봐!", "~느낌이야" 같은 표현 사용
-- 공감과 응원이 담긴 톤
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로 써줘
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
 - "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【역할】
@@ -157,7 +215,7 @@ public class WeeklyFortuneService {
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
-2. 친근한 반말 구어체로 작성
+2. 자연스러운 대화체 반말로 작성
 3. 각 요일별 구체적 행동 조언(tip)과 핵심 조언(advice) 포함
 4. 사주 용어는 알기 쉽게 풀어서 설명
 5. 점수는 일진과 사주의 조화도에 따라 30-95 사이로 책정

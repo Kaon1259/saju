@@ -1,16 +1,18 @@
-import { useState, useRef } from 'react';
-import { getSpecialLoveFortune } from '../api/fortune';
+import { useState, useRef, useEffect } from 'react';
+import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCelebMatch, getSajuCompatibility } from '../api/fortune';
+import CELEBRITIES from '../data/celebrities';
 import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneLoading from '../components/FortuneLoading';
+import StreamText from '../components/StreamText';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
-  { value: 'SINGLE', label: '솔로', icon: '💫', desc: '설레는 인연을 기다리는 중' },
-  { value: 'SOME', label: '썸', icon: '💗', desc: '미묘한 감정, 이건 뭘까?' },
-  { value: 'IN_RELATIONSHIP', label: '연애중', icon: '💕', desc: '사랑하는 사람이 있어요' },
-  { value: 'COMPLICATED', label: '복잡', icon: '💔', desc: '복잡 미묘한 사이...' },
+  { value: 'SINGLE', label: '솔로', icon: '💫' },
+  { value: 'SOME', label: '썸', icon: '💗' },
+  { value: 'IN_RELATIONSHIP', label: '연애중', icon: '💕' },
+  { value: 'COMPLICATED', label: '복잡', icon: '💔' },
 ];
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
@@ -47,7 +49,21 @@ function LoveFortune() {
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [streamText, setStreamText] = useState('');
+  const [aiStreaming, setAiStreaming] = useState(false);
   const resultRef = useRef(null);
+  const cleanupRef = useRef(null);
+
+  useEffect(() => { return () => cleanupRef.current?.(); }, []);
+
+  // 연예인 궁합 매칭
+  const [celebListOpen, setCelebListOpen] = useState(false);
+  const [celebList, setCelebList] = useState([]);
+  const [celebLoading, setCelebLoading] = useState(false);
+  const [celebPopup, setCelebPopup] = useState(false); // 팝업 열림 여부
+  const [selectedCeleb, setSelectedCeleb] = useState(null);
+  const [celebResult, setCelebResult] = useState(null);
+  const [celebDetailLoading, setCelebDetailLoading] = useState(false);
 
   // 로그인 유저는 프로필에서 자동 로드
   const handleAutoFill = () => {
@@ -63,18 +79,117 @@ function LoveFortune() {
     if (!birthDate || !relationStatus) return;
     setLoading(true);
     setResult(null);
+    setStreamText('');
+
     try {
-      const data = await getSpecialLoveFortune(
+      // 1단계: 캐시 체크 + 사주 기본 (즉시)
+      const data = await getLoveFortuneBasic(
         'relationship', birthDate, null, gender || null, null,
         null, null, null, null, relationStatus
       );
-      setResult(data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) {
-      console.error(e);
-    } finally {
+
+      // 캐시에 AI 분석이 있으면 즉시 표시
+      if (data.score && data.overall) {
+        setResult(data);
+        setLoading(false);
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+        return;
+      }
+
+      // 2단계: AI 스트리밍
+      setLoading(false);
+      setAiStreaming(true);
+
+      cleanupRef.current = getLoveFortuneStream(
+        'relationship', birthDate, '', gender || '', '',
+        '', '', '', '', relationStatus,
+        {
+          onCached: (cachedData) => {
+            setAiStreaming(false); setStreamText('');
+            setResult(cachedData);
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+          },
+          onChunk: (text) => setStreamText(prev => prev + text),
+          onDone: (fullText) => {
+            setAiStreaming(false);
+            setStreamText('');
+            try {
+              let json = fullText;
+              if (json.includes('```')) {
+                const s = json.indexOf('\n', json.indexOf('```'));
+                const e = json.lastIndexOf('```');
+                if (s > 0 && e > s) json = json.substring(s + 1, e);
+              }
+              const bs = json.indexOf('{');
+              const be = json.lastIndexOf('}');
+              if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
+              const parsed = JSON.parse(json);
+              const finalResult = {
+                ...data,
+                score: parsed.score || 65,
+                grade: parsed.grade || '보통',
+                overall: parsed.overall || '',
+                timing: parsed.timing || '',
+                advice: parsed.advice || '',
+                caution: parsed.caution || '',
+                luckyDay: parsed.luckyDay || '',
+                luckyPlace: parsed.luckyPlace || '',
+                luckyColor: parsed.luckyColor || '',
+              };
+              setResult(finalResult);
+              // 캐시 저장
+              saveLoveFortuneCache({ ...finalResult, type: 'relationship', birthDate, gender }).catch(() => {});
+              setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+            } catch {
+              setResult({ ...data, score: 65, grade: '보통', overall: fullText });
+            }
+          },
+          onError: () => { setAiStreaming(false); setStreamText(''); },
+        }
+      );
+    } catch (err) {
+      console.error(err);
       setLoading(false);
     }
+  };
+
+  const handleCelebMatch = async () => {
+    if (!birthDate) return;
+    setCelebLoading(true);
+    setCelebListOpen(true);
+    try {
+      const targetGender = gender === 'M' ? 'F' : 'M';
+      const candidates = CELEBRITIES.filter(c => c.gender === targetGender);
+      const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 30);
+      const data = await getCelebMatch(birthDate, null, 'SOLAR', shuffled.map(c => ({
+        name: c.name, birth: c.birth, gender: c.gender, group: c.group || ''
+      })));
+      setCelebList(data);
+    } catch (e) { console.error(e); }
+    setCelebLoading(false);
+  };
+
+  const handleCelebDetail = async (celeb) => {
+    setSelectedCeleb(celeb);
+    setCelebResult(null);
+    setCelebDetailLoading(true);
+    setCelebPopup(true);
+    try {
+      const data = await getSajuCompatibility(
+        birthDate, celeb.birth, null, null, 'SOLAR', 'SOLAR',
+        gender || 'M', celeb.gender
+      );
+      data._celebName = celeb.name;
+      data._celebGroup = celeb.group;
+      setCelebResult(data);
+    } catch (e) { console.error(e); }
+    setCelebDetailLoading(false);
+  };
+
+  const closeCelebPopup = () => {
+    setCelebPopup(false);
+    setCelebResult(null);
+    setSelectedCeleb(null);
   };
 
   const heartColor = result?.score ? getHeartColor(result.score) : '#ffc0cb';
@@ -98,7 +213,7 @@ function LoveFortune() {
       </section>
 
       {/* 입력 폼 */}
-      {!result && !loading && (
+      {!result && !loading && !aiStreaming && (
         <div className="lf-form fade-in">
           {userId && (
             <button className="lf-autofill-btn" onClick={handleAutoFill}>✨ 내 정보로 채우기</button>
@@ -116,7 +231,6 @@ function LoveFortune() {
                 >
                   <span className="lf-status-icon">{s.icon}</span>
                   <span className="lf-status-label">{s.label}</span>
-                  <span className="lf-status-desc">{s.desc}</span>
                 </button>
               ))}
             </div>
@@ -147,9 +261,16 @@ function LoveFortune() {
         </div>
       )}
 
-      {/* 로딩 */}
-      {loading && (
+      {/* 로딩 (스트림 데이터 오기 전) */}
+      {loading && !streamText && (
         <FortuneLoading type="love" />
+      )}
+
+      {/* 스트리밍 텍스트 */}
+      {aiStreaming && streamText && !result && (
+        <div className="lf-stream-section fade-in">
+          <StreamText text={streamText} icon="💕" label="AI가 연애운을 분석하고 있어요..." color="#E91E63" />
+        </div>
       )}
 
       {/* 결과 */}
@@ -185,7 +306,99 @@ function LoveFortune() {
             {result.luckyColor && <div className="lf-lucky-item"><span className="lf-lucky-label">행운의 색</span><span className="lf-lucky-value">{result.luckyColor}</span></div>}
           </div>
 
-          <button className="lf-reset" onClick={() => { setResult(null); setBirthDate(''); setRelationStatus(''); }}>🔄 다시 보기</button>
+          <button className="lf-reset" onClick={() => { setResult(null); setBirthDate(''); setRelationStatus(''); setStreamText(''); setAiStreaming(false); setCelebListOpen(false); setCelebList([]); setCelebResult(null); setSelectedCeleb(null); setCelebPopup(false); }}>🔄 다시 보기</button>
+
+          {/* 궁합이 맞는 연예인 */}
+          {!celebListOpen && (
+            <button className="lf-celeb-match-btn" onClick={handleCelebMatch}>
+              💫 나와 궁합이 맞는 연예인은?
+            </button>
+          )}
+
+          {/* 연예인 리스트 */}
+          {celebListOpen && (
+            <div className="lf-celeb-section fade-in">
+              <h3 className="lf-celeb-title">💫 나와 궁합이 맞는 연예인 TOP 5</h3>
+              {celebLoading ? (
+                <div className="lf-celeb-loading">
+                  <span className="lf-celeb-loading-icon">💫</span>
+                  <p>궁합이 맞는 연예인을 찾고 있어요...</p>
+                </div>
+              ) : (
+                <div className="lf-celeb-list">
+                  {celebList.map((celeb, i) => (
+                    <button key={i} className="lf-celeb-item glass-card" onClick={() => handleCelebDetail(celeb)}>
+                      <span className="lf-celeb-rank">{i + 1}</span>
+                      <span className={`lf-celeb-gender ${celeb.gender === 'M' ? 'lf-celeb-gender--m' : 'lf-celeb-gender--f'}`}>
+                        {celeb.gender === 'M' ? '♂' : '♀'}
+                      </span>
+                      <div className="lf-celeb-info">
+                        <span className="lf-celeb-name">{celeb.name}</span>
+                        {celeb.group && <span className="lf-celeb-group">{celeb.group}</span>}
+                      </div>
+                      <div className="lf-celeb-score-wrap">
+                        <span className="lf-celeb-score" style={{
+                          color: celeb.score >= 80 ? '#ff3d7f' : celeb.score >= 60 ? '#fbbf24' : '#94a3b8'
+                        }}>{celeb.score}점</span>
+                        <span className="lf-celeb-grade">{celeb.grade}</span>
+                      </div>
+                      <span className="lf-celeb-arrow">›</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button className="lf-celeb-hide-btn" onClick={() => setCelebListOpen(false)}>접기</button>
+            </div>
+          )}
+
+          {/* 연예인 상세 궁합 팝업 */}
+          {celebPopup && (
+            <div className="lf-celeb-popup-overlay" onClick={closeCelebPopup}>
+              <div className="lf-celeb-popup" onClick={e => e.stopPropagation()}>
+                <button className="lf-celeb-popup-close" onClick={closeCelebPopup}>✕ 닫기</button>
+                {celebDetailLoading ? (
+                  <FortuneLoading type="love" />
+                ) : celebResult ? (
+                  <div className="lf-celeb-detail fade-in">
+                    <div className="lf-celeb-detail-header">
+                      <span className="lf-celeb-detail-name">나 ♥ {celebResult._celebName}</span>
+                      {celebResult._celebGroup && <span className="lf-celeb-detail-group">{celebResult._celebGroup}</span>}
+                      <div className="lf-celeb-detail-score" style={{
+                        color: celebResult.score >= 80 ? '#ff3d7f' : celebResult.score >= 60 ? '#fbbf24' : '#94a3b8'
+                      }}>
+                        <span className="lf-celeb-detail-num">{celebResult.score}</span>
+                        <span>점</span>
+                      </div>
+                      <span className="lf-celeb-detail-grade">{celebResult.grade}</span>
+                    </div>
+                    {celebResult.aiSummary && (
+                      <div className="lf-celeb-card glass-card">
+                        <p className="lf-celeb-card-summary">{celebResult.aiSummary}</p>
+                      </div>
+                    )}
+                    {celebResult.aiAnalysis && (
+                      <div className="lf-celeb-card glass-card">
+                        <h4>🔮 종합 분석</h4>
+                        <p>{celebResult.aiAnalysis}</p>
+                      </div>
+                    )}
+                    {celebResult.aiLoveCompat && (
+                      <div className="lf-celeb-card glass-card">
+                        <h4>💕 연애 궁합</h4>
+                        <p>{celebResult.aiLoveCompat}</p>
+                      </div>
+                    )}
+                    {celebResult.aiAdvice && (
+                      <div className="lf-celeb-card glass-card">
+                        <h4>💡 조언</h4>
+                        <p>{celebResult.aiAdvice}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

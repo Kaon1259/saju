@@ -104,3 +104,7 @@
 [data-theme="light"] .mbti-best-match { color: #96700a; background: rgba(0,0,0,0.03); }
 [data-theme="light"] .mbti-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #7c3aed; }
 [data-theme="light"] .mbti-result-badge { background: rgba(0,0,0,0.03); }
+
+/* 스트리밍 커서 */
+.stream-cursor { display: inline-block; width: 2px; height: 1em; background: #8B5CF6; margin-left: 2px; vertical-align: text-bottom; animation: streamBlink 0.8s step-end infinite; }
+@keyframes streamBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }

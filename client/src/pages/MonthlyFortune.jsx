@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
-import api from '../api/fortune';
+import { useState, useRef, useEffect } from 'react';
+import { getMonthlyFortuneStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import StreamText from '../components/StreamText';
 import './MonthlyFortune.css';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -53,8 +54,15 @@ function MonthlyFortune() {
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const [streamText, setStreamText] = useState('');
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
+  const cleanupRef = useRef(null);
+
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
 
   const handleAutofill = () => {
     try {
@@ -66,24 +74,47 @@ function MonthlyFortune() {
     } catch {}
   };
 
-  const handleAnalyze = async (month) => {
+  const handleAnalyze = (month) => {
     const m = month || selectedMonth;
     if (!birthDate) return;
     setLoading(true);
+    setStreaming(false);
+    setStreamText('');
     setResult(null);
-    try {
-      const params = { birthDate, month: m };
-      if (gender) params.gender = gender;
-      if (calendarType) params.calendarType = calendarType;
-      if (birthTime) params.birthTime = birthTime;
-      const response = await api.get('/monthly-fortune', { params });
-      setResult({ ...response.data, month: m });
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) {
-      console.error('월별 운세 실패:', e);
-    } finally {
-      setLoading(false);
-    }
+    cleanupRef.current?.();
+
+    let firstChunk = true;
+    cleanupRef.current = getMonthlyFortuneStream(birthDate, m, birthTime, gender, {
+      onCached: (data) => {
+        setResult({ ...data, month: m });
+        setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+      },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: (fullText) => {
+        setStreaming(false);
+        setStreamText('');
+        try {
+          const json = fullText.match(/\{[\s\S]*\}/)?.[0];
+          if (json) {
+            const parsed = JSON.parse(json);
+            setResult({ ...parsed, month: m });
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        } catch (e) {
+          console.error('월별운세 파싱 실패:', e);
+        }
+        setLoading(false);
+      },
+      onError: (err) => {
+        console.error('월별운세 스트림 실패:', err);
+        setLoading(false);
+        setStreaming(false);
+      },
+    });
   };
 
   const handleMonthNav = (direction) => {
@@ -95,8 +126,11 @@ function MonthlyFortune() {
   };
 
   const resetAll = () => {
+    cleanupRef.current?.();
     setResult(null);
     setLoading(false);
+    setStreaming(false);
+    setStreamText('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -191,11 +225,16 @@ function MonthlyFortune() {
       )}
 
       {/* 로딩 */}
-      {loading && (
+      {loading && !streaming && (
         <div className="mf-loading">
           <div className="mf-loading-icon">{getSeasonEmoji(selectedMonth)}</div>
           <p className="mf-loading-text">AI가 {selectedMonth}월 운세를 분석하고 있어요<span className="mf-dots" /></p>
         </div>
+      )}
+
+      {/* 스트리밍 중 */}
+      {streaming && (
+        <StreamText text={streamText} icon="📅" label="AI가 이번 달 운세를 분석하고 있어요..." color="#9B59B6" />
       )}
 
       {/* 결과 */}

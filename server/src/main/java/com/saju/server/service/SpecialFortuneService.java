@@ -275,6 +275,79 @@ public class SpecialFortuneService {
         return result;
     }
 
+    /**
+     * 캐시 체크 + 사주 기본 정보만 (AI 제외)
+     */
+    public Map<String, Object> getLoveFortuneBasic(String type, String birthDate,
+                                               String birthTime, String gender, String calendarType,
+                                               String partnerDate, String partnerGender,
+                                               String breakupDate, String meetDate,
+                                               String relationshipStatus) {
+        LocalDate date = LocalDate.parse(birthDate);
+        LocalDate today = LocalDate.now();
+        String typeKr = LOVE_TYPE_KR.getOrDefault(type, "연애운");
+
+        String cacheKey = buildCacheKey(type, birthDate, gender, partnerDate, partnerGender, breakupDate, meetDate);
+        Map<String, Object> cached = getFromCache(type, cacheKey);
+        if (cached != null) return cached;
+
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("type", type);
+        result.put("typeKr", typeKr);
+        result.put("birthDate", birthDate);
+        result.put("date", today.toString());
+        result.put("dayMaster", dayPillar.getFullName());
+        result.put("zodiacAnimal", yearPillar.getAnimal());
+        return result;
+    }
+
+    /**
+     * 스트리밍 완료 후 캐시 저장용
+     */
+    public void saveLoveFortuneCache(String type, String birthDate, String gender,
+                                      String partnerDate, String partnerGender,
+                                      String breakupDate, String meetDate,
+                                      Map<String, Object> result) {
+        String cacheKey = buildCacheKey(type, birthDate, gender, partnerDate, partnerGender, breakupDate, meetDate);
+        saveToCache(type, cacheKey, result);
+    }
+
+    /**
+     * 스트리밍 완료 후 결과 파싱 + 캐시 저장 (서버에서 직접)
+     */
+    public void parseAndSaveLoveStreamResult(String type, String birthDate, String gender,
+                                              String partnerDate, String partnerGender,
+                                              String breakupDate, String meetDate, String fullText) {
+        try {
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) return;
+
+            JsonNode node = objectMapper.readTree(json);
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("type", type);
+            result.put("birthDate", birthDate);
+            result.put("score", node.path("score").asInt(65));
+            result.put("grade", node.path("grade").asText("보통"));
+            result.put("overall", node.path("overall").asText(""));
+            result.put("timing", node.path("timing").asText(""));
+            result.put("advice", node.path("advice").asText(""));
+            result.put("caution", node.path("caution").asText(""));
+            result.put("luckyDay", node.path("luckyDay").asText(""));
+            result.put("luckyPlace", node.path("luckyPlace").asText(""));
+            result.put("luckyColor", node.path("luckyColor").asText(""));
+
+            String cacheKey = buildCacheKey(type, birthDate, gender, partnerDate, partnerGender, breakupDate, meetDate);
+            saveToCache(type, cacheKey, result);
+            log.info("연애운 스트리밍 캐시 저장 완료: type={}, key={}", type, cacheKey);
+        } catch (Exception e) {
+            log.warn("연애운 스트리밍 캐시 저장 실패: {}", e.getMessage());
+        }
+    }
+
     public Map<String, Object> getLoveFortune(String type, String birthDate,
                                                String birthTime, String gender, String calendarType,
                                                String partnerDate, String partnerGender,
@@ -737,27 +810,23 @@ public class SpecialFortuneService {
         boolean isMale = "M".equals(gender);
         String persona = isMale
             ? """
-당신은 20대 초반 여자 친구처럼 다정하게 연애 상담해주는 사주 전문가야.
-남자에게 여자친구가 얘기해주듯 따뜻하고 귀여운 말투로 답변해.
-"오빠 오늘 진짜 좋은 날이야!", "이거 해봐!", "걱정 마 오빠!" 같은 톤.
+카페에서 친한 여사친이 다정하게 연애 상담해주는 사주 전문가야.
+남자에게 여자친구가 옆에서 편하게 대화하듯 따뜻하게 말해줘.
 
 【말투 스타일】
-- 다정하고 귀여운 여자친구 말투 ("~인 거야!", "~해봐!", "~거든!", "진짜 좋아!")
-- 공감과 응원이 담긴 톤, 살짝 애교 섞인 느낌
-- 이모지 사용 OK (하트, 반짝임 등)
-- 반말 사용, 존댓말/경어 금지
-- "~하옵소서", "~이로다" 같은 고전 표현 절대 금지"""
+- 자연스러운 대화체 반말 (보고서 톤 절대 금지)
+- 공감하고 응원하는 따뜻한 느낌
+- 이모지 사용 OK
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지"""
             : """
-당신은 20대 초반 남자 친구처럼 든든하게 연애 상담해주는 사주 전문가야.
-여자에게 남자친구가 얘기해주듯 따뜻하고 믿음직한 말투로 답변해.
-"야 오늘 진짜 좋은 날이거든!", "이렇게 해봐!", "걱정 마 내가 봤을 때" 같은 톤.
+카페에서 친한 남사친이 든든하게 연애 상담해주는 사주 전문가야.
+여자에게 남자친구가 옆에서 편하게 대화하듯 든든하게 말해줘.
 
 【말투 스타일】
-- 든든하고 따뜻한 남자친구 말투 ("~거든!", "~인 거야", "~해봐!", "내가 봤을 때")
-- 공감하면서도 자신감 있는 톤, 살짝 장난스러운 느낌
-- 이모지 사용 OK (하트, 반짝임 등)
-- 반말 사용, 존댓말/경어 금지
-- "~하옵소서", "~이로다" 같은 고전 표현 절대 금지""";
+- 자연스러운 대화체 반말 (보고서 톤 절대 금지)
+- 공감하면서도 자신감 있는 따뜻한 느낌
+- 이모지 사용 OK
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지""";
 
         return persona + "\n\n사주 용어는 최대한 쉽게 풀어서 설명하고, 딱딱하거나 고전적인 표현은 절대 쓰지 않아.\n\n"
             + typeSpecific + """
@@ -768,8 +837,68 @@ public class SpecialFortuneService {
 3. timing: 구체적 날짜/요일/시간대 포함
 4. advice: 바로 해볼 수 있는 행동 3가지 (친구 조언처럼)
 5. caution: 피해야 할 상황 2가지 (걱정해주는 톤으로)
-6. 반말 구어체 사용 ("~해!", "~거든", "~인 거야")
+6. 자연스러운 대화체 반말 사용
 7. 점수는 사주 궁합도와 일진 기운을 종합하여 0-100 책정""";
+    }
+
+    /**
+     * 연애운 스트리밍용 프롬프트 빌드
+     */
+    public String[] buildLoveStreamPrompts(String type, String birthDate, String birthTime, String gender,
+                                            String calendarType, String partnerDate, String partnerGender,
+                                            String breakupDate, String meetDate, String relationshipStatus) {
+        LocalDate date = LocalDate.parse(birthDate);
+        LocalDate today = LocalDate.now();
+        String typeKr = LOVE_TYPE_KR.getOrDefault(type, "연애운");
+
+        String todayCtx = promptBuilder.buildTodayContext(today);
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+
+        String system = buildLoveSystemPrompt(type, gender);
+
+        StringBuilder extra = new StringBuilder();
+        if (partnerDate != null && !partnerDate.isBlank()) {
+            try {
+                LocalDate pd = LocalDate.parse(partnerDate);
+                SajuPillar pYearP = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(pd));
+                SajuPillar pDayP = SajuCalculator.calculateDayPillar(pd);
+                extra.append("\n【상대방】").append(pYearP.getAnimal()).append("띠 / 일간: ").append(pDayP.getFullName());
+                if (partnerGender != null) extra.append(" / 성별: ").append("M".equals(partnerGender) ? "남" : "여");
+            } catch (Exception ignored) {}
+        }
+        if (breakupDate != null && !breakupDate.isBlank()) extra.append("\n【헤어진 시기】").append(breakupDate);
+        if (meetDate != null && !meetDate.isBlank()) {
+            try {
+                LocalDate md = LocalDate.parse(meetDate);
+                extra.append("\n【소개팅 날짜】").append(meetDate).append(" (").append(SajuCalculator.calculateDayPillar(md).getFullName()).append("일)");
+            } catch (Exception ignored) {}
+        }
+
+        String statusKr = "";
+        if (relationshipStatus != null) {
+            switch (relationshipStatus) {
+                case "SINGLE": statusKr = "솔로(짝 없음)"; break;
+                case "SOME": statusKr = "썸 타는 중"; break;
+                case "IN_RELATIONSHIP": statusKr = "연애 중"; break;
+                case "COMPLICATED": statusKr = "복잡한 관계"; break;
+            }
+        }
+
+        String user = todayCtx + "\n" +
+            "【의뢰인】" + yearPillar.getAnimal() + "띠 / 일간: " + dayPillar.getFullName() +
+            (gender != null ? " / 성별: " + ("M".equals(gender) ? "남" : "여") : "") +
+            (!statusKr.isEmpty() ? " / 연애상태: " + statusKr : "") +
+            extra + "\n\n" +
+            "'" + typeKr + "' 분석." +
+            (!statusKr.isEmpty() ? " 연애상태: " + statusKr : "") + "\n" +
+            "JSON만 응답:\n" +
+            "{\"score\":0-100,\"grade\":\"대길/길/보통/흉\",\"overall\":\"종합 3-4문장\"," +
+            "\"timing\":\"최적시기 2문장\",\"advice\":\"행동조언 3문장\"," +
+            "\"caution\":\"주의 2문장\",\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}";
+
+        return new String[]{system, user};
     }
 
     private Map<String, Object> generateLoveFallback(String type, SajuPillar dayPillar, LocalDate today) {

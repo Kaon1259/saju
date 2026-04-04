@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -121,11 +122,11 @@ public class ConstellationFortuneService {
                 "\"planetInfluence\":\"오늘 행성 영향 분석 (수호성과 오늘 기운의 상호작용, 2-3문장)\"," +
                 "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
             String resp = claudeApiService.generate(
-                "당신은 20대 초반 여자 친구처럼 편하게 상담해주는 별자리 운세 전문가야! " +
+                "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
                 "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
                 "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
-                "\"~거든!\", \"~인 거야\", \"~해봐!\" 같은 친근한 반말 구어체로 작성하고, " +
-                "\"~하옵소서\", \"~이로다\" 같은 고전적 표현은 절대 금지! " +
+                "자연스러운 대화체 반말로 작성하고, " +
+                "딱딱한 보고서 톤이나 고전적 표현은 절대 금지! " +
                 "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.", prompt, 1200);
 
             String json = ClaudeApiService.extractJson(resp);
@@ -212,5 +213,69 @@ public class ConstellationFortuneService {
             if (SIGNS[i][0].equals(sign)) return i;
         }
         return 0;
+    }
+
+    /**
+     * 캐시된 운세 조회 (캐시 없으면 null 반환)
+     */
+    public Map<String, Object> getCachedFortune(String sign) {
+        LocalDate today = LocalDate.now();
+        Optional<ConstellationFortune> cached = repository.findBySignAndFortuneDate(sign, today);
+        if (cached.isPresent()) {
+            return toMap(cached.get(), getSignIndex(sign));
+        }
+        return null;
+    }
+
+    /**
+     * 별자리 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
+     */
+    public SseEmitter streamFortune(String sign) {
+        LocalDate today = LocalDate.now();
+        int idx = getSignIndex(sign);
+
+        String systemPrompt = "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
+            "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
+            "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
+            "자연스러운 대화체 반말로 작성하고, " +
+            "딱딱한 보고서 톤이나 고전적 표현은 절대 금지! " +
+            "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.";
+
+        String todayCtx = promptBuilder.buildTodayContext(today);
+        String userPrompt = todayCtx + "\n【의뢰인】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
+            "성격: " + PERSONALITY.get(sign) + "\n\n" +
+            "위 천기와 별자리 특성을 종합하여 오늘의 운세를 작성하세요.\n" +
+            "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
+            "반드시 JSON만: {\"overall\":\"총운 (시간대별 기운 변화 포함, 4-5문장)\"," +
+            "\"love\":\"애정운 (구체적 행동 조언, 3-4문장)\"," +
+            "\"money\":\"재물운 (금전 방향과 시기별 조언, 3-4문장)\"," +
+            "\"health\":\"건강운 (주의 부위와 운동/식이 조언, 3문장)\"," +
+            "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
+
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1200, (fullText) -> {
+            try {
+                String json = ClaudeApiService.extractJson(fullText);
+                if (json == null) return;
+                var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+                long seed = sign.hashCode() + today.hashCode();
+                Random r = new Random(seed);
+                String[] colors = {"빨강","파랑","노랑","초록","보라","흰색","분홍","금색","하늘색","민트"};
+
+                ConstellationFortune fortune = ConstellationFortune.builder()
+                    .sign(sign)
+                    .fortuneDate(today)
+                    .overall(node.path("overall").asText(""))
+                    .love(node.path("love").asText(""))
+                    .money(node.path("money").asText(""))
+                    .health(node.path("health").asText(""))
+                    .score(node.path("score").asInt(70))
+                    .luckyNumber(node.path("luckyNumber").asInt(r.nextInt(99) + 1))
+                    .luckyColor(node.path("luckyColor").asText(colors[r.nextInt(colors.length)]))
+                    .build();
+                repository.save(fortune);
+            } catch (Exception e) {
+                log.warn("constellation stream cache save failed for {}: {}", sign, e.getMessage());
+            }
+        });
     }
 }

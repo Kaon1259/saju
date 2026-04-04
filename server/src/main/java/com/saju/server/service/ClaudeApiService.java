@@ -104,6 +104,13 @@ public class ClaudeApiService {
      * Claude API 스트리밍 호출 - SSE로 텍스트 청크 전달
      */
     public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens) {
+        return generateStream(systemPrompt, userPrompt, maxTokens, null);
+    }
+
+    /**
+     * Claude API 스트리밍 호출 + 완료 콜백 (캐시 저장 등)
+     */
+    public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens, java.util.function.Consumer<String> onComplete) {
         SseEmitter emitter = new SseEmitter(180000L); // 3분 타임아웃
 
         if (!isAvailable()) {
@@ -166,9 +173,14 @@ public class ClaudeApiService {
                     } catch (Exception ignored) {}
                 }
 
-                emitter.send(SseEmitter.event().name("done").data(fullText.toString()));
+                String fullResult = fullText.toString();
+                emitter.send(SseEmitter.event().name("done").data(fullResult));
                 emitter.complete();
                 reader.close();
+                // 완료 콜백 (캐시 저장 등)
+                if (onComplete != null) {
+                    try { onComplete.accept(fullResult); } catch (Exception ignored) {}
+                }
 
             } catch (Exception e) {
                 log.error("스트리밍 실패: {}", e.getMessage());
@@ -221,7 +233,8 @@ public class ClaudeApiService {
      * 사주 기반 개인 맞춤 운세 생성
      */
     public String generateSajuFortune(String sajuSummary) {
-        String systemPrompt = "사주 전문가. 친구처럼 반말(~거든!, ~인 거야). 고전적 표현 금지.\n"
+        String systemPrompt = "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 운세를 알려주는 사주 전문가.\n"
+            + "분석 보고서가 아니라 대화하는 느낌으로. 딱딱한 표현, 고전적 표현 절대 금지.\n"
             + "JSON 응답. 각 카테고리 2-3문장:\n"
             + "overall/love/money/health/work + score(30-100), luckyNumber(1-99), luckyColor(한국어),\n"
             + "summary(15자이내), timeAdvice(오전/오후/저녁), direction(방위), food(추천음식), avoid(피할것), emotion(2문장)\n"
@@ -236,7 +249,8 @@ public class ClaudeApiService {
      * 사주 기반 성격 분석 생성
      */
     public String generatePersonalityReading(String sajuSummary) {
-        String systemPrompt = "사주 성격분석 전문가. 반말 구어체(~거든!, ~인 거야). 고전적 표현 금지.\n"
+        String systemPrompt = "카페에서 친구한테 성격 얘기해주듯 자연스럽게 분석하는 사주 전문가.\n"
+            + "대화하는 느낌의 반말, 딱딱한 분석 보고서 톤 금지. 고전적 표현 금지.\n"
             + "일반 텍스트 응답 (JSON 아님). 6-8문장으로:\n"
             + "1. 핵심 성격 (장점2+단점2)\n"
             + "2. 대인관계 스타일\n"
@@ -253,7 +267,8 @@ public class ClaudeApiService {
      * 사주 기반 년운 분석 생성
      */
     public String generateYearFortune(String sajuSummary, int year) {
-        String systemPrompt = "사주 년운 전문가. 반말 구어체. 고전적 표현 금지.\n"
+        String systemPrompt = "친구한테 올해 운세 알려주듯 자연스럽게 말하는 사주 전문가.\n"
+            + "대화하듯 편하게 반말로. 딱딱하거나 고전적인 표현 절대 금지.\n"
             + "일반 텍스트 응답. 8-10문장:\n"
             + "1. 올해 핵심 키워드 3개 + 전체 기조\n"
             + "2. 상반기(좋은 달) / 하반기(좋은 달)\n"

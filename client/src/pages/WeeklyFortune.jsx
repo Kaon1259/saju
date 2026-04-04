@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
-import api from '../api/fortune';
+import { useState, useRef, useEffect } from 'react';
+import { getWeeklyFortuneStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import StreamText from '../components/StreamText';
 import './WeeklyFortune.css';
 
 const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -49,9 +50,16 @@ function WeeklyFortune() {
   const [birthTime, setBirthTime] = useState('');
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const [streamText, setStreamText] = useState('');
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
   const daysScrollRef = useRef(null);
+  const cleanupRef = useRef(null);
+
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
 
   const handleAutofill = () => {
     try {
@@ -63,28 +71,54 @@ function WeeklyFortune() {
     } catch {}
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!birthDate) return;
     setLoading(true);
+    setStreaming(false);
+    setStreamText('');
     setResult(null);
-    try {
-      const params = { birthDate };
-      if (birthTime) params.birthTime = birthTime;
-      if (gender) params.gender = gender;
-      if (calendarType) params.calendarType = calendarType;
-      const response = await api.get('/weekly-fortune', { params });
-      setResult(response.data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-    } catch (e) {
-      console.error('주간 운세 실패:', e);
-    } finally {
-      setLoading(false);
-    }
+    cleanupRef.current?.();
+
+    let firstChunk = true;
+    cleanupRef.current = getWeeklyFortuneStream(birthDate, birthTime, gender, {
+      onCached: (data) => {
+        setResult(data);
+        setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+      },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: (fullText) => {
+        setStreaming(false);
+        setStreamText('');
+        try {
+          const json = fullText.match(/\{[\s\S]*\}/)?.[0];
+          if (json) {
+            const parsed = JSON.parse(json);
+            setResult(parsed);
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        } catch (e) {
+          console.error('주간운세 파싱 실패:', e);
+        }
+        setLoading(false);
+      },
+      onError: (err) => {
+        console.error('주간운세 스트림 실패:', err);
+        setLoading(false);
+        setStreaming(false);
+      },
+    });
   };
 
   const resetAll = () => {
+    cleanupRef.current?.();
     setResult(null);
     setLoading(false);
+    setStreaming(false);
+    setStreamText('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -164,7 +198,7 @@ function WeeklyFortune() {
       )}
 
       {/* 로딩 */}
-      {loading && (
+      {loading && !streaming && (
         <div className="wf-loading">
           <div className="wf-loading-cal">
             {DAY_LABELS.map((d, i) => (
@@ -173,6 +207,11 @@ function WeeklyFortune() {
           </div>
           <p className="wf-loading-text">AI가 이번 주 운세를 분석하고 있어요<span className="wf-dots" /></p>
         </div>
+      )}
+
+      {/* 스트리밍 중 */}
+      {streaming && (
+        <StreamText text={streamText} icon="📅" label="AI가 이번 주 운세를 분석하고 있어요..." color="#34D399" />
       )}
 
       {/* 결과 */}

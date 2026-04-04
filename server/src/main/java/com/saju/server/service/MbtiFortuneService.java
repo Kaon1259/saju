@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -196,7 +197,7 @@ public class MbtiFortuneService {
         if (claudeApiService.isAvailable()) {
             try {
                 String prompt = promptBuilder.compatibilityPrompt("mbti", type1, type2, LocalDate.now());
-                String aiAdvice = claudeApiService.generate("당신은 20대 초반 여자 친구처럼 편하게 상담해주는 MBTI 궁합 전문가야! 오행과 인지기능을 융합해서 친근한 반말 구어체로 분석해줘. \"~거든!\", \"~인 거야\" 같은 표현 쓰고, 고전적 표현은 절대 금지!", prompt, 400);
+                String aiAdvice = claudeApiService.generate("카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 MBTI 궁합 전문가야! 오행과 인지기능을 융합해서 자연스러운 대화체 반말로 분석해줘. 딱딱한 보고서 톤이나 고전적 표현은 절대 금지!", prompt, 400);
                 if (aiAdvice != null && !aiAdvice.isBlank()) advice = aiAdvice;
             } catch (Exception e) { log.warn("AI MBTI compat failed: {}", e.getMessage()); }
         }
@@ -242,5 +243,50 @@ public class MbtiFortuneService {
         m.put("work", f.getWork()); m.put("tip", f.getTip());
         m.put("score", f.getScore()); m.put("luckyNumber", f.getLuckyNumber()); m.put("luckyColor", f.getLuckyColor());
         return m;
+    }
+
+    /**
+     * 캐시된 MBTI 운세 조회 (캐시 없으면 null 반환)
+     */
+    public Map<String, Object> getCachedFortune(String mbtiType, String zodiacAnimal) {
+        LocalDate today = LocalDate.now();
+        Optional<MbtiFortune> cached = repository.findByMbtiTypeAndZodiacAnimalAndFortuneDate(mbtiType, zodiacAnimal, today);
+        return cached.map(this::toMap).orElse(null);
+    }
+
+    /**
+     * MBTI 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
+     */
+    public SseEmitter streamFortune(String mbtiType, String zodiacAnimal) {
+        LocalDate today = LocalDate.now();
+        String system = promptBuilder.mbtiSystemPrompt();
+        String user = promptBuilder.mbtiUserPrompt(mbtiType, zodiacAnimal, today);
+
+        return claudeApiService.generateStream(system, user, 2500, (fullText) -> {
+            try {
+                String json = ClaudeApiService.extractJson(fullText);
+                if (json == null) return;
+                var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+
+                MbtiFortune fortune = MbtiFortune.builder()
+                    .mbtiType(mbtiType)
+                    .zodiacAnimal(zodiacAnimal)
+                    .fortuneDate(today)
+                    .overall(node.path("overall").asText(""))
+                    .love(node.path("love").asText(""))
+                    .money(node.path("money").asText(""))
+                    .health(node.path("health").asText(""))
+                    .work(node.path("work").asText(""))
+                    .tip(node.path("tip").asText(""))
+                    .score(node.path("score").asInt(70))
+                    .luckyNumber(node.path("luckyNumber").asInt(7))
+                    .luckyColor(node.path("luckyColor").asText("파랑"))
+                    .personality(PERSONALITY.getOrDefault(mbtiType, ""))
+                    .build();
+                repository.save(fortune);
+            } catch (Exception e) {
+                log.warn("mbti stream cache save failed for {}/{}: {}", mbtiType, zodiacAnimal, e.getMessage());
+            }
+        });
     }
 }

@@ -1,5 +1,7 @@
 package com.saju.server.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.dto.FortuneResponse;
 import com.saju.server.entity.DailyFortune;
 import com.saju.server.repository.DailyFortuneRepository;
@@ -8,6 +10,7 @@ import com.saju.server.saju.SajuInterpreter;
 import com.saju.server.saju.SajuPillar;
 import com.saju.server.saju.SajuResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +22,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FortuneService {
 
     private final DailyFortuneRepository dailyFortuneRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String[] ZODIAC_ANIMALS = {
             "쥐", "소", "호랑이", "토끼", "용", "뱀",
@@ -168,6 +173,62 @@ public class FortuneService {
                 .build();
 
         return dailyFortuneRepository.save(fortune);
+    }
+
+    /**
+     * 스트리밍 완료 후 AI 응답을 파싱하여 기존 운세에 덮어씀
+     */
+    @Transactional
+    public void parseAndSaveStreamResult(String zodiacAnimal, String fullText) {
+        try {
+            String json = fullText.trim();
+            // 마크다운 코드블록 제거
+            if (json.contains("```")) {
+                int start = json.indexOf('\n', json.indexOf("```"));
+                int end = json.lastIndexOf("```");
+                if (start > 0 && end > start) json = json.substring(start + 1, end).trim();
+            }
+            // JSON 부분만 추출
+            int bs = json.indexOf('{');
+            int be = json.lastIndexOf('}');
+            if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
+
+            JsonNode node = objectMapper.readTree(json);
+            LocalDate today = LocalDate.now();
+
+            Optional<DailyFortune> existing = dailyFortuneRepository.findByZodiacAnimalAndFortuneDate(zodiacAnimal, today);
+            if (existing.isPresent()) {
+                DailyFortune fortune = existing.get();
+                if (node.has("overall")) fortune.setOverall(node.get("overall").asText());
+                if (node.has("love")) fortune.setLove(node.get("love").asText());
+                if (node.has("money")) fortune.setMoney(node.get("money").asText());
+                if (node.has("health")) fortune.setHealth(node.get("health").asText());
+                if (node.has("work")) fortune.setWork(node.get("work").asText());
+                if (node.has("score")) fortune.setScore(node.get("score").asInt(fortune.getScore()));
+                if (node.has("luckyNumber")) fortune.setLuckyNumber(node.get("luckyNumber").asInt(fortune.getLuckyNumber()));
+                if (node.has("luckyColor")) fortune.setLuckyColor(node.get("luckyColor").asText());
+                dailyFortuneRepository.save(fortune);
+            } else {
+                // 기존 레코드 없으면 새로 생성
+                long seed = (long) zodiacAnimal.hashCode() + today.hashCode();
+                Random random = new Random(seed);
+                DailyFortune fortune = DailyFortune.builder()
+                    .zodiacAnimal(zodiacAnimal)
+                    .fortuneDate(today)
+                    .overall(node.has("overall") ? node.get("overall").asText() : "")
+                    .love(node.has("love") ? node.get("love").asText() : "")
+                    .money(node.has("money") ? node.get("money").asText() : "")
+                    .health(node.has("health") ? node.get("health").asText() : "")
+                    .work(node.has("work") ? node.get("work").asText() : "")
+                    .score(node.has("score") ? node.get("score").asInt() : random.nextInt(61) + 40)
+                    .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : random.nextInt(99) + 1)
+                    .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : LUCKY_COLORS[random.nextInt(LUCKY_COLORS.length)])
+                    .build();
+                dailyFortuneRepository.save(fortune);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse fortune stream result: {}", e.getMessage());
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.MessageDigest;
 import java.time.LocalDate;
@@ -29,9 +30,9 @@ public class FaceReadingService {
 동양 관상학이랑 서양 인상학을 융합해서 재밌고 알기 쉽게 풀어주는 게 특기거든.
 
 【말투 규칙】
-- 10대 후반~20대 초반 여성 친구에게 말하듯 친근한 반말 구어체
-- "~거든!", "~인 거야", "~해봐!", "~느낌이야" 같은 표현 사용
-- 공감과 응원이 담긴 톤
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로 써줘
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
 - "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【관상 분석 체계】
@@ -83,6 +84,83 @@ public class FaceReadingService {
 3. 재물운, 연애운, 직업운, 건강운 각각 구체적 조언
 4. 관상을 보완하는 행동/색상/방위 조언
 5. 긍정적 관점 우선, 주의점은 개선 방향과 함께 제시""";
+
+    /**
+     * 관상 분석 스트리밍
+     * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버에서 캐시 저장
+     */
+    public SseEmitter streamFace(String faceShape, String eyeShape, String noseShape,
+                                  String mouthShape, String foreheadShape,
+                                  String birthDate, String gender) {
+        String cacheKey = buildCacheKey(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender);
+        Map<String, Object> cached = getFromCache("face-reading", cacheKey);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(30000L);
+            try {
+                String json = objectMapper.writeValueAsString(cached);
+                emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        // 프롬프트 빌드
+        StringBuilder userPrompt = new StringBuilder();
+        userPrompt.append(promptBuilder.buildTodayContext(LocalDate.now())).append("\n");
+        userPrompt.append("【의뢰인 관상 정보】\n");
+        userPrompt.append("얼굴형: ").append(faceShape).append("\n");
+        userPrompt.append("눈: ").append(eyeShape).append("\n");
+        userPrompt.append("코: ").append(noseShape).append("\n");
+        userPrompt.append("입: ").append(mouthShape).append("\n");
+        userPrompt.append("이마: ").append(foreheadShape).append("\n");
+        if (gender != null) userPrompt.append("성별: ").append("M".equals(gender) ? "남성" : "여성").append("\n");
+        if (birthDate != null && !birthDate.isBlank()) {
+            userPrompt.append("생년월일: ").append(birthDate).append(" (사주와 관상의 일치도도 분석)\n");
+        }
+        userPrompt.append("\n\n위 관상 정보를 분석하세요. 반드시 아래 JSON 형식으로만 응답:\n")
+            .append("{\"faceElement\":\"얼굴 오행\",\"overallType\":\"관상 유형명 (4글자 이내)\",\"overallEmoji\":\"대표 이모지\",")
+            .append("\"personality\":\"종합 성격 분석 (5-6문장)\",\"moneyFortune\":\"재물운 (3문장)\",\"loveFortune\":\"연애운 (3문장)\",")
+            .append("\"careerFortune\":\"직업운 (적합 직업 3개 + 조언 2문장)\",\"healthFortune\":\"건강운 (주의 부위 + 조언 2문장)\",")
+            .append("\"luckyColor\":\"행운 색상\",\"luckyDirection\":\"행운 방위\",\"luckyNumber\":숫자,")
+            .append("\"strengths\":[\"강점1\",\"강점2\",\"강점3\"],\"improvements\":[\"개선점1\",\"개선점2\"],")
+            .append("\"score\":종합점수(0-100),\"grade\":\"등급(대길/길/보통/소흉)\"}");
+
+        final String finalCacheKey = cacheKey;
+        final String finalFaceShape = faceShape;
+        final String finalEyeShape = eyeShape;
+
+        return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt.toString(), 1000, (fullText) -> {
+            try {
+                String json = ClaudeApiService.extractJson(fullText);
+                if (json != null) {
+                    Map<String, Object> result = new LinkedHashMap<>();
+                    result.put("faceShape", finalFaceShape);
+                    result.put("eyeShape", finalEyeShape);
+                    result.put("noseShape", noseShape);
+                    result.put("mouthShape", mouthShape);
+                    result.put("foreheadShape", foreheadShape);
+                    result.put("date", LocalDate.now().toString());
+                    JsonNode node = objectMapper.readTree(json);
+                    node.fields().forEachRemaining(e -> {
+                        if (e.getValue().isArray()) {
+                            List<String> list = new ArrayList<>();
+                            e.getValue().forEach(v -> list.add(v.asText()));
+                            result.put(e.getKey(), list);
+                        } else if (e.getValue().isNumber()) {
+                            result.put(e.getKey(), e.getValue().asInt());
+                        } else {
+                            result.put(e.getKey(), e.getValue().asText());
+                        }
+                    });
+                    saveToCache("face-reading", finalCacheKey, result);
+                }
+            } catch (Exception e) {
+                log.warn("관상 스트림 캐시 저장 실패: {}", e.getMessage());
+            }
+        });
+    }
 
     @Transactional
     public Map<String, Object> analyzeFace(String faceShape, String eyeShape, String noseShape,

@@ -809,3 +809,71 @@
 [data-theme="light"] .dream-reset-btn:hover {
   border-color: rgba(124, 58, 237, 0.25);
 }
+
+
+/* ═══ 스트리밍 ═══ */
+.dream-streaming {
+  padding: 0 16px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dream-stream-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.dream-stream-moon {
+  font-size: 1.3rem;
+}
+
+.dream-stream-title {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+}
+
+.dream-stream-box {
+  padding: 18px 20px;
+  border-radius: 16px;
+  min-height: 120px;
+}
+
+.dream-stream-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.88);
+  margin: 0;
+}
+
+.dream-stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #a78bfa;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: dream-blink 1s step-end infinite;
+}
+
+@keyframes dream-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 라이트모드 스트리밍 */
+[data-theme="light"] .dream-stream-title {
+  color: #6b21a8;
+}
+[data-theme="light"] .dream-stream-text {
+  color: #333;
+}
+[data-theme="light"] .dream-stream-cursor {
+  background: #7c3aed;
+}

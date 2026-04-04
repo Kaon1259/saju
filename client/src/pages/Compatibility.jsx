@@ -1,10 +1,22 @@
-import { useState } from 'react';
-import { getSajuCompatibility } from '../api/fortune';
+import { useState, useRef, useEffect } from 'react';
+import { getSajuCompatibilityBasic, getCompatibilityStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import FortuneLoading from '../components/FortuneLoading';
+import StreamText from '../components/StreamText';
 import './Compatibility.css';
+
+// JSON 잔여물 제거
+function cleanAiText(text) {
+  if (!text || typeof text !== 'string') return text;
+  return text
+    .replace(/```[a-z]*\s*/g, '').replace(/```/g, '')
+    .replace(/\{"[a-zA-Z]+":/g, '').replace(/[{}\[\]"]/g, '')
+    .replace(/^\s*[a-zA-Z_]+\s*:\s*/gm, '')
+    .replace(/,\s*$/gm, '')
+    .trim();
+}
 
 const MY_STAR_KEY = 'myStarList';
 function getMyStars() { try { return JSON.parse(localStorage.getItem(MY_STAR_KEY)||'[]'); } catch { return []; } }
@@ -33,19 +45,71 @@ function Compatibility() {
   const [calType2, setCalType2] = useState('SOLAR');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [aiStreaming, setAiStreaming] = useState(false);
+  const [streamText, setStreamText] = useState('');
   const [showStarPicker, setShowStarPicker] = useState(false);
+  const cleanupRef = useRef(null);
 
+  useEffect(() => { return () => cleanupRef.current?.(); }, []);
 
   const handleAnalyze = async () => {
     if (!bd1 || !bd2) return;
     setLoading(true);
+    setStreamText('');
+    setResult(null);
     try {
-      const data = await getSajuCompatibility(bd1, bd2, bt1 || undefined, bt2 || undefined, calType1, calType2);
+      // 1단계: 사주 계산 (캐시에 AI 있으면 즉시 반환)
+      const data = await getSajuCompatibilityBasic(bd1, bd2, bt1 || undefined, bt2 || undefined, calType1, calType2, g1, g2);
       data._g1 = g1;
       data._g2 = g2;
+
+      if (data.aiAnalysis || data.aiSummary) {
+        setResult(data);
+        setLoading(false);
+        return;
+      }
+
+      // 2단계: 사주 결과 즉시 표시 + AI 스트리밍
       setResult(data);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+      setLoading(false);
+      setAiStreaming(true);
+
+      cleanupRef.current = getCompatibilityStream(
+        bd1, bd2, bt1 || '', bt2 || '', calType1, calType2, g1, g2,
+        data.score, data.elementRelation || '', data.branchRelation || '',
+        {
+          onChunk: (text) => setStreamText(prev => prev + text),
+          onDone: (fullText) => {
+            setAiStreaming(false);
+            setStreamText('');
+            try {
+              let json = fullText;
+              if (json.includes('```')) {
+                const s = json.indexOf('\n', json.indexOf('```'));
+                const e = json.lastIndexOf('```');
+                if (s > 0 && e > s) json = json.substring(s + 1, e);
+              }
+              const bs = json.indexOf('{');
+              const be = json.lastIndexOf('}');
+              if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
+              const parsed = JSON.parse(json);
+              setResult(prev => ({
+                ...prev,
+                aiSummary: parsed.summary || null,
+                aiAnalysis: parsed.overall || null,
+                aiLoveCompat: parsed.loveCompat || null,
+                aiWorkCompat: parsed.workCompat || null,
+                aiConflictPoint: parsed.conflictPoint || null,
+                aiAdvice: parsed.advice || null,
+              }));
+            } catch {
+              setResult(prev => ({ ...prev, aiAnalysis: fullText }));
+            }
+          },
+          onError: () => { setAiStreaming(false); setStreamText(''); },
+        }
+      );
+    } catch (err) { console.error(err); setLoading(false); }
   };
 
   if (loading) {
@@ -121,8 +185,8 @@ function Compatibility() {
               label="궁합 결과 읽어주기"
               text={[
                 `사주 궁합 결과입니다.`,
-                result.person1 ? `첫 번째 분은 ${result.person1.birthDate} 생, 일간 ${result.person1.dayMaster}, ${result.person1.dayMasterElement} ${result.person1.dayMasterYang ? '양' : '음'}입니다.` : '',
-                result.person2 ? `두 번째 분은 ${result.person2.birthDate} 생, 일간 ${result.person2.dayMaster}, ${result.person2.dayMasterElement} ${result.person2.dayMasterYang ? '양' : '음'}입니다.` : '',
+                result.person1 ? `${result._g1 === 'M' ? '남자' : '여자'}는 ${result.person1.birthDate} 생, 일간 ${result.person1.dayMaster}, ${result.person1.dayMasterElement} ${result.person1.dayMasterYang ? '양' : '음'}입니다.` : '',
+                result.person2 ? `${result._g2 === 'M' ? '남자' : '여자'}는 ${result.person2.birthDate} 생, 일간 ${result.person2.dayMaster}, ${result.person2.dayMasterElement} ${result.person2.dayMasterYang ? '양' : '음'}입니다.` : '',
                 result.score ? `궁합 점수는 ${result.score}점입니다.` : '',
                 result.elementRelation ? `오행 관계입니다. ${result.elementRelation}` : '',
                 result.branchRelation ? `일지 관계입니다. ${result.branchRelation}` : '',
@@ -135,13 +199,7 @@ function Compatibility() {
                 result.aiAnalysis ? `종합 분석: ${result.aiAnalysis.split('.').slice(0,2).join('.')}.` : '',
               ].filter(Boolean).join(' ')}
             />
-            <button className="compat-share-btn" onClick={async () => {
-              const text = `[1:1연애 💕 사주 궁합]\n궁합 점수: ${result.score}점 (${result.grade})\n${result.aiSummary || ''}\n\nhttps://recipepig.kr`;
-              const res = await shareResult({ title: '사주 궁합 결과', text });
-              if (res === 'copied') { setShareMsg('클립보드에 복사됨!'); setTimeout(() => setShareMsg(''), 2000); }
-            }}>📤 공유</button>
           </div>
-          {shareMsg && <p style={{ textAlign: 'center', fontSize: 12, color: '#4ade80', margin: '4px 0' }}>{shareMsg}</p>}
 
           <div className="compat-grade-badge" style={{
             background: score >= 80 ? 'rgba(74,222,128,0.12)' : score >= 60 ? 'rgba(251,191,36,0.12)' : 'rgba(248,113,113,0.12)',
@@ -152,17 +210,24 @@ function Compatibility() {
           </div>
         </section>
 
+        {/* AI 스트리밍 중 표시 */}
+        {aiStreaming && streamText && (
+          <section className="compat-stream">
+            <StreamText text={streamText} icon="🔮" label="AI가 궁합을 분석하고 있어요..." color="#FBBF24" />
+          </section>
+        )}
+
         {/* 분석 카드 */}
         <section className="compat-cards">
           {result.aiSummary && (
             <div className="compat-card glass-card compat-card--summary">
-              <p className="compat-summary-text">{result.aiSummary}</p>
+              <p className="compat-summary-text">{cleanAiText(result.aiSummary)}</p>
             </div>
           )}
           {result.aiAnalysis && (
             <div className="compat-card glass-card compat-card--ai">
               <div className="compat-card-header"><span className="compat-card-icon">🔮</span><h3>종합 분석</h3></div>
-              <p className="compat-card-text">{result.aiAnalysis}</p>
+              <p className="compat-card-text">{cleanAiText(result.aiAnalysis)}</p>
             </div>
           )}
           <div className="compat-card glass-card">
@@ -172,25 +237,25 @@ function Compatibility() {
           {result.aiLoveCompat && (
             <div className="compat-card glass-card compat-card--ai">
               <div className="compat-card-header"><span className="compat-card-icon">💕</span><h3>연애/결혼 궁합</h3></div>
-              <p className="compat-card-text">{result.aiLoveCompat}</p>
+              <p className="compat-card-text">{cleanAiText(result.aiLoveCompat)}</p>
             </div>
           )}
           {result.aiWorkCompat && (
             <div className="compat-card glass-card compat-card--ai">
               <div className="compat-card-header"><span className="compat-card-icon">💼</span><h3>직장/업무 궁합</h3></div>
-              <p className="compat-card-text">{result.aiWorkCompat}</p>
+              <p className="compat-card-text">{cleanAiText(result.aiWorkCompat)}</p>
             </div>
           )}
           {result.aiConflictPoint && (
             <div className="compat-card glass-card compat-card--ai">
               <div className="compat-card-header"><span className="compat-card-icon">⚠️</span><h3>갈등 포인트 & 해결법</h3></div>
-              <p className="compat-card-text">{result.aiConflictPoint}</p>
+              <p className="compat-card-text">{cleanAiText(result.aiConflictPoint)}</p>
             </div>
           )}
           {result.aiAdvice && (
             <div className="compat-card glass-card compat-card--ai">
               <div className="compat-card-header"><span className="compat-card-icon">💡</span><h3>관계 개선 조언</h3></div>
-              <p className="compat-card-text">{result.aiAdvice}</p>
+              <p className="compat-card-text">{cleanAiText(result.aiAdvice)}</p>
             </div>
           )}
           <div className="compat-card glass-card">
@@ -206,6 +271,12 @@ function Compatibility() {
         <button className="compat-reset-btn" onClick={() => { setResult(null); setBd1(''); setBd2(''); setBt1(''); setBt2(''); setCalType1('SOLAR'); setCalType2('SOLAR'); }}>
           다른 궁합 보기
         </button>
+        <button className="compat-share-btn compat-share-btn--bottom" onClick={async () => {
+          const text = `[1:1연애 💕 사주 궁합]\n궁합 점수: ${result.score}점 (${result.grade})\n${result.aiSummary || ''}\n\nhttps://recipepig.kr`;
+          const res = await shareResult({ title: '사주 궁합 결과', text });
+          if (res === 'copied') { setShareMsg('클립보드에 복사됨!'); setTimeout(() => setShareMsg(''), 2000); }
+        }}>📤 결과 공유하기</button>
+        {shareMsg && <p style={{ textAlign: 'center', fontSize: 12, color: '#4ade80', margin: '4px 0' }}>{shareMsg}</p>}
       </div>
     );
   }

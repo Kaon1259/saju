@@ -25,12 +25,19 @@ public class CompatibilityService {
     private final ObjectMapper objectMapper;
 
     public Map<String, Object> analyzeSaju(LocalDate bd1, String bt1, LocalDate bd2, String bt2) {
+        return analyzeSaju(bd1, bt1, bd2, bt2, "M", "F");
+    }
+
+    public Map<String, Object> analyzeSaju(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
         // DB 캐시 체크
-        String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2);
+        String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
         Map<String, Object> dbCached = getFromCache("compatibility", dbCacheKey);
         if (dbCached != null) {
             return dbCached;
         }
+
+        String label1 = "M".equalsIgnoreCase(gender1) ? "남자" : "여자";
+        String label2 = "M".equalsIgnoreCase(gender2) ? "남자" : "여자";
 
         SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
         SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
@@ -94,7 +101,9 @@ public class CompatibilityService {
         // AI 상세 분석
         if (claudeApiService.isAvailable()) {
             try {
-                String systemPrompt = "사주 궁합 전문가. 친한 친구처럼 반말 구어체(~거든!, ~인 거야, ~해봐!). 고전적 표현 금지.\n"
+                String systemPrompt = "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 대화하는 사주 궁합 전문가.\n"
+                        + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n"
+                        + "딱딱한 분석 보고서가 아니라 옆에서 수다 떠는 느낌으로. 고전적 표현 절대 금지.\n"
                         + "JSON만 응답:\n"
                         + "- summary: 한 줄 요약\n"
                         + "- overall: 전반적 궁합 3-4문장\n"
@@ -105,7 +114,7 @@ public class CompatibilityService {
                         + "- score: 1-100, grade: 천생연분/좋은 인연/보통/노력 필요/상극\n"
                         + "{\"summary\":\"\",\"overall\":\"\",\"loveCompat\":\"\",\"workCompat\":\"\",\"conflictPoint\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
 
-                String userPrompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation);
+                String userPrompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation, label1, label2);
                 String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 1500);
 
                 if (aiResponse != null && !aiResponse.isBlank()) {
@@ -162,6 +171,49 @@ public class CompatibilityService {
     }
 
     /**
+     * 스트리밍 완료 후 캐시 저장용
+     */
+    public void saveCompatCache(String bd1, String bt1, String bd2, String bt2, String gender1, String gender2, Map<String, Object> result) {
+        // 빈 문자열을 null로 통일 (basic 조회 시 null로 들어오므로)
+        if (bt1 != null && bt1.isBlank()) bt1 = null;
+        if (bt2 != null && bt2.isBlank()) bt2 = null;
+        String dbCacheKey = buildCacheKey("compatibility", bd1, bt1, bd2, bt2, gender1, gender2);
+        saveToCache("compatibility", dbCacheKey, result);
+    }
+
+    /**
+     * 스트리밍 완료 후 결과 파싱 + 캐시 저장 (서버에서 직접)
+     */
+    public void parseAndSaveStreamResult(LocalDate bd1, String bt1, LocalDate bd2, String bt2,
+                                          String gender1, String gender2, int score, String grade,
+                                          String elementRelation, String branchRelation, String fullText) {
+        try {
+            SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
+            SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
+
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("person1", buildPersonInfo(r1, bd1));
+            result.put("person2", buildPersonInfo(r2, bd2));
+            result.put("score", score);
+            result.put("grade", grade);
+            result.put("elementRelation", elementRelation);
+            result.put("branchRelation", branchRelation);
+
+            boolean yang1 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r1.getDayMaster())] == 0;
+            boolean yang2 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r2.getDayMaster())] == 0;
+            result.put("yinyangBalance", yang1 != yang2 ? "음양 조화가 잘 맞습니다" : "같은 기운이라 경쟁할 수 있습니다");
+
+            parseAndApplyCompatAI(result, fullText, score, grade);
+
+            String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+            saveToCache("compatibility", dbCacheKey, result);
+            log.info("궁합 스트리밍 캐시 저장 완료: key={}", dbCacheKey);
+        } catch (Exception e) {
+            log.warn("궁합 스트리밍 캐시 저장 실패: {}", e.getMessage());
+        }
+    }
+
+    /**
      * AI 궁합 응답 JSON을 파싱하여 result에 적용
      */
     private void parseAndApplyCompatAI(Map<String, Object> result, String aiResponse, int calcScore, String calcGrade) {
@@ -169,7 +221,11 @@ public class CompatibilityService {
             String cleanJson = ClaudeApiService.extractJson(aiResponse);
             if (cleanJson == null) {
                 log.warn("Failed to extract JSON from AI compatibility response");
-                result.put("aiAnalysis", aiResponse);
+                // JSON 잔여물 제거 후 순수 텍스트만 저장
+                String cleaned = aiResponse.replaceAll("```[a-z]*\\s*", "").replaceAll("```", "")
+                    .replaceAll("\\{[^}]*\"[a-zA-Z]+\"\\s*:", "").replaceAll("[{}\\[\\]\"]", "")
+                    .replaceAll("\\s*,\\s*$", "").replaceAll("(?m)^\\s*\\w+:\\s*$", "").trim();
+                if (!cleaned.isBlank()) result.put("aiAnalysis", cleaned);
                 return;
             }
 
@@ -218,23 +274,159 @@ public class CompatibilityService {
         return info;
     }
 
-    private String buildCompatPrompt(SajuResult r1, SajuResult r2, int score, String elRel, String brRel) {
+    private String buildCompatPrompt(SajuResult r1, SajuResult r2, int score, String elRel, String brRel, String label1, String label2) {
         boolean yang1 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r1.getDayMaster())] == 0;
         boolean yang2 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r2.getDayMaster())] == 0;
         String yinyangInfo = (yang1 ? "양" : "음") + " / " + (yang2 ? "양" : "음") + (yang1 != yang2 ? " (음양 조화)" : " (같은 기운)");
 
-        return "【사람1】일간: " + r1.getDayMasterHanja() + r1.getDayMaster() + "(" + r1.getDayMasterElement() + ", " + (yang1 ? "양" : "음") + ")\n"
+        return "【" + label1 + "】일간: " + r1.getDayMasterHanja() + r1.getDayMaster() + "(" + r1.getDayMasterElement() + ", " + (yang1 ? "양" : "음") + ")\n"
                + "  사주: " + r1.getYearPillar().getFullHanja() + " " + r1.getMonthPillar().getFullHanja() + " " + r1.getDayPillar().getFullHanja() + (r1.getHourPillar() != null ? " " + r1.getHourPillar().getFullHanja() : "") + "\n"
                + "  오행: " + r1.getDayMasterElement() + "\n\n"
-               + "【사람2】일간: " + r2.getDayMasterHanja() + r2.getDayMaster() + "(" + r2.getDayMasterElement() + ", " + (yang2 ? "양" : "음") + ")\n"
+               + "【" + label2 + "】일간: " + r2.getDayMasterHanja() + r2.getDayMaster() + "(" + r2.getDayMasterElement() + ", " + (yang2 ? "양" : "음") + ")\n"
                + "  사주: " + r2.getYearPillar().getFullHanja() + " " + r2.getMonthPillar().getFullHanja() + " " + r2.getDayPillar().getFullHanja() + (r2.getHourPillar() != null ? " " + r2.getHourPillar().getFullHanja() : "") + "\n"
                + "  오행: " + r2.getDayMasterElement() + "\n\n"
                + "【오행 관계】" + elRel + "\n"
                + "【일지 관계】" + brRel + "\n"
                + "【음양 조화】" + yinyangInfo + "\n"
                + "【계산 점수】" + score + "점\n\n"
-               + "위 사주 정보를 바탕으로 두 사람의 궁합을 JSON 형식으로 상세히 분석해주세요.\n"
+               + "위 사주 정보를 바탕으로 " + label1 + "와 " + label2 + "의 궁합을 JSON 형식으로 상세히 분석해주세요.\n"
+               + "반드시 '남자', '여자'로 지칭하고, '사람1', '사람2' 같은 표현은 절대 쓰지 마세요.\n"
                + "오행의 상생/상극 관계가 실제 관계에 어떤 영향을 미치는지 구체적으로 설명해주세요.";
+    }
+
+    /**
+     * 사주 계산만 수행 (AI 제외) - 스트리밍 1단계용
+     */
+    public Map<String, Object> analyzeSajuBasic(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
+        // DB 캐시 체크
+        String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+        log.info("Basic 캐시 조회: key={}, bd1={}, bt1={}, bd2={}, bt2={}, g1={}, g2={}", dbCacheKey, bd1, bt1, bd2, bt2, gender1, gender2);
+        Map<String, Object> dbCached = getFromCache("compatibility", dbCacheKey);
+        if (dbCached != null) {
+            log.info("Basic 캐시 히트!");
+            return dbCached;
+        }
+        log.info("Basic 캐시 미스");
+
+        SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
+        SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("person1", buildPersonInfo(r1, bd1));
+        result.put("person2", buildPersonInfo(r2, bd2));
+
+        int el1 = SajuConstants.CHEONGAN_OHENG[getDayMasterIndex(r1.getDayMaster())];
+        int el2 = SajuConstants.CHEONGAN_OHENG[getDayMasterIndex(r2.getDayMaster())];
+        int score = 60;
+        String relationship = "";
+
+        if (el1 == el2) { score += 15; relationship = "비화(같은 오행) - 동질감이 강하고 서로를 잘 이해합니다"; }
+        else if (SajuConstants.OHENG_PRODUCES[el1] == el2) { score += 25; relationship = "상생(내가 생해줌) - 내가 상대를 돕고 키워주는 관계"; }
+        else if (SajuConstants.OHENG_PRODUCES[el2] == el1) { score += 20; relationship = "상생(상대가 생해줌) - 상대가 나를 지원하는 관계"; }
+        else if (SajuConstants.OHENG_OVERCOMES[el1] == el2) { score -= 5; relationship = "상극(내가 극함) - 내가 상대를 제어하는 관계, 주도권 있음"; }
+        else if (SajuConstants.OHENG_OVERCOMES[el2] == el1) { score -= 10; relationship = "상극(상대가 극함) - 상대에게 눌릴 수 있는 관계, 인내 필요"; }
+
+        int branch1 = SajuCalculator.calculateDayPillar(bd1).getBranchIndex();
+        int branch2 = SajuCalculator.calculateDayPillar(bd2).getBranchIndex();
+        String branchRelation = "일반적 관계";
+        for (int[] yuk : SajuConstants.YUKAP) {
+            if ((branch1 == yuk[0] && branch2 == yuk[1]) || (branch1 == yuk[1] && branch2 == yuk[0])) {
+                score += 15; branchRelation = SajuConstants.JIJI[branch1] + SajuConstants.JIJI[branch2] + " 육합 - 천생연분의 인연!"; break;
+            }
+        }
+        if (Math.floorMod(branch1 - branch2, 12) == 6) {
+            score -= 15; branchRelation = SajuConstants.JIJI[branch1] + SajuConstants.JIJI[branch2] + " 충 - 갈등이 있으나 서로 성장시키는 관계";
+        }
+
+        boolean yang1 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r1.getDayMaster())] == 0;
+        boolean yang2 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r2.getDayMaster())] == 0;
+        if (yang1 != yang2) score += 10;
+        score = Math.max(20, Math.min(98, score));
+
+        String grade;
+        if (score >= 85) grade = "천생연분";
+        else if (score >= 70) grade = "좋은 인연";
+        else if (score >= 55) grade = "보통 인연";
+        else if (score >= 40) grade = "노력 필요";
+        else grade = "어려운 인연";
+
+        result.put("score", score);
+        result.put("grade", grade);
+        result.put("elementRelation", relationship);
+        result.put("branchRelation", branchRelation);
+        result.put("yinyangBalance", yang1 != yang2 ? "음양 조화가 잘 맞습니다" : "같은 기운이라 경쟁할 수 있습니다");
+        return result;
+    }
+
+    /**
+     * 궁합 AI 스트리밍용 프롬프트 생성
+     */
+    public String[] buildStreamPrompts(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2, int score, String elementRelation, String branchRelation) {
+        String label1 = "M".equalsIgnoreCase(gender1) ? "남자" : "여자";
+        String label2 = "M".equalsIgnoreCase(gender2) ? "남자" : "여자";
+        SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
+        SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
+
+        String systemPrompt = "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 대화하는 사주 궁합 전문가.\n"
+                + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n"
+                + "딱딱한 분석 보고서가 아니라 옆에서 수다 떠는 느낌으로. 고전적 표현 절대 금지.\n"
+                + "JSON만 응답:\n"
+                + "- summary: 한 줄 요약\n"
+                + "- overall: 전반적 궁합 3-4문장\n"
+                + "- loveCompat: 연애 궁합 3-4문장\n"
+                + "- workCompat: 업무 궁합 2-3문장\n"
+                + "- conflictPoint: 갈등+해결 3-4문장\n"
+                + "- advice: 실천 조언 3-4문장\n"
+                + "- score: 1-100, grade: 천생연분/좋은 인연/보통/노력 필요/상극\n"
+                + "{\"summary\":\"\",\"overall\":\"\",\"loveCompat\":\"\",\"workCompat\":\"\",\"conflictPoint\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
+
+        String userPrompt = buildCompatPrompt(r1, r2, score, elementRelation, branchRelation, label1, label2);
+        return new String[]{systemPrompt, userPrompt};
+    }
+
+    /**
+     * 빠른 궁합 점수 계산 (AI 없이, 사주 계산만)
+     */
+    public Map<String, Object> quickScore(LocalDate bd1, String bt1, LocalDate bd2) {
+        SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
+        SajuResult r2 = SajuCalculator.calculate(bd2, null);
+
+        int el1 = SajuConstants.CHEONGAN_OHENG[getDayMasterIndex(r1.getDayMaster())];
+        int el2 = SajuConstants.CHEONGAN_OHENG[getDayMasterIndex(r2.getDayMaster())];
+
+        int score = 60;
+        if (el1 == el2) score += 15;
+        else if (SajuConstants.OHENG_PRODUCES[el1] == el2) score += 25;
+        else if (SajuConstants.OHENG_PRODUCES[el2] == el1) score += 20;
+        else if (SajuConstants.OHENG_OVERCOMES[el1] == el2) score -= 5;
+        else if (SajuConstants.OHENG_OVERCOMES[el2] == el1) score -= 10;
+
+        int branch1 = SajuCalculator.calculateDayPillar(bd1).getBranchIndex();
+        int branch2 = SajuCalculator.calculateDayPillar(bd2).getBranchIndex();
+        for (int[] yuk : SajuConstants.YUKAP) {
+            if ((branch1 == yuk[0] && branch2 == yuk[1]) || (branch1 == yuk[1] && branch2 == yuk[0])) {
+                score += 15; break;
+            }
+        }
+        if (Math.floorMod(branch1 - branch2, 12) == 6) score -= 15;
+
+        boolean yang1 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r1.getDayMaster())] == 0;
+        boolean yang2 = SajuConstants.CHEONGAN_YINYANG[getDayMasterIndex(r2.getDayMaster())] == 0;
+        if (yang1 != yang2) score += 10;
+
+        score = Math.max(20, Math.min(98, score));
+
+        String grade;
+        if (score >= 85) grade = "천생연분";
+        else if (score >= 70) grade = "좋은 인연";
+        else if (score >= 55) grade = "보통 인연";
+        else if (score >= 40) grade = "노력 필요";
+        else grade = "어려운 인연";
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("score", score);
+        result.put("grade", grade);
+        return result;
     }
 
     private int getDayMasterIndex(String dayMaster) {

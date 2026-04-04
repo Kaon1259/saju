@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
-import { getFortuneByZodiac, getFortuneByUser } from '../api/fortune';
+import FortuneLoading from '../components/FortuneLoading';
+import { getFortuneByZodiacStream, getFortuneByUserStream } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
+import StreamText from '../components/StreamText';
 import './Fortune.css';
 
 const ZODIAC_EMOJI = {
@@ -27,36 +29,91 @@ function Fortune() {
 
   const [fortune, setFortune] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [streamText, setStreamText] = useState('');
+  const [aiStreaming, setAiStreaming] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const cleanupRef = useRef(null);
 
   useEffect(() => {
-    const fetchFortune = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        let data;
-        if (zodiacParam) {
-          data = await getFortuneByZodiac(zodiacParam);
-        } else {
-          const userId = localStorage.getItem('userId');
-          if (userId) {
-            data = await getFortuneByUser(userId);
-          } else {
-            navigate('/');
-            return;
-          }
-        }
+    return () => cleanupRef.current?.();
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setFortune(null);
+    setStreamText('');
+    setAiStreaming(false);
+
+    const userId = !zodiacParam ? localStorage.getItem('userId') : null;
+
+    if (!zodiacParam && !userId) {
+      navigate('/');
+      return;
+    }
+
+    const handlers = {
+      onCached: (data) => {
         setFortune(data);
-      } catch (err) {
-        console.error('Failed to fetch fortune:', err);
-        setError('운세 정보를 불러오는데 실패했습니다.');
-      } finally {
         setLoading(false);
-      }
+      },
+      onChunk: (text) => {
+        setLoading(false);
+        setAiStreaming(true);
+        setStreamText(prev => prev + text);
+      },
+      onDone: (fullText) => {
+        setAiStreaming(false);
+        setStreamText('');
+        // 스트리밍 완료 후 서버에서 캐시 저장됨 → 재조회로 최신 데이터 가져오기
+        // 스트리밍 텍스트가 JSON이면 파싱, 아니면 텍스트로 표시
+        try {
+          let json = fullText;
+          if (json.includes('```')) {
+            const s = json.indexOf('\n', json.indexOf('```'));
+            const e = json.lastIndexOf('```');
+            if (s > 0 && e > s) json = json.substring(s + 1, e);
+          }
+          const bs = json.indexOf('{');
+          const be = json.lastIndexOf('}');
+          if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
+          const parsed = JSON.parse(json);
+          setFortune(prev => ({
+            ...(prev || {}),
+            zodiacAnimal: zodiacParam || prev?.zodiacAnimal || '',
+            overall: parsed.overall || prev?.overall || '',
+            love: parsed.love || prev?.love || '',
+            money: parsed.money || prev?.money || '',
+            health: parsed.health || prev?.health || '',
+            work: parsed.work || prev?.work || '',
+            score: parsed.score || prev?.score || 75,
+            luckyNumber: parsed.luckyNumber || prev?.luckyNumber || null,
+            luckyColor: parsed.luckyColor || prev?.luckyColor || '',
+          }));
+        } catch {
+          setFortune(prev => prev || {
+            zodiacAnimal: zodiacParam || '',
+            overall: fullText,
+            love: '', money: '', health: '', work: '',
+            score: 75, luckyNumber: null, luckyColor: '',
+          });
+        }
+        setLoading(false);
+      },
+      onError: () => {
+        setAiStreaming(false);
+        setStreamText('');
+        setError('운세 정보를 불러오는데 실패했습니다.');
+        setLoading(false);
+      },
     };
 
-    fetchFortune();
+    if (zodiacParam) {
+      cleanupRef.current = getFortuneByZodiacStream(zodiacParam, handlers);
+    } else {
+      cleanupRef.current = getFortuneByUserStream(userId, handlers);
+    }
   }, [zodiacParam, navigate]);
 
   const handleShare = async () => {
@@ -101,27 +158,20 @@ function Fortune() {
     }
   };
 
-  if (loading) {
-    const emoji = zodiacParam ? (ZODIAC_EMOJI[zodiacParam] || '🔮') : '🔮';
+  if (loading && !aiStreaming) {
     return (
       <div className="fortune-page">
-        <div className="fortune-loading">
-          <div className="fortune-animal-scene">
-            <div className="fortune-animal-circle">
-              <span className="fortune-animal-emoji">{emoji}</span>
-            </div>
-            <div className="fortune-animal-ring" />
-            <div className="fortune-animal-ring fortune-animal-ring--2" />
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="fortune-animal-particle" style={{
-                '--angle': `${i * 45}deg`,
-                animationDelay: `${i * 0.15}s`,
-              }} />
-            ))}
-          </div>
-          <p className="fortune-loading-text">
-            {zodiacParam ? `AI가 ${zodiacParam}띠의 운세를 분석하고 있어요` : 'AI가 운세를 분석하고 있어요'}
-          </p>
+        <FortuneLoading type="fortune" />
+      </div>
+    );
+  }
+
+  // 스트리밍 중: 텍스트 실시간 표시
+  if (aiStreaming) {
+    return (
+      <div className="fortune-page">
+        <div className="fortune-stream-wrap">
+          <StreamText text={streamText} icon="🌟" label="AI가 운세를 분석하고 있어요..." color="#FBBF24" />
         </div>
       </div>
     );
