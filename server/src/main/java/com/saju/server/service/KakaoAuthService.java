@@ -51,10 +51,16 @@ public class KakaoAuthService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
+        log.info("카카오 토큰 요청 - client_id: {}..., redirect_uri: {}, client_secret 존재: {}",
+                restApiKey.substring(0, Math.min(8, restApiKey.length())), redirectUri, !clientSecret.isBlank());
+
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
             JsonNode json = objectMapper.readTree(response.getBody());
             return json.get("access_token").asText();
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            log.error("카카오 토큰 요청 실패 - status: {}, body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("카카오 토큰 요청에 실패했습니다: " + e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("카카오 토큰 요청 실패: {}", e.getMessage());
             throw new RuntimeException("카카오 토큰 요청에 실패했습니다.");
