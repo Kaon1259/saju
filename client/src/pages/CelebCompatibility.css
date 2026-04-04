@@ -1,0 +1,173 @@
+.celeb-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 100px; display: flex; flex-direction: column; gap: 12px; }
+.celeb-back-btn { align-self: flex-start; padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.celeb-back-btn:hover { color: #F472B6; border-color: rgba(244,114,182,0.3); }
+[data-theme="light"] .celeb-back-btn { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.5); }
+
+/* ─── Hero ─── */
+.celeb-hero { text-align: center; padding: 16px 0 8px; }
+.celeb-hero-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+.celeb-hero-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #FBBF24, #F472B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+.celeb-hero-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin: 4px 0 0; }
+
+/* ─── Search ─── */
+.celeb-search-wrap { position: relative; }
+.celeb-search { width: 100%; padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: var(--color-text); font-size: 14px; outline: none; box-sizing: border-box; }
+.celeb-search:focus { border-color: rgba(244,114,182,0.5); box-shadow: 0 0 0 3px rgba(244,114,182,0.1); }
+.celeb-search::placeholder { color: rgba(255,255,255,0.3); }
+
+/* ─── Categories ─── */
+.celeb-categories { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+.celeb-cat-btn { padding: 6px 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.celeb-cat-btn.active { background: rgba(244,114,182,0.15); border-color: rgba(244,114,182,0.4); color: #F472B6; }
+
+/* ─── List ─── */
+.celeb-list { display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto; }
+.celeb-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.2s; }
+.celeb-item:hover { background: rgba(244,114,182,0.06); border-color: rgba(244,114,182,0.25); transform: translateX(4px); }
+.celeb-item-sym {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 12px;
+  font-size: 22px; font-weight: 900; flex-shrink: 0;
+}
+.celeb-sym--m { background: rgba(96,165,250,0.15); color: #60A5FA; }
+.celeb-sym--f { background: rgba(244,114,182,0.15); color: #F472B6; }
+.celeb-sym--lg { width: 48px; height: 48px; font-size: 28px; border-radius: 14px; }
+.celeb-item-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.celeb-item-name { font-size: 15px; font-weight: 800; color: var(--color-text); }
+.celeb-item-detail { font-size: 12px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.celeb-tag { display: inline-block; padding: 1px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+.celeb-tag--group { background: rgba(155,89,182,0.15); color: #C084FC; border: 1px solid rgba(155,89,182,0.25); }
+.celeb-tag--agency { background: rgba(251,191,36,0.1); color: #FBBF24; border: 1px solid rgba(251,191,36,0.2); }
+[data-theme="light"] .celeb-tag--group { background: rgba(124,58,237,0.08); color: #7c3aed; border-color: rgba(124,58,237,0.2); }
+[data-theme="light"] .celeb-tag--agency { background: rgba(180,83,9,0.08); color: #b45309; border-color: rgba(180,83,9,0.15); }
+.celeb-item-arrow { font-size: 18px; color: rgba(255,255,255,0.3); }
+.celeb-empty { text-align: center; padding: 20px; color: rgba(255,255,255,0.5); }
+
+/* ─── Group Section ─── */
+.celeb-group-section { display: flex; flex-direction: column; gap: 6px; }
+.celeb-group-section-title { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.5); margin: 4px 0 0; padding-left: 4px; }
+.celeb-item--group { border-color: rgba(192,132,252,0.15); background: rgba(192,132,252,0.04); }
+.celeb-item--group:hover { background: rgba(192,132,252,0.08); border-color: rgba(192,132,252,0.3); }
+[data-theme="light"] .celeb-group-section-title { color: rgba(0,0,0,0.45); }
+[data-theme="light"] .celeb-item--group { border-color: rgba(124,58,237,0.12); background: rgba(124,58,237,0.03); }
+
+/* ─── Star Fortune ─── */
+.celeb-star-fortune { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.celeb-star-fortune-btn { padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); color: #FBBF24; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+.celeb-star-fortune-btn:hover { background: rgba(251,191,36,0.15); }
+.celeb-star-fortune-btn:disabled { opacity: 0.6; cursor: default; }
+.celeb-star-fortune-result { display: flex; flex-direction: column; gap: 10px; }
+.celeb-sf-item { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+.celeb-sf-item .celeb-sf-label { font-size: 13px; font-weight: 800; color: #FBBF24; display: block; margin-bottom: 4px; }
+.celeb-sf-item p { font-size: 13px; color: var(--color-text); margin: 0; line-height: 1.6; opacity: 0.85; }
+.celeb-sf-lucky { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin: 0; }
+[data-theme="light"] .celeb-sf-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .celeb-sf-lucky { color: rgba(0,0,0,0.45); }
+.celeb-manual-btn { margin-top: 10px; padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); color: #F472B6; font-size: 14px; font-weight: 700; cursor: pointer; }
+.celeb-manual-toggle { text-align: center; padding: 10px; color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer; background: none; border: none; }
+.celeb-manual-toggle:hover { color: #F472B6; }
+
+/* ─── Manual Input ─── */
+.celeb-manual { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.celeb-manual-title { font-size: 16px; font-weight: 800; color: var(--color-text); margin: 0; text-align: center; }
+.celeb-manual-name-row { display: flex; gap: 8px; }
+.celeb-manual-name-row .form-input { flex: 1; }
+.celeb-confirm-btn { padding: 10px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, #9B59B6, #E91E63); color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.celeb-confirm-btn:disabled { opacity: 0.5; }
+.celeb-confirm-btn:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(155,89,182,0.3); }
+
+/* ─── AI 검색 팝업 ─── */
+.celeb-ai-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.3s; }
+.celeb-ai-popup { max-width: 360px; width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; animation: focusCardIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.celeb-ai-popup-title { font-size: 18px; font-weight: 900; color: var(--color-text); margin: 0; text-align: center; }
+.celeb-ai-info { display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+.celeb-ai-detail { display: flex; flex-direction: column; gap: 3px; }
+.celeb-ai-name { font-size: 18px; font-weight: 900; color: var(--color-text); }
+.celeb-ai-sub { font-size: 12px; color: rgba(255,255,255,0.6); }
+.celeb-ai-notice { font-size: 13px; color: rgba(255,255,255,0.5); text-align: center; margin: 0; }
+.celeb-ai-btns { display: flex; gap: 10px; }
+.celeb-ai-btn { flex: 1; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; border: none; }
+.celeb-ai-btn--confirm { background: linear-gradient(135deg, #9B59B6, #E91E63); color: #fff; }
+.celeb-ai-btn--confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(155,89,182,0.3); }
+.celeb-ai-btn--reject { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+.celeb-ai-btn--reject:hover { border-color: rgba(255,255,255,0.3); color: var(--color-text); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes focusCardIn { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+[data-theme="light"] .celeb-ai-info { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .celeb-ai-name { color: #1e293b; }
+[data-theme="light"] .celeb-ai-sub { color: #64748b; }
+[data-theme="light"] .celeb-ai-notice { color: #94a3b8; }
+[data-theme="light"] .celeb-ai-btn--reject { background: #f8f9fa; border-color: rgba(0,0,0,0.12); color: #666; }
+
+/* ─── Selected Celebrity ─── */
+.celeb-selected { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.celeb-selected-emoji { font-size: 36px; }
+.celeb-selected-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.celeb-selected-name { font-size: 18px; font-weight: 900; color: var(--color-text); }
+.celeb-selected-detail { font-size: 12px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.celeb-change-btn { padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 700; cursor: pointer; }
+
+/* ─── Form ─── */
+.celeb-form { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.celeb-form-title { font-size: 16px; font-weight: 800; color: var(--color-text); margin: 0; text-align: center; }
+
+/* ─── Loading ─── */
+.celeb-loading { text-align: center; padding: 60px 20px; }
+.celeb-loading-stars { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+.celeb-loading-star { font-size: 28px; animation: celebStarBounce 1.2s ease-in-out infinite; }
+@keyframes celebStarBounce { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-12px) scale(1.2); } }
+.celeb-loading-text { font-size: 15px; font-weight: 700; color: var(--color-text); }
+.celeb-loading-hint { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+
+/* ─── Result ─── */
+.celeb-result-hero { text-align: center; padding: 16px 0; }
+.celeb-result-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, #FBBF24, #F472B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+.celeb-result-group { font-size: 13px; color: rgba(255,255,255,0.5); margin: 4px 0 0; }
+
+.celeb-score-wrap { position: relative; width: 120px; height: 120px; margin: 16px auto; }
+.celeb-score-ring { width: 100%; height: 100%; }
+.celeb-score-progress { transition: stroke-dasharray 1.5s ease; }
+.celeb-score-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.celeb-score-num { font-size: 36px; font-weight: 900; color: var(--color-text); line-height: 1; }
+.celeb-score-unit { font-size: 12px; color: rgba(255,255,255,0.5); }
+.celeb-grade { font-size: 18px; font-weight: 800; display: block; margin: 8px 0; }
+
+.celeb-result-actions { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
+.celeb-share-btn { padding: 8px 18px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); color: #F472B6; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.celeb-share-btn:hover { background: rgba(244,114,182,0.15); }
+.celeb-share-msg { font-size: 12px; color: #4ade80; margin-top: 6px; animation: fadeIn 0.3s; }
+
+/* ─── Result Cards ─── */
+.celeb-result-cards { display: flex; flex-direction: column; gap: 10px; }
+.celeb-card { padding: 16px; }
+.celeb-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.celeb-card-header span { font-size: 18px; }
+.celeb-card-header h3 { font-size: 15px; font-weight: 800; color: var(--color-accent-gold); margin: 0; }
+.celeb-card-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); margin: 0; }
+.celeb-card--summary { text-align: center; border: 1.5px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
+.celeb-summary-text { font-size: 16px; font-weight: 800; color: #F472B6; margin: 0; line-height: 1.6; }
+.celeb-card--ai { border-left: 3px solid rgba(147,51,234,0.5); }
+.celeb-card--ai h3 { color: #A78BFA; }
+
+.celeb-reset-btn { width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.celeb-reset-btn:hover { border-color: var(--color-primary-light); color: var(--color-text); }
+
+/* ─── Light Theme ─── */
+[data-theme="light"] .celeb-hero-desc { color: #64748b; }
+[data-theme="light"] .celeb-search { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.12); color: #1e293b; }
+[data-theme="light"] .celeb-search::placeholder { color: #94a3b8; }
+[data-theme="light"] .celeb-cat-btn { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #94a3b8; }
+[data-theme="light"] .celeb-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .celeb-item-name { color: #1e293b; }
+[data-theme="light"] .celeb-item-detail { color: #64748b; }
+[data-theme="light"] .celeb-selected-name { color: #1e293b; }
+[data-theme="light"] .celeb-selected-detail { color: #64748b; }
+[data-theme="light"] .celeb-card-text { color: #475569; }
+[data-theme="light"] .celeb-card-header h3 { color: #b45309; }
+[data-theme="light"] .celeb-card--ai h3 { color: #6d28d9; }
+[data-theme="light"] .celeb-score-num { color: #1e293b; }
+[data-theme="light"] .celeb-summary-text { color: #db2777; }
+[data-theme="light"] .celeb-hero-title { background: linear-gradient(135deg, #b45309, #c2185b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .celeb-result-title { background: linear-gradient(135deg, #b45309, #c2185b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }

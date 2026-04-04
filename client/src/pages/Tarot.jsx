@@ -3,6 +3,7 @@ import { getTarotReading, drawTarotCards } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import TarotCardArt from '../components/TarotCardArt';
+import { playTarotReveal, playCardShuffle } from '../utils/sounds';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
@@ -51,7 +52,7 @@ const TAROT_LOVE_TYPES = [
   { id: 'mind_reading',       label: '속마음 타로', icon: '🔍', group: 'love' },
   { id: 'couple_fortune',     label: '커플 운세',   icon: 'couple', group: 'love' },
   // 결혼/인연
-  { id: 'marriage',           label: '결혼운',     icon: '💒', group: 'marriage' },
+  { id: 'marriage',           label: '결혼운',     icon: 'wedding', group: 'marriage' },
   { id: 'remarriage',         label: '재혼운',     icon: '💍', group: 'marriage' },
   { id: 'reunion',            label: '재회운',     icon: '💔', group: 'marriage' },
   { id: 'past_life',          label: '전생 인연',   icon: '🌌', group: 'marriage' },
@@ -126,10 +127,12 @@ function Tarot() {
   const [showDeckModal, setShowDeckModal] = useState(false);
   const resultRef = useRef(null);
 
+
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
 
   // ─── 카드 셔플 ───
   const startShuffle = useCallback(() => {
+    playCardShuffle();
     setStep('shuffle');
     setShuffleAnim(true);
     setSelectedIndices([]);
@@ -335,6 +338,8 @@ function Tarot() {
                         onClick={() => setCategory(lt.id)}>
                         <span className="tarot-love-icon">{lt.icon === 'couple'
                           ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span>
+                          : lt.icon === 'wedding'
+                          ? <span className="wedding-icon"><span className="wedding-person"><span className="wedding-hat">🎩</span><span className="wedding-sym wedding-sym--m">♂</span></span><span className="wedding-person"><span className="wedding-hat">🎀</span><span className="wedding-sym wedding-sym--f">♀</span></span></span>
                           : lt.icon}</span>
                         <span className="tarot-love-label">{lt.label}</span>
                       </button>
@@ -521,7 +526,7 @@ function Tarot() {
                   <circle cx="40" cy="40" r="30" fill="url(#loadCrystal)" />
                 </svg>
               </div>
-              <p className="tarot-loading-text">카드의 메시지를 해석하고 있습니다<span className="tarot-dots" /></p>
+              <p className="tarot-loading-text">AI가 카드의 메시지를 해석하고 있어요<span className="tarot-dots" /></p>
             </div>
           )}
 

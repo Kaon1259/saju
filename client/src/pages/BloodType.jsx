@@ -4,6 +4,7 @@ import { getBloodTypeFortune, getBloodTypeCompatibility, getUser } from '../api/
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
+
 import './BloodType.css';
 
 const TYPES = [
@@ -109,7 +110,7 @@ function BloodType() {
           )}
 
           {loading && (
-            <div className="bt-loading"><div className="bt-spinner" /><p>운세를 분석중...</p></div>
+            <div className="bt-loading"><div className="bt-spinner" /><p>AI가 운세를 분석하고 있어요</p></div>
           )}
 
           {fortune && !loading && (
@@ -228,7 +229,7 @@ function BloodType() {
             })}
           </div>
           <button className="bt-compat-submit" onClick={handleCompat} disabled={!type1 || !type2 || compatLoading}>
-            {compatLoading ? '분석중...' : '💕 궁합 보기'}
+            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'}
           </button>
           {compat && !compatLoading && (
             <div className="bt-compat-result fade-in glass-card">

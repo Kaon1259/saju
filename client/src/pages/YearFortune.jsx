@@ -193,7 +193,7 @@ function YearFortune() {
               <span key={i} className="yf-loading-burst" style={{ animationDelay: `${i * 0.4}s` }}>&#127878;</span>
             ))}
           </div>
-          <p className="yf-loading-text">2026년 운세를 분석하고 있습니다<span className="yf-dots" /></p>
+          <p className="yf-loading-text">AI가 2026년 운세를 분석하고 있어요<span className="yf-dots" /></p>
         </div>
       )}
 

@@ -171,7 +171,7 @@ function WeeklyFortune() {
               <span key={i} className="wf-loading-day" style={{ animationDelay: `${i * 0.15}s` }}>{d}</span>
             ))}
           </div>
-          <p className="wf-loading-text">이번 주 운세를 분석하고 있습니다<span className="wf-dots" /></p>
+          <p className="wf-loading-text">AI가 이번 주 운세를 분석하고 있어요<span className="wf-dots" /></p>
         </div>
       )}
 

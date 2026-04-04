@@ -71,6 +71,7 @@ function SpecialFortune() {
   const [meetDate, setMeetDate] = useState('');
   const [breakupDate, setBreakupDate] = useState('');
   const [showPartner, setShowPartner] = useState(false);
+  const [showStarPicker, setShowStarPicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
@@ -213,6 +214,39 @@ function SpecialFortune() {
               {showPartner && (
                 <div className="sf-partner-section fade-in">
                   <h3 className="sf-form-section-title">상대방 정보 <span className="sf-optional">(더 정밀한 분석)</span></h3>
+                  {(() => {
+                    const prof = (() => { try { return JSON.parse(localStorage.getItem('userProfile')||'{}'); } catch { return {}; } })();
+                    const stars = (() => { try { return JSON.parse(localStorage.getItem('myStarList')||'[]'); } catch { return []; } })();
+                    return (prof.partnerBirthDate || stars.length > 0) ? (
+                      <div className="compat-autofill-row">
+                        {prof.partnerBirthDate && (
+                          <button className="sf-autofill-btn" onClick={() => { setPartnerDate(prof.partnerBirthDate); if (prof.gender === 'M') setPartnerGender('F'); else setPartnerGender('M'); }}>💕 연인 정보로 채우기</button>
+                        )}
+                        {stars.length > 0 && (
+                          <button className="sf-autofill-btn" onClick={() => setShowStarPicker(true)}>⭐ 스타 정보로 채우기</button>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
+                  {showStarPicker && (
+                    <div className="star-picker-overlay" onClick={() => setShowStarPicker(false)}>
+                      <div className="star-picker-popup" onClick={e => e.stopPropagation()}>
+                        <div className="star-picker-header">
+                          <h3 className="star-picker-title">⭐ 나의 스타 선택</h3>
+                          <button className="star-picker-close" onClick={() => setShowStarPicker(false)}>✕</button>
+                        </div>
+                        <div className="star-picker-list">
+                          {(() => { try { return JSON.parse(localStorage.getItem('myStarList')||'[]'); } catch { return []; } })().map((s, i) => (
+                            <button key={i} className="star-picker-item" onClick={() => { setPartnerDate(s.birth); if (s.gender) setPartnerGender(s.gender); setShowStarPicker(false); }}>
+                              <span className={`star-picker-sym ${s.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>{s.gender === 'M' ? '♂' : '♀'}</span>
+                              <div className="star-picker-info"><span className="star-picker-name">{s.name}</span>{s.group && <span className="star-picker-group">{s.group}</span>}</div>
+                              <span className="star-picker-birth">{s.birth?.slice(0, 4)}년생</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="sf-form-group">
                     <label className="sf-label">상대방 생년월일</label>
                     <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />

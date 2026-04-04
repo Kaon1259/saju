@@ -4,6 +4,7 @@ import { getMbtiTypes, getMbtiFortune, getMbtiCompatibility, getUser } from '../
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
+
 import './Mbti.css';
 
 const TYPES_DATA = {
@@ -131,7 +132,7 @@ function Mbti() {
           )}
 
           {loading && (
-            <div className="mbti-loading"><div className="mbti-spinner" /><p>운세를 분석중...</p></div>
+            <div className="mbti-loading"><div className="mbti-spinner" /><p>AI가 운세를 분석하고 있어요</p></div>
           )}
 
           {fortune && !loading && (
@@ -244,7 +245,7 @@ function Mbti() {
             );
           })}
           <button className="mbti-compat-submit" onClick={handleCompat} disabled={!type1 || !type2 || compatLoading}>
-            {compatLoading ? '분석중...' : '💕 궁합 보기'}
+            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'}
           </button>
           {compat && !compatLoading && (
             <div className="mbti-compat-result fade-in glass-card">

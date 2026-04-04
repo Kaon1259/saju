@@ -49,6 +49,7 @@ function getZodiacFromYear(year) {
 
 function Profile() {
   const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dailyFortunes, setDailyFortunes] = useState(null);
@@ -150,20 +151,52 @@ function Profile() {
         </div>
       </section>
 
-      {/* 이번 주 일운 */}
+      {/* 나의 연인 */}
+      {user.partnerBirthDate && (
+        <section className="pf-partner glass-card">
+          <h3 className="profile-section-title">💕 나의 연인</h3>
+          <div className="pf-partner-info">
+            <div className="pf-partner-row">
+              <span className="pf-partner-label">생년월일</span>
+              <span className="pf-partner-value">{formatDate(user.partnerBirthDate)}</span>
+            </div>
+            {(() => {
+              const pYear = parseInt(user.partnerBirthDate.split('-')[0]);
+              const pZodiac = getZodiacFromYear(pYear);
+              const pConst = getConstellation(user.partnerBirthDate);
+              return (
+                <div className="pf-partner-tags">
+                  {pZodiac && <span className="pf-badge pf-badge--zodiac">{pZodiac.name}띠</span>}
+                  {pConst && <span className="pf-badge pf-badge--const" style={{ borderColor: pConst.color, color: pConst.color }}>{pConst.icon} {pConst.name}</span>}
+                </div>
+              );
+            })()}
+          </div>
+          <button className="pf-partner-compat-btn" onClick={() => navigate('/compatibility')}>
+            💑 궁합 분석하러 가기
+          </button>
+        </section>
+      )}
+
+      {/* 이번 달 일운 */}
       {dailyFortunes && (
         <section className="profile-daily glass-card">
-          <h3 className="profile-section-title">📆 이번 주 일운</h3>
+          <h3 className="profile-section-title">📆 {new Date().getMonth() + 1}월 일운</h3>
           <div className="profile-daily-list">
-            {dailyFortunes.map((day) => (
+            {dailyFortunes.map((day) => {
+              const score = day.rating === '대길' ? 95 : day.rating === '길' ? 78 : day.rating === '보통' ? 55 : day.rating === '소길' ? 42 : 30;
+              const scoreColor = score >= 80 ? '#ff3d7f' : score >= 60 ? '#fbbf24' : score >= 45 ? '#94a3b8' : '#64748b';
+              return (
               <div key={day.date} className={`profile-daily-item ${day.isToday ? 'profile-daily--today' : ''}`}>
                 <span className="profile-daily-date">{new Date(day.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short' })}</span>
                 <span className="profile-daily-pillar">{day.dayPillar}</span>
                 <span className="profile-daily-sipsung">{day.sipsung}</span>
+                <span className="profile-daily-score" style={{ color: scoreColor }}>{score}점</span>
                 <span className={`profile-daily-rating ${day.rating === '대길' ? 'rate-best' : day.rating === '길' ? 'rate-good' : day.rating === '보통' ? 'rate-normal' : 'rate-bad'}`}>{day.rating}</span>
                 {day.isToday && <span className="profile-daily-now">오늘</span>}
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

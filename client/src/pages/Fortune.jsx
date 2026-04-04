@@ -120,7 +120,7 @@ function Fortune() {
             ))}
           </div>
           <p className="fortune-loading-text">
-            {zodiacParam ? `${zodiacParam}띠의 운세를 살피고 있습니다...` : '운세를 확인하고 있습니다...'}
+            {zodiacParam ? `AI가 ${zodiacParam}띠의 운세를 분석하고 있어요` : 'AI가 운세를 분석하고 있어요'}
           </p>
         </div>
       </div>

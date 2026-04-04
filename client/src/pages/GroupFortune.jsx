@@ -1,0 +1,338 @@
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getGuestFortune, getSajuCompatibility } from '../api/fortune';
+import GROUPS, { GROUP_TYPES } from '../data/groups';
+import CELEBRITIES from '../data/celebrities';
+import BirthDatePicker from '../components/BirthDatePicker';
+import FortuneCard from '../components/FortuneCard';
+import SpeechButton from '../components/SpeechButton';
+import { shareResult } from '../utils/share';
+import './GroupFortune.css';
+
+const CATEGORY_CONFIG = [
+  { key: 'overall', icon: '🌟', title: '총운', field: 'overall' },
+  { key: 'love', icon: '💕', title: '애정운', field: 'love' },
+  { key: 'money', icon: '💰', title: '재물운', field: 'money' },
+  { key: 'health', icon: '💪', title: '건강운', field: 'health' },
+  { key: 'work', icon: '💼', title: '활동운', field: 'work' },
+];
+
+function GroupFortune() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mode, setMode] = useState('list'); // list, fortune, compat, memberCompat
+  const [activeType, setActiveType] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState(null);
+
+  // 다른 페이지에서 그룹을 선택해서 넘어온 경우 바로 상세 화면으로
+  useEffect(() => {
+    if (location.state?.selectedGroup) {
+      setSelectedGroup(location.state.selectedGroup);
+      setMode('fortune');
+      // state 소비 후 제거 (뒤로가기 시 중복 방지)
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []);
+
+  // 운세
+  const [fortuneLoading, setFortuneLoading] = useState(false);
+  const [fortuneResult, setFortuneResult] = useState(null);
+
+  // 궁합
+  const [myBirth, setMyBirth] = useState('');
+  const [myGender, setMyGender] = useState('');
+  const [myCalType, setMyCalType] = useState('SOLAR');
+  const [compatLoading, setCompatLoading] = useState(false);
+  const [compatResult, setCompatResult] = useState(null);
+
+  // 멤버 선택
+  const [selectedMember, setSelectedMember] = useState(null);
+
+  const [shareMsg, setShareMsg] = useState('');
+  const [fortuneOpen, setFortuneOpen] = useState(true);
+  const [compatOpen, setCompatOpen] = useState(true);
+  const memberRef = useRef(null);
+  const resultRef = useRef(null);
+
+  const filtered = useMemo(() => {
+    let list = GROUPS;
+    if (activeType !== 'all') list = list.filter(g => g.type === activeType);
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(g => g.name.toLowerCase().includes(q));
+    }
+    return list;
+  }, [activeType, searchQuery]);
+
+  const handleSelectGroup = (group) => {
+    setSelectedGroup(group);
+    setSelectedMember(null); // 기본: 그룹 자체 선택
+    setMode('fortune');
+    setFortuneResult(null);
+    setCompatResult(null);
+  };
+
+  // 현재 궁합 대상 이름과 생년월일
+  const compatTargetName = selectedMember ? selectedMember.name : selectedGroup?.name;
+  const compatTargetBirth = selectedMember ? selectedMember.birth : selectedGroup?.debut;
+
+  // 그룹 오늘의 운세
+  const handleGroupFortune = async () => {
+    if (!selectedGroup) return;
+    setFortuneLoading(true);
+    try {
+      const data = await getGuestFortune(selectedGroup.debut, undefined, 'SOLAR', undefined);
+      setFortuneResult(data);
+    } catch (e) { console.error(e); }
+    finally { setFortuneLoading(false); }
+  };
+
+  // 멤버/그룹 선택
+  const handleSelectTarget = (memberName) => {
+    if (memberName === null) {
+      // 그룹 자체 선택
+      setSelectedMember(null);
+    } else {
+      const celeb = CELEBRITIES.find(c => c.name === memberName);
+      if (!celeb) return;
+      setSelectedMember(celeb);
+    }
+    setCompatResult(null);
+    setCompatOpen(true);
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+  };
+
+  // 궁합 분석 (그룹이든 멤버든 통합)
+  const handleCompat = async () => {
+    if (!myBirth || !compatTargetBirth) return;
+    setCompatLoading(true);
+    try {
+      const data = await getSajuCompatibility(myBirth, compatTargetBirth, undefined, undefined, myCalType, 'SOLAR');
+      data._groupName = selectedGroup.name;
+      data._celebName = compatTargetName;
+      setCompatResult(data);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    } catch (e) { console.error(e); }
+    finally { setCompatLoading(false); }
+  };
+
+  const handleAutoFill = () => {
+    try {
+      const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (p.birthDate) setMyBirth(p.birthDate);
+      if (p.gender) setMyGender(p.gender);
+      if (p.calendarType) setMyCalType(p.calendarType);
+    } catch {}
+  };
+
+  const handleShare = async (text) => {
+    const res = await shareResult({ title: '그룹 운세', text });
+    if (res === 'copied') { setShareMsg('클립보드에 복사됨!'); setTimeout(() => setShareMsg(''), 2000); }
+  };
+
+  // ─── 그룹 리스트 ───
+  if (mode === 'list') {
+    return (
+      <div className="gf-page">
+        <button className="gf-nav-back" onClick={() => navigate('/')}>← 홈으로</button>
+        <section className="gf-hero">
+          <div className="gf-hero-icons">
+            <span className="gf-hero-icon-item">♂</span>
+            <span className="gf-hero-icon-item gf-hero-icon--center">💕</span>
+            <span className="gf-hero-icon-item">♀</span>
+          </div>
+          <h1 className="gf-hero-title">보이그룹, 걸그룹과 나의 궁합</h1>
+          <p className="gf-hero-desc">좋아하는 그룹과 사주 궁합을 확인해보세요</p>
+        </section>
+
+        <input className="gf-search" type="text" placeholder="그룹 이름 검색..."
+          value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+
+        <div className="gf-types">
+          {GROUP_TYPES.map(t => (
+            <button key={t.key} className={`gf-type-btn ${activeType === t.key ? 'active' : ''}`}
+              onClick={() => setActiveType(t.key)}>{t.label}</button>
+          ))}
+        </div>
+
+        <div className="gf-list">
+          {filtered.map((group, i) => (
+            <button key={i} className="gf-item" onClick={() => handleSelectGroup(group)}>
+              <span className={`gf-item-badge ${group.type === 'boy' ? 'gf-badge--boy' : 'gf-badge--girl'}`}>
+                {group.type === 'boy' ? '♂' : '♀'}
+              </span>
+              <div className="gf-item-info">
+                <span className="gf-item-name">{group.name}</span>
+                <span className="gf-item-detail">
+                  <span className="celeb-tag celeb-tag--agency">{group.agency}</span>
+                  {group.members.length}명 · {group.debut.slice(0, 4)}년 데뷔
+                </span>
+              </div>
+              <span className="gf-item-arrow">›</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── 그룹 상세 (운세 + 궁합 + 멤버) ───
+  return (
+    <div className="gf-page">
+      {/* 그룹 헤더 */}
+      <section className="gf-group-header glass-card">
+        <span className={`gf-item-badge gf-badge--lg ${selectedGroup.type === 'boy' ? 'gf-badge--boy' : 'gf-badge--girl'}`}>
+          {selectedGroup.type === 'boy' ? '♂' : '♀'}
+        </span>
+        <div className="gf-group-info">
+          <h2 className="gf-group-name">{selectedGroup.name}</h2>
+          <span className="gf-group-detail">
+            <span className="celeb-tag celeb-tag--agency">{selectedGroup.agency}</span>
+            데뷔: {selectedGroup.debut}
+          </span>
+        </div>
+        <button className="gf-back-btn" onClick={() => { setMode('list'); setSelectedGroup(null); }}>목록</button>
+      </section>
+
+      {/* 궁합 대상 선택 (그룹 + 멤버) */}
+      <section className="gf-members">
+        <h3 className="gf-section-title">궁합 대상 선택</h3>
+        <div className="gf-member-chips">
+          {/* 그룹 자체 */}
+          <button className={`gf-member-chip gf-chip--group ${!selectedMember ? 'active' : ''}`}
+            onClick={() => handleSelectTarget(null)}>
+            <span className="gf-chip-sym" style={{ color: '#C084FC' }}>★</span>
+            {selectedGroup.name}
+          </button>
+          {/* 멤버들 */}
+          {selectedGroup.members.map((m, i) => {
+            const inDB = CELEBRITIES.find(c => c.name === m);
+            return (
+              <button key={i} className={`gf-member-chip ${selectedMember?.name === m ? 'active' : ''} ${inDB ? '' : 'gf-chip--dim'}`}
+                onClick={() => inDB && handleSelectTarget(m)}>
+                <span className={`gf-chip-sym ${selectedGroup.type === 'boy' ? 'gf-chip--m' : 'gf-chip--f'}`}>
+                  {selectedGroup.type === 'boy' ? '♂' : '♀'}
+                </span>
+                {m}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 그룹 오늘의 운세 */}
+      <section className="gf-fortune-section glass-card">
+        <div className="gf-section-header">
+          <h3 className="gf-section-title">🌟 {selectedGroup.name} 오늘의 운세</h3>
+          {fortuneResult && (
+            <button className="gf-fold-btn" onClick={() => setFortuneOpen(!fortuneOpen)}>
+              {fortuneOpen ? '접기 ▲' : '펼치기 ▼'}
+            </button>
+          )}
+        </div>
+        {fortuneResult ? (
+          <>
+            {/* 접혀도 점수는 항상 표시 */}
+            <div className="gf-fortune-score">
+              <span className="gf-fortune-num">{fortuneResult.todayFortune?.score || 0}</span>
+              <span className="gf-fortune-unit">점</span>
+            </div>
+            {fortuneOpen && (
+              <div className="gf-fortune-result fade-in">
+                <div className="gf-fortune-cards">
+                  {CATEGORY_CONFIG.map((cat, idx) => (
+                    <FortuneCard key={cat.key} icon={cat.icon} title={cat.title}
+                      description={fortuneResult.todayFortune?.[cat.field] || ''} delay={idx * 80} />
+                  ))}
+                </div>
+                <button className="gf-share-btn" onClick={() => handleShare(
+                  `[1:1연애 💕 그룹 운세]\n${selectedGroup.name} 오늘의 운세: ${fortuneResult.todayFortune?.score || 0}점\n\nhttps://recipepig.kr`
+                )}>📤 공유</button>
+                {shareMsg && <p className="gf-share-msg">{shareMsg}</p>}
+              </div>
+            )}
+          </>
+        ) : fortuneLoading ? (
+          <div className="gf-loading-anim">
+            <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>⭐</span>)}</div>
+            <p className="gf-loading-text">AI가 운세를 분석하고 있어요</p>
+            <p className="gf-loading-hint">10~30초 정도 소요됩니다</p>
+          </div>
+        ) : (
+          <button className="btn-gold" onClick={handleGroupFortune} style={{ width: '100%' }}>
+            🌟 {selectedGroup.name} 오늘의 운세 보기
+          </button>
+        )}
+      </section>
+
+      {/* 나와 궁합 */}
+      <section className="gf-compat-section glass-card" ref={resultRef}>
+        <div className="gf-section-header">
+          <h3 className="gf-section-title">💕 나와 {compatTargetName} 궁합</h3>
+          {compatResult && (
+            <button className="gf-fold-btn" onClick={() => setCompatOpen(!compatOpen)}>
+              {compatOpen ? '접기 ▲' : '펼치기 ▼'}
+            </button>
+          )}
+        </div>
+        {!compatResult && !compatLoading && (
+          <div className="gf-compat-form">
+            {localStorage.getItem('userId') && (
+              <button className="sf-autofill-btn" onClick={handleAutoFill}>✨ 내 정보로 채우기</button>
+            )}
+            <div className="form-group">
+              <label className="form-label">성별</label>
+              <div className="form-toggle">
+                <button type="button" className={`form-toggle__btn ${myGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyGender('M')}><span className="g-circle g-male">♂</span></button>
+                <button type="button" className={`form-toggle__btn ${myGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyGender('F')}><span className="g-circle g-female">♀</span></button>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">생년월일</label>
+              <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
+            </div>
+            <button className="btn-gold" onClick={handleCompat} disabled={!myBirth} style={{ width: '100%', opacity: myBirth ? 1 : 0.5 }}>
+              💕 {compatTargetName}와(과) 궁합 분석하기
+            </button>
+          </div>
+        )}
+        {compatLoading && (
+          <div className="gf-loading-anim">
+            <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>💫</span>)}</div>
+            <p className="gf-loading-text">AI가 {compatTargetName} 궁합을 분석하고 있어요</p>
+            <p className="gf-loading-hint">10~30초 정도 소요됩니다</p>
+          </div>
+        )}
+        {compatResult && (
+          <div className="gf-compat-result fade-in">
+            <div className="gf-compat-score">
+              <span className="gf-compat-num">{compatResult.score || 0}</span>
+              <span className="gf-compat-unit">점</span>
+              <span className="gf-compat-grade" style={{ color: compatResult.score >= 80 ? '#ff3d7f' : compatResult.score >= 60 ? '#fbbf24' : '#94a3b8' }}>
+                {compatResult.grade}
+              </span>
+            </div>
+            {compatOpen && (
+              <>
+                {compatResult.aiAnalysis && <p className="gf-compat-text">{compatResult.aiAnalysis}</p>}
+                {compatResult.aiLoveCompat && (
+                  <div className="gf-compat-card"><span>💕</span><p>{compatResult.aiLoveCompat}</p></div>
+                )}
+                <button className="gf-share-btn" onClick={() => handleShare(
+                  `[1:1연애 💕 궁합]\n나와 ${compatTargetName}의 궁합: ${compatResult.score}점 (${compatResult.grade})\n\nhttps://recipepig.kr`
+                )}>📤 공유</button>
+                {shareMsg && <p className="gf-share-msg">{shareMsg}</p>}
+              </>
+            )}
+            <button className="gf-reset-btn" onClick={() => { setCompatResult(null); setCompatOpen(true); }}>
+              다시 분석하기
+            </button>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+export default GroupFortune;

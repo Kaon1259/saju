@@ -54,6 +54,7 @@ function Dream() {
   const resultRef = useRef(null);
   const textareaRef = useRef(null);
 
+
   // ── 키워드 클릭 ──
   const handleKeyword = (keyword) => {
     const newText = dreamText
@@ -253,7 +254,7 @@ function Dream() {
             <div className="dream-loading-cloud dream-loading-cloud--1" />
             <div className="dream-loading-cloud dream-loading-cloud--2" />
           </div>
-          <p className="dream-loading-text">꿈의 의미를 해석하고 있습니다<span className="dream-dots" /></p>
+          <p className="dream-loading-text">AI가 꿈의 의미를 해석하고 있어요<span className="dream-dots" /></p>
           <p className="dream-loading-hint">당신의 무의식이 전하는 메시지를 풀어봅니다</p>
         </div>
       )}

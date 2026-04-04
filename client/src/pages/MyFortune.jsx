@@ -21,6 +21,7 @@ function MyFortune() {
   const [otherData, setOtherData] = useState(null);
   const [otherLoading, setOtherLoading] = useState(false);
 
+
   const handleShare = async () => {
     if (!data) return;
     const saju = data.saju;
@@ -184,7 +185,7 @@ function MyFortune() {
                   } catch (e) { console.error(e); }
                   finally { setOtherLoading(false); }
                 }}>
-                {otherLoading ? '분석중...' : '운세 보기'}
+                {otherLoading ? 'AI 분석중...' : '운세 보기'}
               </button>
             </div>
           ) : (

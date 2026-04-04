@@ -123,6 +123,7 @@ function Biorhythm() {
   const [serverData, setServerData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+
   // 로그인 사용자 정보 가져오기
   useEffect(() => {
     try {
@@ -247,7 +248,7 @@ function Biorhythm() {
               onClick={handleAnalyze}
               disabled={!birthDate || loading}
             >
-              {loading ? '분석 중...' : '\uD83D\uDCC8 바이오리듬 분석'}
+              {loading ? 'AI 분석중...' : '\uD83D\uDCC8 바이오리듬 분석'}
             </button>
           </div>
         </div>

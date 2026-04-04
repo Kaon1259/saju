@@ -13,6 +13,8 @@ import MyFortune from './pages/MyFortune';
 import Constellation from './pages/Constellation';
 import Tojeong from './pages/Tojeong';
 import Compatibility from './pages/Compatibility';
+import CelebCompatibility from './pages/CelebCompatibility';
+import GroupFortune from './pages/GroupFortune';
 import Manseryeok from './pages/Manseryeok';
 import Tarot from './pages/Tarot';
 import SpecialFortune from './pages/SpecialFortune';
@@ -26,6 +28,8 @@ import YearFortune from './pages/YearFortune';
 import MonthlyFortune from './pages/MonthlyFortune';
 import WeeklyFortune from './pages/WeeklyFortune';
 import LoveFortune from './pages/LoveFortune';
+import MyStar from './pages/MyStar';
+import CelebMatch from './pages/CelebMatch';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
 
@@ -188,6 +192,9 @@ function App() {
               <Route path="/constellation" element={<Constellation />} />
               <Route path="/tojeong" element={<Tojeong />} />
               <Route path="/compatibility" element={<Compatibility />} />
+              <Route path="/celeb-compatibility" element={<CelebCompatibility />} />
+              <Route path="/celeb-fortune" element={<GroupFortune />} />
+              <Route path="/celeb-match" element={<CelebMatch />} />
               <Route path="/manseryeok" element={<Manseryeok />} />
               <Route path="/tarot" element={<Tarot />} />
               <Route path="/special" element={<SpecialFortune />} />
@@ -201,6 +208,7 @@ function App() {
               <Route path="/monthly-fortune" element={<MonthlyFortune />} />
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
               <Route path="/love-fortune" element={<LoveFortune />} />
+              <Route path="/my-star" element={<MyStar />} />
             </Routes>
           </main>
           {/* <FloatingMenu /> */}

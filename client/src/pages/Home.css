@@ -1065,13 +1065,30 @@
   100% { transform: translateY(-220px) scale(1.2) rotate(20deg); opacity: 0; }
 }
 
+/* 온도 + 연애운 상단 행 */
+.home-love-top-row { display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; z-index: 1; margin-bottom: 8px; }
+.home-love-fortune-btn { padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; }
+.home-love-fortune-btn:hover { background: rgba(244,114,182,0.2); }
+
+/* 커플 운세 */
+.home-couple-section { margin-top: 16px; position: relative; z-index: 1; }
+.home-couple-title { font-size: 16px; font-weight: 900; color: var(--color-text); margin: 0 0 10px; text-align: center; }
+.home-couple-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.home-couple-card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.2s; text-align: center; }
+.home-couple-card:hover { background: rgba(244,114,182,0.08); border-color: rgba(244,114,182,0.25); transform: translateY(-2px); }
+.home-couple-icon { font-size: 24px; }
+.home-couple-info { display: flex; flex-direction: column; gap: 2px; }
+.home-couple-label { font-size: 13px; font-weight: 800; color: var(--color-text); }
+.home-couple-desc { font-size: 10px; color: rgba(255,255,255,0.4); }
+[data-theme="light"] .home-couple-card { border-color: rgba(0,0,0,0.06); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .home-couple-desc { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .home-love-fortune-btn { border-color: rgba(233,30,99,0.25); color: #E91E63; background: rgba(233,30,99,0.06); }
+
 /* 온도 표시 */
 .home-love-temp-display {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  margin-bottom: 8px;
   position: relative;
   z-index: 1;
 }
@@ -1129,11 +1146,16 @@
 }
 
 /* 연애 카드 그룹 */
-.home-love-group { position: relative; z-index: 1; margin-bottom: 12px; }
+.home-love-group { position: relative; z-index: 1; margin-bottom: 12px; padding: 10px; border-radius: 16px; }
+.home-love-group--active { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); }
 .home-love-group-title {
   font-size: 13px; font-weight: 700; color: var(--color-text-secondary, rgba(255,255,255,0.6));
   margin: 0 0 8px 2px; display: flex; align-items: center; gap: 4px;
 }
+.home-love-group--active .home-love-group-title { color: #F472B6; font-weight: 900; }
+.home-love-group-my { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 6px; background: rgba(244,114,182,0.2); color: #F472B6; letter-spacing: 0.5px; margin-left: 4px; }
+[data-theme="light"] .home-love-group--active { background: rgba(233,30,99,0.04); border-color: rgba(233,30,99,0.15); }
+[data-theme="light"] .home-love-group--active .home-love-group-title { color: #E91E63; }
 .home-love-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; position: relative; z-index: 1; }
 .home-love-card {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -1146,15 +1168,141 @@
 .home-love-icon { font-size: 22px; }
 
 /* 커플 운세 커스텀 아이콘: ♂♡♀ */
-.couple-icon { display: inline-flex; align-items: center; gap: 1px; font-size: 14px; font-weight: 900; }
-.couple-m { color: #64B5F6; font-size: 16px; }
-.couple-f { color: #F48FB1; font-size: 16px; }
-.couple-heart { color: #F472B6; font-size: 10px; animation: coupleHeartBeat 1.5s ease-in-out infinite; }
+.couple-icon { display: inline-flex; align-items: center; gap: 2px; font-weight: 900; }
+.couple-m { color: #64B5F6; }
+.couple-f { color: #F48FB1; }
+.couple-heart { color: #F472B6; animation: coupleHeartBeat 1.5s ease-in-out infinite; }
+/* 홈 카드 */
+.home-love-icon .couple-icon { font-size: 18px; }
+.home-love-icon .couple-heart { font-size: 12px; }
+/* 모달 헤더 - 크게 */
+.love-modal-icon .couple-icon { font-size: 32px; gap: 4px; }
+.love-modal-icon .couple-heart { font-size: 22px; }
+/* 모달 버튼 */
+.love-modal-submit .couple-icon { font-size: 18px; }
+.love-modal-submit .couple-heart { font-size: 13px; }
 @keyframes coupleHeartBeat {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.3); }
 }
+
+/* 결혼운 아이콘: 🎩/♂ 🎀/♀ 세로 배치 */
+.wedding-icon { display: inline-flex; align-items: flex-end; gap: 6px; font-weight: 900; line-height: 1; }
+.wedding-person { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.wedding-hat { font-size: 10px; line-height: 1; margin-bottom: -2px; }
+.wedding-sym { font-size: 18px; font-weight: 900; }
+.wedding-sym--m { color: #60A5FA; }
+.wedding-sym--f { color: #F472B6; }
+.home-love-icon .wedding-hat { font-size: 9px; }
+.home-love-icon .wedding-sym { font-size: 16px; }
+.home-love-icon .wedding-icon { gap: 4px; }
+.wedding-icon--lg .wedding-hat { font-size: 18px; margin-bottom: -3px; }
+.wedding-icon--lg .wedding-sym { font-size: 32px; }
+.wedding-icon--lg { gap: 12px; }
+
 .home-love-label { font-size: 11px; font-weight: 800; color: var(--color-text); }
+
+/* ═══ 스타 운세 섹션 ═══ */
+.home-star-section {
+  margin: 8px 0;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, rgba(147,51,234,0.08), rgba(233,30,99,0.06));
+  border-radius: 20px;
+  border: 1px solid rgba(147,51,234,0.15);
+  position: relative;
+  overflow: hidden;
+}
+.home-star-section::before {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(233,30,99,0.08), transparent 70%);
+  pointer-events: none;
+}
+.home-star-bubbles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.home-star-bubble {
+  position: absolute; bottom: -10px;
+  color: #FBBF24; opacity: 0;
+  left: calc(8% + var(--sb-i) * 11%);
+  font-size: calc(14px + var(--sb-i) * 2.5px);
+  text-shadow: 0 0 8px rgba(251,191,36,0.6);
+  animation: starBubbleUp calc(3.5s + var(--sb-i) * 0.3s) ease-out infinite,
+             starTwinkle 0.8s ease-in-out infinite;
+  animation-delay: calc(var(--sb-i) * 0.5s), calc(var(--sb-i) * 0.2s);
+}
+@keyframes starBubbleUp {
+  0% { transform: translateY(0) scale(0.5) rotate(-5deg); opacity: 0; }
+  12% { opacity: 0.7; }
+  55% { opacity: 0.35; }
+  100% { transform: translateY(-220px) scale(1.2) rotate(20deg); opacity: 0; }
+}
+@keyframes starTwinkle {
+  0%, 100% { text-shadow: 0 0 4px rgba(251,191,36,0.3); color: #D4A017; filter: brightness(0.8); }
+  25% { text-shadow: 0 0 18px rgba(255,215,0,1), 0 0 36px rgba(255,215,0,0.6), 0 0 50px rgba(255,180,0,0.3); color: #FFD700; filter: brightness(1.8); }
+  50% { text-shadow: 0 0 6px rgba(251,191,36,0.4); color: #DAA520; filter: brightness(0.9); }
+  75% { text-shadow: 0 0 22px rgba(255,223,0,1), 0 0 40px rgba(255,215,0,0.7), 0 0 60px rgba(255,180,0,0.4); color: #FFF8DC; filter: brightness(2); }
+}
+.home-star-header { text-align: center; margin-bottom: 16px; position: relative; }
+.home-star-badge {
+  display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  padding: 3px 12px; border-radius: 10px;
+  background: linear-gradient(135deg, #9B59B6, #E91E63);
+  color: #fff; margin-bottom: 8px;
+}
+.home-star-title {
+  font-size: 20px; font-weight: 900; margin: 0;
+  background: linear-gradient(135deg, #C084FC, #F472B6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.home-star-desc { font-size: 12px; color: rgba(255,255,255,0.55); margin: 4px 0 0; }
+
+.home-star-cards { display: flex; flex-direction: column; gap: 10px; }
+.home-star-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer; transition: all 0.25s;
+}
+.home-star-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--sc-color, #9B59B6);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(147,51,234,0.15);
+}
+.home-star-card-icon {
+  position: relative; font-size: 28px; line-height: 1;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  background: rgba(147,51,234,0.1); border-radius: 12px; flex-shrink: 0;
+}
+.home-star-card-sub {
+  position: absolute; bottom: -2px; right: -2px;
+  font-size: 14px; line-height: 1; color: #F472B6;
+}
+.home-star-card-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.home-star-card-label { font-size: 15px; font-weight: 800; color: var(--color-text); }
+.home-star-card-desc { font-size: 12px; color: rgba(255,255,255,0.6); }
+.home-star-card-arrow { font-size: 20px; color: var(--color-text-muted); font-weight: 300; }
+
+/* 스타 운세 라이트 모드 */
+[data-theme="light"] .home-star-section {
+  background: linear-gradient(135deg, rgba(147,51,234,0.06), rgba(233,30,99,0.05));
+  border-color: rgba(147,51,234,0.25);
+}
+[data-theme="light"] .home-star-card {
+  background: rgba(255,255,255,0.7); border-color: rgba(147,51,234,0.18);
+}
+[data-theme="light"] .home-star-card:hover {
+  background: rgba(147,51,234,0.06); border-color: rgba(147,51,234,0.35);
+}
+[data-theme="light"] .home-star-card-icon { background: rgba(147,51,234,0.1); }
+[data-theme="light"] .home-star-card-label { color: #1e293b; }
+[data-theme="light"] .home-star-card-desc { color: #64748b; }
+[data-theme="light"] .home-star-desc { color: #64748b; }
+[data-theme="light"] .home-star-card-arrow { color: #9B59B6; }
+[data-theme="light"] .home-star-title {
+  background: linear-gradient(135deg, #7c3aed, #c2185b);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
 
 /* 연애 온도 라이트 모드 */
 [data-theme="light"] .home-love-section { background: linear-gradient(180deg, rgba(233,30,99,0.04), transparent 80%); }
@@ -1530,6 +1678,12 @@
 .love-modal-lucky-label { display: block; font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 5px; font-weight: 600; }
 .love-modal-lucky-value { font-size: 16px; font-weight: 800; color: #fbbf24; }
 
+.love-modal-share {
+  width: 100%; padding: 13px; border-radius: 14px; border: 1.5px solid rgba(244,114,182,0.3);
+  background: rgba(244,114,182,0.08); color: #F472B6;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+}
+.love-modal-share:hover { background: rgba(244,114,182,0.15); }
 .love-modal-reset {
   width: 100%; padding: 15px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.06); color: #e0e0e0;

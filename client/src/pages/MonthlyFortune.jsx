@@ -194,7 +194,7 @@ function MonthlyFortune() {
       {loading && (
         <div className="mf-loading">
           <div className="mf-loading-icon">{getSeasonEmoji(selectedMonth)}</div>
-          <p className="mf-loading-text">{selectedMonth}월 운세를 분석하고 있습니다<span className="mf-dots" /></p>
+          <p className="mf-loading-text">AI가 {selectedMonth}월 운세를 분석하고 있어요<span className="mf-dots" /></p>
         </div>
       )}
 

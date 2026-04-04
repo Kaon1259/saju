@@ -18,6 +18,7 @@ const MONTH_NAMES = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8�
 
 function Tojeong() {
   const navigate = useNavigate();
+
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showInput, setShowInput] = useState(true);
@@ -81,7 +82,7 @@ function Tojeong() {
             <div className="tj-book-page tj-book-page--4"><span>福</span></div>
             <div className="tj-book-page tj-book-page--5"><span>祿</span></div>
           </div>
-          <p className="tj-loading-text">고서를 펼쳐 운세를 풀이하고 있습니다...</p>
+          <p className="tj-loading-text">AI가 고서를 펼쳐 운세를 풀이하고 있어요</p>
           <div className="tj-loading-dots"><span>.</span><span>.</span><span>.</span></div>
         </div>
       </div>

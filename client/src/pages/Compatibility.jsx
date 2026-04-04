@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { getSajuCompatibility } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import { shareResult } from '../utils/share';
 import './Compatibility.css';
+
+const MY_STAR_KEY = 'myStarList';
+function getMyStars() { try { return JSON.parse(localStorage.getItem(MY_STAR_KEY)||'[]'); } catch { return []; } }
 
 const BIRTH_TIMES = [
   { value: '', label: '모름' },
@@ -17,6 +21,7 @@ const BIRTH_TIMES = [
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
 
 function Compatibility() {
+  const [shareMsg, setShareMsg] = useState('');
   const [bd1, setBd1] = useState('');
   const [bt1, setBt1] = useState('');
   const [g1, setG1] = useState('M');
@@ -27,6 +32,8 @@ function Compatibility() {
   const [calType2, setCalType2] = useState('SOLAR');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showStarPicker, setShowStarPicker] = useState(false);
+
 
   const handleAnalyze = async () => {
     if (!bd1 || !bd2) return;
@@ -44,12 +51,22 @@ function Compatibility() {
     return (
       <div className="compat-page">
         <div className="compat-loading">
+          <div className="compat-loading-rings">
+            <div className="compat-ring compat-ring--1" />
+            <div className="compat-ring compat-ring--2" />
+          </div>
           <div className="compat-loading-anim">
             <span className="compat-load-male">♂</span>
-            <span className="compat-load-heart">❤️</span>
+            <div className="compat-load-hearts">
+              {[0,1,2].map(i => <span key={i} className="compat-load-heart" style={{ animationDelay: `${i * 0.25}s` }}>❤️</span>)}
+            </div>
             <span className="compat-load-female">♀</span>
           </div>
-          <p className="compat-loading-text">두 사람의 운명을 비교하고 있습니다...</p>
+          <p className="compat-loading-text">AI가 두 사람의 운명을 분석하고 있어요</p>
+          <p className="compat-loading-hint">10~30초 정도 소요됩니다</p>
+          <div className="compat-loading-dots">
+            {[0,1,2,3,4].map(i => <span key={i} className="compat-loading-dot" style={{ animationDelay: `${i * 0.15}s` }} />)}
+          </div>
         </div>
       </div>
     );
@@ -114,8 +131,8 @@ function Compatibility() {
             </div>
           </div>
 
-          {/* Speech Button */}
-          <div style={{ margin: '12px 0' }}>
+          {/* Speech & Share */}
+          <div style={{ margin: '12px 0', display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
             <SpeechButton
               label="궁합 결과 읽어주기"
               text={[
@@ -134,7 +151,13 @@ function Compatibility() {
                 result.aiAnalysis ? `종합 분석: ${result.aiAnalysis.split('.').slice(0,2).join('.')}.` : '',
               ].filter(Boolean).join(' ')}
             />
+            <button className="compat-share-btn" onClick={async () => {
+              const text = `[1:1연애 💕 사주 궁합]\n궁합 점수: ${result.score}점 (${result.grade})\n${result.aiSummary || ''}\n\nhttps://recipepig.kr`;
+              const res = await shareResult({ title: '사주 궁합 결과', text });
+              if (res === 'copied') { setShareMsg('클립보드에 복사됨!'); setTimeout(() => setShareMsg(''), 2000); }
+            }}>📤 공유</button>
           </div>
+          {shareMsg && <p style={{ textAlign: 'center', fontSize: 12, color: '#4ade80', margin: '4px 0' }}>{shareMsg}</p>}
 
           <div className="compat-grade-badge" style={{
             background: score >= 80 ? 'rgba(74,222,128,0.12)' : score >= 60 ? 'rgba(251,191,36,0.12)' : 'rgba(248,113,113,0.12)',
@@ -147,6 +170,45 @@ function Compatibility() {
 
         {/* 분석 카드 */}
         <section className="compat-cards">
+          {result.aiSummary && (
+            <div className="compat-card glass-card compat-card--summary">
+              <p className="compat-summary-text">{result.aiSummary}</p>
+            </div>
+          )}
+          {result.aiAnalysis && (
+            <div className="compat-card glass-card compat-card--ai">
+              <div className="compat-card-header"><span className="compat-card-icon">🔮</span><h3>종합 분석</h3></div>
+              <p className="compat-card-text">{result.aiAnalysis}</p>
+            </div>
+          )}
+          <div className="compat-card glass-card">
+            <div className="compat-card-header"><span className="compat-card-icon">☯️</span><h3>음양 조화</h3></div>
+            <p className="compat-card-text">{result.yinyangBalance}</p>
+          </div>
+          {result.aiLoveCompat && (
+            <div className="compat-card glass-card compat-card--ai">
+              <div className="compat-card-header"><span className="compat-card-icon">💕</span><h3>연애/결혼 궁합</h3></div>
+              <p className="compat-card-text">{result.aiLoveCompat}</p>
+            </div>
+          )}
+          {result.aiWorkCompat && (
+            <div className="compat-card glass-card compat-card--ai">
+              <div className="compat-card-header"><span className="compat-card-icon">💼</span><h3>직장/업무 궁합</h3></div>
+              <p className="compat-card-text">{result.aiWorkCompat}</p>
+            </div>
+          )}
+          {result.aiConflictPoint && (
+            <div className="compat-card glass-card compat-card--ai">
+              <div className="compat-card-header"><span className="compat-card-icon">⚠️</span><h3>갈등 포인트 & 해결법</h3></div>
+              <p className="compat-card-text">{result.aiConflictPoint}</p>
+            </div>
+          )}
+          {result.aiAdvice && (
+            <div className="compat-card glass-card compat-card--ai">
+              <div className="compat-card-header"><span className="compat-card-icon">💡</span><h3>관계 개선 조언</h3></div>
+              <p className="compat-card-text">{result.aiAdvice}</p>
+            </div>
+          )}
           <div className="compat-card glass-card">
             <div className="compat-card-header"><span className="compat-card-icon">⚡</span><h3>오행 관계</h3></div>
             <p className="compat-card-text">{result.elementRelation}</p>
@@ -155,16 +217,6 @@ function Compatibility() {
             <div className="compat-card-header"><span className="compat-card-icon">🔗</span><h3>일지 관계</h3></div>
             <p className="compat-card-text">{result.branchRelation}</p>
           </div>
-          <div className="compat-card glass-card">
-            <div className="compat-card-header"><span className="compat-card-icon">☯️</span><h3>음양 조화</h3></div>
-            <p className="compat-card-text">{result.yinyangBalance}</p>
-          </div>
-          {result.aiAnalysis && (
-            <div className="compat-card glass-card compat-card--ai">
-              <div className="compat-card-header"><span className="compat-card-icon">🔮</span><h3>AI 종합 분석</h3></div>
-              <p className="compat-card-text">{result.aiAnalysis}</p>
-            </div>
-          )}
         </section>
 
         <button className="compat-reset-btn" onClick={() => { setResult(null); setBd1(''); setBd2(''); setBt1(''); setBt2(''); setCalType1('SOLAR'); setCalType2('SOLAR'); }}>
@@ -177,73 +229,148 @@ function Compatibility() {
   return (
     <div className="compat-page">
       <section className="compat-intro">
-        <div className="compat-intro-symbols">
-          <span className="compat-sym-male">♂</span>
-          <span className="compat-sym-heart">❤</span>
-          <span className="compat-sym-female">♀</span>
+        <div className="compat-intro-scene">
+          {/* 남 - 사모 + ♂ */}
+          <div className="compat-intro-sym compat-intro-sym--m">
+            <span className="compat-hat">🎩</span>
+            <span className="compat-gender-sym">♂</span>
+          </div>
+
+          {/* 중앙 인연 */}
+          <div className="compat-intro-center">
+            <span className="compat-intro-yeon">縁</span>
+            <div className="compat-intro-glow" />
+            {[...Array(4)].map((_, i) => <span key={i} className="compat-intro-particle" style={{ '--cp-i': i }}>✦</span>)}
+          </div>
+
+          {/* 여 - 쪽두리 + ♀ */}
+          <div className="compat-intro-sym compat-intro-sym--f">
+            <span className="compat-hat">🎀</span>
+            <span className="compat-gender-sym">♀</span>
+          </div>
         </div>
         <h1 className="compat-intro-title">사주 궁합</h1>
-        <p className="compat-intro-desc">두 사람의 사주팔자로 운명의 궁합을 분석합니다</p>
+        <p className="compat-intro-desc">두 사람의 사주팔자로 운명의 인연을 분석합니다</p>
       </section>
 
       <div className="compat-form glass-card">
         {/* Person 1 */}
-        <div className="compat-form-section">
-          <div className="compat-form-top">
-            <div className="compat-form-gender-toggle">
-              <button className={`compat-g-btn compat-g-male ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}><span className="g-circle g-male">♂</span></button>
-              <button className={`compat-g-btn compat-g-female ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}><span className="g-circle g-female">♀</span></button>
-            </div>
-            {localStorage.getItem('userId') && (
-              <button className="sf-autofill-btn" style={{ marginTop: 8, fontSize: 12, padding: '8px 12px' }} onClick={() => {
-                try {
-                  const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
-                  if (p.birthDate) setBd1(p.birthDate);
-                  if (p.gender) setG1(p.gender);
-                  if (p.birthTime) setBt1(p.birthTime);
-                } catch {}
-              }}>✨ 내 정보</button>
-            )}
+        <div className="form-group">
+          <label className="form-label">성별</label>
+          <div className="form-toggle">
+            <button type="button" className={`form-toggle__btn ${g1 === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => { setG1('M'); setG2('F'); }}><span className="g-circle g-male">♂</span></button>
+            <button type="button" className={`form-toggle__btn ${g1 === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => { setG1('F'); setG2('M'); }}><span className="g-circle g-female">♀</span></button>
           </div>
-          <div className="form-group">
-            <label className="form-label">달력 구분</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${calType1 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('SOLAR')}>양력</button>
-              <button type="button" className={`form-toggle__btn ${calType1 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('LUNAR')}>음력</button>
-            </div>
+        </div>
+        {localStorage.getItem('userId') && (
+          <button className="sf-autofill-btn" onClick={() => {
+            try {
+              const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+              if (p.birthDate) setBd1(p.birthDate);
+              if (p.gender) setG1(p.gender);
+              if (p.birthTime) setBt1(p.birthTime);
+              if (p.calendarType) setCalType1(p.calendarType);
+            } catch {}
+          }}>✨ 내 정보로 채우기</button>
+        )}
+        <div className="form-group">
+          <label className="form-label">달력 구분</label>
+          <div className="form-toggle">
+            <button type="button" className={`form-toggle__btn ${calType1 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('SOLAR')}>☀️ 양력</button>
+            <button type="button" className={`form-toggle__btn ${calType1 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('LUNAR')}>🌙 음력</button>
           </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">생년월일</label>
           <BirthDatePicker value={bd1} onChange={setBd1} calendarType={calType1} />
-          <select className="compat-input compat-select" value={bt1} onChange={e => setBt1(e.target.value)}>
+        </div>
+        <div className="form-group">
+          <label className="form-label">태어난 시간 (선택)</label>
+          <select className="form-input form-select" value={bt1} onChange={e => setBt1(e.target.value)}>
             {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
 
         <div className="compat-form-divider">
-          <span>❤</span>
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="compat-bubble-heart" style={{ '--bh-i': i }}>♥</span>
+          ))}
+          <span className="compat-divider-heart">♥</span>
         </div>
 
         {/* Person 2 */}
-        <div className="compat-form-section">
-          <div className="compat-form-top">
-            <div className="compat-form-gender-toggle">
-              <button className={`compat-g-btn compat-g-male ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}><span className="g-circle g-male">♂</span></button>
-              <button className={`compat-g-btn compat-g-female ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}><span className="g-circle g-female">♀</span></button>
+        {(() => {
+          const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile')||'{}'); } catch { return {}; } })();
+          const hasPartner = !!profile.partnerBirthDate;
+          const stars = getMyStars();
+          return (hasPartner || stars.length > 0) ? (
+            <div className="compat-autofill-row">
+              {hasPartner && (
+                <button className="sf-autofill-btn" onClick={() => {
+                  setBd2(profile.partnerBirthDate);
+                  if (profile.gender === 'M') setG2('F'); else setG2('M');
+                }}>💕 연인 정보로 채우기</button>
+              )}
+              {stars.length > 0 && (
+                <button className="sf-autofill-btn" onClick={() => setShowStarPicker(true)}>
+                  ⭐ 스타 정보로 채우기
+                </button>
+              )}
+            </div>
+          ) : null;
+        })()}
+        {showStarPicker && (
+          <div className="star-picker-overlay" onClick={() => setShowStarPicker(false)}>
+            <div className="star-picker-popup" onClick={e => e.stopPropagation()}>
+              <div className="star-picker-header">
+                <h3 className="star-picker-title">⭐ 나의 스타 선택</h3>
+                <button className="star-picker-close" onClick={() => setShowStarPicker(false)}>✕</button>
+              </div>
+              <div className="star-picker-list">
+                {getMyStars().map((s, i) => (
+                  <button key={i} className="star-picker-item" onClick={() => {
+                    setBd2(s.birth);
+                    if (s.gender) setG2(s.gender);
+                    setShowStarPicker(false);
+                  }}>
+                    <span className={`star-picker-sym ${s.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>{s.gender === 'M' ? '♂' : '♀'}</span>
+                    <div className="star-picker-info">
+                      <span className="star-picker-name">{s.name}</span>
+                      {s.group && <span className="star-picker-group">{s.group}</span>}
+                    </div>
+                    <span className="star-picker-birth">{s.birth?.slice(0, 4)}년생</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">달력 구분</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${calType2 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('SOLAR')}>양력</button>
-              <button type="button" className={`form-toggle__btn ${calType2 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('LUNAR')}>음력</button>
-            </div>
+        )}
+        <div className="form-group">
+          <label className="form-label">상대방 성별</label>
+          <div className="form-toggle">
+            <button type="button" className={`form-toggle__btn ${g2 === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setG2('M')}><span className="g-circle g-male">♂</span></button>
+            <button type="button" className={`form-toggle__btn ${g2 === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setG2('F')}><span className="g-circle g-female">♀</span></button>
           </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">달력 구분</label>
+          <div className="form-toggle">
+            <button type="button" className={`form-toggle__btn ${calType2 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('SOLAR')}>☀️ 양력</button>
+            <button type="button" className={`form-toggle__btn ${calType2 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('LUNAR')}>🌙 음력</button>
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">생년월일</label>
           <BirthDatePicker value={bd2} onChange={setBd2} calendarType={calType2} />
-          <select className="compat-input compat-select" value={bt2} onChange={e => setBt2(e.target.value)}>
+        </div>
+        <div className="form-group">
+          <label className="form-label">태어난 시간 (선택)</label>
+          <select className="form-input form-select" value={bt2} onChange={e => setBt2(e.target.value)}>
             {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
 
-        <button className="compat-submit" onClick={handleAnalyze} disabled={!bd1 || !bd2}>
+        <button className="btn-gold" onClick={handleAnalyze} disabled={!bd1 || !bd2} style={{ opacity: bd1 && bd2 ? 1 : 0.5 }}>
           💕 궁합 분석하기
         </button>
       </div>

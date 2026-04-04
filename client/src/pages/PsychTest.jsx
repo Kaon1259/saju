@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getPsychTests, analyzePsychTest } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -74,6 +75,7 @@ function PsychTest() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
+
 
   // 서버에서 테스트 목록 가져오기
   useEffect(() => {
@@ -272,8 +274,8 @@ function PsychTest() {
               <div className="pt-loading-ring pt-loading-ring--2" style={{ borderColor: selectedTest?.color || '#9B59B6' }} />
             </div>
           </div>
-          <p className="pt-loading-text">분석 중입니다<span className="pt-dots" /></p>
-          <p className="pt-loading-sub">당신의 답변을 깊이 분석하고 있습니다</p>
+          <p className="pt-loading-text">AI가 분석하고 있어요<span className="pt-dots" /></p>
+          <p className="pt-loading-sub">당신의 답변을 AI가 깊이 분석하고 있어요</p>
         </div>
       )}
 
