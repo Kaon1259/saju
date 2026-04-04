@@ -1066,8 +1066,11 @@
 }
 
 /* 온도 + 연애운 상단 행 */
-.home-love-top-row { display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; z-index: 1; margin-bottom: 8px; }
-.home-love-fortune-btn { padding: 6px 12px; border-radius: 10px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 12px !important; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; }
+.home-love-temp-center {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative; z-index: 1; margin-bottom: 4px;
+}
+.home-love-fortune-btn { padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 11px !important; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; margin: 4px auto 10px; }
 .home-love-fortune-btn:hover { background: rgba(244,114,182,0.2); }
 
 /* 커플 운세 */
@@ -1082,20 +1085,12 @@
 .home-couple-desc { font-size: 10px; color: rgba(255,255,255,0.4); }
 [data-theme="light"] .home-couple-card { border-color: rgba(0,0,0,0.06); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .home-couple-desc { color: rgba(0,0,0,0.6); }
-[data-theme="light"] .home-love-fortune-btn { border-color: rgba(233,30,99,0.25); color: #E91E63; background: rgba(233,30,99,0.06); }
+[data-theme="light"] .home-love-fortune-btn { border-color: rgba(233,30,99,0.25); color: #E91E63; background: rgba(233,30,99,0.06); font-size: 11px !important; }
 
 /* 온도 표시 */
-.home-love-temp-display {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  z-index: 1;
-}
-
 .home-love-temp-heart {
-  font-size: 38px;
-  filter: drop-shadow(0 0 12px var(--love-temp-color, #E91E63));
+  font-size: 44px;
+  filter: drop-shadow(0 0 16px var(--love-temp-color, #E91E63));
   animation: loveTempPump 1.8s ease-in-out infinite;
 }
 
@@ -1106,20 +1101,19 @@
   45% { transform: scale(1.1); }
 }
 
-.home-love-temp-info {
-  display: flex;
-  flex-direction: column;
-}
-
 .home-love-temp-label {
   font-size: 11px !important;
   font-weight: 600;
   color: var(--color-text-muted);
   letter-spacing: 1px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  margin: 0 0 2px;
 }
 
 .home-love-temp-num {
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 900;
   line-height: 1;
 }
