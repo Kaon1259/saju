@@ -1067,7 +1067,7 @@
 
 /* 온도 + 연애운 상단 행 */
 .home-love-top-row { display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; z-index: 1; margin-bottom: 8px; }
-.home-love-fortune-btn { padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; }
+.home-love-fortune-btn { padding: 6px 12px; border-radius: 10px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 12px !important; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; }
 .home-love-fortune-btn:hover { background: rgba(244,114,182,0.2); }
 
 /* 커플 운세 */
@@ -1112,7 +1112,7 @@
 }
 
 .home-love-temp-label {
-  font-size: 12px;
+  font-size: 11px !important;
   font-weight: 600;
   color: var(--color-text-muted);
   letter-spacing: 1px;
@@ -1126,7 +1126,7 @@
 
 .home-love-weather-tag {
   text-align: center;
-  font-size: 12px;
+  font-size: 11px !important;
   font-weight: 600;
   color: var(--color-text-muted);
   margin: -2px 0 6px;
