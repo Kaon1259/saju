@@ -1137,12 +1137,15 @@
 
 .home-love-temp-msg {
   text-align: center;
-  font-size: 13px;
+  font-size: 13px !important;
   color: var(--color-text-secondary);
   margin: 0 0 14px;
   position: relative;
   z-index: 1;
   line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 연애 카드 그룹 */
