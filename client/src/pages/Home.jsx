@@ -40,12 +40,12 @@ const LOVE_TYPES = [
   { id: 'meeting_timing',     label: '만남시기',   icon: '🔮', desc: '언제 인연을 만날까', group: 'solo' },
   { id: 'ideal_type',         label: '이상형',    icon: '👩‍❤️‍👨', desc: '사주로 보는 나의 이상형', group: 'solo' },
   // 썸/연애
-  { id: 'couple_fortune',     label: '커플운세',   icon: 'couple', desc: '오늘 연인과의 하루', group: 'love' },
+  { id: 'couple_fortune',     label: '커플운세',   icon: '💑', desc: '오늘 연인과의 하루', group: 'love' },
   { id: 'confession_timing',  label: '고백운',    icon: '💌', desc: '고백하기 좋은 날은?', group: 'love' },
   { id: 'some_check',         label: '썸진단',    icon: '🎯', desc: '이 썸, 연애로 발전할까?', group: 'love' },
   { id: 'contact_fortune',    label: '연락운',    icon: '📱', desc: '먼저 연락해도 될까?', group: 'love' },
   // 결혼/인연
-  { id: 'marriage',           label: '결혼운',    icon: 'wedding', desc: '결혼 시기와 인연', group: 'marriage' },
+  { id: 'marriage',           label: '결혼운',    icon: '💒', desc: '결혼 시기와 인연', group: 'marriage' },
   { id: 'remarriage',         label: '재혼운',    icon: '💍', desc: '새로운 인연의 가능성', group: 'marriage' },
   { id: 'reunion',            label: '재회운',    icon: '💔', desc: '다시 만날 수 있을까?', group: 'marriage' },
   { id: 'past_life',          label: '전생인연',   icon: '🌌', desc: '전생에서의 우리 이야기', group: 'marriage' },
@@ -398,11 +398,7 @@ function Home() {
                 <div className="home-love-cards">
                   {LOVE_TYPES.filter(l => l.group === group.key).map(lt => (
                     <button key={lt.id} className="home-love-card" onClick={() => openLoveModal(lt.id)}>
-                      <span className="home-love-icon">{lt.icon === 'couple'
-                        ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span>
-                        : lt.icon === 'wedding'
-                        ? <span className="wedding-icon"><span className="wedding-person"><span className="wedding-hat">🎩</span><span className="wedding-sym wedding-sym--m">♂</span></span><span className="wedding-person"><span className="wedding-hat">🎀</span><span className="wedding-sym wedding-sym--f">♀</span></span></span>
-                        : lt.icon}</span>
+                      <span className="home-love-icon">{lt.icon}</span>
                       <span className="home-love-label">{lt.label}</span>
                     </button>
                   ))}
