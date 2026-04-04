@@ -21,6 +21,9 @@ public class User {
     @Column(unique = true)
     private String phone;
 
+    @Column(unique = true)
+    private String kakaoId;
+
     @Column(nullable = false)
     private String name;
 

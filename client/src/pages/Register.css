@@ -280,6 +280,23 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* ── 카카오 로그인 ── */
+.kakao-login-btn {
+  width: 100%; padding: 14px 20px; border-radius: 12px; border: none;
+  background: #FEE500; color: #191919; font-size: 16px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s; box-shadow: 0 2px 8px rgba(254,229,0,0.3);
+}
+.kakao-login-btn:hover { background: #F5DD00; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(254,229,0,0.4); }
+.kakao-logo { flex-shrink: 0; }
+.register-kakao-notice { font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; margin: 8px 0 0; }
+.register-kakao-welcome { text-align: center; padding: 12px; border-radius: 10px; background: rgba(254,229,0,0.08); border: 1px solid rgba(254,229,0,0.2); color: #FEE500; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.register-kakao-loading { text-align: center; padding: 80px 20px; }
+.register-kakao-spinner { width: 40px; height: 40px; border: 3px solid rgba(254,229,0,0.2); border-top-color: #FEE500; border-radius: 50%; animation: kakaoSpin 0.8s linear infinite; margin: 0 auto 16px; }
+.register-kakao-loading p { font-size: 15px; font-weight: 700; color: var(--color-text); }
+@keyframes kakaoSpin { to { transform: rotate(360deg); } }
+[data-theme="light"] .register-kakao-notice { color: rgba(0,0,0,0.4); }
+
 /* Skip & Back buttons */
 .register-skip {
   background: none;

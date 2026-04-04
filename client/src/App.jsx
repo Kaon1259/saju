@@ -184,6 +184,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/fortune" element={<Fortune />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/auth/kakao/callback" element={<Register />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/saju" element={<SajuAnalysis />} />
               <Route path="/bloodtype" element={<BloodType />} />

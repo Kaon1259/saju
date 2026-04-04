@@ -35,6 +35,17 @@ export const loginUser = async (phone) => {
   return response.data;
 };
 
+// 카카오 로그인
+export const kakaoLogin = async (code) => {
+  const response = await api.post('/auth/kakao/login', { code });
+  return response.data;
+};
+
+export const kakaoRegister = async (userData) => {
+  const response = await api.post('/auth/kakao/register', userData);
+  return response.data;
+};
+
 export const updateUser = async (userId, userData) => {
   const response = await api.put(`/users/${userId}`, userData);
   return response.data;

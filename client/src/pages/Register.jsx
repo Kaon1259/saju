@@ -1,9 +1,12 @@
-import { useState, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { registerUser, loginUser } from '../api/fortune';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { kakaoLogin, kakaoRegister } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './Register.css';
+
+const KAKAO_JS_KEY = import.meta.env.VITE_KAKAO_JS_KEY || '';
+const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI || `${window.location.origin}/auth/kakao/callback`;
 
 const BIRTH_TIMES = [
   { value: '', label: '모름 / 선택안함' },
@@ -24,8 +27,7 @@ const BIRTH_TIMES = [
 function getZodiacFromYear(year) {
   if (!year || year < 1900) return null;
   const index = (year - 4) % 12;
-  const normalizedIndex = index < 0 ? index + 12 : index;
-  return ZODIAC_ANIMALS[normalizedIndex] || null;
+  return ZODIAC_ANIMALS[index < 0 ? index + 12 : index] || null;
 }
 
 const CONSTELLATIONS = [
@@ -47,13 +49,9 @@ const CONSTELLATIONS = [
 function getConstellationFromDate(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
-  const m = d.getMonth() + 1;
-  const day = d.getDate();
-  const v = m * 100 + day;
+  const v = (d.getMonth() + 1) * 100 + d.getDate();
   for (const c of CONSTELLATIONS) {
-    const s = c.start[0] * 100 + c.start[1];
-    const e = c.end[0] * 100 + c.end[1];
-    if (v >= s && v <= e) return c;
+    if (v >= c.start[0] * 100 + c.start[1] && v <= c.end[0] * 100 + c.end[1]) return c;
   }
   return null;
 }
@@ -61,18 +59,14 @@ function getConstellationFromDate(dateStr) {
 function Register() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const redirectTo = location.state?.from || '/';
-  const [mode, setMode] = useState('login'); // 'login' or 'register'
-  const [step, setStep] = useState(1); // register: 1=phone, 2=saju info
+
+  const [step, setStep] = useState('kakao'); // 'kakao' | 'profile' | 'loading'
+  const [kakaoData, setKakaoData] = useState(null); // { kakaoId, nickname, gender, birthDate }
   const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    birthDate: '',
-    calendarType: 'SOLAR',
-    gender: 'M',
-    birthTime: '',
-    bloodType: '',
-    mbtiType: '',
+    name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
+    birthTime: '', bloodType: '', mbtiType: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -82,63 +76,53 @@ function Register() {
   const constellation = useMemo(() => getConstellationFromDate(form.birthDate), [form.birthDate]);
 
   const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm(prev => ({ ...prev, [field]: value }));
     setError('');
   };
 
-  const formatPhone = (value) => {
-    const numbers = value.replace(/\D/g, '').slice(0, 11);
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7)}`;
+  // 카카오 로그인 버튼 클릭
+  const handleKakaoLogin = () => {
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_JS_KEY}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
+    window.location.href = kakaoAuthUrl;
   };
 
-  const switchMode = (newMode) => {
-    setMode(newMode);
-    setStep(1);
-    setError('');
-  };
+  // 카카오 콜백 처리 (URL에 code가 있으면)
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (!code) return;
 
-  // ─── 로그인 ───
-  const handleLogin = async () => {
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) {
-      setError('올바른 전화번호를 입력해주세요.');
-      return;
-    }
-    setSubmitting(true);
-    setError('');
-    try {
-      const result = await loginUser(form.phone);
-      const userId = result.id || result.userId;
-      if (userId) {
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('userName', result.name);
-        localStorage.setItem('userPhone', form.phone);
-        localStorage.setItem('userProfile', JSON.stringify(result));
+    setStep('loading');
+    (async () => {
+      try {
+        const result = await kakaoLogin(code);
+
+        if (result.status === 'login') {
+          // 기존 회원 → 바로 로그인
+          const user = result.user;
+          localStorage.setItem('userId', user.id);
+          localStorage.setItem('userName', user.name);
+          localStorage.setItem('userProfile', JSON.stringify(user));
+          navigate(redirectTo, { replace: true });
+        } else if (result.status === 'new') {
+          // 신규 → 프로필 입력 단계
+          setKakaoData(result);
+          setForm(prev => ({
+            ...prev,
+            name: result.nickname || '',
+            gender: result.gender || 'M',
+            birthDate: result.birthDate || '',
+          }));
+          setStep('profile');
+        }
+      } catch (e) {
+        console.error(e);
+        setError('카카오 로그인에 실패했습니다. 다시 시도해주세요.');
+        setStep('kakao');
       }
-      navigate(redirectTo);
-    } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || '';
-      if (typeof msg === 'string' && msg.includes('등록되지 않은')) {
-        setError('등록되지 않은 전화번호입니다. 회원가입을 해주세요.');
-      } else {
-        setError('로그인에 실패했습니다. 전화번호를 확인해주세요.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    })();
+  }, [searchParams]);
 
-  // ─── 회원가입: 다음 단계 ───
-  const handlePhoneStep = () => {
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) {
-      setError('올바른 전화번호를 입력해주세요.');
-      return;
-    }
-    setStep(2);
-  };
-
-  // ─── 회원가입: 제출 ───
+  // 프로필 입력 완료 → 회원가입
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) { setError('이름을 입력해주세요.'); return; }
@@ -147,8 +131,8 @@ function Register() {
     setSubmitting(true);
     setError('');
     try {
-      const userData = {
-        phone: form.phone,
+      const result = await kakaoRegister({
+        kakaoId: kakaoData.kakaoId,
         name: form.name.trim(),
         birthDate: form.birthDate,
         calendarType: form.calendarType,
@@ -156,83 +140,55 @@ function Register() {
         birthTime: form.birthTime || null,
         bloodType: form.bloodType || null,
         mbtiType: form.mbtiType || null,
-      };
-      const result = await registerUser(userData);
-      const userId = result.id || result.userId;
-      if (userId) {
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('userName', userData.name);
-        localStorage.setItem('userPhone', form.phone);
-        localStorage.setItem('userProfile', JSON.stringify({ ...userData, id: userId }));
-      }
-      navigate(redirectTo);
+      });
+
+      const user = result.user;
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('userName', user.name);
+      localStorage.setItem('userProfile', JSON.stringify(user));
+      navigate(redirectTo, { replace: true });
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || '';
-      if (typeof msg === 'string' && msg.includes('이미 등록된')) {
-        setError('이미 등록된 전화번호입니다. 로그인해주세요.');
-      } else {
-        setError('등록에 실패했습니다. 다시 시도해주세요.');
-      }
+      const msg = err.response?.data?.error || '';
+      setError(msg || '등록에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ─── 로딩 ───
+  if (step === 'loading') {
+    return (
+      <div className="register-page">
+        <div className="register-kakao-loading">
+          <div className="register-kakao-spinner" />
+          <p>카카오 로그인 처리 중...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="register-page">
       <section className="register-header animate-fade-in-up">
         <h1 className="register-header__title">
-          {mode === 'login' ? '🔮 로그인' : '🌟 회원가입'}
+          {step === 'kakao' ? '🔮 로그인' : '🌟 프로필 설정'}
         </h1>
         <p className="register-header__subtitle">
-          {mode === 'login'
-            ? '전화번호로 간편하게 로그인하세요'
-            : step === 1
-              ? '전화번호로 시작하세요'
-              : '사주 정보를 입력하면 맞춤 운세를 받을 수 있어요'}
+          {step === 'kakao'
+            ? '카카오톡으로 간편하게 시작하세요'
+            : '사주 정보를 입력하면 맞춤 운세를 받을 수 있어요'}
         </p>
-
-        {/* 모드 탭 */}
-        <div className="register-mode-tabs">
-          <button
-            className={`register-mode-tab ${mode === 'login' ? 'register-mode-tab--active' : ''}`}
-            onClick={() => switchMode('login')}
-          >
-            로그인
-          </button>
-          <button
-            className={`register-mode-tab ${mode === 'register' ? 'register-mode-tab--active' : ''}`}
-            onClick={() => switchMode('register')}
-          >
-            회원가입
-          </button>
-        </div>
-
-        {/* 회원가입 단계 표시 */}
-        {mode === 'register' && (
-          <div className="register-steps">
-            <div className={`register-step ${step >= 1 ? 'register-step--active' : ''}`}>1</div>
-            <div className="register-step__line" />
-            <div className={`register-step ${step >= 2 ? 'register-step--active' : ''}`}>2</div>
-          </div>
-        )}
       </section>
 
-      {/* ═══ 로그인 ═══ */}
-      {mode === 'login' && (
+      {/* ═══ 카카오 로그인 ═══ */}
+      {step === 'kakao' && (
         <div className="register-form glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="login-phone">전화번호</label>
-            <input
-              id="login-phone"
-              type="tel"
-              className="form-input"
-              placeholder="010-0000-0000"
-              value={form.phone}
-              onChange={(e) => handleChange('phone', formatPhone(e.target.value))}
-              autoFocus
-            />
-          </div>
+          <button className="kakao-login-btn" onClick={handleKakaoLogin}>
+            <svg className="kakao-logo" viewBox="0 0 24 24" width="22" height="22">
+              <path fill="#000" d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.16c-.1.36.32.65.64.44l4.94-3.26c.38.04.76.06 1.16.06 5.52 0 10-3.36 10-7.64C22 6.36 17.52 3 12 3z"/>
+            </svg>
+            카카오 로그인
+          </button>
 
           {error && (
             <div className="form-error animate-fade-in">
@@ -240,55 +196,17 @@ function Register() {
             </div>
           )}
 
-          <button
-            className="btn-gold register-submit"
-            onClick={handleLogin}
-            disabled={submitting}
-          >
-            {submitting ? '확인 중...' : '🔮 로그인'}
-          </button>
-
-          <button className="register-skip" onClick={() => switchMode('register')}>
-            계정이 없으신가요? <strong>회원가입</strong>
-          </button>
+          <p className="register-kakao-notice">카카오 계정으로 간편하게 로그인하세요</p>
         </div>
       )}
 
-      {/* ═══ 회원가입 Step 1: 전화번호 ═══ */}
-      {mode === 'register' && step === 1 && (
-        <div className="register-form glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="reg-phone">전화번호</label>
-            <input
-              id="reg-phone"
-              type="tel"
-              className="form-input"
-              placeholder="010-0000-0000"
-              value={form.phone}
-              onChange={(e) => handleChange('phone', formatPhone(e.target.value))}
-              autoFocus
-            />
-          </div>
-
-          {error && (
-            <div className="form-error animate-fade-in">
-              <span>&#x26A0;&#xFE0F;</span> {error}
-            </div>
-          )}
-
-          <button className="btn-gold register-submit" onClick={handlePhoneStep}>
-            다음 단계 &rarr;
-          </button>
-
-          <button className="register-skip" onClick={() => switchMode('login')}>
-            이미 계정이 있으신가요? <strong>로그인</strong>
-          </button>
-        </div>
-      )}
-
-      {/* ═══ 회원가입 Step 2: 사주 정보 ═══ */}
-      {mode === 'register' && step === 2 && (
+      {/* ═══ 프로필 입력 (신규 회원) ═══ */}
+      {step === 'profile' && (
         <form className="register-form glass-card animate-fade-in-up" onSubmit={handleSubmit} style={{ animationDelay: '100ms' }}>
+          <div className="register-kakao-welcome">
+            카카오 인증 완료! 프로필을 설정해주세요
+          </div>
+
           <div className="form-group">
             <label className="form-label" htmlFor="name">이름</label>
             <input id="name" type="text" className="form-input" placeholder="이름을 입력하세요"
@@ -306,26 +224,14 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="birthDate">
-              생년월일 ({form.calendarType === 'SOLAR' ? '양력' : '음력'})
-            </label>
+            <label className="form-label">생년월일 ({form.calendarType === 'SOLAR' ? '양력' : '음력'})</label>
             <BirthDatePicker value={form.birthDate} onChange={(v) => handleChange('birthDate', v)} calendarType={form.calendarType} />
           </div>
 
           {(zodiac || constellation) && (
             <div className="register-info-badges animate-scale-in">
-              {zodiac && (
-                <div className="register-zodiac">
-                  <span className="register-zodiac__emoji">{zodiac.emoji}</span>
-                  <span className="register-zodiac__text">{zodiac.name}띠</span>
-                </div>
-              )}
-              {constellation && (
-                <div className="register-constellation">
-                  <span className="register-constellation__emoji">{constellation.emoji}</span>
-                  <span className="register-constellation__text">{constellation.name}</span>
-                </div>
-              )}
+              {zodiac && <div className="register-zodiac"><span className="register-zodiac__emoji">{zodiac.emoji}</span><span className="register-zodiac__text">{zodiac.name}띠</span></div>}
+              {constellation && <div className="register-constellation"><span className="register-constellation__emoji">{constellation.emoji}</span><span className="register-constellation__text">{constellation.name}</span></div>}
             </div>
           )}
 
@@ -340,17 +246,17 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="birthTime">태어난 시간 (선택)</label>
-            <select id="birthTime" className="form-input form-select" value={form.birthTime}
+            <label className="form-label">태어난 시간 (선택)</label>
+            <select className="form-input form-select" value={form.birthTime}
               onChange={(e) => handleChange('birthTime', e.target.value)}>
-              {BIRTH_TIMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
 
           <div className="form-group">
             <label className="form-label">혈액형 (선택)</label>
             <div className="form-toggle form-toggle--4">
-              {['A', 'B', 'O', 'AB'].map((bt) => (
+              {['A', 'B', 'O', 'AB'].map(bt => (
                 <button key={bt} type="button"
                   className={`form-toggle__btn ${form.bloodType === bt ? 'form-toggle__btn--active' : ''}`}
                   onClick={() => handleChange('bloodType', form.bloodType === bt ? '' : bt)}>{bt}형</button>
@@ -361,7 +267,7 @@ function Register() {
           <div className="form-group">
             <label className="form-label">MBTI (선택)</label>
             <div className="form-mbti-grid">
-              {['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'].map((t) => (
+              {['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'].map(t => (
                 <button key={t} type="button"
                   className={`form-mbti-btn ${form.mbtiType === t ? 'form-mbti-btn--active' : ''}`}
                   onClick={() => handleChange('mbtiType', form.mbtiType === t ? '' : t)}>{t}</button>
@@ -369,16 +275,10 @@ function Register() {
             </div>
           </div>
 
-          {error && (
-            <div className="form-error animate-fade-in"><span>&#x26A0;&#xFE0F;</span> {error}</div>
-          )}
+          {error && <div className="form-error animate-fade-in"><span>&#x26A0;&#xFE0F;</span> {error}</div>}
 
           <button type="submit" className="btn-gold register-submit" disabled={submitting}>
             {submitting ? '확인 중...' : '🔮 가입 완료'}
-          </button>
-
-          <button type="button" className="register-back-step" onClick={() => setStep(1)}>
-            &#x2190; 이전 단계
           </button>
         </form>
       )}
