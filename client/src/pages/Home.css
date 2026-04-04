@@ -1200,7 +1200,7 @@
 .wedding-icon--lg .wedding-sym { font-size: 32px; }
 .wedding-icon--lg { gap: 12px; }
 
-.home-love-label { font-size: 11px; font-weight: 800; color: var(--color-text); }
+.home-love-label { font-size: 11px !important; font-weight: 800; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 /* ═══ 스타 운세 섹션 ═══ */
 .home-star-section {

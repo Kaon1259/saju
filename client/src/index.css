@@ -584,7 +584,10 @@ html {
   overflow-wrap: break-word;
 }
 [data-fontsize] .home-love-card {
-  font-size: clamp(10px, calc(11px * var(--fs-scale)), 13px) !important;
+  font-size: 11px !important;
+}
+[data-fontsize] .home-love-label {
+  font-size: 11px !important;
 }
 
 /* 뱃지/태그: 크기 제한 */
