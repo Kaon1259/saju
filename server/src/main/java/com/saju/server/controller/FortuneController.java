@@ -54,11 +54,11 @@ public class FortuneController {
     public SseEmitter streamTodayFortune(@RequestParam("zodiac") String zodiacAnimal) {
         SseEmitter emitter = new SseEmitter(180000L);
 
-        // 기존 데이터(캐시) 체크
-        FortuneResponse existing = fortuneService.getTodayFortune(zodiacAnimal);
+        // 캐시 체크 (읽기 전용, INSERT 없음)
+        FortuneResponse existing = fortuneService.getCachedFortune(zodiacAnimal);
 
-        // overall이 있으면 이미 생성된 운세 → cached 이벤트로 즉시 반환
-        if (existing.getOverall() != null && !existing.getOverall().isBlank()) {
+        // 캐시 히트 → cached 이벤트로 즉시 반환
+        if (existing != null && existing.getOverall() != null && !existing.getOverall().isBlank()) {
             try {
                 String json = objectMapper.writeValueAsString(existing);
                 emitter.send(SseEmitter.event().name("cached").data(json));

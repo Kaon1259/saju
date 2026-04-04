@@ -123,6 +123,17 @@ public class FortuneService {
             "중요한 계약이나 협상에서 유리한 위치를 점할 수 있는 날입니다. 자신감 있게 임하되 상대방의 입장도 고려하세요. 윈윈 전략이 최고의 결과를 가져옵니다."
     };
 
+    /**
+     * 캐시된 운세만 조회 (INSERT 없음, 스트리밍 캐시 체크용)
+     */
+    @Transactional(readOnly = true)
+    public FortuneResponse getCachedFortune(String zodiacAnimal) {
+        LocalDate today = LocalDate.now();
+        Optional<DailyFortune> existing = dailyFortuneRepository
+                .findByZodiacAnimalAndFortuneDate(zodiacAnimal, today);
+        return existing.map(FortuneResponse::from).orElse(null);
+    }
+
     @Transactional(readOnly = true)
     public FortuneResponse getTodayFortune(String zodiacAnimal) {
         LocalDate today = LocalDate.now();
