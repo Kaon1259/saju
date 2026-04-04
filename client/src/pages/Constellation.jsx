@@ -5,6 +5,7 @@ import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
+
 import './Constellation.css';
 
 const SIGN_DATA = {

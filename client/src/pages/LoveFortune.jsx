@@ -84,8 +84,16 @@ function LoveFortune() {
       {/* 히어로 */}
       <section className="lf-hero">
         <div className="lf-hero-bg" />
-        <h1 className="lf-title">오늘의 연애운</h1>
-        <p className="lf-subtitle">지금 나의 연애 기운은 어떨까?</p>
+        <div className="lf-hero-couple">
+          <span className="lf-sym lf-sym--m">♂</span>
+          <div className="lf-hero-bond">
+            <span className="lf-bond-heart">♥</span>
+            {[...Array(5)].map((_, i) => <span key={i} className="lf-hero-sparkle" style={{ '--sp-i': i }}>✦</span>)}
+          </div>
+          <span className="lf-sym lf-sym--f">♀</span>
+        </div>
+        <h1 className="lf-title">1:1 연애운</h1>
+        <p className="lf-subtitle">두근두근, 오늘 나의 연애 기운은?</p>
       </section>
 
       {/* 입력 폼 */}

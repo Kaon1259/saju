@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from './PageTransition';
+import {
+  playHomeChime, playLovebeat, playCrystalBall, playHarmony, playOriental,
+  playProfilePing, playTarotReveal, playStarTwinkle, playBloodDrop,
+  playMbtiPop, playDreamWave, playPsychPop, playAncientBell,
+  playClockChime, playShutter, playBioWave
+} from '../utils/sounds';
 import './Header.css';
 
 const NAV_ITEMS = [
@@ -10,12 +16,12 @@ const NAV_ITEMS = [
   { path: '/love-fortune', label: '1:1연애', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /><text x="12" y="13" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="900" stroke="none">1:1</text></svg>
   ), color: '#F472B6' },
-  { path: '/my', label: '오늘운세', icon: (
-    <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" /><path d="M15 4l2 2-2 2M17 2l2 2-2 2" strokeWidth="1.5" /></svg>
-  ), color: '#FBBF24' },
   { path: '/compatibility', label: '궁합', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
   ), color: '#F472B6' },
+  { path: '/my', label: '오늘운세', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" /><path d="M15 4l2 2-2 2M17 2l2 2-2 2" strokeWidth="1.5" /></svg>
+  ), color: '#FBBF24' },
   { path: '/traditional', label: '정통사주', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="12" r="10" /><path d="M12 2c0 5.5-5 10-5 10s5 4.5 5 10" /><circle cx="10" cy="7" r="1.5" fill="var(--color-bg, #1a0533)" stroke="none" /><circle cx="14" cy="17" r="1.5" /></svg>
   ), color: '#E879F9' },
@@ -50,6 +56,26 @@ const PATH_EFFECTS = {
   '/love-fortune': 'compatibility',
 };
 
+const PATH_SOUNDS = {
+  '/': playHomeChime,
+  '/love-fortune': playLovebeat,
+  '/my': playCrystalBall,
+  '/compatibility': playHarmony,
+  '/traditional': playOriental,
+  '/profile': playProfilePing,
+  '/tarot': playTarotReveal,
+  '/constellation': playStarTwinkle,
+  '/bloodtype': playBloodDrop,
+  '/mbti': playMbtiPop,
+  '/dream': playDreamWave,
+  '/psych-test': playPsychPop,
+  '/saju': playOriental,
+  '/tojeong': playAncientBell,
+  '/manseryeok': playClockChime,
+  '/face-reading': playShutter,
+  '/biorhythm': playBioWave,
+};
+
 function Header({ onHomeSplash }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,6 +105,10 @@ function Header({ onHomeSplash }) {
       return;
     }
 
+    // 클릭 즉시 효과음
+    const sound = PATH_SOUNDS[item.path];
+    if (sound) sound();
+
     if (item.path === '/' && onHomeSplash) {
       onHomeSplash();
       navigate('/');
@@ -93,6 +123,11 @@ function Header({ onHomeSplash }) {
   const handleMoreNav = (item) => {
     setShowMore(false);
     if (location.pathname === item.path) return;
+
+    // 클릭 즉시 효과음
+    const sound = PATH_SOUNDS[item.path];
+    if (sound) sound();
+
     triggerTransition(item.effect, item.path);
   };
 

@@ -318,4 +318,9 @@ export const getFortuneShorts = async (context) => {
   return response.data;
 };
 
+export const searchCeleb = async (name) => {
+  const response = await api.post('/celeb/search', { name });
+  return response.data;
+};
+
 export default api;

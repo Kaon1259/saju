@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -32,7 +33,8 @@ public class SpecialFortuneService {
     private static final String[] LOVE_TYPES = {
         "relationship", "reunion", "remarriage", "blind_date",
         "crush", "marriage", "confession_timing", "ideal_type",
-        "past_life", "mind_reading", "couple_fortune", "meeting_timing"
+        "past_life", "couple_fortune", "meeting_timing",
+        "some_check", "contact_fortune"
     };
     private static final Map<String, String> LOVE_TYPE_KR = new LinkedHashMap<>() {{
         put("relationship", "연애운");
@@ -44,9 +46,10 @@ public class SpecialFortuneService {
         put("confession_timing", "고백 타이밍");
         put("ideal_type", "이상형 분석");
         put("past_life", "전생 인연");
-        put("mind_reading", "속마음 타로");
         put("couple_fortune", "커플 운세");
         put("meeting_timing", "만남의 시기");
+        put("some_check", "썸 진단");
+        put("contact_fortune", "연락 운");
     }};
 
     private static final String[][] SIJIN = {
@@ -349,12 +352,13 @@ public class SpecialFortuneService {
                     "위 정보를 바탕으로 '" + typeKr + "'을 분석하세요." +
                     (!statusKr.isEmpty() ? " 현재 연애 상태('" + statusKr + "')에 맞춰서 오늘 하루 연애 기운과 조언을 해주세요." : "") + "\n" +
                     "반드시 아래 JSON 형식으로만 응답:\n" +
-                    "{\"score\":점수(0-100),\"grade\":\"등급(대길/길/보통/흉)\",\"overall\":\"종합 분석 (4-5문장)\"," +
-                    "\"timing\":\"최적 시기 (2문장)\",\"advice\":\"구체적 행동 조언 (3문장)\"," +
-                    "\"caution\":\"주의사항 (2문장)\",\"luckyDay\":\"이번 달 행운의 날짜\"," +
-                    "\"luckyPlace\":\"행운의 장소\",\"luckyColor\":\"행운의 색\"}";
+                    "{\"score\":점수(0-100),\"grade\":\"등급(대길/길/보통/흉)\",\"overall\":\"종합 분석 (8-10문장, 구체적이고 재미있게 길게 작성!)\"," +
+                    "\"timing\":\"최적 시기 (3-4문장, 날짜/시간 구체적으로)\",\"advice\":\"구체적 행동 조언 (5-6문장, 실천 가능한 팁 상세히)\"," +
+                    "\"caution\":\"주의사항 (3-4문장)\",\"luckyDay\":\"이번 달 행운의 날짜\"," +
+                    "\"luckyPlace\":\"행운의 장소\",\"luckyColor\":\"행운의 색\"}\n" +
+                    "⚠️ 각 항목을 충분히 길고 구체적으로 작성해! 짧게 쓰지 마!";
 
-                String response = claudeApiService.generate(system, user, 800);
+                String response = claudeApiService.generate(system, user, 2000);
                 String json = ClaudeApiService.extractJson(response);
                 if (json != null) {
                     JsonNode node = objectMapper.readTree(json);
@@ -697,6 +701,28 @@ public class SpecialFortuneService {
 - 이번 주 커플 럭키데이 제시
 - 권태기 예방/극복 팁 (사주 기반)""";
 
+            case "some_check" -> """
+【썸 진단 전문 분석 프레임워크】
+- 의뢰인 일간(日干) 오행으로 현재 썸의 성격과 패턴 분석
+- 오늘 일진이 썸 관계에 미치는 에너지 분석 (진전/정체/후퇴)
+- 썸 → 연애 발전 가능성을 사주 오행 상생/상극으로 퍼센트 제시
+- 상대가 나에게 보내는 신호 해석 (관심/호감/우정/경계)
+- 썸에서 연애로 넘어가기 위한 결정적 행동 3가지
+- 이 썸의 유통기한 분석 (지금 행동해야 할지, 기다려야 할지)
+- 상대방 사주가 있으면: 상대의 연애관과 썸 스타일 분석
+- 이번 주/이번 달 썸이 발전할 최적 타이밍 제시""";
+
+            case "contact_fortune" -> """
+【연락 운 전문 분석 프레임워크】
+- 의뢰인 일간(日干) 오행으로 커뮤니케이션 스타일 분석
+- 오늘 일진의 기운이 연락/대화에 미치는 영향
+- 먼저 연락해도 되는 시간대 vs 기다려야 하는 시간대 구체 제시
+- 연락할 때 효과적인 대화 주제/톤/이모지 추천
+- 피해야 할 연락 타이밍과 대화 주제 경고
+- 상대방이 연락을 기다리고 있는지 기운 분석
+- 읽씹/안읽씹 당했을 때 대처법 (사주 기반)
+- 상대방 사주가 있으면: 상대의 연락 스타일과 선호 패턴 분석""";
+
             case "meeting_timing" -> """
 【만남의 시기 전문 분석 프레임워크】
 - 일간(日干)과 사주 전체 구조로 인연의 시기 분석
@@ -824,6 +850,13 @@ public class SpecialFortuneService {
         try {
             var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
             if (cached.isPresent()) {
+                // 1시간 지나면 캐시 만료 → 재질의
+                LocalDateTime createdAt = cached.get().getCreatedAt();
+                if (createdAt != null && createdAt.plusHours(1).isBefore(LocalDateTime.now())) {
+                    log.info("캐시 만료(1시간 경과): {} / {}", type, cacheKey);
+                    specialFortuneRepository.delete(cached.get());
+                    return null;
+                }
                 log.debug("캐시 히트: {} / {}", type, cacheKey);
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
