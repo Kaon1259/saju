@@ -528,11 +528,11 @@ function Home() {
         </section>
       )}
 
-      {/* 비로그인: 회원가입 유도 */}
+      {/* 비로그인: 카카오 로그인 유도 */}
       {!userId && !showForm && (
         <section style={{ padding: '0 4px' }}>
           <button className="home-cta-btn" onClick={() => navigate('/register', { state: { from: '/' } })}>
-            회원가입하고 맞춤 운세 받기
+            카카오 로그인하고 맞춤 운세 받기
           </button>
         </section>
       )}
