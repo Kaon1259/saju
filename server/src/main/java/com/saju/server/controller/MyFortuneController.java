@@ -29,16 +29,20 @@ public class MyFortuneController {
     public ResponseEntity<Map<String, Object>> getMyFortune(@PathVariable Long userId) {
         UserResponse user = userService.getUser(userId);
 
+        if (user.getBirthDate() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "프로필을 먼저 완성해주세요."));
+        }
+
         Map<String, Object> result = new LinkedHashMap<>();
         var userMap = new java.util.LinkedHashMap<String, Object>();
         userMap.put("name", user.getName());
-        userMap.put("zodiacAnimal", user.getZodiacAnimal());
+        userMap.put("zodiacAnimal", user.getZodiacAnimal() != null ? user.getZodiacAnimal() : "");
         userMap.put("bloodType", user.getBloodType() != null ? user.getBloodType() : "");
         userMap.put("mbtiType", user.getMbtiType() != null ? user.getMbtiType() : "");
         userMap.put("birthDate", user.getBirthDate().toString());
         userMap.put("birthTime", user.getBirthTime() != null ? user.getBirthTime() : "");
-        userMap.put("gender", user.getGender());
-        userMap.put("calendarType", user.getCalendarType());
+        userMap.put("gender", user.getGender() != null ? user.getGender() : "");
+        userMap.put("calendarType", user.getCalendarType() != null ? user.getCalendarType() : "SOLAR");
         userMap.put("relationshipStatus", user.getRelationshipStatus() != null ? user.getRelationshipStatus() : "");
         result.put("user", userMap);
 

@@ -210,6 +210,7 @@ public class SpecialFortuneService {
 
         var user = userOpt.get();
         LocalDate birthDate = user.getBirthDate();
+        if (birthDate == null) return getLoveTemperature(); // 프로필 미완성 폴백
 
         // 사용자 사주 기둥 계산
         int sajuYear = SajuCalculator.getSajuYear(birthDate);
