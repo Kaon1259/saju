@@ -133,11 +133,16 @@ function MyFortune() {
       onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
       onDone: () => {
         setStreaming(false); setStreamText('');
-        (async () => { try { setData(await getMyFortune(userId)); } catch {} finally { setLoading(false); } })();
+        // 스트리밍 완료 → 서버 캐시 저장됨 → 같은 날짜로 재요청하면 캐시 히트
+        cleanupRef.current = getMyFortuneStream(userId, {
+          onCached: (d) => { setData(d); setLoading(false); },
+          onDone: () => { setLoading(false); },
+          onError: () => { setLoading(false); },
+        }, targetDate);
       },
       onError: () => {
         setStreaming(false); setStreamText('');
-        (async () => { try { setData(await getMyFortune(userId)); } catch {} finally { setLoading(false); } })();
+        setLoading(false);
       },
     }, targetDate);
     return () => cleanupRef.current?.();
