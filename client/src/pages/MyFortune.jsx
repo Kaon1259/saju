@@ -276,7 +276,7 @@ function MyFortune() {
                 🌙 내일의 운세 보기
               </button>
               <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => setShowDatePicker(true)}>
-                📅 날짜 지정 운세
+                📅 날짜 지정 운세 보기
               </button>
             </div>
           ) : (
