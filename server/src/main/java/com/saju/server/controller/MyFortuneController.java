@@ -105,16 +105,15 @@ public class MyFortuneController {
         // 캐시 체크
         var cached = fortuneService.getCachedFortune(user.getZodiacAnimal(), targetDate);
         if (cached != null && cached.getOverall() != null && !cached.getOverall().isBlank()) {
-            // 사주 정보도 함께 계산 (성격분석, 일간 등)
+            // 빠른 사주 기본 계산 (AI 호출 없음)
             LocalDate bd = user.getBirthDate();
             if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
                 bd = lunarCalendarService.lunarToSolar(bd);
             }
-            SajuResult sajuResult = sajuService.analyze(bd, user.getBirthTime(), user.getGender());
+            SajuResult sajuResult = sajuService.buildBasicResult(bd, user.getBirthTime(), user.getGender());
 
             SseEmitter emitter = new SseEmitter(5000L);
             final Map<String, Object> data = buildMyFortuneData(user, cached);
-            // 사주 추가정보 병합
             @SuppressWarnings("unchecked")
             Map<String, Object> sajuMap = (Map<String, Object>) data.get("saju");
             if (sajuResult != null) {
