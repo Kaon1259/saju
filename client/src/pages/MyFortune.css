@@ -4,14 +4,15 @@
 .myf-mode-tabs { display: flex; gap: 0; margin-bottom: 16px; border-radius: 14px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.12); }
 .myf-mode-tab { flex: 1; padding: 14px 0; font-size: 15px; font-weight: 700; border: none; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
 .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(124,58,237,0.15)); color: #FBBF24; }
-.myf-mode-tab:first-child { border-right: 1px solid rgba(255,255,255,0.08); }
+.myf-mode-tab { border-right: 1px solid rgba(255,255,255,0.08); }
+.myf-mode-tab:last-child { border-right: none; }
 [data-theme="light"] .myf-mode-tabs { border-color: rgba(0,0,0,0.1); }
 [data-theme="light"] .myf-mode-tab { background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.6); }
 [data-theme="light"] .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.08)); color: #b8860b; }
 
 /* 다른 사람 운세 */
-.myf-other-view { padding: 0; }
-.myf-other-form { padding: 24px 20px; }
+.myf-other-view { padding: 0 0 60px; }
+.myf-other-form { padding: 24px 20px 32px; }
 .myf-other-form h2 { font-size: 18px; font-weight: 800; color: #fff; }
 [data-theme="light"] .myf-other-form h2 { color: #111; }
 

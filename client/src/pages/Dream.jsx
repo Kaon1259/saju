@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -96,16 +97,10 @@ function Dream() {
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onDone: (fullText) => {
-          // JSON 파싱 시도
-          try {
-            const match = fullText.match(/\{[\s\S]*\}/);
-            if (match) {
-              const parsed = JSON.parse(match[0]);
-              setResult(parsed);
-            } else {
-              setResult({ interpretation: fullText, score: 65, category: '일반', symbol: '🌙' });
-            }
-          } catch {
+          const parsed = parseAiJson(fullText);
+          if (parsed) {
+            setResult(parsed);
+          } else {
             setResult({ interpretation: fullText, score: 65, category: '일반', symbol: '🌙' });
           }
           setStep('result');

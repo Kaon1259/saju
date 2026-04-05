@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { getWeeklyFortuneStream } from '../api/fortune';
+import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
@@ -93,15 +94,12 @@ function WeeklyFortune() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
-        try {
-          const json = fullText.match(/\{[\s\S]*\}/)?.[0];
-          if (json) {
-            const parsed = JSON.parse(json);
+        {
+          const parsed = parseAiJson(fullText);
+          if (parsed) {
             setResult(parsed);
             setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
           }
-        } catch (e) {
-          console.error('주간운세 파싱 실패:', e);
         }
         setLoading(false);
       },
@@ -232,21 +230,21 @@ function WeeklyFortune() {
                 <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
                 <circle
                   cx="60" cy="60" r="52" fill="none"
-                  stroke={getScoreColor(result.score)}
+                  stroke={getScoreColor(result.overallScore ?? result.score)}
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
-                  strokeDashoffset={circumference - (circumference * (result.score || 0)) / 100}
+                  strokeDashoffset={circumference - (circumference * ((result.overallScore ?? result.score) || 0)) / 100}
                   transform="rotate(-90 60 60)"
                   className="wf-score-ring"
                 />
               </svg>
               <div className="wf-score-inner">
-                <span className="wf-score-num">{result.score || 0}</span>
+                <span className="wf-score-num">{(result.overallScore ?? result.score) || 0}</span>
                 <span className="wf-score-unit">점</span>
               </div>
             </div>
-            <span className="wf-grade" style={{ color: getScoreColor(result.score) }}>
+            <span className="wf-grade" style={{ color: getScoreColor(result.overallScore ?? result.score) }}>
               {result.grade || ''}
             </span>
           </div>
@@ -305,7 +303,7 @@ function WeeklyFortune() {
               label="주간 운세 읽어주기"
               text={[
                 '이번 주 운세 결과입니다.',
-                `종합 점수 ${result.score}점, ${result.grade}입니다.`,
+                `종합 점수 ${result.overallScore ?? result.score}점, ${result.grade}입니다.`,
                 result.summary,
                 result.love ? `애정운. ${result.love}` : '',
                 result.money ? `재물운. ${result.money}` : '',
@@ -313,7 +311,7 @@ function WeeklyFortune() {
                 result.advice ? `조언. ${result.advice}` : '',
               ].filter(Boolean).join(' ')}
               summaryText={[
-                `이번 주 운세 ${result.score}점, ${result.grade}.`,
+                `이번 주 운세 ${result.overallScore ?? result.score}점, ${result.grade}.`,
                 result.summary,
               ].filter(Boolean).join(' ')}
             />

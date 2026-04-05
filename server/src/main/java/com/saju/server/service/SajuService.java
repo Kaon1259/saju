@@ -179,6 +179,93 @@ public class SajuService {
         return result;
     }
 
+    /**
+     * DB 캐시에서 사주 분석 결과 조회 (스트리밍 캐시 체크용)
+     */
+    public SajuResult getCachedResult(LocalDate birthDate, String birthTime, String gender) {
+        String dbCacheKey = buildCacheKey("saju", birthDate.toString(), birthTime, gender);
+        Map<String, Object> dbCached = getFromCache("saju", dbCacheKey);
+        if (dbCached != null) {
+            try {
+                return objectMapper.convertValue(dbCached, SajuResult.class);
+            } catch (Exception e) {
+                log.warn("Failed to deserialize cached saju result: {}", e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 기본 사주 계산 (AI 호출 없이 - 빠른 응답용)
+     */
+    public SajuResult buildBasicResult(LocalDate birthDate, String birthTime, String gender) {
+        SajuResult result = SajuCalculator.calculate(birthDate, birthTime);
+        int dayStemIdx = getDayMasterIndex(result.getDayMaster());
+        if (dayStemIdx >= 0) {
+            SajuPillar yearP = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(birthDate));
+            SajuPillar monthP = SajuCalculator.calculateMonthPillar(birthDate, yearP.getStemIndex());
+            SajuPillar dayP = SajuCalculator.calculateDayPillar(birthDate);
+            SajuPillar hourP = (birthTime != null && !birthTime.isEmpty())
+                ? SajuCalculator.calculateHourPillar(birthTime, dayP.getStemIndex()) : null;
+            result.setInteractions(SajuCalculator.calculateInteractions(yearP, monthP, dayP, hourP));
+            result.setSinsalList(SajuCalculator.calculateSinsal(dayStemIdx, dayP.getBranchIndex(), yearP, monthP, dayP, hourP));
+            result.setTwelveStages(SajuCalculator.calculateAllTwelveStages(dayStemIdx, yearP, monthP, dayP, hourP));
+            result.setGyeokguk(SajuCalculator.calculateGyeokguk(dayStemIdx, monthP));
+            result.setInteractionAnalysis(SajuInterpreter.interpretInteractions(result.getInteractions()));
+            result.setGyeokgukAnalysis(SajuInterpreter.interpretGyeokguk(result.getGyeokguk()));
+            result.setSinsalAnalysis(SajuInterpreter.interpretSinsal(result.getSinsalList()));
+        }
+        SajuInterpreter.interpret(result, LocalDate.now());
+        return result;
+    }
+
+    /**
+     * 스트리밍 완료 후 AI 응답을 파싱하여 캐시 저장
+     */
+    @Transactional
+    public void parseAndSaveStreamResult(LocalDate birthDate, String birthTime, String gender, SajuResult basicResult, String fullText) {
+        try {
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) {
+                log.error("Saju stream: JSON extraction failed from fullText length={}", fullText.length());
+                return;
+            }
+
+            JsonNode node = objectMapper.readTree(json);
+
+            // AI 결과를 basicResult에 병합
+            if (node.has("personalityReading")) {
+                basicResult.setPersonalityReading(node.get("personalityReading").asText());
+            }
+            SajuResult.CategoryFortune fortune = SajuResult.CategoryFortune.builder()
+                .overall(node.has("overall") ? node.get("overall").asText() : "")
+                .love(node.has("love") ? node.get("love").asText() : "")
+                .money(node.has("money") ? node.get("money").asText() : "")
+                .health(node.has("health") ? node.get("health").asText() : "")
+                .work(node.has("work") ? node.get("work").asText() : "")
+                .score(node.has("score") ? node.get("score").asInt() : 70)
+                .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : 7)
+                .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : "파랑")
+                .build();
+            basicResult.setTodayFortune(fortune);
+
+            // DB 캐시에 저장
+            String dbCacheKey = buildCacheKey("saju", birthDate.toString(), birthTime, gender);
+            Map<String, Object> resultMap = objectMapper.convertValue(basicResult, new TypeReference<Map<String, Object>>() {});
+            saveToCache("saju", dbCacheKey, resultMap);
+            log.info("Saju stream result cached: birthDate={}", birthDate);
+        } catch (Exception e) {
+            log.error("Failed to parse/save saju stream result: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 사주 분석용 사주 요약 문자열 (외부에서 접근 가능)
+     */
+    public String getSajuSummary(SajuResult result, LocalDate birthDate, String birthTime, LocalDate today) {
+        return buildSajuSummary(result, birthDate, birthTime, today);
+    }
+
     // ===== DB 캐싱 헬퍼 메서드 =====
 
     private String buildCacheKey(String... parts) {

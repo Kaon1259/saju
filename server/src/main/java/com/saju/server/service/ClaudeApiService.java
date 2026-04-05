@@ -174,13 +174,19 @@ public class ClaudeApiService {
                 }
 
                 String fullResult = fullText.toString();
+
+                // 완료 콜백을 먼저 실행 (캐시 저장 등) - emitter 에러로 콜백 누락 방지
+                if (onComplete != null) {
+                    try {
+                        onComplete.accept(fullResult);
+                    } catch (Exception e) {
+                        log.error("스트리밍 완료 콜백 실패: {}", e.getMessage(), e);
+                    }
+                }
+
                 emitter.send(SseEmitter.event().name("done").data(fullResult));
                 emitter.complete();
                 reader.close();
-                // 완료 콜백 (캐시 저장 등)
-                if (onComplete != null) {
-                    try { onComplete.accept(fullResult); } catch (Exception ignored) {}
-                }
 
             } catch (Exception e) {
                 log.error("스트리밍 실패: {}", e.getMessage());

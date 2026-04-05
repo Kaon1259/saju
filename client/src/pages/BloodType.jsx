@@ -6,6 +6,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './BloodType.css';
 
 const TYPES = [
@@ -61,13 +62,10 @@ function BloodType() {
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onDone: (fullText) => {
-        try {
-          const jsonMatch = fullText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            setFortune({ bloodType: type, ...parsed });
-          }
-        } catch (e) { console.error('parse error', e); }
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          setFortune({ bloodType: type, ...parsed });
+        }
         setStreamText('');
         setLoading(false);
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);

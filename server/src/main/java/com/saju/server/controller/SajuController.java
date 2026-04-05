@@ -1,14 +1,19 @@
 package com.saju.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.saju.*;
 import com.saju.server.service.ClaudeApiService;
+import com.saju.server.service.FortunePromptBuilder;
 import com.saju.server.service.LunarCalendarService;
 import com.saju.server.service.SajuService;
 import com.saju.server.service.UserService;
 import com.saju.server.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,12 +23,15 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/saju")
 @RequiredArgsConstructor
+@Slf4j
 public class SajuController {
 
     private final UserService userService;
     private final SajuService sajuService;
     private final LunarCalendarService lunarCalendarService;
     private final ClaudeApiService claudeApiService;
+    private final FortunePromptBuilder promptBuilder;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Analyze saju by birth date and optional time
@@ -45,6 +53,83 @@ public class SajuController {
 
         SajuResult result = sajuService.analyze(birthDate, birthTime, gender);
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 다른 사람 사주 분석 스트리밍
+     * GET /api/saju/analyze/stream?birthDate=1990-05-15&birthTime=자시&calendarType=SOLAR&gender=M
+     */
+    @GetMapping(value = "/analyze/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamAnalyzeSaju(
+            @RequestParam("birthDate") String birthDateStr,
+            @RequestParam(value = "birthTime", required = false) String birthTime,
+            @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
+            @RequestParam(value = "gender", required = false) String gender) {
+
+        LocalDate birthDate = LocalDate.parse(birthDateStr);
+        if ("LUNAR".equalsIgnoreCase(calendarType)) {
+            birthDate = lunarCalendarService.lunarToSolar(birthDate);
+        }
+
+        // 1. DB 캐시 체크
+        SajuResult cached = sajuService.getCachedResult(birthDate, birthTime, gender);
+        if (cached != null && cached.getTodayFortune() != null
+                && cached.getTodayFortune().getOverall() != null
+                && !cached.getTodayFortune().getOverall().isBlank()) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            final SajuResult result = cached;
+            new Thread(() -> {
+                try {
+                    String json = objectMapper.writeValueAsString(result);
+                    emitter.send(SseEmitter.event().name("cached").data(json));
+                    emitter.complete();
+                } catch (Exception e) {
+                    log.warn("Failed to send cached saju result: {}", e.getMessage());
+                }
+            }).start();
+            return emitter;
+        }
+
+        // 2. 기본 사주 계산 (빠름)
+        SajuResult basicResult = sajuService.buildBasicResult(birthDate, birthTime, gender);
+
+        // 3. 통합 AI 프롬프트 (성격분석 + 오늘의 운세 한 번에)
+        String sajuSummary = sajuService.getSajuSummary(basicResult, birthDate, birthTime, LocalDate.now());
+        String todayContext = promptBuilder.buildTodayContext(LocalDate.now());
+
+        String systemPrompt = """
+카페에서 친한 친구한테 수다 떨듯이 자연스럽게 대화하는 사주 전문가야.
+사주 정보를 바탕으로 성격 분석과 오늘의 운세를 함께 봐줘!
+
+【말투 규칙】
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
+
+【작성 규칙】
+1. 반드시 JSON만 응답 (설명 텍스트 없이)
+2. personalityReading: 핵심 성격(장점+단점), 대인관계 스타일, 연애 스타일을 6-8문장으로
+3. overall~work 각 항목은 3-4문장, 구체적 시간/행동/색상 포함
+4. 점수는 45-98 사이
+5. 대화하듯 자연스러운 반말 구어체""";
+
+        String userPrompt = todayContext + "\n" + sajuSummary + "\n\n" +
+            "위 사주 정보와 오늘의 천기를 종합하여 성격 분석과 오늘의 운세를 함께 작성하세요.\n" +
+            "반드시 아래 JSON 형식으로만 응답:\n" +
+            "{\"personalityReading\":\"성격 분석 (6-8문장)\"," +
+            "\"overall\":\"총운 (오전/오후/저녁 시간대별 기운 변화, 4-5문장)\"," +
+            "\"love\":\"애정운 (3-4문장)\"," +
+            "\"money\":\"재물운 (3-4문장)\"," +
+            "\"health\":\"건강운 (3-4문장)\"," +
+            "\"work\":\"직장운 (3-4문장)\"," +
+            "\"score\":점수(45-98)," +
+            "\"luckyNumber\":행운숫자(1-99)," +
+            "\"luckyColor\":\"행운색상\"}";
+
+        final LocalDate finalBd = birthDate;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2000, (fullText) -> {
+            sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
+        });
     }
 
     /**

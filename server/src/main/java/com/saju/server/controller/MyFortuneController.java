@@ -102,10 +102,24 @@ public class MyFortuneController {
         // 캐시 체크
         var cached = fortuneService.getCachedFortune(user.getZodiacAnimal());
         if (cached != null && cached.getOverall() != null && !cached.getOverall().isBlank()) {
+            // 사주 정보도 함께 계산 (성격분석, 일간 등)
+            LocalDate bd = user.getBirthDate();
+            if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
+                bd = lunarCalendarService.lunarToSolar(bd);
+            }
+            SajuResult sajuResult = sajuService.analyze(bd, user.getBirthTime(), user.getGender());
+
             SseEmitter emitter = new SseEmitter(5000L);
+            final Map<String, Object> data = buildMyFortuneData(user, cached);
+            // 사주 추가정보 병합
+            @SuppressWarnings("unchecked")
+            Map<String, Object> sajuMap = (Map<String, Object>) data.get("saju");
+            if (sajuResult != null) {
+                sajuMap.put("dayMaster", sajuResult.getDayMasterHanja() + " " + sajuResult.getDayMaster());
+                sajuMap.put("personalityReading", sajuResult.getPersonalityReading());
+            }
             new Thread(() -> {
                 try {
-                    Map<String, Object> data = buildMyFortuneData(user, cached);
                     emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(data)));
                     emitter.complete();
                 } catch (Exception ignored) {}

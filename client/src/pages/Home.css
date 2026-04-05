@@ -2002,3 +2002,30 @@
 [data-theme="light"] .home-landing-card { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .home-landing-card-title { color: #222; }
 [data-theme="light"] .home-landing-card-desc { color: #4a4a5a; }
+
+/* 신년운세 배너 */
+.home-year-banner {
+  position: relative; display: flex; width: 100%; padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(251,191,36,0.3);
+  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(220,38,38,0.08), rgba(124,58,237,0.06));
+  cursor: pointer; overflow: hidden; transition: all 0.3s;
+}
+.home-year-banner:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(251,191,36,0.2); }
+.home-year-banner:active { transform: scale(0.98); }
+.home-year-banner-bg {
+  position: absolute; inset: 0; opacity: 0.06;
+  background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(251,191,36,0.3) 10px, rgba(251,191,36,0.3) 12px);
+}
+.home-year-banner-sparkles {
+  position: absolute; top: 6px; right: 14px; font-size: 10px; letter-spacing: 6px;
+  color: rgba(251,191,36,0.5); animation: bannerSparkle 2s ease-in-out infinite;
+}
+@keyframes bannerSparkle { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+.home-year-banner-content { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; }
+.home-year-banner-icon { font-size: 32px; flex-shrink: 0; }
+.home-year-banner-text { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.home-year-banner-title { font-size: 16px; font-weight: 900; color: #FBBF24; }
+.home-year-banner-desc { font-size: 12px; color: var(--color-text-muted); }
+.home-year-banner-arrow { font-size: 24px; font-weight: 300; color: rgba(251,191,36,0.6); flex-shrink: 0; }
+[data-theme="light"] .home-year-banner { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(220,38,38,0.04), rgba(124,58,237,0.03)); border-color: rgba(184,134,11,0.25); }
+[data-theme="light"] .home-year-banner-title { color: #b8860b; }
+[data-theme="light"] .home-year-banner-sparkles { color: rgba(184,134,11,0.4); }

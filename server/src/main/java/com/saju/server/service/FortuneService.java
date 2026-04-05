@@ -219,6 +219,7 @@ public class FortuneService {
                 if (node.has("luckyNumber")) fortune.setLuckyNumber(node.get("luckyNumber").asInt(fortune.getLuckyNumber()));
                 if (node.has("luckyColor")) fortune.setLuckyColor(node.get("luckyColor").asText());
                 dailyFortuneRepository.save(fortune);
+                log.info("Daily fortune cache updated: zodiac={}, date={}", zodiacAnimal, today);
             } else {
                 // 기존 레코드 없으면 새로 생성
                 long seed = (long) zodiacAnimal.hashCode() + today.hashCode();
@@ -236,9 +237,10 @@ public class FortuneService {
                     .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : LUCKY_COLORS[random.nextInt(LUCKY_COLORS.length)])
                     .build();
                 dailyFortuneRepository.save(fortune);
+                log.info("Daily fortune cache created: zodiac={}, date={}", zodiacAnimal, today);
             }
         } catch (Exception e) {
-            log.warn("Failed to parse fortune stream result: {}", e.getMessage());
+            log.error("Failed to parse/save fortune stream result: zodiac={}, error={}", zodiacAnimal, e.getMessage(), e);
         }
     }
 

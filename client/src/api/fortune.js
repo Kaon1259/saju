@@ -100,6 +100,27 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
   return response.data;
 };
 
+export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError }) => {
+  const params = new URLSearchParams({ birthDate });
+  if (birthTime) params.set('birthTime', birthTime);
+  if (calendarType) params.set('calendarType', calendarType);
+  if (gender) params.set('gender', gender);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/saju/analyze/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
+};
+
 export const getUserSaju = async (userId) => {
   const response = await api.get(`/saju/user/${userId}`);
   return response.data;

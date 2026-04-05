@@ -4,6 +4,7 @@ import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -163,32 +164,27 @@ function FaceReading() {
         },
         onDone: (fullText) => {
           clearInterval(phaseTimer);
-          try {
-            const match = fullText.match(/\{[\s\S]*\}/);
-            if (match) {
-              const data = JSON.parse(match[0]);
-              const mapped = {
-                overallType: data.overallType,
-                emoji: data.overallEmoji || data.emoji,
-                element: data.faceElement || data.element,
-                score: data.score,
-                grade: data.grade,
-                personality: data.personality,
-                wealth: data.moneyFortune || data.wealth,
-                love: data.loveFortune || data.love,
-                career: data.careerFortune || data.career,
-                health: data.healthFortune || data.health,
-                strengths: data.strengths,
-                improvements: data.improvements,
-                luckyColor: data.luckyColor,
-                luckyDirection: data.luckyDirection,
-                luckyNumber: data.luckyNumber,
-              };
-              setResult(mapped);
-            } else {
-              setResult({ overallType: '분석 완료', personality: fullText, score: 75, grade: 'B' });
-            }
-          } catch {
+          const data = parseAiJson(fullText);
+          if (data) {
+            const mapped = {
+              overallType: data.overallType,
+              emoji: data.overallEmoji || data.emoji,
+              element: data.faceElement || data.element,
+              score: data.score,
+              grade: data.grade,
+              personality: data.personality,
+              wealth: data.moneyFortune || data.wealth,
+              love: data.loveFortune || data.love,
+              career: data.careerFortune || data.career,
+              health: data.healthFortune || data.health,
+              strengths: data.strengths,
+              improvements: data.improvements,
+              luckyColor: data.luckyColor,
+              luckyDirection: data.luckyDirection,
+              luckyNumber: data.luckyNumber,
+            };
+            setResult(mapped);
+          } else {
             setResult({ overallType: '분석 완료', personality: fullText, score: 75, grade: 'B' });
           }
           setStep('result');

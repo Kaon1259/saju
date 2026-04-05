@@ -5,6 +5,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './Tojeong.css';
 
 const RATING_STYLE = {
@@ -80,25 +81,18 @@ function Tojeong() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
-        try {
-          const json = fullText.match(/\{[\s\S]*\}/)?.[0];
-          if (json) {
-            // done 이벤트 시 서버가 이미 캐시 저장 완료
-            // 결과는 TojeongResult 형식이 아닌 AI JSON이므로 기본 구조로 매핑
-            const parsed = JSON.parse(json);
-            // yearSummary, monthlyFortunes 등이 months 배열로 올 수 있음
-            const mapped = {
-              yearSummary: parsed.yearSummary,
-              yearKeywords: parsed.yearKeywords,
-              bestMonth: parsed.bestMonth,
-              cautionMonth: parsed.cautionMonth,
-              yearAdvice: parsed.yearAdvice,
-              monthlyFortunes: parsed.months || parsed.monthlyFortunes || [],
-            };
-            setResult(mapped);
-          }
-        } catch (e) {
-          console.error('토정비결 파싱 실패:', e);
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          const mapped = {
+            yearSummary: parsed.yearSummary,
+            yearKeywords: parsed.yearKeywords,
+            bestMonth: parsed.bestMonth,
+            cautionMonth: parsed.cautionMonth,
+            yearAdvice: parsed.yearAdvice,
+            monthlyFortunes: parsed.months || parsed.monthlyFortunes || [],
+          };
+          setResult(mapped);
+        } else {
           setShowInput(true);
         }
         setLoading(false);

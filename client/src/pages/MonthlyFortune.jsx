@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { getMonthlyFortuneStream } from '../api/fortune';
+import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
@@ -97,15 +98,10 @@ function MonthlyFortune() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
-        try {
-          const json = fullText.match(/\{[\s\S]*\}/)?.[0];
-          if (json) {
-            const parsed = JSON.parse(json);
-            setResult({ ...parsed, month: m });
-            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
-          }
-        } catch (e) {
-          console.error('월별운세 파싱 실패:', e);
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          setResult({ ...parsed, month: m });
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         }
         setLoading(false);
       },

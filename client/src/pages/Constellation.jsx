@@ -7,6 +7,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './Constellation.css';
 
 const SIGN_DATA = {
@@ -89,13 +90,10 @@ function Constellation() {
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onDone: (fullText) => {
-        try {
-          const jsonMatch = fullText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            setFortune({ sign, ...parsed });
-          }
-        } catch (e) { console.error('parse error', e); }
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          setFortune({ sign, ...parsed });
+        }
         setStreamText('');
         setLoading(false);
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);

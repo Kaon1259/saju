@@ -6,6 +6,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './Mbti.css';
 
 const TYPES_DATA = {
@@ -82,13 +83,10 @@ function Mbti() {
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onDone: (fullText) => {
-        try {
-          const jsonMatch = fullText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            setFortune({ mbtiType: type, ...parsed });
-          }
-        } catch (e) { console.error('parse error', e); }
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          setFortune({ mbtiType: type, ...parsed });
+        }
         setStreamText('');
         setLoading(false);
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);

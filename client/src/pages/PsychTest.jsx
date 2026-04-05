@@ -3,6 +3,7 @@ import { getPsychTests, analyzePsychTestStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -144,15 +145,10 @@ function PsychTest() {
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onDone: (fullText) => {
-          try {
-            const match = fullText.match(/\{[\s\S]*\}/);
-            if (match) {
-              const parsed = JSON.parse(match[0]);
-              setResult(parsed);
-            } else {
-              setResult({ type: '분석 완료', description: fullText, score: 80 });
-            }
-          } catch {
+          const parsed = parseAiJson(fullText);
+          if (parsed) {
+            setResult(parsed);
+          } else {
             setResult({ type: '분석 완료', description: fullText, score: 80 });
           }
           setStep('result');
