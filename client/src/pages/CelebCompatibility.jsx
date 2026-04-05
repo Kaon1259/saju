@@ -1,10 +1,11 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, searchCeleb, getGuestFortune } from '../api/fortune';
+import { getSajuCompatibility, searchCeleb, analyzeSaju, analyzeSajuStream } from '../api/fortune';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
 import SpeechButton from '../components/SpeechButton';
+import StreamText from '../components/StreamText';
 import { shareResult } from '../utils/share';
 import './CelebCompatibility.css';
 
@@ -56,6 +57,9 @@ function CelebCompatibility() {
   // 스타 운세
   const [starFortune, setStarFortune] = useState(null);
   const [starFortuneLoading, setStarFortuneLoading] = useState(false);
+  const [starStreamText, setStarStreamText] = useState('');
+  const [starStreaming, setStarStreaming] = useState(false);
+  const starCleanupRef = useRef(null);
 
   // state 소비 후 제거 (뒤로가기 중복 방지)
   useEffect(() => {
@@ -210,21 +214,54 @@ function CelebCompatibility() {
     if (res === 'copied') { setShareMsg('클립보드에 복사됨!'); setTimeout(() => setShareMsg(''), 2000); }
   };
 
-  const handleStarFortune = async () => {
+  const handleStarFortune = () => {
     if (!selectedCeleb) return;
     setStarFortuneLoading(true);
-    try {
-      const data = await getGuestFortune(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender);
-      setStarFortune(data);
-    } catch (e) { console.error(e); }
-    setStarFortuneLoading(false);
+    setStarStreamText('');
+    setStarStreaming(false);
+    setStarFortune(null);
+    starCleanupRef.current?.();
+
+    starCleanupRef.current = analyzeSajuStream(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender, {
+      onCached: (data) => {
+        setStarFortune(data.todayFortune || data);
+        setStarFortuneLoading(false);
+      },
+      onChunk: (text) => {
+        setStarStreaming(true);
+        setStarStreamText(prev => prev + text);
+      },
+      onDone: () => {
+        setStarStreaming(false);
+        (async () => {
+          try {
+            const data = await analyzeSaju(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender);
+            setStarFortune(data.todayFortune || data);
+          } catch (e) { console.error(e); }
+          finally { setStarFortuneLoading(false); setStarStreamText(''); }
+        })();
+      },
+      onError: () => {
+        setStarStreaming(false);
+        (async () => {
+          try {
+            const data = await analyzeSaju(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender);
+            setStarFortune(data.todayFortune || data);
+          } catch (e) { console.error(e); }
+          finally { setStarFortuneLoading(false); setStarStreamText(''); }
+        })();
+      },
+    });
   };
 
   const handleReset = () => {
+    starCleanupRef.current?.();
     setStep('select');
     setSelectedCeleb(null);
     setResult(null);
     setStarFortune(null);
+    setStarStreamText('');
+    setStarStreaming(false);
     setSearchQuery('');
     setShowManual(false);
     setManualName('');
@@ -377,9 +414,12 @@ function CelebCompatibility() {
 
         {/* 스타 운세 보기 */}
         <div className="celeb-star-fortune glass-card">
-          <button className="celeb-star-fortune-btn" onClick={handleStarFortune} disabled={starFortuneLoading}>
-            {starFortuneLoading ? '운세 불러오는 중...' : `🌟 ${selectedCeleb.name}의 오늘 운세 보기`}
+          <button className="celeb-star-fortune-btn" onClick={handleStarFortune} disabled={starFortuneLoading || starStreaming}>
+            {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : `🌟 ${selectedCeleb.name}의 오늘 운세 보기`}
           </button>
+          {(starStreaming || starFortuneLoading) && starStreamText && (
+            <StreamText text={starStreamText} icon="🌟" label={`${selectedCeleb.name}의 운세를 분석하고 있어요...`} color="#FBBF24" />
+          )}
           {starFortune && (
             <div className="celeb-star-fortune-result fade-in">
               {starFortune.overall && <div className="celeb-sf-item"><span className="celeb-sf-label">🌟 총운</span><p>{starFortune.overall}</p></div>}

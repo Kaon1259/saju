@@ -1,11 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getGuestFortune, getSajuCompatibility } from '../api/fortune';
+import { getGuestFortune, getSajuCompatibility, analyzeSaju, analyzeSajuStream } from '../api/fortune';
 import GROUPS, { GROUP_TYPES } from '../data/groups';
 import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
+import StreamText from '../components/StreamText';
 import { shareResult } from '../utils/share';
 import './GroupFortune.css';
 
@@ -38,6 +39,9 @@ function GroupFortune() {
   // 운세
   const [fortuneLoading, setFortuneLoading] = useState(false);
   const [fortuneResult, setFortuneResult] = useState(null);
+  const [fortuneStreamText, setFortuneStreamText] = useState('');
+  const [fortuneStreaming, setFortuneStreaming] = useState(false);
+  const fortuneCleanupRef = useRef(null);
 
   // 궁합
   const [myBirth, setMyBirth] = useState('');
@@ -77,15 +81,35 @@ function GroupFortune() {
   const compatTargetName = selectedMember ? selectedMember.name : selectedGroup?.name;
   const compatTargetBirth = selectedMember ? selectedMember.birth : selectedGroup?.debut;
 
-  // 그룹 오늘의 운세
-  const handleGroupFortune = async () => {
+  // 그룹 오늘의 운세 (스트리밍)
+  const handleGroupFortune = () => {
     if (!selectedGroup) return;
     setFortuneLoading(true);
-    try {
-      const data = await getGuestFortune(selectedGroup.debut, undefined, 'SOLAR', undefined);
-      setFortuneResult(data);
-    } catch (e) { console.error(e); }
-    finally { setFortuneLoading(false); }
+    setFortuneStreamText('');
+    setFortuneStreaming(false);
+    setFortuneResult(null);
+    fortuneCleanupRef.current?.();
+
+    fortuneCleanupRef.current = analyzeSajuStream(selectedGroup.debut, undefined, 'SOLAR', undefined, {
+      onCached: (data) => { setFortuneResult(data); setFortuneLoading(false); },
+      onChunk: (text) => { setFortuneStreaming(true); setFortuneStreamText(prev => prev + text); },
+      onDone: () => {
+        setFortuneStreaming(false);
+        (async () => {
+          try { const data = await analyzeSaju(selectedGroup.debut, undefined, 'SOLAR', undefined); setFortuneResult(data); }
+          catch (e) { console.error(e); }
+          finally { setFortuneLoading(false); setFortuneStreamText(''); }
+        })();
+      },
+      onError: () => {
+        setFortuneStreaming(false);
+        (async () => {
+          try { const data = await analyzeSaju(selectedGroup.debut, undefined, 'SOLAR', undefined); setFortuneResult(data); }
+          catch (e) { console.error(e); }
+          finally { setFortuneLoading(false); setFortuneStreamText(''); }
+        })();
+      },
+    });
   };
 
   // 멤버/그룹 선택
@@ -253,12 +277,15 @@ function GroupFortune() {
               </div>
             )}
           </>
-        ) : fortuneLoading ? (
-          <div className="gf-loading-anim">
-            <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>⭐</span>)}</div>
-            <p className="gf-loading-text">AI가 운세를 분석하고 있어요</p>
-            <p className="gf-loading-hint">10~30초 정도 소요됩니다</p>
-          </div>
+        ) : fortuneLoading || fortuneStreaming ? (
+          fortuneStreamText ? (
+            <StreamText text={fortuneStreamText} icon="🌟" label={`${selectedGroup.name}의 운세를 분석하고 있어요...`} color="#FBBF24" />
+          ) : (
+            <div className="gf-loading-anim">
+              <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>⭐</span>)}</div>
+              <p className="gf-loading-text">AI가 운세를 분석하고 있어요</p>
+            </div>
+          )
         ) : (
           <button className="btn-gold" onClick={handleGroupFortune} style={{ width: '100%' }}>
             🌟 {selectedGroup.name} 오늘의 운세 보기
