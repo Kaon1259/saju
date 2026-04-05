@@ -28,6 +28,7 @@ function StreamText({ text, icon = '🔮', label = 'AI가 분석하고 있어요
       <div className="stream-text-header">
         <span className="stream-text-icon">{icon}</span>
         <span>{label}</span>
+        <div className="stream-text-dots"><span /><span /><span /></div>
       </div>
       <div className="stream-text-body" ref={textRef}>
         <p className="stream-text-content">{text}<span className="stream-text-cursor">|</span></p>
