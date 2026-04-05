@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.entity.SpecialFortune;
 import com.saju.server.repository.SpecialFortuneRepository;
+import com.saju.server.service.ClaudeApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -421,5 +422,21 @@ public class DeepAnalysisService {
                 .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
+    }
+
+    /** 스트리밍 완료 후 캐시 저장 */
+    public void saveStreamResult(String type, String birthDate, String birthTime, String gender, String calendarType, String extra, String fullText) {
+        try {
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) return;
+            Map<String, Object> parsed = objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+            parsed.put("type", type);
+            parsed.put("birthDate", birthDate);
+            String fortuneType = "deep-" + type;
+            String cacheKey = buildCacheKey(type, birthDate, birthTime, gender, calendarType, extra);
+            saveToCache(fortuneType, cacheKey, parsed);
+        } catch (Exception e) {
+            // 파싱 실패 시 무시
+        }
     }
 }

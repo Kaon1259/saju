@@ -62,7 +62,9 @@ public class DeepAnalysisController {
 
         String systemPrompt = deepAnalysisService.getSystemPrompt(type);
         String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 4000);
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 4000, (fullText) -> {
+            deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);
+        });
     }
 
     @DeleteMapping("/cache")
