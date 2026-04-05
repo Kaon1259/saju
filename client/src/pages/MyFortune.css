@@ -10,8 +10,8 @@
 [data-theme="light"] .myf-mode-tab { background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.6); }
 [data-theme="light"] .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.08)); color: #b8860b; }
 
-/* 하단 날짜 액션 버튼 */
-.myf-date-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; padding: 0 4px; }
+/* 날짜 액션 버튼 */
+.myf-date-actions { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; padding: 0; }
 .myf-date-action-btn { flex: 1; padding: 14px 12px; border-radius: 14px; border: 1.5px solid rgba(251,191,36,0.25); background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(124,58,237,0.05)); color: #FBBF24; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.25s; }
 .myf-date-action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(251,191,36,0.15); }
 .myf-date-action-btn:active { transform: scale(0.97); }

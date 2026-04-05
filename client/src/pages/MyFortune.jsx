@@ -267,6 +267,41 @@ function MyFortune() {
         <button className={`myf-mode-tab ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>다른 사람</button>
       </div>
 
+      {/* 날짜 선택 (내 운세 탭) */}
+      {viewMode === 'mine' && (
+        <>
+          {dateMode === 'today' ? (
+            <div className="myf-date-actions">
+              <button className="myf-date-action-btn" onClick={() => { setDateMode('tomorrow'); setPickDate(''); }}>
+                🌙 내일의 운세 보기
+              </button>
+              <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => setShowDatePicker(true)}>
+                📅 날짜 지정 운세
+              </button>
+            </div>
+          ) : (
+            <div className="myf-date-actions">
+              <button className="myf-date-action-btn" onClick={() => { setDateMode('today'); setPickDate(''); }}>
+                ☀️ 오늘의 운세로 돌아가기
+              </button>
+            </div>
+          )}
+          {showDatePicker && (
+            <div className="myf-date-picker-overlay" onClick={() => setShowDatePicker(false)}>
+              <div className="myf-date-picker-popup glass-card" onClick={e => e.stopPropagation()}>
+                <h3 style={{ textAlign: 'center', marginBottom: 12, fontSize: 16, fontWeight: 800 }}>📅 날짜 선택</h3>
+                <input type="date" className="myf-date-picker-input"
+                  value={pickDate}
+                  min={(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })()}
+                  max={(() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().slice(0, 10); })()}
+                  onChange={(e) => { setPickDate(e.target.value); setDateMode('pick'); setShowDatePicker(false); }} />
+                <button className="myf-date-picker-close" onClick={() => setShowDatePicker(false)}>닫기</button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {/* ════════ 연인 운세 ════════ */}
       {viewMode === 'partner' && (
         <div className="myf-other-view">
@@ -485,37 +520,6 @@ function MyFortune() {
           </button>
         </div>
 
-        {/* 내일의 운세 / 날짜지정 운세 */}
-        {dateMode === 'today' && (
-          <div className="myf-date-actions">
-            <button className="myf-date-action-btn" onClick={() => { setDateMode('tomorrow'); setPickDate(''); }}>
-              🌙 내일의 운세 보기
-            </button>
-            <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => setShowDatePicker(true)}>
-              📅 날짜 지정 운세
-            </button>
-          </div>
-        )}
-        {dateMode !== 'today' && (
-          <div className="myf-date-actions">
-            <button className="myf-date-action-btn" onClick={() => { setDateMode('today'); setPickDate(''); }}>
-              ☀️ 오늘의 운세로 돌아가기
-            </button>
-          </div>
-        )}
-        {showDatePicker && (
-          <div className="myf-date-picker-overlay" onClick={() => setShowDatePicker(false)}>
-            <div className="myf-date-picker-popup glass-card" onClick={e => e.stopPropagation()}>
-              <h3 style={{ textAlign: 'center', marginBottom: 12, fontSize: 16, fontWeight: 800 }}>📅 날짜 선택</h3>
-              <input type="date" className="myf-date-picker-input"
-                value={pickDate}
-                min={(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })()}
-                max={(() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().slice(0, 10); })()}
-                onChange={(e) => { setPickDate(e.target.value); setDateMode('pick'); setShowDatePicker(false); }} />
-              <button className="myf-date-picker-close" onClick={() => setShowDatePicker(false)}>닫기</button>
-            </div>
-          </div>
-        )}
         </>
       )}
       </>
