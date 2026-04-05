@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCelebMatch, getSajuCompatibility } from '../api/fortune';
 import CELEBRITIES from '../data/celebrities';
 import SpeechButton from '../components/SpeechButton';
@@ -44,6 +45,7 @@ function FloatingHearts({ score }) {
 }
 
 function LoveFortune() {
+  const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const [relationStatus, setRelationStatus] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -212,6 +214,13 @@ function LoveFortune() {
         <h1 className="lf-title">1:1 연애운</h1>
         <p className="lf-subtitle">두근두근, 오늘 나의 연애 기운은?</p>
       </section>
+
+      {/* 비로그인 CTA */}
+      {!userId && !result && !loading && !aiStreaming && (
+        <button className="home-cta-btn" style={{ margin: '0 0 10px' }} onClick={() => navigate('/register', { state: { from: '/love-fortune' } })}>
+          카카오 로그인하고 맞춤 연애운 받기
+        </button>
+      )}
 
       {/* 입력 폼 */}
       {!result && !loading && !aiStreaming && (
