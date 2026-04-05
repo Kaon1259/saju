@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getGuestFortune, getSajuCompatibility, analyzeSaju, analyzeSajuStream } from '../api/fortune';
+import { getSajuCompatibility, analyzeSajuStream } from '../api/fortune';
+import parseAiJson from '../utils/parseAiJson';
 import GROUPS, { GROUP_TYPES } from '../data/groups';
 import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -98,22 +99,17 @@ function GroupFortune() {
     fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, {
       onCached: (data) => { setFortuneResult(data); setFortuneLoading(false); },
       onChunk: (text) => { setFortuneStreaming(true); setFortuneStreamText(prev => prev + text); },
-      onDone: () => {
+      onDone: (fullText) => {
         setFortuneStreaming(false);
-        (async () => {
-          try { const data = await analyzeSaju(bd, undefined, 'SOLAR', g); setFortuneResult(data); }
-          catch (e) { console.error(e); }
-          finally { setFortuneLoading(false); setFortuneStreamText(''); }
-        })();
+        setFortuneStreamText('');
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          // AI JSON에서 todayFortune 구조 생성
+          setFortuneResult({ todayFortune: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor } });
+        }
+        setFortuneLoading(false);
       },
-      onError: () => {
-        setFortuneStreaming(false);
-        (async () => {
-          try { const data = await analyzeSaju(bd, undefined, 'SOLAR', g); setFortuneResult(data); }
-          catch (e) { console.error(e); }
-          finally { setFortuneLoading(false); setFortuneStreamText(''); }
-        })();
-      },
+      onError: () => { setFortuneStreaming(false); setFortuneStreamText(''); setFortuneLoading(false); },
     });
   };
 

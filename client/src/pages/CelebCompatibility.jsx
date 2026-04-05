@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, searchCeleb, analyzeSaju, analyzeSajuStream } from '../api/fortune';
+import { getSajuCompatibility, searchCeleb, analyzeSajuStream } from '../api/fortune';
+import parseAiJson from '../utils/parseAiJson';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -231,26 +232,16 @@ function CelebCompatibility() {
         setStarStreaming(true);
         setStarStreamText(prev => prev + text);
       },
-      onDone: () => {
+      onDone: (fullText) => {
         setStarStreaming(false);
-        (async () => {
-          try {
-            const data = await analyzeSaju(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender);
-            setStarFortune(data.todayFortune || data);
-          } catch (e) { console.error(e); }
-          finally { setStarFortuneLoading(false); setStarStreamText(''); }
-        })();
+        setStarStreamText('');
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          setStarFortune({ overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor });
+        }
+        setStarFortuneLoading(false);
       },
-      onError: () => {
-        setStarStreaming(false);
-        (async () => {
-          try {
-            const data = await analyzeSaju(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender);
-            setStarFortune(data.todayFortune || data);
-          } catch (e) { console.error(e); }
-          finally { setStarFortuneLoading(false); setStarStreamText(''); }
-        })();
-      },
+      onError: () => { setStarStreaming(false); setStarStreamText(''); setStarFortuneLoading(false); },
     });
   };
 
