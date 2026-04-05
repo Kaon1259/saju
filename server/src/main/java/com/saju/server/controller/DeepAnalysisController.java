@@ -51,12 +51,12 @@ public class DeepAnalysisController {
         Map<String, Object> cached = deepAnalysisService.getCached(type, birthDate, birthTime, gender, calendarType, extra);
         if (cached != null) {
             SseEmitter emitter = new SseEmitter(5000L);
-            try {
-                emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
-                emitter.complete();
-            } catch (Exception e) {
-                emitter.completeWithError(e);
-            }
+            new Thread(() -> {
+                try {
+                    emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
+                    emitter.complete();
+                } catch (Exception ignored) {}
+            }).start();
             return emitter;
         }
 

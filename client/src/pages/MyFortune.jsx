@@ -355,7 +355,7 @@ function MyFortune() {
             ) : (
               renderResult(partnerData, () => {
                 partnerCleanupRef.current?.(); setPartnerData(null); setPartnerStreamText(''); setPartnerStreaming(false);
-              }, () => handleShare(partnerData, '연인 운세'), '연인 운세 분석 결과', partnerInfo ? { birthDate: partnerInfo.birthDate, birthTime: partnerInfo.birthTime, gender: partnerInfo.gender } : null)
+              }, () => handleShare(partnerData, '연인 운세'), '연인 운세 분석 결과', partnerInfo ? { birthDate: partnerInfo.birthDate, birthTime: partnerInfo.birthTime, gender: partnerInfo.gender, calendarType: 'SOLAR' } : null)
             )
           )}
         </div>
