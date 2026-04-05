@@ -758,9 +758,24 @@ function Home() {
                   </div>
 
                   <FortuneCard icon={loveInfo?.icon === 'couple' ? '💕' : loveInfo?.icon === 'wedding' ? '💒' : loveInfo?.icon} title="종합 분석" description={loveResult.overall} delay={0} />
-                  {loveResult.timing && <FortuneCard icon="📅" title="최적 시기" description={loveResult.timing} delay={80} />}
-                  {loveResult.advice && <FortuneCard icon="💡" title="행동 조언" description={loveResult.advice} delay={160} />}
-                  {loveResult.caution && <FortuneCard icon="⚠️" title="주의사항" description={loveResult.caution} delay={240} />}
+
+                  {/* 이상형 전용 카드 */}
+                  {loveModal === 'ideal_type' && (
+                    <>
+                      {loveResult.lookType && <FortuneCard icon="✨" title="이상형 외모/분위기" description={loveResult.lookType} delay={80} />}
+                      {loveResult.personalityType && <FortuneCard icon="💎" title="이상형 성격/가치관" description={loveResult.personalityType} delay={160} />}
+                      {loveResult.bestZodiac && <FortuneCard icon="🐾" title="잘 맞는 띠 TOP3" description={loveResult.bestZodiac} delay={240} />}
+                      {loveResult.bestMbti && <FortuneCard icon="🧬" title="잘 맞는 MBTI" description={loveResult.bestMbti} delay={320} />}
+                      {loveResult.celebMatch && <FortuneCard icon="🌟" title="나와 궁합 좋은 연예인" description={loveResult.celebMatch} delay={400} />}
+                      {loveResult.meetingPlace && <FortuneCard icon="📍" title="만남 장소 추천" description={loveResult.meetingPlace} delay={480} />}
+                      {loveResult.meetingTiming && <FortuneCard icon="📅" title="인연 만날 시기" description={loveResult.meetingTiming} delay={560} />}
+                    </>
+                  )}
+
+                  {/* 일반 연애 운세 카드 */}
+                  {loveModal !== 'ideal_type' && loveResult.timing && <FortuneCard icon="📅" title="최적 시기" description={loveResult.timing} delay={80} />}
+                  {loveModal !== 'ideal_type' && loveResult.advice && <FortuneCard icon="💡" title="행동 조언" description={loveResult.advice} delay={160} />}
+                  {loveResult.caution && <FortuneCard icon="⚠️" title="주의사항" description={loveResult.caution} delay={loveModal === 'ideal_type' ? 640 : 240} />}
 
                   {(loveResult.luckyDay || loveResult.luckyPlace || loveResult.luckyColor) && (
                     <div className="love-modal-lucky glass-card">
