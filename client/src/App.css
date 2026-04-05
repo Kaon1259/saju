@@ -200,7 +200,7 @@
 }
 
 .splash-ring--love { border-top-color: #E91E63; border-right-color: rgba(233,30,99,0.3); }
-.splash-yin--love { filter: drop-shadow(0 0 24px rgba(233,30,99,0.5)); }
+.splash-yin--love { color: #E91E63; filter: drop-shadow(0 0 24px rgba(233,30,99,0.5)); }
 .splash-title--love {
   background: linear-gradient(135deg, #E91E63, #fff, #FF6B6B);
   background-size: 200% auto;

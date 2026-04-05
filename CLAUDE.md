@@ -56,6 +56,21 @@
 - 모든 탭에 공유하기 + 다시보기 하단 배치
 - renderResult/renderLoading 공통 함수로 중복 제거
 
+[완료] 오늘의 운세 내일/지정일 운세 기능
+- 모드탭 아래에 "내일의 운세 보기" + "날짜 지정 운세 보기" 버튼
+- 서버: stream 엔드포인트에 date 파라미터 추가, 날짜별 캐시
+- 내일/지정일 선택 시 해당 날짜의 천기(天氣) 기반 AI 분석
+- 심화분석도 날짜별 분리 (extra 파라미터로 날짜 전달)
+
+[완료] 연애상태별 맞춤 운세 프롬프트
+- 솔로/썸/연애중/기혼/복잡 상태에 따라 AI 해석 방향 조정
+- 프로필 편집에 기혼(MARRIED) 옵션 추가
+
+[완료] 심화분석 캐시 저장 + 스트리밍 자동스크롤
+- DeepAnalysisController: onComplete 콜백 추가 (기존 누락)
+- StreamText 컴포넌트 적용, parseAiJson 유틸 적용
+- 섹션 간 빈공간 축소
+
 [완료] 스타 궁합/그룹 운세 스트리밍 적용
 - CelebCompatibility.jsx: 스타 운세 보기에 analyzeSajuStream 스트리밍 + StreamText 적용
 - CelebCompatibility.jsx: starFortune 필드 접근 수정 (todayFortune 중첩 처리)
@@ -68,6 +83,19 @@
 - 원인: AI가 ```json 코드블록으로 감싸서 응답 → 기존 regex 파싱 실패 → 결과 화면 안 나옴
 
 [완료] 주간운세 0점 버그 수정 - 서버는 overallScore 키 / 클라이언트는 score로 접근 → (overallScore ?? score) 매핑
+
+[완료] 페이지 전환 인트로 크기 수정
+- fontsize 스케일링이 trans-symbol을 15px로 강제 축소하던 버그 수정
+- trans-symbol 100px + drop-shadow 글로우 적용
+- FortuneLoading 오브/아이콘 크기 확대 (100px/48px)
+
+[완료] 그룹운세 멤버 선택 시 운세 대상 변경
+- 멤버 선택 시 운세 타이틀/버튼/분석 대상이 해당 멤버로 변경
+- 멤버 전환 시 운세+궁합 결과 자동 리셋
+
+[완료] 홈 신년운세 배너 위치 조정 (바로가기 위)
+
+[완료] 홈 바로가기~빠른메뉴 간격 축소
 
 [완료] 만세력/바이오리듬 애니메이션 강화
 - 만세력: 기둥 카드 순차 등장(translateY+scale), 시진 카드 스케일인, 해석 슬라이드인
