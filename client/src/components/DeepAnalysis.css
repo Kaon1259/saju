@@ -18,7 +18,7 @@
   transform: translateY(-1px);
 }
 
-.deep-content { margin-top: 8px; padding: 16px; }
+.deep-content { margin-top: 8px; padding: 12px 16px 16px; }
 .deep-content:empty { display: none; }
 
 .deep-loading { text-align: center; padding: 30px 0; }
@@ -26,9 +26,9 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .deep-loading p { color: rgba(255,255,255,0.6); font-size: 13px; }
 
-.deep-summary { text-align: center; font-size: 16px; font-weight: 700; color: #FBBF24; margin-bottom: 12px; padding: 10px; background: rgba(251,191,36,0.08); border-radius: 12px; }
+.deep-summary { text-align: center; font-size: 16px; font-weight: 700; color: #FBBF24; margin-bottom: 10px; padding: 8px; background: rgba(251,191,36,0.08); border-radius: 12px; }
 
-.deep-section { margin-bottom: 20px; }
+.deep-section { margin-bottom: 14px; }
 .deep-section-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; color: rgba(255,255,255,0.9); }
 .deep-section p { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.8); }
 .deep-section strong { color: #FBBF24; }

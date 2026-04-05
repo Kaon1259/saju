@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDeepAnalysis, getDeepAnalysisStream } from '../api/fortune';
 import FortuneLoading from './FortuneLoading';
+import StreamText from './StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './DeepAnalysis.css';
 
 // 필드별 표시 설정
@@ -127,25 +129,12 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
           setLoading(false);
         },
         onDone: (fullText) => {
-          // 스트리밍 완료 → JSON 파싱 시도
-          try {
-            let json = fullText;
-            if (json.includes('```')) {
-              const start = json.indexOf('\n', json.indexOf('```'));
-              const end = json.lastIndexOf('```');
-              if (start > 0 && end > start) json = json.substring(start + 1, end);
-            }
-            const braceStart = json.indexOf('{');
-            const braceEnd = json.lastIndexOf('}');
-            if (braceStart >= 0 && braceEnd > braceStart) {
-              json = json.substring(braceStart, braceEnd + 1);
-            }
-            const parsed = JSON.parse(json);
+          const parsed = parseAiJson(fullText);
+          if (parsed) {
             parsed.type = type;
             parsed.birthDate = birthDate;
             setData(parsed);
-          } catch {
-            // JSON 파싱 실패 → 일반 텍스트로 표시
+          } else {
             setData({ type, birthDate, detailAnalysis: fullText });
           }
           setLoading(false);
@@ -193,7 +182,11 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
       {(open || autoOpen) && (
         <div className="deep-content glass-card fade-in">
           {loading && !data ? (
-            <FortuneLoading type={loadingType} streaming={!!streamText} streamText={streamText} />
+            streamText ? (
+              <StreamText text={streamText} icon="🔍" label="심화분석 중..." color="#C084FC" />
+            ) : (
+              <FortuneLoading type={loadingType} />
+            )
           ) : data ? (
             <div className="deep-result">
               {/* 핵심 요약 */}
