@@ -367,7 +367,31 @@ function MyFortune() {
           {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData) || (
             !otherData ? (
               <div className="myf-other-form glass-card">
-                <h2 style={{ textAlign: 'center', marginBottom: 20 }}>다른 사람 운세 보기</h2>
+                <h2 style={{ textAlign: 'center', marginBottom: 12 }}>다른 사람 운세 보기</h2>
+                {(() => {
+                  const stars = (() => { try { return JSON.parse(localStorage.getItem('myStarList') || '[]'); } catch { return []; } })();
+                  return stars.length > 0 ? (
+                    <button className="sf-autofill-btn" style={{ marginBottom: 10 }} onClick={() => {
+                      const el = document.getElementById('other-star-picker');
+                      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+                    }}>⭐ 스타 정보로 채우기</button>
+                  ) : null;
+                })()}
+                <div id="other-star-picker" style={{ display: 'none', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 150, overflowY: 'auto' }}>
+                    {(() => { try { return JSON.parse(localStorage.getItem('myStarList') || '[]'); } catch { return []; } })().map((s, i) => (
+                      <button key={i} className="sf-autofill-btn" style={{ justifyContent: 'flex-start', gap: 8 }} onClick={() => {
+                        setOtherBirthDate(s.birth);
+                        if (s.gender) setOtherGender(s.gender);
+                        document.getElementById('other-star-picker').style.display = 'none';
+                      }}>
+                        <span>{s.gender === 'M' ? '♂' : '♀'}</span>
+                        <span>{s.name}</span>
+                        <span style={{ opacity: 0.6, fontSize: 12 }}>{s.birth?.slice(0,4)}년생</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="form-group">
                   <label className="form-label">달력 구분</label>
                   <div className="form-toggle">
