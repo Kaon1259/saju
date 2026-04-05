@@ -11,27 +11,27 @@
 /* ─── 오브 (메인 아이콘 영역) ─── */
 .fortune-loading__orb {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .fortune-loading__orb-inner {
-  width: 70px;
-  height: 70px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, rgba(168,85,247,0.4), rgba(99,42,173,0.8));
   display: flex;
   align-items: center;
   justify-content: center;
   animation: orbPulse 2s ease-in-out infinite;
-  box-shadow: 0 0 30px rgba(168,85,247,0.5), 0 0 60px rgba(168,85,247,0.2);
+  box-shadow: 0 0 40px rgba(168,85,247,0.5), 0 0 80px rgba(168,85,247,0.2);
 }
 
 .fortune-loading__icon {
-  font-size: 32px;
+  font-size: 48px;
   animation: iconFloat 2.5s ease-in-out infinite;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .fortune-loading__ring--2 {
-  inset: -8px;
+  inset: -12px;
   border-top-color: rgba(236,72,153,0.4);
   border-right-color: rgba(168,85,247,0.3);
   animation-duration: 4s;
