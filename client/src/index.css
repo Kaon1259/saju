@@ -493,7 +493,7 @@ html {
 [data-fontsize] li,
 [data-fontsize] td,
 [data-fontsize] th,
-[data-fontsize] span:not([class*="icon"]):not([class*="emoji"]):not(.tab-label):not(.home-love-temp-heart):not(.home-love-temp-num):not(.lf-heart-num):not(.lf-heart-unit):not(.lf-heart-big):not(.lf-heart-grade):not(.love-modal-heart-num):not(.love-modal-heart-unit):not(.love-modal-heart-big):not(.love-modal-heart-grade),
+[data-fontsize] span:not([class*="icon"]):not([class*="emoji"]):not(.tab-label):not(.trans-symbol):not(.trans-profile-zodiac):not(.trans-profile-const):not(.trans-profile-gender-symbol):not(.home-love-temp-heart):not(.home-love-temp-num):not(.lf-heart-num):not(.lf-heart-unit):not(.lf-heart-big):not(.lf-heart-grade):not(.love-modal-heart-num):not(.love-modal-heart-unit):not(.love-modal-heart-big):not(.love-modal-heart-grade),
 [data-fontsize] .fortune-card__desc,
 [data-fontsize] .deep-section p,
 [data-fontsize] .deep-list li,
