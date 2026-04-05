@@ -52,7 +52,7 @@ const TAROT_LOVE_TYPES = [
   { id: 'relationship',       label: '연애운',     icon: '💕', group: 'love' },
   { id: 'confession_timing',  label: '고백 타이밍', icon: '💌', group: 'love' },
   { id: 'mind_reading',       label: '속마음 타로', icon: '🔍', group: 'love' },
-  { id: 'couple_fortune',     label: '연애 운세',   icon: 'couple', group: 'love' },
+  { id: 'couple_fortune',     label: '데이트 운세', icon: 'couple', group: 'love' },
   // 결혼/인연
   { id: 'marriage',           label: '결혼운',     icon: 'wedding', group: 'marriage' },
   { id: 'remarriage',         label: '재혼운',     icon: '💍', group: 'marriage' },

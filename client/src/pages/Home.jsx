@@ -41,7 +41,7 @@ const LOVE_TYPES = [
   { id: 'meeting_timing',     label: '만남시기',   icon: '🔮', desc: '언제 인연을 만날까', group: 'solo' },
   { id: 'ideal_type',         label: '이상형',    icon: '👩‍❤️‍👨', desc: '사주로 보는 나의 이상형', group: 'solo' },
   // 썸/연애
-  { id: 'couple_fortune',     label: '연애운',    icon: '💑', desc: '오늘 연인과의 하루', group: 'love' },
+  { id: 'couple_fortune',     label: '데이트운',   icon: '💑', desc: '오늘 연인과의 하루', group: 'love' },
   { id: 'confession_timing',  label: '고백운',    icon: '💌', desc: '고백 타이밍은?', group: 'love' },
   { id: 'some_check',         label: '썸진단',    icon: '🎯', desc: '이 썸, 연애로 발전할까?', group: 'love' },
   { id: 'contact_fortune',    label: '연락운',    icon: '📱', desc: '먼저 연락해도 될까?', group: 'love' },
