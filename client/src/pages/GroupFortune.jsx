@@ -77,26 +77,31 @@ function GroupFortune() {
     setCompatResult(null);
   };
 
-  // 현재 궁합 대상 이름과 생년월일
-  const compatTargetName = selectedMember ? selectedMember.name : selectedGroup?.name;
-  const compatTargetBirth = selectedMember ? selectedMember.birth : selectedGroup?.debut;
+  // 현재 궁합/운세 대상 이름과 생년월일
+  const fortuneTargetName = selectedMember ? selectedMember.name : selectedGroup?.name;
+  const fortuneTargetBirth = selectedMember ? selectedMember.birth : selectedGroup?.debut;
+  const fortuneTargetGender = selectedMember ? selectedMember.gender : undefined;
+  const compatTargetName = fortuneTargetName;
+  const compatTargetBirth = fortuneTargetBirth;
 
-  // 그룹 오늘의 운세 (스트리밍)
+  // 오늘의 운세 (멤버 또는 그룹, 스트리밍)
   const handleGroupFortune = () => {
-    if (!selectedGroup) return;
+    const bd = fortuneTargetBirth;
+    const g = fortuneTargetGender;
+    if (!bd) return;
     setFortuneLoading(true);
     setFortuneStreamText('');
     setFortuneStreaming(false);
     setFortuneResult(null);
     fortuneCleanupRef.current?.();
 
-    fortuneCleanupRef.current = analyzeSajuStream(selectedGroup.debut, undefined, 'SOLAR', undefined, {
+    fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, {
       onCached: (data) => { setFortuneResult(data); setFortuneLoading(false); },
       onChunk: (text) => { setFortuneStreaming(true); setFortuneStreamText(prev => prev + text); },
       onDone: () => {
         setFortuneStreaming(false);
         (async () => {
-          try { const data = await analyzeSaju(selectedGroup.debut, undefined, 'SOLAR', undefined); setFortuneResult(data); }
+          try { const data = await analyzeSaju(bd, undefined, 'SOLAR', g); setFortuneResult(data); }
           catch (e) { console.error(e); }
           finally { setFortuneLoading(false); setFortuneStreamText(''); }
         })();
@@ -104,7 +109,7 @@ function GroupFortune() {
       onError: () => {
         setFortuneStreaming(false);
         (async () => {
-          try { const data = await analyzeSaju(selectedGroup.debut, undefined, 'SOLAR', undefined); setFortuneResult(data); }
+          try { const data = await analyzeSaju(bd, undefined, 'SOLAR', g); setFortuneResult(data); }
           catch (e) { console.error(e); }
           finally { setFortuneLoading(false); setFortuneStreamText(''); }
         })();
@@ -112,16 +117,21 @@ function GroupFortune() {
     });
   };
 
-  // 멤버/그룹 선택
+  // 멤버/그룹 선택 → 운세 + 궁합 결과 모두 리셋
   const handleSelectTarget = (memberName) => {
     if (memberName === null) {
-      // 그룹 자체 선택
       setSelectedMember(null);
     } else {
       const celeb = CELEBRITIES.find(c => c.name === memberName);
       if (!celeb) return;
       setSelectedMember(celeb);
     }
+    // 대상이 바뀌면 운세/궁합 결과 초기화
+    fortuneCleanupRef.current?.();
+    setFortuneResult(null);
+    setFortuneStreamText('');
+    setFortuneStreaming(false);
+    setFortuneLoading(false);
     setCompatResult(null);
     setCompatOpen(true);
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
@@ -248,7 +258,7 @@ function GroupFortune() {
       {/* 그룹 오늘의 운세 */}
       <section className="gf-fortune-section glass-card">
         <div className="gf-section-header">
-          <h3 className="gf-section-title">🌟 {selectedGroup.name} 오늘의 운세</h3>
+          <h3 className="gf-section-title">🌟 {fortuneTargetName} 오늘의 운세</h3>
           {fortuneResult && (
             <button className="gf-fold-btn" onClick={() => setFortuneOpen(!fortuneOpen)}>
               {fortuneOpen ? '접기 ▲' : '펼치기 ▼'}
@@ -271,7 +281,7 @@ function GroupFortune() {
                   ))}
                 </div>
                 <button className="gf-share-btn" onClick={() => handleShare(
-                  `[1:1연애 💕 그룹 운세]\n${selectedGroup.name} 오늘의 운세: ${fortuneResult.todayFortune?.score || 0}점\n\nhttps://recipepig.kr`
+                  `[1:1연애 💕 스타 운세]\n${fortuneTargetName} 오늘의 운세: ${fortuneResult.todayFortune?.score || 0}점\n\nhttps://recipepig.kr`
                 )}>📤 공유</button>
                 {shareMsg && <p className="gf-share-msg">{shareMsg}</p>}
               </div>
@@ -279,7 +289,7 @@ function GroupFortune() {
           </>
         ) : fortuneLoading || fortuneStreaming ? (
           fortuneStreamText ? (
-            <StreamText text={fortuneStreamText} icon="🌟" label={`${selectedGroup.name}의 운세를 분석하고 있어요...`} color="#FBBF24" />
+            <StreamText text={fortuneStreamText} icon="🌟" label={`${fortuneTargetName}의 운세를 분석하고 있어요...`} color="#FBBF24" />
           ) : (
             <div className="gf-loading-anim">
               <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>⭐</span>)}</div>
@@ -288,7 +298,7 @@ function GroupFortune() {
           )
         ) : (
           <button className="btn-gold" onClick={handleGroupFortune} style={{ width: '100%' }}>
-            🌟 {selectedGroup.name} 오늘의 운세 보기
+            🌟 {fortuneTargetName} 오늘의 운세 보기
           </button>
         )}
       </section>
