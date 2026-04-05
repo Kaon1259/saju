@@ -48,6 +48,8 @@ function Compatibility() {
   const [aiStreaming, setAiStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [showStarPicker, setShowStarPicker] = useState(false);
+  const [showTime, setShowTime] = useState(false);
+  const [showMoreCards, setShowMoreCards] = useState(false);
   const cleanupRef = useRef(null);
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
@@ -240,32 +242,41 @@ function Compatibility() {
               <p className="compat-card-text">{cleanAiText(result.aiLoveCompat)}</p>
             </div>
           )}
-          {result.aiWorkCompat && (
-            <div className="compat-card glass-card compat-card--ai">
-              <div className="compat-card-header"><span className="compat-card-icon">💼</span><h3>직장/업무 궁합</h3></div>
-              <p className="compat-card-text">{cleanAiText(result.aiWorkCompat)}</p>
-            </div>
+          {!showMoreCards ? (
+            <button className="compat-more-btn" onClick={() => setShowMoreCards(true)}>
+              더 자세한 분석 보기 ▼
+            </button>
+          ) : (
+            <>
+              {result.aiWorkCompat && (
+                <div className="compat-card glass-card compat-card--ai fade-in">
+                  <div className="compat-card-header"><span className="compat-card-icon">💼</span><h3>직장/업무 궁합</h3></div>
+                  <p className="compat-card-text">{cleanAiText(result.aiWorkCompat)}</p>
+                </div>
+              )}
+              {result.aiConflictPoint && (
+                <div className="compat-card glass-card compat-card--ai fade-in">
+                  <div className="compat-card-header"><span className="compat-card-icon">⚠️</span><h3>갈등 포인트 & 해결법</h3></div>
+                  <p className="compat-card-text">{cleanAiText(result.aiConflictPoint)}</p>
+                </div>
+              )}
+              {result.aiAdvice && (
+                <div className="compat-card glass-card compat-card--ai fade-in">
+                  <div className="compat-card-header"><span className="compat-card-icon">💡</span><h3>관계 개선 조언</h3></div>
+                  <p className="compat-card-text">{cleanAiText(result.aiAdvice)}</p>
+                </div>
+              )}
+              <div className="compat-card glass-card fade-in">
+                <div className="compat-card-header"><span className="compat-card-icon">⚡</span><h3>오행 관계</h3></div>
+                <p className="compat-card-text">{result.elementRelation}</p>
+              </div>
+              <div className="compat-card glass-card fade-in">
+                <div className="compat-card-header"><span className="compat-card-icon">🔗</span><h3>일지 관계</h3></div>
+                <p className="compat-card-text">{result.branchRelation}</p>
+              </div>
+              <button className="compat-more-btn" onClick={() => setShowMoreCards(false)}>접기 ▲</button>
+            </>
           )}
-          {result.aiConflictPoint && (
-            <div className="compat-card glass-card compat-card--ai">
-              <div className="compat-card-header"><span className="compat-card-icon">⚠️</span><h3>갈등 포인트 & 해결법</h3></div>
-              <p className="compat-card-text">{cleanAiText(result.aiConflictPoint)}</p>
-            </div>
-          )}
-          {result.aiAdvice && (
-            <div className="compat-card glass-card compat-card--ai">
-              <div className="compat-card-header"><span className="compat-card-icon">💡</span><h3>관계 개선 조언</h3></div>
-              <p className="compat-card-text">{cleanAiText(result.aiAdvice)}</p>
-            </div>
-          )}
-          <div className="compat-card glass-card">
-            <div className="compat-card-header"><span className="compat-card-icon">⚡</span><h3>오행 관계</h3></div>
-            <p className="compat-card-text">{result.elementRelation}</p>
-          </div>
-          <div className="compat-card glass-card">
-            <div className="compat-card-header"><span className="compat-card-icon">🔗</span><h3>일지 관계</h3></div>
-            <p className="compat-card-text">{result.branchRelation}</p>
-          </div>
         </section>
 
         <button className="compat-reset-btn" onClick={() => { setResult(null); setBd1(''); setBd2(''); setBt1(''); setBt2(''); setCalType1('SOLAR'); setCalType2('SOLAR'); }}>
@@ -283,29 +294,9 @@ function Compatibility() {
 
   return (
     <div className="compat-page">
-      <section className="compat-intro">
-        <div className="compat-intro-scene">
-          {/* 남 - 사모 + ♂ */}
-          <div className="compat-intro-sym compat-intro-sym--m">
-            <span className="compat-hat">🎩</span>
-            <span className="compat-gender-sym">♂</span>
-          </div>
-
-          {/* 중앙 인연 */}
-          <div className="compat-intro-center">
-            <span className="compat-intro-yeon">縁</span>
-            <div className="compat-intro-glow" />
-            {[...Array(4)].map((_, i) => <span key={i} className="compat-intro-particle" style={{ '--cp-i': i }}>✦</span>)}
-          </div>
-
-          {/* 여 - 쪽두리 + ♀ */}
-          <div className="compat-intro-sym compat-intro-sym--f">
-            <span className="compat-hat">🎀</span>
-            <span className="compat-gender-sym">♀</span>
-          </div>
-        </div>
+      <section className="compat-intro compat-intro--compact">
+        <span className="compat-intro-icon">💕</span>
         <h1 className="compat-intro-title">사주 궁합</h1>
-        <p className="compat-intro-desc">두 사람의 사주팔자로 운명의 인연을 분석합니다</p>
       </section>
 
       <div className="compat-form glass-card">
@@ -339,12 +330,17 @@ function Compatibility() {
           <label className="form-label">생년월일</label>
           <BirthDatePicker value={bd1} onChange={setBd1} calendarType={calType1} />
         </div>
-        <div className="form-group">
-          <label className="form-label">태어난 시간 (선택)</label>
-          <select className="form-input form-select" value={bt1} onChange={e => setBt1(e.target.value)}>
-            {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
-        </div>
+        {!showTime && (
+          <button className="compat-time-toggle" onClick={() => setShowTime(true)}>⏰ 태어난 시간 입력 (선택, 더 정확한 분석)</button>
+        )}
+        {showTime && (
+          <div className="form-group">
+            <label className="form-label">태어난 시간</label>
+            <select className="form-input form-select" value={bt1} onChange={e => setBt1(e.target.value)}>
+              {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
+        )}
 
         <div className="compat-form-divider">
           {[...Array(5)].map((_, i) => (
@@ -419,12 +415,14 @@ function Compatibility() {
           <label className="form-label">생년월일</label>
           <BirthDatePicker value={bd2} onChange={setBd2} calendarType={calType2} />
         </div>
-        <div className="form-group">
-          <label className="form-label">태어난 시간 (선택)</label>
-          <select className="form-input form-select" value={bt2} onChange={e => setBt2(e.target.value)}>
-            {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
-        </div>
+        {showTime && (
+          <div className="form-group">
+            <label className="form-label">태어난 시간</label>
+            <select className="form-input form-select" value={bt2} onChange={e => setBt2(e.target.value)}>
+              {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
+        )}
 
         <button className="btn-gold" onClick={handleAnalyze} disabled={!bd1 || !bd2} style={{ opacity: bd1 && bd2 ? 1 : 0.5 }}>
           💕 궁합 분석하기
