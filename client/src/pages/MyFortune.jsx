@@ -267,29 +267,6 @@ function MyFortune() {
         <button className={`myf-mode-tab ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>다른 사람</button>
       </div>
 
-      {/* 날짜 칩 바 */}
-      {viewMode === 'mine' && (
-        <div className="myf-date-chips">
-          <button className={`myf-date-chip ${dateMode === 'today' ? 'active' : ''}`}
-            onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}>오늘</button>
-          <button className={`myf-date-chip ${dateMode === 'tomorrow' ? 'active' : ''}`}
-            onClick={() => { setDateMode('tomorrow'); setPickDate(''); setShowDatePicker(false); }}>내일</button>
-          <button className={`myf-date-chip ${dateMode === 'pick' ? 'active' : ''}`}
-            onClick={() => setShowDatePicker(v => !v)}>
-            {dateMode === 'pick' && pickDate ? getDateLabel() : '📅 날짜선택'}
-          </button>
-          {showDatePicker && (
-            <div className="myf-date-picker-wrap">
-              <input type="date" className="myf-date-picker-input"
-                value={pickDate}
-                min={(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })()}
-                max={(() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().slice(0, 10); })()}
-                onChange={(e) => { setPickDate(e.target.value); setDateMode('pick'); setShowDatePicker(false); }} />
-            </div>
-          )}
-        </div>
-      )}
-
       {/* ════════ 연인 운세 ════════ */}
       {viewMode === 'partner' && (
         <div className="myf-other-view">
@@ -400,7 +377,7 @@ function MyFortune() {
       {viewMode === 'mine' && (
       <>
       <div className="myf-header">
-        <h1 className="myf-title">{userName || user.name}님의 {dateMode === 'today' ? '오늘' : dateMode === 'tomorrow' ? '내일' : getDateLabel()} 운세</h1>
+        <h1 className="myf-title">{userName || user.name}님의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h1>
         <div className="myf-badges">
           <span className="myf-badge">{user.zodiacAnimal}띠</span>
           {saju?.dayMaster && <span className="myf-badge myf-badge--saju">{saju.dayMaster}일간</span>}
@@ -501,11 +478,45 @@ function MyFortune() {
       )}
 
       {f && (
+        <>
         <div className="myf-actions">
           <button className="myf-share-btn" onClick={() => handleShare(data, '오늘의 사주 운세')}>
             {copied ? '✅ 복사 완료!' : '📤 운세 공유하기'}
           </button>
         </div>
+
+        {/* 내일의 운세 / 날짜지정 운세 */}
+        {dateMode === 'today' && (
+          <div className="myf-date-actions">
+            <button className="myf-date-action-btn" onClick={() => { setDateMode('tomorrow'); setPickDate(''); }}>
+              🌙 내일의 운세 보기
+            </button>
+            <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => setShowDatePicker(true)}>
+              📅 날짜 지정 운세
+            </button>
+          </div>
+        )}
+        {dateMode !== 'today' && (
+          <div className="myf-date-actions">
+            <button className="myf-date-action-btn" onClick={() => { setDateMode('today'); setPickDate(''); }}>
+              ☀️ 오늘의 운세로 돌아가기
+            </button>
+          </div>
+        )}
+        {showDatePicker && (
+          <div className="myf-date-picker-overlay" onClick={() => setShowDatePicker(false)}>
+            <div className="myf-date-picker-popup glass-card" onClick={e => e.stopPropagation()}>
+              <h3 style={{ textAlign: 'center', marginBottom: 12, fontSize: 16, fontWeight: 800 }}>📅 날짜 선택</h3>
+              <input type="date" className="myf-date-picker-input"
+                value={pickDate}
+                min={(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })()}
+                max={(() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().slice(0, 10); })()}
+                onChange={(e) => { setPickDate(e.target.value); setDateMode('pick'); setShowDatePicker(false); }} />
+              <button className="myf-date-picker-close" onClick={() => setShowDatePicker(false)}>닫기</button>
+            </div>
+          </div>
+        )}
+        </>
       )}
       </>
       )}
