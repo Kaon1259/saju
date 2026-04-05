@@ -21,6 +21,7 @@ const REL_STATUS = [
   { id: 'SINGLE', label: '솔로', icon: '💫', color: '#FFB020' },
   { id: 'SOME', label: '썸', icon: '💗', color: '#FF6B6B' },
   { id: 'IN_RELATIONSHIP', label: '연애중', icon: '💕', color: '#E91E63' },
+  { id: 'MARRIED', label: '기혼', icon: '💍', color: '#9B59B6' },
   { id: 'COMPLICATED', label: '복잡', icon: '💔', color: '#94A3B8' },
 ];
 
@@ -92,7 +93,7 @@ function ProfileEdit() {
 
   const handleChange = (field, value) => { setForm(prev => ({ ...prev, [field]: value })); setError(''); setSuccess(false); };
 
-  const isPartnerEnabled = form.relationshipStatus === 'IN_RELATIONSHIP' || form.relationshipStatus === 'SOME';
+  const isPartnerEnabled = form.relationshipStatus === 'IN_RELATIONSHIP' || form.relationshipStatus === 'SOME' || form.relationshipStatus === 'MARRIED';
 
   const partnerZodiac = useMemo(() => {
     if (!form.partnerBirthDate) return null;

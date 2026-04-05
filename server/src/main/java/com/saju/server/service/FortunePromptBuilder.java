@@ -91,9 +91,14 @@ public class FortunePromptBuilder {
      * 오늘의 운세 스트리밍 유저 프롬프트
      */
     public String fortuneStreamUserPrompt(String zodiacAnimal, LocalDate date) {
+        return fortuneStreamUserPrompt(zodiacAnimal, date, null);
+    }
+
+    public String fortuneStreamUserPrompt(String zodiacAnimal, LocalDate date, String relationshipStatus) {
         String todayCtx = buildTodayContext(date);
+        String relCtx = buildRelationshipContext(relationshipStatus);
         return todayCtx + "\n" +
-            "【의뢰인】" + zodiacAnimal + "띠\n\n" +
+            "【의뢰인】" + zodiacAnimal + "띠" + relCtx + "\n\n" +
             "위 천기 정보와 의뢰인의 띠를 종합 분석하여 오늘의 운세를 작성하세요.\n" +
             "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
             "반드시 아래 JSON 형식으로만 응답:\n" +
@@ -338,5 +343,20 @@ public class FortunePromptBuilder {
                 val1 + "과 " + val2 + "의 MBTI 궁합을 오늘의 일진 기운을 반영하여 분석하세요.\n" +
                 "두 유형의 인지기능 상호작용, 오행 기질 조화, 오늘 함께하면 좋은 활동, 주의점을 포함하여 5줄 이내로 한국어로 답변하세요.";
         }
+    }
+
+    /**
+     * 연애 상태별 프롬프트 맥락 생성
+     */
+    public String buildRelationshipContext(String status) {
+        if (status == null || status.isBlank()) return "";
+        return switch (status) {
+            case "SINGLE" -> " / 현재 솔로 (새로운 만남·인연 가능성에 초점)";
+            case "SOME" -> " / 현재 썸 타는 중 (상대방과의 관계 발전에 초점)";
+            case "IN_RELATIONSHIP" -> " / 현재 연애 중 (연인과의 관계·데이트에 초점)";
+            case "MARRIED" -> " / 기혼 (부부 관계·가정 화목·가족운에 초점)";
+            case "COMPLICATED" -> " / 복잡한 관계 (관계 정리·방향성에 초점)";
+            default -> "";
+        };
     }
 }

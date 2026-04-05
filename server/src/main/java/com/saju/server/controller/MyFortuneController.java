@@ -127,9 +127,9 @@ public class MyFortuneController {
             return emitter;
         }
 
-        // AI 스트리밍
+        // AI 스트리밍 (연애상태 반영)
         String systemPrompt = promptBuilder.fortuneStreamSystemPrompt();
-        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), LocalDate.now());
+        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), LocalDate.now(), user.getRelationshipStatus());
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText);
         });
