@@ -461,17 +461,14 @@ function Home() {
         <button className="home-main-action-card" onClick={() => navigate('/love-fortune')} style={{ '--mac-color': '#E91E63' }}>
           <span className="home-mac-icon">💕</span>
           <span className="home-mac-label">1:1연애운</span>
-          <span className="home-mac-desc">오늘의 연애 AI 분석</span>
         </button>
         <button className="home-main-action-card" onClick={() => { playHarmony(); navigate('/compatibility'); }} style={{ '--mac-color': '#F472B6' }}>
           <span className="home-mac-icon">💑</span>
           <span className="home-mac-label">사주궁합</span>
-          <span className="home-mac-desc">나와 상대방의 궁합</span>
         </button>
         <button className="home-main-action-card" onClick={() => navigate('/celeb-compatibility')} style={{ '--mac-color': '#9B59B6' }}>
           <span className="home-mac-icon">🌟</span>
-          <span className="home-mac-label">스타궁합</span>
-          <span className="home-mac-desc">최애와 사주 궁합</span>
+          <span className="home-mac-label">최애스타궁합</span>
         </button>
       </section>
 
