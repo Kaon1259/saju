@@ -199,7 +199,7 @@ function MyFortune() {
   const partnerInfo = getPartnerInfo();
 
   /* ── 결과 렌더링 공통 ── */
-  const renderResult = (rd, onReset, onShare, label) => (
+  const renderResult = (rd, onReset, onShare, label, birthInfo) => (
     <>
       <div className="myf-header">
         <h1 className="myf-title">{label}</h1>
@@ -251,6 +251,9 @@ function MyFortune() {
           </div>
         )}
       </div>
+      {birthInfo?.birthDate && (
+        <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} />
+      )}
       <div className="myf-actions" style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
         <button className="myf-share-btn" onClick={onShare}>{copied ? '✅ 복사 완료!' : '📤 공유하기'}</button>
         <button className="myf-share-btn" onClick={onReset}>🔄 다시 보기</button>
@@ -352,7 +355,7 @@ function MyFortune() {
             ) : (
               renderResult(partnerData, () => {
                 partnerCleanupRef.current?.(); setPartnerData(null); setPartnerStreamText(''); setPartnerStreaming(false);
-              }, () => handleShare(partnerData, '연인 운세'), '연인 운세 분석 결과')
+              }, () => handleShare(partnerData, '연인 운세'), '연인 운세 분석 결과', partnerInfo ? { birthDate: partnerInfo.birthDate, birthTime: partnerInfo.birthTime, gender: partnerInfo.gender } : null)
             )
           )}
         </div>
@@ -412,7 +415,7 @@ function MyFortune() {
             ) : (
               renderResult(otherData, () => {
                 otherCleanupRef.current?.(); setOtherData(null); setOtherBirthDate(''); setOtherBirthTime(''); setOtherGender(''); setOtherStreamText(''); setOtherStreaming(false);
-              }, () => handleShare(otherData, '사주 운세 분석'), '운세 분석 결과')
+              }, () => handleShare(otherData, '사주 운세 분석'), '운세 분석 결과', otherBirthDate ? { birthDate: otherBirthDate, birthTime: otherBirthTime, gender: otherGender, calendarType: otherCalendarType } : null)
             )
           )}
         </div>
