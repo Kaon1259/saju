@@ -1934,7 +1934,10 @@
 
 /* ─── 빠른 메뉴 ─── */
 .home-quick-section {
-  padding: 8px 0 100px;
+  padding: 8px 0 4px;
+}
+.home-quick-section:last-of-type {
+  padding-bottom: 100px;
 }
 
 .home-quick-grid {
