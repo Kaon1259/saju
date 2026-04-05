@@ -176,9 +176,10 @@ export const getMyFortune = async (userId) => {
   return response.data;
 };
 
-export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError }) => {
+export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError }, date) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
-  const url = `${baseURL}/my/fortune/${userId}/stream`;
+  const params = date ? `?date=${date}` : '';
+  const url = `${baseURL}/my/fortune/${userId}/stream${params}`;
   const eventSource = new EventSource(url);
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));

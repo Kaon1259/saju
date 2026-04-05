@@ -88,7 +88,8 @@ public class MyFortuneController {
      * 나의 운세 스트리밍 (사주 AI 부분)
      */
     @GetMapping(value = "/fortune/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamMyFortune(@PathVariable Long userId) {
+    public SseEmitter streamMyFortune(@PathVariable Long userId,
+            @RequestParam(value = "date", required = false) String dateStr) {
         UserResponse user = userService.getUser(userId);
         if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
             SseEmitter emitter = new SseEmitter(5000L);
@@ -99,8 +100,10 @@ public class MyFortuneController {
             return emitter;
         }
 
+        LocalDate targetDate = (dateStr != null && !dateStr.isBlank()) ? LocalDate.parse(dateStr) : LocalDate.now();
+
         // 캐시 체크
-        var cached = fortuneService.getCachedFortune(user.getZodiacAnimal());
+        var cached = fortuneService.getCachedFortune(user.getZodiacAnimal(), targetDate);
         if (cached != null && cached.getOverall() != null && !cached.getOverall().isBlank()) {
             // 사주 정보도 함께 계산 (성격분석, 일간 등)
             LocalDate bd = user.getBirthDate();
@@ -127,11 +130,12 @@ public class MyFortuneController {
             return emitter;
         }
 
-        // AI 스트리밍 (연애상태 반영)
+        // AI 스트리밍 (연애상태 + 날짜 반영)
         String systemPrompt = promptBuilder.fortuneStreamSystemPrompt();
-        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), LocalDate.now(), user.getRelationshipStatus());
+        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), targetDate, user.getRelationshipStatus());
+        final LocalDate finalDate = targetDate;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
-            fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText);
+            fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
         });
     }
 

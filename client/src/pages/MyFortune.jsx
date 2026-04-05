@@ -19,6 +19,9 @@ function MyFortune() {
   const [streaming, setStreaming] = useState(false);
   const cleanupRef = useRef(null);
   const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'partner' | 'other'
+  const [dateMode, setDateMode] = useState('today'); // 'today' | 'tomorrow' | 'pick'
+  const [pickDate, setPickDate] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // 연인 운세
   const [partnerData, setPartnerData] = useState(null);
@@ -40,6 +43,27 @@ function MyFortune() {
 
   const userId = localStorage.getItem('userId');
   const userName = localStorage.getItem('userName');
+
+  // 날짜 계산
+  const getTargetDate = () => {
+    if (dateMode === 'tomorrow') {
+      const d = new Date(); d.setDate(d.getDate() + 1);
+      return d.toISOString().slice(0, 10);
+    }
+    if (dateMode === 'pick' && pickDate) return pickDate;
+    return null; // today = null (서버 기본값)
+  };
+  const getDateLabel = () => {
+    if (dateMode === 'tomorrow') {
+      const d = new Date(); d.setDate(d.getDate() + 1);
+      return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+    }
+    if (dateMode === 'pick' && pickDate) {
+      const [, m, day] = pickDate.split('-');
+      return `${parseInt(m)}월 ${parseInt(day)}일`;
+    }
+    return '오늘';
+  };
 
   // 프로필에서 연인 정보 가져오기
   const getPartnerInfo = () => {
@@ -100,9 +124,10 @@ function MyFortune() {
     }
   };
 
-  useEffect(() => {
+  const loadMyFortune = (targetDate) => {
     if (!userId) { setLoading(false); return; }
-    setStreamText(''); setStreaming(false);
+    setData(null); setLoading(true); setStreamText(''); setStreaming(false);
+    cleanupRef.current?.();
     cleanupRef.current = getMyFortuneStream(userId, {
       onCached: (d) => { setData(d); setLoading(false); },
       onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
@@ -114,9 +139,14 @@ function MyFortune() {
         setStreaming(false); setStreamText('');
         (async () => { try { setData(await getMyFortune(userId)); } catch {} finally { setLoading(false); } })();
       },
-    });
+    }, targetDate);
     return () => cleanupRef.current?.();
-  }, [userId]);
+  };
+
+  useEffect(() => {
+    loadMyFortune(getTargetDate());
+    return () => cleanupRef.current?.();
+  }, [userId, dateMode, pickDate]);
 
   if (!userId) {
     return (
@@ -237,6 +267,29 @@ function MyFortune() {
         <button className={`myf-mode-tab ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>다른 사람</button>
       </div>
 
+      {/* 날짜 칩 바 */}
+      {viewMode === 'mine' && (
+        <div className="myf-date-chips">
+          <button className={`myf-date-chip ${dateMode === 'today' ? 'active' : ''}`}
+            onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}>오늘</button>
+          <button className={`myf-date-chip ${dateMode === 'tomorrow' ? 'active' : ''}`}
+            onClick={() => { setDateMode('tomorrow'); setPickDate(''); setShowDatePicker(false); }}>내일</button>
+          <button className={`myf-date-chip ${dateMode === 'pick' ? 'active' : ''}`}
+            onClick={() => setShowDatePicker(v => !v)}>
+            {dateMode === 'pick' && pickDate ? getDateLabel() : '📅 날짜선택'}
+          </button>
+          {showDatePicker && (
+            <div className="myf-date-picker-wrap">
+              <input type="date" className="myf-date-picker-input"
+                value={pickDate}
+                min={(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })()}
+                max={(() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().slice(0, 10); })()}
+                onChange={(e) => { setPickDate(e.target.value); setDateMode('pick'); setShowDatePicker(false); }} />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ════════ 연인 운세 ════════ */}
       {viewMode === 'partner' && (
         <div className="myf-other-view">
@@ -347,7 +400,7 @@ function MyFortune() {
       {viewMode === 'mine' && (
       <>
       <div className="myf-header">
-        <h1 className="myf-title">{userName || user.name}님의 운세</h1>
+        <h1 className="myf-title">{userName || user.name}님의 {dateMode === 'today' ? '오늘' : dateMode === 'tomorrow' ? '내일' : getDateLabel()} 운세</h1>
         <div className="myf-badges">
           <span className="myf-badge">{user.zodiacAnimal}띠</span>
           {saju?.dayMaster && <span className="myf-badge myf-badge--saju">{saju.dayMaster}일간</span>}

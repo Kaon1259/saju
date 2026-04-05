@@ -128,9 +128,13 @@ public class FortuneService {
      */
     @Transactional(readOnly = true)
     public FortuneResponse getCachedFortune(String zodiacAnimal) {
-        LocalDate today = LocalDate.now();
+        return getCachedFortune(zodiacAnimal, LocalDate.now());
+    }
+
+    @Transactional(readOnly = true)
+    public FortuneResponse getCachedFortune(String zodiacAnimal, LocalDate date) {
         Optional<DailyFortune> existing = dailyFortuneRepository
-                .findByZodiacAnimalAndFortuneDate(zodiacAnimal, today);
+                .findByZodiacAnimalAndFortuneDate(zodiacAnimal, date);
         return existing.map(FortuneResponse::from).orElse(null);
     }
 
@@ -191,6 +195,11 @@ public class FortuneService {
      */
     @Transactional
     public void parseAndSaveStreamResult(String zodiacAnimal, String fullText) {
+        parseAndSaveStreamResult(zodiacAnimal, fullText, LocalDate.now());
+    }
+
+    @Transactional
+    public void parseAndSaveStreamResult(String zodiacAnimal, String fullText, LocalDate targetDate) {
         try {
             String json = fullText.trim();
             // 마크다운 코드블록 제거
@@ -205,9 +214,8 @@ public class FortuneService {
             if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
 
             JsonNode node = objectMapper.readTree(json);
-            LocalDate today = LocalDate.now();
 
-            Optional<DailyFortune> existing = dailyFortuneRepository.findByZodiacAnimalAndFortuneDate(zodiacAnimal, today);
+            Optional<DailyFortune> existing = dailyFortuneRepository.findByZodiacAnimalAndFortuneDate(zodiacAnimal, targetDate);
             if (existing.isPresent()) {
                 DailyFortune fortune = existing.get();
                 if (node.has("overall")) fortune.setOverall(node.get("overall").asText());
@@ -219,14 +227,14 @@ public class FortuneService {
                 if (node.has("luckyNumber")) fortune.setLuckyNumber(node.get("luckyNumber").asInt(fortune.getLuckyNumber()));
                 if (node.has("luckyColor")) fortune.setLuckyColor(node.get("luckyColor").asText());
                 dailyFortuneRepository.save(fortune);
-                log.info("Daily fortune cache updated: zodiac={}, date={}", zodiacAnimal, today);
+                log.info("Daily fortune cache updated: zodiac={}, date={}", zodiacAnimal, targetDate);
             } else {
                 // 기존 레코드 없으면 새로 생성
-                long seed = (long) zodiacAnimal.hashCode() + today.hashCode();
+                long seed = (long) zodiacAnimal.hashCode() + targetDate.hashCode();
                 Random random = new Random(seed);
                 DailyFortune fortune = DailyFortune.builder()
                     .zodiacAnimal(zodiacAnimal)
-                    .fortuneDate(today)
+                    .fortuneDate(targetDate)
                     .overall(node.has("overall") ? node.get("overall").asText() : "")
                     .love(node.has("love") ? node.get("love").asText() : "")
                     .money(node.has("money") ? node.get("money").asText() : "")
@@ -237,7 +245,7 @@ public class FortuneService {
                     .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : LUCKY_COLORS[random.nextInt(LUCKY_COLORS.length)])
                     .build();
                 dailyFortuneRepository.save(fortune);
-                log.info("Daily fortune cache created: zodiac={}, date={}", zodiacAnimal, today);
+                log.info("Daily fortune cache created: zodiac={}, date={}", zodiacAnimal, targetDate);
             }
         } catch (Exception e) {
             log.error("Failed to parse/save fortune stream result: zodiac={}, error={}", zodiacAnimal, e.getMessage(), e);
