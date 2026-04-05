@@ -301,6 +301,17 @@ function Compatibility() {
 
       <div className="compat-form glass-card">
         {/* Person 1 */}
+        {(() => { try { const p = JSON.parse(localStorage.getItem('userProfile') || '{}'); return !!p.birthDate; } catch { return false; } })() && (
+          <button className="sf-autofill-btn" style={{ marginBottom: 8 }} onClick={() => {
+            try {
+              const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+              if (p.birthDate) setBd1(p.birthDate);
+              if (p.gender) { setG1(p.gender); setG2(p.gender === 'M' ? 'F' : 'M'); }
+              if (p.birthTime) setBt1(p.birthTime);
+              if (p.calendarType) setCalType1(p.calendarType);
+            } catch {}
+          }}>✨ 내 정보로 채우기</button>
+        )}
         <div className="form-group">
           <label className="form-label">성별</label>
           <div className="form-toggle">
@@ -308,17 +319,6 @@ function Compatibility() {
             <button type="button" className={`form-toggle__btn ${g1 === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => { setG1('F'); setG2('M'); }}><span className="g-circle g-female">♀</span></button>
           </div>
         </div>
-        {(() => { try { const p = JSON.parse(localStorage.getItem('userProfile') || '{}'); return !!p.birthDate; } catch { return false; } })() && (
-          <button className="sf-autofill-btn" onClick={() => {
-            try {
-              const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
-              if (p.birthDate) setBd1(p.birthDate);
-              if (p.gender) setG1(p.gender);
-              if (p.birthTime) setBt1(p.birthTime);
-              if (p.calendarType) setCalType1(p.calendarType);
-            } catch {}
-          }}>✨ 내 정보로 채우기</button>
-        )}
         <div className="form-group">
           <label className="form-label">달력 구분</label>
           <div className="form-toggle">
