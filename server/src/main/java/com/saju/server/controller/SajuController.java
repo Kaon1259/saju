@@ -127,7 +127,7 @@ public class SajuController {
             "\"luckyColor\":\"행운색상\"}";
 
         final LocalDate finalBd = birthDate;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2000, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
             sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
         });
     }

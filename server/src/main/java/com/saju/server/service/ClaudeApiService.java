@@ -219,9 +219,17 @@ public class ClaudeApiService {
             if (start != end && afterStart > 0 && afterStart < end) {
                 // 정상: 여는 ``` 와 닫는 ``` 모두 존재
                 cleaned = cleaned.substring(afterStart + 1, end).trim();
+            } else if (start != end) {
+                // ``` 가 두 개 있지만 줄바꿈이 없는 경우 → { 위치로 직접 추출
+                int bracePos = cleaned.indexOf("{", start);
+                if (bracePos >= 0) cleaned = cleaned.substring(bracePos, end).trim();
             } else if (afterStart > 0) {
-                // 잘림: 여는 ```만 있음 (max_tokens로 응답 잘린 경우)
+                // 잘림: 여는 ```만 있음 + 줄바꿈 있음
                 cleaned = cleaned.substring(afterStart + 1).trim();
+            } else {
+                // 잘림: 여는 ```만 있음 + 줄바꿈 없음 → { 위치로 직접 추출
+                int bracePos = cleaned.indexOf("{", start);
+                if (bracePos >= 0) cleaned = cleaned.substring(bracePos);
             }
         }
 
