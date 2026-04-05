@@ -463,22 +463,6 @@ function Home() {
         </button>
       </section>
 
-      {/* 3.5 신년운세 배너 */}
-      <section style={{ padding: '0 4px', marginBottom: 4 }}>
-        <button className="home-year-banner" onClick={() => navigate('/year-fortune')}>
-          <span className="home-year-banner-bg" />
-          <span className="home-year-banner-sparkles">✦✦✦</span>
-          <div className="home-year-banner-content">
-            <span className="home-year-banner-icon">🎊</span>
-            <div className="home-year-banner-text">
-              <span className="home-year-banner-title">2026 신년운세</span>
-              <span className="home-year-banner-desc">병오년, 새해 운명을 미리 확인하세요</span>
-            </div>
-            <span className="home-year-banner-arrow">›</span>
-          </div>
-        </button>
-      </section>
-
       {/* 4. 연애 카테고리 (축소 + 더보기) */}
       <section className="home-love-cats-section">
         <div className="home-love-cats-grid">
@@ -555,6 +539,22 @@ function Home() {
             <span className="home-star-card-arrow">›</span>
           </button>
         </div>
+      </section>
+
+      {/* 5.5 신년운세 배너 */}
+      <section style={{ padding: '0 4px', marginBottom: 4 }}>
+        <button className="home-year-banner" onClick={() => navigate('/year-fortune')}>
+          <span className="home-year-banner-bg" />
+          <span className="home-year-banner-sparkles">✦✦✦</span>
+          <div className="home-year-banner-content">
+            <span className="home-year-banner-icon">🎊</span>
+            <div className="home-year-banner-text">
+              <span className="home-year-banner-title">2026 신년운세</span>
+              <span className="home-year-banner-desc">병오년, 새해 운명을 미리 확인하세요</span>
+            </div>
+            <span className="home-year-banner-arrow">›</span>
+          </div>
+        </button>
       </section>
 
       {/* 6. 통합 메뉴 그리드 */}
