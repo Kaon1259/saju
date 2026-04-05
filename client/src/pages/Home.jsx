@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from '../components/PageTransition';
 import FortuneCard from '../components/FortuneCard';
-import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser } from '../api/fortune';
+import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { playHarmony, playTarotReveal, playStarTwinkle, playCrystalBall } from '../utils/sounds';
@@ -230,6 +230,11 @@ function Home() {
         const user = await getUser(userId);
         setMyData({ user });
         localStorage.setItem('userProfile', JSON.stringify(user));
+        // 오늘 운세 점수/한줄 가져오기 (Hero 표시용)
+        try {
+          const fortune = await getMyFortune(userId);
+          if (fortune?.saju) setMyData(prev => ({ ...prev, saju: fortune.saju }));
+        } catch {}
       } catch (e) { console.error(e); }
     })();
   }, [userId]);
@@ -431,6 +436,16 @@ function Home() {
               {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
             </p>
             <p className="home-hero-new__msg">{msg}</p>
+            {/* 로그인 사용자: 오늘 운세 미리보기 */}
+            {userId && myData?.saju?.score && (
+              <button className="home-hero-fortune-peek" onClick={() => navigate('/my')}>
+                <span className="home-hero-fortune-score">{myData.saju.score}점</span>
+                <span className="home-hero-fortune-text">
+                  {myData.saju.overall ? myData.saju.overall.split('.')[0] + '.' : '오늘의 운세를 확인하세요'}
+                </span>
+                <span className="home-hero-fortune-arrow">›</span>
+              </button>
+            )}
           </section>
         );
       })()}
@@ -604,19 +619,6 @@ function Home() {
           </button>
         </section>
       )}
-
-      {/* 빠른 메뉴 */}
-      <section className="home-quick-section">
-        <h2 className="home-section-title">빠른 메뉴</h2>
-        <div className="home-quick-grid">
-          {QUICK_MENUS.map((item) => (
-            <button key={item.path} className="home-quick-item" onClick={() => navigate(item.path)} style={{ '--qi-color': item.color }}>
-              <span className="home-quick-icon">{item.icon}</span>
-              <span className="home-quick-label">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
 
       {/* 연애 운세 바텀시트 모달 */}
       {loveModal && (
