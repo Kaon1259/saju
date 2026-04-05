@@ -425,9 +425,6 @@ function Home() {
               <h1 className="home-hero__title">연애 운세</h1>
               <span className="home-hero__date-inline">{dayStr} {dateStr}</span>
             </div>
-            {userId && userName && (
-              <p className="home-hero-new__greeting">{userName}님의 사랑운</p>
-            )}
             <div className="home-love-temp-center">
               <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
               <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
