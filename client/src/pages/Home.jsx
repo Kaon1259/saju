@@ -663,9 +663,11 @@ function Home() {
                     </div>
                   )}
 
+                  {loveModal !== 'ideal_type' && (
                   <button className="love-modal-partner-btn" onClick={() => setLoveShowPartner(!loveShowPartner)}>
                     {loveShowPartner ? '상대방 정보 접기' : '상대방 정보 추가 (선택)'}
                   </button>
+                  )}
                   {loveShowPartner && (
                     <div className="love-modal-partner fade-in">
                       {(() => {

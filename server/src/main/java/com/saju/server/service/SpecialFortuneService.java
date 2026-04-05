@@ -745,7 +745,8 @@ public class SpecialFortuneService {
 - lookType: "이상형 외모/분위기 키워드 (2-3문장)"
 - personalityType: "이상형 성격/가치관 (2-3문장)"
 - meetingPlace: "만남 장소·활동 추천 3가지 (2-3문장)"
-- meetingTiming: "인연 만날 시기·계절 (2문장)\"""";
+- meetingTiming: "인연 만날 시기·계절 (2문장)"
+- celebMatch: "나와 사주 궁합이 잘 맞을 실제 한국 연예인 3명 추천 + 각각 이유 한줄 (예: 'BTS 뷔 - 토 기운이 너의 수를 안정시켜줘')\"""";
 
             case "past_life" -> """
 【전생 인연 분석 프레임워크】
