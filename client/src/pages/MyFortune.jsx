@@ -7,6 +7,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
 import StreamText from '../components/StreamText';
 import FortuneLoading from '../components/FortuneLoading';
+import parseAiJson from '../utils/parseAiJson';
 import './MyFortune.css';
 
 function MyFortune() {
@@ -131,14 +132,18 @@ function MyFortune() {
     cleanupRef.current = getMyFortuneStream(userId, {
       onCached: (d) => { setData(d); setLoading(false); },
       onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
-      onDone: () => {
+      onDone: (fullText) => {
         setStreaming(false); setStreamText('');
-        // 스트리밍 완료 → 서버 캐시 저장됨 → 같은 날짜로 재요청하면 캐시 히트
-        cleanupRef.current = getMyFortuneStream(userId, {
-          onCached: (d) => { setData(d); setLoading(false); },
-          onDone: () => { setLoading(false); },
-          onError: () => { setLoading(false); },
-        }, targetDate);
+        // 스트리밍 텍스트에서 직접 파싱 → 즉시 표시
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
+          setData({
+            user: { name: profile.name || '', zodiacAnimal: profile.zodiacAnimal || '', bloodType: profile.bloodType || '', mbtiType: profile.mbtiType || '' },
+            saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor }
+          });
+        }
+        setLoading(false);
       },
       onError: () => {
         setStreaming(false); setStreamText('');
