@@ -443,7 +443,7 @@ function Home() {
                 <span className="home-hero-fortune-text">
                   {myData.saju.overall ? myData.saju.overall.split('.')[0] + '.' : '오늘의 운세를 확인하세요'}
                 </span>
-                <span className="home-hero-fortune-arrow">›</span>
+                <span className="home-hero-fortune-arrow">오늘의 운세 보기 ›</span>
               </button>
             )}
           </section>
