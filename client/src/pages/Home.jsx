@@ -747,17 +747,24 @@ function Home() {
                     text={[`${loveInfo?.label} 결과입니다.`, `점수는 ${loveResult.score}점, ${loveResult.grade}입니다.`, loveResult.overall, loveResult.timing, loveResult.advice, loveResult.caution].filter(Boolean).join(' ')}
                     summaryText={`${loveInfo?.label} ${loveResult.score}점, ${loveResult.grade}. ${(loveResult.overall||'').split('.').slice(0,2).join('.')}.`} />
 
-                  <div className="love-modal-score-card">
-                    <div className="love-modal-heart-aura" style={{ background: `radial-gradient(circle, ${loveHeartColor}, transparent 70%)` }} />
-                    <div className="love-modal-heart-center">
-                      <span className="love-modal-heart-big" style={{ color: loveHeartColor }}>&#x2764;</span>
-                      <span className="love-modal-heart-num">{loveResult.score}</span>
-                      <span className="love-modal-heart-unit">점</span>
+                  {loveModal === 'ideal_type' ? (
+                    <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
+                      <span style={{ fontSize: 40 }}>👩‍❤️‍👨</span>
+                      <h3 style={{ fontSize: 18, fontWeight: 800, margin: '8px 0 4px', color: 'var(--color-text)' }}>나의 이상형 분석</h3>
                     </div>
-                    <span className="love-modal-heart-grade" style={{ color: GRADE_COLORS[loveResult.grade] || loveHeartColor }}>{loveResult.grade}</span>
-                  </div>
+                  ) : (
+                    <div className="love-modal-score-card">
+                      <div className="love-modal-heart-aura" style={{ background: `radial-gradient(circle, ${loveHeartColor}, transparent 70%)` }} />
+                      <div className="love-modal-heart-center">
+                        <span className="love-modal-heart-big" style={{ color: loveHeartColor }}>&#x2764;</span>
+                        <span className="love-modal-heart-num">{loveResult.score}</span>
+                        <span className="love-modal-heart-unit">점</span>
+                      </div>
+                      <span className="love-modal-heart-grade" style={{ color: GRADE_COLORS[loveResult.grade] || loveHeartColor }}>{loveResult.grade}</span>
+                    </div>
+                  )}
 
-                  <FortuneCard icon={loveInfo?.icon === 'couple' ? '💕' : loveInfo?.icon === 'wedding' ? '💒' : loveInfo?.icon} title="종합 분석" description={loveResult.overall} delay={0} />
+                  <FortuneCard icon={loveModal === 'ideal_type' ? '🔮' : loveInfo?.icon === 'couple' ? '💕' : loveInfo?.icon === 'wedding' ? '💒' : loveInfo?.icon} title={loveModal === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'} description={loveResult.overall} delay={0} />
 
                   {/* 이상형 전용 카드 */}
                   {loveModal === 'ideal_type' && (
