@@ -8,6 +8,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import { playHarmony, playTarotReveal, playStarTwinkle, playCrystalBall } from '../utils/sounds';
 import { shareResult } from '../utils/share';
 import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -309,21 +310,14 @@ function Home() {
           onDone: (fullText) => {
             setLoveStreaming(false);
             setLoveStreamText('');
-            try {
-              let json = fullText;
-              if (json.includes('```')) { const s = json.indexOf('\n', json.indexOf('```')); const e = json.lastIndexOf('```'); if (s > 0 && e > s) json = json.substring(s + 1, e); }
-              const bs = json.indexOf('{'); const be = json.lastIndexOf('}');
-              if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
-              const parsed = JSON.parse(json);
-              const finalResult = {
-                ...basic, score: parsed.score || 65, grade: parsed.grade || '보통',
-                overall: parsed.overall || '', timing: parsed.timing || '',
-                advice: parsed.advice || '', caution: parsed.caution || '',
-                luckyDay: parsed.luckyDay || '', luckyPlace: parsed.luckyPlace || '', luckyColor: parsed.luckyColor || '',
-              };
+            const parsed = parseAiJson(fullText);
+            if (parsed) {
+              const finalResult = { ...basic, ...parsed, score: parsed.score || basic.score || 65, grade: parsed.grade || basic.grade || '보통', overall: parsed.overall || '' };
               setLoveResult(finalResult);
               saveLoveFortuneCache({ ...finalResult, type: loveModal, birthDate: loveBirth, gender: loveGender }).catch(() => {});
-            } catch { setLoveResult({ ...basic, score: 65, grade: '보통', overall: fullText }); }
+            } else {
+              setLoveResult({ ...basic, score: 65, grade: '보통', overall: fullText });
+            }
           },
           onError: () => { setLoveStreaming(false); setLoveStreamText(''); },
         }
