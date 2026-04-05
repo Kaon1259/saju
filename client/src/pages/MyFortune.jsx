@@ -254,7 +254,7 @@ function MyFortune() {
       {birthInfo?.birthDate && (
         <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} />
       )}
-      <div className="myf-actions" style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+      <div className="myf-actions">
         <button className="myf-share-btn" onClick={onShare}>{copied ? '✅ 복사 완료!' : '📤 공유하기'}</button>
         <button className="myf-share-btn" onClick={onReset}>🔄 다시 보기</button>
       </div>
