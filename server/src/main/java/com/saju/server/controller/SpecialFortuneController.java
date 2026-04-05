@@ -122,7 +122,8 @@ public class SpecialFortuneController {
         String[] prompts = specialFortuneService.buildLoveStreamPrompts(
             type, birthDate, birthTime, gender, calendarType,
             partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus);
-        return claudeApiService.generateStream(prompts[0], prompts[1], 1200, (fullText) -> {
+        int maxTokens = "ideal_type".equals(type) ? 2500 : 1200;
+        return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens, (fullText) -> {
             specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
                 partnerDate, partnerGender, breakupDate, meetDate, fullText);
         });
