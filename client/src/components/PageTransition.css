@@ -9,15 +9,9 @@
 .trans--out { opacity: 0; }
 @keyframes transIn { from { opacity: 0; } to { opacity: 1; } }
 
-.trans-content { position: relative; z-index: 10; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.trans-orb { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-.trans-orb-ring { position: absolute; inset: 0; border-radius: 50%; border: 2.5px solid transparent; border-top-color: rgba(251,191,36,0.7); border-right-color: rgba(168,85,247,0.4); animation: transOrbSpin 2s linear infinite; }
-.trans-orb-ring--2 { inset: -10px; border-top-color: rgba(168,85,247,0.4); border-right-color: rgba(251,191,36,0.3); animation-duration: 3s; animation-direction: reverse; }
-.trans-orb-inner { width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(168,85,247,0.3), rgba(99,42,173,0.6)); display: flex; align-items: center; justify-content: center; animation: transOrbPulse 2s ease-in-out infinite; box-shadow: 0 0 40px rgba(168,85,247,0.4), 0 0 80px rgba(168,85,247,0.15); }
-.trans-symbol { font-size: 48px; font-weight: 900; display: block; animation: transSymbol 0.8s cubic-bezier(0.34,1.56,0.64,1); filter: drop-shadow(0 0 12px currentColor); }
+.trans-content { position: relative; z-index: 10; text-align: center; }
+.trans-symbol { font-size: 100px; font-weight: 900; font-family: serif; display: block; animation: transSymbol 0.8s cubic-bezier(0.34,1.56,0.64,1); filter: drop-shadow(0 0 20px currentColor); }
 @keyframes transSymbol { from { transform: scale(0.3) rotate(-20deg); opacity: 0; } to { transform: scale(1) rotate(0deg); opacity: 1; } }
-@keyframes transOrbSpin { to { transform: rotate(360deg); } }
-@keyframes transOrbPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
 /* ─── Snow (fortune/오늘운세) ─── */
 .trans--snow { background: radial-gradient(ellipse at 50% 30%, rgba(140,170,210,0.15), rgba(10,5,30,0.98)); }
