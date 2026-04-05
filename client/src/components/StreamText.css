@@ -3,8 +3,15 @@
 .stream-text-header {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   margin-bottom: 12px; font-size: 14px; font-weight: 700;
-  color: var(--stream-color, #FBBF24); text-align: center;
+  text-align: center;
 }
+.stream-text-label {
+  background: linear-gradient(90deg, #FBBF24, #E91E63, #A855F7, #60A5FA, #4ADE80, #FBBF24);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: streamLabelShift 4s linear infinite;
+}
+@keyframes streamLabelShift { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
 .stream-text-icon { font-size: 32px; animation: streamPulse 1.5s ease-in-out infinite; }
 .stream-text-dots { display: inline-flex; gap: 4px; margin-top: 2px; }
 .stream-text-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--stream-color, #FBBF24); opacity: 0.3; animation: streamDot 1.2s ease-in-out infinite; }
