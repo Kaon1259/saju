@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getSajuCompatibilityBasic, getCompatibilityStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -34,6 +35,8 @@ const BIRTH_TIMES = [
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
 
 function Compatibility() {
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('userId');
   const [shareMsg, setShareMsg] = useState('');
   const [bd1, setBd1] = useState('');
   const [bt1, setBt1] = useState('');
@@ -299,9 +302,16 @@ function Compatibility() {
         <h1 className="compat-intro-title">사주 궁합</h1>
       </section>
 
+      {/* 비로그인 CTA */}
+      {!userId && (
+        <button className="home-cta-btn" style={{ margin: '0 0 8px' }} onClick={() => navigate('/register', { state: { from: '/compatibility' } })}>
+          카카오 로그인하고 맞춤 궁합 받기
+        </button>
+      )}
+
       <div className="compat-form glass-card">
         {/* Person 1 */}
-        {(() => { try { const p = JSON.parse(localStorage.getItem('userProfile') || '{}'); return !!p.birthDate; } catch { return false; } })() && (
+        {userId && (() => { try { const p = JSON.parse(localStorage.getItem('userProfile') || '{}'); return !!p.birthDate; } catch { return false; } })() && (
           <button className="sf-autofill-btn" style={{ marginBottom: 8 }} onClick={() => {
             try {
               const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
