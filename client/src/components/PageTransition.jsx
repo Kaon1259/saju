@@ -150,7 +150,13 @@ function PageTransition({ effect, onDone }) {
   return (
     <div className={`page-transition ${config.className} ${fadeOut ? 'trans--out' : ''}`}>
       <div className="trans-content">
-        <span className="trans-symbol">{config.label}</span>
+        <div className="trans-orb">
+          <div className="trans-orb-ring" />
+          <div className="trans-orb-ring trans-orb-ring--2" />
+          <div className="trans-orb-inner">
+            <span className="trans-symbol">{config.label}</span>
+          </div>
+        </div>
       </div>
 
       {effect === 'fortune' && <>
