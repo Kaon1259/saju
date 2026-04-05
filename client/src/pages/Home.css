@@ -476,9 +476,11 @@
 .home-hero-fortune-score { font-size: 20px; font-weight: 900; color: #FBBF24; flex-shrink: 0; }
 .home-hero-fortune-text { flex: 1; font-size: 13px; color: rgba(255,255,255,0.75); text-align: left; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .home-hero-fortune-arrow { font-size: 20px; color: rgba(251,191,36,0.5); flex-shrink: 0; }
-[data-theme="light"] .home-hero-fortune-peek { border-color: rgba(184,134,11,0.15); background: rgba(251,191,36,0.04); }
-[data-theme="light"] .home-hero-fortune-score { color: #b8860b; }
-[data-theme="light"] .home-hero-fortune-text { color: #333; }
+[data-theme="light"] .home-hero-fortune-peek { border-color: rgba(184,134,11,0.35); background: rgba(251,191,36,0.1); box-shadow: 0 2px 8px rgba(184,134,11,0.1); }
+[data-theme="light"] .home-hero-fortune-peek:hover { background: rgba(251,191,36,0.18); border-color: rgba(184,134,11,0.5); }
+[data-theme="light"] .home-hero-fortune-score { color: #9a6700; font-size: 22px; }
+[data-theme="light"] .home-hero-fortune-text { color: #1a1a2e; font-weight: 600; }
+[data-theme="light"] .home-hero-fortune-arrow { color: rgba(154,103,0,0.6); }
 
 /* ─── 핵심 동선 3개 ─── */
 .home-main-actions {
