@@ -511,7 +511,7 @@ function MyFortune() {
             try {
               const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
               if (!profile.birthDate) return null;
-              return <DeepAnalysis type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} />;
+              return <DeepAnalysis key={dateMode + pickDate} type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={getTargetDate() || new Date().toISOString().slice(0, 10)} />;
             } catch { return null; }
           })()}
         </div>

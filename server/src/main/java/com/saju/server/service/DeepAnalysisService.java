@@ -258,8 +258,12 @@ public class DeepAnalysisService {
         if (birthTime != null && !birthTime.isEmpty()) sb.append(", 태어난 시간: ").append(birthTime);
         if (gender != null && !gender.isEmpty()) sb.append(", 성별: ").append("M".equals(gender) ? "남성" : "여성");
         if (calendarType != null) sb.append(", 달력: ").append("LUNAR".equals(calendarType) ? "음력" : "양력");
-        if (extra != null && !extra.isEmpty()) sb.append(", 추가정보: ").append(extra);
-        sb.append(", 오늘 날짜: ").append(LocalDate.now());
+        // extra에 날짜(yyyy-MM-dd)가 들어오면 분석 대상 날짜로 사용
+        LocalDate targetDate = LocalDate.now();
+        if (extra != null && !extra.isEmpty()) {
+            try { targetDate = LocalDate.parse(extra); } catch (Exception e) { sb.append(", 추가정보: ").append(extra); }
+        }
+        sb.append(", 분석 대상 날짜: ").append(targetDate);
 
         sb.append("\n\n[중요] 프리미엄 분석입니다. 각 항목을 간결하되 구체적으로 작성하세요. 추상적 표현 금지.\n다음 JSON 형식으로 응답하세요:\n");
 
