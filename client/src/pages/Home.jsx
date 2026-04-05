@@ -429,13 +429,17 @@ function Home() {
             <p className="home-hero-new__msg">{msg}</p>
             {/* 로그인 사용자: 오늘 운세 미리보기 */}
             {userId && myData?.saju?.score && (
-              <button className="home-hero-fortune-peek" onClick={() => navigate('/my')}>
-                <span className="home-hero-fortune-score">{myData.saju.score}점</span>
-                <span className="home-hero-fortune-text">
-                  {myData.saju.overall ? myData.saju.overall.split('.')[0] + '.' : '오늘의 운세를 확인하세요'}
-                </span>
-                <span className="home-hero-fortune-arrow">오늘의 운세 보기 ›</span>
-              </button>
+              <div className="home-hero-fortune-wrap">
+                <div className="home-hero-fortune-peek">
+                  <span className="home-hero-fortune-score">{myData.saju.score}점</span>
+                  <span className="home-hero-fortune-text">
+                    {myData.saju.overall ? myData.saju.overall.split('.')[0] + '.' : '오늘의 운세를 확인하세요'}
+                  </span>
+                </div>
+                <button className="home-hero-fortune-btn" onClick={() => navigate('/my')}>
+                  오늘의 운세 보기 ›
+                </button>
+              </div>
             )}
           </section>
         );
