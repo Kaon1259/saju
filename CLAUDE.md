@@ -101,5 +101,15 @@
 - 만세력: 기둥 카드 순차 등장(translateY+scale), 시진 카드 스케일인, 해석 슬라이드인
 - 바이오리듬: 게이지 바운스(scale+translateY), 링 드로우 페이드인 강화
 
+[모바일 앱] Capacitor 기반 Android 하이브리드 앱
+- 방식: WebView로 React 웹앱을 네이티브 앱으로 래핑
+- 프레임워크: Capacitor 8.3 (@capacitor/android, @capacitor/core, @capacitor/cli)
+- 패키지명: com.love.onetoone / 앱이름: 1:1연애
+- 경로: client/android/ (Android Studio 프로젝트)
+- 설정: client/capacitor.config.json
+- 빌드 흐름: npm run build → npx cap sync → Android Studio에서 APK/AAB 빌드
+- 현재 상태: 개발 서버(10.0.2.2:3000) 연결, 프로덕션 배포 시 server.url 제거 필요
+- webDir: "dist" (Vite 빌드 출력)
+
 [TODO] 토정비결 스트리밍 캐시 미작동 - 스트리밍은 되지만 같은 조합으로 재요청 시 AI 분석을 다시 함. 캐시 저장/조회 키 불일치 확인 필요
 [TODO] 나머지 페이지 스트리밍 캐시 동작 전수 검증 - 커플운세/토정비결처럼 캐시가 안 되는 페이지가 더 있을 수 있음
