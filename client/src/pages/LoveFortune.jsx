@@ -12,6 +12,7 @@ const RELATION_STATUSES = [
   { value: 'SINGLE', label: '솔로', icon: '💫' },
   { value: 'SOME', label: '썸', icon: '💗' },
   { value: 'IN_RELATIONSHIP', label: '연애중', icon: '💕' },
+  { value: 'MARRIED', label: '기혼', icon: '💍' },
   { value: 'COMPLICATED', label: '복잡', icon: '💔' },
 ];
 
