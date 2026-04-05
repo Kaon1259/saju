@@ -380,7 +380,7 @@ function Home() {
     );
   };
 
-  const POPULAR_LOVE_IDS = ['crush', 'blind_date', 'couple_fortune', 'confession_timing', 'marriage', 'past_life'];
+  const POPULAR_LOVE_IDS = ['ideal_type', 'crush', 'blind_date', 'couple_fortune', 'confession_timing', 'marriage'];
   const popularLoveTypes = LOVE_TYPES.filter(l => POPULAR_LOVE_IDS.includes(l.id));
   const extraLoveTypes = LOVE_TYPES.filter(l => !POPULAR_LOVE_IDS.includes(l.id));
 
