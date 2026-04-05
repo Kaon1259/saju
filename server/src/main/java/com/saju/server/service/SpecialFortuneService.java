@@ -905,9 +905,19 @@ public class SpecialFortuneService {
             "'" + typeKr + "' 분석." +
             (!statusKr.isEmpty() ? " 연애상태: " + statusKr : "") + "\n" +
             "JSON만 응답:\n" +
-            "{\"score\":0-100,\"grade\":\"대길/길/보통/흉\",\"overall\":\"종합 3-4문장\"," +
-            "\"timing\":\"최적시기 2문장\",\"advice\":\"행동조언 3문장\"," +
-            "\"caution\":\"주의 2문장\",\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}";
+            ("ideal_type".equals(type)
+                ? "{\"overall\":\"사주로 본 나의 이상형 종합 분석 4-5문장\"," +
+                  "\"lookType\":\"이상형 외모/분위기 키워드 2-3문장\"," +
+                  "\"personalityType\":\"이상형 성격/가치관 2-3문장\"," +
+                  "\"bestZodiac\":\"잘 맞는 띠 TOP3과 이유 2-3문장\"," +
+                  "\"bestMbti\":\"잘 맞는 MBTI 2-3개와 이유 2-3문장\"," +
+                  "\"celebMatch\":\"나와 궁합 좋은 실제 한국 연예인 3명 + 각각 이유 한줄\"," +
+                  "\"meetingPlace\":\"만남 장소·활동 추천 3가지 2-3문장\"," +
+                  "\"meetingTiming\":\"인연 만날 시기·계절 2문장\"," +
+                  "\"caution\":\"주의할 유형 2문장\"}"
+                : "{\"score\":0-100,\"grade\":\"대길/길/보통/흉\",\"overall\":\"종합 3-4문장\"," +
+                  "\"timing\":\"최적시기 2문장\",\"advice\":\"행동조언 3문장\"," +
+                  "\"caution\":\"주의 2문장\",\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}");
 
         return new String[]{system, user};
     }
