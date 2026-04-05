@@ -1,7 +1,7 @@
 .compat-page { max-width: 600px; margin: 0 auto; padding: 8px 16px 40px; display: flex; flex-direction: column; gap: 8px; }
 
 /* 자동 채우기 버튼 행 */
-.compat-autofill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.compat-autofill-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
 
 /* ─── Intro ─── */
 .compat-intro { text-align: center; padding: 8px 0 4px; }
@@ -50,7 +50,7 @@
 .compat-intro-icon { font-size: 28px; }
 
 /* 시간 입력 토글 */
-.compat-time-toggle { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 10px; border: 1px dashed rgba(251,191,36,0.3); background: rgba(251,191,36,0.04); color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.compat-time-toggle { width: 100%; padding: 7px; margin-bottom: 6px; border-radius: 8px; border: 1px dashed rgba(251,191,36,0.3); background: rgba(251,191,36,0.04); color: rgba(255,255,255,0.5); font-size: 12px; cursor: pointer; transition: all 0.2s; }
 .compat-time-toggle:hover { border-color: rgba(251,191,36,0.5); color: rgba(255,255,255,0.7); }
 [data-theme="light"] .compat-time-toggle { border-color: rgba(184,134,11,0.2); background: rgba(251,191,36,0.03); color: rgba(0,0,0,0.4); }
 
@@ -60,9 +60,18 @@
 [data-theme="light"] .compat-more-btn { border-color: rgba(124,58,237,0.15); background: rgba(124,58,237,0.04); color: #7c3aed; }
 
 /* ─── Form ─── */
-.compat-form { padding: 20px; display: flex; flex-direction: column; gap: 0; }
-.compat-form .form-group { margin-bottom: 12px; }
-.compat-form-divider { position: relative; display: flex; align-items: center; justify-content: center; height: 32px; overflow: visible; margin: 4px 0; }
+.compat-form { padding: 14px; display: flex; flex-direction: column; gap: 0; }
+.compat-form .form-group { margin-bottom: 8px; }
+.compat-form .form-label { font-size: 12px; margin-bottom: 3px; }
+.compat-form .form-toggle__btn { padding: 8px 10px; font-size: 13px; }
+.compat-form .form-input,
+.compat-form .form-select { padding: 8px 10px; font-size: 13px; }
+.compat-form .btn-gold { padding: 12px; font-size: 15px; }
+.compat-form .sf-autofill-btn { padding: 6px 12px; font-size: 12px; }
+.compat-form .bdp-select { padding: 8px 6px; font-size: 13px; border-radius: 10px; }
+.compat-form .bdp-selects { gap: 6px; }
+.compat-form .g-circle { width: 22px; height: 22px; font-size: 13px; }
+.compat-form-divider { position: relative; display: flex; align-items: center; justify-content: center; height: 24px; overflow: visible; margin: 2px 0; }
 .compat-divider-heart { font-size: 22px; color: #F472B6; z-index: 1; animation: compatDividerPulse 1.8s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(244,114,182,0.4)); }
 .compat-bubble-heart {
   position: absolute; font-size: 12px; color: #F472B6; opacity: 0;
@@ -78,7 +87,7 @@
   80% { opacity: 0.1; transform: translateY(-22px) translateX(calc((var(--bh-i) - 2) * 6px)) scale(0.5); }
   100% { opacity: 0; transform: translateY(-28px) scale(0.3); }
 }
-.compat-form .btn-gold { width: 100%; margin-top: 8px; }
+.compat-form .btn-gold { width: 100%; margin-top: 6px; }
 
 /* ─── Loading ─── */
 .compat-loading { text-align: center; padding: 60px 20px; position: relative; overflow: hidden; }
