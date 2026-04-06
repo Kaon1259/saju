@@ -34,8 +34,10 @@ public class KakaoAuthService {
     /**
      * 인가 코드로 카카오 액세스 토큰 요청
      */
-    public String getAccessToken(String code) {
+    public String getAccessToken(String code, String clientRedirectUri) {
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
+        String effectiveRedirectUri = (clientRedirectUri != null && !clientRedirectUri.isBlank())
+                ? clientRedirectUri : redirectUri;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -43,7 +45,7 @@ public class KakaoAuthService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", restApiKey);
-        params.add("redirect_uri", redirectUri);
+        params.add("redirect_uri", effectiveRedirectUri);
         params.add("code", code);
         if (clientSecret != null && !clientSecret.isBlank()) {
             params.add("client_secret", clientSecret);
@@ -52,7 +54,7 @@ public class KakaoAuthService {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
         log.info("카카오 토큰 요청 - client_id: {}..., redirect_uri: {}, client_secret 존재: {}",
-                restApiKey.substring(0, Math.min(8, restApiKey.length())), redirectUri, !clientSecret.isBlank());
+                restApiKey.substring(0, Math.min(8, restApiKey.length())), effectiveRedirectUri, !clientSecret.isBlank());
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);

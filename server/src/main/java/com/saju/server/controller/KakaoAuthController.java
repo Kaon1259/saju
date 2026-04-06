@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,11 +46,13 @@ public class KakaoAuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "인가 코드가 필요합니다."));
         }
 
+        String redirectUri = body.get("redirectUri");
+
         String accessToken;
         Map<String, Object> kakaoUser;
         try {
             // 1) 토큰 획득
-            accessToken = kakaoAuthService.getAccessToken(code);
+            accessToken = kakaoAuthService.getAccessToken(code, redirectUri);
         } catch (Exception e) {
             log.error("카카오 토큰 획득 실패: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of("error", "카카오 토큰 획득 실패: " + e.getMessage()));
@@ -137,5 +143,17 @@ public class KakaoAuthController {
         result.put("user", UserResponse.from(saved));
 
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 모바일 앱용 카카오 콜백
+     * GET /api/auth/kakao/app-callback?code=인가코드
+     * 카카오에서 리다이렉트 → 커스텀 스킴으로 앱에 코드 전달
+     */
+    @GetMapping("/app-callback")
+    public void appCallback(@RequestParam String code, HttpServletResponse response) throws IOException {
+        String redirectUrl = "com.love.onetoone://auth/kakao/callback?code="
+                + URLEncoder.encode(code, StandardCharsets.UTF_8);
+        response.sendRedirect(redirectUrl);
     }
 }
