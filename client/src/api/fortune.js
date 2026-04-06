@@ -21,8 +21,9 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
       onInsufficientHearts?.(data);
       window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: data }));
     } catch {
-      onError?.('하트가 부족합니다.');
+      // parse error 무시
     }
+    onError?.('하트가 부족합니다.');
     eventSource.close();
   });
   // 스트리밍 완료 시 하트 잔액 갱신
