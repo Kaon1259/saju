@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns("http://localhost:*", "https://*.vercel.app", "https://*.onrender.com", "https://*.up.railway.app", "https://www.recipepig.kr", "https://recipepig.kr")
+                .allowedOriginPatterns("http://localhost:*", "https://localhost", "https://*.vercel.app", "https://*.onrender.com", "https://*.up.railway.app", "https://www.recipepig.kr", "https://recipepig.kr")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
