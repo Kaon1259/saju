@@ -160,8 +160,41 @@
 - 경로: client/android/ (Android Studio 프로젝트)
 - 설정: client/capacitor.config.json
 - 빌드 흐름: npm run build → npx cap sync → Android Studio에서 APK/AAB 빌드
-- 현재 상태: 개발 서버(10.0.2.2:3000) 연결, 프로덕션 배포 시 server.url 제거 필요
+- Gradle JDK: Java 21 필요 (Android Studio 번들 JBR 사용, gradle.properties에 설정됨)
 - webDir: "dist" (Vite 빌드 출력)
+
+[모바일 앱] 연결 구조
+- 프론트엔드(React): 앱 안에 내장됨 (dist → android/app/src/main/assets/public)
+  - npm run build + npx cap sync 으로 업데이트
+  - WebView origin: https://localhost (Capacitor androidScheme: "https")
+- 백엔드(Spring): Railway 클라우드에서 실행 (별도 배포 필요)
+  - API URL: https://saju-production-ac3c.up.railway.app/api
+  - 서버 코드 수정 시 Railway 재배포 필요 (로컬 수정만으로는 반영 안 됨)
+- 앱 안의 React가 API 호출 시 Railway 원격 서버로 요청
+
+[모바일 앱] 카카오 로그인 OAuth 흐름 (완료)
+- 문제1: WebView에서 외부 URL 이동 시 시스템 브라우저(Chrome) 열림 → 구글 로그인 화면
+- 문제2: allowNavigation으로 WebView 안에서 카카오 로그인 후, https://localhost로 redirect 시 ERR_CONNECTION_REFUSED
+- 해결 방향: allowNavigation + 서버 경유 딥링크 조합
+  1) WebView에서 카카오 로그인 (allowNavigation: kauth.kakao.com, accounts.kakao.com, Railway서버)
+  2) 카카오 인증 완료 → 서버 /api/auth/kakao/app-callback 으로 redirect (WebView 안에서)
+  3) 서버가 com.love.onetoone://auth/kakao/callback?code=xxx 커스텀 스킴으로 redirect
+  4) Android intent-filter가 커스텀 스킴 감지 → MainActivity.onNewIntent 호출
+  5) MainActivity가 code 추출 → getBridge().getWebView().loadUrl()로 WebView에 콜백 URL 로드
+  6) React Router가 /auth/kakao/callback 매칭 → code로 로그인 API 호출
+- 수정된 파일:
+  - client/capacitor.config.json: allowNavigation 추가 (kakao + Railway 서버)
+  - client/android/app/src/main/AndroidManifest.xml: 커스텀 스킴 intent-filter 추가
+  - client/android/app/src/main/java/.../MainActivity.java: 딥링크 핸들러 추가
+  - client/src/pages/Register.jsx: Capacitor 감지 → 앱용 redirect URI 분기
+  - client/src/api/fortune.js: kakaoLogin에 redirectUri 파라미터 추가
+  - server/.../KakaoAuthController.java: GET /app-callback 엔드포인트 추가
+  - server/.../KakaoAuthService.java: getAccessToken에 clientRedirectUri 파라미터 추가
+
+[완료-모바일] 카카오 로그인 (2026-04-06)
+- 서버 Railway 재배포 완료 (app-callback 엔드포인트 + CORS https://localhost 허용)
+- 카카오 개발자 콘솔 redirect URI 등록 완료
+- 앱에서 카카오 로그인 테스트 성공
 
 [TODO] 토정비결 스트리밍 캐시 미작동 - 스트리밍은 되지만 같은 조합으로 재요청 시 AI 분석을 다시 함. 캐시 저장/조회 키 불일치 확인 필요
 [TODO] 나머지 페이지 스트리밍 캐시 동작 전수 검증 - 커플운세/토정비결처럼 캐시가 안 되는 페이지가 더 있을 수 있음

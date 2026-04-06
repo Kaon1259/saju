@@ -71,8 +71,9 @@ export const loginUser = async (phone) => {
 };
 
 // 카카오 로그인
-export const kakaoLogin = async (code) => {
-  const response = await api.post('/auth/kakao/login', { code });
+export const kakaoLogin = async (code, redirectUri) => {
+  const effectiveRedirectUri = redirectUri || `${window.location.origin}/auth/kakao/callback`;
+  const response = await api.post('/auth/kakao/login', { code, redirectUri: effectiveRedirectUri });
   return response.data;
 };
 

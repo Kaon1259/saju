@@ -1,12 +1,17 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { kakaoLogin, kakaoRegister, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './Register.css';
 
 const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY || '';
-const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI || `${window.location.origin}/auth/kakao/callback`;
+const isNative = Capacitor.isNativePlatform();
+const API_URL = import.meta.env.VITE_API_URL || '/api';
+const KAKAO_REDIRECT_URI = isNative
+  ? `${API_URL}/auth/kakao/app-callback`
+  : `${window.location.origin}/auth/kakao/callback`;
 
 const BIRTH_TIMES = [
   { value: '', label: '모름 / 선택안함' },
@@ -105,7 +110,7 @@ function Register() {
     setStep('loading');
     (async () => {
       try {
-        const result = await kakaoLogin(code);
+        const result = await kakaoLogin(code, KAKAO_REDIRECT_URI);
         const user = result.user;
 
         // localStorage에 기본 정보 저장
