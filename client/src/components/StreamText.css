@@ -20,12 +20,12 @@
 
 @keyframes streamBreathingLight {
   0%, 100% {
-    box-shadow: 0 0 12px rgba(180, 120, 0, 0.06), inset 0 0 20px rgba(180, 120, 0, 0.02);
-    filter: brightness(1);
+    box-shadow: 0 0 8px rgba(100, 60, 200, 0.08), 0 0 0 2px rgba(100, 60, 200, 0.05);
+    background-color: rgba(255, 255, 255, 0.88);
   }
   50% {
-    box-shadow: 0 0 24px rgba(180, 120, 0, 0.18), inset 0 0 36px rgba(180, 120, 0, 0.06);
-    filter: brightness(1.06);
+    box-shadow: 0 0 30px rgba(100, 60, 200, 0.22), 0 0 0 3px rgba(100, 60, 200, 0.12);
+    background-color: rgba(245, 240, 255, 0.95);
   }
 }
 

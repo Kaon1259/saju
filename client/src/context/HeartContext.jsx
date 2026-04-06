@@ -53,12 +53,33 @@ export function HeartProvider({ children }) {
     };
   }, [refreshHearts]);
 
+  // 하트 차감 버블 애니메이션
+  const [deductBubble, setDeductBubble] = useState(null);
+  useEffect(() => {
+    const handler = (e) => {
+      const cost = e.detail?.cost;
+      if (cost) {
+        setDeductBubble(`-${cost}`);
+        setTimeout(() => setDeductBubble(null), 1500);
+      }
+    };
+    window.addEventListener('heart:deducted', handler);
+    return () => window.removeEventListener('heart:deducted', handler);
+  }, []);
+
   return (
     <HeartContext.Provider value={{
       heartPoints, refreshHearts, deductLocal,
       showInsufficient, showInsufficientPopup, dismissInsufficient
     }}>
       {children}
+      {/* 하트 차감 버블 */}
+      {deductBubble && (
+        <div className="heart-deduct-bubble">
+          <span className="heart-deduct-icon">💗</span>
+          <span className="heart-deduct-amount">{deductBubble}</span>
+        </div>
+      )}
       {showInsufficient && (
         <div className="heart-insufficient-overlay" onClick={dismissInsufficient}>
           <div className="heart-insufficient-popup" onClick={e => e.stopPropagation()}>

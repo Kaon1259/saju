@@ -29,12 +29,13 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
   eventSource.addEventListener('done', () => {
     window.dispatchEvent(new Event('heart:refresh'));
   });
-  // 캐시 히트가 아닌 chunk가 시작되면 (AI 호출 = 하트 차감됨) 잔액 갱신
+  // 캐시 히트가 아닌 chunk가 시작되면 (AI 호출 = 하트 차감됨) 잔액 갱신 + 버블
   let chunkStarted = false;
   eventSource.addEventListener('chunk', () => {
     if (!chunkStarted) {
       chunkStarted = true;
       window.dispatchEvent(new Event('heart:refresh'));
+      window.dispatchEvent(new CustomEvent('heart:deducted', { detail: { cost: 5 } }));
     }
   });
 };
