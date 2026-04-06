@@ -19,12 +19,23 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
     try {
       const data = JSON.parse(e.data);
       onInsufficientHearts?.(data);
-      // 전역 이벤트 발생 → HeartContext가 팝업 처리
       window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: data }));
     } catch {
       onError?.('하트가 부족합니다.');
     }
     eventSource.close();
+  });
+  // 스트리밍 완료 시 하트 잔액 갱신
+  eventSource.addEventListener('done', () => {
+    window.dispatchEvent(new Event('heart:refresh'));
+  });
+  // 캐시 히트가 아닌 chunk가 시작되면 (AI 호출 = 하트 차감됨) 잔액 갱신
+  let chunkStarted = false;
+  eventSource.addEventListener('chunk', () => {
+    if (!chunkStarted) {
+      chunkStarted = true;
+      window.dispatchEvent(new Event('heart:refresh'));
+    }
   });
 };
 
