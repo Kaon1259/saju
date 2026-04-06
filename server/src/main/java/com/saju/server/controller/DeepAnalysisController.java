@@ -1,8 +1,11 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.repository.*;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.DeepAnalysisService;
+import com.saju.server.service.HeartPointService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ public class DeepAnalysisController {
 
     private final DeepAnalysisService deepAnalysisService;
     private final ClaudeApiService claudeApiService;
+    private final HeartPointService heartPointService;
     private final SpecialFortuneRepository specialFortuneRepository;
     private final DailyFortuneRepository dailyFortuneRepository;
     private final BloodTypeFortuneRepository bloodTypeFortuneRepository;
@@ -46,8 +50,9 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String birthTime,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String calendarType,
-            @RequestParam(required = false) String extra) {
-        // 캐시 확인 - 있으면 즉시 완료
+            @RequestParam(required = false) String extra,
+            @RequestParam(required = false) Long userId) {
+        // 캐시 확인 - ��으면 즉시 완료 (무료)
         Map<String, Object> cached = deepAnalysisService.getCached(type, birthDate, birthTime, gender, calendarType, extra);
         if (cached != null) {
             SseEmitter emitter = new SseEmitter(5000L);
@@ -60,11 +65,39 @@ public class DeepAnalysisController {
             return emitter;
         }
 
+        // 하트 차감 (심화분석 - type별 개별 설정)
+        if (userId != null) {
+            try {
+                String configKey = mapDeepTypeToConfigKey(type);
+                heartPointService.deductPoints(userId, configKey, "심화분석 - " + type);
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
+
         String systemPrompt = deepAnalysisService.getSystemPrompt(type);
         String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
         return claudeApiService.generateStream(systemPrompt, userPrompt, 4000, (fullText) -> {
             deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);
         });
+    }
+
+    private String mapDeepTypeToConfigKey(String type) {
+        return switch (type) {
+            case "today" -> "DEEP_TODAY";
+            case "love" -> "DEEP_LOVE";
+            case "reunion" -> "DEEP_REUNION";
+            case "remarriage" -> "DEEP_REMARRIAGE";
+            case "blind_date" -> "DEEP_BLIND_DATE";
+            case "yearly" -> "DEEP_YEARLY";
+            case "monthly" -> "DEEP_MONTHLY";
+            case "weekly" -> "DEEP_WEEKLY";
+            case "bloodtype" -> "DEEP_BLOODTYPE";
+            case "mbti" -> "DEEP_MBTI";
+            case "constellation" -> "DEEP_CONSTELLATION";
+            case "tojeong" -> "DEEP_TOJEONG";
+            default -> "DEEP_TODAY";
+        };
     }
 
     @DeleteMapping("/cache")

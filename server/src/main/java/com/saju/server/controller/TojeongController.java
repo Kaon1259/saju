@@ -2,11 +2,10 @@ package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.dto.UserResponse;
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.saju.TojeongResult;
-import com.saju.server.service.ClaudeApiService;
-import com.saju.server.service.LunarCalendarService;
-import com.saju.server.service.TojeongService;
-import com.saju.server.service.UserService;
+import com.saju.server.service.*;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +24,7 @@ public class TojeongController {
     private final UserService userService;
     private final LunarCalendarService lunarCalendarService;
     private final ClaudeApiService claudeApiService;
+    private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -72,7 +72,8 @@ public class TojeongController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamTojeong(
             @RequestParam("birthDate") String birthDateStr,
-            @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType) {
+            @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
+            @RequestParam(required = false) Long userId) {
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
@@ -95,6 +96,15 @@ public class TojeongController {
                 emitter.completeWithError(e);
             }
             return emitter;
+        }
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "TOJEONG", "토정비결");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
         }
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) ->

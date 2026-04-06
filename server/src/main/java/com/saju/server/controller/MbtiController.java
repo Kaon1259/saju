@@ -1,7 +1,10 @@
 package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.MbtiFortuneService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.util.Map;
 public class MbtiController {
 
     private final MbtiFortuneService mbtiFortuneService;
+    private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper;
 
     @GetMapping("/types")
@@ -50,7 +54,8 @@ public class MbtiController {
     @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamFortune(
             @RequestParam String type,
-            @RequestParam(required = false) String zodiac) {
+            @RequestParam(required = false) String zodiac,
+            @RequestParam(required = false) Long userId) {
         String mbtiType = type.toUpperCase();
         String zodiacAnimal = (zodiac != null && !zodiac.isBlank()) ? zodiac : "용";
         SseEmitter emitter = new SseEmitter(180000L);
@@ -66,6 +71,15 @@ public class MbtiController {
                 emitter.completeWithError(e);
             }
             return emitter;
+        }
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "MBTI", "MBTI 운세");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
         }
 
         // 캐시 없으면 AI 스트리밍

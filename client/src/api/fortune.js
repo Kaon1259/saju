@@ -8,6 +8,36 @@ const api = axios.create({
   },
 });
 
+// 하트 포인트 시스템 헬퍼
+const appendUserId = (params) => {
+  const userId = localStorage.getItem('userId');
+  if (userId) params.set('userId', userId);
+};
+
+const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
+  eventSource.addEventListener('insufficient_hearts', (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      onInsufficientHearts?.(data);
+    } catch {
+      onError?.('하트가 부족합니다.');
+    }
+    eventSource.close();
+  });
+};
+
+// 하트 잔액 조회
+export const getHeartBalance = async (userId) => {
+  const response = await api.get('/hearts/balance', { params: { userId } });
+  return response.data;
+};
+
+// 하트 충분 여부 확인
+export const checkHeartSufficient = async (userId, category = 'BASIC_ANALYSIS') => {
+  const response = await api.get('/hearts/check', { params: { userId, category } });
+  return response.data;
+};
+
 export const getFortuneByZodiac = async (zodiac) => {
   const response = await api.get('/fortune/today', {
     params: { zodiac },
@@ -15,11 +45,13 @@ export const getFortuneByZodiac = async (zodiac) => {
   return response.data;
 };
 
-export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, onError }) => {
+export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ zodiac });
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/fortune/today/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -33,10 +65,14 @@ export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, on
   return () => eventSource.close();
 };
 
-export const getFortuneByUserStream = (userId, { onChunk, onCached, onDone, onError }) => {
+export const getFortuneByUserStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
-  const url = `${baseURL}/fortune/user/${userId}/stream`;
+  const params = new URLSearchParams();
+  appendUserId(params);
+  const paramStr = params.toString();
+  const url = `${baseURL}/fortune/user/${userId}/stream${paramStr ? '?' + paramStr : ''}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -101,14 +137,16 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
   return response.data;
 };
 
-export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError }) => {
+export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (calendarType) params.set('calendarType', calendarType);
   if (gender) params.set('gender', gender);
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/saju/analyze/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -143,11 +181,13 @@ export const getConstellationFortune = async (sign) => {
   return response.data;
 };
 
-export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone, onError }) => {
+export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ sign });
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/constellation/fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -177,11 +217,15 @@ export const getMyFortune = async (userId) => {
   return response.data;
 };
 
-export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError }, date) => {
+export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts }, date) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
-  const params = date ? `?date=${date}` : '';
-  const url = `${baseURL}/my/fortune/${userId}/stream${params}`;
+  const params = new URLSearchParams();
+  if (date) params.set('date', date);
+  appendUserId(params);
+  const paramStr = params.toString();
+  const url = `${baseURL}/my/fortune/${userId}/stream${paramStr ? '?' + paramStr : ''}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -201,11 +245,13 @@ export const getBloodTypeFortune = async (type) => {
   return response.data;
 };
 
-export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onError }) => {
+export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ type });
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/bloodtype/fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -240,11 +286,13 @@ export const getMbtiFortune = async (type) => {
   return response.data;
 };
 
-export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError }) => {
+export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ type });
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/mbti/fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -284,12 +332,14 @@ export const getUserTojeong = async (userId) => {
   return response.data;
 };
 
-export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onDone, onError }) => {
+export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate });
   if (calendarType) params.set('calendarType', calendarType);
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/tojeong/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
@@ -330,7 +380,7 @@ export const saveCompatCache = async (data) => {
   await api.post('/compatibility/saju/cache', data);
 };
 
-export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError }) => {
+export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate1, birthDate2 });
   if (birthTime1) params.set('birthTime1', birthTime1);
   if (birthTime2) params.set('birthTime2', birthTime2);
@@ -341,10 +391,12 @@ export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birth
   if (score) params.set('score', score);
   if (elementRelation) params.set('elementRelation', elementRelation);
   if (branchRelation) params.set('branchRelation', branchRelation);
+  appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/compatibility/saju/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
@@ -374,13 +426,15 @@ export const getTarotReading = async (cardIds, reversals, spread, category, ques
   return response.data;
 };
 
-export const getTarotReadingStream = (cardIds, reversals, spread, category, question, { onChunk, onCached, onDone, onError }) => {
+export const getTarotReadingStream = (cardIds, reversals, spread, category, question, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ cardIds, reversals, spread, category });
   if (question) params.set('question', question);
+  appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/tarot/reading/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -435,7 +489,7 @@ export const saveLoveFortuneCache = async (data) => {
   await api.post('/special/love/cache', data);
 };
 
-export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus, { onChunk, onCached, onDone, onError }) => {
+export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams();
   params.set('type', type);
   params.set('birthDate', birthDate);
@@ -447,10 +501,12 @@ export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calenda
   if (breakupDate && breakupDate !== 'null') params.set('breakupDate', breakupDate);
   if (meetDate && meetDate !== 'null') params.set('meetDate', meetDate);
   if (relationshipStatus && relationshipStatus !== 'null') params.set('relationshipStatus', relationshipStatus);
+  appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/special/love/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -504,14 +560,16 @@ export const interpretDream = async (dreamText, birthDate, gender) => {
   return response.data;
 };
 
-export const interpretDreamStream = (dreamText, birthDate, gender, { onChunk, onCached, onDone, onError }) => {
+export const interpretDreamStream = (dreamText, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
   params.set('dreamText', dreamText);
   if (birthDate) params.set('birthDate', birthDate);
   if (gender) params.set('gender', gender);
+  appendUserId(params);
   const url = `${baseURL}/dream/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -541,13 +599,15 @@ export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthSh
   return response.data;
 };
 
-export const analyzeFaceReadingStream = (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, { onChunk, onCached, onDone, onError }) => {
+export const analyzeFaceReadingStream = (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams({ faceShape, eyeShape, noseShape, mouthShape, foreheadShape });
   if (birthDate) params.set('birthDate', birthDate);
   if (gender) params.set('gender', gender);
+  appendUserId(params);
   const url = `${baseURL}/face-reading/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -579,13 +639,15 @@ export const analyzePsychTest = async (testId, answers, birthDate, gender) => {
   return response.data;
 };
 
-export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onChunk, onCached, onDone, onError }) => {
+export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams({ testId, answers });
   if (birthDate) params.set('birthDate', birthDate);
   if (gender) params.set('gender', gender);
+  appendUserId(params);
   const url = `${baseURL}/psych/analyze/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
@@ -615,14 +677,16 @@ export const getYearFortune = async (birthDate, birthTime, gender, calendarType)
   return response.data;
 };
 
-export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError }) => {
+export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
   if (calendarType) params.set('calendarType', calendarType);
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/year-fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
@@ -643,13 +707,15 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
   return response.data;
 };
 
-export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError }) => {
+export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate, month });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/monthly-fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
@@ -670,13 +736,15 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
   return response.data;
 };
 
-export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError }) => {
+export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
+  appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/weekly-fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
@@ -700,16 +768,18 @@ export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calend
 };
 
 // ─── 심화분석 스트리밍 ───
-export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError }) => {
+export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ type, birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
   if (calendarType) params.set('calendarType', calendarType);
   if (extra) params.set('extra', extra);
+  appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/deep/fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {

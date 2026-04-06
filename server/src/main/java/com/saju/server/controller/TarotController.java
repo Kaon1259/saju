@@ -1,6 +1,9 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.TarotService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import java.util.Map;
 public class TarotController {
 
     private final TarotService tarotService;
+    private final HeartPointService heartPointService;
 
     /**
      * 메이저 아르카나 22장 카드 정보
@@ -60,7 +64,16 @@ public class TarotController {
             @RequestParam String reversals,
             @RequestParam(defaultValue = "three") String spread,
             @RequestParam(defaultValue = "general") String category,
-            @RequestParam(required = false) String question) {
+            @RequestParam(required = false) String question,
+            @RequestParam(required = false) Long userId) {
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "TAROT", "타로");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
         return tarotService.streamReading(cardIds, reversals, spread, category, question);
     }
 }

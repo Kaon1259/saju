@@ -29,6 +29,7 @@ public class UserResponse {
     private String partnerBirthTime;
     private String partnerBloodType;
     private String partnerMbtiType;
+    private Integer heartPoints;
     private LocalDateTime createdAt;
 
     public static UserResponse from(User user) {
@@ -49,6 +50,7 @@ public class UserResponse {
                 .partnerBirthTime(user.getPartnerBirthTime())
                 .partnerBloodType(user.getPartnerBloodType())
                 .partnerMbtiType(user.getPartnerMbtiType())
+                .heartPoints(user.getHeartPoints())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

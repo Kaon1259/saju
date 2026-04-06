@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하트 설정 - 1:1연애 관리자</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body { background: #f4f6f9; }
+        .sidebar { width: 250px; min-height: 100vh; background: #2c3e50; position: fixed; }
+        .sidebar .nav-link { color: #bdc3c7; padding: 12px 20px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #34495e; color: #fff; }
+        .sidebar .brand { padding: 20px; color: #fff; font-size: 18px; font-weight: 700; border-bottom: 1px solid #34495e; }
+        .main-content { margin-left: 250px; padding: 20px; }
+        .topbar { background: #fff; padding: 12px 24px; margin: -20px -20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; justify-content: space-between; align-items: center; }
+        .config-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .config-item:last-child { border-bottom: none; }
+        .config-name { flex: 1; font-weight: 500; }
+        .config-key { color: #95a5a6; font-size: 12px; font-family: monospace; }
+        .group-icon { font-size: 20px; margin-right: 6px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand"><i class="bi bi-heart-fill text-danger"></i> 1:1연애 관리</div>
+        <nav class="nav flex-column mt-2">
+            <a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i>대시보드</a>
+            <a class="nav-link" href="/users"><i class="bi bi-people me-2"></i>유저 관리</a>
+            <a class="nav-link active" href="/hearts/config"><i class="bi bi-gear me-2"></i>하트 설정</a>
+            <a class="nav-link" href="/hearts/logs"><i class="bi bi-list-ul me-2"></i>거래 로그</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>메뉴별 하트 비용 설정</h5>
+            <a href="/logout" class="btn btn-outline-secondary btn-sm">로그아웃</a>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+            <div th:each="entry : ${configGroups}" class="col-md-6">
+                <div class="card">
+                    <div class="card-header fw-semibold">
+                        <span th:switch="${entry.key}">
+                            <span th:case="'기본운세'"><i class="bi bi-sun group-icon text-warning"></i></span>
+                            <span th:case="'연애/궁합'"><i class="bi bi-heart group-icon text-danger"></i></span>
+                            <span th:case="'특수분석'"><i class="bi bi-stars group-icon text-info"></i></span>
+                            <span th:case="'운세종합'"><i class="bi bi-diagram-3 group-icon text-success"></i></span>
+                            <span th:case="'기간별운세'"><i class="bi bi-calendar3 group-icon text-primary"></i></span>
+                            <span th:case="'심화분석'"><i class="bi bi-lightning group-icon text-warning"></i></span>
+                            <span th:case="'시스템'"><i class="bi bi-gear group-icon text-secondary"></i></span>
+                            <span th:case="*"><i class="bi bi-circle group-icon"></i></span>
+                        </span>
+                        <span th:text="${entry.key}"></span>
+                    </div>
+                    <div class="card-body">
+                        <div th:each="config : ${entry.value}" class="config-item">
+                            <div class="config-name">
+                                <div th:text="${config.description}"></div>
+                                <div class="config-key" th:text="${config.analysisCategory}"></div>
+                            </div>
+                            <form method="post" action="/hearts/config/update" class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="id" th:value="${config.id}">
+                                <input type="hidden" name="description" th:value="${config.description}">
+                                <div class="input-group" style="width:130px">
+                                    <input type="number" name="cost" th:value="${config.cost}" class="form-control form-control-sm text-center" min="0">
+                                    <span class="input-group-text" style="font-size:12px">하트</span>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-primary">저장</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

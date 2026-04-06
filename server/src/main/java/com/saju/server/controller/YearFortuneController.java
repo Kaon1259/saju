@@ -1,8 +1,11 @@
 package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.YearFortuneService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ public class YearFortuneController {
 
     private final YearFortuneService yearFortuneService;
     private final ClaudeApiService claudeApiService;
+    private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper;
 
     @GetMapping
@@ -36,7 +40,8 @@ public class YearFortuneController {
             @RequestParam String birthDate,
             @RequestParam(required = false) String birthTime,
             @RequestParam(required = false) String gender,
-            @RequestParam(required = false) String calendarType) {
+            @RequestParam(required = false) String calendarType,
+            @RequestParam(required = false) Long userId) {
 
         Object[] ctx = yearFortuneService.buildStreamContext(birthDate, birthTime, gender, calendarType);
         String systemPrompt = (String) ctx[0];
@@ -54,6 +59,15 @@ public class YearFortuneController {
                 emitter.completeWithError(e);
             }
             return emitter;
+        }
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "YEAR_FORTUNE", "신년운세");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
         }
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2400, (fullText) ->

@@ -1,8 +1,11 @@
 package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.MonthlyFortuneService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ public class MonthlyFortuneController {
 
     private final MonthlyFortuneService monthlyFortuneService;
     private final ClaudeApiService claudeApiService;
+    private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper;
 
     @GetMapping
@@ -36,7 +40,8 @@ public class MonthlyFortuneController {
             @RequestParam String birthDate,
             @RequestParam int month,
             @RequestParam(required = false) String birthTime,
-            @RequestParam(required = false) String gender) {
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long userId) {
 
         Object[] ctx = monthlyFortuneService.buildStreamContext(birthDate, month, birthTime, gender);
         String systemPrompt = (String) ctx[0];
@@ -53,6 +58,15 @@ public class MonthlyFortuneController {
                 emitter.completeWithError(e);
             }
             return emitter;
+        }
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "MONTHLY_FORTUNE", "월간운세");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
         }
 
         final int finalMonth = month;

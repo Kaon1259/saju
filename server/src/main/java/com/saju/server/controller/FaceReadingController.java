@@ -1,6 +1,9 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.FaceReadingService;
+import com.saju.server.service.HeartPointService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import java.util.Map;
 public class FaceReadingController {
 
     private final FaceReadingService faceReadingService;
+    private final HeartPointService heartPointService;
 
     /**
      * 관상 분석 (기존 동기 방식)
@@ -45,7 +49,16 @@ public class FaceReadingController {
             @RequestParam String mouthShape,
             @RequestParam String foreheadShape,
             @RequestParam(required = false) String birthDate,
-            @RequestParam(required = false) String gender) {
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long userId) {
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "FACE_READING", "관상분석");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
         return faceReadingService.streamFace(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender);
     }
 }

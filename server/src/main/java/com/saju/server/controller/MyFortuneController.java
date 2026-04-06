@@ -1,8 +1,10 @@
 package com.saju.server.controller;
 
 import com.saju.server.dto.UserResponse;
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.saju.SajuResult;
 import com.saju.server.service.*;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class MyFortuneController {
     private final FortuneService fortuneService;
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
+    private final HeartPointService heartPointService;
 
     /**
      * 나의 통합 운세 (사주 AI + 혈액형 + MBTI)
@@ -127,6 +130,13 @@ public class MyFortuneController {
                 } catch (Exception ignored) {}
             }).start();
             return emitter;
+        }
+
+        // 하트 차감
+        try {
+            heartPointService.deductPoints(userId, "TODAY_FORTUNE", "오늘의 운세");
+        } catch (InsufficientHeartsException e) {
+            return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
         }
 
         // AI 스트리밍 (연애상태 + 날짜 반영)

@@ -1,6 +1,9 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.PsychTestService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import java.util.Map;
 public class PsychTestController {
 
     private final PsychTestService psychTestService;
+    private final HeartPointService heartPointService;
 
     /**
      * 사용 가능한 심리테스트 목록 조회
@@ -46,7 +50,16 @@ public class PsychTestController {
             @RequestParam String testId,
             @RequestParam String answers,
             @RequestParam(required = false) String birthDate,
-            @RequestParam(required = false) String gender) {
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long userId) {
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "PSYCH_TEST", "심리테스트");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
         return psychTestService.streamAnalyze(testId, answers, birthDate, gender);
     }
 }

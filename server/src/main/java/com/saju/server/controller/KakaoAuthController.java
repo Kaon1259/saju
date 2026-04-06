@@ -29,6 +29,7 @@ public class KakaoAuthController {
     private final KakaoAuthService kakaoAuthService;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final com.saju.server.service.HeartPointService heartPointService;
 
     /**
      * 카카오 로그인/회원가입
@@ -93,6 +94,9 @@ public class KakaoAuthController {
                     .profileImage(profileImage)
                     .build();
             user = userRepository.save(user);
+            // 회원가입 보너스 하트 지급
+            heartPointService.grantSignupBonus(user.getId());
+            user = userRepository.findById(user.getId()).orElse(user);
         }
 
         boolean profileComplete = user.getBirthDate() != null && user.getGender() != null;

@@ -2,11 +2,9 @@ package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.saju.*;
-import com.saju.server.service.ClaudeApiService;
-import com.saju.server.service.FortunePromptBuilder;
-import com.saju.server.service.LunarCalendarService;
-import com.saju.server.service.SajuService;
-import com.saju.server.service.UserService;
+import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.service.*;
+import com.saju.server.util.SseEmitterUtils;
 import com.saju.server.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +29,7 @@ public class SajuController {
     private final LunarCalendarService lunarCalendarService;
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
+    private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -64,7 +63,8 @@ public class SajuController {
             @RequestParam("birthDate") String birthDateStr,
             @RequestParam(value = "birthTime", required = false) String birthTime,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
-            @RequestParam(value = "gender", required = false) String gender) {
+            @RequestParam(value = "gender", required = false) String gender,
+            @RequestParam(required = false) Long userId) {
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
@@ -92,6 +92,15 @@ public class SajuController {
 
         // 2. 기본 사주 계산 (빠름)
         SajuResult basicResult = sajuService.buildBasicResult(birthDate, birthTime, gender);
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "SAJU_ANALYSIS", "사주분석");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
 
         // 3. 통합 AI 프롬프트 (성격분석 + 오늘의 운세 한 번에)
         String sajuSummary = sajuService.getSajuSummary(basicResult, birthDate, birthTime, LocalDate.now());

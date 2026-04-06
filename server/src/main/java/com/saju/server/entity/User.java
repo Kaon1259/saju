@@ -51,6 +51,10 @@ public class User {
     @Column(length = 20)
     private String relationshipStatus; // IN_RELATIONSHIP, SOME, SINGLE
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer heartPoints = 0;
+
     // 상대방 정보
     private LocalDate partnerBirthDate;
     private String partnerBirthTime;

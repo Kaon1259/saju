@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - 1:1연애 관리자</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body { background: #f4f6f9; }
+        .sidebar { width: 250px; min-height: 100vh; background: #2c3e50; position: fixed; }
+        .sidebar .nav-link { color: #bdc3c7; padding: 12px 20px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #34495e; color: #fff; }
+        .sidebar .brand { padding: 20px; color: #fff; font-size: 18px; font-weight: 700; border-bottom: 1px solid #34495e; }
+        .main-content { margin-left: 250px; padding: 20px; }
+        .topbar { background: #fff; padding: 12px 24px; margin: -20px -20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; justify-content: space-between; align-items: center; }
+        .stat-card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .stat-card .stat-value { font-size: 32px; font-weight: 700; }
+        .stat-card .stat-label { color: #7f8c8d; font-size: 14px; margin-top: 4px; }
+        .stat-card .stat-icon { font-size: 40px; opacity: 0.2; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand"><i class="bi bi-heart-fill text-danger"></i> 1:1연애 관리</div>
+        <nav class="nav flex-column mt-2">
+            <a class="nav-link active" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i>대시보드</a>
+            <a class="nav-link" href="/users"><i class="bi bi-people me-2"></i>유저 관리</a>
+            <a class="nav-link" href="/hearts/config"><i class="bi bi-gear me-2"></i>하트 설정</a>
+            <a class="nav-link" href="/hearts/logs"><i class="bi bi-list-ul me-2"></i>거래 로그</a>
+        </nav>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <h5 class="mb-0">대시보드</h5>
+            <div>
+                <span class="me-3" th:text="${session.adminUser.name}">관리자</span>
+                <a href="/logout" class="btn btn-outline-secondary btn-sm">로그아웃</a>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value" th:text="${totalUsers}">0</div>
+                        <div class="stat-label">전체 유저</div>
+                    </div>
+                    <i class="bi bi-people stat-icon text-primary"></i>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value text-danger" th:text="${#numbers.formatInteger(totalHeartPoints, 1, 'COMMA')}">0</div>
+                        <div class="stat-label">전체 보유 하트</div>
+                    </div>
+                    <i class="bi bi-heart stat-icon text-danger"></i>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value text-success" th:text="${#numbers.formatInteger(totalGranted, 1, 'COMMA')}">0</div>
+                        <div class="stat-label">총 지급 하트</div>
+                    </div>
+                    <i class="bi bi-plus-circle stat-icon text-success"></i>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-value text-warning" th:text="${#numbers.formatInteger(totalDeducted, 1, 'COMMA')}">0</div>
+                        <div class="stat-label">총 차감 하트</div>
+                    </div>
+                    <i class="bi bi-dash-circle stat-icon text-warning"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-value" th:text="${newUsersToday}">0</div>
+                    <div class="stat-label">���늘 신규 유저</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-value" th:text="${newUsersWeek}">0</div>
+                    <div class="stat-label">이번 주 신규 유저</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Grant -->
+        <div class="card">
+            <div class="card-header"><i class="bi bi-gift me-2"></i>전체 유저 하트 일괄 지급</div>
+            <div class="card-body">
+                <form method="post" action="/hearts/bulk-grant" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">지급 수량</label>
+                        <input type="number" name="amount" class="form-control" value="100" min="1" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">사유</label>
+                        <input type="text" name="description" class="form-control" value="전체 일괄 지급">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success" onclick="return confirm('전체 유저에게 하트를 지급하시겠습니까?')">일괄 지급</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,8 +1,11 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.CompatibilityService;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.LunarCalendarService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ public class CompatibilityController {
     private final CompatibilityService compatibilityService;
     private final LunarCalendarService lunarCalendarService;
     private final ClaudeApiService claudeApiService;
+    private final HeartPointService heartPointService;
 
     @GetMapping("/saju/basic")
     public ResponseEntity<Map<String, Object>> analyzeSajuBasic(
@@ -82,11 +86,21 @@ public class CompatibilityController {
             @RequestParam(value = "gender2", defaultValue = "F") String gender2,
             @RequestParam(value = "score", defaultValue = "60") int score,
             @RequestParam(value = "elementRelation", defaultValue = "") String elementRelation,
-            @RequestParam(value = "branchRelation", defaultValue = "") String branchRelation) {
+            @RequestParam(value = "branchRelation", defaultValue = "") String branchRelation,
+            @RequestParam(required = false) Long userId) {
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
         if ("LUNAR".equalsIgnoreCase(calendarType2)) bd2 = lunarCalendarService.lunarToSolar(bd2);
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "COMPATIBILITY", "사주궁합");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
 
         String[] prompts = compatibilityService.buildStreamPrompts(bd1, birthTime1, bd2, birthTime2, gender1, gender2, score, elementRelation, branchRelation);
         final LocalDate fbd1 = bd1, fbd2 = bd2;

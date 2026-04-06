@@ -1,7 +1,10 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
+import com.saju.server.service.HeartPointService;
 import com.saju.server.service.SpecialFortuneService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ public class SpecialFortuneController {
 
     private final SpecialFortuneService specialFortuneService;
     private final ClaudeApiService claudeApiService;
+    private final HeartPointService heartPointService;
 
     /**
      * 오늘의 연애 온도 (만20세 기준, 로그인 불필요)
@@ -102,7 +106,8 @@ public class SpecialFortuneController {
             @RequestParam(required = false) String partnerGender,
             @RequestParam(required = false) String breakupDate,
             @RequestParam(required = false) String meetDate,
-            @RequestParam(required = false) String relationshipStatus) {
+            @RequestParam(required = false) String relationshipStatus,
+            @RequestParam(required = false) Long userId) {
         // 캐시 체크 먼저
         Map<String, Object> cached = specialFortuneService.getLoveFortuneBasic(
             type, birthDate, birthTime, gender, calendarType,
@@ -117,6 +122,16 @@ public class SpecialFortuneController {
                 } catch (Exception ignored) {}
             }).start();
             return emitter;
+        }
+
+        // 하트 차감 (type별 개별 설정)
+        if (userId != null) {
+            try {
+                String configKey = mapLoveTypeToConfigKey(type);
+                heartPointService.deductPoints(userId, configKey, "1:1연애운 - " + type);
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
         }
 
         String[] prompts = specialFortuneService.buildLoveStreamPrompts(
@@ -155,5 +170,24 @@ public class SpecialFortuneController {
         return ResponseEntity.ok(
             specialFortuneService.getHourlyFortune(birthDate, birthTime, gender, calendarType)
         );
+    }
+
+    private String mapLoveTypeToConfigKey(String type) {
+        return switch (type) {
+            case "relationship" -> "LOVE_RELATIONSHIP";
+            case "crush" -> "LOVE_CRUSH";
+            case "some_check" -> "LOVE_SOME_CHECK";
+            case "blind_date" -> "LOVE_BLIND_DATE";
+            case "couple_fortune" -> "LOVE_COUPLE";
+            case "confession_timing" -> "LOVE_CONFESSION";
+            case "ideal_type" -> "LOVE_IDEAL_TYPE";
+            case "reunion" -> "LOVE_REUNION";
+            case "remarriage" -> "LOVE_REMARRIAGE";
+            case "marriage" -> "LOVE_MARRIAGE";
+            case "past_life" -> "LOVE_PAST_LIFE";
+            case "meeting_timing" -> "LOVE_MEETING_TIMING";
+            case "contact_fortune" -> "LOVE_CONTACT";
+            default -> "LOVE_RELATIONSHIP";
+        };
     }
 }

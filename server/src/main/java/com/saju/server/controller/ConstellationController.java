@@ -1,7 +1,10 @@
 package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ConstellationFortuneService;
+import com.saju.server.service.HeartPointService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import java.util.Map;
 public class ConstellationController {
 
     private final ConstellationFortuneService service;
+    private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper;
 
     @GetMapping("/fortune")
@@ -42,7 +46,8 @@ public class ConstellationController {
      * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장
      */
     @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamFortune(@RequestParam String sign) {
+    public SseEmitter streamFortune(@RequestParam String sign,
+            @RequestParam(required = false) Long userId) {
         SseEmitter emitter = new SseEmitter(180000L);
 
         // 캐시 확인
@@ -56,6 +61,15 @@ public class ConstellationController {
                 emitter.completeWithError(e);
             }
             return emitter;
+        }
+
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "CONSTELLATION", "별자리 운세");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
         }
 
         // 캐시 없으면 AI 스트리밍

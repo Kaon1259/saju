@@ -1,6 +1,9 @@
 package com.saju.server.controller;
 
+import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.DreamService;
+import com.saju.server.service.HeartPointService;
+import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import java.util.Map;
 public class DreamController {
 
     private final DreamService dreamService;
+    private final HeartPointService heartPointService;
 
     /**
      * 꿈 해몽 API (기존 동기 방식)
@@ -35,7 +39,16 @@ public class DreamController {
     public SseEmitter streamDream(
             @RequestParam String dreamText,
             @RequestParam(required = false) String birthDate,
-            @RequestParam(required = false) String gender) {
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long userId) {
+        // 하트 차감
+        if (userId != null) {
+            try {
+                heartPointService.deductPoints(userId, "DREAM", "꿈해몽");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
         return dreamService.streamDream(dreamText, birthDate, gender);
     }
 }
