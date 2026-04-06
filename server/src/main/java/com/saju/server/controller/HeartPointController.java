@@ -54,7 +54,8 @@ public class HeartPointController {
         List<User> allUsers = userRepository.findAll();
         int count = 0;
         for (User user : allUsers) {
-            user.setHeartPoints(user.getHeartPoints() + amount);
+            int cur = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
+            user.setHeartPoints(cur + amount);
             userRepository.save(user);
             heartPointLogRepository.save(HeartPointLog.builder()
                     .userId(user.getId())

@@ -28,7 +28,7 @@ public class HeartPointService {
     public int getBalance(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        return user.getHeartPoints();
+        return user.getHeartPoints() != null ? user.getHeartPoints() : 0;
     }
 
     public int getCost(String analysisCategory) {
@@ -54,7 +54,7 @@ public class HeartPointService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         int cost = getCost(analysisCategory);
-        int balance = user.getHeartPoints();
+        int balance = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
 
         if (balance < cost) {
             throw new InsufficientHeartsException(cost, balance);
@@ -81,7 +81,8 @@ public class HeartPointService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         int bonus = getCost("SIGNUP_BONUS");
-        user.setHeartPoints(user.getHeartPoints() + bonus);
+        int current = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
+        user.setHeartPoints(current + bonus);
         userRepository.save(user);
 
         heartPointLogRepository.save(HeartPointLog.builder()
@@ -100,7 +101,8 @@ public class HeartPointService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        user.setHeartPoints(user.getHeartPoints() + amount);
+        int cur = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
+        user.setHeartPoints(cur + amount);
         if (user.getHeartPoints() < 0) {
             user.setHeartPoints(0);
         }
