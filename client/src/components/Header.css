@@ -67,6 +67,24 @@
   gap: 8px;
 }
 
+/* 하트 잔액 */
+.top-bar-hearts {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 16px;
+  background: rgba(244,114,182,0.12);
+  border: 1px solid rgba(244,114,182,0.2);
+}
+.top-bar-hearts-icon { font-size: 14px; }
+.top-bar-hearts-count {
+  font-size: 13px; font-weight: 800; color: #F472B6;
+  min-width: 20px; text-align: center;
+}
+[data-theme="light"] .top-bar-hearts {
+  background: rgba(244,114,182,0.08);
+  border-color: rgba(244,114,182,0.15);
+}
+[data-theme="light"] .top-bar-hearts-count { color: #d4380d; }
+
 /* 더보기 버튼 */
 .top-bar-more-btn {
   display: flex;

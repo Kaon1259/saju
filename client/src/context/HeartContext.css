@@ -1,0 +1,40 @@
+.heart-insufficient-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  animation: heartOverlayIn 0.2s ease;
+}
+@keyframes heartOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.heart-insufficient-popup {
+  background: rgba(30, 15, 60, 0.95);
+  border: 1px solid rgba(244, 114, 182, 0.3);
+  border-radius: 20px; padding: 28px 24px; text-align: center;
+  max-width: 300px; width: 85%;
+  animation: heartPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+@keyframes heartPopIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.heart-insufficient-icon { font-size: 48px; margin-bottom: 12px; }
+.heart-insufficient-title { font-size: 18px; font-weight: 700; color: #F472B6; margin-bottom: 16px; }
+.heart-insufficient-info {
+  display: flex; justify-content: center; gap: 20px;
+  font-size: 15px; color: rgba(255,255,255,0.8); margin-bottom: 12px;
+}
+.heart-insufficient-info strong { color: #FBBF24; }
+.heart-insufficient-desc { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+.heart-insufficient-btn {
+  background: linear-gradient(135deg, #F472B6, #E91E63);
+  border: none; border-radius: 12px; padding: 12px 40px;
+  color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+
+/* 라이트모드 */
+[data-theme="light"] .heart-insufficient-popup {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(244,114,182,0.2);
+}
+[data-theme="light"] .heart-insufficient-info { color: #333; }
+[data-theme="light"] .heart-insufficient-info strong { color: #d4380d; }
+[data-theme="light"] .heart-insufficient-desc { color: #888; }

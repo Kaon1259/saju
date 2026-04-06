@@ -31,6 +31,8 @@ import LoveFortune from './pages/LoveFortune';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
 import Settings from './pages/Settings';
+import { HeartProvider } from './context/HeartContext';
+import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
 
@@ -224,6 +226,7 @@ function App() {
   };
 
   return (
+    <HeartProvider>
     <>
       {showSplash && <Splash key={splashKey} onDone={() => setShowSplash(false)} />}
       <div className="app" style={{ display: showSplash ? 'none' : undefined }}>
@@ -267,6 +270,7 @@ function App() {
         </TransitionProvider>
       </div>
     </>
+    </HeartProvider>
   );
 }
 

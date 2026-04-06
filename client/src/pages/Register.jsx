@@ -117,6 +117,7 @@ function Register() {
         localStorage.setItem('userId', user.id);
         localStorage.setItem('userName', user.name);
         localStorage.setItem('userProfile', JSON.stringify(user));
+        window.dispatchEvent(new Event('heart:refresh'));
 
         if (result.profileComplete) {
           // 프로필 완성됨 → 바로 이동

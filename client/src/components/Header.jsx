@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from './PageTransition';
+import { useHearts } from '../context/HeartContext';
 import {
   playHomeChime, playLovebeat, playCrystalBall, playHarmony, playOriental,
   playProfilePing, playTarotReveal, playStarTwinkle, playBloodDrop,
@@ -81,6 +82,7 @@ function Header({ onHomeSplash }) {
   const location = useLocation();
   const { triggerTransition } = useTransition();
   const userId = localStorage.getItem('userId');
+  const { heartPoints } = useHearts();
   const [showMore, setShowMore] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     return (localStorage.getItem('theme') || 'dark') === 'dark';
@@ -145,6 +147,12 @@ function Header({ onHomeSplash }) {
         </button>
 
         <div className="top-bar-right">
+          {userId && heartPoints != null && (
+            <div className="top-bar-hearts">
+              <span className="top-bar-hearts-icon">💗</span>
+              <span className="top-bar-hearts-count">{heartPoints}</span>
+            </div>
+          )}
           <button
             className={`top-bar-more-btn ${showMore ? 'active' : ''}`}
             onClick={() => setShowMore(!showMore)}

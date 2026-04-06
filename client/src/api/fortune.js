@@ -19,6 +19,8 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
     try {
       const data = JSON.parse(e.data);
       onInsufficientHearts?.(data);
+      // 전역 이벤트 발생 → HeartContext가 팝업 처리
+      window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: data }));
     } catch {
       onError?.('하트가 부족합니다.');
     }
