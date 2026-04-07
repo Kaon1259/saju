@@ -12,4 +12,5 @@ server.zip
 .claude/
 backup/
 railway_db.txt
-management/
+management/.gradle/
+management/build/
