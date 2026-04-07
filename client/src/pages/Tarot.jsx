@@ -37,9 +37,9 @@ const MAJOR_ARCANA = [
 ];
 
 const SPREADS = [
-  { id: 'one',   label: '원카드',   count: 1, icon: '🎴', desc: '핵심 한 장', color: '#FF9800' },
-  { id: 'three', label: '쓰리카드', count: 3, icon: '🃏', desc: '과거·현재·미래', color: '#9B59B6' },
-  { id: 'five',  label: '켈틱',     count: 5, icon: '✨', desc: '상황·장애·조언·결과', color: '#E91E63' },
+  { id: 'one',   label: '원카드',   count: 1, icon: '🎴', desc: '핵심 한 장', color: '#FF9800', cost: 1 },
+  { id: 'three', label: '쓰리카드', count: 3, icon: '🃏', desc: '과거·현재·미래', color: '#9B59B6', cost: 3 },
+  { id: 'five',  label: '켈틱',     count: 5, icon: '✨', desc: '상황·장애·조언·결과', color: '#E91E63', cost: 5 },
 ];
 
 const TAROT_LOVE_TYPES = [
@@ -418,6 +418,7 @@ function Tarot() {
                   className={`tarot-spread-card ${spread === s.id ? 'active' : ''}`}
                   style={{ '--spread-color': s.color }}
                   onClick={() => setSpread(s.id)}>
+                  <span className="tarot-spread-cost-badge">💗{s.cost}</span>
                   <span className="tarot-spread-icon">{s.icon}</span>
                   <span className="tarot-spread-label">{s.label}</span>
                   <span className="tarot-spread-count">{s.count}장</span>

@@ -1,0 +1,330 @@
+/* ═══ MyMenu Page ═══ */
+.mymenu {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 8px 12px 100px;
+}
+
+/* ─── Hero ─── */
+.mymenu-hero {
+  text-align: center;
+  padding: 18px 0 10px;
+}
+
+.mymenu-hero-icon {
+  font-size: 36px;
+  display: inline-block;
+  animation: mymenuFloat 3s ease-in-out infinite;
+}
+
+@keyframes mymenuFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.mymenu-hero-title {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 6px 0 4px;
+  background: linear-gradient(135deg, #FBBF24, #F472B6, #9B59B6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.mymenu-hero-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary, rgba(255,255,255,0.5));
+  margin: 0;
+}
+
+[data-theme="light"] .mymenu-hero-desc {
+  color: #888;
+}
+
+/* ─── Section ─── */
+.mymenu-section {
+  margin-bottom: 16px;
+}
+
+.mymenu-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text, #fff);
+  margin: 0 0 10px 4px;
+}
+
+.mymenu-section-icon {
+  font-size: 18px;
+}
+
+[data-theme="light"] .mymenu-section-title {
+  color: #222;
+}
+
+/* ═══ 1. Shortcut Grid (3x3) ═══ */
+.mymenu-shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mymenu-shortcut-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mymenu-shortcut-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--mi-color);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mymenu-shortcut-item:hover::before,
+.mymenu-shortcut-item:active::before {
+  opacity: 1;
+}
+
+.mymenu-shortcut-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: color-mix(in srgb, var(--mi-color) 30%, transparent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mymenu-shortcut-item:active {
+  transform: scale(0.95);
+}
+
+.mymenu-shortcut-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.mymenu-shortcut-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text, rgba(255, 255, 255, 0.8));
+  white-space: nowrap;
+}
+
+[data-theme="light"] .mymenu-shortcut-item {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .mymenu-shortcut-item:hover {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .mymenu-shortcut-label {
+  color: #333;
+}
+
+/* ═══ 2. Viral Contents (Horizontal Scroll) ═══ */
+.mymenu-viral-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mymenu-viral-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mymenu-viral-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 86px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+  animation: mymenuCardIn 0.4s ease both;
+}
+
+@keyframes mymenuCardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mymenu-viral-card:hover {
+  border-color: color-mix(in srgb, var(--vc-color) 40%, transparent);
+  background: color-mix(in srgb, var(--vc-color) 8%, transparent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--vc-color) 15%, transparent);
+}
+
+.mymenu-viral-card:active {
+  transform: scale(0.95);
+}
+
+.mymenu-viral-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.mymenu-viral-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text, rgba(255, 255, 255, 0.8));
+  white-space: nowrap;
+}
+
+[data-theme="light"] .mymenu-viral-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .mymenu-viral-card:hover {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .mymenu-viral-label {
+  color: #333;
+}
+
+/* ═══ 3. Couple Grid ═══ */
+.mymenu-couple-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mymenu-couple-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, rgba(233, 30, 99, 0.08), rgba(244, 114, 182, 0.04));
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.mymenu-couple-card:hover {
+  border-color: color-mix(in srgb, var(--cc-color) 40%, transparent);
+  background: color-mix(in srgb, var(--cc-color) 12%, transparent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--cc-color) 15%, transparent);
+}
+
+.mymenu-couple-card:active {
+  transform: scale(0.97);
+}
+
+.mymenu-couple-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.mymenu-couple-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text, rgba(255, 255, 255, 0.9));
+}
+
+[data-theme="light"] .mymenu-couple-card {
+  background: linear-gradient(145deg, rgba(233, 30, 99, 0.06), rgba(255, 255, 255, 0.92));
+  border-color: rgba(233, 30, 99, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .mymenu-couple-card:hover {
+  background: linear-gradient(145deg, rgba(233, 30, 99, 0.1), #fff);
+}
+
+[data-theme="light"] .mymenu-couple-label {
+  color: #333;
+}
+
+/* ═══ 4. General Grid ═══ */
+.mymenu-general-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mymenu-general-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.mymenu-general-card:hover {
+  border-color: color-mix(in srgb, var(--gc-color) 35%, transparent);
+  background: color-mix(in srgb, var(--gc-color) 8%, transparent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--gc-color) 12%, transparent);
+}
+
+.mymenu-general-card:active {
+  transform: scale(0.97);
+}
+
+.mymenu-general-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.mymenu-general-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text, rgba(255, 255, 255, 0.85));
+}
+
+[data-theme="light"] .mymenu-general-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .mymenu-general-card:hover {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .mymenu-general-label {
+  color: #333;
+}

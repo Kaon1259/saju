@@ -30,6 +30,7 @@ import WeeklyFortune from './pages/WeeklyFortune';
 import LoveFortune from './pages/LoveFortune';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
+import MyMenu from './pages/MyMenu';
 import Settings from './pages/Settings';
 import { HeartProvider } from './context/HeartContext';
 import './context/HeartContext.css';
@@ -262,6 +263,7 @@ function App() {
               <Route path="/monthly-fortune" element={<MonthlyFortune />} />
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
               <Route path="/love-fortune" element={<LoveFortune />} />
+              <Route path="/my-menu" element={<MyMenu />} />
               <Route path="/my-star" element={<MyStar />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>

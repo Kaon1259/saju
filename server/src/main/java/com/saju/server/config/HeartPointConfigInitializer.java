@@ -43,6 +43,9 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
 
         // ── 특수분석 ──
         init("TAROT",                5,  "특수분석",    "타로");
+        init("TAROT_ONE",            1,  "특수분석",    "타로 원카드");
+        init("TAROT_THREE",          3,  "특수분석",    "타로 쓰리카드");
+        init("TAROT_FIVE",           5,  "특수분석",    "타로 켈틱크로스");
         init("DREAM",                5,  "특수분석",    "꿈해몽");
         init("FACE_READING",         5,  "특수분석",    "관상분석");
         init("PSYCH_TEST",           5,  "특수분석",    "심리테스트");
@@ -50,7 +53,7 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         // ── 운세종합 ──
         init("BLOOD_TYPE",           3,  "운세종합",    "혈액형 운세");
         init("MBTI",                 3,  "운세종합",    "MBTI 운세");
-        init("CONSTELLATION",        3,  "운세종합",    "별자리 운세");
+        init("CONSTELLATION",        1,  "운세종합",    "별자리 운세");
 
         // ── 기간별 운세 ──
         init("YEAR_FORTUNE",         5,  "기간별운세",  "신년운세");
@@ -77,7 +80,8 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
     }
 
     private void init(String category, int cost, String group, String description) {
-        if (configRepository.findByAnalysisCategory(category).isEmpty()) {
+        var existing = configRepository.findByAnalysisCategory(category);
+        if (existing.isEmpty()) {
             configRepository.save(HeartPointConfig.builder()
                     .analysisCategory(category)
                     .cost(cost)
@@ -85,6 +89,14 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
                     .description(description)
                     .build());
             log.info("하트 설정 초기화: [{}] {} = {}", group, category, cost);
+        } else {
+            HeartPointConfig config = existing.get();
+            if (config.getCost() != cost) {
+                int oldCost = config.getCost();
+                config.setCost(cost);
+                configRepository.save(config);
+                log.info("하트 설정 업데이트: [{}] {} = {} → {}", group, category, oldCost, cost);
+            }
         }
     }
 }

@@ -66,17 +66,26 @@ public class TarotController {
             @RequestParam(defaultValue = "general") String category,
             @RequestParam(required = false) String question,
             @RequestParam(required = false) Long userId) {
+        // spread 파라미터에 따라 하트 카테고리 결정
+        String heartCategory = switch (spread) {
+            case "one"   -> "TAROT_ONE";
+            case "three" -> "TAROT_THREE";
+            case "five", "celtic" -> "TAROT_FIVE";
+            default      -> "TAROT";
+        };
+
         // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.checkPoints(userId, "TAROT");
+                heartPointService.checkPoints(userId, heartCategory);
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
         final Long uid = userId;
+        final String finalHeartCategory = heartCategory;
         return tarotService.streamReading(cardIds, reversals, spread, category, question, () -> {
-            if (uid != null) heartPointService.deductPoints(uid, "TAROT", "타로");
+            if (uid != null) heartPointService.deductPoints(uid, finalHeartCategory, "타로");
         });
     }
 }
