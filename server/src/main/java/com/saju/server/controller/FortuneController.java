@@ -71,10 +71,10 @@ public class FortuneController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "TODAY_FORTUNE", "오늘의 운세");
+                heartPointService.checkPoints(userId, "TODAY_FORTUNE");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
@@ -83,9 +83,11 @@ public class FortuneController {
         // 캐시 없으면 AI 스트리밍
         String systemPrompt = promptBuilder.fortuneStreamSystemPrompt();
         String userPrompt = promptBuilder.fortuneStreamUserPrompt(zodiacAnimal, LocalDate.now());
+        final Long uid = userId;
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(zodiacAnimal, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
         });
     }
 

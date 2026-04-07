@@ -184,6 +184,7 @@ function Home() {
   const dailyMsg = useMemo(() => DAILY_MESSAGES[today.getDate() % DAILY_MESSAGES.length], []);
 
   const [myData, setMyData] = useState(null);
+  const [fortuneLoading, setFortuneLoading] = useState(false);
   const [loveTemp, setLoveTemp] = useState(null);
 
   // guest form
@@ -228,15 +229,18 @@ function Home() {
     if (!userId) return;
     (async () => {
       try {
-        const user = await getUser(userId);
-        setMyData({ user });
+        setFortuneLoading(true);
+        // 유저 정보와 운세를 병렬 로딩
+        const [user, fortune] = await Promise.all([
+          getUser(userId),
+          getMyFortune(userId).catch(e => { console.warn('운세 미리보기 로드 실패:', e.message); return null; })
+        ]);
+        const data = { user };
+        if (fortune?.saju) data.saju = fortune.saju;
+        setMyData(data);
         localStorage.setItem('userProfile', JSON.stringify(user));
-        // 오늘 운세 점수/한줄 가져오기 (Hero 표시용)
-        try {
-          const fortune = await getMyFortune(userId);
-          if (fortune?.saju) setMyData(prev => ({ ...prev, saju: fortune.saju }));
-        } catch {}
       } catch (e) { console.error(e); }
+      finally { setFortuneLoading(false); }
     })();
   }, [userId]);
 
@@ -428,7 +432,15 @@ function Home() {
             </p>
             <p className="home-hero-new__msg">{msg}</p>
             {/* 로그인 사용자: 오늘 운세 미리보기 */}
-            {userId && myData?.saju?.score && (
+            {userId && fortuneLoading && !myData?.saju && (
+              <div className="home-hero-fortune-wrap home-hero-fortune-loading">
+                <div className="home-hero-fortune-peek">
+                  <span className="home-hero-fortune-score skeleton-pulse">--점</span>
+                  <span className="home-hero-fortune-text skeleton-pulse">오늘의 운세를 불러오는 중...</span>
+                </div>
+              </div>
+            )}
+            {userId && myData?.saju?.score != null && (
               <div className="home-hero-fortune-wrap">
                 <div className="home-hero-fortune-peek">
                   <span className="home-hero-fortune-score">{myData.saju.score}점</span>

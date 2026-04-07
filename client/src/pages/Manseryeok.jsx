@@ -1,10 +1,20 @@
-import { useState, useEffect } from 'react';
-import { getManseryeok } from '../api/fortune';
+import { useState, useEffect, useRef } from 'react';
+import { getManseryeok, getManseryeokStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
+import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './Manseryeok.css';
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
+
+const AI_SECTIONS = [
+  { key: 'dayMasterMeaning', icon: '☯️', label: '일간 해석' },
+  { key: 'fiveElementBalance', icon: '🔄', label: '오행 균형 분석' },
+  { key: 'pillarRelation', icon: '🏛️', label: '기둥 간 관계' },
+  { key: 'todayEnergy', icon: '✨', label: '오늘의 기운' },
+  { key: 'advice', icon: '💡', label: '조언' },
+];
 
 function Manseryeok() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -12,17 +22,97 @@ function Manseryeok() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // AI 스트리밍 상태
+  const [aiResult, setAiResult] = useState(null);
+  const [streamText, setStreamText] = useState('');
+  const [aiStreaming, setAiStreaming] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const cleanupRef = useRef(null);
+
+  useEffect(() => {
+    return () => cleanupRef.current?.();
+  }, []);
+
+  // 사용자 생년월일 가져오기
+  const getUserBirthDate = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.birthDate || null;
+      }
+    } catch { /* ignore */ }
+    return null;
+  };
+
+  // AI 스트리밍 해석 시작
+  const startAiStream = (queryDate, calType) => {
+    cleanupRef.current?.();
+    setAiResult(null);
+    setStreamText('');
+    setAiStreaming(false);
+    setAiLoading(true);
+
+    const birthDate = getUserBirthDate();
+
+    const cleanup = getManseryeokStream(queryDate, calType, birthDate, {
+      onCached: (cached) => {
+        setAiResult(cached);
+        setAiLoading(false);
+      },
+      onChunk: (text) => {
+        setAiLoading(false);
+        setAiStreaming(true);
+        setStreamText(prev => prev + text);
+      },
+      onDone: (fullText) => {
+        setAiStreaming(false);
+        setStreamText('');
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          setAiResult(parsed);
+        } else {
+          // 파싱 실패 시 텍스트를 advice에 넣어서 표시
+          setAiResult({ advice: fullText });
+        }
+        setAiLoading(false);
+      },
+      onError: () => {
+        setAiStreaming(false);
+        setStreamText('');
+        setAiLoading(false);
+      },
+      onInsufficientHearts: () => {
+        setAiLoading(false);
+      },
+    });
+    cleanupRef.current = cleanup;
+  };
 
   const handleSearch = async () => {
     if (!date) return;
     setLoading(true);
-    try { setData(await getManseryeok(date, calendarType)); }
-    catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    setAiResult(null);
+    setStreamText('');
+    try {
+      const result = await getManseryeok(date, calendarType);
+      setData(result);
+      // 기본 데이터 로드 후 AI 스트리밍 시작
+      startAiStream(date, calendarType);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Auto-load today
-  useEffect(() => { getManseryeok(date).then(setData).catch(() => {}); }, []);
+  useEffect(() => {
+    getManseryeok(date).then(result => {
+      setData(result);
+      startAiStream(date, 'SOLAR');
+    }).catch(() => {});
+  }, []);
 
   const renderPillar = (p) => {
     if (!p) return null;
@@ -39,6 +129,18 @@ function Manseryeok() {
         </div>
         <span className="ms-pillar-element">{p.stemElement}/{p.branchElement}</span>
         {p.animal && <span className="ms-pillar-animal">{p.animal}</span>}
+      </div>
+    );
+  };
+
+  const renderAiScore = () => {
+    if (!aiResult?.score) return null;
+    const score = aiResult.score;
+    return (
+      <div className="ms-ai-score">
+        <span className="ms-ai-score-label">오늘의 점수</span>
+        <span className="ms-ai-score-value">{score}</span>
+        <span className="ms-ai-score-max">/100</span>
       </div>
     );
   };
@@ -99,8 +201,44 @@ function Manseryeok() {
             </div>
           </section>
 
-          {/* AI 해석 */}
-          {data.interpretation && (
+          {/* AI 스트리밍 해석 */}
+          {aiStreaming && streamText && (
+            <StreamText
+              text={streamText}
+              icon="📖"
+              label="만세력 AI 해석 중..."
+            />
+          )}
+
+          {/* AI 해석 완료 결과 */}
+          {aiResult && !aiStreaming && (
+            <section className="ms-ai-interp glass-card fade-in">
+              <h2 className="ms-section-title">📖 AI 만세력 해석</h2>
+              {renderAiScore()}
+              {AI_SECTIONS.map(({ key, icon, label }) =>
+                aiResult[key] ? (
+                  <div key={key} className="ms-interp-item">
+                    <span className="ms-interp-icon">{icon}</span>
+                    <div>
+                      <h4 className="ms-interp-label">{label}</h4>
+                      <p>{aiResult[key]}</p>
+                    </div>
+                  </div>
+                ) : null
+              )}
+            </section>
+          )}
+
+          {/* AI 로딩 중 (스트리밍 시작 전) */}
+          {aiLoading && !aiStreaming && (
+            <div className="ms-ai-loading glass-card">
+              <div className="ms-ai-loading-spinner" />
+              <span>AI 해석을 준비하고 있어요...</span>
+            </div>
+          )}
+
+          {/* 기존 서버 해석 (AI 스트리밍 결과가 없을 때 폴백) */}
+          {!aiResult && !aiStreaming && !aiLoading && data.interpretation && (
             <section className="ms-interp glass-card">
               <h2 className="ms-section-title">📖 만세력 해석</h2>
               {data.interpretation.dayAnalysis && (

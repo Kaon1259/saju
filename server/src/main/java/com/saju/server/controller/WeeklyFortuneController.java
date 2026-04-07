@@ -58,17 +58,19 @@ public class WeeklyFortuneController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "WEEKLY_FORTUNE", "주간운세");
+                heartPointService.checkPoints(userId, "WEEKLY_FORTUNE");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) ->
-            weeklyFortuneService.saveStreamResult(birthDate, birthTime, gender, fullText)
-        );
+        final Long uid = userId;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) -> {
+            weeklyFortuneService.saveStreamResult(birthDate, birthTime, gender, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "WEEKLY_FORTUNE", "주간운세");
+        });
     }
 }

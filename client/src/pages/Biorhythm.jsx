@@ -1,7 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
-import { getBiorhythm } from '../api/fortune';
+import { useState, useEffect, useRef } from 'react';
+import { getBiorhythm, getBiorhythmStream } from '../api/fortune';
 import SpeechButton from '../components/SpeechButton';
+import StreamText from '../components/StreamText';
 import BirthDatePicker from '../components/BirthDatePicker';
+import parseAiJson from '../utils/parseAiJson';
 import './Biorhythm.css';
 
 // ═══════════════════════════════════════════════════
@@ -123,30 +125,30 @@ function Biorhythm() {
   const [serverData, setServerData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // AI 스트리밍 상태
+  const [streamText, setStreamText] = useState('');
+  const [streaming, setStreaming] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+  const cleanupRef = useRef(null);
 
   // 로그인 사용자 정보 가져오기
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('user');
-      if (saved) {
-        const user = JSON.parse(saved);
-        if (user.birthDate) setBirthDate(user.birthDate);
-      }
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (profile.birthDate) setBirthDate(profile.birthDate);
     } catch { /* 무시 */ }
   }, []);
 
-  const handleMyBirthday = () => {
+  // cleanup on unmount
+  useEffect(() => () => cleanupRef.current?.(), []);
+
+  const handleAutoFill = () => {
     try {
-      const saved = localStorage.getItem('user');
-      if (saved) {
-        const user = JSON.parse(saved);
-        if (user.birthDate) {
-          setBirthDate(user.birthDate);
-        } else {
-          alert('프로필에 생년월일을 등록해주세요.');
-        }
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (profile.birthDate) {
+        setBirthDate(profile.birthDate);
       } else {
-        alert('로그인이 필요합니다.');
+        alert('프로필에 생년월일을 등록해주세요.');
       }
     } catch {
       alert('로그인이 필요합니다.');
@@ -156,6 +158,10 @@ function Biorhythm() {
   const handleAnalyze = async () => {
     if (!birthDate) return;
     setLoading(true);
+    setStreamText('');
+    setStreaming(false);
+    setAiResult(null);
+    cleanupRef.current?.();
 
     // 클라이언트 사이드 계산 (즉시)
     const todayStr = new Date().toISOString().split('T')[0];
@@ -170,15 +176,39 @@ function Biorhythm() {
       advice: generateAdvice(todayValues),
     });
 
-    // 서버 데이터도 시도
+    // AI 스트리밍 분석 시작
+    cleanupRef.current = getBiorhythmStream(birthDate, {
+      onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
+      onCached: (data) => {
+        setAiResult(data);
+        setStreaming(false);
+        setStreamText('');
+        setLoading(false);
+      },
+      onDone: (fullText) => {
+        setStreaming(false);
+        setStreamText('');
+        const parsed = parseAiJson(fullText);
+        if (parsed) setAiResult(parsed);
+        setLoading(false);
+      },
+      onError: () => {
+        setStreaming(false);
+        setLoading(false);
+      },
+      onInsufficientHearts: () => {
+        setStreaming(false);
+        setLoading(false);
+      },
+    });
+
+    // 서버 기본 데이터도 시도
     try {
       const data = await getBiorhythm(birthDate);
       if (data) setServerData(data);
     } catch {
       /* 클라이언트 계산으로 충분 */
     }
-
-    setLoading(false);
   };
 
   const generateAdvice = (values) => {
@@ -237,11 +267,13 @@ function Biorhythm() {
         <div className="bio-input-section fade-in">
           <div className="bio-input-card glass-card">
             <h3 className="bio-input-title">{'\uD83C\uDF82'} 생년월일 입력</h3>
+            {localStorage.getItem('userId') && (
+              <button className="sf-autofill-btn" style={{ marginBottom: 12 }} onClick={handleAutoFill}>
+                ✨ 내 정보로 채우기
+              </button>
+            )}
             <div className="bio-input-row">
               <BirthDatePicker value={birthDate} onChange={setBirthDate} />
-              <button className="bio-my-btn" onClick={handleMyBirthday}>
-                내 생일
-              </button>
             </div>
             <button
               className="bio-analyze-btn"
@@ -408,8 +440,63 @@ function Biorhythm() {
             </div>
           )}
 
-          {/* 오늘의 조언 */}
-          {advice && (
+          {/* AI 스트리밍 분석 */}
+          {streaming && streamText && (
+            <StreamText text={streamText} icon="📈" label="AI가 바이오리듬을 분석하고 있어요..." color="#3498DB" />
+          )}
+
+          {/* AI 분석 결과 */}
+          {aiResult && (
+            <div className="bio-ai-result">
+              <div className="bio-advice glass-card">
+                <h3 className="bio-advice-title">{'\uD83E\uDD16'} AI 종합 분석</h3>
+                <p className="bio-advice-text">{aiResult.overall}</p>
+                {aiResult.score != null && (
+                  <div className="bio-ai-score">
+                    <span className="bio-ai-score-label">오늘의 컨디션</span>
+                    <span className="bio-ai-score-value">{aiResult.score}<small>점</small></span>
+                  </div>
+                )}
+              </div>
+
+              <div className="bio-ai-cards">
+                {aiResult.physical && (
+                  <div className="bio-ai-card glass-card" style={{ '--ai-card-color': '#E74C3C' }}>
+                    <h4 className="bio-ai-card-title">{'\uD83C\uDFCB'} 신체 리듬</h4>
+                    <p className="bio-ai-card-text">{aiResult.physical}</p>
+                  </div>
+                )}
+                {aiResult.emotional && (
+                  <div className="bio-ai-card glass-card" style={{ '--ai-card-color': '#2ECC71' }}>
+                    <h4 className="bio-ai-card-title">{'\uD83D\uDC9A'} 감정 리듬</h4>
+                    <p className="bio-ai-card-text">{aiResult.emotional}</p>
+                  </div>
+                )}
+                {aiResult.intellectual && (
+                  <div className="bio-ai-card glass-card" style={{ '--ai-card-color': '#3498DB' }}>
+                    <h4 className="bio-ai-card-title">{'\uD83E\uDDE0'} 지성 리듬</h4>
+                    <p className="bio-ai-card-text">{aiResult.intellectual}</p>
+                  </div>
+                )}
+                {aiResult.intuition && (
+                  <div className="bio-ai-card glass-card" style={{ '--ai-card-color': '#9B59B6' }}>
+                    <h4 className="bio-ai-card-title">{'\uD83D\uDD2E'} 직관 리듬</h4>
+                    <p className="bio-ai-card-text">{aiResult.intuition}</p>
+                  </div>
+                )}
+              </div>
+
+              {aiResult.advice && (
+                <div className="bio-advice glass-card">
+                  <h3 className="bio-advice-title">{'\uD83D\uDCA1'} 오늘의 조언</h3>
+                  <p className="bio-advice-text">{aiResult.advice}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* AI 결과 없으면 기본 조언 표시 */}
+          {!aiResult && !streaming && advice && (
             <div className="bio-advice glass-card">
               <h3 className="bio-advice-title">{'\uD83D\uDCA1'} 오늘의 조언</h3>
               <p className="bio-advice-text">{advice}</p>
@@ -423,7 +510,7 @@ function Biorhythm() {
               text={[
                 '바이오리듬 분석 결과입니다.',
                 ...todayData.map(c => `${c.label} 리듬은 ${c.value}퍼센트, ${PHASE_LABELS[c.phase]}입니다.`),
-                advice || '',
+                aiResult?.overall || aiResult?.advice || advice || '',
               ].filter(Boolean).join(' ')}
               summaryText={[
                 '바이오리듬 요약.',
@@ -433,7 +520,11 @@ function Biorhythm() {
           </div>
 
           {/* 리셋 */}
-          <button className="bio-reset-btn" onClick={() => { setResult(null); setServerData(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          <button className="bio-reset-btn" onClick={() => {
+            cleanupRef.current?.();
+            setResult(null); setServerData(null); setAiResult(null); setStreamText(''); setStreaming(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}>
             {'\uD83D\uDD04'} 다시 분석
           </button>
         </div>

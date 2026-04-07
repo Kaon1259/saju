@@ -66,14 +66,17 @@ public class TarotController {
             @RequestParam(defaultValue = "general") String category,
             @RequestParam(required = false) String question,
             @RequestParam(required = false) Long userId) {
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "TAROT", "타로");
+                heartPointService.checkPoints(userId, "TAROT");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
-        return tarotService.streamReading(cardIds, reversals, spread, category, question);
+        final Long uid = userId;
+        return tarotService.streamReading(cardIds, reversals, spread, category, question, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "TAROT", "타로");
+        });
     }
 }

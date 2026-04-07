@@ -26,16 +26,12 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
     onError?.('하트가 부족합니다.');
     eventSource.close();
   });
-  // 스트리밍 완료 시 하트 잔액 갱신
+  // 스트리밍 완료 시 하트 차감 완료 → 잔액 갱신 + 버블 애니메이션
+  let hadChunks = false;
+  eventSource.addEventListener('chunk', () => { hadChunks = true; });
   eventSource.addEventListener('done', () => {
     window.dispatchEvent(new Event('heart:refresh'));
-  });
-  // 캐시 히트가 아닌 chunk가 시작되면 (AI 호출 = 하트 차감됨) 잔액 갱신 + 버블
-  let chunkStarted = false;
-  eventSource.addEventListener('chunk', () => {
-    if (!chunkStarted) {
-      chunkStarted = true;
-      window.dispatchEvent(new Event('heart:refresh'));
+    if (hadChunks) {
       window.dispatchEvent(new CustomEvent('heart:deducted', { detail: { cost: 5 } }));
     }
   });
@@ -332,6 +328,29 @@ export const getManseryeok = async (date, calendarType) => {
   if (calendarType) params.calendarType = calendarType;
   const response = await api.get('/saju/manseryeok', { params });
   return response.data;
+};
+
+// ─── 만세력 AI 해석 스트리밍 ───
+export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  const params = new URLSearchParams({ date });
+  if (calendarType) params.set('calendarType', calendarType);
+  if (birthDate) params.set('birthDate', birthDate);
+  appendUserId(params);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/saju/manseryeok/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
+
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+
+  return () => eventSource.close();
 };
 
 // ─── 토정비결 ───
@@ -680,6 +699,24 @@ export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onC
 export const getBiorhythm = async (birthDate) => {
   const response = await api.get('/biorhythm', { params: { birthDate } });
   return response.data;
+};
+
+export const getBiorhythmStream = (birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  const params = new URLSearchParams({ birthDate });
+  appendUserId(params);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/biorhythm/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
 };
 
 // ─── 2026 신년운세 ───

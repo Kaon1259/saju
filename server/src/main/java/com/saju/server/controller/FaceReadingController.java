@@ -51,14 +51,17 @@ public class FaceReadingController {
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) Long userId) {
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "FACE_READING", "관상분석");
+                heartPointService.checkPoints(userId, "FACE_READING");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
-        return faceReadingService.streamFace(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender);
+        final Long uid = userId;
+        return faceReadingService.streamFace(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "FACE_READING", "관상분석");
+        });
     }
 }

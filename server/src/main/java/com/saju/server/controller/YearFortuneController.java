@@ -61,17 +61,19 @@ public class YearFortuneController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "YEAR_FORTUNE", "신년운세");
+                heartPointService.checkPoints(userId, "YEAR_FORTUNE");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2400, (fullText) ->
-            yearFortuneService.saveStreamResult(birthDate, birthTime, gender, calendarType, fullText)
-        );
+        final Long uid = userId;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2400, (fullText) -> {
+            yearFortuneService.saveStreamResult(birthDate, birthTime, gender, calendarType, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "YEAR_FORTUNE", "신년운세");
+        });
     }
 }

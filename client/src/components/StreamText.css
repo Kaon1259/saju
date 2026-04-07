@@ -1,6 +1,40 @@
 .stream-text-wrap {
   padding: 16px;
+  position: relative;
+  overflow: hidden;
   animation: streamBreathing 2.5s ease-in-out infinite;
+}
+
+/* 매트릭스 폭포수 효과 */
+.stream-text-wrap::before,
+.stream-text-wrap::after {
+  content: '運 愛 命 緣 福 吉 心 夢 星 月 花 風 光 道 氣 陰 陽 五 行 卦 占 相 魂 靈 天 地 火 水 木 金 土';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  right: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 8px;
+  word-break: break-all;
+  color: rgba(251, 191, 36, 0.12);
+  pointer-events: none;
+  z-index: 0;
+  animation: matrixFall 4s linear infinite;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.15);
+}
+.stream-text-wrap::after {
+  animation-delay: -2s;
+  color: rgba(233, 30, 99, 0.08);
+  text-shadow: 0 0 8px rgba(233, 30, 99, 0.1);
+  letter-spacing: 12px;
+}
+
+@keyframes matrixFall {
+  0% { transform: translateY(-10%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110%); opacity: 0; }
 }
 
 @keyframes streamBreathing {
@@ -33,6 +67,7 @@
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   margin-bottom: 12px; font-size: 14px; font-weight: 700;
   text-align: center;
+  position: relative; z-index: 1;
 }
 .stream-text-label {
   background: linear-gradient(90deg, #FBBF24, #E91E63, #A855F7, #60A5FA, #4ADE80, #FBBF24);
@@ -52,6 +87,7 @@
 .stream-text-body {
   max-height: 280px; overflow-y: auto; scroll-behavior: smooth;
   scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
+  position: relative; z-index: 1;
 }
 .stream-text-body::-webkit-scrollbar { width: 4px; }
 .stream-text-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
@@ -72,3 +108,5 @@
 [data-theme="light"] .stream-text-header { color: var(--stream-color, #b8860b); }
 [data-theme="light"] .stream-text-content { color: #2e2e45; }
 [data-theme="light"] .stream-text-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
+[data-theme="light"] .stream-text-wrap::before { color: rgba(100, 60, 200, 0.08); text-shadow: 0 0 6px rgba(100, 60, 200, 0.1); }
+[data-theme="light"] .stream-text-wrap::after { color: rgba(184, 134, 11, 0.06); text-shadow: 0 0 6px rgba(184, 134, 11, 0.08); }

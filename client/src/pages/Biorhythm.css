@@ -411,6 +411,79 @@
   margin: 0;
 }
 
+/* ═══ AI 분석 결과 ═══ */
+.bio-ai-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bio-ai-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-glass-border);
+}
+
+.bio-ai-score-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.bio-ai-score-value {
+  font-size: 28px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #3498DB, #2ECC71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bio-ai-score-value small {
+  font-size: 14px;
+  font-weight: 700;
+  -webkit-text-fill-color: var(--color-text-muted);
+}
+
+.bio-ai-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 380px) {
+  .bio-ai-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bio-ai-card {
+  padding: 14px;
+  border-left: 3px solid var(--ai-card-color, #3498DB);
+  animation: bioFadeIn 0.4s ease both;
+}
+
+.bio-ai-card-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ai-card-color, #3498DB);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bio-ai-card-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
 /* 읽어주기 */
 .bio-speech-area {
   margin-bottom: 4px;
@@ -478,3 +551,7 @@
 [data-theme="light"] .bio-phase--up { background: rgba(46, 204, 113, 0.08); color: #1a9e4a; }
 [data-theme="light"] .bio-phase--down { background: rgba(231, 76, 60, 0.08); color: #c0392b; }
 [data-theme="light"] .bio-phase--critical { background: rgba(241, 196, 15, 0.08); color: #b7950b; }
+[data-theme="light"] .bio-ai-card { background: rgba(255, 255, 255, 0.88); }
+[data-theme="light"] .bio-ai-card-text { color: #2e2e45; }
+[data-theme="light"] .bio-ai-score-label { color: #4a4a5a; }
+[data-theme="light"] .bio-ai-score-value small { -webkit-text-fill-color: #666; }

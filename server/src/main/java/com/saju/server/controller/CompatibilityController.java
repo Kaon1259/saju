@@ -93,10 +93,10 @@ public class CompatibilityController {
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
         if ("LUNAR".equalsIgnoreCase(calendarType2)) bd2 = lunarCalendarService.lunarToSolar(bd2);
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "COMPATIBILITY", "사주궁합");
+                heartPointService.checkPoints(userId, "COMPATIBILITY");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
@@ -104,10 +104,12 @@ public class CompatibilityController {
 
         String[] prompts = compatibilityService.buildStreamPrompts(bd1, birthTime1, bd2, birthTime2, gender1, gender2, score, elementRelation, branchRelation);
         final LocalDate fbd1 = bd1, fbd2 = bd2;
+        final Long uid = userId;
         return claudeApiService.generateStream(prompts[0], prompts[1], 2000, (fullText) -> {
             // 스트리밍 완료 → 서버에서 직접 캐시 저장
             compatibilityService.parseAndSaveStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
                 score, grade(score), elementRelation, branchRelation, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "COMPATIBILITY", "사주궁합");
         });
     }
 

@@ -93,10 +93,10 @@ public class SajuController {
         // 2. 기본 사주 계산 (빠름)
         SajuResult basicResult = sajuService.buildBasicResult(birthDate, birthTime, gender);
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "SAJU_ANALYSIS", "사주분석");
+                heartPointService.checkPoints(userId, "SAJU_ANALYSIS");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
@@ -136,8 +136,10 @@ public class SajuController {
             "\"luckyColor\":\"행운색상\"}";
 
         final LocalDate finalBd = birthDate;
+        final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
             sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "SAJU_ANALYSIS", "사주분석");
         });
     }
 
@@ -157,6 +159,114 @@ public class SajuController {
 
         SajuResult result = sajuService.analyze(birthDate, user.getBirthTime(), user.getGender());
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 만세력 AI 해석 스트리밍
+     * GET /api/saju/manseryeok/stream?date=2026-04-07&calendarType=SOLAR&birthDate=1990-05-15
+     */
+    @GetMapping(value = "/manseryeok/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamManseryeokInterpretation(
+            @RequestParam("date") String dateStr,
+            @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
+            @RequestParam(value = "birthDate", required = false) String birthDateStr,
+            @RequestParam(required = false) Long userId) {
+
+        LocalDate date = LocalDate.parse(dateStr);
+        if ("LUNAR".equalsIgnoreCase(calendarType)) {
+            date = lunarCalendarService.lunarToSolar(date);
+        }
+
+        // 천간지지 계산
+        int sajuYear = SajuCalculator.getSajuYear(date);
+        SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar monthPillar = SajuCalculator.calculateMonthPillar(date, yearPillar.getStemIndex());
+        SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+
+        // 오행 분포 계산
+        Map<String, Integer> elements = new java.util.LinkedHashMap<>();
+        elements.put("목", 0); elements.put("화", 0); elements.put("토", 0); elements.put("금", 0); elements.put("수", 0);
+        for (SajuPillar p : new SajuPillar[]{ yearPillar, monthPillar, dayPillar }) {
+            String se = p.getStemElementName();
+            String be = p.getBranchElementName();
+            elements.merge(se, 1, Integer::sum);
+            elements.merge(be, 1, Integer::sum);
+        }
+
+        // 캐시 체크
+        String cacheKey = sajuService.buildManseryeokCacheKey(date.toString(), birthDateStr);
+        Map<String, Object> cached = sajuService.getManseryeokCache(cacheKey);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try {
+                    String json = objectMapper.writeValueAsString(cached);
+                    emitter.send(SseEmitter.event().name("cached").data(json));
+                    emitter.complete();
+                } catch (Exception e) {
+                    log.warn("Failed to send cached manseryeok result: {}", e.getMessage());
+                }
+            }).start();
+            return emitter;
+        }
+
+        // 하트 잔액 확인
+        if (userId != null) {
+            try {
+                heartPointService.checkPoints(userId, "MANSERYEOK");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
+
+        // AI 프롬프트 구성
+        StringBuilder pillarInfo = new StringBuilder();
+        pillarInfo.append("【만세력 정보】\n");
+        pillarInfo.append(String.format("날짜: %s, 띠: %s\n", date, yearPillar.getAnimal()));
+        pillarInfo.append(String.format("년주: %s%s (%s/%s)\n",
+            yearPillar.getStemHanja(), yearPillar.getBranchHanja(), yearPillar.getStemElementName(), yearPillar.getBranchElementName()));
+        pillarInfo.append(String.format("월주: %s%s (%s/%s)\n",
+            monthPillar.getStemHanja(), monthPillar.getBranchHanja(), monthPillar.getStemElementName(), monthPillar.getBranchElementName()));
+        pillarInfo.append(String.format("일주: %s%s (%s/%s)\n",
+            dayPillar.getStemHanja(), dayPillar.getBranchHanja(), dayPillar.getStemElementName(), dayPillar.getBranchElementName()));
+        pillarInfo.append(String.format("일간(日干): %s %s (%s)\n",
+            dayPillar.getStemHanja(), dayPillar.getStemName(), dayPillar.getStemElementName()));
+        pillarInfo.append("【오행 분포】 ");
+        elements.forEach((k, v) -> pillarInfo.append(k).append(":").append(v).append(" "));
+        pillarInfo.append("\n");
+        if (birthDateStr != null && !birthDateStr.isBlank()) {
+            pillarInfo.append("【생년월일】 ").append(birthDateStr).append("\n");
+        }
+
+        String systemPrompt = """
+카페에서 친한 친구한테 수다 떨듯이 자연스럽게 대화하는 사주 전문가야.
+만세력(천간지지) 데이터를 기반으로 해석해줘!
+
+【말투 규칙】
+- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
+- 분석 보고서가 아니라 대화하는 느낌으로
+- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
+
+【작성 규칙】
+1. 반드시 JSON만 응답 (설명 텍스트 없이)
+2. 각 항목은 3-5문장, 구체적이고 알기 쉽게
+3. 점수는 45-98 사이""";
+
+        String userPrompt = pillarInfo.toString() + "\n이 천간지지의 의미를 해석해줘.\n" +
+            "반드시 아래 JSON 형식으로만 응답:\n" +
+            "{\"dayMasterMeaning\":\"일간(日干) 해석 - 이 날의 주인공 기운, 성향과 특성 (3-5문장)\"," +
+            "\"fiveElementBalance\":\"오행 균형 분석 - 어떤 기운이 강하고 약한지, 보완 방법 (3-5문장)\"," +
+            "\"pillarRelation\":\"기둥 간 관계 - 년월일주의 상생/상극, 조화 (3-5문장)\"," +
+            "\"todayEnergy\":\"오늘의 기운 - 이 날의 전체적인 에너지와 분위기 (3-5문장)\"," +
+            "\"advice\":\"조언 - 이 날 어떻게 보내면 좋을지, 주의할 점 (3-5문장)\"," +
+            "\"score\":점수(45-98)}";
+
+        final Long uid = userId;
+        final String finalCacheKey = cacheKey;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2000, (fullText) -> {
+            sajuService.parseManseryeokStreamResult(finalCacheKey, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "MANSERYEOK", "만세력 AI해석");
+        });
     }
 
     /**

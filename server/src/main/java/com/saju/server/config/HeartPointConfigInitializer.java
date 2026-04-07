@@ -39,6 +39,8 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("COMPATIBILITY",        5,  "궁합",       "사주궁합");
         init("CELEB_COMPAT",         3,  "궁합",       "최애스타궁합");
 
+        init("MANSERYEOK",          5,  "기본운세",    "만세력 AI해석");
+
         // ── 특수분석 ──
         init("TAROT",                5,  "특수분석",    "타로");
         init("DREAM",                5,  "특수분석",    "꿈해몽");

@@ -70,16 +70,19 @@ public class BloodTypeController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "BLOOD_TYPE", "혈액형 운세");
+                heartPointService.checkPoints(userId, "BLOOD_TYPE");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
         // 캐시 없으면 AI 스트리밍
-        return bloodTypeFortuneService.streamFortune(bloodType, zodiacAnimal);
+        final Long uid = userId;
+        return bloodTypeFortuneService.streamFortune(bloodType, zodiacAnimal, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "BLOOD_TYPE", "혈액형 운세");
+        });
     }
 }

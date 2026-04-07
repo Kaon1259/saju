@@ -98,17 +98,19 @@ public class TojeongController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "TOJEONG", "토정비결");
+                heartPointService.checkPoints(userId, "TOJEONG");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) ->
-            tojeongService.saveStreamResult(finalBirthDate, fullText)
-        );
+        final Long uid = userId;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
+            tojeongService.saveStreamResult(finalBirthDate, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "TOJEONG", "토정비결");
+        });
     }
 }

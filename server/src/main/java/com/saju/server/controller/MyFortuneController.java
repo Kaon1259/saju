@@ -54,32 +54,47 @@ public class MyFortuneController {
         userMap.put("relationshipStatus", user.getRelationshipStatus() != null ? user.getRelationshipStatus() : "");
         result.put("user", userMap);
 
-        // 1. 사주 기반 AI 오늘의 운세 (생년월일+시간 기반)
-        LocalDate birthDate = user.getBirthDate();
-        if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
-            birthDate = lunarCalendarService.lunarToSolar(birthDate);
-        }
-        SajuResult sajuResult = sajuService.analyze(birthDate, user.getBirthTime(), user.getGender());
+        // 1. 스트리밍 캐시 먼저 확인 (운세 페이지와 동일한 점수 보장)
+        LocalDate today = LocalDate.now();
+        var cachedFortune = (user.getZodiacAnimal() != null)
+            ? fortuneService.getCachedFortune(user.getZodiacAnimal(), today) : null;
 
-        // 사주 운세를 기존 포맷에 맞춰 변환
         Map<String, Object> sajuFortune = new LinkedHashMap<>();
-        SajuResult.CategoryFortune today = sajuResult.getTodayFortune();
-        if (today != null) {
-            sajuFortune.put("overall", today.getOverall());
-            sajuFortune.put("love", today.getLove());
-            sajuFortune.put("money", today.getMoney());
-            sajuFortune.put("health", today.getHealth());
-            sajuFortune.put("work", today.getWork());
-            sajuFortune.put("score", today.getScore());
-            sajuFortune.put("luckyNumber", today.getLuckyNumber());
-            sajuFortune.put("luckyColor", today.getLuckyColor());
+        if (cachedFortune != null && cachedFortune.getOverall() != null && !cachedFortune.getOverall().isBlank()) {
+            // 스트리밍 캐시 히트 → 운세 페이지와 동일한 데이터
+            sajuFortune.put("overall", cachedFortune.getOverall());
+            sajuFortune.put("love", cachedFortune.getLove());
+            sajuFortune.put("money", cachedFortune.getMoney());
+            sajuFortune.put("health", cachedFortune.getHealth());
+            sajuFortune.put("work", cachedFortune.getWork());
+            sajuFortune.put("score", cachedFortune.getScore());
+            sajuFortune.put("luckyNumber", cachedFortune.getLuckyNumber());
+            sajuFortune.put("luckyColor", cachedFortune.getLuckyColor());
+        } else {
+            // 캐시 없음 → 사주 기반 AI 분석 (첫 방문)
+            LocalDate birthDate = user.getBirthDate();
+            if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
+                birthDate = lunarCalendarService.lunarToSolar(birthDate);
+            }
+            SajuResult sajuResult = sajuService.analyze(birthDate, user.getBirthTime(), user.getGender());
+            SajuResult.CategoryFortune todayFortune = sajuResult.getTodayFortune();
+            if (todayFortune != null) {
+                sajuFortune.put("overall", todayFortune.getOverall());
+                sajuFortune.put("love", todayFortune.getLove());
+                sajuFortune.put("money", todayFortune.getMoney());
+                sajuFortune.put("health", todayFortune.getHealth());
+                sajuFortune.put("work", todayFortune.getWork());
+                sajuFortune.put("score", todayFortune.getScore());
+                sajuFortune.put("luckyNumber", todayFortune.getLuckyNumber());
+                sajuFortune.put("luckyColor", todayFortune.getLuckyColor());
+            }
+            sajuFortune.put("dayMaster", sajuResult.getDayMasterHanja() + " " + sajuResult.getDayMaster());
+            sajuFortune.put("dayMasterElement", sajuResult.getDayMasterElement());
+            sajuFortune.put("personalityReading", sajuResult.getPersonalityReading());
+            sajuFortune.put("yearFortune", sajuResult.getYearFortune());
         }
-        sajuFortune.put("dayMaster", sajuResult.getDayMasterHanja() + " " + sajuResult.getDayMaster());
-        sajuFortune.put("dayMasterElement", sajuResult.getDayMasterElement());
-        sajuFortune.put("personalityReading", sajuResult.getPersonalityReading());
-        sajuFortune.put("yearFortune", sajuResult.getYearFortune());
         sajuFortune.put("zodiacAnimal", user.getZodiacAnimal());
-        sajuFortune.put("fortuneDate", LocalDate.now().toString());
+        sajuFortune.put("fortuneDate", today.toString());
         result.put("saju", sajuFortune);
 
         // 2. 혈액형/MBTI는 각 페이지에서 개별 호출 (홈 로딩 속도 개선)
@@ -132,9 +147,9 @@ public class MyFortuneController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         try {
-            heartPointService.deductPoints(userId, "TODAY_FORTUNE", "오늘의 운세");
+            heartPointService.checkPoints(userId, "TODAY_FORTUNE");
         } catch (InsufficientHeartsException e) {
             return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
         }
@@ -143,8 +158,10 @@ public class MyFortuneController {
         String systemPrompt = promptBuilder.fortuneStreamSystemPrompt();
         String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), targetDate, user.getRelationshipStatus());
         final LocalDate finalDate = targetDate;
+        final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
+            if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
         });
     }
 

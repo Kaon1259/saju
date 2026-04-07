@@ -223,7 +223,15 @@ public class BloodTypeFortuneService {
     /**
      * 혈액형 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
      */
+    public SseEmitter streamFortune(String bloodType, String zodiacAnimal, Runnable onSuccess) {
+        return doStreamFortune(bloodType, zodiacAnimal, onSuccess);
+    }
+
     public SseEmitter streamFortune(String bloodType, String zodiacAnimal) {
+        return doStreamFortune(bloodType, zodiacAnimal, null);
+    }
+
+    private SseEmitter doStreamFortune(String bloodType, String zodiacAnimal, Runnable onSuccess) {
         LocalDate today = LocalDate.now();
         String system = promptBuilder.bloodTypeSystemPrompt();
         String user = promptBuilder.bloodTypeUserPrompt(bloodType, zodiacAnimal, today);
@@ -253,6 +261,7 @@ public class BloodTypeFortuneService {
             } catch (Exception e) {
                 log.warn("bloodtype stream cache save failed for {}형/{}: {}", bloodType, zodiacAnimal, e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 }

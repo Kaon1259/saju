@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getTojeongStream, getUserTojeong } from '../api/fortune';
+import { getTojeongStream } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -42,16 +42,56 @@ function Tojeong() {
     if (!userId) return;
     setShowInput(false);
     setLoading(true);
-    // 유저 프로필에서 birthDate 설정 (심화분석용)
+    setStreaming(false);
+    setStreamText('');
+    cleanupRef.current?.();
+
+    let userBirthDate = '';
+    let userCalendarType = 'SOLAR';
     try {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      if (profile.birthDate) setBirthDate(profile.birthDate);
-      if (profile.calendarType) setCalendarType(profile.calendarType);
+      if (profile.birthDate) { userBirthDate = profile.birthDate; setBirthDate(profile.birthDate); }
+      if (profile.calendarType) { userCalendarType = profile.calendarType; setCalendarType(profile.calendarType); }
     } catch {}
-    getUserTojeong(userId)
-      .then(setResult)
-      .catch(() => setShowInput(true))
-      .finally(() => setLoading(false));
+
+    if (!userBirthDate) { setShowInput(true); setLoading(false); return; }
+
+    let firstChunk = true;
+    cleanupRef.current = getTojeongStream(userBirthDate, userCalendarType, {
+      onCached: (data) => {
+        setResult(data);
+        setLoading(false);
+      },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: (fullText) => {
+        setStreaming(false);
+        setStreamText('');
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          const mapped = {
+            yearSummary: parsed.yearSummary,
+            yearKeywords: parsed.yearKeywords,
+            bestMonth: parsed.bestMonth,
+            cautionMonth: parsed.cautionMonth,
+            yearAdvice: parsed.yearAdvice,
+            monthlyFortunes: parsed.months || parsed.monthlyFortunes || [],
+          };
+          setResult(mapped);
+        } else {
+          setShowInput(true);
+        }
+        setLoading(false);
+      },
+      onError: (err) => {
+        console.error('토정비결 스트림 실패:', err);
+        setLoading(false);
+        setStreaming(false);
+        setShowInput(true);
+      },
+    });
   };
 
   useEffect(() => {

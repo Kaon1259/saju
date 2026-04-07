@@ -63,16 +63,19 @@ public class ConstellationController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "CONSTELLATION", "별자리 운세");
+                heartPointService.checkPoints(userId, "CONSTELLATION");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
         // 캐시 없으면 AI 스트리밍
-        return service.streamFortune(sign);
+        final Long uid = userId;
+        return service.streamFortune(sign, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "CONSTELLATION", "별자리 운세");
+        });
     }
 }

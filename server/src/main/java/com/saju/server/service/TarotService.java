@@ -262,7 +262,17 @@ public class TarotService {
      * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버 캐시 저장
      */
     public SseEmitter streamReading(String cardIds, String reversals,
+                                    String spread, String category, String question, Runnable onSuccess) {
+        return doStreamReading(cardIds, reversals, spread, category, question, onSuccess);
+    }
+
+    public SseEmitter streamReading(String cardIds, String reversals,
                                     String spread, String category, String question) {
+        return doStreamReading(cardIds, reversals, spread, category, question, null);
+    }
+
+    private SseEmitter doStreamReading(String cardIds, String reversals,
+                                    String spread, String category, String question, Runnable onSuccess) {
         // 캐시 체크
         String cacheKey = buildCacheKey(cardIds, reversals, spread, category, question != null ? question : "");
         Map<String, Object> cached = getFromCache("tarot", cacheKey);
@@ -338,6 +348,7 @@ public class TarotService {
             } catch (Exception e) {
                 log.warn("Failed to save tarot stream cache: {}", e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 

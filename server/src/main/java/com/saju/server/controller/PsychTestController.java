@@ -52,14 +52,17 @@ public class PsychTestController {
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) Long userId) {
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "PSYCH_TEST", "심리테스트");
+                heartPointService.checkPoints(userId, "PSYCH_TEST");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
-        return psychTestService.streamAnalyze(testId, answers, birthDate, gender);
+        final Long uid = userId;
+        return psychTestService.streamAnalyze(testId, answers, birthDate, gender, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "PSYCH_TEST", "심리테스트");
+        });
     }
 }

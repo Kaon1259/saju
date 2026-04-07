@@ -49,7 +49,28 @@
 .ms-hour-hanja { font-size: 20px; font-weight: 900; font-family: serif; }
 .ms-hour-element { font-size: 10px; color: var(--color-text-muted); }
 
+/* AI Score */
+.ms-ai-score { display: flex; align-items: baseline; justify-content: center; gap: 4px; margin-bottom: 16px; padding: 12px; border-radius: 12px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.15); }
+.ms-ai-score-label { font-size: 13px; color: var(--color-text-muted); font-weight: 700; margin-right: 8px; }
+.ms-ai-score-value { font-size: 36px; font-weight: 900; background: linear-gradient(135deg, #FBBF24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.ms-ai-score-max { font-size: 14px; color: var(--color-text-muted); font-weight: 600; }
+
+/* AI Interpretation section */
+.ms-ai-interp { padding: 16px; }
+
+/* AI Loading */
+.ms-ai-loading { display: flex; align-items: center; gap: 12px; padding: 20px 16px; font-size: 14px; color: var(--color-text-muted); }
+.ms-ai-loading-spinner { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(251,191,36,0.2); border-top-color: #FBBF24; animation: msAiSpin 0.8s linear infinite; flex-shrink: 0; }
+@keyframes msAiSpin { to { transform: rotate(360deg); } }
+
 /* Light theme */
+[data-theme="light"] .ms-ai-score { background: rgba(180,130,0,0.06); border-color: rgba(180,130,0,0.15); }
+[data-theme="light"] .ms-ai-score-value { background: linear-gradient(135deg, #b8860b, #96700a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .ms-ai-score-label { color: #555; }
+[data-theme="light"] .ms-ai-score-max { color: #666; }
+[data-theme="light"] .ms-ai-loading { color: #555; }
+[data-theme="light"] .ms-ai-loading-spinner { border-color: rgba(150,112,10,0.2); border-top-color: #96700a; }
+
 [data-theme="light"] .ms-date-input { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.12); color: #1e293b; color-scheme: light; }
 [data-theme="light"] .ms-pillar { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .ms-hour-item { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }

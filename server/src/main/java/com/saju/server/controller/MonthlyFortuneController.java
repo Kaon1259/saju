@@ -60,18 +60,20 @@ public class MonthlyFortuneController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "MONTHLY_FORTUNE", "월간운세");
+                heartPointService.checkPoints(userId, "MONTHLY_FORTUNE");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
         final int finalMonth = month;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) ->
-            monthlyFortuneService.saveStreamResult(birthDate, finalMonth, birthTime, gender, fullText)
-        );
+        final Long uid = userId;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) -> {
+            monthlyFortuneService.saveStreamResult(birthDate, finalMonth, birthTime, gender, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "MONTHLY_FORTUNE", "월간운세");
+        });
     }
 }

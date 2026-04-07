@@ -230,7 +230,15 @@ public class ConstellationFortuneService {
     /**
      * 별자리 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
      */
+    public SseEmitter streamFortune(String sign, Runnable onSuccess) {
+        return doStreamFortune(sign, onSuccess);
+    }
+
     public SseEmitter streamFortune(String sign) {
+        return doStreamFortune(sign, null);
+    }
+
+    private SseEmitter doStreamFortune(String sign, Runnable onSuccess) {
         LocalDate today = LocalDate.now();
         int idx = getSignIndex(sign);
 
@@ -276,6 +284,7 @@ public class ConstellationFortuneService {
             } catch (Exception e) {
                 log.warn("constellation stream cache save failed for {}: {}", sign, e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 }

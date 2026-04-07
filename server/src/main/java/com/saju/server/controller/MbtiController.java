@@ -73,16 +73,19 @@ public class MbtiController {
             return emitter;
         }
 
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "MBTI", "MBTI 운세");
+                heartPointService.checkPoints(userId, "MBTI");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
 
         // 캐시 없으면 AI 스트리밍
-        return mbtiFortuneService.streamFortune(mbtiType, zodiacAnimal);
+        final Long uid = userId;
+        return mbtiFortuneService.streamFortune(mbtiType, zodiacAnimal, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "MBTI", "MBTI 운세");
+        });
     }
 }

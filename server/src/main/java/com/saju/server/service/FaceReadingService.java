@@ -91,7 +91,19 @@ public class FaceReadingService {
      */
     public SseEmitter streamFace(String faceShape, String eyeShape, String noseShape,
                                   String mouthShape, String foreheadShape,
+                                  String birthDate, String gender, Runnable onSuccess) {
+        return doStreamFace(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, onSuccess);
+    }
+
+    public SseEmitter streamFace(String faceShape, String eyeShape, String noseShape,
+                                  String mouthShape, String foreheadShape,
                                   String birthDate, String gender) {
+        return doStreamFace(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, null);
+    }
+
+    private SseEmitter doStreamFace(String faceShape, String eyeShape, String noseShape,
+                                  String mouthShape, String foreheadShape,
+                                  String birthDate, String gender, Runnable onSuccess) {
         String cacheKey = buildCacheKey(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender);
         Map<String, Object> cached = getFromCache("face-reading", cacheKey);
         if (cached != null) {
@@ -159,6 +171,7 @@ public class FaceReadingService {
             } catch (Exception e) {
                 log.warn("관상 스트림 캐시 저장 실패: {}", e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 

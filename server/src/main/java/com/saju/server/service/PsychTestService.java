@@ -360,7 +360,15 @@ public class PsychTestService {
      * 심리테스트 분석 스트리밍
      * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버에서 캐시 저장
      */
+    public SseEmitter streamAnalyze(String testId, String answers, String birthDate, String gender, Runnable onSuccess) {
+        return doStreamAnalyze(testId, answers, birthDate, gender, onSuccess);
+    }
+
     public SseEmitter streamAnalyze(String testId, String answers, String birthDate, String gender) {
+        return doStreamAnalyze(testId, answers, birthDate, gender, null);
+    }
+
+    private SseEmitter doStreamAnalyze(String testId, String answers, String birthDate, String gender, Runnable onSuccess) {
         String cacheKey = buildCacheKey(testId, answers, birthDate, gender);
         Map<String, Object> cached = getFromCache("psych-test", cacheKey);
         if (cached != null) {
@@ -399,6 +407,7 @@ public class PsychTestService {
             } catch (Exception e) {
                 log.warn("심리테스트 스트림 캐시 저장 실패: {}", e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 

@@ -91,7 +91,15 @@ public class DreamService {
      * 꿈 해몽 스트리밍
      * 캐시 있으면 cached 이벤트로 즉시 반환, 없으면 AI 스트리밍 후 서버에서 캐시 저장
      */
+    public SseEmitter streamDream(String dreamText, String birthDate, String gender, Runnable onSuccess) {
+        return doStreamDream(dreamText, birthDate, gender, onSuccess);
+    }
+
     public SseEmitter streamDream(String dreamText, String birthDate, String gender) {
+        return doStreamDream(dreamText, birthDate, gender, null);
+    }
+
+    private SseEmitter doStreamDream(String dreamText, String birthDate, String gender, Runnable onSuccess) {
         String cacheKey = buildCacheKey(dreamText, birthDate, gender);
         Map<String, Object> cached = getFromCache("dream", cacheKey);
         if (cached != null) {
@@ -121,6 +129,7 @@ public class DreamService {
             } catch (Exception e) {
                 log.warn("꿈 해몽 스트림 캐시 저장 실패: {}", e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 

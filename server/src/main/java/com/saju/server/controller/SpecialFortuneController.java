@@ -124,23 +124,28 @@ public class SpecialFortuneController {
             return emitter;
         }
 
-        // 하트 차감 (type별 개별 설정)
+        // 하트 잔액 확인 (차감은 AI 완료 후)
+        final String configKey;
         if (userId != null) {
             try {
-                String configKey = mapLoveTypeToConfigKey(type);
-                heartPointService.deductPoints(userId, configKey, "1:1연애운 - " + type);
+                configKey = mapLoveTypeToConfigKey(type);
+                heartPointService.checkPoints(userId, configKey);
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
+        } else {
+            configKey = null;
         }
 
         String[] prompts = specialFortuneService.buildLoveStreamPrompts(
             type, birthDate, birthTime, gender, calendarType,
             partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus);
         int maxTokens = "ideal_type".equals(type) ? 2500 : 1200;
+        final Long uid = userId;
         return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens, (fullText) -> {
             specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
                 partnerDate, partnerGender, breakupDate, meetDate, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, configKey, "1:1연애운 - " + type);
         });
     }
 

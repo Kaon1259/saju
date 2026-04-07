@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { analyzeSaju, getUserSaju, getDailyFortunes } from '../api/fortune';
+import { analyzeSaju, analyzeSajuStream, getUserSaju, getDailyFortunes } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneLoading from '../components/FortuneLoading';
+import StreamText from '../components/StreamText';
+import parseAiJson from '../utils/parseAiJson';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -59,6 +61,9 @@ function SajuAnalysis() {
   const [gender, setGender] = useState('');
   const [activeTab, setActiveTab] = useState('saju'); // saju, fortune, advanced
   const [dailyFortunes, setDailyFortunes] = useState(null);
+  const [streaming, setStreaming] = useState(false);
+  const [streamText, setStreamText] = useState('');
+  const cleanupRef = useRef(null);
 
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
@@ -66,19 +71,86 @@ function SajuAnalysis() {
   const loadUserSaju = () => {
     const userId = localStorage.getItem('userId');
     if (!userId) return;
+
+    // 프로필에서 birthDate, birthTime, gender 추출
+    let userBd = localStorage.getItem('userBirthDate');
+    let userBt = '';
+    let userGender = '';
+    let userCalendar = 'SOLAR';
+    try {
+      const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      if (p.birthDate) userBd = p.birthDate;
+      if (p.birthTime) userBt = p.birthTime;
+      if (p.gender) userGender = p.gender;
+      if (p.calendarType) userCalendar = p.calendarType;
+    } catch {}
+
+    if (!userBd) {
+      // birthDate 없으면 기존 REST 방식 폴백
+      setShowInput(false);
+      setLoading(true);
+      getUserSaju(userId)
+        .then((data) => {
+          setResult(data);
+          getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+        })
+        .catch((err) => {
+          console.error('Failed to load user saju:', err);
+          setShowInput(true);
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    // 스트리밍 방식
     setShowInput(false);
     setLoading(true);
-    getUserSaju(userId)
-      .then((data) => {
-        setResult(data);
-        const userBd = localStorage.getItem('userBirthDate');
-        if (userBd) getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
-      })
-      .catch((err) => {
-        console.error('Failed to load user saju:', err);
+    setStreaming(false);
+    setStreamText('');
+    cleanupRef.current?.();
+
+    let firstChunk = true;
+    cleanupRef.current = analyzeSajuStream(userBd, userBt || undefined, userCalendar, userGender || undefined, {
+      onCached: (cached) => {
+        setResult(cached);
+        setLoading(false);
+        getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+      },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: () => {
+        setStreaming(false);
+        // 스트리밍 완료 후 서버 캐시에서 전체 결과 가져오기
+        (async () => {
+          try {
+            const r = await analyzeSaju(userBd, userBt || undefined, userCalendar, userGender || undefined);
+            setResult(r);
+            getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+          } catch (e) { console.error('사주 결과 로드 실패:', e); }
+          finally { setLoading(false); setStreamText(''); }
+        })();
+      },
+      onError: (err) => {
+        console.error('사주 스트림 실패:', err);
+        setStreaming(false);
+        // 폴백: REST로 결과 가져오기
+        (async () => {
+          try {
+            const r = await analyzeSaju(userBd, userBt || undefined, userCalendar, userGender || undefined);
+            setResult(r);
+            getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+          } catch (e) { console.error(e); setShowInput(true); }
+          finally { setLoading(false); setStreamText(''); }
+        })();
+      },
+      onInsufficientHearts: () => {
+        setLoading(false);
+        setStreaming(false);
         setShowInput(true);
-      })
-      .finally(() => setLoading(false));
+      },
+    });
   };
 
   useEffect(() => {
@@ -88,33 +160,85 @@ function SajuAnalysis() {
     }
   }, []);
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!birthDate) return;
     setLoading(true);
     setShowInput(false);
-    try {
-      const data = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
-      setResult(data);
-      getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
-    } catch (err) {
-      console.error('Saju analysis failed:', err);
-      setShowInput(true);
-    } finally {
-      setLoading(false);
-    }
+    setStreaming(false);
+    setStreamText('');
+    cleanupRef.current?.();
+
+    let firstChunk = true;
+    cleanupRef.current = analyzeSajuStream(birthDate, birthTime || undefined, calendarType, gender || undefined, {
+      onCached: (cached) => {
+        setResult(cached);
+        setLoading(false);
+        getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
+      },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: () => {
+        setStreaming(false);
+        // 스트리밍 완료 후 서버 캐시에서 전체 결과 가져오기
+        (async () => {
+          try {
+            const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
+            setResult(r);
+            getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
+          } catch (e) { console.error('사주 결과 로드 실패:', e); }
+          finally { setLoading(false); setStreamText(''); }
+        })();
+      },
+      onError: (err) => {
+        console.error('사주 스트림 실패:', err);
+        setStreaming(false);
+        // 폴백: REST로 결과 가져오기
+        (async () => {
+          try {
+            const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
+            setResult(r);
+            getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
+          } catch (e) { console.error(e); setShowInput(true); }
+          finally { setLoading(false); setStreamText(''); }
+        })();
+      },
+      onInsufficientHearts: () => {
+        setLoading(false);
+        setStreaming(false);
+        setShowInput(true);
+      },
+    });
   };
 
   const handleReset = () => {
+    cleanupRef.current?.();
     setResult(null);
     setShowInput(true);
+    setStreaming(false);
+    setStreamText('');
     setBirthDate('');
     setBirthTime('');
   };
 
-  if (loading) {
+  // cleanup on unmount
+  useEffect(() => {
+    return () => { cleanupRef.current?.(); };
+  }, []);
+
+  if (loading && !streaming) {
     return (
       <div className="saju-page">
         <FortuneLoading type="default" />
+      </div>
+    );
+  }
+
+  if (streaming) {
+    return (
+      <div className="saju-page">
+        <StreamText text={streamText} icon="☯" label="사주를 분석하고 있어요..." />
       </div>
     );
   }

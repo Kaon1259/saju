@@ -48,6 +48,17 @@ public class HeartPointService {
         return balance >= cost;
     }
 
+    /**
+     * 하트 잔액 확인 (부족하면 예외) — 차감하지 않음
+     */
+    public void checkPoints(Long userId, String analysisCategory) {
+        int balance = getBalance(userId);
+        int cost = getCost(analysisCategory);
+        if (balance < cost) {
+            throw new InsufficientHeartsException(cost, balance);
+        }
+    }
+
     @Transactional
     public void deductPoints(Long userId, String analysisCategory, String endpointDesc) {
         User user = userRepository.findById(userId)

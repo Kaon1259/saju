@@ -257,7 +257,15 @@ public class MbtiFortuneService {
     /**
      * MBTI 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
      */
+    public SseEmitter streamFortune(String mbtiType, String zodiacAnimal, Runnable onSuccess) {
+        return doStreamFortune(mbtiType, zodiacAnimal, onSuccess);
+    }
+
     public SseEmitter streamFortune(String mbtiType, String zodiacAnimal) {
+        return doStreamFortune(mbtiType, zodiacAnimal, null);
+    }
+
+    private SseEmitter doStreamFortune(String mbtiType, String zodiacAnimal, Runnable onSuccess) {
         LocalDate today = LocalDate.now();
         String system = promptBuilder.mbtiSystemPrompt();
         String user = promptBuilder.mbtiUserPrompt(mbtiType, zodiacAnimal, today);
@@ -287,6 +295,7 @@ public class MbtiFortuneService {
             } catch (Exception e) {
                 log.warn("mbti stream cache save failed for {}/{}: {}", mbtiType, zodiacAnimal, e.getMessage());
             }
+            if (onSuccess != null) onSuccess.run();
         });
     }
 }

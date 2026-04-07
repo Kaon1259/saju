@@ -41,14 +41,17 @@ public class DreamController {
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) Long userId) {
-        // 하트 차감
+        // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.deductPoints(userId, "DREAM", "꿈해몽");
+                heartPointService.checkPoints(userId, "DREAM");
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
-        return dreamService.streamDream(dreamText, birthDate, gender);
+        final Long uid = userId;
+        return dreamService.streamDream(dreamText, birthDate, gender, () -> {
+            if (uid != null) heartPointService.deductPoints(uid, "DREAM", "꿈해몽");
+        });
     }
 }

@@ -266,6 +266,41 @@ public class SajuService {
         return buildSajuSummary(result, birthDate, birthTime, today);
     }
 
+    // ===== 만세력 AI 해석 캐시 메서드 =====
+
+    /**
+     * 만세력 캐시 키 생성 (외부 접근 가능)
+     */
+    public String buildManseryeokCacheKey(String date, String birthDate) {
+        return buildCacheKey("manseryeok", date, birthDate);
+    }
+
+    /**
+     * 만세력 AI 해석 캐시 조회
+     */
+    public Map<String, Object> getManseryeokCache(String cacheKey) {
+        return getFromCache("manseryeok", cacheKey);
+    }
+
+    /**
+     * 만세력 AI 스트리밍 완료 후 결과 파싱 및 캐시 저장
+     */
+    @Transactional
+    public void parseManseryeokStreamResult(String cacheKey, String fullText) {
+        try {
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) {
+                log.error("Manseryeok stream: JSON extraction failed from fullText length={}", fullText.length());
+                return;
+            }
+            Map<String, Object> resultMap = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+            saveToCache("manseryeok", cacheKey, resultMap);
+            log.info("Manseryeok stream result cached: cacheKey={}", cacheKey);
+        } catch (Exception e) {
+            log.error("Failed to parse/save manseryeok stream result: {}", e.getMessage(), e);
+        }
+    }
+
     // ===== DB 캐싱 헬퍼 메서드 =====
 
     private String buildCacheKey(String... parts) {

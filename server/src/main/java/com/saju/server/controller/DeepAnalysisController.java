@@ -65,20 +65,25 @@ public class DeepAnalysisController {
             return emitter;
         }
 
-        // 하트 차감 (심화분석 - type별 개별 설정)
+        // 하트 잔액 확인 (차감은 AI 완료 후)
+        final String configKey;
         if (userId != null) {
             try {
-                String configKey = mapDeepTypeToConfigKey(type);
-                heartPointService.deductPoints(userId, configKey, "심화분석 - " + type);
+                configKey = mapDeepTypeToConfigKey(type);
+                heartPointService.checkPoints(userId, configKey);
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
+        } else {
+            configKey = null;
         }
 
         String systemPrompt = deepAnalysisService.getSystemPrompt(type);
         String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
+        final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 4000, (fullText) -> {
             deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, configKey, "심화분석 - " + type);
         });
     }
 
