@@ -844,37 +844,304 @@
   color: #fff; font-size: 14px; font-weight: 700;
 }
 
-.tarot-card-fan {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 10px; padding: 8px; margin-bottom: 16px;
-  max-width: 400px; width: 100%;
+/* ═══ 반원형 카드 배치 ═══ */
+.tarot-arc-swipe-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+  animation: hintFade 2.5s ease-in-out infinite;
+}
+@keyframes hintFade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 
-.tarot-fan-card {
-  aspect-ratio: 2.5 / 4; border: none; background: transparent;
-  cursor: pointer; padding: 0;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative; transform-origin: center center;
+.tarot-arc-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 20px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  -webkit-user-select: none;
 }
-.tarot-fan-card:hover:not(:disabled) { transform: translateY(-8px) scale(1.05); z-index: 2; }
-.tarot-fan-card:disabled { opacity: 0.4; cursor: not-allowed; }
-.tarot-fan-card.selected { transform: translateY(-12px) scale(1.08); z-index: 3; }
-.tarot-fan-card.selected .tarot-card-back {
-  border-color: #FFD700;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+.tarot-arc-container:active { cursor: grabbing; }
+
+.tarot-arc {
+  position: relative;
+  width: 320px;
+  height: 280px;
 }
 
-.tarot-card-selected-badge {
-  position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
-  border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFA500);
-  color: #1a0533; font-size: 14px; font-weight: 900;
-  display: flex; align-items: center; justify-content: center;
+.tarot-arc-card {
+  position: absolute;
+  width: 52px;
+  height: 78px;
+  left: 50%;
+  bottom: 0;
+  margin-left: -26px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transform-origin: center 260px;
+  transform: rotate(var(--arc-angle)) translateY(-170px);
+  transition: transform 0.15s ease-out, opacity 0.2s;
+}
+
+.tarot-arc-card:hover:not(:disabled):not(.arc-picked) {
+  transform: rotate(var(--arc-angle)) translateY(-190px) scale(1.12);
+  z-index: 50 !important;
+  filter: brightness(1.2);
+}
+
+.tarot-arc-card:active:not(:disabled):not(.arc-picked) {
+  transform: rotate(var(--arc-angle)) translateY(-195px) scale(1.15);
+}
+
+.tarot-arc-card:disabled {
+  cursor: not-allowed;
+}
+
+.tarot-arc-card.arc-picked {
+  opacity: 0.15;
+  pointer-events: none;
+  transform: rotate(var(--arc-angle)) translateY(-170px) scale(0.9);
+}
+
+.tarot-arc-card.arc-picking {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tarot-arc-card .tarot-card-back {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+.tarot-arc-card .tarot-card-back-star {
+  font-size: 16px;
+}
+
+/* ═══ 중앙 카드 공개 ═══ */
+.tarot-center-reveal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.tarot-center-card {
+  width: 160px;
+  text-align: center;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tarot-center-reveal.reveal-in .tarot-center-card {
+  animation: centerRevealIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes centerRevealIn {
+  0% { transform: scale(0.3) rotateY(180deg); opacity: 0; }
+  60% { transform: scale(1.1) rotateY(0deg); opacity: 1; }
+  100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+}
+
+.tarot-center-reveal.fly-to-slot {
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+}
+
+.tarot-center-reveal.fly-to-slot .tarot-center-card {
+  animation: flyToSlot 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes flyToSlot {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  50% { transform: scale(0.6) translateY(30vh); opacity: 0.8; }
+  100% { transform: scale(0.3) translateY(50vh); opacity: 0; }
+}
+
+.tarot-center-card .tarot-card-art,
+.tarot-center-card .tarot-minor-card {
+  width: 160px;
+  height: 248px;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), 0 20px 60px rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+}
+
+.tarot-center-card-name {
+  margin-top: 16px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #FFD700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.tarot-center-card-name-en {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* ═══ 하단 덱 슬롯 ═══ */
+.tarot-deck-slots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.tarot-deck-slot {
+  width: 72px;
+  height: 108px;
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tarot-deck-slot.slot-empty {
+  border: 2px dashed rgba(255, 215, 0, 0.4);
+  background: rgba(255, 215, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tarot-slot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tarot-slot-num {
+  font-size: 20px;
+  font-weight: 800;
+  color: rgba(255, 215, 0, 0.3);
+}
+
+.tarot-slot-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tarot-deck-slot.slot-filled {
+  animation: slotFillIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slotFillIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.tarot-slot-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.tarot-slot-card .tarot-card-art,
+.tarot-slot-card .tarot-minor-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.15);
+}
+
+.tarot-slot-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #1a0533;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
-  animation: badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5;
+  z-index: 5;
 }
-@keyframes badgePop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+/* ═══ 덱 완성 ═══ */
+.tarot-deck-complete {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.tarot-deck-complete-msg {
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFD700;
+  margin-bottom: 12px;
+  animation: completePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes completePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; text-shadow: 0 0 12px rgba(255, 215, 0, 0.6); }
+}
+
+.tarot-read-btn {
+  background: linear-gradient(135deg, #6C3483, #9B59B6);
+  color: #fff;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 30px;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(155, 89, 182, 0.4);
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+
+.tarot-read-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 28px rgba(155, 89, 182, 0.6);
+}
+
+.tarot-read-btn:active {
+  transform: scale(0.97);
+}
 
 .tarot-pick-hint { text-align: center; font-size: 14px; color: var(--color-text-muted); font-style: italic; }
+
+/* ═══ 라이트모드 덱슬롯 ═══ */
+[data-theme="light"] .tarot-deck-slot.slot-empty {
+  border-color: rgba(155, 89, 182, 0.3);
+  background: rgba(155, 89, 182, 0.05);
+}
+[data-theme="light"] .tarot-slot-num {
+  color: rgba(155, 89, 182, 0.3);
+}
+[data-theme="light"] .tarot-deck-complete-msg {
+  color: #6C3483;
+}
+[data-theme="light"] .tarot-center-card-name {
+  color: #FFD700;
+}
 
 /* 처음으로 버튼 */
 .tarot-back-btn {
@@ -1235,7 +1502,12 @@
 
 /* ═══ 반응형 ═══ */
 @media (max-width: 380px) {
-  .tarot-card-fan { grid-template-columns: repeat(3, 1fr); }
+  .tarot-arc-container { height: 260px; }
+  .tarot-arc { width: 280px; height: 240px; }
+  .tarot-arc-card { width: 44px; height: 66px; margin-left: -22px; }
+  .tarot-deck-slot { width: 60px; height: 90px; }
+  .tarot-center-card .tarot-card-art,
+  .tarot-center-card .tarot-minor-card { width: 130px; height: 202px; }
   .tarot-reveal-card { width: 100px; height: 155px; }
   .spread-five .tarot-reveal-card { width: 70px; height: 109px; }
   .tarot-card-brief { font-size: 11px; }

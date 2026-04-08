@@ -9,9 +9,10 @@ import StreamText from '../components/StreamText';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
-// 메이저 아르카나 22장 데이터
+// 타로 78장 데이터 (메이저 22 + 마이너 56)
 // ═══════════════════════════════════════════════════
-const MAJOR_ARCANA = [
+const ALL_CARDS = [
+  // ── 메이저 아르카나 (0-21) ──
   { id: 0,  nameEn: 'The Fool',            nameKr: '광대',          color: '#FFD700', msg: '새로운 시작과 모험의 기운이 감돕니다. 두려움 없이 한 걸음을 내딛으세요.' },
   { id: 1,  nameEn: 'The Magician',        nameKr: '마법사',        color: '#FF6B35', msg: '당신에게는 원하는 것을 현실로 만들 힘이 있습니다.' },
   { id: 2,  nameEn: 'The High Priestess',  nameKr: '여사제',        color: '#4A90D9', msg: '내면의 목소리에 귀 기울이세요. 직관이 답을 알고 있습니다.' },
@@ -34,6 +35,70 @@ const MAJOR_ARCANA = [
   { id: 19, nameEn: 'The Sun',             nameKr: '태양',          color: '#F4D03F', msg: '성공과 기쁨의 시기입니다. 자신감을 갖고 빛나세요.' },
   { id: 20, nameEn: 'Judgement',           nameKr: '심판',          color: '#8E44AD', msg: '과거를 돌아보고 새롭게 시작할 때입니다. 내면의 소명을 따르세요.' },
   { id: 21, nameEn: 'The World',           nameKr: '세계',          color: '#27AE60', msg: '하나의 순환이 완성됩니다. 목표를 달성하고 새로운 차원으로 나아갑니다.' },
+
+  // ── 완드 (Wands) 22-35: 열정·행동·창조 ──
+  { id: 22, nameEn: 'Ace of Wands',    nameKr: '완드 에이스',  color: '#FF4500', msg: '뜨거운 열정이 타오릅니다. 새로운 사랑의 불꽃이 시작되는 순간이에요.' },
+  { id: 23, nameEn: 'Two of Wands',    nameKr: '완드 2',       color: '#FF5722', msg: '두 갈래 길 앞에서 용기 있는 선택을 하세요. 새로운 가능성이 열립니다.' },
+  { id: 24, nameEn: 'Three of Wands',  nameKr: '완드 3',       color: '#FF6F00', msg: '기다려온 소식이 곧 도착합니다. 넓은 시야로 사랑을 바라보세요.' },
+  { id: 25, nameEn: 'Four of Wands',   nameKr: '완드 4',       color: '#FFA000', msg: '축하할 일이 생깁니다. 함께하는 기쁨이 두 배가 되는 시기예요.' },
+  { id: 26, nameEn: 'Five of Wands',   nameKr: '완드 5',       color: '#E65100', msg: '작은 갈등이 있지만 경쟁 속에서 성장합니다. 솔직하게 마음을 전하세요.' },
+  { id: 27, nameEn: 'Six of Wands',    nameKr: '완드 6',       color: '#FF8F00', msg: '승리와 인정의 기운! 자신감 있게 다가가면 좋은 결과가 옵니다.' },
+  { id: 28, nameEn: 'Seven of Wands',  nameKr: '완드 7',       color: '#E64A19', msg: '당당하게 자신을 지키세요. 흔들리지 않는 마음이 사랑을 지킵니다.' },
+  { id: 29, nameEn: 'Eight of Wands',  nameKr: '완드 8',       color: '#FF7043', msg: '급물살을 타는 전개! 연락이 오고, 만남이 빨라지고, 설렘이 커집니다.' },
+  { id: 30, nameEn: 'Nine of Wands',   nameKr: '완드 9',       color: '#D84315', msg: '조금만 더 버텨보세요. 포기하지 않는 마음이 사랑을 완성합니다.' },
+  { id: 31, nameEn: 'Ten of Wands',    nameKr: '완드 10',      color: '#BF360C', msg: '짊어진 짐을 내려놓을 때입니다. 혼자 다 안아도 되는 거예요.' },
+  { id: 32, nameEn: 'Page of Wands',   nameKr: '완드 시종',    color: '#FF9100', msg: '설레는 소식이 찾아옵니다. 호기심 가득한 새 만남의 기운이에요.' },
+  { id: 33, nameEn: 'Knight of Wands', nameKr: '완드 기사',    color: '#FF6D00', msg: '열정적인 사람이 다가옵니다. 불꽃같은 어드벤처가 시작됩니다.' },
+  { id: 34, nameEn: 'Queen of Wands',  nameKr: '완드 여왕',    color: '#F4511E', msg: '매력이 빛나는 시기입니다. 자신감이 곧 최고의 매력이에요.' },
+  { id: 35, nameEn: 'King of Wands',   nameKr: '완드 왕',      color: '#DD2C00', msg: '리더십과 카리스마가 넘칩니다. 주도적으로 사랑을 이끌어보세요.' },
+
+  // ── 컵 (Cups) 36-49: 감정·사랑·관계 ──
+  { id: 36, nameEn: 'Ace of Cups',     nameKr: '컵 에이스',    color: '#E91E63', msg: '사랑의 샘이 솟아오릅니다. 새로운 감정의 시작, 마음을 활짝 여세요.' },
+  { id: 37, nameEn: 'Two of Cups',     nameKr: '컵 2',         color: '#F06292', msg: '두 마음이 하나로 연결됩니다. 운명적인 만남, 깊은 유대감의 카드예요.' },
+  { id: 38, nameEn: 'Three of Cups',   nameKr: '컵 3',         color: '#EC407A', msg: '함께하는 기쁨이 넘칩니다. 축하와 우정, 사랑이 어우러지는 시간이에요.' },
+  { id: 39, nameEn: 'Four of Cups',    nameKr: '컵 4',         color: '#AD1457', msg: '지금 있는 것에 감사해보세요. 놓치고 있는 소중한 사랑이 곁에 있어요.' },
+  { id: 40, nameEn: 'Five of Cups',    nameKr: '컵 5',         color: '#880E4F', msg: '슬픔 뒤에 남아있는 희망을 보세요. 아직 채워지지 않은 컵이 있습니다.' },
+  { id: 41, nameEn: 'Six of Cups',     nameKr: '컵 6',         color: '#FF80AB', msg: '달콤한 추억이 미소 짓게 합니다. 순수했던 그 감정을 다시 떠올려보세요.' },
+  { id: 42, nameEn: 'Seven of Cups',   nameKr: '컵 7',         color: '#F48FB1', msg: '꿈과 환상이 가득합니다. 진짜 원하는 사랑이 무엇인지 마음에 물어보세요.' },
+  { id: 43, nameEn: 'Eight of Cups',   nameKr: '컵 8',         color: '#C2185B', msg: '더 깊은 사랑을 찾아 떠날 용기. 지금의 안주가 진짜 행복은 아닐 수 있어요.' },
+  { id: 44, nameEn: 'Nine of Cups',    nameKr: '컵 9',         color: '#D81B60', msg: '소원이 이루어지는 카드! 원하던 사랑이 현실이 되는 행복한 시기예요.' },
+  { id: 45, nameEn: 'Ten of Cups',     nameKr: '컵 10',        color: '#E91E63', msg: '완벽한 사랑의 완성. 무지개 아래 행복한 결말이 기다리고 있어요.' },
+  { id: 46, nameEn: 'Page of Cups',    nameKr: '컵 시종',      color: '#F8BBD0', msg: '순수한 감정의 메시지가 옵니다. 첫사랑 같은 설렘을 느끼게 될 거예요.' },
+  { id: 47, nameEn: 'Knight of Cups',  nameKr: '컵 기사',      color: '#CE93D8', msg: '로맨틱한 백마탄 왕자가 다가옵니다. 감성적인 고백이 기다리고 있어요.' },
+  { id: 48, nameEn: 'Queen of Cups',   nameKr: '컵 여왕',      color: '#AB47BC', msg: '깊은 공감과 따뜻한 사랑의 에너지. 직관으로 상대의 마음을 읽어보세요.' },
+  { id: 49, nameEn: 'King of Cups',    nameKr: '컵 왕',        color: '#7B1FA2', msg: '감정의 균형을 이룬 성숙한 사랑. 흔들리지 않는 깊은 애정이 빛납니다.' },
+
+  // ── 소드 (Swords) 50-63: 지성·진실·결단 ──
+  { id: 50, nameEn: 'Ace of Swords',     nameKr: '소드 에이스',  color: '#42A5F5', msg: '명확한 진실의 순간. 관계의 본질을 꿰뚫어 보는 통찰력이 생깁니다.' },
+  { id: 51, nameEn: 'Two of Swords',     nameKr: '소드 2',       color: '#5C6BC0', msg: '선택의 기로에서 두 눈을 감고 마음의 소리를 들어보세요.' },
+  { id: 52, nameEn: 'Three of Swords',   nameKr: '소드 3',       color: '#7986CB', msg: '마음의 상처가 아프지만, 이 아픔이 더 깊은 사랑을 알게 해줍니다.' },
+  { id: 53, nameEn: 'Four of Swords',    nameKr: '소드 4',       color: '#90CAF9', msg: '지친 마음에 휴식이 필요합니다. 쉬어가야 더 멀리 사랑할 수 있어요.' },
+  { id: 54, nameEn: 'Five of Swords',    nameKr: '소드 5',       color: '#455A64', msg: '이기려 하지 마세요. 사랑에서 승부욕은 둘 다 지게 만듭니다.' },
+  { id: 55, nameEn: 'Six of Swords',     nameKr: '소드 6',       color: '#78909C', msg: '힘든 시기를 지나 평화로운 곳으로 향하고 있어요. 더 나은 날이 옵니다.' },
+  { id: 56, nameEn: 'Seven of Swords',   nameKr: '소드 7',       color: '#546E7A', msg: '숨기고 있는 것이 있나요? 솔직함이 관계를 더 단단하게 만듭니다.' },
+  { id: 57, nameEn: 'Eight of Swords',   nameKr: '소드 8',       color: '#607D8B', msg: '스스로 만든 감옥에서 벗어나세요. 두려움은 생각보다 작습니다.' },
+  { id: 58, nameEn: 'Nine of Swords',    nameKr: '소드 9',       color: '#37474F', msg: '밤새 걱정하지 마세요. 불안은 실제보다 크게 느껴지는 법이에요.' },
+  { id: 59, nameEn: 'Ten of Swords',     nameKr: '소드 10',      color: '#263238', msg: '가장 힘든 순간은 지났습니다. 바닥을 찍었으니 이제 올라갈 일만 남았어요.' },
+  { id: 60, nameEn: 'Page of Swords',    nameKr: '소드 시종',    color: '#64B5F6', msg: '호기심 어린 눈으로 진실을 찾아보세요. 새로운 관점이 열립니다.' },
+  { id: 61, nameEn: 'Knight of Swords',  nameKr: '소드 기사',    color: '#1E88E5', msg: '거침없이 돌진하는 에너지. 하지만 상대의 마음도 헤아려주세요.' },
+  { id: 62, nameEn: 'Queen of Swords',   nameKr: '소드 여왕',    color: '#1565C0', msg: '냉철한 판단력으로 관계를 정리하세요. 현명한 선택이 행복을 가져옵니다.' },
+  { id: 63, nameEn: 'King of Swords',    nameKr: '소드 왕',      color: '#0D47A1', msg: '이성적이고 공정한 시선으로 바라보세요. 진심은 논리 너머에 있습니다.' },
+
+  // ── 펜타클 (Pentacles) 64-77: 안정·현실·풍요 ──
+  { id: 64, nameEn: 'Ace of Pentacles',     nameKr: '펜타클 에이스', color: '#43A047', msg: '풍요로운 새 시작! 현실적인 사랑의 기반이 단단하게 놓이고 있어요.' },
+  { id: 65, nameEn: 'Two of Pentacles',     nameKr: '펜타클 2',      color: '#66BB6A', msg: '일과 사랑 사이에서 균형을 찾으세요. 유연하게 대처하면 둘 다 잡을 수 있어요.' },
+  { id: 66, nameEn: 'Three of Pentacles',   nameKr: '펜타클 3',      color: '#4CAF50', msg: '함께 만들어가는 사랑. 서로의 노력이 관계를 더 견고하게 합니다.' },
+  { id: 67, nameEn: 'Four of Pentacles',    nameKr: '펜타클 4',      color: '#388E3C', msg: '마음을 꽉 쥐고 있지 마세요. 놓아줄 때 더 큰 사랑이 들어옵니다.' },
+  { id: 68, nameEn: 'Five of Pentacles',    nameKr: '펜타클 5',      color: '#2E7D32', msg: '외로움을 느끼고 있나요? 도움의 손길은 생각보다 가까이에 있어요.' },
+  { id: 69, nameEn: 'Six of Pentacles',     nameKr: '펜타클 6',      color: '#81C784', msg: '주고받는 사랑의 균형. 베풀 줄 아는 마음이 더 큰 행복을 가져옵니다.' },
+  { id: 70, nameEn: 'Seven of Pentacles',   nameKr: '펜타클 7',      color: '#A5D6A7', msg: '씨앗을 뿌려놓은 사랑이 자라고 있어요. 조급해하지 말고 기다려보세요.' },
+  { id: 71, nameEn: 'Eight of Pentacles',   nameKr: '펜타클 8',      color: '#558B2F', msg: '사랑도 연습이 필요해요. 꾸준한 노력이 완벽한 관계를 만듭니다.' },
+  { id: 72, nameEn: 'Nine of Pentacles',    nameKr: '펜타클 9',      color: '#689F38', msg: '독립적이고 당당한 매력이 빛납니다. 자기 자신을 사랑하는 것이 먼저예요.' },
+  { id: 73, nameEn: 'Ten of Pentacles',     nameKr: '펜타클 10',     color: '#33691E', msg: '오래도록 이어지는 풍요로운 사랑. 가족 같은 안정감이 찾아옵니다.' },
+  { id: 74, nameEn: 'Page of Pentacles',    nameKr: '펜타클 시종',   color: '#7CB342', msg: '진지하고 성실한 만남의 기운. 천천히 다가오는 사랑이 더 오래갑니다.' },
+  { id: 75, nameEn: 'Knight of Pentacles',  nameKr: '펜타클 기사',   color: '#9E9D24', msg: '느리지만 확실한 사람이 옵니다. 변함없는 마음이 진짜 사랑이에요.' },
+  { id: 76, nameEn: 'Queen of Pentacles',   nameKr: '펜타클 여왕',   color: '#827717', msg: '따뜻한 보살핌과 현실적인 사랑. 안정감 속에서 사랑이 꽃핍니다.' },
+  { id: 77, nameEn: 'King of Pentacles',    nameKr: '펜타클 왕',     color: '#6D4C41', msg: '든든하고 신뢰할 수 있는 사랑. 물질적·정서적 풍요가 함께합니다.' },
 ];
 
 const SPREADS = [
@@ -111,7 +176,7 @@ function TarotIntro({ onDone, heroCardId, deck }) {
 
 function Tarot() {
   // ─── 상태 ───
-  const [heroCardId] = useState(() => Math.floor(Math.random() * 22));
+  const [heroCardId] = useState(() => Math.floor(Math.random() * 78));
   const [showIntro, setShowIntro] = useState(true);
   const [step, setStep] = useState('setup');
   const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'love');
@@ -132,8 +197,41 @@ function Tarot() {
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
 
+  // 반원 스와이프 상태
+  const [arcOffset, setArcOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, offset: 0 });
+  const arcContainerRef = useRef(null);
+
+
+
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
 
+  // 반원 스와이프 핸들러
+  const handleArcDragStart = (clientX) => {
+    if (pickingCard || allFilled) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: clientX, offset: arcOffset };
+  };
+  const handleArcDragMove = (clientX) => {
+    if (!isDragging) return;
+    const dx = clientX - dragStartRef.current.x;
+    // 1px 드래그 = 0.15도 회전
+    setArcOffset(dragStartRef.current.offset + dx * 0.15);
+  };
+  const handleArcDragEnd = () => setIsDragging(false);
+
+  // 네이티브 touchmove에서 preventDefault (passive 문제 해결)
+  useEffect(() => {
+    const el = arcContainerRef.current;
+    if (!el) return;
+    const onTouchMove = (e) => {
+      e.preventDefault();
+      if (e.touches.length > 0) handleArcDragMove(e.touches[0].clientX);
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  });
 
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
 
@@ -147,13 +245,13 @@ function Tarot() {
     setReading(null);
     setFlipIndex(-1);
 
-    const indices = Array.from({ length: 22 }, (_, i) => i);
+    const indices = Array.from({ length: 78 }, (_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [indices[i], indices[j]] = [indices[j], indices[i]];
     }
     const cards = indices.map(idx => ({
-      ...MAJOR_ARCANA[idx],
+      ...ALL_CARDS[idx],
       reversed: Math.random() > 0.5,
     }));
 
@@ -164,18 +262,50 @@ function Tarot() {
     }, 2000);
   }, []);
 
+  // 카드 선택 애니메이션 상태
+  const [pickingCard, setPickingCard] = useState(null); // 현재 중앙에 보여지는 카드
+  const [filledSlots, setFilledSlots] = useState([]); // 덱에 채워진 카드들
+  const [flyingToSlot, setFlyingToSlot] = useState(false); // 중앙→슬롯 이동 중
+  const [allFilled, setAllFilled] = useState(false); // 모든 덱 완성
+
   const handleCardPick = (index) => {
-    if (step !== 'pick') return;
-    if (selectedIndices.includes(index)) {
-      setSelectedIndices(prev => prev.filter(i => i !== index));
-      return;
-    }
+    if (step !== 'pick' || pickingCard !== null) return;
+    if (selectedIndices.includes(index)) return;
     if (selectedIndices.length >= requiredCount) return;
-    const newSelected = [...selectedIndices, index];
-    setSelectedIndices(newSelected);
-    if (newSelected.length === requiredCount) {
-      setTimeout(() => revealCards(newSelected), 600);
-    }
+
+    const card = shuffledCards[index];
+    setPickingCard({ ...card, index });
+
+    // 1) 카드가 중앙에서 잠시 보여짐 (1.2초)
+    setTimeout(() => {
+      setFlyingToSlot(true);
+      // 2) 중앙에서 덱 슬롯으로 날아감 (0.6초)
+      setTimeout(() => {
+        const newSelected = [...selectedIndices, index];
+        const newFilled = [...filledSlots, card];
+        setSelectedIndices(newSelected);
+        setFilledSlots(newFilled);
+        setPickingCard(null);
+        setFlyingToSlot(false);
+
+        if (newFilled.length === requiredCount) {
+          setAllFilled(true);
+        }
+      }, 600);
+    }, 1200);
+  };
+
+  const handleReadCards = () => {
+    revealCards(selectedIndices);
+  };
+
+  const handleReshuffle = () => {
+    setPickingCard(null);
+    setFilledSlots([]);
+    setFlyingToSlot(false);
+    setAllFilled(false);
+    setArcOffset(0);
+    startShuffle();
   };
 
   const revealCards = async (indices) => {
@@ -270,6 +400,11 @@ function Tarot() {
     setFocusCard(null);
     setStreamText('');
     setAiStreaming(false);
+    setPickingCard(null);
+    setFilledSlots([]);
+    setFlyingToSlot(false);
+    setAllFilled(false);
+    setArcOffset(0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -340,9 +475,9 @@ function Tarot() {
             </div>
             <div className="tarot-hero-card-shine" />
           </div>
-          <h1 className="tarot-title">{MAJOR_ARCANA[heroCardId].nameKr}</h1>
-          <p className="tarot-subtitle">{MAJOR_ARCANA[heroCardId].nameEn}</p>
-          <p className="tarot-hero-msg">{MAJOR_ARCANA[heroCardId].msg}</p>
+          <h1 className="tarot-title">{ALL_CARDS[heroCardId].nameKr}</h1>
+          <p className="tarot-subtitle">{ALL_CARDS[heroCardId].nameEn}</p>
+          <p className="tarot-hero-msg">{ALL_CARDS[heroCardId].msg}</p>
           <div className="tarot-hero-divider" />
         </div>
       )}
@@ -476,7 +611,7 @@ function Tarot() {
         </div>
       )}
 
-      {/* ═══ STEP 3: 카드 선택 ═══ */}
+      {/* ═══ STEP 3: 카드 선택 (반원형 배치) ═══ */}
       {step === 'pick' && (
         <div className="tarot-pick-stage fade-in">
           <div className="tarot-pick-header">
@@ -484,36 +619,100 @@ function Tarot() {
               마음이 이끄는 카드 <strong>{requiredCount}장</strong>을 선택하세요
             </p>
             <div className="tarot-pick-counter">
-              {selectedIndices.length} / {requiredCount}
+              {filledSlots.length} / {requiredCount}
             </div>
           </div>
 
-          <div className="tarot-card-fan">
-            {shuffledCards.slice(0, 12).map((card, index) => {
-              const isSelected = selectedIndices.includes(index);
-              const selOrder = selectedIndices.indexOf(index);
-              return (
-                <button key={card.id}
-                  className={`tarot-fan-card ${isSelected ? 'selected' : ''}`}
-                  style={{ '--fan-i': index, '--fan-total': 12, '--sel-order': selOrder }}
-                  onClick={() => handleCardPick(index)}
-                  disabled={!isSelected && selectedIndices.length >= requiredCount}>
-                  <div className="tarot-card-back">
-                    <div className="tarot-card-back-inner">
-                      <div className="tarot-card-back-star">✦</div>
-                      <div className="tarot-card-back-border" />
+          {/* 반원형 카드 배치 — 좌우 스와이프로 78장 회전 */}
+          <div className="tarot-arc-swipe-hint">← 좌우로 밀어서 카드를 돌려보세요 →</div>
+          <div className="tarot-arc-container"
+            ref={arcContainerRef}
+            onMouseDown={e => handleArcDragStart(e.clientX)}
+            onMouseMove={e => handleArcDragMove(e.clientX)}
+            onMouseUp={handleArcDragEnd}
+            onMouseLeave={handleArcDragEnd}
+            onTouchStart={e => handleArcDragStart(e.touches[0].clientX)}
+            onTouchEnd={handleArcDragEnd}
+          >
+            <div className="tarot-arc">
+              {shuffledCards.map((card, index) => {
+                const isSelected = selectedIndices.includes(index);
+                const isPicking = pickingCard?.index === index;
+                const total = shuffledCards.length;
+                // 각 카드의 기본 각도 (78장을 360도에 배치) + 스와이프 오프셋
+                const baseAngle = (index / total) * 360;
+                const angle = baseAngle + arcOffset;
+                // -180~180으로 정규화
+                let norm = ((angle % 360) + 540) % 360 - 180;
+                // 보이는 범위: -80~80도 (반원)
+                if (norm < -85 || norm > 85) return null;
+
+                return (
+                  <button key={card.id}
+                    className={`tarot-arc-card ${isSelected ? 'arc-picked' : ''} ${isPicking ? 'arc-picking' : ''}`}
+                    style={{
+                      '--arc-angle': `${norm}deg`,
+                      zIndex: isPicking ? 100 : Math.round(85 - Math.abs(norm)),
+                    }}
+                    onClick={() => !isSelected && !pickingCard && !allFilled && handleCardPick(index)}
+                    disabled={isSelected || pickingCard !== null || allFilled}>
+                    <div className="tarot-card-back">
+                      <div className="tarot-card-back-inner">
+                        <div className="tarot-card-back-star">✦</div>
+                        <div className="tarot-card-back-border" />
+                      </div>
                     </div>
-                  </div>
-                  {isSelected && (
-                    <div className="tarot-card-selected-badge">{selOrder + 1}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 중앙 카드 공개 오버레이 */}
+          {pickingCard && (
+            <div className={`tarot-center-reveal ${flyingToSlot ? 'fly-to-slot' : 'reveal-in'}`}>
+              <div className="tarot-center-card">
+                <TarotCardArt cardId={pickingCard.id} deck={deck} />
+                <div className="tarot-center-card-name">{pickingCard.nameKr}</div>
+                <div className="tarot-center-card-name-en">{pickingCard.nameEn}</div>
+              </div>
+            </div>
+          )}
+
+          {/* 하단 덱 슬롯 */}
+          <div className="tarot-deck-slots">
+            {Array.from({ length: requiredCount }).map((_, i) => {
+              const filled = filledSlots[i];
+              const posLabel = POSITION_LABELS[spread]?.[i] || `${i + 1}`;
+              return (
+                <div key={i} className={`tarot-deck-slot ${filled ? 'slot-filled' : 'slot-empty'}`}>
+                  {filled ? (
+                    <div className="tarot-slot-card">
+                      <TarotCardArt cardId={filled.id} deck={deck} />
+                      <div className="tarot-slot-badge">{i + 1}</div>
+                    </div>
+                  ) : (
+                    <div className="tarot-slot-placeholder">
+                      <span className="tarot-slot-num">{i + 1}</span>
+                      <span className="tarot-slot-label">{posLabel}</span>
+                    </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
 
-          <p className="tarot-pick-hint">직감을 믿으세요. 당신의 무의식이 올바른 카드로 인도합니다.</p>
-          <button className="tarot-back-btn" onClick={resetAll}>🔄 다시 뽑기</button>
+          {/* 안내 + 버튼 */}
+          {!allFilled && !pickingCard && (
+            <p className="tarot-pick-hint">직감을 믿으세요. 당신의 무의식이 올바른 카드로 인도합니다.</p>
+          )}
+          {allFilled && (
+            <div className="tarot-deck-complete fade-in">
+              <p className="tarot-deck-complete-msg">✨ 카드가 모두 선택되었습니다</p>
+              <button className="tarot-read-btn" onClick={handleReadCards}>🔮 타로점 보기</button>
+            </div>
+          )}
+          <button className="tarot-back-btn" onClick={handleReshuffle}>🔄 다시 섞기</button>
         </div>
       )}
 
@@ -623,7 +822,7 @@ function Tarot() {
       {focusCard !== null && (() => {
         // 히어로 카드 상세보기
         if (focusCard === 'hero') {
-          const heroCard = MAJOR_ARCANA[heroCardId];
+          const heroCard = ALL_CARDS[heroCardId];
           return (
             <div className="tarot-focus-overlay" onClick={() => setFocusCard(null)}>
               <div className="tarot-focus-content" onClick={e => e.stopPropagation()}>

@@ -46,8 +46,8 @@
 
 /* ─── Light Theme ─── */
 [data-theme="light"] {
-  --color-bg-start: #f8f9fc;
-  --color-bg-end: #f0f1f6;
+  --color-bg-start: #eaebee;
+  --color-bg-end: #e2e3e8;
   --color-primary: #6d28d9;
   --color-primary-light: #7c3aed;
   --color-primary-dark: #5b21b6;
@@ -651,13 +651,13 @@ p, li, span { color: inherit; }
 [data-time="evening"]{ --color-bg-start: #1a0835; --color-bg-end: #2d1250; --color-bg-deep: #150630; }
 [data-time="night"]  { --color-bg-start: #1a0a30; --color-bg-end: #2a1048; --color-bg-deep: #120625; }
 
-/* ─── 시간대별 배경 (라이트모드) — 흰색 기반 은은한 색감 ─── */
-[data-theme="light"][data-time="dawn"]   { --color-bg-start: #fdf6ef; --color-bg-end: #f5ece3; }
-[data-theme="light"][data-time="morning"]{ --color-bg-start: #fdfbf3; --color-bg-end: #f5f2e8; }
-[data-theme="light"][data-time="noon"]   { --color-bg-start: #f8f9fc; --color-bg-end: #f0f1f6; }
-[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #fdf5ef; --color-bg-end: #f5ece5; }
-[data-theme="light"][data-time="evening"]{ --color-bg-start: #f8f2fb; --color-bg-end: #f0e8f5; }
-[data-theme="light"][data-time="night"]  { --color-bg-start: #f3eef8; --color-bg-end: #ebe4f2; }
+/* ─── 시간대별 배경 (라이트모드) — 부드러운 톤, 눈 편안한 채도 ─── */
+[data-theme="light"][data-time="dawn"]   { --color-bg-start: #f0e8de; --color-bg-end: #e8ddd2; }
+[data-theme="light"][data-time="morning"]{ --color-bg-start: #efe9df; --color-bg-end: #e7e2d8; }
+[data-theme="light"][data-time="noon"]   { --color-bg-start: #eaebee; --color-bg-end: #e2e3e8; }
+[data-theme="light"][data-time="afternoon"]{ --color-bg-start: #ede5dc; --color-bg-end: #e5ddd4; }
+[data-theme="light"][data-time="evening"]{ --color-bg-start: #ebe4f0; --color-bg-end: #e2dae8; }
+[data-theme="light"][data-time="night"]  { --color-bg-start: #e5dded; --color-bg-end: #ddd4e5; }
 
 /* Starfield background effect */
 body::before {

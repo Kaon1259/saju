@@ -37,7 +37,7 @@ const VIRAL_ITEMS = [
 ];
 
 const COUPLE_ITEMS = [
-  { id: 'couple_fortune', icon: '💑', label: '오늘운세', color: '#E91E63' },
+  { id: 'couple_fortune', icon: '💑', label: '데이트운', color: '#E91E63' },
   { id: 'some_check', icon: '🎯', label: '썸진단', color: '#FF9800' },
 ];
 
