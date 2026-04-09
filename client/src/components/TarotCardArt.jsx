@@ -3,6 +3,7 @@
  * - classic: Rider-Waite-Smith (1909, 퍼블릭 도메인)
  * - skt: SKT Vitruvian (CC-BY, Benebell Wen)
  * - love: 1:1연애 오리지널 (SVG, 핑크/로맨틱)
+ * - dark: Dark Gothic 포토리얼리스틱
  *
  * 메이저 아르카나(0-21): m00.jpg ~ m21.jpg
  * 마이너 아르카나(22-77): 슈트별 이미지 또는 심볼 카드
@@ -13,6 +14,8 @@ import LoveTarotSVG from './LoveTarotSVG';
 const DECK_PATHS = {
   classic: '/tarot',
   skt: '/tarot-skt',
+  custom: '/tarot-custom',
+  dark: '/tarot-dark',
 };
 
 // 메이저 아르카나 이름
@@ -72,13 +75,25 @@ function TarotCardArt({ cardId, deck = 'classic' }) {
   const id = Math.min(Math.max(cardId || 0, 0), 77);
   const isMajor = id <= 21;
 
-  // 마이너 아르카나는 심볼 카드로 렌더링
-  if (!isMajor) {
+  // 덱별 이미지 없는 카드 — 심볼 폴백
+  const MISSING_CUSTOM = new Set([28,29, 42,43, 56,57, 70,71]);
+  const MISSING_DARK = new Set([
+    15, 17,  // Devil, Star
+    23,24,25,26,27,28,29,30,31,32,33,34,  // Wands 2~Queen
+    36,37,38,39,40,41,42,  // Cups Ace~7
+    77,  // King of Pentacles
+  ]);
+  const missingSet = deck === 'dark' ? MISSING_DARK : MISSING_CUSTOM;
+
+  if (!isMajor && missingSet.has(id)) {
     return <MinorArcanaCard info={getMinorInfo(id)} />;
+  }
+  if (isMajor && deck === 'dark' && MISSING_DARK.has(id)) {
+    return <MinorArcanaCard info={{ label: MAJOR_NAMES[id], name: MAJOR_NAMES[id], symbol: '🖤', color: '#666', rank: '' }} />;
   }
 
   // love 덱은 SVG 렌더링 (메이저만)
-  if (deck === 'love') {
+  if (isMajor && deck === 'love') {
     return (
       <div className="tarot-card-art">
         <LoveTarotSVG cardId={id} />
@@ -95,7 +110,7 @@ function TarotCardArt({ cardId, deck = 'classic' }) {
     <div className="tarot-card-art">
       <img
         src={`${basePath}/m${num}.jpg`}
-        alt={MAJOR_NAMES[id]}
+        alt={isMajor ? MAJOR_NAMES[id] : getMinorInfo(id).name}
         className="tarot-card-art-img"
         draggable={false}
         loading="eager"

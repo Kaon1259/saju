@@ -179,7 +179,7 @@ function Tarot() {
   const [heroCardId] = useState(() => Math.floor(Math.random() * 78));
   const [showIntro, setShowIntro] = useState(true);
   const [step, setStep] = useState('setup');
-  const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'love');
+  const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'custom');
   const [spread, setSpread] = useState('three');
   const [category, setCategory] = useState('relationship');
   const [question, setQuestion] = useState('');
@@ -880,9 +880,11 @@ function Tarot() {
             <h3 className="tarot-deck-modal-title">🃏 덱 선택</h3>
             <div className="tarot-deck-modal-grid">
               {[
+                { id: 'custom', name: '커스텀', sub: '연애감성 아트', preview: <img src="/tarot-custom/m06.jpg" alt="Custom" className="tarot-deck-thumb" /> },
                 { id: 'love', name: '러브', sub: '1:1연애 오리지널', preview: <TarotCardArt cardId={6} deck="love" />, loveStyle: true },
                 { id: 'classic', name: '클래식', sub: 'Rider-Waite', preview: <img src="/tarot/m01.jpg" alt="Classic" className="tarot-deck-thumb" /> },
                 { id: 'skt', name: '비트루비안', sub: 'SKT Vitruvian', preview: <img src="/tarot-skt/m01.jpg" alt="SKT" className="tarot-deck-thumb" /> },
+                { id: 'dark', name: '다크', sub: 'Dark Gothic', preview: <img src="/tarot-dark/m13.jpg" alt="Dark" className="tarot-deck-thumb" /> },
               ].map(d => (
                 <button key={d.id}
                   className={`tarot-deck-modal-item ${deck === d.id ? 'active' : ''}`}
