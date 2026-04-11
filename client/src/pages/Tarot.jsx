@@ -187,6 +187,19 @@ function TarotIntro({ onDone }) {
   );
 }
 
+// 배경 GIF 크로스페이드 — 현재+이전 2장만 렌더 (성능)
+function BgGifCrossfade({ gifs, idx, className = '' }) {
+  if (!gifs || gifs.length === 0) return null;
+  const cur = idx % gifs.length;
+  const prev = (cur - 1 + gifs.length) % gifs.length;
+  return (
+    <div className="bg-gif-crossfade">
+      <img src={gifs[prev]} alt="" className={`${className} bg-gif-hidden`} />
+      <img src={gifs[cur]} alt="" className={`${className} bg-gif-active`} />
+    </div>
+  );
+}
+
 function Tarot() {
   // ─── 상태 ───
   const [heroCardId] = useState(() => Math.floor(Math.random() * 78));
@@ -917,10 +930,8 @@ function Tarot() {
                   }}>
                     {off === 0 && d.gifs ? (
                       <div className="deck-gif-crossfade">
-                        {d.gifs.map((g, gi) => (
-                          <img key={gi} src={g} alt={d.name} draggable={false}
-                            className={gi === (deckGifIdx % d.gifs.length) ? 'deck-gif-active' : 'deck-gif-hidden'} />
-                        ))}
+                        <img src={d.gifs[(deckGifIdx - 1 + d.gifs.length) % d.gifs.length]} alt={d.name} draggable={false} className="deck-gif-hidden" />
+                        <img src={d.gifs[deckGifIdx % d.gifs.length]} alt={d.name} draggable={false} className="deck-gif-active" />
                       </div>
                     ) : (
                       <img src={d.img} alt={d.name} draggable={false} />
@@ -980,12 +991,7 @@ function Tarot() {
           <div className="tarot-setup-screen">
             <div className="tarot-setup-bg">
               {hasGifs ? (
-                <div className="bg-gif-crossfade">
-                  {curDeck.gifs.map((g, gi) => (
-                    <img key={gi} src={g} alt="" draggable={false}
-                      className={`setup-bg-slide ${gi === (setupGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'}`} />
-                  ))}
-                </div>
+                <BgGifCrossfade gifs={curDeck.gifs} idx={setupGifIdx} className="setup-bg-slide" />
               ) : (
                 <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
               )}
@@ -1090,11 +1096,7 @@ function Tarot() {
           <div className="tarot-shuffle-stage">
             <div className="shuffle-bg">
               {curDeck?.gifs ? (
-                <div className="bg-gif-crossfade">
-                  {curDeck.gifs.map((g, gi) => (
-                    <img key={gi} src={g} alt="" className={`shuffle-bg-gif ${gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'}`} />
-                  ))}
-                </div>
+                <BgGifCrossfade gifs={curDeck.gifs} idx={stageGifIdx} className="shuffle-bg-gif" />
               ) : (
                 <img src={stageBg} alt="" className="shuffle-bg-gif" />
               )}
@@ -1128,11 +1130,7 @@ function Tarot() {
             {/* GIF 배경 */}
             {curDeck?.gifs && (
               <div className="pick-gif-bg">
-                <div className="bg-gif-crossfade">
-                  {curDeck.gifs.map((g, gi) => (
-                    <img key={gi} src={g} alt="" className={gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'} />
-                  ))}
-                </div>
+                <BgGifCrossfade gifs={curDeck.gifs} idx={stageGifIdx} />
               </div>
             )}
             {/* 상단 바 */}

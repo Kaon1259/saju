@@ -2063,9 +2063,10 @@
 
 /* AI 분석 영역 */
 .reveal-ai-area {
-  position: relative; z-index: 2;
+  position: relative; z-index: 4;
   width: 100%; max-width: 500px;
-  padding: 0 16px 100px;
+  padding: 16px 16px 100px;
+  margin-top: min(48vh, 360px);
 }
 
 /* 캐러셀 상단 고정 */
@@ -2075,10 +2076,6 @@
   left: 0; right: 0;
   z-index: 3;
   pointer-events: auto;
-}
-/* 아래 AI 영역이 카드 밑으로 나오도록 여백 */
-.reveal-ai-area {
-  margin-top: min(50vh, 380px);
 }
 
 /* AI 분석 — 블러 배경 + 회전하는 신비한 빛 */

@@ -294,11 +294,30 @@ public class FortunePromptBuilder {
     public String tarotUserPrompt(java.util.List<java.util.Map<String, Object>> cards,
                                    String spread, String categoryKr,
                                    String question, LocalDate date) {
+        return tarotUserPrompt(cards, spread, categoryKr, question, date, null, null);
+    }
+
+    public String tarotUserPrompt(java.util.List<java.util.Map<String, Object>> cards,
+                                   String spread, String categoryKr,
+                                   String question, LocalDate date,
+                                   String birthDate, String gender) {
         String todayCtx = buildTodayContext(date);
         StringBuilder sb = new StringBuilder();
         sb.append(todayCtx).append("\n");
         sb.append("【타로 리딩 요청】\n");
         sb.append("카테고리: ").append(categoryKr).append("\n");
+
+        // 나이/성별 반영
+        if (birthDate != null && !birthDate.isBlank()) {
+            try {
+                LocalDate bd = LocalDate.parse(birthDate);
+                int age = java.time.Period.between(bd, date).getYears();
+                sb.append("상담자: ").append(age).append("세");
+                if (gender != null) sb.append(gender.equals("F") ? " 여성" : " 남성");
+                sb.append("\n");
+                sb.append("※ 나이와 성별에 맞는 현실적이고 공감 가는 해석을 해주세요.\n");
+            } catch (Exception ignored) {}
+        }
 
         String spreadName = switch (spread) {
             case "one" -> "원카드 (단일 메시지)";
