@@ -155,6 +155,7 @@ const DECK_LIST = [
   { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_cover.jpg', gifs: ['/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif', '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif'], hasVariants: true },
   { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', gifs: ['/tarot-effects/deck-intro/western_0.gif', '/tarot-effects/deck-intro/western_1.gif', '/tarot-effects/deck-intro/western_2.gif', '/tarot-effects/deck-intro/western_3.gif'], hasVariants: true },
   { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', gifs: ['/tarot-effects/deck-intro/girl_0.gif', '/tarot-effects/deck-intro/girl_1.gif', '/tarot-effects/deck-intro/girl_2.gif', '/tarot-effects/deck-intro/girl_3.gif'], hasVariants: true },
+  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-boy/m00_v0.jpg', hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
@@ -958,7 +959,7 @@ function Tarot() {
       {/* ═══ STEP 1: 메뉴 화면 (타로 스타일) ═══ */}
       {step === 'setup' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl' };
+        const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy' };
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
         // GIF 배경 우선, 없으면 카드 슬라이드쇼
@@ -1225,8 +1226,16 @@ function Tarot() {
             })}
           </div>
 
-          {/* AI 분석 영역 */}
+          {/* AI 분석 영역 — 블러 배경 + 신비한 빛 */}
           <div className="reveal-ai-area">
+            {(loading || aiStreaming) && (
+              <div className="reveal-ai-mystic">
+                <div className="reveal-ai-blur" />
+                <div className="reveal-ai-glow reveal-ai-glow-1" />
+                <div className="reveal-ai-glow reveal-ai-glow-2" />
+                <div className="reveal-ai-glow reveal-ai-glow-3" />
+              </div>
+            )}
             {loading && !aiStreaming && <FortuneLoading type="tarot" />}
             {aiStreaming && (
               <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />

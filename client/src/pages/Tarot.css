@@ -2041,6 +2041,56 @@
   padding: 0 16px 100px;
 }
 
+/* AI 분석 신비한 빛 효과 */
+.reveal-ai-mystic {
+  position: absolute; inset: 0; z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.reveal-ai-blur {
+  position: absolute; inset: 0;
+  background: rgba(5,5,16,0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.reveal-ai-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  mix-blend-mode: screen;
+}
+.reveal-ai-glow-1 {
+  width: 200px; height: 200px;
+  top: 10%; left: 10%;
+  background: radial-gradient(circle, rgba(147,51,234,0.4) 0%, transparent 70%);
+  animation: mysticGlow1 4s ease-in-out infinite alternate;
+}
+.reveal-ai-glow-2 {
+  width: 160px; height: 160px;
+  top: 30%; right: 5%;
+  background: radial-gradient(circle, rgba(222,169,87,0.35) 0%, transparent 70%);
+  animation: mysticGlow2 5s ease-in-out infinite alternate;
+}
+.reveal-ai-glow-3 {
+  width: 180px; height: 180px;
+  bottom: 20%; left: 30%;
+  background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%);
+  animation: mysticGlow3 6s ease-in-out infinite alternate;
+}
+@keyframes mysticGlow1 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  100% { transform: translate(30px, 20px) scale(1.3); opacity: 1; }
+}
+@keyframes mysticGlow2 {
+  0%   { transform: translate(0, 0) scale(1.1); opacity: 0.5; }
+  100% { transform: translate(-25px, 15px) scale(0.9); opacity: 0.9; }
+}
+@keyframes mysticGlow3 {
+  0%   { transform: translate(0, 0) scale(0.9); opacity: 0.4; }
+  100% { transform: translate(20px, -20px) scale(1.2); opacity: 0.8; }
+}
+
 /* 결과 카드 상세보기 모달 */
 .result-card-detail-overlay {
   position: fixed; inset: 0; z-index: 100;
