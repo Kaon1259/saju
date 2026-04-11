@@ -2055,16 +2055,19 @@
 [data-theme="light"] .reveal-card-label { color: #b8860b; text-shadow: none; }
 [data-theme="light"] .reveal-card-name { color: #333; text-shadow: none; }
 
-/* AI 분석 영역 */
-.reveal-ai-area {
+/* AI 분석 영역 — 리빌 단계 (카드 fixed 아래) */
+.tarot-reveal-stage .reveal-ai-area {
   position: relative; z-index: 5;
   width: 100%; max-width: 500px;
   padding: 16px 16px 100px;
   margin-top: min(45vh, 340px);
 }
-/* 결과 화면에서는 margin-top 추가 (카드 fixed 때문) */
+/* 결과 화면에서는 카드가 flow이므로 margin-top 불필요 */
 .tarot-result-stage .reveal-ai-area {
-  margin-top: min(45vh, 340px);
+  position: relative; z-index: 2;
+  width: 100%; max-width: 500px;
+  padding: 16px 16px 100px;
+  margin-top: 0;
 }
 
 /* 캐러셀 상단 고정 */
@@ -2820,6 +2823,8 @@
 .tarot-result-stage {
   position: relative;
   z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh;
 }
 
 /* 결과 카드 나열 그리드 */
