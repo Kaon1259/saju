@@ -555,6 +555,10 @@
 .setup-bg-slide {
   animation: setupBgFade 5s ease-in-out both, setupBgZoom 5s ease-in-out both;
 }
+/* GIF 크로스페이드 모드에서는 페이드아웃 애니메이션 비활성화 */
+.bg-gif-crossfade .setup-bg-slide {
+  animation: none;
+}
 @keyframes setupBgFade {
   0% { opacity: 0; }
   8% { opacity: 1; }
