@@ -120,7 +120,7 @@ function Splash({ onDone }) {
               <div className="splash-ring splash-ring--love" />
               <span className="splash-yin splash-yin--love">💕</span>
             </div>
-            <h1 className="splash-title splash-title--love">1:1연애 💕</h1>
+            <h1 className="splash-title splash-title--love">1:1연애운 💕</h1>
             <p className="splash-sub">{relStatus === 'IN_RELATIONSHIP' ? '사랑이 빛나는 오늘 하루' : '설레는 인연이 다가오고 있어요'}</p>
           </>
         ) : isSingle ? (
@@ -129,7 +129,7 @@ function Splash({ onDone }) {
               <div className="splash-ring" />
               <span className="splash-yin">🌟</span>
             </div>
-            <h1 className="splash-title">1:1연애 💕</h1>
+            <h1 className="splash-title">1:1연애운 💕</h1>
             <p className="splash-sub">빛나는 당신의 하루가 시작됩니다</p>
           </>
         ) : (
@@ -138,7 +138,7 @@ function Splash({ onDone }) {
               <div className="splash-ring" />
               <span className="splash-yin">☯</span>
             </div>
-            <h1 className="splash-title">1:1연애 💕</h1>
+            <h1 className="splash-title">1:1연애운 💕</h1>
             <p className="splash-sub">사주팔자로 보는 당신의 운명</p>
           </>
         )}

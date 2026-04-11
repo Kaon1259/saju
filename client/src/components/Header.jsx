@@ -20,8 +20,8 @@ const NAV_ITEMS = [
   { path: '/traditional', label: '정통운세', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="12" r="10" /><path d="M12 2c0 5.5-5 10-5 10s5 4.5 5 10" /><circle cx="10" cy="7" r="1.5" fill="var(--color-bg, #1a0533)" stroke="none" /><circle cx="14" cy="17" r="1.5" /></svg>
   ), color: '#E879F9' },
-  { path: '/my-menu', label: '마이메뉴', icon: (
-    <svg viewBox="0 0 24 24" className="tab-svg"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+  { path: '/my-menu', label: '하트충전', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
   ), color: '#FBBF24' },
   { path: '/profile', label: '마이', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="8" r="5" /><path d="M3 21c0-4.4 3.6-8 8-8h2c4.4 0 8 3.6 8 8" /></svg>
