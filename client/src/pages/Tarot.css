@@ -2169,36 +2169,30 @@
   100% { opacity: 1; }
 }
 
-/* AI 분석중 — 카드 중앙, 입체 그라데이션 좌우 시프트 */
+/* AI 분석중 — 카드 중앙, 녹색 글로우 + 좌우 시프트 */
 .reveal-ai-status {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   z-index: 20;
-  font-size: 22px; font-weight: 900;
+  font-size: 24px; font-weight: 900;
   letter-spacing: 6px;
   white-space: nowrap;
-  background: linear-gradient(90deg,
-    rgba(147,51,234,0.3),
-    rgba(222,169,87,0.9),
-    #fff,
-    rgba(222,169,87,0.9),
-    rgba(147,51,234,0.3));
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: aiStatusShimmer 2.5s ease-in-out infinite;
-  filter: drop-shadow(0 2px 12px rgba(222,169,87,0.5)) drop-shadow(0 0 30px rgba(147,51,234,0.3));
+  color: rgba(0,255,100,0.95);
+  text-shadow:
+    0 0 10px rgba(0,255,100,1),
+    0 0 30px rgba(0,255,100,0.7),
+    0 0 60px rgba(0,255,100,0.3),
+    0 2px 4px rgba(0,0,0,0.8);
+  animation: aiStatusPulse 2s ease-in-out infinite;
 }
 .reveal-ai-status::after {
   content: '';
-  -webkit-text-fill-color: transparent;
   animation: aiDots 1.5s steps(4) infinite;
 }
-@keyframes aiStatusShimmer {
-  0%   { background-position: 200% 0; opacity: 0.6; }
-  50%  { background-position: 0% 0; opacity: 1; }
-  100% { background-position: -200% 0; opacity: 0.6; }
+@keyframes aiStatusPulse {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); text-shadow: 0 0 10px rgba(0,255,100,0.8), 0 0 30px rgba(0,255,100,0.5), 0 2px 4px rgba(0,0,0,0.8); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); text-shadow: 0 0 15px rgba(0,255,100,1), 0 0 40px rgba(0,255,100,0.8), 0 0 80px rgba(0,255,100,0.3), 0 2px 4px rgba(0,0,0,0.8); }
 }
 @keyframes aiDots {
   0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; }
