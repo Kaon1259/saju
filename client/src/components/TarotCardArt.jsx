@@ -1,14 +1,10 @@
 /**
  * 타로 78장 — 덱 선택 지원
- * - classic: Rider-Waite-Smith (1909, 퍼블릭 도메인)
- * - skt: SKT Vitruvian (CC-BY, Benebell Wen)
- * - love: 1:1연애 오리지널 (SVG, 핑크/로맨틱)
- * - dark: Dark Gothic 포토리얼리스틱
- *
- * 메이저 아르카나(0-21): m00.jpg ~ m21.jpg
- * 마이너 아르카나(22-77): 슈트별 이미지 또는 심볼 카드
+ * - classic, skt, custom: 단일 이미지
+ * - dark, romantic, oriental, western: 4벌 변형 (m00_v0~v3.jpg)
  */
 
+import { useMemo } from 'react';
 import LoveTarotSVG from './LoveTarotSVG';
 
 const DECK_PATHS = {
@@ -16,7 +12,13 @@ const DECK_PATHS = {
   skt: '/tarot-skt',
   custom: '/tarot-custom',
   dark: '/tarot-dark',
+  romantic: '/tarot-romantic',
+  oriental: '/tarot-oriental',
+  western: '/tarot-western',
 };
+
+// 4벌 변형 덱 (각 카드마다 _v0~v3)
+const MULTI_VARIANT_DECKS = new Set(['oriental', 'western', 'dark', 'romantic']);
 
 // 메이저 아르카나 이름
 const MAJOR_NAMES = [
@@ -71,25 +73,16 @@ function MinorArcanaCard({ info }) {
   );
 }
 
-function TarotCardArt({ cardId, deck = 'classic' }) {
+function TarotCardArt({ cardId, deck = 'classic', variant: propVariant }) {
   const id = Math.min(Math.max(cardId || 0, 0), 77);
   const isMajor = id <= 21;
 
   // 덱별 이미지 없는 카드 — 심볼 폴백
   const MISSING_CUSTOM = new Set([28,29, 42,43, 56,57, 70,71]);
-  const MISSING_DARK = new Set([
-    15, 17,  // Devil, Star
-    23,24,25,26,27,28,29,30,31,32,33,34,  // Wands 2~Queen
-    36,37,38,39,40,41,42,  // Cups Ace~7
-    77,  // King of Pentacles
-  ]);
-  const missingSet = deck === 'dark' ? MISSING_DARK : MISSING_CUSTOM;
+  const missingSet = deck === 'custom' ? MISSING_CUSTOM : new Set();
 
   if (!isMajor && missingSet.has(id)) {
     return <MinorArcanaCard info={getMinorInfo(id)} />;
-  }
-  if (isMajor && deck === 'dark' && MISSING_DARK.has(id)) {
-    return <MinorArcanaCard info={{ label: MAJOR_NAMES[id], name: MAJOR_NAMES[id], symbol: '🖤', color: '#666', rank: '' }} />;
   }
 
   // love 덱은 SVG 렌더링 (메이저만)
@@ -106,10 +99,19 @@ function TarotCardArt({ cardId, deck = 'classic' }) {
   const num = String(id).padStart(2, '0');
   const basePath = DECK_PATHS[deck] || DECK_PATHS.classic;
 
+  // 4벌 변형 덱: prop으로 받으면 고정, 없으면 랜덤
+  const randomVariant = useMemo(() => Math.floor(Math.random() * 4), [id, deck]);
+  let variant = propVariant ?? randomVariant;
+  const isMulti = MULTI_VARIANT_DECKS.has(deck);
+
+  const imgSrc = isMulti
+    ? `${basePath}/m${num}_v${variant}.jpg`
+    : `${basePath}/m${num}.jpg`;
+
   return (
     <div className="tarot-card-art">
       <img
-        src={`${basePath}/m${num}.jpg`}
+        src={imgSrc}
         alt={isMajor ? MAJOR_NAMES[id] : getMinorInfo(id).name}
         className="tarot-card-art-img"
         draggable={false}
