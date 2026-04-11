@@ -187,17 +187,11 @@ function TarotIntro({ onDone }) {
   );
 }
 
-// 배경 GIF 크로스페이드 — 현재+이전 2장만 렌더 (성능)
-function BgGifCrossfade({ gifs, idx, className = '' }) {
-  if (!gifs || gifs.length === 0) return null;
-  const cur = idx % gifs.length;
-  const prev = (cur - 1 + gifs.length) % gifs.length;
-  return (
-    <div className="bg-gif-crossfade">
-      <img src={gifs[prev]} alt="" className={`${className} bg-gif-hidden`} />
-      <img src={gifs[cur]} alt="" className={`${className} bg-gif-active`} />
-    </div>
-  );
+// 배경 GIF — 랜덤 1장만 (성능 + 깔끔)
+function BgGif({ gifs, className = '' }) {
+  const [src] = useState(() => gifs && gifs.length > 0 ? gifs[Math.floor(Math.random() * gifs.length)] : null);
+  if (!src) return null;
+  return <img src={src} alt="" className={`bg-gif-single ${className}`} />;
 }
 
 function Tarot() {
@@ -991,7 +985,7 @@ function Tarot() {
           <div className="tarot-setup-screen">
             <div className="tarot-setup-bg">
               {hasGifs ? (
-                <BgGifCrossfade gifs={curDeck.gifs} idx={setupGifIdx} className="setup-bg-slide" />
+                <BgGif gifs={curDeck.gifs} className="setup-bg-slide" />
               ) : (
                 <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
               )}
@@ -1096,7 +1090,7 @@ function Tarot() {
           <div className="tarot-shuffle-stage">
             <div className="shuffle-bg">
               {curDeck?.gifs ? (
-                <BgGifCrossfade gifs={curDeck.gifs} idx={stageGifIdx} className="shuffle-bg-gif" />
+                <BgGif gifs={curDeck.gifs} className="shuffle-bg-gif" />
               ) : (
                 <img src={stageBg} alt="" className="shuffle-bg-gif" />
               )}
@@ -1130,7 +1124,7 @@ function Tarot() {
             {/* GIF 배경 */}
             {curDeck?.gifs && (
               <div className="pick-gif-bg">
-                <BgGifCrossfade gifs={curDeck.gifs} idx={stageGifIdx} />
+                <BgGif gifs={curDeck.gifs} />
               </div>
             )}
             {/* 상단 바 */}
@@ -1224,11 +1218,7 @@ function Tarot() {
         <div className="tarot-reveal-stage fade-in">
           {curDeck?.gifs && (
             <div className="reveal-gif-bg">
-              <div className="bg-gif-crossfade">
-                {curDeck.gifs.map((g, gi) => (
-                  <img key={gi} src={g} alt="" className={gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'} />
-                ))}
-              </div>
+              <BgGif gifs={curDeck.gifs} />
             </div>
           )}
 
@@ -1286,11 +1276,7 @@ function Tarot() {
         <div className="tarot-result-stage fade-in">
           {curDeck?.gifs && (
             <div className="reveal-gif-bg">
-              <div className="bg-gif-crossfade">
-                {curDeck.gifs.map((g, gi) => (
-                  <img key={gi} src={g} alt="" className={gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'} />
-                ))}
-              </div>
+              <BgGif gifs={curDeck.gifs} />
             </div>
           )}
 
