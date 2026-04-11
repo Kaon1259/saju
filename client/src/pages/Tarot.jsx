@@ -161,7 +161,22 @@ const DECK_LIST = [
 // 멀티변형 덱의 톤 이름
 const VARIANT_NAMES = ['톤 A', '톤 B', '톤 C', '톤 D'];
 
-// ── 인트로: 영상/GIF 풀스크린 → 페이드아웃 ──
+// ── 인트로: GIF 랜덤 풀스크린 → 페이드아웃 ──
+const TAROT_INTRO_GIFS = [
+  '/tarot-effects/deck-intro/classic_0.gif', '/tarot-effects/deck-intro/classic_1.gif',
+  '/tarot-effects/deck-intro/classic_2.gif', '/tarot-effects/deck-intro/classic_3.gif',
+  '/tarot-effects/deck-intro/dark_0.gif', '/tarot-effects/deck-intro/dark_1.gif',
+  '/tarot-effects/deck-intro/dark_2.gif', '/tarot-effects/deck-intro/dark_3.gif',
+  '/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif',
+  '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif',
+  '/tarot-effects/deck-intro/western_0.gif', '/tarot-effects/deck-intro/western_1.gif',
+  '/tarot-effects/deck-intro/western_2.gif', '/tarot-effects/deck-intro/western_3.gif',
+  '/tarot-effects/deck-intro/girl_0.gif', '/tarot-effects/deck-intro/girl_1.gif',
+  '/tarot-effects/deck-intro/girl_2.gif', '/tarot-effects/deck-intro/girl_3.gif',
+  '/tarot-effects/deck-intro/boy_0.gif', '/tarot-effects/deck-intro/boy_1.gif',
+  '/tarot-effects/deck-intro/boy_2.gif', '/tarot-effects/deck-intro/boy_3.gif',
+];
+
 const TAROT_QUOTES = [
   { main: '카드가 당신을 부르고 있습니다', sub: 'The cards are calling you' },
   { main: '운명의 카드를 뽑아보세요', sub: 'Draw your destiny' },
@@ -175,6 +190,7 @@ const TAROT_QUOTES = [
 
 function TarotIntro({ onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
+  const [introGif] = useState(() => TAROT_INTRO_GIFS[Math.floor(Math.random() * TAROT_INTRO_GIFS.length)]);
   const [quote] = useState(() => TAROT_QUOTES[Math.floor(Math.random() * TAROT_QUOTES.length)]);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
@@ -187,13 +203,7 @@ function TarotIntro({ onDone }) {
 
   return (
     <div className={`tarot-intro ${fadeOut ? 'fade-out' : ''}`}>
-      <video
-        className="tarot-intro-video"
-        src="/tarot-effects/intro.mp4"
-        autoPlay muted playsInline
-        onError={(e) => { e.target.style.display = 'none'; }}
-      />
-      <img src="/tarot-effects/intro.gif" alt="" className="tarot-intro-gif" />
+      <img src={introGif} alt="" className="tarot-intro-gif" />
       <div className="tarot-intro-overlay" />
       <div className="tarot-intro-text">
         <p className="tarot-intro-quote">{quote.main}</p>
@@ -1262,7 +1272,7 @@ function Tarot() {
               })}
             </div>
 
-            {/* AI 분석 — 매트릭스 스타일 세로 텍스트 */}
+            {/* AI 분석 — 매트릭스 + 분석중 문구 */}
             {(loading || aiStreaming) && (
               <div className="reveal-ai-behind">
                 <div className="reveal-ai-orbit">
@@ -1276,7 +1286,7 @@ function Tarot() {
                       left: `${4 + col * 8}%`,
                       animationDuration: `${2.5 + Math.random() * 3}s`,
                       animationDelay: `${-Math.random() * 4}s`,
-                      opacity: 0.15 + Math.random() * 0.15,
+                      opacity: 0.4 + Math.random() * 0.4,
                     }}>
                       {(aiStreaming ? streamText : '운명의카드가당신에게전하는메시지를해석하고있습니다사주오행천간지지').split('').filter((_, i) => i % 3 === col % 3).slice(0, 30).map((ch, i) => (
                         <span key={i} style={{ animationDelay: `${i * 0.1}s` }}>{ch}</span>
@@ -1284,6 +1294,7 @@ function Tarot() {
                     </div>
                   ))}
                 </div>
+                <p className="reveal-ai-status">🔮 AI 분석중</p>
               </div>
             )}
           </div>
