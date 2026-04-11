@@ -205,6 +205,14 @@ function TarotIntro({ onDone }) {
     <div className={`tarot-intro ${fadeOut ? 'fade-out' : ''}`}>
       <img src={introGif} alt="" className="tarot-intro-gif" />
       <div className="tarot-intro-overlay" />
+      {/* 타로카드 테두리 */}
+      <div className="tarot-intro-border" />
+      <span className="tarot-intro-corner tarot-intro-corner--top">✦ TAROT ✦</span>
+      <span className="tarot-intro-corner tarot-intro-corner--bottom">✦ ✦ ✦</span>
+      <span className="tarot-intro-corner tarot-intro-corner--tl">☽</span>
+      <span className="tarot-intro-corner tarot-intro-corner--tr">☾</span>
+      <span className="tarot-intro-corner tarot-intro-corner--bl">✧</span>
+      <span className="tarot-intro-corner tarot-intro-corner--br">✧</span>
       <div className="tarot-intro-text">
         <p className="tarot-intro-quote">{quote.main}</p>
         <p className="tarot-intro-quote-sub">{quote.sub}</p>
@@ -1127,11 +1135,7 @@ function Tarot() {
         return (
           <div className="tarot-shuffle-stage">
             <div className="shuffle-bg">
-              {curDeck?.gifs ? (
-                <BgGif gifs={curDeck.gifs} className="shuffle-bg-gif" />
-              ) : (
-                <img src={stageBg} alt="" className="shuffle-bg-gif" />
-              )}
+              <img src={curDeck?.img || '/shuffle-start.png'} alt="" className="shuffle-bg-static" />
             </div>
             <p className="shuffle-top-text">카드를 섞고 있습니다<span className="tarot-dots" /></p>
             <div className="pick-carousel">
@@ -1159,10 +1163,10 @@ function Tarot() {
         const pickBg = curDeck?.gifs ? curDeck.gifs[stageGifIdx % curDeck.gifs.length] : null;
         return (
           <div className="tarot-pick-stage fade-in">
-            {/* GIF 배경 */}
-            {curDeck?.gifs && (
+            {/* 정적 이미지 배경 + CSS 애니메이션 */}
+            {curDeck?.img && (
               <div className="pick-gif-bg">
-                <BgGif gifs={curDeck.gifs} />
+                <img src={curDeck.img} alt="" className="pick-bg-static" />
               </div>
             )}
             {/* 상단 바 */}
