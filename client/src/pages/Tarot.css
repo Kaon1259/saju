@@ -20,6 +20,8 @@
   object-fit: cover;
   display: block;
   border-radius: 4px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 /* 내부 금색 장식 테두리 */
@@ -281,6 +283,8 @@
   object-fit: cover;
   display: block;
   pointer-events: none;
+  image-rendering: -webkit-optimize-contrast;
+  filter: contrast(1.05) saturate(1.05);
 }
 
 /* 좌우 화살표 */
@@ -471,6 +475,9 @@
   width: 100%; height: 100%; object-fit: cover; display: block;
   filter: blur(1px) brightness(0.7) saturate(1.6);
 }
+.tarot-setup-bg .tarot-card-art { padding: 0; background: none; border-radius: 0; }
+.tarot-setup-bg .tarot-card-art-frame,
+.tarot-setup-bg .tarot-card-art-shine { display: none; }
 .setup-bg-slide {
   animation: setupBgFade 5s ease-in-out both, setupBgZoom 5s ease-in-out both;
 }
@@ -636,6 +643,9 @@
 .tarot-hero-blur-bg .tarot-minor-card {
   width: 100%; height: 100%; object-fit: cover;
 }
+.tarot-hero-blur-bg .tarot-card-art { padding: 0; background: none; border-radius: 0; }
+.tarot-hero-blur-bg .tarot-card-art-frame,
+.tarot-hero-blur-bg .tarot-card-art-shine { display: none; }
 [data-theme="light"] .tarot-hero-blur-bg {
   filter: blur(50px) saturate(1.5) brightness(0.6);
   opacity: 0.4;
@@ -1315,105 +1325,137 @@
 .tarot-dots::after { content: ''; animation: dotsAnim 1.5s steps(4) infinite; }
 @keyframes dotsAnim { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
 
-/* ══ Golden Thread 스타일 카드 뒷면 ══ */
+/* ══ Golden Thread 카드 뒷면 — 골드 배경 + 빛 애니메이션 ══ */
 .tarot-card-back {
   width: 100%; height: 100%; border-radius: 12px;
-  background: #0a0a14;
-  border: 1.5px solid rgba(222,169,87,0.25);
+  background: linear-gradient(160deg, #1a1408, #2a1f0a, #1a1408);
+  border: 1.5px solid rgba(222,169,87,0.4);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px rgba(222,169,87,0.08);
   position: relative; overflow: hidden;
+}
+
+/* 골드 빛줄기 애니메이션 — 대각선으로 흐르는 빛 */
+.tarot-card-back::before {
+  content: ''; position: absolute; inset: -50%;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(222,169,87,0.08) 45%,
+    rgba(255,215,100,0.15) 50%,
+    rgba(222,169,87,0.08) 55%,
+    transparent 60%
+  );
+  animation: goldShimmer 3s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes goldShimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(0deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(0deg); }
+}
+
+/* 배경 방사형 골드 글로우 */
+.tarot-card-back::after {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(222,169,87,0.1) 0%, transparent 55%),
+              radial-gradient(ellipse at 50% 65%, rgba(222,169,87,0.05) 0%, transparent 45%);
+  animation: bgGlow 4s ease-in-out infinite alternate;
+}
+@keyframes bgGlow {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
 /* 내부 프레임 */
 .tarot-card-back-inner {
   width: calc(100% - 12px); height: calc(100% - 12px);
-  border: 1px solid rgba(222,169,87,0.18); border-radius: 8px;
+  border: 1px solid rgba(222,169,87,0.25); border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  position: relative; overflow: hidden;
-  background: linear-gradient(180deg, rgba(222,169,87,0.02) 0%, transparent 30%, transparent 70%, rgba(222,169,87,0.02) 100%);
+  position: relative; overflow: hidden; z-index: 2;
+  background: linear-gradient(180deg, rgba(222,169,87,0.04) 0%, transparent 25%, transparent 75%, rgba(222,169,87,0.04) 100%);
 }
 
-/* 세로 라인 장식 */
+/* 십자 + 다이아몬드 격자 패턴 */
 .tarot-card-back-inner::before {
   content: ''; position: absolute; inset: 0;
   background:
-    linear-gradient(0deg, transparent 0%, rgba(222,169,87,0.06) 50%, transparent 100%),
-    linear-gradient(90deg, transparent 48%, rgba(222,169,87,0.04) 49.5%, rgba(222,169,87,0.04) 50.5%, transparent 52%),
-    linear-gradient(0deg, transparent 48%, rgba(222,169,87,0.04) 49.5%, rgba(222,169,87,0.04) 50.5%, transparent 52%);
+    linear-gradient(90deg, transparent 48.5%, rgba(222,169,87,0.06) 49.5%, rgba(222,169,87,0.06) 50.5%, transparent 51.5%),
+    linear-gradient(0deg, transparent 48.5%, rgba(222,169,87,0.06) 49.5%, rgba(222,169,87,0.06) 50.5%, transparent 51.5%),
+    repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(222,169,87,0.02) 18px, rgba(222,169,87,0.02) 19px),
+    repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(222,169,87,0.02) 18px, rgba(222,169,87,0.02) 19px);
 }
 
-/* 중앙 제3의 눈 심볼 */
+/* 중앙 심볼 — 골드 빛나는 별 */
 .tarot-card-back-star {
-  position: relative; z-index: 2;
-  width: 44px; height: 44px;
+  position: relative; z-index: 3;
+  width: 48px; height: 48px;
   display: flex; align-items: center; justify-content: center;
-  color: rgba(222,169,87,0.8); font-size: 16px;
-  animation: goldPulse 4s ease-in-out infinite;
+  color: rgba(222,169,87,0.9); font-size: 18px;
+  animation: starGlow 3s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(222,169,87,0.6);
 }
 /* 내부 원 */
 .tarot-card-back-star::before {
   content: ''; position: absolute;
-  width: 36px; height: 36px;
-  border: 1px solid rgba(222,169,87,0.3); border-radius: 50%;
+  width: 38px; height: 38px;
+  border: 1.5px solid rgba(222,169,87,0.35); border-radius: 50%;
+  animation: ringPulse 3s ease-in-out infinite;
 }
 /* 외부 다이아몬드 */
 .tarot-card-back-star::after {
   content: ''; position: absolute;
-  width: 52px; height: 52px;
-  border: 1px solid rgba(222,169,87,0.15);
+  width: 56px; height: 56px;
+  border: 1px solid rgba(222,169,87,0.2);
   transform: rotate(45deg);
+  animation: ringPulse 3s ease-in-out infinite reverse;
 }
-@keyframes goldPulse {
-  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(222,169,87,0.2)); }
-  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(222,169,87,0.5)); }
+@keyframes starGlow {
+  0%, 100% { text-shadow: 0 0 6px rgba(222,169,87,0.4); transform: scale(1); }
+  50% { text-shadow: 0 0 16px rgba(222,169,87,0.8), 0 0 30px rgba(255,215,100,0.3); transform: scale(1.08); }
+}
+@keyframes ringPulse {
+  0%, 100% { border-color: rgba(222,169,87,0.2); box-shadow: none; }
+  50% { border-color: rgba(222,169,87,0.45); box-shadow: 0 0 8px rgba(222,169,87,0.15); }
 }
 
-/* 테두리 — 이중 프레임 */
+/* 이중 프레임 */
 .tarot-card-back-border {
-  position: absolute; inset: 8px;
-  border: 1px solid rgba(222,169,87,0.08); border-radius: 6px;
+  position: absolute; inset: 7px; z-index: 2;
+  border: 1px solid rgba(222,169,87,0.1); border-radius: 6px;
 }
-/* 코너 도트 */
+/* 코너 별 장식 */
 .tarot-card-back-border::before,
 .tarot-card-back-border::after {
-  content: '·'; position: absolute; font-size: 14px; line-height: 1;
-  color: rgba(222,169,87,0.3);
+  content: '✦'; position: absolute; font-size: 7px;
+  color: rgba(222,169,87,0.35);
 }
-.tarot-card-back-border::before { top: 2px; left: 5px; }
-.tarot-card-back-border::after { bottom: 2px; right: 5px; }
+.tarot-card-back-border::before { top: 5px; left: 6px; }
+.tarot-card-back-border::after { bottom: 5px; right: 6px; }
 
-/* 상단/하단 삼각 라인아트 */
-.tarot-card-back::before {
+/* 상/하 삼각형 장식 */
+.tarot-card-back-inner::after {
   content: ''; position: absolute; z-index: 1;
   top: 10%; left: 50%; transform: translateX(-50%);
   width: 0; height: 0;
-  border-left: 16px solid transparent; border-right: 16px solid transparent;
-  border-bottom: 22px solid rgba(222,169,87,0.06);
-}
-.tarot-card-back::after {
-  content: ''; position: absolute; z-index: 1;
-  bottom: 10%; left: 50%; transform: translateX(-50%);
-  width: 0; height: 0;
-  border-left: 16px solid transparent; border-right: 16px solid transparent;
-  border-top: 22px solid rgba(222,169,87,0.06);
+  border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-bottom: 20px solid rgba(222,169,87,0.05);
 }
 
 /* 라이트모드 */
 [data-theme="light"] .tarot-card-back {
-  background: #f5f0e8;
-  border-color: rgba(180,140,60,0.3);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  background: linear-gradient(160deg, #f8f0dc, #efe4c8, #f8f0dc);
+  border-color: rgba(180,140,60,0.35);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 8px rgba(180,140,60,0.1);
 }
 [data-theme="light"] .tarot-card-back-inner {
-  border-color: rgba(180,140,60,0.15);
+  border-color: rgba(180,140,60,0.2);
 }
-[data-theme="light"] .tarot-card-back-star { color: rgba(160,120,40,0.7); }
-[data-theme="light"] .tarot-card-back-star::before { border-color: rgba(160,120,40,0.25); }
-[data-theme="light"] .tarot-card-back-star::after { border-color: rgba(160,120,40,0.12); }
-[data-theme="light"] .tarot-card-back-border { border-color: rgba(160,120,40,0.08); }
+[data-theme="light"] .tarot-card-back-star { color: rgba(160,120,40,0.8); text-shadow: 0 0 6px rgba(160,120,40,0.3); }
+[data-theme="light"] .tarot-card-back-star::before { border-color: rgba(160,120,40,0.3); }
+[data-theme="light"] .tarot-card-back-star::after { border-color: rgba(160,120,40,0.15); }
+[data-theme="light"] .tarot-card-back-border { border-color: rgba(160,120,40,0.1); }
 [data-theme="light"] .tarot-card-back-border::before,
-[data-theme="light"] .tarot-card-back-border::after { color: rgba(160,120,40,0.25); }
+[data-theme="light"] .tarot-card-back-border::after { color: rgba(160,120,40,0.3); }
 
 /* ═══ 카드 선택 (공통) ═══ */
 .tarot-pick-header {
@@ -2184,6 +2226,9 @@
 .tinder-card-img .tarot-card-art-img {
   width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
 }
+.tinder-card-img .tarot-card-art { padding: 0; background: none; }
+.tinder-card-img .tarot-card-art-frame,
+.tinder-card-img .tarot-card-art-shine { display: none; }
 .tinder-card-label {
   padding: 10px 14px;
   display: flex; flex-direction: column; gap: 2px;
@@ -2310,6 +2355,8 @@
 }
 .pick-slide-card .tarot-card-art-img {
   width: 100%; height: 100%; object-fit: cover; border-radius: 11px;
+  image-rendering: -webkit-optimize-contrast;
+  filter: contrast(1.05) saturate(1.1);
 }
 .pick-slide-card .tarot-card-art { width: 100%; height: 100%; padding: 0; background: none; }
 .pick-slide-card .tarot-card-art-frame,
