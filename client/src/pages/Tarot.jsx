@@ -162,8 +162,20 @@ const DECK_LIST = [
 const VARIANT_NAMES = ['톤 A', '톤 B', '톤 C', '톤 D'];
 
 // ── 인트로: 영상/GIF 풀스크린 → 페이드아웃 ──
+const TAROT_QUOTES = [
+  { main: '카드가 당신을 부르고 있습니다', sub: 'The cards are calling you' },
+  { main: '운명의 카드를 뽑아보세요', sub: 'Draw your destiny' },
+  { main: '별빛이 당신의 길을 비춥니다', sub: 'Starlight guides your path' },
+  { main: '마음이 이끄는 대로', sub: 'Follow where your heart leads' },
+  { main: '오늘, 우주가 전하는 메시지', sub: 'A message from the universe' },
+  { main: '당신만을 위한 카드가 기다립니다', sub: 'A card awaits only you' },
+  { main: '직감을 믿고 카드를 선택하세요', sub: 'Trust your intuition' },
+  { main: '숨겨진 진실이 드러납니다', sub: 'Hidden truths shall be revealed' },
+];
+
 function TarotIntro({ onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
+  const [quote] = useState(() => TAROT_QUOTES[Math.floor(Math.random() * TAROT_QUOTES.length)]);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
@@ -183,6 +195,11 @@ function TarotIntro({ onDone }) {
       />
       <img src="/tarot-effects/intro.gif" alt="" className="tarot-intro-gif" />
       <div className="tarot-intro-overlay" />
+      <div className="tarot-intro-text">
+        <p className="tarot-intro-quote">{quote.main}</p>
+        <p className="tarot-intro-quote-sub">{quote.sub}</p>
+        <div className="tarot-intro-symbol">✦</div>
+      </div>
     </div>
   );
 }
@@ -1245,7 +1262,7 @@ function Tarot() {
               })}
             </div>
 
-            {/* AI 분석 — 카드 뒤에서 텍스트가 흘러가는 연출 */}
+            {/* AI 분석 — 매트릭스 스타일 세로 텍스트 */}
             {(loading || aiStreaming) && (
               <div className="reveal-ai-behind">
                 <div className="reveal-ai-orbit">
@@ -1253,12 +1270,20 @@ function Tarot() {
                   <div className="reveal-ai-orb reveal-ai-orb-2" />
                   <div className="reveal-ai-orb reveal-ai-orb-3" />
                 </div>
-                {aiStreaming && (
-                  <div className="reveal-ai-ghost-text">{streamText}</div>
-                )}
-                {loading && !aiStreaming && (
-                  <p className="reveal-ai-waiting">카드의 메시지를 읽고 있습니다...</p>
-                )}
+                <div className="matrix-rain">
+                  {Array.from({ length: 12 }).map((_, col) => (
+                    <div key={col} className="matrix-col" style={{
+                      left: `${4 + col * 8}%`,
+                      animationDuration: `${2.5 + Math.random() * 3}s`,
+                      animationDelay: `${-Math.random() * 4}s`,
+                      opacity: 0.15 + Math.random() * 0.15,
+                    }}>
+                      {(aiStreaming ? streamText : '운명의카드가당신에게전하는메시지를해석하고있습니다사주오행천간지지').split('').filter((_, i) => i % 3 === col % 3).slice(0, 30).map((ch, i) => (
+                        <span key={i} style={{ animationDelay: `${i * 0.1}s` }}>{ch}</span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
