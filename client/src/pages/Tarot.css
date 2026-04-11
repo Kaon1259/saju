@@ -1953,9 +1953,10 @@
 /* ── N+1 버리기 모드 ── */
 .discard-mode {
   display: grid;
-  grid-template-columns: repeat(2, min(22vw, 90px));
-  gap: 12px;
+  grid-template-columns: repeat(2, min(30vw, 120px));
+  gap: 16px;
   justify-content: center;
+  justify-items: center;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1965,10 +1966,10 @@
 }
 /* 6장일 때 3열 */
 .discard-mode.discard-cols-3 {
-  grid-template-columns: repeat(3, min(22vw, 90px));
+  grid-template-columns: repeat(3, min(26vw, 110px));
 }
 .discard-mode .tarot-deck-slot {
-  width: min(18vw, 75px); cursor: pointer;
+  width: min(28vw, 115px); cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .slot-discard-tap:hover {
