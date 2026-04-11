@@ -1294,7 +1294,7 @@ function Tarot() {
                     </div>
                   ))}
                 </div>
-                <p className="reveal-ai-status">🔮 AI 분석중</p>
+                <div className="reveal-ai-status">AI 분석중</div>
               </div>
             )}
           </div>
