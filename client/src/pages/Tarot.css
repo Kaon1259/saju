@@ -465,7 +465,34 @@
 }
 .tone-fullscreen-overlay {
   position: absolute; inset: 0; z-index: 1;
-  background: linear-gradient(0deg, rgba(5,5,16,0.5) 0%, transparent 40%, transparent 60%, rgba(5,5,16,0.3) 100%);
+  background: linear-gradient(0deg, rgba(5,5,16,0.6) 0%, transparent 35%, transparent 65%, rgba(5,5,16,0.3) 100%);
+}
+/* 덱 전환 문구 */
+.tone-phrase {
+  position: absolute;
+  bottom: 15%;
+  left: 50%; transform: translateX(-50%);
+  z-index: 2;
+  text-align: center;
+  animation: tonePhraseIn 1.5s ease-out both;
+}
+.tone-phrase-text {
+  font-size: 17px; font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 1px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.8), 0 0 30px rgba(222,169,87,0.3);
+  margin: 0 0 10px;
+}
+.tone-phrase-deck {
+  font-size: 13px; font-weight: 700;
+  color: rgba(222,169,87,0.7);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0;
+}
+@keyframes tonePhraseIn {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 /* 좌측 상단 덱 선택 버튼 */
 .tone-back-top {

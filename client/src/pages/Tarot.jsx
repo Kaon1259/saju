@@ -404,7 +404,7 @@ function Tarot() {
     if (step !== 'shuffle' || shuffledCards.length === 0) return;
     cPos.current = 0;
 
-    let vel = 0.8;                   // 부드러운 초기 속도
+    let vel = 0.9;                   // 부드러운 초기 속도
     let lastTime = Date.now();
     const startTime = lastTime;
     let didSecondPush = false;
@@ -414,14 +414,14 @@ function Tarot() {
       const dt = Math.min((now - lastTime) / 16.67, 2);
       lastTime = now;
 
-      // 1.5초쯤 재셔플 임펄스
-      if (!didSecondPush && (now - startTime) > 1500) {
-        vel += 0.2;
+      // 0.8초쯤 재셔플 임펄스
+      if (!didSecondPush && (now - startTime) > 800) {
+        vel += 0.15;
         didSecondPush = true;
       }
 
-      // 가변 마찰: 부드러운 감속
-      const dynamicFriction = vel > 0.4 ? 0.990 : vel > 0.15 ? 0.993 : vel > 0.05 ? 0.995 : 0.990;
+      // 가변 마찰: 좀 더 빠른 감속 (총 시간 2/3로)
+      const dynamicFriction = vel > 0.4 ? 0.985 : vel > 0.15 ? 0.988 : vel > 0.05 ? 0.992 : 0.985;
       vel *= Math.pow(dynamicFriction, dt);
 
       // 미세 떨림 — 속도 비례
@@ -989,10 +989,21 @@ function Tarot() {
       {step === 'tone' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
         const gifSrc = curDeck.gifs ? curDeck.gifs[Math.floor(Math.random() * curDeck.gifs.length)] : curDeck.img;
+        const phrases = [
+          '카드가 당신의 운명을 속삭입니다',
+          '별들이 당신의 이야기를 준비합니다',
+          '운명의 카드가 펼쳐집니다',
+          '신비로운 에너지가 모이고 있습니다',
+          '카드 속 비밀이 드러나려 합니다',
+        ];
         return (
           <div className="tarot-tone-screen">
             <img src={gifSrc} alt={curDeck.name} className="tone-fullscreen-gif" />
             <div className="tone-fullscreen-overlay" />
+            <div className="tone-phrase">
+              <p className="tone-phrase-text">{phrases[Math.floor(Math.random() * phrases.length)]}</p>
+              <p className="tone-phrase-deck">{curDeck.name}</p>
+            </div>
           </div>
         );
       })()}
