@@ -2070,9 +2070,15 @@
 
 /* 캐러셀 상단 고정 */
 .reveal-carousel-sticky {
-  position: sticky;
+  position: fixed;
   top: 50px;
+  left: 0; right: 0;
   z-index: 3;
+  pointer-events: auto;
+}
+/* 아래 AI 영역이 카드 밑으로 나오도록 여백 */
+.reveal-ai-area {
+  margin-top: min(50vh, 380px);
 }
 
 /* AI 분석 — 블러 배경 + 회전하는 신비한 빛 */

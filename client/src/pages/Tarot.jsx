@@ -370,28 +370,28 @@ function Tarot() {
     if (step !== 'shuffle' || shuffledCards.length === 0) return;
     cPos.current = 0;
 
-    let vel = 2.2;                  // 초기 임펄스
+    let vel = 0.8;                   // 부드러운 초기 속도
     let lastTime = Date.now();
     const startTime = lastTime;
     let didSecondPush = false;
 
     const tick = () => {
       const now = Date.now();
-      const dt = Math.min((now - lastTime) / 16.67, 3);
+      const dt = Math.min((now - lastTime) / 16.67, 2);
       lastTime = now;
 
-      // 1.3초쯤 재셔플 임펄스
-      if (!didSecondPush && (now - startTime) > 1300) {
-        vel += 0.35;
+      // 1.5초쯤 재셔플 임펄스
+      if (!didSecondPush && (now - startTime) > 1500) {
+        vel += 0.2;
         didSecondPush = true;
       }
 
-      // 가변 마찰: 고속=약한 마찰, 저속=아주 약한 마찰 (느릿느릿 멈춤)
-      const dynamicFriction = vel > 0.8 ? 0.988 : vel > 0.3 ? 0.991 : vel > 0.08 ? 0.993 : 0.988;
+      // 가변 마찰: 부드러운 감속
+      const dynamicFriction = vel > 0.4 ? 0.990 : vel > 0.15 ? 0.993 : vel > 0.05 ? 0.995 : 0.990;
       vel *= Math.pow(dynamicFriction, dt);
 
       // 미세 떨림 — 속도 비례
-      const jitter = (Math.random() - 0.5) * vel * 0.05;
+      const jitter = (Math.random() - 0.5) * vel * 0.03;
 
       cPos.current += (vel + jitter) * dt;
       setCTick(n => n + 1);
