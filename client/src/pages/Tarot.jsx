@@ -1222,8 +1222,8 @@ function Tarot() {
             </div>
           )}
 
-          {/* 카드 캐러셀 — 상단 고정 */}
-          <div className="reveal-carousel-sticky">
+          {/* 카드 캐러셀 — 화면 중앙 */}
+          <div className="reveal-center-wrap">
             <div className="reveal-carousel" {...cHandlers}>
               {revealedCards.length > 0 && revealItems.map(({ off, idx, x, scale, opacity, z }) => {
                 const card = revealedCards[idx % revealedCards.length];
@@ -1244,23 +1244,23 @@ function Tarot() {
                 );
               })}
             </div>
-          </div>
 
-          {/* AI 분석 영역 — 블러 배경 + 회전하는 신비한 빛 */}
-          <div className="reveal-ai-area">
+            {/* AI 분석 — 카드 영역 안에 오버레이 */}
             {(loading || aiStreaming) && (
-              <div className="reveal-ai-mystic">
+              <div className="reveal-ai-overlay">
                 <div className="reveal-ai-blur" />
                 <div className="reveal-ai-orbit">
                   <div className="reveal-ai-orb reveal-ai-orb-1" />
                   <div className="reveal-ai-orb reveal-ai-orb-2" />
                   <div className="reveal-ai-orb reveal-ai-orb-3" />
                 </div>
+                <div className="reveal-ai-text">
+                  {loading && !aiStreaming && <FortuneLoading type="tarot" />}
+                  {aiStreaming && (
+                    <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />
+                  )}
+                </div>
               </div>
-            )}
-            {loading && !aiStreaming && <FortuneLoading type="tarot" />}
-            {aiStreaming && (
-              <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />
             )}
           </div>
         </div>
