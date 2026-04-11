@@ -428,8 +428,8 @@ function Tarot() {
         didSecondPush = true;
       }
 
-      // 가변 마찰: 좀 더 빠른 감속 (총 시간 2/3로)
-      const dynamicFriction = vel > 0.4 ? 0.985 : vel > 0.15 ? 0.988 : vel > 0.05 ? 0.992 : 0.985;
+      // 가변 마찰: 빠른 감속
+      const dynamicFriction = vel > 0.4 ? 0.980 : vel > 0.15 ? 0.984 : vel > 0.05 ? 0.988 : 0.980;
       vel *= Math.pow(dynamicFriction, dt);
 
       // 미세 떨림 — 속도 비례
@@ -1258,9 +1258,9 @@ function Tarot() {
         const revealItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-reveal-stage fade-in">
-          {curDeck?.gifs && (
+          {curDeck?.img && (
             <div className="reveal-gif-bg">
-              <BgGif gifs={curDeck.gifs} />
+              <img src={curDeck.img} alt="" className="reveal-bg-static" />
             </div>
           )}
 
@@ -1296,15 +1296,15 @@ function Tarot() {
                   <div className="reveal-ai-orb reveal-ai-orb-3" />
                 </div>
                 <div className="matrix-rain">
-                  {Array.from({ length: 12 }).map((_, col) => (
+                  {Array.from({ length: 6 }).map((_, col) => (
                     <div key={col} className="matrix-col" style={{
-                      left: `${4 + col * 8}%`,
-                      animationDuration: `${2.5 + Math.random() * 3}s`,
-                      animationDelay: `${-Math.random() * 4}s`,
-                      opacity: 0.4 + Math.random() * 0.4,
+                      left: `${8 + col * 15}%`,
+                      animationDuration: `${3 + col * 0.8}s`,
+                      animationDelay: `${-col * 0.7}s`,
+                      opacity: 0.5 + col * 0.08,
                     }}>
-                      {(aiStreaming ? streamText : '운명의카드가당신에게전하는메시지를해석하고있습니다사주오행천간지지').split('').filter((_, i) => i % 3 === col % 3).slice(0, 30).map((ch, i) => (
-                        <span key={i} style={{ animationDelay: `${i * 0.1}s` }}>{ch}</span>
+                      {(aiStreaming ? streamText : '운명의카드가당신에게전하는메시지를해석하고있습니다').split('').filter((_, i) => i % 2 === col % 2).slice(0, 15).map((ch, i) => (
+                        <span key={i}>{ch}</span>
                       ))}
                     </div>
                   ))}
@@ -1324,9 +1324,9 @@ function Tarot() {
         const resultItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-result-stage fade-in">
-          {curDeck?.gifs && (
+          {curDeck?.img && (
             <div className="reveal-gif-bg">
-              <BgGif gifs={curDeck.gifs} />
+              <img src={curDeck.img} alt="" className="reveal-bg-static" />
             </div>
           )}
 
