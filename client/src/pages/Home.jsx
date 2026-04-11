@@ -72,13 +72,13 @@ const DAILY_MESSAGES = [
 
 const HOME_MAIN_MENUS = [
   { id: 'love', icon: '💕', label: '1:1연애운', sub: '오늘 연애 기운은?', path: '/love-fortune' },
-  { id: 'fortune', icon: '🔮', label: '오늘의 운세', sub: '오늘 하루는 어떨까?', path: '/my' },
-  { id: 'compat', icon: '💑', label: '사주궁합', sub: '우리 궁합 몇 점?', path: '/compatibility' },
+  { id: 'some', icon: '🎯', label: '썸진단', sub: '누가 먼저 끌리나요', loveType: 'some_check' },
+  { id: 'compat', icon: '🌌', label: '전생인연', sub: '전생에 어떤 사이였을까?', loveType: 'past_life' },
   { id: 'crush', icon: '💘', label: '짝사랑', sub: '플러팅해도 될까요?', loveType: 'crush' },
   { id: 'blind', icon: '🤝', label: '소개팅', sub: '새로운 인연이 올까요?', loveType: 'blind_date' },
   { id: 'date', icon: '💑', label: '데이트운', sub: '오늘 만나도 될까요?', loveType: 'couple_fortune' },
   { id: 'confess', icon: '💌', label: '고백타이밍', sub: '언제 마음을 전할까?', loveType: 'confession_timing' },
-  { id: 'some', icon: '🎯', label: '썸진단', sub: '누가 먼저 끌리나요', loveType: 'some_check' },
+  { id: 'meeting', icon: '🔮', label: '만남시기', sub: '언제 인연을 만날까?', loveType: 'meeting_timing' },
   { id: 'reunion', icon: '💔', label: '재회운', sub: '다시 만날 수 있을까?', loveType: 'reunion' },
 ];
 
@@ -406,7 +406,7 @@ function Home() {
               ))}
             </div>
             <div className="home-hero-new__top">
-              <h1 className="home-hero__title">연애 운세</h1>
+              <h1 className="home-hero__title">1:1연애운</h1>
               <span className="home-hero__date-inline">{dayStr} {dateStr}</span>
             </div>
             <div className="home-love-temp-center">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from './PageTransition';
 import { useHearts } from '../context/HeartContext';
@@ -51,7 +51,7 @@ const PATH_EFFECTS = {
   '/bloodtype': 'bloodtype',
   '/constellation': 'star',
   '/manseryeok': 'saju',
-  '/tarot': 'tarot',
+  // '/tarot': 'tarot', // 타로는 자체 GIF 인트로 사용
   '/special': 'compatibility',
   '/love-fortune': 'compatibility',
 };
@@ -84,16 +84,11 @@ function Header({ onHomeSplash }) {
   const userId = localStorage.getItem('userId');
   const { heartPoints } = useHearts();
   const [showMore, setShowMore] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    return (localStorage.getItem('theme') || 'dark') === 'dark';
-  });
-
-  const toggleTheme = () => {
-    const next = isDark ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    setIsDark(!isDark);
-  };
+  // 다크모드 고정
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  }, []);
 
   const handleTabClick = (item) => {
     const isActive = item.path === '/'
@@ -143,7 +138,7 @@ function Header({ onHomeSplash }) {
           navigate('/');
         }}>
           <span className="top-bar-heart">♥</span>
-          <span className="top-bar-text">1:1연애 <span style={{color:'#F472B6'}}>💕</span></span>
+          <span className="top-bar-text">1:1연애운 <span style={{color:'#F472B6'}}>💕</span></span>
         </button>
 
         <div className="top-bar-right">
@@ -154,42 +149,13 @@ function Header({ onHomeSplash }) {
             </div>
           )}
           <button
-            className={`top-bar-more-btn ${showMore ? 'active' : ''}`}
-            onClick={() => setShowMore(!showMore)}
+            className="top-bar-settings-btn"
+            onClick={() => navigate('/settings')}
           >
-            <span className="top-bar-more-dots">⋯</span>
-            <span>더보기</span>
+            ⚙️
           </button>
         </div>
       </header>
-
-      {/* 더보기 드롭다운 */}
-      {showMore && (
-        <>
-          <div className="top-bar-overlay" onClick={() => setShowMore(false)} />
-          <div className="top-bar-dropdown">
-            {MORE_ITEMS.map((item) => (
-              <button
-                key={item.path}
-                className={`top-bar-dropdown-item ${location.pathname === item.path ? 'active' : ''}`}
-                onClick={() => handleMoreNav(item)}
-              >
-                <span className="top-bar-dropdown-icon">{item.icon}</span>
-                <span className="top-bar-dropdown-label">{item.label}</span>
-              </button>
-            ))}
-            <div className="top-bar-dropdown-divider" />
-            <button className="top-bar-dropdown-item" onClick={() => { toggleTheme(); setShowMore(false); }}>
-              <span className="top-bar-dropdown-icon">{isDark ? '☀️' : '🌙'}</span>
-              <span className="top-bar-dropdown-label">{isDark ? '라이트 모드' : '다크 모드'}</span>
-            </button>
-            <button className="top-bar-dropdown-item" onClick={() => { navigate('/settings'); setShowMore(false); }}>
-              <span className="top-bar-dropdown-icon">⚙️</span>
-              <span className="top-bar-dropdown-label">설정</span>
-            </button>
-          </div>
-        </>
-      )}
 
       {/* 하단 고정 탭바 */}
       <nav className="bottom-tab-bar">

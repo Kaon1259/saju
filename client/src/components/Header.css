@@ -100,6 +100,19 @@
   font-size: 12px;
   font-weight: 700;
 }
+.top-bar-settings-btn {
+  padding: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.top-bar-settings-btn:hover {
+  opacity: 1;
+}
 
 .top-bar-more-btn:hover,
 .top-bar-more-btn.active {
