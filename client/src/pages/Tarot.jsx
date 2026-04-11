@@ -1234,36 +1234,40 @@ function Tarot() {
             </div>
           )}
 
-          {/* 카드 캐러셀 — 앞면, 천천히 슬라이드 */}
-          <div className="reveal-carousel" {...cHandlers}>
-            {revealedCards.length > 0 && revealItems.map(({ off, idx, x, scale, opacity, z }) => {
-              const card = revealedCards[idx % revealedCards.length];
-              if (!card) return null;
-              const posLabel = POSITION_LABELS[spread]?.[idx % revealedCards.length] || '';
-              return (
-                <div key={`rev-${off}`} className={`reveal-slide-card ${off === 0 ? 'reveal-slide-active' : ''}`} style={{
-                  transform: `translateX(${x}px) scale(${scale})`,
-                  opacity, zIndex: z,
-                }}>
-                  <div className={`reveal-card-front ${card.reversed ? 'reversed' : ''}`}>
-                    <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} />
-                    {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
+          {/* 카드 캐러셀 — 상단 고정 */}
+          <div className="reveal-carousel-sticky">
+            <div className="reveal-carousel" {...cHandlers}>
+              {revealedCards.length > 0 && revealItems.map(({ off, idx, x, scale, opacity, z }) => {
+                const card = revealedCards[idx % revealedCards.length];
+                if (!card) return null;
+                const posLabel = POSITION_LABELS[spread]?.[idx % revealedCards.length] || '';
+                return (
+                  <div key={`rev-${off}`} className={`reveal-slide-card ${off === 0 ? 'reveal-slide-active' : ''}`} style={{
+                    transform: `translateX(${x}px) scale(${scale})`,
+                    opacity, zIndex: z,
+                  }}>
+                    <div className={`reveal-card-front ${card.reversed ? 'reversed' : ''}`}>
+                      <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} />
+                      {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
+                    </div>
+                    <div className="reveal-card-label">{posLabel}</div>
+                    <div className="reveal-card-name">{card.nameKr}</div>
                   </div>
-                  <div className="reveal-card-label">{posLabel}</div>
-                  <div className="reveal-card-name">{card.nameKr}</div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
-          {/* AI 분석 영역 — 블러 배경 + 신비한 빛 */}
+          {/* AI 분석 영역 — 블러 배경 + 회전하는 신비한 빛 */}
           <div className="reveal-ai-area">
             {(loading || aiStreaming) && (
               <div className="reveal-ai-mystic">
                 <div className="reveal-ai-blur" />
-                <div className="reveal-ai-glow reveal-ai-glow-1" />
-                <div className="reveal-ai-glow reveal-ai-glow-2" />
-                <div className="reveal-ai-glow reveal-ai-glow-3" />
+                <div className="reveal-ai-orbit">
+                  <div className="reveal-ai-orb reveal-ai-orb-1" />
+                  <div className="reveal-ai-orb reveal-ai-orb-2" />
+                  <div className="reveal-ai-orb reveal-ai-orb-3" />
+                </div>
               </div>
             )}
             {loading && !aiStreaming && <FortuneLoading type="tarot" />}
@@ -1334,23 +1338,6 @@ function Tarot() {
               {reading.advice && (
                 <FortuneCard icon="💡" title="오늘의 조언" description={reading.advice} delay={200} />
               )}
-
-              <div className="tarot-actions-speech">
-                <SpeechButton
-                  label="리딩 읽어주기"
-                  text={[
-                    '타로 리딩 결과입니다.',
-                    reading.overallMessage,
-                    reading.interpretation,
-                    reading.advice ? `오늘의 조언. ${reading.advice}` : '',
-                  ].filter(Boolean).join(' ')}
-                  summaryText={[
-                    '타로 요약입니다.',
-                    reading.overallMessage,
-                    reading.advice ? `조언. ${reading.advice}` : '',
-                  ].filter(Boolean).join(' ')}
-                />
-              </div>
 
               <div className="tarot-actions">
                 <button className="tarot-action-btn tarot-share-btn" onClick={handleShare}>
