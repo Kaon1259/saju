@@ -470,7 +470,7 @@
 /* 덱 전환 문구 */
 .tone-phrase {
   position: absolute;
-  bottom: 15%;
+  bottom: 22%;
   left: 50%; transform: translateX(-50%);
   z-index: 2;
   text-align: center;
@@ -2197,30 +2197,29 @@
   100% { opacity: 1; }
 }
 
-/* AI 분석중 — 카드 중앙, 녹색 글로우 + 좌우 시프트 */
+/* AI 분석중 — 우하단 작은 그라데이션 텍스트 */
 .reveal-ai-status {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 16px; right: 16px;
   z-index: 20;
-  font-size: 24px; font-weight: 900;
-  letter-spacing: 6px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 2px;
   white-space: nowrap;
-  color: rgba(0,255,100,0.95);
-  text-shadow:
-    0 0 10px rgba(0,255,100,1),
-    0 0 30px rgba(0,255,100,0.7),
-    0 0 60px rgba(0,255,100,0.3),
-    0 2px 4px rgba(0,0,0,0.8);
-  animation: aiStatusPulse 2s ease-in-out infinite;
+  background: linear-gradient(90deg, #9B59B6, #E91E63, #F39C12, #2ECC71, #3498DB, #9B59B6);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: aiStatusRainbow 3s linear infinite;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6));
 }
 .reveal-ai-status::after {
   content: '';
+  -webkit-text-fill-color: transparent;
   animation: aiDots 1.5s steps(4) infinite;
 }
-@keyframes aiStatusPulse {
-  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); text-shadow: 0 0 10px rgba(0,255,100,0.8), 0 0 30px rgba(0,255,100,0.5), 0 2px 4px rgba(0,0,0,0.8); }
-  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); text-shadow: 0 0 15px rgba(0,255,100,1), 0 0 40px rgba(0,255,100,0.8), 0 0 80px rgba(0,255,100,0.3), 0 2px 4px rgba(0,0,0,0.8); }
+@keyframes aiStatusRainbow {
+  0%   { background-position: 0% 0; }
+  100% { background-position: 300% 0; }
 }
 @keyframes aiDots {
   0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; }
