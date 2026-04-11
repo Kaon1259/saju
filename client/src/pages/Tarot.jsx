@@ -145,6 +145,7 @@ const POSITION_LABELS = {
 };
 
 const DECK_LIST = [
+  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-classic-rws/m00_v0.jpg', hasVariants: true },
   { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-dark/m15_v0.jpg', hasVariants: true },
   { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-romantic/m17_v0.jpg', hasVariants: true },
   { id: 'oriental', name: '오리엔탈', sub: 'Eastern Gold', img: '/tarot-oriental/m14_v0.jpg', hasVariants: true },
@@ -817,7 +818,7 @@ function Tarot() {
       {/* ═══ STEP 0.5: 톤 선택 (멀티변형 덱) ═══ */}
       {step === 'tone' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const basePath = { dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western' }[deck] || '';
+        const basePath = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western' }[deck] || '';
         const previewCard = deck === 'western' ? '00' : '14';
         return (
           <div className="tarot-tone-screen">
@@ -840,7 +841,6 @@ function Tarot() {
                     alt={VARIANT_NAMES[v]}
                     draggable={false}
                   />
-                  <span className="tone-label">{VARIANT_NAMES[v]}</span>
                 </div>
               ))}
             </div>
@@ -971,6 +971,10 @@ function Tarot() {
         const items = getCarouselItems(shuffledCards.length);
         return (
           <div className="tarot-shuffle-stage">
+            <div className="shuffle-bg">
+              <img src="/shuffle-start.png" alt="" className="shuffle-bg-start" />
+              <img src="/shuffle-end.png" alt="" className="shuffle-bg-end" />
+            </div>
             <p className="shuffle-top-text">카드를 섞고 있습니다<span className="tarot-dots" /></p>
             <div className="pick-carousel">
               {items.map(({ off, idx, x, scale, opacity, z }) => (
@@ -1107,7 +1111,16 @@ function Tarot() {
           </div>
 
           {loading && !aiStreaming && <FortuneLoading type="tarot" />}
-          {aiStreaming && <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />}
+          {aiStreaming && (
+            <div className="tarot-mystic-wrap">
+              <div className="mystic-orb mystic-orb-1" />
+              <div className="mystic-orb mystic-orb-2" />
+              <div className="mystic-orb mystic-orb-3" />
+              <div className="mystic-thread mystic-thread-1" />
+              <div className="mystic-thread mystic-thread-2" />
+              <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />
+            </div>
+          )}
         </div>
       )}
 

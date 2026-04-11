@@ -1316,11 +1316,41 @@
   min-height: 80vh;
 }
 
-.shuffle-top-text {
-  font-size: 17px; font-weight: 700; color: rgba(222,169,87,0.8);
-  margin-bottom: 0; text-align: center; letter-spacing: 1px;
+/* 셔플 배경 이미지 */
+.shuffle-bg {
+  position: absolute; inset: 0; z-index: 0;
 }
-.tarot-shuffle-hint { font-size: 14px; color: var(--color-text-muted); margin-top: 8px; text-align: center; }
+.shuffle-bg img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover;
+}
+.shuffle-bg-start {
+  animation: shuffleBgStart 2.5s ease-in-out forwards;
+}
+.shuffle-bg-end {
+  opacity: 0;
+  animation: shuffleBgEnd 2.5s ease-in-out forwards;
+}
+@keyframes shuffleBgStart {
+  0% { opacity: 0.6; filter: brightness(0.7); }
+  60% { opacity: 0.5; filter: brightness(0.6); }
+  100% { opacity: 0; }
+}
+@keyframes shuffleBgEnd {
+  0%, 50% { opacity: 0; }
+  100% { opacity: 0.5; filter: brightness(0.6); }
+}
+
+.shuffle-top-text {
+  font-size: 17px; font-weight: 700; color: rgba(222,169,87,0.9);
+  margin-bottom: 0; text-align: center; letter-spacing: 1px;
+  position: relative; z-index: 2;
+  text-shadow: 0 0 20px rgba(222,169,87,0.3);
+}
+.tarot-shuffle-hint {
+  font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 8px; text-align: center;
+  position: relative; z-index: 2;
+}
 
 .tarot-dots::after { content: ''; animation: dotsAnim 1.5s steps(4) infinite; }
 @keyframes dotsAnim { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
@@ -1850,6 +1880,72 @@
 
 /* ═══ 리빌 ═══ */
 .tarot-reveal-stage { position: relative; z-index: 1; }
+
+/* ══ AI 분석 신비 효과 ══ */
+.tarot-mystic-wrap {
+  position: relative; overflow: hidden;
+  border-radius: 20px; padding: 0;
+  margin-top: 16px;
+}
+/* 떠다니는 골드 오브 */
+.mystic-orb {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(222,169,87,0.2) 0%, transparent 70%);
+  filter: blur(20px);
+}
+.mystic-orb-1 {
+  width: 120px; height: 120px; top: 10%; left: -20px;
+  animation: orbFloat1 6s ease-in-out infinite;
+}
+.mystic-orb-2 {
+  width: 80px; height: 80px; top: 40%; right: -10px;
+  animation: orbFloat2 5s ease-in-out infinite 1s;
+}
+.mystic-orb-3 {
+  width: 100px; height: 100px; bottom: 10%; left: 30%;
+  animation: orbFloat3 7s ease-in-out infinite 2s;
+}
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  50% { transform: translate(30px, 20px) scale(1.3); opacity: 0.6; }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+  50% { transform: translate(-20px, -30px) scale(1.2); opacity: 0.5; }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(0.8); opacity: 0.25; }
+  50% { transform: translate(15px, -15px) scale(1.1); opacity: 0.5; }
+}
+/* 소용돌이 실 */
+.mystic-thread {
+  position: absolute; pointer-events: none;
+  width: 200%; height: 1px; left: -50%;
+  background: linear-gradient(90deg, transparent, rgba(222,169,87,0.15), rgba(187,143,206,0.1), transparent);
+  filter: blur(1px);
+}
+.mystic-thread-1 {
+  top: 25%;
+  animation: threadFlow 4s ease-in-out infinite;
+  transform-origin: center;
+}
+.mystic-thread-2 {
+  top: 65%;
+  animation: threadFlow 5s ease-in-out infinite 1.5s;
+  transform-origin: center;
+}
+@keyframes threadFlow {
+  0% { transform: translateX(-30%) rotate(-2deg); opacity: 0; }
+  30% { opacity: 0.8; }
+  70% { opacity: 0.8; }
+  100% { transform: translateX(30%) rotate(2deg); opacity: 0; }
+}
+[data-theme="light"] .mystic-orb {
+  background: radial-gradient(circle, rgba(147,51,234,0.1) 0%, transparent 70%);
+}
+[data-theme="light"] .mystic-thread {
+  background: linear-gradient(90deg, transparent, rgba(147,51,234,0.1), rgba(222,169,87,0.08), transparent);
+}
 
 .tarot-reveal-cards {
   display: flex; justify-content: center; gap: 12px;
