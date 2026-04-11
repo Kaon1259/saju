@@ -1245,21 +1245,20 @@ function Tarot() {
               })}
             </div>
 
-            {/* AI 분석 — 카드 영역 안에 오버레이 */}
+            {/* AI 분석 — 카드 뒤에서 텍스트가 흘러가는 연출 */}
             {(loading || aiStreaming) && (
-              <div className="reveal-ai-overlay">
-                <div className="reveal-ai-blur" />
+              <div className="reveal-ai-behind">
                 <div className="reveal-ai-orbit">
                   <div className="reveal-ai-orb reveal-ai-orb-1" />
                   <div className="reveal-ai-orb reveal-ai-orb-2" />
                   <div className="reveal-ai-orb reveal-ai-orb-3" />
                 </div>
-                <div className="reveal-ai-text">
-                  {loading && !aiStreaming && <FortuneLoading type="tarot" />}
-                  {aiStreaming && (
-                    <StreamText text={streamText} icon="🔮" label="AI가 타로를 해석하고 있어요..." color="#9B59B6" />
-                  )}
-                </div>
+                {aiStreaming && (
+                  <div className="reveal-ai-ghost-text">{streamText}</div>
+                )}
+                {loading && !aiStreaming && (
+                  <p className="reveal-ai-waiting">카드의 메시지를 읽고 있습니다...</p>
+                )}
               </div>
             )}
           </div>
