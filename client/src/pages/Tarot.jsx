@@ -150,12 +150,12 @@ const DECK_INTROS = {
 };
 
 const DECK_LIST = [
-  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_cover.jpg', gifs: ['/tarot-effects/deck-intro/classic_0.gif', '/tarot-effects/deck-intro/classic_1.gif', '/tarot-effects/deck-intro/classic_2.gif', '/tarot-effects/deck-intro/classic_3.gif'], hasVariants: true },
-  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_cover.jpg', gifs: ['/tarot-effects/deck-intro/dark_0.gif', '/tarot-effects/deck-intro/dark_1.gif', '/tarot-effects/deck-intro/dark_2.gif', '/tarot-effects/deck-intro/dark_3.gif', '/tarot-effects/deck-intro/dark_0b.gif', '/tarot-effects/deck-intro/dark_1b.gif', '/tarot-effects/deck-intro/dark_2b.gif', '/tarot-effects/deck-intro/dark_3b.gif'], hasVariants: true },
-  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_cover.jpg', gifs: ['/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif', '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif'], hasVariants: true },
-  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', gifs: ['/tarot-effects/deck-intro/western_0.gif', '/tarot-effects/deck-intro/western_1.gif', '/tarot-effects/deck-intro/western_2.gif', '/tarot-effects/deck-intro/western_3.gif'], hasVariants: true },
-  { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', gifs: ['/tarot-effects/deck-intro/girl_0.gif', '/tarot-effects/deck-intro/girl_1.gif', '/tarot-effects/deck-intro/girl_2.gif', '/tarot-effects/deck-intro/girl_3.gif'], hasVariants: true },
-  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-boy/m00_v0.jpg', hasVariants: true },
+  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_0.gif', gifs: ['/tarot-effects/deck-intro/classic_0.gif', '/tarot-effects/deck-intro/classic_1.gif', '/tarot-effects/deck-intro/classic_2.gif', '/tarot-effects/deck-intro/classic_3.gif'], hasVariants: true },
+  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_0.gif', gifs: ['/tarot-effects/deck-intro/dark_0.gif', '/tarot-effects/deck-intro/dark_1.gif', '/tarot-effects/deck-intro/dark_2.gif', '/tarot-effects/deck-intro/dark_3.gif', '/tarot-effects/deck-intro/dark_0b.gif', '/tarot-effects/deck-intro/dark_1b.gif', '/tarot-effects/deck-intro/dark_2b.gif', '/tarot-effects/deck-intro/dark_3b.gif'], hasVariants: true },
+  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_0.gif', gifs: ['/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif', '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif'], hasVariants: true },
+  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_0.gif', gifs: ['/tarot-effects/deck-intro/western_0.gif', '/tarot-effects/deck-intro/western_1.gif', '/tarot-effects/deck-intro/western_2.gif', '/tarot-effects/deck-intro/western_3.gif'], hasVariants: true },
+  { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_0.gif', gifs: ['/tarot-effects/deck-intro/girl_0.gif', '/tarot-effects/deck-intro/girl_1.gif', '/tarot-effects/deck-intro/girl_2.gif', '/tarot-effects/deck-intro/girl_3.gif'], hasVariants: true },
+  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_0.gif', gifs: ['/tarot-effects/deck-intro/boy_0.gif', '/tarot-effects/deck-intro/boy_1.gif', '/tarot-effects/deck-intro/boy_2.gif', '/tarot-effects/deck-intro/boy_3.gif'], hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
@@ -915,7 +915,16 @@ function Tarot() {
                       else setStep('setup');
                     }
                   }}>
-                    <img key={off === 0 && d.gifs ? `${d.id}-gif-${deckGifIdx}` : d.id} src={(off === 0 && d.gifs) ? d.gifs[deckGifIdx % d.gifs.length] : d.img} alt={d.name} draggable={false} />
+                    {off === 0 && d.gifs ? (
+                      <div className="deck-gif-crossfade">
+                        {d.gifs.map((g, gi) => (
+                          <img key={gi} src={g} alt={d.name} draggable={false}
+                            className={gi === (deckGifIdx % d.gifs.length) ? 'deck-gif-active' : 'deck-gif-hidden'} />
+                        ))}
+                      </div>
+                    ) : (
+                      <img src={d.img} alt={d.name} draggable={false} />
+                    )}
                   </div>
                 );
               })}
@@ -971,7 +980,12 @@ function Tarot() {
           <div className="tarot-setup-screen">
             <div className="tarot-setup-bg">
               {hasGifs ? (
-                <img key={`gif-${setupGifIdx}`} src={gifBgSrc} alt="" draggable={false} className="setup-bg-slide" />
+                <div className="bg-gif-crossfade">
+                  {curDeck.gifs.map((g, gi) => (
+                    <img key={gi} src={g} alt="" draggable={false}
+                      className={`setup-bg-slide ${gi === (setupGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'}`} />
+                  ))}
+                </div>
               ) : (
                 <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
               )}
@@ -1075,7 +1089,15 @@ function Tarot() {
         return (
           <div className="tarot-shuffle-stage">
             <div className="shuffle-bg">
-              <img key={`shuf-bg-${stageGifIdx}`} src={stageBg} alt="" className="shuffle-bg-gif" />
+              {curDeck?.gifs ? (
+                <div className="bg-gif-crossfade">
+                  {curDeck.gifs.map((g, gi) => (
+                    <img key={gi} src={g} alt="" className={`shuffle-bg-gif ${gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'}`} />
+                  ))}
+                </div>
+              ) : (
+                <img src={stageBg} alt="" className="shuffle-bg-gif" />
+              )}
             </div>
             <p className="shuffle-top-text">카드를 섞고 있습니다<span className="tarot-dots" /></p>
             <div className="pick-carousel">
@@ -1104,9 +1126,13 @@ function Tarot() {
         return (
           <div className="tarot-pick-stage fade-in">
             {/* GIF 배경 */}
-            {pickBg && (
+            {curDeck?.gifs && (
               <div className="pick-gif-bg">
-                <img key={`pick-bg-${stageGifIdx}`} src={pickBg} alt="" />
+                <div className="bg-gif-crossfade">
+                  {curDeck.gifs.map((g, gi) => (
+                    <img key={gi} src={g} alt="" className={gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'} />
+                  ))}
+                </div>
               </div>
             )}
             {/* 상단 바 */}
@@ -1198,9 +1224,13 @@ function Tarot() {
         const revealItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-reveal-stage fade-in">
-          {revealBg && (
+          {curDeck?.gifs && (
             <div className="reveal-gif-bg">
-              <img key={`rev-bg-${stageGifIdx}`} src={revealBg} alt="" />
+              <div className="bg-gif-crossfade">
+                {curDeck.gifs.map((g, gi) => (
+                  <img key={gi} src={g} alt="" className={gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'} />
+                ))}
+              </div>
             </div>
           )}
 
@@ -1252,9 +1282,13 @@ function Tarot() {
         const resultItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-result-stage fade-in">
-          {resultBg && (
+          {curDeck?.gifs && (
             <div className="reveal-gif-bg">
-              <img key={`res-bg-${stageGifIdx}`} src={resultBg} alt="" />
+              <div className="bg-gif-crossfade">
+                {curDeck.gifs.map((g, gi) => (
+                  <img key={gi} src={g} alt="" className={gi === (stageGifIdx % curDeck.gifs.length) ? 'bg-gif-active' : 'bg-gif-hidden'} />
+                ))}
+              </div>
             </div>
           )}
 
