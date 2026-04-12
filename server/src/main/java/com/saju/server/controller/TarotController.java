@@ -1,6 +1,8 @@
 package com.saju.server.controller;
 
+import com.saju.server.entity.User;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.repository.UserRepository;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.TarotService;
 import com.saju.server.util.SseEmitterUtils;
@@ -20,6 +22,7 @@ public class TarotController {
 
     private final TarotService tarotService;
     private final HeartPointService heartPointService;
+    private final UserRepository userRepository;
 
     /**
      * 메이저 아르카나 22장 카드 정보
@@ -82,9 +85,24 @@ public class TarotController {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
         }
+        // 유저 프로필에서 나이/성별 가져오기
+        String birthDate = null;
+        String gender = null;
+        if (userId != null) {
+            try {
+                User user = userRepository.findById(userId).orElse(null);
+                if (user != null) {
+                    if (user.getBirthDate() != null) birthDate = user.getBirthDate().toString();
+                    gender = user.getGender();
+                }
+            } catch (Exception ignored) {}
+        }
+
         final Long uid = userId;
         final String finalHeartCategory = heartCategory;
-        return tarotService.streamReading(cardIds, reversals, spread, category, question, () -> {
+        final String finalBirthDate = birthDate;
+        final String finalGender = gender;
+        return tarotService.streamReading(cardIds, reversals, spread, category, question, finalBirthDate, finalGender, () -> {
             if (uid != null) heartPointService.deductPoints(uid, finalHeartCategory, "타로");
         });
     }

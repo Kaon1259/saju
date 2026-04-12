@@ -96,7 +96,7 @@ function GroupFortune() {
     setFortuneResult(null);
     fortuneCleanupRef.current?.();
 
-    fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, {
+    fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, { context: 'idol',
       onCached: (data) => { setFortuneResult(data); setFortuneLoading(false); },
       onChunk: (text) => { setFortuneStreaming(true); setFortuneStreamText(prev => prev + text); },
       onDone: (fullText) => {

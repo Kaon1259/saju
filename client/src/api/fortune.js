@@ -148,11 +148,12 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
   return response.data;
 };
 
-export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, context }) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (calendarType) params.set('calendarType', calendarType);
   if (gender) params.set('gender', gender);
+  if (context) params.set('context', context);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/saju/analyze/stream?${params.toString()}`;

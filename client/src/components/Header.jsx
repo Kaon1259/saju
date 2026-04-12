@@ -77,7 +77,14 @@ const PATH_SOUNDS = {
   '/biorhythm': playBioWave,
 };
 
-function Header({ onHomeSplash }) {
+// 탭 경로 → 인트로 키 매핑
+const TAB_INTRO_MAP = {
+  '/traditional': 'fortune',
+  '/my-menu': 'heart',
+  '/profile': 'my',
+};
+
+function Header({ onHomeSplash, onTabIntro }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { triggerTransition } = useTransition();
@@ -109,6 +116,14 @@ function Header({ onHomeSplash }) {
     if (item.path === '/' && onHomeSplash) {
       onHomeSplash();
       navigate('/');
+      return;
+    }
+
+    // 탭 인트로 표시
+    const introKey = TAB_INTRO_MAP[item.path];
+    if (introKey && onTabIntro) {
+      onTabIntro(introKey);
+      navigate(item.path);
       return;
     }
 

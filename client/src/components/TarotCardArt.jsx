@@ -15,10 +15,13 @@ const DECK_PATHS = {
   romantic: '/tarot-romantic',
   oriental: '/tarot-oriental',
   western: '/tarot-western',
+  classic_rws: '/tarot-classic-rws',
+  girl: '/tarot-girl',
+  boy: '/tarot-boy',
 };
 
 // 4벌 변형 덱 (각 카드마다 _v0~v3)
-const MULTI_VARIANT_DECKS = new Set(['oriental', 'western', 'dark', 'romantic']);
+const MULTI_VARIANT_DECKS = new Set(['oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy']);
 
 // 메이저 아르카나 이름
 const MAJOR_NAMES = [
@@ -103,6 +106,9 @@ function TarotCardArt({ cardId, deck = 'classic', variant: propVariant }) {
   const randomVariant = useMemo(() => Math.floor(Math.random() * 4), [id, deck]);
   let variant = propVariant ?? randomVariant;
   const isMulti = MULTI_VARIANT_DECKS.has(deck);
+
+  // classic_rws m77: v2 누락 → v0으로 폴백
+  if (deck === 'classic_rws' && id === 77 && variant === 2) variant = 0;
 
   const imgSrc = isMulti
     ? `${basePath}/m${num}_v${variant}.jpg`

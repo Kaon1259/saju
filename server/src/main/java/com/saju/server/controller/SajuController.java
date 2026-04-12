@@ -64,7 +64,8 @@ public class SajuController {
             @RequestParam(value = "birthTime", required = false) String birthTime,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
             @RequestParam(value = "gender", required = false) String gender,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(value = "context", required = false) String context) {
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
@@ -122,7 +123,12 @@ public class SajuController {
 4. 점수는 45-98 사이
 5. 대화하듯 자연스러운 반말 구어체""";
 
+        boolean isIdol = "idol".equals(context);
+        String workLabel = isIdol ? "활동운 (무대·팬·컨텐츠·그룹 활동 관련, 3-4문장)" : "직장운 (3-4문장)";
+        String idolNote = isIdol ? "※ 이 사람은 아이돌/연예인입니다. 직장이 아닌 연예 활동, 무대, 팬 관계, 그룹 케미 관점에서 해석해주세요.\n" : "";
+
         String userPrompt = todayContext + "\n" + sajuSummary + "\n\n" +
+            idolNote +
             "위 사주 정보와 오늘의 천기를 종합하여 성격 분석과 오늘의 운세를 함께 작성하세요.\n" +
             "반드시 아래 JSON 형식으로만 응답:\n" +
             "{\"personalityReading\":\"성격 분석 (6-8문장)\"," +
@@ -130,7 +136,7 @@ public class SajuController {
             "\"love\":\"애정운 (3-4문장)\"," +
             "\"money\":\"재물운 (3-4문장)\"," +
             "\"health\":\"건강운 (3-4문장)\"," +
-            "\"work\":\"직장운 (3-4문장)\"," +
+            "\"work\":\"" + workLabel + "\"," +
             "\"score\":점수(45-98)," +
             "\"luckyNumber\":행운숫자(1-99)," +
             "\"luckyColor\":\"행운색상\"}";
