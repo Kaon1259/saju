@@ -52,8 +52,8 @@ function TabIntro({ tabKey, onDone }) {
   const [img] = useState(() => config.images[Math.floor(Math.random() * config.images.length)]);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFadeOut(true), 4000);
-    const t2 = setTimeout(onDone, 4600);
+    const t1 = setTimeout(() => setFadeOut(true), 2000);
+    const t2 = setTimeout(onDone, 2600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onDone]);
 

@@ -4,8 +4,25 @@
  * - dark, romantic, oriental, western: 4벌 변형 (m00_v0~v3.jpg)
  */
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import LoveTarotSVG from './LoveTarotSVG';
+
+// ── 프레임 이미지 프리로드 캐시 ──
+const frameCache = new Map();
+function preloadFrame(src) {
+  if (frameCache.has(src)) return;
+  const img = new Image();
+  img.src = src;
+  frameCache.set(src, img);
+}
+// 앱 시작 시 전체 프레임 프리로드
+(function preloadAllFrames() {
+  for (let s = 0; s < 10; s++) {
+    for (let v = 0; v < 4; v++) {
+      preloadFrame(`/tarot-frames/frame_${s}_${v}.png`);
+    }
+  }
+})();
 
 const DECK_PATHS = {
   classic: '/tarot',
@@ -76,9 +93,21 @@ function MinorArcanaCard({ info }) {
   );
 }
 
-function TarotCardArt({ cardId, deck = 'classic', variant: propVariant }) {
+// 프레임 오버레이: 10세트 x 4장
+const FRAME_SETS = 10;
+const FRAME_VARIANTS = 4;
+
+function TarotCardArt({ cardId, deck = 'classic', variant: propVariant, frameSet: propFrameSet, frameV: propFrameV, noFrame = false }) {
   const id = Math.min(Math.max(cardId || 0, 0), 77);
   const isMajor = id <= 21;
+
+  // 프레임 오버레이 — 상위에서 고정값을 받거나 폴백 랜덤
+  const frameIdx = useMemo(() => {
+    const set = propFrameSet ?? Math.floor(Math.random() * FRAME_SETS);
+    const v = propFrameV ?? Math.floor(Math.random() * FRAME_VARIANTS);
+    return { set, v };
+  }, [propFrameSet, propFrameV]);
+  const frameSrc = `/tarot-frames/frame_${frameIdx.set}_${frameIdx.v}.png`;
 
   // 덱별 이미지 없는 카드 — 심볼 폴백
   const MISSING_CUSTOM = new Set([28,29, 42,43, 56,57, 70,71]);
@@ -93,7 +122,7 @@ function TarotCardArt({ cardId, deck = 'classic', variant: propVariant }) {
     return (
       <div className="tarot-card-art">
         <LoveTarotSVG cardId={id} />
-        <div className="tarot-card-art-frame" />
+        {!noFrame && <img src={frameSrc} alt="" className="tarot-card-frame-overlay" draggable={false} />}
         <div className="tarot-card-art-shine" />
       </div>
     );
@@ -123,7 +152,7 @@ function TarotCardArt({ cardId, deck = 'classic', variant: propVariant }) {
         draggable={false}
         loading="eager"
       />
-      <div className="tarot-card-art-frame" />
+      {!noFrame && <img src={frameSrc} alt="" className="tarot-card-frame-overlay" draggable={false} />}
       <div className="tarot-card-art-shine" />
     </div>
   );

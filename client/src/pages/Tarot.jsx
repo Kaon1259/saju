@@ -145,12 +145,12 @@ const POSITION_LABELS = {
 };
 
 const DECK_LIST = [
-  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_cover.jpg', hasVariants: true },
-  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_cover.jpg', hasVariants: true },
-  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_cover.jpg', hasVariants: true },
-  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', hasVariants: true },
-  { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', hasVariants: true },
-  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_cover.jpg', hasVariants: true },
+  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_cover.jpg', gif: '/tarot-effects/deck-intro/classic_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/classic_rws_${i}.png`), hasVariants: true },
+  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_cover.jpg', gif: '/tarot-effects/deck-intro/dark_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/dark_${i}.png`), hasVariants: true },
+  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_cover.jpg', gif: '/tarot-effects/deck-intro/romantic_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/romantic_${i}.png`), hasVariants: true },
+  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', gif: '/tarot-effects/deck-intro/western_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/western_${i}.png`), hasVariants: true },
+  { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', gif: '/tarot-effects/deck-intro/girl_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/girl_${i}.png`), hasVariants: true },
+  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_cover.jpg', gif: '/tarot-effects/deck-intro/boy_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/boy_${i}.png`), hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
@@ -224,6 +224,7 @@ function Tarot() {
   const [streamText, setStreamText] = useState('');
   const [aiStreaming, setAiStreaming] = useState(false);
   const [shuffleAnim, setShuffleAnim] = useState(false);
+  const [shuffleFlipping, setShuffleFlipping] = useState(false);
   const [flipIndex, setFlipIndex] = useState(-1);
   const [focusCard, setFocusCard] = useState(null);
   const [showDeckModal, setShowDeckModal] = useState(false);
@@ -238,6 +239,19 @@ function Tarot() {
   const [pickSwipeIdx, setPickSwipeIdx] = useState(0);
   const [resultDetailIdx, setResultDetailIdx] = useState(null); // 결과 카드 상세보기 인덱스
   const [setupBgIdx, setSetupBgIdx] = useState(0);
+  // 프레임 오버레이: 덱 선택 시 세트+변형 고정
+  const [selectedFrame, setSelectedFrame] = useState(() => {
+    const set = Math.floor(Math.random() * 10);
+    const v = Math.floor(Math.random() * 4);
+    return { set, v };
+  });
+  const frameSrc = `/tarot-frames/frame_${selectedFrame.set}_${selectedFrame.v}.png`;
+  const [selectedBack, setSelectedBack] = useState(() => {
+    const saved = localStorage.getItem('tarotDeck') || 'custom';
+    const deckData = DECK_LIST.find(d => d.id === saved);
+    if (deckData?.backs?.length) return deckData.backs[Math.floor(Math.random() * deckData.backs.length)];
+    return null;
+  }); // 선택된 뒷면 이미지 경로
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const carouselTouchRef = useRef({ startX: 0 });
@@ -419,7 +433,13 @@ function Tarot() {
             cVel.current = 0;
             setCTick(n => n + 1);
             cAnimId.current = null;
-            setTimeout(() => { setShuffleAnim(false); setStep('pick'); }, 1000);
+            // 셔플 완료 → 캐러셀 그대로 뒤집기 → pick
+            setShuffleAnim(false);
+            setShuffleFlipping(true);
+            setTimeout(() => {
+              setShuffleFlipping(false);
+              setStep('pick');
+            }, 1200);
           }
         };
         cAnimId.current = requestAnimationFrame(snapTick);
@@ -486,6 +506,15 @@ function Tarot() {
   // 순환 인덱스 헬퍼
   const deckAt = (offset) => DECK_LIST[(deckSwipeIdx + offset + DECK_LIST.length) % DECK_LIST.length];
 
+  // ── 덱 캐러셀 자동 회전 (3초마다 다음 덱) ──
+  useEffect(() => {
+    if (step !== 'deck') return;
+    const timer = setInterval(() => {
+      if (!deckDragRef.current.dragging) deckSlide(1);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [step, deckSwipeIdx, deckSliding]);
+
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
 
   // ─── 카드 셔플 ───
@@ -520,9 +549,15 @@ function Tarot() {
     cPos.current = 0;
     cVel.current = 0;
 
+    // selectedBack이 없으면 현재 덱의 뒷면 이미지 설정
+    const deckData = DECK_LIST.find(d => d.id === deck);
+    if (!selectedBack && deckData?.backs?.length) {
+      setSelectedBack(deckData.backs[Math.floor(Math.random() * deckData.backs.length)]);
+    }
+
     setStep('shuffle');
     setShuffleAnim(true);
-  }, []);
+  }, [deck, selectedBack]);
 
   // 카드 선택 — ref 기반 (stale closure 방지)
   const [pickingCard, setPickingCard] = useState(null);
@@ -744,6 +779,13 @@ function Tarot() {
   const handleDeckChange = (d) => {
     setDeck(d);
     localStorage.setItem('tarotDeck', d);
+    // 덱에 맞는 뒷면 이미지 4장 중 랜덤 선택
+    const deckData = DECK_LIST.find(dl => dl.id === d);
+    if (deckData?.backs) {
+      setSelectedBack(deckData.backs[Math.floor(Math.random() * deckData.backs.length)]);
+    }
+    // 프레임 오버레이 세트+변형 고정 (덱 선택 시 1회)
+    setSelectedFrame({ set: Math.floor(Math.random() * 10), v: Math.floor(Math.random() * 4) });
   };
 
   const handleVariantChange = (v) => {
@@ -764,6 +806,7 @@ function Tarot() {
     setFlipIndex(-1);
     setFocusCard(null);
     setStreamText('');
+    setShuffleFlipping(false);
     setAiStreaming(false);
     setPickingCard(null);
     setFilledSlots([]);
@@ -811,7 +854,7 @@ function Tarot() {
             animationDuration: `${8 + i * 2}s`,
             opacity: 0.04 + i * 0.01,
           }}>
-            <TarotCardArt cardId={i * 4} deck={deck} variant={deckVariant} />
+            <TarotCardArt cardId={i * 4} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
           </div>
         ))}
         {/* 별 파티클 */}
@@ -847,6 +890,7 @@ function Tarot() {
 
         return (
           <div className="tarot-deck-screen">
+            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
             {/* 배경 영상 */}
             <div className="deck-bg-video">
               <video src="/tarot-effects/intro.mp4" autoPlay muted loop playsInline
@@ -883,12 +927,16 @@ function Tarot() {
                 const scale = Math.max(0.65, 1 - dist * 0.15);
                 const opacity = Math.max(0.3, 1 - dist * 0.35);
                 const z = 10 - Math.abs(off);
+                // 테두리 강도: 가운데=1, 인접=거리에 따라 감소, 2칸 이상=0
+                const borderIntensity = Math.max(0, 1 - dist * 0.7);
+                const isNear = dist < 1.5;
                 return (
-                  <div key={`${d.id}-${off}`} className={`deck-slide-card${off === 0 ? ' deck-slide-active' : ''}`} style={{
+                  <div key={`${d.id}-${off}`} className={`deck-slide-card${off === 0 ? ' deck-slide-active' : isNear ? ' deck-slide-near' : ''}`} style={{
                     transform: `translateX(${x}px) scale(${scale})`,
                     opacity,
                     zIndex: z,
                     transition: transStyle,
+                    '--border-intensity': borderIntensity,
                   }} onClick={() => {
                     if (off === 0 && !deckSliding && Math.abs(deckDragX) < 10) {
                       handleDeckChange(d.id);
@@ -897,7 +945,9 @@ function Tarot() {
                     }
                   }}>
                     <div className={`deck-cover-wrap${off === 0 ? ' deck-cover-active' : ''}`}>
-                      <img src={d.img} alt={d.name} draggable={false} />
+                      <img src={d.img} alt={d.name} draggable={false} className="deck-cover-static" style={{ opacity: off === 0 && d.gif ? 0 : 1 }} />
+                      {d.gif && <img src={d.gif} alt="" draggable={false} className="deck-cover-gif" style={{ opacity: off === 0 ? 1 : 0 }} />}
+                      <img src={`/tarot-frames/frame_${DECK_LIST.indexOf(d) % 10}_${Math.floor(DECK_LIST.indexOf(d) / 2) % 4}.png`} alt="" className="deck-cover-frame" draggable={false} style={{ opacity: borderIntensity }} />
                     </div>
                   </div>
                 );
@@ -959,6 +1009,7 @@ function Tarot() {
         const bgSrc = `${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.jpg`;
         return (
           <div className="tarot-setup-screen">
+            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
             <div className="tarot-setup-bg">
               <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
             </div>
@@ -1059,24 +1110,48 @@ function Tarot() {
         const curDeck = DECK_LIST.find(d => d.id === deck);
         return (
           <div className="tarot-shuffle-stage">
+            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
             <div className="shuffle-bg">
               <img src={curDeck?.img || '/shuffle-start.png'} alt="" className="shuffle-bg-static" />
             </div>
-            <p className="shuffle-top-text">카드를 섞고 있습니다<span className="tarot-dots" /></p>
+            <p className="shuffle-top-text">
+              {shuffleFlipping ? '카드를 뒤집는 중...' : <>카드를 섞고 있습니다<span className="tarot-dots" /></>}
+            </p>
             <div className="pick-carousel">
               {items.map(({ off, idx, x, scale, opacity, z }) => (
-                <div key={`shuf-${off}`} className="pick-slide-card" style={{
+                <div key={`shuf-${off}`} className={`pick-slide-card shuffle-flip-card${shuffleFlipping ? ' shuffle-flipping' : ''}`} style={{
                   transform: `translateX(${x}px) scale(${scale})`,
                   opacity, zIndex: z,
+                  animationDelay: shuffleFlipping ? `${Math.abs(off) * 0.08}s` : undefined,
                 }}>
-                  <TarotCardArt cardId={shuffledCards[idx].id} deck={deck} variant={deckVariant} />
+                  <div className="shuffle-flip-inner">
+                    <div className="shuffle-flip-front">
+                      <TarotCardArt cardId={shuffledCards[idx].id} deck={deck} variant={deckVariant} noFrame frameSet={selectedFrame.set} frameV={selectedFrame.v} />
+                    </div>
+                    <div className="shuffle-flip-back">
+                      {selectedBack ? (
+                        <img src={selectedBack} alt="" draggable={false} />
+                      ) : (
+                        <div className="tarot-card-back">
+                          <div className="tarot-card-back-inner">
+                            <div className="tarot-card-back-star">✦</div>
+                            <div className="tarot-card-back-border" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            <p className="tarot-shuffle-hint">마음을 가라앉히고 질문에 집중하세요</p>
+            <p className="tarot-shuffle-hint">
+              {shuffleFlipping ? '직감을 믿고 카드를 선택하세요' : '마음을 가라앉히고 질문에 집중하세요'}
+            </p>
           </div>
         );
       })()}
+
+      {/* STEP 2.5 (flip) 제거됨 — 셔플 캐러셀에서 직접 뒤집기 */}
 
       {/* ═══ STEP 3: 카드 선택 — 무한 캐러셀 + 관성 물리 ═══ */}
       {step === 'pick' && shuffledCards.length > 0 && (() => {
@@ -1087,10 +1162,12 @@ function Tarot() {
         const curDeck = DECK_LIST.find(d => d.id === deck);
         return (
           <div className="tarot-pick-stage fade-in">
+            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
             {/* 정적 이미지 배경 + CSS 애니메이션 */}
             {curDeck?.img && (
               <div className="pick-gif-bg">
                 <img src={curDeck.img} alt="" className="pick-bg-static" />
+                <img src={frameSrc} alt="" className="bg-frame-overlay" draggable={false} />
               </div>
             )}
             {/* 상단 바 */}
@@ -1100,12 +1177,7 @@ function Tarot() {
               ) : (
                 <span className="pick-top-label">카드 <strong>{pickLimit}장</strong> 선택</span>
               )}
-              <div className="pick-top-actions">
-                {!allFilled && !autoPickRunning && !pickBusy.current && !discardPhase && (
-                  <button className="pick-random-btn" onClick={handleRandomPick}>✦ 자동</button>
-                )}
-                <span className="pick-top-counter">{filledSlots.length}/{pickLimit}</span>
-              </div>
+              <span className="pick-top-counter">{filledSlots.length}/{pickLimit}</span>
             </div>
 
             {/* 무한 캐러셀 — 버리기 단계에선 숨김 */}
@@ -1123,16 +1195,25 @@ function Tarot() {
                       }}
                       onClick={() => isCenter && !isSelected && !allFilled && handleCardPick(idx)}
                     >
-                      <div className="tarot-card-back">
-                        <div className="tarot-card-back-inner">
-                          <div className="tarot-card-back-star">✦</div>
-                          <div className="tarot-card-back-border" />
+                      {selectedBack ? (
+                        <img src={selectedBack} alt="" className="pick-card-back-img" draggable={false} />
+                      ) : (
+                        <div className="tarot-card-back">
+                          <div className="tarot-card-back-inner">
+                            <div className="tarot-card-back-star">✦</div>
+                            <div className="tarot-card-back-border" />
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
+            )}
+
+            {/* 자동 선택 버튼 — 캐러셀과 슬롯 사이 */}
+            {!allFilled && !autoPickRunning && !pickBusy.current && !discardPhase && (
+              <button className="pick-auto-btn" onClick={handleRandomPick}>✦ 자동 선택</button>
             )}
 
             {/* 하단 슬롯 — 뒷면만 표시, 버리기 모드에서만 ✕ */}
@@ -1143,12 +1224,16 @@ function Tarot() {
                   onClick={() => discardPhase && discardingIdx === null && handleDiscard(i)}
                 >
                   <div className="tarot-slot-card">
-                    <div className="tarot-card-back">
-                      <div className="tarot-card-back-inner">
-                        <div className="tarot-card-back-star">✦</div>
-                        <div className="tarot-card-back-border" />
+                    {selectedBack ? (
+                      <img src={selectedBack} alt="" className="slot-card-back-img" draggable={false} />
+                    ) : (
+                      <div className="tarot-card-back">
+                        <div className="tarot-card-back-inner">
+                          <div className="tarot-card-back-star">✦</div>
+                          <div className="tarot-card-back-border" />
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="tarot-slot-badge">{i + 1}</div>
                   </div>
                 </div>
@@ -1181,6 +1266,7 @@ function Tarot() {
         const revealItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-reveal-stage fade-in">
+            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
           {curDeck?.img && (
             <div className="reveal-gif-bg">
               <img src={curDeck.img} alt="" className="reveal-bg-static" />
@@ -1200,7 +1286,7 @@ function Tarot() {
                     opacity, zIndex: z,
                   }}>
                     <div className={`reveal-card-front ${card.reversed ? 'reversed' : ''}`}>
-                      <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} />
+                      <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
                       {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
                     </div>
                     <div className="reveal-card-label">{posLabel}</div>
@@ -1246,6 +1332,7 @@ function Tarot() {
         const resultItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-result-stage fade-in">
+            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
           {curDeck?.img && (
             <div className="reveal-gif-bg">
               <img src={curDeck.img} alt="" className="reveal-bg-static" />
@@ -1264,7 +1351,7 @@ function Tarot() {
                   opacity, zIndex: z,
                 }} onClick={() => off === 0 && setResultDetailIdx(idx % revealedCards.length)}>
                   <div className={`reveal-card-front ${card.reversed ? 'reversed' : ''}`}>
-                    <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} />
+                    <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
                     {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
                   </div>
                   <div className="reveal-card-label">{posLabel}</div>
@@ -1277,12 +1364,14 @@ function Tarot() {
           {/* AI 해석 결과 */}
           {reading && (
             <div className="reveal-ai-area fade-in" ref={resultRef}>
-              <div className="tarot-overall glass-card">
+              <div className="tarot-overall glass-card tarot-framed-card">
+                <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
                 <div className="tarot-overall-icon">🌟</div>
                 <p className="tarot-overall-text">{reading.overallMessage}</p>
               </div>
 
-              <div className="tarot-interpretation glass-card">
+              <div className="tarot-interpretation glass-card tarot-framed-card">
+                <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
                 <h3 className="tarot-interp-title"><span>📜</span> 타로 마스터의 해석</h3>
                 <div className="tarot-interp-body">
                   {reading.interpretation.split('\n').map((line, i) => (
@@ -1292,7 +1381,10 @@ function Tarot() {
               </div>
 
               {reading.advice && (
-                <FortuneCard icon="💡" title="오늘의 조언" description={reading.advice} delay={200} />
+                <div className="tarot-framed-card" style={{ position: 'relative' }}>
+                  <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
+                  <FortuneCard icon="💡" title="오늘의 조언" description={reading.advice} delay={200} />
+                </div>
               )}
 
               <div className="tarot-actions">
@@ -1316,7 +1408,7 @@ function Tarot() {
               <div className="result-card-detail-overlay fade-in" onClick={() => setResultDetailIdx(null)}>
                 <div className="result-card-detail">
                   <div className={`result-card-detail-img ${card.reversed ? 'reversed' : ''}`}>
-                    <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} />
+                    <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
                     {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
                   </div>
                   <div className="result-card-detail-info">
@@ -1346,7 +1438,7 @@ function Tarot() {
               <div className="tarot-focus-content" onClick={e => e.stopPropagation()}>
                 <div className="tarot-focus-card-wrap">
                   <div className="tarot-focus-card">
-                    <TarotCardArt cardId={heroCardId} deck={deck} variant={deckVariant} />
+                    <TarotCardArt cardId={heroCardId} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
                   </div>
                 </div>
                 <div className="tarot-focus-info">
@@ -1370,7 +1462,7 @@ function Tarot() {
             <div className="tarot-focus-content" onClick={e => e.stopPropagation()}>
               <div className="tarot-focus-card-wrap">
                 <div className={`tarot-focus-card ${card.reversed ? 'reversed-front' : ''}`}>
-                  <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} />
+                  <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
                   {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
                 </div>
               </div>
