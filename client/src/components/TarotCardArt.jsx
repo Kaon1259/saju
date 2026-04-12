@@ -35,10 +35,11 @@ const DECK_PATHS = {
   classic_rws: '/tarot-classic-rws',
   girl: '/tarot-girl',
   boy: '/tarot-boy',
+  cats: '/tarot-cats',
 };
 
 // 4벌 변형 덱 (각 카드마다 _v0~v3)
-const MULTI_VARIANT_DECKS = new Set(['oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy']);
+const MULTI_VARIANT_DECKS = new Set(['oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy', 'cats']);
 
 // 메이저 아르카나 이름
 const MAJOR_NAMES = [

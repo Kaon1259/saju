@@ -662,12 +662,13 @@
 
 /* ═══ 톤 선택 화면 ═══ */
 .tarot-tone-screen {
-  position: relative; z-index: 2;
+  position: fixed; inset: 0; z-index: 10;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 100vh; padding: 0;
-  margin: -12px -16px -100px;
+  padding: 0;
   background: #050510;
   overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 /* 풀스크린 커버 이미지 + Ken Burns */
 .tone-fullscreen-cover {
@@ -830,9 +831,10 @@
 
 /* ═══ 메뉴 화면 ═══ */
 .tarot-setup-screen {
-  position: relative; z-index: 1;
-  margin: -12px -16px -100px;
-  min-height: 100vh; overflow: hidden;
+  position: fixed; inset: 0; z-index: 10;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 .tarot-setup-bg {
   position: fixed; inset: 0; z-index: 0;
@@ -1682,11 +1684,12 @@
 
 /* ═══ 셔플 — 자동 스와이프 ═══ */
 .tarot-shuffle-stage {
-  text-align: center; position: relative; z-index: 1;
+  text-align: center;
+  position: fixed; inset: 0; z-index: 10;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 100vh;
-  margin: -12px -16px -100px;
-  padding: 12px 16px 100px;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 /* 셔플 배경 — 정적 이미지 */
@@ -2882,6 +2885,29 @@
 .tarot-action-btn:hover { transform: translateY(-2px); }
 .tarot-share-btn:hover { border-color: #9B59B6; background: rgba(147, 51, 234, 0.1); }
 .tarot-reset-btn:hover { border-color: #FFD700; background: rgba(255, 215, 0, 0.1); }
+
+/* 결과 상단 다시 버튼 */
+.tarot-retry-btn {
+  position: fixed; top: 12px; right: 12px;
+  z-index: 100;
+  padding: 6px 14px; border-radius: 20px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(222,169,87,0.4);
+  color: rgba(222,169,87,0.9);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+.tarot-retry-btn:hover {
+  background: rgba(0,0,0,0.7);
+  border-color: rgba(222,169,87,0.7);
+}
+[data-theme="light"] .tarot-retry-btn {
+  background: rgba(255,255,255,0.7);
+  border-color: rgba(180,140,60,0.3);
+  color: #b8860b;
+}
 
 /* ═══ 유틸리티 ═══ */
 .fade-in { animation: fadeIn 0.5s ease; }

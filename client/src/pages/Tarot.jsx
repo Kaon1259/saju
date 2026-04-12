@@ -151,6 +151,7 @@ const DECK_LIST = [
   { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', gif: '/tarot-effects/deck-intro/western_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/western_${i}.png`), hasVariants: true },
   { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', gif: '/tarot-effects/deck-intro/girl_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/girl_${i}.png`), hasVariants: true },
   { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_cover.jpg', gif: '/tarot-effects/deck-intro/boy_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/boy_${i}.png`), hasVariants: true },
+  { id: 'cats', name: '고양이 타로', sub: 'Cat Tarot', img: '/tarot-effects/deck-intro/cats_cover.jpg', gif: '/tarot-effects/deck-intro/cats_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/cats_${i}.png`), hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
@@ -1002,7 +1003,7 @@ function Tarot() {
       {/* ═══ STEP 1: 메뉴 화면 (타로 스타일) ═══ */}
       {step === 'setup' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy' };
+        const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cats: '/tarot-cats' };
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
         const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];
@@ -1333,6 +1334,7 @@ function Tarot() {
         return (
         <div className="tarot-result-stage fade-in">
             <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
+            <button className="tarot-retry-btn" onClick={resetAll}>↻ 다시</button>
           {curDeck?.img && (
             <div className="reveal-gif-bg">
               <img src={curDeck.img} alt="" className="reveal-bg-static" />
