@@ -37,43 +37,66 @@ import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
 
-function Splash({ onDone }) {
+const TITLE_IMAGES = Array.from({ length: 20 }, (_, i) => `/title/title_${String(i).padStart(2, '0')}.jpg`);
+
+// 탭별 인트로 이미지
+const TAB_INTRO_IMAGES = {
+  fortune: { images: Array.from({ length: 24 }, (_, i) => `/intro-fortune/fortune_${String(i).padStart(2, '0')}.jpg`), title: '정통운세', sub: '사주팔자로 읽는 당신의 운명', color: '#E879F9' },
+  heart: { images: Array.from({ length: 24 }, (_, i) => `/intro-heart/heart_${String(i).padStart(2, '0')}.jpg`), title: '하트충전', sub: '사랑의 에너지를 충전하세요', color: '#FF6B8A' },
+  my: { images: Array.from({ length: 24 }, (_, i) => `/intro-my/my_${String(i).padStart(2, '0')}.jpg`), title: '마이', sub: '별들이 그린 나의 이야기', color: '#34D399' },
+};
+
+function TabIntro({ tabKey, onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
-  const userProfile = (() => {
-    try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; }
-  })();
-  const isLoggedIn = !!localStorage.getItem('userId');
-  const relStatus = userProfile.relationshipStatus;
-  const isLovey = relStatus === 'IN_RELATIONSHIP' || relStatus === 'SOME';
-  const isSingle = isLoggedIn && !isLovey;
+  const config = TAB_INTRO_IMAGES[tabKey];
+  const [img] = useState(() => config.images[Math.floor(Math.random() * config.images.length)]);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFadeOut(true), 1200);
-    const t2 = setTimeout(onDone, 1700);
+    const t1 = setTimeout(() => setFadeOut(true), 4000);
+    const t2 = setTimeout(onDone, 4600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onDone]);
 
   return (
-    <div className={`splash ${fadeOut ? 'splash--out' : ''}`}>
-      {/* 번개 효과 */}
-      <div className="splash-lightning" />
-      <div className="splash-lightning splash-lightning--2" />
-
-      {/* 비/빛 입자 */}
-      <div className="splash-rain">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <div key={i} className="splash-drop" style={{
-            left: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 2}s`,
-            animationDuration: `${0.6 + Math.random() * 0.8}s`,
-            opacity: 0.15 + Math.random() * 0.35,
-          }} />
-        ))}
+    <div className={`splash splash--title ${fadeOut ? 'splash--out' : ''}`}>
+      <img src={img} alt="" className="splash-title-img" draggable={false} />
+      <div className="splash-title-overlay">
+        <h1 className="splash-title-text" style={{ background: `linear-gradient(135deg, #fff 0%, ${config.color}88 50%, ${config.color} 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>{config.title}</h1>
+        <p className="tab-intro-sub">{config.sub}</p>
       </div>
+    </div>
+  );
+}
 
-      {/* 별 반짝임 */}
+function Splash({ onDone }) {
+  const [fadeOut, setFadeOut] = useState(false);
+  const [titleImg] = useState(() => TITLE_IMAGES[Math.floor(Math.random() * TITLE_IMAGES.length)]);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setFadeOut(true), 2500);
+    const t2 = setTimeout(onDone, 3200);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [onDone]);
+
+  return (
+    <div className={`splash splash--title ${fadeOut ? 'splash--out' : ''}`} onClick={() => { setFadeOut(true); setTimeout(onDone, 500); }}>
+      <img src={titleImg} alt="1:1연애운" className="splash-title-img" draggable={false} />
+      <div className="splash-title-overlay">
+        <div className="splash-title-hearts">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <span key={i} className="splash-title-heart" style={{
+              left: `${8 + Math.random() * 84}%`,
+              animationDelay: `${0.5 + Math.random() * 1.5}s`,
+              animationDuration: `${2 + Math.random() * 1.5}s`,
+              fontSize: `${10 + Math.random() * 16}px`,
+            }}>{['💕','💗','💖','🩷','♥'][Math.floor(Math.random()*5)]}</span>
+          ))}
+        </div>
+        <h1 className="splash-title-text">💕 1:1연애운 💕</h1>
+      </div>
+      {/* 반짝임 파티클 */}
       <div className="splash-stars">
-        {Array.from({ length: 25 }).map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <span key={i} className="splash-star" style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -81,67 +104,6 @@ function Splash({ onDone }) {
             fontSize: `${Math.random() * 3 + 1}px`,
           }}>✦</span>
         ))}
-      </div>
-
-      {/* 로그인 + 연애중/썸: 러블리 하트 */}
-      {isLovey && (
-        <div className="splash-hearts">
-          {Array.from({ length: 18 }).map((_, i) => (
-            <span key={i} className="splash-heart" style={{
-              left: `${5 + Math.random() * 90}%`,
-              animationDelay: `${Math.random() * 1.2}s`,
-              animationDuration: `${1.5 + Math.random() * 1}s`,
-              fontSize: `${12 + Math.random() * 18}px`,
-              color: ['#ff4081', '#e91e63', '#f06292', '#ff80ab', '#ff1744'][Math.floor(Math.random()*5)],
-            }}>{['❤','💕','💗','💖','✨'][Math.floor(Math.random()*5)]}</span>
-          ))}
-        </div>
-      )}
-
-      {/* 로그인 + 솔로: 별빛 강화 */}
-      {isSingle && (
-        <div className="splash-solo-sparkles">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <span key={i} className="splash-solo-star" style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 1.5}s`,
-              fontSize: `${6 + Math.random() * 12}px`,
-            }}>{['✦','⭐','💫','🌟'][Math.floor(Math.random()*4)]}</span>
-          ))}
-        </div>
-      )}
-
-      {/* 메인 콘텐츠 */}
-      <div className="splash-content">
-        {isLovey ? (
-          <>
-            <div className="splash-symbol splash-symbol--love">
-              <div className="splash-ring splash-ring--love" />
-              <span className="splash-yin splash-yin--love">💕</span>
-            </div>
-            <h1 className="splash-title splash-title--love">1:1연애운 💕</h1>
-            <p className="splash-sub">{relStatus === 'IN_RELATIONSHIP' ? '사랑이 빛나는 오늘 하루' : '설레는 인연이 다가오고 있어요'}</p>
-          </>
-        ) : isSingle ? (
-          <>
-            <div className="splash-symbol">
-              <div className="splash-ring" />
-              <span className="splash-yin">🌟</span>
-            </div>
-            <h1 className="splash-title">1:1연애운 💕</h1>
-            <p className="splash-sub">빛나는 당신의 하루가 시작됩니다</p>
-          </>
-        ) : (
-          <>
-            <div className="splash-symbol">
-              <div className="splash-ring" />
-              <span className="splash-yin">☯</span>
-            </div>
-            <h1 className="splash-title">1:1연애운 💕</h1>
-            <p className="splash-sub">사주팔자로 보는 당신의 운명</p>
-          </>
-        )}
       </div>
     </div>
   );
@@ -208,6 +170,7 @@ function useProfileGuard() {
 function App() {
   const [splashKey, setSplashKey] = useState(Date.now());
   const [showSplash, setShowSplash] = useState(true);
+  const [tabIntro, setTabIntro] = useState(null); // { key, tabKey }
   useTimeTheme();
   useFontSize();
   useProfileGuard();
@@ -226,13 +189,20 @@ function App() {
     setShowSplash(true);
   };
 
+  const triggerTabIntro = (tabKey) => {
+    if (TAB_INTRO_IMAGES[tabKey]) {
+      setTabIntro({ key: Date.now(), tabKey });
+    }
+  };
+
   return (
     <HeartProvider>
     <>
       {showSplash && <Splash key={splashKey} onDone={() => setShowSplash(false)} />}
+      {tabIntro && <TabIntro key={tabIntro.key} tabKey={tabIntro.tabKey} onDone={() => setTabIntro(null)} />}
       <div className="app" style={{ display: showSplash ? 'none' : undefined }}>
         <TransitionProvider>
-          <Header onHomeSplash={triggerSplash} />
+          <Header onHomeSplash={triggerSplash} onTabIntro={triggerTabIntro} />
           <main className="app-main">
             <Routes>
               <Route path="/" element={<Home />} />

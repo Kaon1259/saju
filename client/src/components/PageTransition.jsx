@@ -142,8 +142,8 @@ function PageTransition({ effect, onDone }) {
 
   useEffect(() => {
     config.sound();
-    const t1 = setTimeout(() => setFadeOut(true), 900);
-    const t2 = setTimeout(onDone, 1200);
+    const t1 = setTimeout(() => setFadeOut(true), 1900);
+    const t2 = setTimeout(onDone, 2200);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
