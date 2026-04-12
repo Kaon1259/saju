@@ -196,5 +196,12 @@
 - 카카오 개발자 콘솔 redirect URI 등록 완료
 - 앱에서 카카오 로그인 테스트 성공
 
-[TODO] 토정비결 스트리밍 캐시 미작동 - 스트리밍은 되지만 같은 조합으로 재요청 시 AI 분석을 다시 함. 캐시 저장/조회 키 불일치 확인 필요
-[TODO] 나머지 페이지 스트리밍 캐시 동작 전수 검증 - 커플운세/토정비결처럼 캐시가 안 되는 페이지가 더 있을 수 있음
+[완료]client_web GIF 전면 제거 → 정적 커버 JPG + CSS 애니메이션 대체
+- Tarot.jsx: DECK_LIST img→cover JPG, gifs/TAROT_INTRO_GIFS/DECK_INTROS/BgGif 제거
+- TarotIntro: GIF→커버 JPG + Ken Burns CSS
+- 덱 선택: GIF 크로스페이드→정적 이미지 + shimmer/breathe CSS
+- 톤 화면: GIF→커버 JPG + Ken Burns CSS
+- Setup/Shuffle/Pick/Reveal/Result: GIF 변수 제거 (기존 정적 이미지 유지)
+- GIF 파일 7개(~100MB) 삭제, boy_cover.jpg 신규 생성
+- Tarot.css: GIF 관련 클래스 제거, CSS 애니메이션 추가
+[완료]client_app은 현재 GIF 버전 그대로 유지 (GIF 7개 보존)

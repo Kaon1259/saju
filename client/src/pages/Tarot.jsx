@@ -144,38 +144,20 @@ const POSITION_LABELS = {
   five: ['현재 상황', '장애물', '잠재의식', '조언', '결과'],
 };
 
-// 덱별 인트로 GIF (있으면 덱 선택 배경에 표시)
-const DECK_INTROS = {
-  romantic: ['/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif', '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif'],
-};
-
 const DECK_LIST = [
-  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_0.gif', gifs: ['/tarot-effects/deck-intro/classic_0.gif', '/tarot-effects/deck-intro/classic_1.gif', '/tarot-effects/deck-intro/classic_2.gif', '/tarot-effects/deck-intro/classic_3.gif'], hasVariants: true },
-  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_0.gif', gifs: ['/tarot-effects/deck-intro/dark_0.gif', '/tarot-effects/deck-intro/dark_1.gif', '/tarot-effects/deck-intro/dark_2.gif', '/tarot-effects/deck-intro/dark_3.gif', '/tarot-effects/deck-intro/dark_0b.gif', '/tarot-effects/deck-intro/dark_1b.gif', '/tarot-effects/deck-intro/dark_2b.gif', '/tarot-effects/deck-intro/dark_3b.gif'], hasVariants: true },
-  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_0.gif', gifs: ['/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif', '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif'], hasVariants: true },
-  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_0.gif', gifs: ['/tarot-effects/deck-intro/western_0.gif', '/tarot-effects/deck-intro/western_1.gif', '/tarot-effects/deck-intro/western_2.gif', '/tarot-effects/deck-intro/western_3.gif'], hasVariants: true },
-  { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_0.gif', gifs: ['/tarot-effects/deck-intro/girl_0.gif', '/tarot-effects/deck-intro/girl_1.gif', '/tarot-effects/deck-intro/girl_2.gif', '/tarot-effects/deck-intro/girl_3.gif'], hasVariants: true },
-  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_0.gif', gifs: ['/tarot-effects/deck-intro/boy_0.gif', '/tarot-effects/deck-intro/boy_1.gif', '/tarot-effects/deck-intro/boy_2.gif', '/tarot-effects/deck-intro/boy_3.gif'], hasVariants: true },
+  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_cover.jpg', hasVariants: true },
+  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_cover.jpg', hasVariants: true },
+  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_cover.jpg', hasVariants: true },
+  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', hasVariants: true },
+  { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', hasVariants: true },
+  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_cover.jpg', hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
 const VARIANT_NAMES = ['톤 A', '톤 B', '톤 C', '톤 D'];
 
-// ── 인트로: GIF 랜덤 풀스크린 → 페이드아웃 ──
-const TAROT_INTRO_GIFS = [
-  '/tarot-effects/deck-intro/classic_0.gif', '/tarot-effects/deck-intro/classic_1.gif',
-  '/tarot-effects/deck-intro/classic_2.gif', '/tarot-effects/deck-intro/classic_3.gif',
-  '/tarot-effects/deck-intro/dark_0.gif', '/tarot-effects/deck-intro/dark_1.gif',
-  '/tarot-effects/deck-intro/dark_2.gif', '/tarot-effects/deck-intro/dark_3.gif',
-  '/tarot-effects/deck-intro/romantic_0.gif', '/tarot-effects/deck-intro/romantic_1.gif',
-  '/tarot-effects/deck-intro/romantic_2.gif', '/tarot-effects/deck-intro/romantic_3.gif',
-  '/tarot-effects/deck-intro/western_0.gif', '/tarot-effects/deck-intro/western_1.gif',
-  '/tarot-effects/deck-intro/western_2.gif', '/tarot-effects/deck-intro/western_3.gif',
-  '/tarot-effects/deck-intro/girl_0.gif', '/tarot-effects/deck-intro/girl_1.gif',
-  '/tarot-effects/deck-intro/girl_2.gif', '/tarot-effects/deck-intro/girl_3.gif',
-  '/tarot-effects/deck-intro/boy_0.gif', '/tarot-effects/deck-intro/boy_1.gif',
-  '/tarot-effects/deck-intro/boy_2.gif', '/tarot-effects/deck-intro/boy_3.gif',
-];
+// ── 인트로: 덱 커버 이미지 랜덤 풀스크린 → 페이드아웃 ──
+const TAROT_INTRO_COVERS = DECK_LIST.map(d => d.img);
 
 const TAROT_QUOTES = [
   { main: '카드가 당신을 부르고 있습니다', sub: 'The cards are calling you' },
@@ -190,7 +172,7 @@ const TAROT_QUOTES = [
 
 function TarotIntro({ onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
-  const [introGif] = useState(() => TAROT_INTRO_GIFS[Math.floor(Math.random() * TAROT_INTRO_GIFS.length)]);
+  const [introCover] = useState(() => TAROT_INTRO_COVERS[Math.floor(Math.random() * TAROT_INTRO_COVERS.length)]);
   const [quote] = useState(() => TAROT_QUOTES[Math.floor(Math.random() * TAROT_QUOTES.length)]);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
@@ -203,9 +185,8 @@ function TarotIntro({ onDone }) {
 
   return (
     <div className={`tarot-intro ${fadeOut ? 'fade-out' : ''}`}>
-      <img src={introGif} alt="" className="tarot-intro-gif" />
+      <img src={introCover} alt="" className="tarot-intro-cover" />
       <div className="tarot-intro-overlay" />
-      {/* 타로카드 테두리 */}
       <div className="tarot-intro-border" />
       <span className="tarot-intro-corner tarot-intro-corner--top">✦ TAROT ✦</span>
       <span className="tarot-intro-corner tarot-intro-corner--bottom">✦ ✦ ✦</span>
@@ -220,13 +201,6 @@ function TarotIntro({ onDone }) {
       </div>
     </div>
   );
-}
-
-// 배경 GIF — 랜덤 1장만 (성능 + 깔끔)
-function BgGif({ gifs, className = '' }) {
-  const [src] = useState(() => gifs && gifs.length > 0 ? gifs[Math.floor(Math.random() * gifs.length)] : null);
-  if (!src) return null;
-  return <img src={src} alt="" className={`bg-gif-single ${className}`} />;
 }
 
 function Tarot() {
@@ -264,7 +238,6 @@ function Tarot() {
   const [pickSwipeIdx, setPickSwipeIdx] = useState(0);
   const [resultDetailIdx, setResultDetailIdx] = useState(null); // 결과 카드 상세보기 인덱스
   const [setupBgIdx, setSetupBgIdx] = useState(0);
-  const [deckGifIdx, setDeckGifIdx] = useState(0);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const carouselTouchRef = useRef({ startX: 0 });
@@ -395,17 +368,6 @@ function Tarot() {
     return items;
   }, [cTick]); // eslint-disable-line
 
-  // 덱 GIF 순차 교체 (4초 간격)
-  useEffect(() => {
-    if (step !== 'deck') return;
-    setDeckGifIdx(0);
-    const curDeck = DECK_LIST[deckSwipeIdx];
-    if (!curDeck?.gifs || curDeck.gifs.length <= 1) return;
-    const iv = setInterval(() => {
-      setDeckGifIdx(prev => (prev + 1) % curDeck.gifs.length);
-    }, 4000);
-    return () => clearInterval(iv);
-  }, [step, deckSwipeIdx]);
 
   // 셔플 자동 회전 — 마찰 물리 (관성 회전판)
   useEffect(() => {
@@ -477,33 +439,11 @@ function Tarot() {
     return () => clearTimeout(t);
   }, [step]);
 
-  // 셔플/픽 배경 GIF 순환
-  const [stageGifIdx, setStageGifIdx] = useState(0);
-  useEffect(() => {
-    if (step !== 'shuffle' && step !== 'pick' && step !== 'reveal' && step !== 'result') return;
-    const curDeck = DECK_LIST.find(d => d.id === deck);
-    if (!curDeck?.gifs) return;
-    setStageGifIdx(0);
-    const iv = setInterval(() => {
-      setStageGifIdx(prev => (prev + 1) % curDeck.gifs.length);
-    }, 4000);
-    return () => clearInterval(iv);
-  }, [step, deck]);
 
-  // 메뉴 배경 GIF 순환
-  const [setupGifIdx, setSetupGifIdx] = useState(0);
+  // 메뉴 배경 카드 슬라이드쇼
   const SETUP_BG_CARDS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
   useEffect(() => {
     if (step !== 'setup') return;
-    const curDeck = DECK_LIST.find(d => d.id === deck);
-    if (curDeck?.gifs) {
-      setSetupGifIdx(0);
-      const iv = setInterval(() => {
-        setSetupGifIdx(prev => (prev + 1) % curDeck.gifs.length);
-      }, 4000);
-      return () => clearInterval(iv);
-    }
-    // GIF 없는 덱은 기존 카드 슬라이드쇼
     setSetupBgIdx(Math.floor(Math.random() * SETUP_BG_CARDS.length));
     const iv = setInterval(() => {
       setSetupBgIdx(prev => (prev + 1) % SETUP_BG_CARDS.length);
@@ -907,11 +847,10 @@ function Tarot() {
 
         return (
           <div className="tarot-deck-screen">
-            {/* 배경 영상/GIF */}
+            {/* 배경 영상 */}
             <div className="deck-bg-video">
               <video src="/tarot-effects/intro.mp4" autoPlay muted loop playsInline
                 onError={(e) => { e.target.style.display = 'none'; }} />
-              <img src="/tarot-effects/intro.gif" alt="" />
             </div>
             {/* 상단 덱 이름 */}
             <div className="deck-top-header">
@@ -957,14 +896,9 @@ function Tarot() {
                       else setStep('setup');
                     }
                   }}>
-                    {off === 0 && d.gifs ? (
-                      <div className="deck-gif-crossfade">
-                        <img src={d.gifs[(deckGifIdx - 1 + d.gifs.length) % d.gifs.length]} alt={d.name} draggable={false} className="deck-gif-hidden" />
-                        <img src={d.gifs[deckGifIdx % d.gifs.length]} alt={d.name} draggable={false} className="deck-gif-active" />
-                      </div>
-                    ) : (
+                    <div className={`deck-cover-wrap${off === 0 ? ' deck-cover-active' : ''}`}>
                       <img src={d.img} alt={d.name} draggable={false} />
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -993,10 +927,9 @@ function Tarot() {
         );
       })()}
 
-      {/* ═══ STEP 0.5: 덱 GIF 풀스크린 인트로 → 자동 메뉴 전환 ═══ */}
+      {/* ═══ STEP 0.5: 덱 커버 풀스크린 인트로 → 자동 메뉴 전환 ═══ */}
       {step === 'tone' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const gifSrc = curDeck.gifs ? curDeck.gifs[Math.floor(Math.random() * curDeck.gifs.length)] : curDeck.img;
         const phrases = [
           '카드가 당신의 운명을 속삭입니다',
           '별들이 당신의 이야기를 준비합니다',
@@ -1006,7 +939,7 @@ function Tarot() {
         ];
         return (
           <div className="tarot-tone-screen">
-            <img src={gifSrc} alt={curDeck.name} className="tone-fullscreen-gif" />
+            <img src={curDeck.img} alt={curDeck.name} className="tone-fullscreen-cover" />
             <div className="tone-fullscreen-overlay" />
             <div className="tone-phrase">
               <p className="tone-phrase-text">{phrases[Math.floor(Math.random() * phrases.length)]}</p>
@@ -1022,19 +955,12 @@ function Tarot() {
         const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy' };
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
-        // GIF 배경 우선, 없으면 카드 슬라이드쇼
-        const hasGifs = curDeck.gifs && curDeck.gifs.length > 0;
-        const gifBgSrc = hasGifs ? curDeck.gifs[setupGifIdx % curDeck.gifs.length] : null;
         const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];
         const bgSrc = `${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.jpg`;
         return (
           <div className="tarot-setup-screen">
             <div className="tarot-setup-bg">
-              {hasGifs ? (
-                <BgGif gifs={curDeck.gifs} className="setup-bg-slide" />
-              ) : (
-                <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
-              )}
+              <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
             </div>
             <div className="tarot-setup-overlay" />
 
@@ -1131,7 +1057,6 @@ function Tarot() {
       {step === 'shuffle' && shuffledCards.length > 0 && (() => {
         const items = getCarouselItems(shuffledCards.length);
         const curDeck = DECK_LIST.find(d => d.id === deck);
-        const stageBg = curDeck?.gifs ? curDeck.gifs[stageGifIdx % curDeck.gifs.length] : '/shuffle-start.png';
         return (
           <div className="tarot-shuffle-stage">
             <div className="shuffle-bg">
@@ -1160,7 +1085,6 @@ function Tarot() {
         const centerIdx = ((Math.round(cPos.current) % total) + total) % total;
         const isCenterSelected = selectedIndices.includes(centerIdx);
         const curDeck = DECK_LIST.find(d => d.id === deck);
-        const pickBg = curDeck?.gifs ? curDeck.gifs[stageGifIdx % curDeck.gifs.length] : null;
         return (
           <div className="tarot-pick-stage fade-in">
             {/* 정적 이미지 배경 + CSS 애니메이션 */}
@@ -1254,7 +1178,6 @@ function Tarot() {
       {/* ═══ STEP 4: 리빌 — 카드 캐러셀(앞면) + AI 분석 ═══ */}
       {step === 'reveal' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck);
-        const revealBg = curDeck?.gifs ? curDeck.gifs[stageGifIdx % curDeck.gifs.length] : null;
         const revealItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-reveal-stage fade-in">
@@ -1317,10 +1240,9 @@ function Tarot() {
         );
       })()}
 
-      {/* ═══ STEP 5: 결과 — 캐러셀 + GIF 배경 + 해석 결과 ═══ */}
+      {/* ═══ STEP 5: 결과 — 캐러셀 + 해석 결과 ═══ */}
       {step === 'result' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck);
-        const resultBg = curDeck?.gifs ? curDeck.gifs[stageGifIdx % curDeck.gifs.length] : null;
         const resultItems = getCarouselItems(revealedCards.length || 1);
         return (
         <div className="tarot-result-stage fade-in">

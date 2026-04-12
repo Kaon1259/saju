@@ -14,3 +14,4 @@ backup/
 railway_db.txt
 management/.gradle/
 management/build/
+client_app/
