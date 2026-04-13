@@ -2,12 +2,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
 import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune } from '../api/fortune';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 // sounds (kept for potential future use)
 import { shareResult } from '../utils/share';
-import StreamText from '../components/StreamText';
 import parseAiJson from '../utils/parseAiJson';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -211,6 +210,8 @@ function Home() {
   const [loveLoading, setLoveLoading] = useState(false);
   const [loveResult, setLoveResult] = useState(null);
   const [loveStreamText, setLoveStreamText] = useState('');
+  const [loveMatrixShown, setLoveMatrixShown] = useState(false);
+  const [loveMatrixExiting, setLoveMatrixExiting] = useState(false);
   const [loveStreaming, setLoveStreaming] = useState(false);
   const loveResultRef = useRef(null);
   const loveCleanupRef = useRef(null);
@@ -274,11 +275,19 @@ function Home() {
     setLoveBreakupDate('');
     setLoveShowPartner(false);
   };
-  const closeLoveModal = () => { setLoveModal(null); setLoveResult(null); setLoveLoading(false); setLoveStreamText(''); setLoveStreaming(false); loveCleanupRef.current?.(); };
+  const closeLoveModal = () => { setLoveModal(null); setLoveResult(null); setLoveLoading(false); setLoveStreaming(false); setLoveStreamText(''); setLoveMatrixShown(false); setLoveMatrixExiting(false); loveCleanupRef.current?.(); };
+
+  useEffect(() => {
+    if (loveResult && loveMatrixShown) {
+      setLoveMatrixExiting(true);
+      const t = setTimeout(() => setLoveMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [loveResult, loveMatrixShown]);
 
   const handleLoveAnalyze = async () => {
     if (!loveBirth || !loveModal) return;
-    setLoveLoading(true); setLoveResult(null); setLoveStreamText('');
+    setLoveLoading(true); setLoveResult(null); setLoveStreamText(''); setLoveMatrixShown(true); setLoveMatrixExiting(false);
 
     const pDate = loveShowPartner && lovePartnerDate ? lovePartnerDate : null;
     const pGender = loveShowPartner && lovePartnerGender ? lovePartnerGender : null;
@@ -294,40 +303,34 @@ function Home() {
         return;
       }
 
-      // 2단계: 스트리밍
-      setLoveLoading(false);
+      // 2단계: 스트리밍 — 매트릭스에 실시간 텍스트 공급
       setLoveStreaming(true);
 
       loveCleanupRef.current = getLoveFortuneStream(
         loveModal, loveBirth, '', loveGender || '', '', pDate || '', pGender || '', bDate || '', mDate || '', '',
         {
           onCached: (cachedData) => {
-            setLoveStreaming(false);
-            setLoveStreamText('');
+            setLoveStreaming(false); setLoveLoading(false); setLoveStreamText('');
             setLoveResult(cachedData);
           },
-          onChunk: (text) => {
-            setLoveStreamText(prev => {
-              if (!prev) setTimeout(() => loveResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-              return prev + text;
-            });
-          },
+          onChunk: (text) => setLoveStreamText(prev => prev + text),
           onDone: (fullText) => {
-            setLoveStreaming(false);
+            setLoveStreaming(false); setLoveLoading(false);
+            const text = fullText || '';
             setLoveStreamText('');
-            const parsed = parseAiJson(fullText);
+            const parsed = parseAiJson(text);
             if (parsed) {
               const finalResult = { ...basic, ...parsed, score: parsed.score || basic.score || 65, grade: parsed.grade || basic.grade || '보통', overall: parsed.overall || '' };
               setLoveResult(finalResult);
               saveLoveFortuneCache({ ...finalResult, type: loveModal, birthDate: loveBirth, gender: loveGender }).catch(() => {});
             } else {
-              setLoveResult({ ...basic, score: 65, grade: '보통', overall: fullText });
+              setLoveResult({ ...basic, score: 65, grade: '보통', overall: text });
             }
           },
-          onError: () => { setLoveStreaming(false); setLoveStreamText(''); },
+          onError: () => { setLoveStreaming(false); setLoveLoading(false); setLoveStreamText(''); },
         }
       );
-    } catch (e) { console.error(e); setLoveLoading(false); }
+    } catch (e) { console.error(e); setLoveLoading(false); setLoveStreaming(false); }
   };
 
   const loveInfo = LOVE_TYPES.find(l => l.id === loveModal);
@@ -540,7 +543,7 @@ function Home() {
       {!userId && showForm && (
         <section className="home-guest-section">
           {guestLoading ? (
-            <div className="home-fortune-loading"><div className="home-fortune-spinner" /><p>오늘의 운세를 분석하고 있습니다...</p><p className="home-fortune-loading-hint">AI 분석에 10~30초가 소요됩니다</p></div>
+            <AnalysisMatrix theme="saju" label="오늘의 운세를 분석하고 있어요" />
           ) : guestResult ? (
             renderGuestResult()
           ) : (
@@ -675,30 +678,12 @@ function Home() {
                 </div>
               )}
 
-              {(loveLoading || loveStreaming) && !loveResult && (
-                <div className="love-modal-loading fade-in">
-                  {!loveStreamText && (
-                    <>
-                      <div className="love-modal-loading-hearts">
-                        {[0,1,2].map(i => <span key={i} className="love-modal-loading-heart" style={{ animationDelay: `${i * 0.3}s` }}>💗</span>)}
-                      </div>
-                      <p>AI가 {loveInfo?.label}을 분석하고 있습니다...</p>
-                    </>
-                  )}
-                  {loveStreamText && (
-                    <div ref={loveResultRef}>
-                      <StreamText text={loveStreamText} icon="💕" label="AI가 분석하고 있어요..." color="#F472B6" />
-                    </div>
-                  )}
-                </div>
+              {loveMatrixShown && (
+                <AnalysisMatrix theme="love" variant="modal" label={`AI가 ${loveInfo?.label || '연애운'}을 분석하고 있어요`} streamText={loveStreamText} exiting={loveMatrixExiting} />
               )}
 
               {loveResult && (
-                <div className="love-modal-result fade-in" ref={loveResultRef} style={{ '--heart-color': loveHeartColor }}>
-                  <SpeechButton label={`${loveInfo?.label} 읽어주기`}
-                    text={[`${loveInfo?.label} 결과입니다.`, `점수는 ${loveResult.score}점, ${loveResult.grade}입니다.`, loveResult.overall, loveResult.timing, loveResult.advice, loveResult.caution].filter(Boolean).join(' ')}
-                    summaryText={`${loveInfo?.label} ${loveResult.score}점, ${loveResult.grade}. ${(loveResult.overall||'').split('.').slice(0,2).join('.')}.`} />
-
+                <div className="love-modal-result love-result-reveal" ref={loveResultRef} style={{ '--heart-color': loveHeartColor }}>
                   {loveModal === 'ideal_type' ? (
                     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
                       <span style={{ fontSize: 40 }}>👩‍❤️‍👨</span>

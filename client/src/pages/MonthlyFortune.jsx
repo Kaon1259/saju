@@ -3,7 +3,6 @@ import { getMonthlyFortuneStream } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
 import './MonthlyFortune.css';
@@ -322,27 +321,6 @@ function MonthlyFortune() {
           {result.advice && (
             <FortuneCard icon="💡" title={`${result.month}월 조언`} description={result.advice} delay={400} />
           )}
-
-          {/* 읽어주기 */}
-          <div className="mf-speech-area">
-            <SpeechButton
-              label={`${result.month}월 운세 읽어주기`}
-              text={[
-                `${result.month}월 운세 결과입니다.`,
-                `점수 ${result.score}점, ${result.grade}입니다.`,
-                result.overall,
-                result.love ? `애정운. ${result.love}` : '',
-                result.money ? `재물운. ${result.money}` : '',
-                result.career ? `직장운. ${result.career}` : '',
-                result.health ? `건강운. ${result.health}` : '',
-                result.advice ? `조언. ${result.advice}` : '',
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                `${result.month}월 운세 ${result.score}점, ${result.grade}.`,
-                result.overall,
-              ].filter(Boolean).join(' ')}
-            />
-          </div>
 
           {/* 심화분석 */}
           {birthDate && (

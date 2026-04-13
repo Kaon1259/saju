@@ -2,11 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
-import StreamText from '../components/StreamText';
-import FortuneLoading from '../components/FortuneLoading';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import './MyFortune.css';
 
@@ -174,8 +172,7 @@ function MyFortune() {
   if (loading || streaming) {
     return (
       <div className="myf-page">
-        {!streamText && <FortuneLoading type="default" />}
-        {streamText && <StreamText text={streamText} icon="🔮" label="AI가 사주를 분석하고 있어요..." color="#FBBF24" />}
+        <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={streamText} />
       </div>
     );
   }
@@ -264,9 +261,7 @@ function MyFortune() {
   /* ── 스트리밍/로딩 표시 공통 ── */
   const renderLoading = (isLoading, isStreaming, sText, hasData) => {
     if ((isLoading || isStreaming) && !hasData) {
-      return sText
-        ? <StreamText text={sText} icon="🔮" label="AI가 사주를 분석하고 있어요..." color="#FBBF24" />
-        : <FortuneLoading type="default" />;
+      return <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={sText} />;
     }
     return null;
   };
@@ -456,28 +451,6 @@ function MyFortune() {
           {user.bloodType && <span className="myf-badge myf-badge--bt">{user.bloodType}형</span>}
           {user.mbtiType && <span className="myf-badge myf-badge--mbti">{user.mbtiType}</span>}
         </div>
-        {f && (
-          <div className="myf-speech-top">
-            <SpeechButton
-              label="운세 읽어주기"
-              text={[
-                `${userName || user.name}님의 오늘의 ${active?.label || '운세'}입니다.`,
-                `오늘의 점수는 ${f.score || 70}점입니다.`,
-                f.overall ? `총운. ${f.overall}` : '', f.love ? `애정운. ${f.love}` : '',
-                f.money ? `재물운. ${f.money}` : '', f.health ? `건강운. ${f.health}` : '',
-                f.work ? `직장운. ${f.work}` : '', f.tip ? `오늘의 팁. ${f.tip}` : '',
-                f.luckyNumber ? `행운의 숫자는 ${f.luckyNumber}이고` : '',
-                f.luckyColor ? `행운의 색은 ${f.luckyColor}입니다.` : '',
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                `${userName || user.name}님, ${active?.label || '운세'} 점수 ${f.score || 70}점.`,
-                f.overall ? `총운. ${f.overall.split('.').slice(0, 2).join('.')}.` : '',
-                f.luckyNumber ? `행운의 숫자 ${f.luckyNumber},` : '',
-                f.luckyColor ? `행운의 색 ${f.luckyColor}.` : '',
-              ].filter(Boolean).join(' ')}
-            />
-          </div>
-        )}
       </div>
 
       {tabs.length > 1 && (

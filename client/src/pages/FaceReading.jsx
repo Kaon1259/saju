@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { analyzeFaceReadingStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
 import parseAiJson from '../utils/parseAiJson';
@@ -525,27 +524,6 @@ function FaceReading() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* 읽어주기 */}
-          <div className="fr-speech-area">
-            <SpeechButton
-              label="결과 읽어주기"
-              text={[
-                `AI 관상 분석 결과입니다.`,
-                `당신의 관상 유형은 ${result.overallType}입니다.`,
-                `점수는 ${result.score || 75}점, ${result.grade || 'A'} 등급입니다.`,
-                result.personality,
-                `재물운. ${result.wealth || ''}`,
-                `애정운. ${result.love || ''}`,
-                `직장운. ${result.career || ''}`,
-                `건강운. ${result.health || ''}`,
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                `관상 유형: ${result.overallType}, ${result.score || 75}점.`,
-                result.personality,
-              ].filter(Boolean).join(' ')}
-            />
           </div>
 
           {/* 액션 */}

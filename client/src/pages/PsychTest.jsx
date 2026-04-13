@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { getPsychTests, analyzePsychTestStream } from '../api/fortune';
-import SpeechButton from '../components/SpeechButton';
 
 import StreamText from '../components/StreamText';
 import parseAiJson from '../utils/parseAiJson';
@@ -392,24 +391,6 @@ function PsychTest() {
               <span className="pt-score-label">점수</span>
             </div>
           )}
-
-          {/* 읽어주기 */}
-          <div className="pt-speech-area">
-            <SpeechButton
-              label="결과 읽어주기"
-              text={[
-                `심리테스트 결과입니다.`,
-                `당신의 유형은 ${result.type}입니다.`,
-                result.description,
-                result.advice ? `조언. ${result.advice}` : '',
-                result.compatibility ? `궁합. ${result.compatibility}` : '',
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                `유형: ${result.type}.`,
-                result.description,
-              ].filter(Boolean).join(' ')}
-            />
-          </div>
 
           {/* 액션 */}
           <div className="pt-actions">

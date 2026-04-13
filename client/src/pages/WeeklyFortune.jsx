@@ -3,7 +3,6 @@ import { getWeeklyFortuneStream } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
 import './WeeklyFortune.css';
@@ -296,26 +295,6 @@ function WeeklyFortune() {
           {result.advice && (
             <FortuneCard icon="💡" title="이번 주 조언" description={result.advice} delay={240} />
           )}
-
-          {/* 읽어주기 */}
-          <div className="wf-speech-area">
-            <SpeechButton
-              label="주간 운세 읽어주기"
-              text={[
-                '이번 주 운세 결과입니다.',
-                `종합 점수 ${result.overallScore ?? result.score}점, ${result.grade}입니다.`,
-                result.summary,
-                result.love ? `애정운. ${result.love}` : '',
-                result.money ? `재물운. ${result.money}` : '',
-                result.career ? `직장운. ${result.career}` : '',
-                result.advice ? `조언. ${result.advice}` : '',
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                `이번 주 운세 ${result.overallScore ?? result.score}점, ${result.grade}.`,
-                result.summary,
-              ].filter(Boolean).join(' ')}
-            />
-          </div>
 
           {/* 심화분석 */}
           {birthDate && (

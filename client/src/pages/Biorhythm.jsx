@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { getBiorhythm, getBiorhythmStream } from '../api/fortune';
-import SpeechButton from '../components/SpeechButton';
 import StreamText from '../components/StreamText';
 import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson from '../utils/parseAiJson';
@@ -502,22 +501,6 @@ function Biorhythm() {
               <p className="bio-advice-text">{advice}</p>
             </div>
           )}
-
-          {/* 읽어주기 */}
-          <div className="bio-speech-area">
-            <SpeechButton
-              label="결과 읽어주기"
-              text={[
-                '바이오리듬 분석 결과입니다.',
-                ...todayData.map(c => `${c.label} 리듬은 ${c.value}퍼센트, ${PHASE_LABELS[c.phase]}입니다.`),
-                aiResult?.overall || aiResult?.advice || advice || '',
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                '바이오리듬 요약.',
-                ...todayData.map(c => `${c.label} ${c.value}퍼센트.`),
-              ].filter(Boolean).join(' ')}
-            />
-          </div>
 
           {/* 리셋 */}
           <button className="bio-reset-btn" onClick={() => {

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getTojeongStream } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
 import parseAiJson from '../utils/parseAiJson';
@@ -280,24 +279,6 @@ function Tojeong() {
           )}
         </div>
       </section>
-
-      {/* Speech Button */}
-      {result && (
-        <div style={{ margin: '12px 0' }}>
-          <SpeechButton
-            label="토정비결 읽어주기"
-            text={[
-              result.yearSummary ? `${new Date().getFullYear()}년 총평입니다. ${result.yearSummary}` : '',
-              ...(result.monthlyFortunes || []).map((m, idx) =>
-                m.fortune ? `${idx + 1}월 운세입니다. ${m.fortune}` : ''
-              ),
-            ].filter(Boolean).join(' ')}
-            summaryText={
-              result.yearSummary ? `${new Date().getFullYear()}년 총평: ${result.yearSummary.split('.').slice(0,2).join('.')}.` : ''
-            }
-          />
-        </div>
-      )}
 
       {/* 올해 총평 */}
       {result.yearSummary && (

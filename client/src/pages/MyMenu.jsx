@@ -5,7 +5,6 @@ import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache } from 
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
 import FortuneCard from '../components/FortuneCard';
-import SpeechButton from '../components/SpeechButton';
 import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
 import {
@@ -374,10 +373,6 @@ function MyMenu() {
 
               {loveResult && (
                 <div className="love-modal-result fade-in" ref={loveResultRef} style={{ '--heart-color': loveHeartColor }}>
-                  <SpeechButton label={`${loveInfo.label} 읽어주기`}
-                    text={[`${loveInfo.label} 결과입니다.`, `점수는 ${loveResult.score}점, ${loveResult.grade}입니다.`, loveResult.overall, loveResult.timing, loveResult.advice, loveResult.caution].filter(Boolean).join(' ')}
-                    summaryText={`${loveInfo.label} ${loveResult.score}점, ${loveResult.grade}. ${(loveResult.overall||'').split('.').slice(0,2).join('.')}.`} />
-
                   <div className="love-modal-score-card">
                     <div className="love-modal-heart-aura" style={{ background: `radial-gradient(circle, ${loveHeartColor}, transparent 70%)` }} />
                     <div className="love-modal-heart-center">

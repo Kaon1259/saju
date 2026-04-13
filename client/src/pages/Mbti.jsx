@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { getMbtiTypes, getMbtiFortuneStream, getMbtiCompatibility, getUser } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
-import SpeechButton from '../components/SpeechButton';
 
 import StreamText from '../components/StreamText';
 import parseAiJson from '../utils/parseAiJson';
@@ -176,31 +175,6 @@ function Mbti() {
                   </div>
                 </div>
                 <p className="mbti-result-personality">{fortune.personality}</p>
-              </div>
-
-              {/* Speech Button */}
-              <div style={{ margin: '12px 0' }}>
-                <SpeechButton
-                  label="운세 읽어주기"
-                  text={[
-                    fortune.mbtiType ? `${fortune.mbtiType} ${TYPES_DATA[fortune.mbtiType]?.nick || ''} 오늘의 운세입니다.` : '',
-                    fortune.personality ? `성격 분석입니다. ${fortune.personality}` : '',
-                    fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
-                    fortune.overall ? `총운입니다. ${fortune.overall}` : '',
-                    fortune.love ? `애정운입니다. ${fortune.love}` : '',
-                    fortune.work ? `직장운입니다. ${fortune.work}` : '',
-                    fortune.tip ? `오늘의 팁입니다. ${fortune.tip}` : '',
-                    fortune.luckyNumber ? `행운의 숫자는 ${fortune.luckyNumber}입니다.` : '',
-                    fortune.luckyColor ? `행운의 색상은 ${fortune.luckyColor}입니다.` : '',
-                  ].filter(Boolean).join(' ')}
-                  summaryText={[
-                    fortune.mbtiType ? `${fortune.mbtiType} ${TYPES_DATA[fortune.mbtiType]?.nick || ''} 오늘의 운세입니다.` : '',
-                    fortune.score ? `운세 점수는 ${fortune.score}점입니다.` : '',
-                    fortune.overall ? `총운: ${fortune.overall.split('.').slice(0,2).join('.')}.` : '',
-                    fortune.luckyNumber ? `행운의 숫자 ${fortune.luckyNumber},` : '',
-                    fortune.luckyColor ? `행운의 색상 ${fortune.luckyColor}.` : '',
-                  ].filter(Boolean).join(' ')}
-                />
               </div>
 
               <div className="mbti-score-wrap">

@@ -1,0 +1,185 @@
+.analysis-matrix {
+  position: fixed;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, var(--am-bg-start) 0%, var(--am-bg-end) 100%);
+  box-shadow: inset 0 0 120px var(--am-inner-shadow);
+  animation: analysisMatrixFadeIn 0.4s ease;
+  transition: opacity 0.7s ease;
+}
+
+/* 페이지 안에 떠 있는 효과 — 상단 헤더(100+)/하단 탭(100)은 그대로 보임 */
+.analysis-matrix--page {
+  top: 64px;
+  bottom: 80px;
+  z-index: 50;
+}
+
+/* 모달/오버레이 위에 올릴 때 — 전체화면 */
+.analysis-matrix--modal {
+  top: 0;
+  bottom: 0;
+  z-index: 10000;
+}
+
+.analysis-matrix.analysis-matrix-exit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .analysis-matrix--page { top: 68px; bottom: 88px; }
+}
+
+@keyframes analysisMatrixFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.analysis-matrix-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.analysis-matrix-col {
+  position: absolute;
+  top: -80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--am-color);
+  text-shadow:
+    0 0 4px var(--am-glow1),
+    0 0 10px var(--am-glow2);
+  animation: analysisMatrixFall linear infinite;
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 20%, #000 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 20%, #000 80%, transparent 100%);
+}
+
+.analysis-matrix-col span {
+  display: block;
+}
+
+@keyframes analysisMatrixFall {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(220%); }
+}
+
+.analysis-matrix-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: var(--am-label-bg);
+  border: 1px solid var(--am-label-border);
+  border-radius: 999px;
+  color: var(--am-label-text);
+  font-size: 14px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 20px var(--am-glow2);
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.analysis-matrix-label-icon {
+  font-size: 18px;
+  animation: analysisMatrixHeartbeat 1s ease-in-out infinite;
+}
+
+.analysis-matrix-label-text {
+  background: var(--am-label-grad);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: analysisMatrixShimmer 3s linear infinite;
+}
+
+.analysis-matrix-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.analysis-matrix-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--am-color);
+  box-shadow: 0 0 6px var(--am-color);
+  animation: analysisMatrixDot 1.2s ease-in-out infinite;
+}
+
+.analysis-matrix-dots span:nth-child(2) { animation-delay: 0.2s; }
+.analysis-matrix-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes analysisMatrixHeartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+@keyframes analysisMatrixShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes analysisMatrixDot {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-4px); opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .analysis-matrix-label { font-size: 13px; padding: 8px 16px; }
+}
+
+/* 결과 부드러운 등장 (매트릭스 후) — 공용 */
+.analysis-result-reveal,
+.lf-result-reveal,
+.love-result-reveal {
+  animation: analysisResultReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.analysis-result-reveal > *,
+.lf-result-reveal > *,
+.love-result-reveal > * {
+  animation: analysisResultChildReveal 0.7s ease both;
+}
+.analysis-result-reveal > *:nth-child(1),
+.lf-result-reveal > *:nth-child(1),
+.love-result-reveal > *:nth-child(1) { animation-delay: 0.15s; }
+.analysis-result-reveal > *:nth-child(2),
+.lf-result-reveal > *:nth-child(2),
+.love-result-reveal > *:nth-child(2) { animation-delay: 0.28s; }
+.analysis-result-reveal > *:nth-child(3),
+.lf-result-reveal > *:nth-child(3),
+.love-result-reveal > *:nth-child(3) { animation-delay: 0.4s; }
+.analysis-result-reveal > *:nth-child(4),
+.lf-result-reveal > *:nth-child(4),
+.love-result-reveal > *:nth-child(4) { animation-delay: 0.52s; }
+.analysis-result-reveal > *:nth-child(5),
+.lf-result-reveal > *:nth-child(5),
+.love-result-reveal > *:nth-child(5) { animation-delay: 0.62s; }
+.analysis-result-reveal > *:nth-child(n+6),
+.lf-result-reveal > *:nth-child(n+6),
+.love-result-reveal > *:nth-child(n+6) { animation-delay: 0.72s; }
+
+@keyframes analysisResultReveal {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.985); filter: blur(6px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes analysisResultChildReveal {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}

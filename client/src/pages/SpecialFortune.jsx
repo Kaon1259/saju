@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getSpecialLoveFortune, getHourlyFortune, getTimeblockFortune } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
-import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import './SpecialFortune.css';
@@ -280,12 +279,6 @@ function SpecialFortune() {
           {/* 연애 결과 — 하트 강도 UI */}
           {result && tab === 'love' && (
             <div className="sf-love-result fade-in" ref={resultRef} style={{ '--heart-color': heartColor }}>
-              <div className="sf-speech-area">
-                <SpeechButton label={`${loveInfo?.label} 읽어주기`}
-                  text={[`${loveInfo?.label} 결과입니다.`, `점수는 ${result.score}점, ${result.grade}입니다.`, result.overall, result.timing, result.advice, result.caution].filter(Boolean).join(' ')}
-                  summaryText={`${loveInfo?.label} ${result.score}점, ${result.grade}. ${(result.overall||'').split('.').slice(0,2).join('.')}.`} />
-              </div>
-
               {/* 하트 점수 */}
               <div className="sf-heart-score-card">
                 <FloatingHearts score={result.score} />
@@ -388,12 +381,6 @@ function SpecialFortune() {
           {/* 아침/점심/저녁 결과 */}
           {result && timeMode === 'timeblock' && result.blocks && (
             <div className="sf-timeblock-result fade-in" ref={resultRef}>
-              <div className="sf-speech-area">
-                <SpeechButton label="시간별 운세 읽어주기"
-                  text={[result.summary, ...(result.blocks||[]).map(b => `${b.name}. ${b.fortune} ${b.advice}`)].filter(Boolean).join(' ')}
-                  summaryText={`${result.summary || ''} 최고 시간대 ${result.bestBlock}.`} />
-              </div>
-
               {result.summary && <div className="sf-time-summary glass-card"><p>{result.summary}</p></div>}
 
               <div className="sf-blocks">
@@ -433,12 +420,6 @@ function SpecialFortune() {
           {/* 12시진 결과 */}
           {result && timeMode === 'hourly' && result.hours && (
             <div className="sf-hourly-result fade-in" ref={resultRef}>
-              <div className="sf-speech-area">
-                <SpeechButton label="12시진 읽어주기"
-                  text={[result.summary, ...(result.hours||[]).map(h => `${h.name} ${h.time}. ${h.fortune}`)].filter(Boolean).join(' ')}
-                  summaryText={`${result.summary || ''}`} />
-              </div>
-
               {result.summary && (
                 <div className="sf-time-summary glass-card">
                   <p>{result.summary}</p>

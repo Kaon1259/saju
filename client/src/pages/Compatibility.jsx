@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSajuCompatibilityBasic, getCompatibilityStream } from '../api/fortune';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import FortuneLoading from '../components/FortuneLoading';
@@ -182,28 +181,6 @@ function Compatibility() {
               <span className="compat-person-el">{result.person2.dayMasterElement}({result.person2.dayMasterYang ? '양' : '음'})</span>
               <span className="compat-person-date">{result.person2.birthDate}</span>
             </div>
-          </div>
-
-          {/* Speech & Share */}
-          <div style={{ margin: '12px 0', display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <SpeechButton
-              label="궁합 결과 읽어주기"
-              text={[
-                `사주 궁합 결과입니다.`,
-                result.person1 ? `${result._g1 === 'M' ? '남자' : '여자'}는 ${result.person1.birthDate} 생, 일간 ${result.person1.dayMaster}, ${result.person1.dayMasterElement} ${result.person1.dayMasterYang ? '양' : '음'}입니다.` : '',
-                result.person2 ? `${result._g2 === 'M' ? '남자' : '여자'}는 ${result.person2.birthDate} 생, 일간 ${result.person2.dayMaster}, ${result.person2.dayMasterElement} ${result.person2.dayMasterYang ? '양' : '음'}입니다.` : '',
-                result.score ? `궁합 점수는 ${result.score}점입니다.` : '',
-                result.elementRelation ? `오행 관계입니다. ${result.elementRelation}` : '',
-                result.branchRelation ? `일지 관계입니다. ${result.branchRelation}` : '',
-                result.yinyangBalance ? `음양 조화입니다. ${result.yinyangBalance}` : '',
-                result.aiAnalysis ? `AI 종합 분석입니다. ${result.aiAnalysis}` : '',
-              ].filter(Boolean).join(' ')}
-              summaryText={[
-                result.score ? `궁합 점수는 ${result.score}점,` : '',
-                result.grade ? `등급은 ${result.grade}입니다.` : '',
-                result.aiAnalysis ? `종합 분석: ${result.aiAnalysis.split('.').slice(0,2).join('.')}.` : '',
-              ].filter(Boolean).join(' ')}
-            />
           </div>
 
           <div className="compat-grade-badge" style={{

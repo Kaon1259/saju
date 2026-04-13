@@ -5,8 +5,7 @@ import parseAiJson from '../utils/parseAiJson';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
-import SpeechButton from '../components/SpeechButton';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import { shareResult } from '../utils/share';
 import './CelebCompatibility.css';
 
@@ -61,6 +60,11 @@ function CelebCompatibility() {
   const [starStreamText, setStarStreamText] = useState('');
   const [starStreaming, setStarStreaming] = useState(false);
   const starCleanupRef = useRef(null);
+
+  // 매트릭스 오버레이 (메인 궁합 + 스타 운세)
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
+  const [matrixLabel, setMatrixLabel] = useState('');
 
   // state 소비 후 제거 (뒤로가기 중복 방지)
   useEffect(() => {
@@ -191,6 +195,9 @@ function CelebCompatibility() {
   const handleAnalyze = async () => {
     if (!myBirth || !selectedCeleb) return;
     setStep('loading');
+    setMatrixLabel(`AI가 나와 ${selectedCeleb.name}의 운명을 분석하고 있어요`);
+    setMatrixShown(true);
+    setMatrixExiting(false);
     try {
       const data = await getSajuCompatibility(
         myBirth, selectedCeleb.birth,
@@ -205,8 +212,18 @@ function CelebCompatibility() {
     } catch (e) {
       console.error(e);
       setStep('input');
+      setMatrixShown(false);
     }
   };
+
+  // 결과 도착 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if ((step === 'result' || starFortune) && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [step, starFortune, matrixShown]);
 
   const handleShare = async () => {
     if (!result) return;
@@ -221,6 +238,9 @@ function CelebCompatibility() {
     setStarStreamText('');
     setStarStreaming(false);
     setStarFortune(null);
+    setMatrixLabel(`${selectedCeleb.name}의 오늘 운세를 분석하고 있어요`);
+    setMatrixShown(true);
+    setMatrixExiting(false);
     starCleanupRef.current?.();
 
     starCleanupRef.current = analyzeSajuStream(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender, {
@@ -408,9 +428,6 @@ function CelebCompatibility() {
           <button className="celeb-star-fortune-btn" onClick={handleStarFortune} disabled={starFortuneLoading || starStreaming}>
             {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : `🌟 ${selectedCeleb.name}의 오늘 운세 보기`}
           </button>
-          {(starStreaming || starFortuneLoading) && starStreamText && (
-            <StreamText text={starStreamText} icon="🌟" label={`${selectedCeleb.name}의 운세를 분석하고 있어요...`} color="#FBBF24" />
-          )}
           {starFortune && (
             <div className="celeb-star-fortune-result fade-in">
               {starFortune.overall && <div className="celeb-sf-item"><span className="celeb-sf-label">🌟 총운</span><p>{starFortune.overall}</p></div>}
@@ -458,13 +475,9 @@ function CelebCompatibility() {
   if (step === 'loading') {
     return (
       <div className="celeb-page">
-        <div className="celeb-loading">
-          <div className="celeb-loading-stars">
-            {[0,1,2].map(i => <span key={i} className="celeb-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>⭐</span>)}
-          </div>
-          <p className="celeb-loading-text">AI가 나와 {selectedCeleb.name}의 운명을 분석하고 있어요</p>
-          <p className="celeb-loading-hint">10~30초 정도 소요됩니다</p>
-        </div>
+        {matrixShown && (
+          <AnalysisMatrix theme="star" label={matrixLabel} exiting={matrixExiting} />
+        )}
       </div>
     );
   }
@@ -474,7 +487,10 @@ function CelebCompatibility() {
     const score = result.score || 0;
     const scoreColor = score >= 80 ? '#ff3d7f' : score >= 60 ? '#fbbf24' : '#94a3b8';
     return (
-      <div className="celeb-page" ref={resultRef}>
+      <div className="celeb-page analysis-result-reveal" ref={resultRef}>
+        {matrixShown && (
+          <AnalysisMatrix theme="star" label={matrixLabel} exiting={matrixExiting} />
+        )}
         <button className="celeb-back-btn" onClick={handleReset}>← 스타 목록으로</button>
         <section className="celeb-result-hero">
           <h2 className="celeb-result-title">나 ♥ {result._celebName}</h2>
@@ -492,9 +508,6 @@ function CelebCompatibility() {
           </div>
           <span className="celeb-grade" style={{ color: GRADE_COLORS[result.grade] || scoreColor }}>{result.grade}</span>
           <div className="celeb-result-actions">
-            <SpeechButton label="결과 읽어주기"
-              text={`나와 ${result._celebName}의 궁합 결과입니다. 점수는 ${score}점, ${result.grade}입니다. ${result.aiAnalysis || ''}`}
-              summaryText={`${result._celebName} 궁합 ${score}점, ${result.grade}`} />
             <button className="celeb-share-btn" onClick={handleShare}>📤 공유하기</button>
           </div>
           {shareMsg && <p className="celeb-share-msg">{shareMsg}</p>}

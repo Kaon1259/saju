@@ -6,8 +6,7 @@ import GROUPS, { GROUP_TYPES } from '../data/groups';
 import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneCard from '../components/FortuneCard';
-import SpeechButton from '../components/SpeechButton';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import { shareResult } from '../utils/share';
 import './GroupFortune.css';
 
@@ -39,6 +38,10 @@ function GroupFortune() {
 
   // 운세
   const [fortuneLoading, setFortuneLoading] = useState(false);
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
+  const [matrixLabel, setMatrixLabel] = useState('');
+  const [matrixTheme, setMatrixTheme] = useState('group');
   const [fortuneResult, setFortuneResult] = useState(null);
   const [fortuneStreamText, setFortuneStreamText] = useState('');
   const [fortuneStreaming, setFortuneStreaming] = useState(false);
@@ -94,6 +97,10 @@ function GroupFortune() {
     setFortuneStreamText('');
     setFortuneStreaming(false);
     setFortuneResult(null);
+    setMatrixTheme('star');
+    setMatrixLabel(`${fortuneTargetName}의 오늘 운세를 분석하고 있어요`);
+    setMatrixShown(true);
+    setMatrixExiting(false);
     fortuneCleanupRef.current?.();
 
     fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, { context: 'idol',
@@ -133,10 +140,22 @@ function GroupFortune() {
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
   };
 
+  useEffect(() => {
+    if ((fortuneResult || compatResult) && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [fortuneResult, compatResult, matrixShown]);
+
   // 궁합 분석 (그룹이든 멤버든 통합)
   const handleCompat = async () => {
     if (!myBirth || !compatTargetBirth) return;
     setCompatLoading(true);
+    setMatrixTheme('group');
+    setMatrixLabel(`AI가 나와 ${compatTargetName} 궁합을 분석하고 있어요`);
+    setMatrixShown(true);
+    setMatrixExiting(false);
     try {
       const data = await getSajuCompatibility(myBirth, compatTargetBirth, undefined, undefined, myCalType, 'SOLAR');
       data._groupName = selectedGroup.name;
@@ -210,6 +229,9 @@ function GroupFortune() {
   // ─── 그룹 상세 (운세 + 궁합 + 멤버) ───
   return (
     <div className="gf-page">
+      {matrixShown && (
+        <AnalysisMatrix theme={matrixTheme} label={matrixLabel} streamText={fortuneStreamText} exiting={matrixExiting} />
+      )}
       {/* 그룹 헤더 */}
       <section className="gf-group-header glass-card">
         <span className={`gf-item-badge gf-badge--lg ${selectedGroup.type === 'boy' ? 'gf-badge--boy' : 'gf-badge--girl'}`}>
@@ -284,14 +306,7 @@ function GroupFortune() {
             )}
           </>
         ) : fortuneLoading || fortuneStreaming ? (
-          fortuneStreamText ? (
-            <StreamText text={fortuneStreamText} icon="🌟" label={`${fortuneTargetName}의 운세를 분석하고 있어요...`} color="#FBBF24" />
-          ) : (
-            <div className="gf-loading-anim">
-              <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>⭐</span>)}</div>
-              <p className="gf-loading-text">AI가 운세를 분석하고 있어요</p>
-            </div>
-          )
+          <div style={{ minHeight: 120 }} />
         ) : (
           <button className="btn-gold" onClick={handleGroupFortune} style={{ width: '100%' }}>
             🌟 {fortuneTargetName} 오늘의 운세 보기
@@ -330,13 +345,7 @@ function GroupFortune() {
             </button>
           </div>
         )}
-        {compatLoading && (
-          <div className="gf-loading-anim">
-            <div className="gf-loading-stars">{[0,1,2].map(i => <span key={i} className="gf-loading-star" style={{ animationDelay: `${i * 0.3}s` }}>💫</span>)}</div>
-            <p className="gf-loading-text">AI가 {compatTargetName} 궁합을 분석하고 있어요</p>
-            <p className="gf-loading-hint">10~30초 정도 소요됩니다</p>
-          </div>
-        )}
+        {compatLoading && <div style={{ minHeight: 120 }} />}
         {compatResult && (
           <div className="gf-compat-result fade-in">
             <div className="gf-compat-score">

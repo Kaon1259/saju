@@ -1,0 +1,106 @@
+.myf-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 40px; }
+
+/* 최상단 모드 탭 */
+.myf-mode-tabs { display: flex; gap: 0; margin-bottom: 16px; border-radius: 14px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.12); }
+.myf-mode-tab { flex: 1; padding: 14px 0; font-size: 15px; font-weight: 700; border: none; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
+.myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(124,58,237,0.15)); color: #FBBF24; }
+.myf-mode-tab { border-right: 1px solid rgba(255,255,255,0.08); }
+.myf-mode-tab:last-child { border-right: none; }
+[data-theme="light"] .myf-mode-tabs { border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .myf-mode-tab { background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.6); }
+[data-theme="light"] .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.08)); color: #b8860b; }
+
+/* 다른 사람 운세 */
+.myf-other-view { padding: 0 0 60px; }
+.myf-other-form { padding: 24px 20px 32px; }
+.myf-other-form h2 { font-size: 18px; font-weight: 800; color: #fff; }
+[data-theme="light"] .myf-other-form h2 { color: #111; }
+
+/* 헤더 */
+.myf-header { text-align: center; padding: 8px 0 16px; }
+.myf-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, var(--color-accent-gold), #fff, var(--color-accent-gold)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; }
+.myf-badges { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+.myf-badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+.myf-badge--saju { border-color: rgba(251,191,36,0.4); color: #FBBF24; background: rgba(251,191,36,0.1); }
+.myf-badge--bt { border-color: rgba(244,114,182,0.4); color: #F472B6; background: rgba(244,114,182,0.1); }
+.myf-badge--mbti { border-color: rgba(52,211,153,0.4); color: #34D399; background: rgba(52,211,153,0.1); }
+
+/* 탭 */
+.myf-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.myf-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.25s; }
+.myf-tab.active { background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(251,191,36,0.15)); border-color: rgba(124,58,237,0.5); box-shadow: 0 4px 16px rgba(124,58,237,0.2); }
+.myf-tab-icon { font-size: 18px; }
+.myf-tab-label { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); }
+.myf-tab.active .myf-tab-label { color: #fff; font-weight: 800; }
+
+/* 점수 */
+.myf-score-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 20px; }
+.myf-score-circle { width: 100%; height: 100%; transform: rotate(-90deg); }
+.myf-score-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+.myf-score-fill { fill: none; stroke: var(--color-accent-gold, #fbbf24); stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
+.myf-score-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+.myf-score-num { font-size: 34px; font-weight: 900; color: #fff; display: block; }
+.myf-score-unit { font-size: 14px; color: var(--color-text-muted); }
+
+/* 일진/사주 분석 */
+.myf-analysis { display: flex; flex-direction: column; gap: 8px; padding: 14px; margin-bottom: 16px; }
+.myf-analysis-icon { font-size: 20px; }
+.myf-analysis-title { font-size: 14px; font-weight: 800; color: var(--color-accent-gold, #fbbf24); margin: 0; }
+.myf-analysis p { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8); margin: 0; }
+
+/* 카드 */
+.myf-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+/* 팁 */
+.myf-tip { display: flex; align-items: flex-start; gap: 10px; padding: 14px; margin-bottom: 16px; }
+.myf-tip p { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.85); }
+
+/* 럭키 */
+.myf-lucky { display: flex; align-items: center; padding: 16px; }
+.myf-lucky-item { flex: 1; text-align: center; }
+.myf-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
+.myf-lucky-value { font-size: 18px; font-weight: 800; color: var(--color-accent-gold); }
+.myf-lucky-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.08); }
+
+/* 빈 상태 */
+.myf-empty { text-align: center; padding: 60px 20px; }
+.myf-empty-icon { font-size: 56px; margin-bottom: 16px; }
+.myf-empty h2 { font-size: 20px; font-weight: 900; color: #fff; }
+.myf-empty p { font-size: 14px; color: var(--color-text-muted); margin-top: 8px; line-height: 1.6; }
+.myf-register-btn { margin-top: 24px; padding: 14px 32px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--color-primary), #a855f7); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+
+/* 로딩 */
+.myf-loading { text-align: center; padding: 80px 20px; color: var(--color-text-muted); }
+.myf-spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--color-accent-gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 읽어주기 (상단) */
+.myf-speech-top { margin-top: 14px; }
+
+/* 공유 */
+.myf-actions { padding: 0 4px; margin-top: 12px; display: flex; justify-content: center; }
+.myf-share-btn { padding: 12px 20px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--color-primary, #7c3aed), #a855f7); color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 16px rgba(124,58,237,0.3); }
+.myf-share-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(124,58,237,0.4); }
+.myf-share-btn:active { transform: scale(0.97); }
+
+.fade-in { animation: fadeInUp 0.4s ease; }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .myf-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+[data-theme="light"] .myf-badge { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #3a3a50; }
+[data-theme="light"] .myf-badge--saju { border-color: rgba(184,134,11,0.3); color: #96700a; background: rgba(251,191,36,0.06); }
+[data-theme="light"] .myf-badge--bt { border-color: rgba(194,24,91,0.3); color: #c2185b; background: rgba(194,24,91,0.06); }
+[data-theme="light"] .myf-badge--mbti { border-color: rgba(13,121,82,0.3); color: #0d7952; background: rgba(13,121,82,0.06); }
+[data-theme="light"] .myf-tab { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .myf-tab.active { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(251,191,36,0.06)); border-color: rgba(124,58,237,0.35); }
+[data-theme="light"] .myf-tab-label { color: #4a4a5a; }
+[data-theme="light"] .myf-tab.active .myf-tab-label { color: #111; }
+[data-theme="light"] .myf-score-bg { stroke: rgba(0,0,0,0.06); }
+[data-theme="light"] .myf-score-num { color: #111; }
+[data-theme="light"] .myf-analysis-title { color: #96700a; }
+[data-theme="light"] .myf-analysis p { color: #333; }
+[data-theme="light"] .myf-tip p { color: #333; }
+[data-theme="light"] .myf-lucky-divider { background: rgba(0,0,0,0.08); }
+[data-theme="light"] .myf-lucky-value { color: #b8860b; }
+[data-theme="light"] .myf-empty h2 { color: #111; }
+[data-theme="light"] .myf-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #b8860b; }

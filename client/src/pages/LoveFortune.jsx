@@ -2,11 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCelebMatch, getSajuCompatibility } from '../api/fortune';
 import CELEBRITIES from '../data/celebrities';
-import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
-import FortuneLoading from '../components/FortuneLoading';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
@@ -52,12 +50,23 @@ function LoveFortune() {
   const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [streamText, setStreamText] = useState('');
   const [aiStreaming, setAiStreaming] = useState(false);
+  const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
+
+  // 결과 등장 시 매트릭스 부드럽게 페이드아웃
+  useEffect(() => {
+    if (result && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [result, matrixShown]);
 
   // 연예인 궁합 매칭
   const [celebListOpen, setCelebListOpen] = useState(false);
@@ -83,6 +92,8 @@ function LoveFortune() {
     setLoading(true);
     setResult(null);
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
 
     try {
       // 1단계: 캐시 체크 + 사주 기본 (즉시)
@@ -99,8 +110,7 @@ function LoveFortune() {
         return;
       }
 
-      // 2단계: AI 스트리밍
-      setLoading(false);
+      // 2단계: AI 스트리밍 — 매트릭스에 실시간 텍스트 공급, 완료 시 결과 일괄 렌더
       setAiStreaming(true);
 
       cleanupRef.current = getLoveFortuneStream(
@@ -108,13 +118,13 @@ function LoveFortune() {
         '', '', '', '', relationStatus,
         {
           onCached: (cachedData) => {
-            setAiStreaming(false); setStreamText('');
+            setAiStreaming(false); setLoading(false); setStreamText('');
             setResult(cachedData);
             setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
           },
           onChunk: (text) => setStreamText(prev => prev + text),
           onDone: (fullText) => {
-            setAiStreaming(false);
+            setAiStreaming(false); setLoading(false);
             setStreamText('');
             try {
               let json = fullText;
@@ -147,7 +157,7 @@ function LoveFortune() {
               setResult({ ...data, score: 65, grade: '보통', overall: fullText });
             }
           },
-          onError: () => { setAiStreaming(false); setStreamText(''); },
+          onError: () => { setAiStreaming(false); setLoading(false); },
         }
       );
     } catch (err) {
@@ -271,27 +281,14 @@ function LoveFortune() {
         </div>
       )}
 
-      {/* 로딩 (스트림 데이터 오기 전) */}
-      {loading && !streamText && (
-        <FortuneLoading type="love" />
-      )}
-
-      {/* 스트리밍 텍스트 */}
-      {aiStreaming && streamText && !result && (
-        <div className="lf-stream-section fade-in">
-          <StreamText text={streamText} icon="💕" label="AI가 연애운을 분석하고 있어요..." color="#E91E63" />
-        </div>
+      {/* 연애 매트릭스 로딩 — 완료 후 부드럽게 페이드아웃 */}
+      {matrixShown && (
+        <AnalysisMatrix theme="love" label="AI가 연애운을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
 
       {/* 결과 */}
       {result && (
-        <div className="lf-result fade-in" ref={resultRef} style={{ '--heart-color': heartColor }}>
-          <div className="lf-speech-area">
-            <SpeechButton label="연애운 읽어주기"
-              text={[`오늘의 연애운 결과입니다.`, `점수는 ${result.score}점, ${result.grade}입니다.`, result.overall, result.timing, result.advice, result.caution].filter(Boolean).join(' ')}
-              summaryText={`연애운 ${result.score}점, ${result.grade}. ${(result.overall||'').split('.').slice(0,2).join('.')}.`} />
-          </div>
-
+        <div className="lf-result lf-result-reveal" ref={resultRef} style={{ '--heart-color': heartColor }}>
           {/* 하트 점수 */}
           <div className="lf-heart-score-card">
             <FloatingHearts score={result.score} />
@@ -316,7 +313,7 @@ function LoveFortune() {
             {result.luckyColor && <div className="lf-lucky-item"><span className="lf-lucky-label">행운의 색</span><span className="lf-lucky-value">{result.luckyColor}</span></div>}
           </div>
 
-          <button className="lf-reset" onClick={() => { setResult(null); setBirthDate(''); setRelationStatus(''); setStreamText(''); setAiStreaming(false); setCelebListOpen(false); setCelebList([]); setCelebResult(null); setSelectedCeleb(null); setCelebPopup(false); }}>🔄 다시 보기</button>
+          <button className="lf-reset" onClick={() => { setResult(null); setBirthDate(''); setRelationStatus(''); setAiStreaming(false); setCelebListOpen(false); setCelebList([]); setCelebResult(null); setSelectedCeleb(null); setCelebPopup(false); }}>🔄 다시 보기</button>
 
           {/* 궁합이 맞는 연예인 */}
           {!celebListOpen && (
@@ -367,7 +364,7 @@ function LoveFortune() {
               <div className="lf-celeb-popup" onClick={e => e.stopPropagation()}>
                 <button className="lf-celeb-popup-close" onClick={closeCelebPopup}>✕ 닫기</button>
                 {celebDetailLoading ? (
-                  <FortuneLoading type="love" />
+                  <AnalysisMatrix theme="love" variant="modal" label="스타와의 궁합을 분석하고 있어요" />
                 ) : celebResult ? (
                   <div className="lf-celeb-detail fade-in">
                     <div className="lf-celeb-detail-header">

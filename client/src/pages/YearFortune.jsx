@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getYearFortuneStream } from '../api/fortune';
+import { getYearFortuneStream, getYearFortune } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
-import SpeechButton from '../components/SpeechButton';
 import BirthDatePicker from '../components/BirthDatePicker';
-import StreamText from '../components/StreamText';
-import FortuneLoading from '../components/FortuneLoading';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import './YearFortune.css';
 
 const BIRTH_TIMES = [
@@ -73,16 +71,52 @@ function YearFortune() {
     setLoading(true); setStreamText(''); setStreaming(false); setResult(null);
     cleanupRef.current?.();
     let firstChunk = true;
+    let gotResult = false;
+
+    // 비스트리밍 폴백: 스트림 실패/파싱실패 시 일반 API 로 재시도
+    const fallback = async (reason) => {
+      console.warn('[YearFortune] stream failed, falling back to non-stream:', reason);
+      try {
+        const data = await getYearFortune(bd, bt, g, ct);
+        if (data) {
+          gotResult = true;
+          setResult(data);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        }
+      } catch (e) {
+        console.error('[YearFortune] fallback failed:', e);
+      } finally {
+        setLoading(false); setStreaming(false); setStreamText('');
+      }
+    };
+
     cleanupRef.current = getYearFortuneStream(bd, bt, g, ct, {
-      onCached: (data) => { setResult(data); setLoading(false); setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200); },
-      onChunk: (chunk) => { if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); } setStreamText(prev => prev + chunk); },
-      onDone: (fullText) => {
-        setStreaming(false);
-        const parsed = parseAiJson(fullText);
-        if (parsed) { setResult(parsed); setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200); }
-        setLoading(false); setStreamText('');
+      onCached: (data) => {
+        gotResult = true;
+        setResult(data); setLoading(false);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
       },
-      onError: () => { setLoading(false); setStreaming(false); setStreamText(''); },
+      onChunk: (chunk) => {
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        setStreamText(prev => prev + chunk);
+      },
+      onDone: (fullText) => {
+        const parsed = parseAiJson(fullText);
+        if (parsed) {
+          gotResult = true;
+          setStreaming(false); setLoading(false); setStreamText('');
+          setResult(parsed);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        } else {
+          // 파싱 실패 → 불완전 JSON(토큰 초과 등) → 폴백
+          console.warn('[YearFortune] parseAiJson failed, fallback. raw length:', fullText?.length);
+          fallback('parse-failed');
+        }
+      },
+      onError: (err) => {
+        if (gotResult) return; // 이미 결과 받았으면 무시 (EventSource close 후 onerror 정상 발화)
+        fallback(err || 'stream-error');
+      },
     });
   };
 
@@ -164,11 +198,6 @@ function YearFortune() {
           </div>
         )}
         {rAdvice && <FortuneCard icon="💡" title="2026년 조언" description={rAdvice} delay={400} />}
-        <div className="yf-speech-area">
-          <SpeechButton label="신년운세 읽어주기"
-            text={[`2026 신년운세 ${rScore}점, ${rGrade}.`, result.summary, result.love ? `애정운. ${result.love}` : '', result.money ? `재물운. ${result.money}` : '', rAdvice ? `조언. ${rAdvice}` : ''].filter(Boolean).join(' ')}
-            summaryText={`2026 신년운세 ${rScore}점, ${rGrade}. ${result.summary || ''}`} />
-        </div>
         {bd && <DeepAnalysis type="yearly" birthDate={bd} birthTime={bt} gender={g} calendarType={ct} />}
         <div className="yf-actions">
           <button className="yf-action-btn yf-share-btn" onClick={() => handleShare(result)}>{copied ? '✅ 복사됨' : '📤 공유하기'}</button>
@@ -180,9 +209,7 @@ function YearFortune() {
 
   const renderLoading = (isLoading, isStreaming, sText, hasResult) => {
     if ((isLoading || isStreaming) && !hasResult) {
-      return sText
-        ? <StreamText text={sText} icon="📅" label="AI가 2026년 운세를 분석하고 있어요..." color="#FBBF24" />
-        : <FortuneLoading type="default" />;
+      return <AnalysisMatrix theme="year" label="AI가 2026년 운세를 분석하고 있어요" streamText={sText} />;
     }
     return null;
   };

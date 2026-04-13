@@ -71,7 +71,7 @@ public class YearFortuneController {
         }
 
         final Long uid = userId;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2400, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 3500, (fullText) -> {
             yearFortuneService.saveStreamResult(birthDate, birthTime, gender, calendarType, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "YEAR_FORTUNE", "신년운세");
         });

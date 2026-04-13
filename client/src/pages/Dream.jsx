@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { interpretDreamStream } from '../api/fortune';
-import SpeechButton from '../components/SpeechButton';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneLoading from '../components/FortuneLoading';
@@ -365,29 +364,6 @@ function Dream() {
                 )}
               </div>
             )}
-
-            {/* ── TTS ── */}
-            <div className="dream-speech-area">
-              <SpeechButton
-                label="해몽 읽어주기"
-                text={[
-                  '꿈해몽 결과입니다.',
-                  result.category ? `분류: ${result.category}.` : '',
-                  result.score ? `점수는 ${result.score}점, ${rating.label}입니다.` : '',
-                  result.interpretation,
-                  result.psychology ? `심리 분석. ${result.psychology}` : '',
-                  result.fortuneHint ? `운세 힌트. ${result.fortuneHint}` : '',
-                  result.luckyAction ? `행운의 행동은 ${result.luckyAction}입니다.` : '',
-                  result.luckyNumber ? `행운의 숫자는 ${result.luckyNumber}입니다.` : '',
-                ].filter(Boolean).join(' ')}
-                summaryText={[
-                  '꿈해몽 요약입니다.',
-                  result.score ? `${rating.label}, ${result.score}점.` : '',
-                  result.interpretation ? result.interpretation.split('.').slice(0, 2).join('.') + '.' : '',
-                  result.luckyAction ? `행운의 행동: ${result.luckyAction}.` : '',
-                ].filter(Boolean).join(' ')}
-              />
-            </div>
 
             {/* ── 액션 버튼 ── */}
             <div className="dream-actions">
