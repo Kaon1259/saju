@@ -6,6 +6,7 @@ import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
 import './CelebCompatibility.css';
 
@@ -284,10 +285,13 @@ function CelebCompatibility() {
   if (step === 'select') {
     return (
       <div className="celeb-page">
-        <section className="celeb-hero celeb-hero--compact">
-          <span className="celeb-hero-icon">💫</span>
-          <h1 className="celeb-hero-title">스타와 나의 궁합</h1>
-        </section>
+        <StarHero
+          icon="💫"
+          title="스타와 나의 궁합"
+          desc="최애와 사주 궁합을 확인해보세요"
+          color="#E91E63"
+          particles={['💖','💫','✨','💘','🌟']}
+        />
 
         <div className="celeb-search-wrap">
           <input className="celeb-search" type="text" placeholder="스타 이름 또는 그룹 검색..."

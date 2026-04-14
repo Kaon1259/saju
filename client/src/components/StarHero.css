@@ -1,0 +1,121 @@
+.star-hero {
+  position: relative;
+  text-align: center;
+  padding: 24px 12px 22px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.star-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%,
+    color-mix(in srgb, var(--sh-color, #FF9800) 18%, transparent),
+    transparent 70%);
+  pointer-events: none;
+  animation: shBgPulse 4s ease-in-out infinite;
+}
+@keyframes shBgPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+
+.star-hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.star-hero-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 18px;
+  opacity: 0;
+  animation: shParticle 3.6s ease-out infinite;
+  animation-delay: calc(var(--p-i) * 0.38s);
+  --angle: calc(var(--p-i) * 72deg);
+}
+@keyframes shParticle {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) rotate(calc(-1 * var(--angle))) scale(0.4); }
+  15%  { opacity: 1; }
+  70%  { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-92px) rotate(calc(-1 * var(--angle))) scale(1.1); }
+}
+
+.star-hero-iconwrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  height: 110px;
+  margin-bottom: 8px;
+}
+.star-hero-aura {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--sh-color, #FF9800) 45%, transparent) 0%,
+    transparent 70%);
+  filter: blur(6px);
+  animation: shAura1 2.5s ease-in-out infinite;
+}
+.star-hero-aura--2 {
+  inset: -14px;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--sh-color, #FF9800) 22%, transparent) 0%,
+    transparent 65%);
+  filter: blur(10px);
+  animation: shAura2 3.2s ease-in-out infinite;
+}
+@keyframes shAura1 {
+  0%, 100% { transform: scale(1);    opacity: 0.8; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+@keyframes shAura2 {
+  0%, 100% { transform: scale(1.05); opacity: 0.5; }
+  50%      { transform: scale(1.28); opacity: 0.8; }
+}
+.star-hero-icon {
+  position: relative;
+  font-size: 64px;
+  line-height: 1;
+  display: inline-block;
+  animation: shIconBounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 18px color-mix(in srgb, var(--sh-color, #FF9800) 55%, transparent));
+}
+@keyframes shIconBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35%      { transform: translateY(-7px) scale(1.05); }
+  65%      { transform: translateY(0) scale(1); }
+}
+
+.star-hero-title {
+  position: relative;
+  font-size: 24px;
+  font-weight: 900;
+  margin: 6px 0 4px;
+  background: linear-gradient(135deg,
+    var(--sh-color, #FF9800),
+    color-mix(in srgb, var(--sh-color, #FF9800) 60%, #fff));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shTitleFadeIn 0.8s ease-out;
+}
+.star-hero-desc {
+  position: relative;
+  font-size: 13px;
+  color: var(--color-text-muted, rgba(255,255,255,0.7));
+  margin: 0;
+  animation: shDescFadeIn 1s ease-out 0.2s backwards;
+}
+@keyframes shTitleFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shDescFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+[data-theme="light"] .star-hero-desc { color: rgba(0,0,0,0.58); }

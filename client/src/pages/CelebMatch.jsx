@@ -4,6 +4,7 @@ import { getSajuCompatibility } from '../api/fortune';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import { shareResult } from '../utils/share';
+import StarHero from '../components/StarHero';
 import './CelebMatch.css';
 
 // ─── 사주 오행 기반 간이 궁합 계산 ───
@@ -234,11 +235,13 @@ function CelebMatch() {
   return (
     <div className="cm-page">
       <button className="cm-back-btn" onClick={() => navigate('/')}>← 홈으로</button>
-      <section className="cm-hero">
-        <span className="cm-hero-icon">🔮</span>
-        <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
-        <p className="cm-hero-desc">사주 오행 + AI 분석으로 찾는 운명의 스타</p>
-      </section>
+      <StarHero
+        icon="🔮"
+        title="나와 궁합이 맞는 스타"
+        desc="사주 오행 + AI 분석으로 찾는 운명의 스타"
+        color="#FF6B6B"
+        particles={['🔮','✨','💫','⭐','💖']}
+      />
 
       {/* AI 분석 진행 표시 */}
       {aiLoading && (

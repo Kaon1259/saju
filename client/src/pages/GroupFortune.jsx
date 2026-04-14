@@ -7,6 +7,7 @@ import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
 import './GroupFortune.css';
 
@@ -185,15 +186,13 @@ function GroupFortune() {
     return (
       <div className="gf-page">
         <button className="gf-nav-back" onClick={() => navigate('/')}>← 홈으로</button>
-        <section className="gf-hero">
-          <div className="gf-hero-icons">
-            <span className="gf-hero-icon-item">♂</span>
-            <span className="gf-hero-icon-item gf-hero-icon--center">💕</span>
-            <span className="gf-hero-icon-item">♀</span>
-          </div>
-          <h1 className="gf-hero-title">보이그룹, 걸그룹과 나의 궁합</h1>
-          <p className="gf-hero-desc">좋아하는 그룹과 사주 궁합을 확인해보세요</p>
-        </section>
+        <StarHero
+          icon="🌟"
+          title="보이그룹·걸그룹 궁합"
+          desc="좋아하는 그룹과 사주 궁합을 확인해보세요"
+          color="#9B59B6"
+          particles={['🌟','💫','✨','💜','⭐']}
+        />
 
         <input className="gf-search" type="text" placeholder="그룹 이름 검색..."
           value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />

@@ -72,6 +72,20 @@ const THEMES = {
     icon: '💫',
     keywords: '그룹보이그룹걸그룹아이돌멤버무대팬덤최애덕질운명인연궁합에너지시너지조화케미스타별빛콘서트앨범',
   },
+  tarot: {
+    color: '#f5d78e',
+    glow1: 'rgba(222, 169, 87, 0.8)',
+    glow2: 'rgba(147, 51, 234, 0.4)',
+    bgStart: 'rgba(30, 12, 45, 0.94)',
+    bgEnd: 'rgba(8, 3, 18, 0.98)',
+    labelBg: 'rgba(20, 8, 30, 0.78)',
+    labelBorder: 'rgba(222, 169, 87, 0.55)',
+    labelText: '#fef0c7',
+    labelGrad: 'linear-gradient(90deg, #fef0c7, #f5d78e, #c084fc, #f5d78e, #fef0c7)',
+    innerShadow: 'rgba(222, 169, 87, 0.22)',
+    icon: '🔮',
+    keywords: '타로카드운명인연메시지직감신비마법예언상징미래과거현재죽음연인마법사은둔자여사제별달태양심판세계바보전차',
+  },
 };
 
 function sanitize(text) {

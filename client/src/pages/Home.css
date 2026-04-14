@@ -588,6 +588,47 @@
 [data-theme="light"] .home-mac-label { color: #1e293b; }
 [data-theme="light"] .home-mac-desc { color: #64748b; }
 
+/* 더보기 드롭다운 */
+.home-more-actions {
+  margin-top: 10px;
+  animation: homeMoreDrop 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transform-origin: top center;
+}
+@keyframes homeMoreDrop {
+  0%   { opacity: 0; transform: translateY(-8px) scaleY(0.92); max-height: 0; }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); max-height: 500px; }
+}
+
+.home-more-toggle {
+  display: block;
+  width: 100%;
+  margin: 12px auto 0;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1.5px dashed rgba(233,30,99,0.35);
+  background: linear-gradient(160deg, rgba(233,30,99,0.08), rgba(233,30,99,0.02));
+  color: var(--color-text, #fff);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.home-more-toggle:hover {
+  border-color: rgba(233,30,99,0.55);
+  background: linear-gradient(160deg, rgba(233,30,99,0.14), rgba(233,30,99,0.04));
+  transform: translateY(-1px);
+}
+.home-more-toggle:active { transform: scale(0.98); }
+
+[data-theme="light"] .home-more-toggle {
+  color: #1e293b;
+  border-color: rgba(233,30,99,0.3);
+  background: linear-gradient(160deg, rgba(233,30,99,0.05), rgba(233,30,99,0.01));
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
 /* ─── 연애 카테고리 (심플 그리드) ─── */
 .home-love-cats-section {
   display: flex;
@@ -2102,3 +2143,22 @@
 [data-theme="light"] .home-year-banner { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(220,38,38,0.04), rgba(124,58,237,0.03)); border-color: rgba(184,134,11,0.25); }
 [data-theme="light"] .home-year-banner-title { color: #b8860b; }
 [data-theme="light"] .home-year-banner-sparkles { color: rgba(184,134,11,0.4); }
+
+/* 오늘의 운세 배너 (핑크/퍼플 톤) */
+.home-today-banner {
+  border-color: rgba(236,72,153,0.35);
+  background: linear-gradient(135deg, rgba(236,72,153,0.14), rgba(168,85,247,0.08), rgba(59,130,246,0.05));
+}
+.home-today-banner:hover { box-shadow: 0 8px 24px rgba(236,72,153,0.22); }
+.home-today-banner .home-year-banner-bg {
+  background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(236,72,153,0.3) 10px, rgba(236,72,153,0.3) 12px);
+}
+.home-today-banner .home-year-banner-sparkles { color: rgba(236,72,153,0.55); }
+.home-today-banner .home-year-banner-title { color: #ff6b9d; }
+.home-today-banner .home-year-banner-arrow { color: rgba(236,72,153,0.65); }
+[data-theme="light"] .home-today-banner {
+  background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(168,85,247,0.04), rgba(59,130,246,0.02));
+  border-color: rgba(219,39,119,0.25);
+}
+[data-theme="light"] .home-today-banner .home-year-banner-title { color: #be185d; }
+[data-theme="light"] .home-today-banner .home-year-banner-sparkles { color: rgba(219,39,119,0.4); }

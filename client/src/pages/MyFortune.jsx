@@ -172,7 +172,7 @@ function MyFortune() {
   if (loading || streaming) {
     return (
       <div className="myf-page">
-        <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={streamText} />
+        <AnalysisMatrix theme="saju" label="AI가 오늘의 운세를 분석하고 있어요" streamText={streamText} />
       </div>
     );
   }
@@ -261,7 +261,7 @@ function MyFortune() {
   /* ── 스트리밍/로딩 표시 공통 ── */
   const renderLoading = (isLoading, isStreaming, sText, hasData) => {
     if ((isLoading || isStreaming) && !hasData) {
-      return <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={sText} />;
+      return <AnalysisMatrix theme="saju" label="AI가 오늘의 운세를 분석하고 있어요" streamText={sText} />;
     }
     return null;
   };

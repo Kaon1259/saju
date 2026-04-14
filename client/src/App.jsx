@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { TransitionProvider } from './components/PageTransition';
 import Header from './components/Header';
@@ -28,6 +28,7 @@ import YearFortune from './pages/YearFortune';
 import MonthlyFortune from './pages/MonthlyFortune';
 import WeeklyFortune from './pages/WeeklyFortune';
 import LoveFortune from './pages/LoveFortune';
+import LoveTypeFortune from './pages/LoveTypeFortune';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
 import MyMenu from './pages/MyMenu';
@@ -50,15 +51,23 @@ function TabIntro({ tabKey, onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
   const config = TAB_INTRO_IMAGES[tabKey];
   const [img] = useState(() => config.images[Math.floor(Math.random() * config.images.length)]);
+  const doneRef = useRef(false);
+
+  const finish = () => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setFadeOut(true);
+    setTimeout(onDone, 200);
+  };
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFadeOut(true), 2000);
-    const t2 = setTimeout(onDone, 2600);
+    const t1 = setTimeout(() => setFadeOut(true), 800);
+    const t2 = setTimeout(onDone, 1100);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onDone]);
 
   return (
-    <div className={`splash splash--title ${fadeOut ? 'splash--out' : ''}`}>
+    <div className={`splash splash--title ${fadeOut ? 'splash--out' : ''}`} onClick={finish} style={{ cursor: 'pointer' }}>
       <img src={img} alt="" className="splash-title-img" draggable={false} />
       <div className="splash-title-overlay">
         <h1 className="splash-title-text" style={{ background: `linear-gradient(135deg, #fff 0%, ${config.color}88 50%, ${config.color} 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>{config.title}</h1>
@@ -168,8 +177,11 @@ function useProfileGuard() {
 }
 
 function App() {
+  // 세션 내 스플래시 중복 방지: sessionStorage에 표시 여부 기록
   const [splashKey, setSplashKey] = useState(Date.now());
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    return sessionStorage.getItem('splashShown') !== '1';
+  });
   const [tabIntro, setTabIntro] = useState(null); // { key, tabKey }
   useTimeTheme();
   useFontSize();
@@ -185,8 +197,15 @@ function App() {
   }, []);
 
   const triggerSplash = () => {
+    // 세션에 한 번이라도 스플래시를 봤다면 다시 띄우지 않음
+    if (sessionStorage.getItem('splashShown') === '1') return;
     setSplashKey(Date.now());
     setShowSplash(true);
+  };
+
+  const handleSplashDone = () => {
+    sessionStorage.setItem('splashShown', '1');
+    setShowSplash(false);
   };
 
   const triggerTabIntro = (tabKey) => {
@@ -198,7 +217,7 @@ function App() {
   return (
     <HeartProvider>
     <>
-      {showSplash && <Splash key={splashKey} onDone={() => setShowSplash(false)} />}
+      {showSplash && <Splash key={splashKey} onDone={handleSplashDone} />}
       {tabIntro && <TabIntro key={tabIntro.key} tabKey={tabIntro.tabKey} onDone={() => setTabIntro(null)} />}
       <div className="app" style={{ display: showSplash ? 'none' : undefined }}>
         <TransitionProvider>
@@ -233,6 +252,7 @@ function App() {
               <Route path="/monthly-fortune" element={<MonthlyFortune />} />
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
               <Route path="/love-fortune" element={<LoveFortune />} />
+              <Route path="/love/:type" element={<LoveTypeFortune />} />
               <Route path="/my-menu" element={<MyMenu />} />
               <Route path="/my-star" element={<MyStar />} />
               <Route path="/settings" element={<Settings />} />

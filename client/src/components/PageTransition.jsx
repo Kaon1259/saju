@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext } from 'react';
+import { useState, useEffect, useRef, useContext, createContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './PageTransition.css';
 
@@ -138,17 +138,25 @@ export const TRANSITION_EFFECTS = {
 
 function PageTransition({ effect, onDone }) {
   const [fadeOut, setFadeOut] = useState(false);
+  const doneRef = useRef(false);
   const config = TRANSITION_EFFECTS[effect] || TRANSITION_EFFECTS.fortune;
+
+  const finish = () => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setFadeOut(true);
+    setTimeout(onDone, 180);
+  };
 
   useEffect(() => {
     config.sound();
-    const t1 = setTimeout(() => setFadeOut(true), 900);
-    const t2 = setTimeout(onDone, 1200);
+    const t1 = setTimeout(() => setFadeOut(true), 450);
+    const t2 = setTimeout(onDone, 700);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   return (
-    <div className={`page-transition ${config.className} ${fadeOut ? 'trans--out' : ''}`}>
+    <div className={`page-transition ${config.className} ${fadeOut ? 'trans--out' : ''}`} onClick={finish} style={{ cursor: 'pointer' }}>
       <div className="trans-content">
         <span className="trans-symbol">{config.label}</span>
       </div>

@@ -208,8 +208,36 @@ function LoveFortune() {
   const heartColor = result?.score ? getHeartColor(result.score) : '#ffc0cb';
   const statusInfo = RELATION_STATUSES.find(r => r.value === relationStatus);
 
+  const handleReset = () => {
+    setResult(null);
+    setBirthDate('');
+    setRelationStatus('');
+    setGender('');
+    setAiStreaming(false);
+    setStreamText('');
+    setMatrixShown(false);
+    setMatrixExiting(false);
+    setCelebListOpen(false);
+    setCelebList([]);
+    setCelebResult(null);
+    setSelectedCeleb(null);
+    setCelebPopup(false);
+    cleanupRef.current?.();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="lf-page">
+      {/* 상단 버튼바 */}
+      <div className="lf-topbar">
+        <button className="lf-topbtn lf-topbtn--back" onClick={() => navigate(-1)} aria-label="뒤로">
+          <span>‹</span> 뒤로
+        </button>
+        <button className="lf-topbtn lf-topbtn--reset" onClick={handleReset} aria-label="다시하기">
+          다시하기 <span>↻</span>
+        </button>
+      </div>
+
       {/* 히어로 */}
       <section className="lf-hero">
         <div className="lf-hero-bg" />

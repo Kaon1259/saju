@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
+import StarHero from '../components/StarHero';
 import './MyStar.css';
 
 const STORAGE_KEY = 'myStarList';
@@ -56,11 +57,13 @@ function MyStar() {
     return (
       <div className="mystar-page">
         <button className="mystar-back-btn" onClick={() => navigate('/')}>← 홈으로</button>
-        <section className="mystar-hero">
-          <span className="mystar-hero-icon">⭐</span>
-          <h1 className="mystar-hero-title">나의 스타</h1>
-          <p className="mystar-hero-desc">나만의 최애 스타를 등록하고 관리하세요</p>
-        </section>
+        <StarHero
+          icon="⭐"
+          title="나의 스타"
+          desc="나만의 최애 스타를 등록하고 관리하세요"
+          color="#FF9800"
+          particles={['⭐','✨','💫','🌟','✦']}
+        />
 
         <section className="mystar-login-card glass-card">
           <span className="mystar-login-icon">🔒</span>
@@ -88,11 +91,13 @@ function MyStar() {
   // ─── 로그인 상태: 나의 스타 목록 ───
   return (
     <div className="mystar-page">
-      <section className="mystar-hero">
-        <span className="mystar-hero-icon">⭐</span>
-        <h1 className="mystar-hero-title">나의 스타</h1>
-        <p className="mystar-hero-desc">나만의 최애 스타를 등록하고 관리하세요</p>
-      </section>
+      <StarHero
+        icon="⭐"
+        title="나의 스타"
+        desc="나만의 최애 스타를 등록하고 관리하세요"
+        color="#FF9800"
+        particles={['⭐','✨','💫','🌟','✦']}
+      />
 
       {/* 나의 스타 목록 */}
       {myStars.length > 0 ? (

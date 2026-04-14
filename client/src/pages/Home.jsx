@@ -71,14 +71,23 @@ const DAILY_MESSAGES = [
 
 const HOME_MAIN_MENUS = [
   { id: 'love', icon: '💕', label: '1:1연애운', sub: '오늘 연애 기운은?', path: '/love-fortune' },
-  { id: 'some', icon: '🎯', label: '썸진단', sub: '누가 먼저 끌리나요', loveType: 'some_check' },
-  { id: 'compat', icon: '🌌', label: '전생인연', sub: '전생에 어떤 사이였을까?', loveType: 'past_life' },
-  { id: 'crush', icon: '💘', label: '짝사랑', sub: '플러팅해도 될까요?', loveType: 'crush' },
-  { id: 'blind', icon: '🤝', label: '소개팅', sub: '새로운 인연이 올까요?', loveType: 'blind_date' },
-  { id: 'date', icon: '💑', label: '데이트운', sub: '오늘 만나도 될까요?', loveType: 'couple_fortune' },
-  { id: 'confess', icon: '💌', label: '고백타이밍', sub: '언제 마음을 전할까?', loveType: 'confession_timing' },
-  { id: 'meeting', icon: '🔮', label: '만남시기', sub: '언제 인연을 만날까?', loveType: 'meeting_timing' },
-  { id: 'reunion', icon: '💔', label: '재회운', sub: '다시 만날 수 있을까?', loveType: 'reunion' },
+  { id: 'some', icon: '🎯', label: '썸진단', sub: '누가 먼저 끌리나요', path: '/love/some_check' },
+  { id: 'compat', icon: '🌌', label: '전생인연', sub: '전생에 어떤 사이였을까?', path: '/love/past_life' },
+  { id: 'crush', icon: '💘', label: '짝사랑', sub: '플러팅해도 될까요?', path: '/love/crush' },
+  { id: 'blind', icon: '🤝', label: '소개팅', sub: '새로운 인연이 올까요?', path: '/love/blind_date' },
+  { id: 'date', icon: '💑', label: '데이트운', sub: '오늘 만나도 될까요?', path: '/love/couple_fortune' },
+  { id: 'confess', icon: '💌', label: '고백타이밍', sub: '언제 마음을 전할까?', path: '/love/confession_timing' },
+  { id: 'meeting', icon: '🔮', label: '만남시기', sub: '언제 인연을 만날까?', path: '/love/meeting_timing' },
+  { id: 'reunion', icon: '💔', label: '재회운', sub: '다시 만날 수 있을까?', path: '/love/reunion' },
+];
+
+const HOME_MORE_MENUS = [
+  { id: 'contact', icon: '📱', label: '연락운', sub: '먼저 연락해도 될까?', path: '/love/contact_fortune' },
+  { id: 'marriage', icon: '💒', label: '결혼운', sub: '결혼 시기와 인연', path: '/love/marriage' },
+  { id: 'remarriage', icon: '💍', label: '재혼운', sub: '새로운 인연의 가능성', path: '/love/remarriage' },
+  { id: 'psych', icon: '🎭', label: '심리테스트', sub: '내 마음속 연애 유형', path: '/psych-test' },
+  { id: 'mbti', icon: '🧬', label: 'MBTI', sub: 'MBTI로 보는 연애 궁합', path: '/mbti' },
+  { id: 'blood', icon: '🩸', label: '혈액형', sub: '혈액형별 연애 스타일', path: '/bloodtype' },
 ];
 
 function getLoveHeartColor(score) {
@@ -196,6 +205,7 @@ function Home() {
   const [guestResult, setGuestResult] = useState(null);
   const [guestLoading, setGuestLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showMoreMenus, setShowMoreMenus] = useState(false);
 
   // love modal
   const [loveModal, setLoveModal] = useState(null);
@@ -454,7 +464,7 @@ function Home() {
           <button
             key={item.id}
             className="home-main-action-card"
-            onClick={item.path ? () => navigate(item.path) : () => openLoveModal(item.loveType)}
+            onClick={() => navigate(item.path)}
             style={{ '--mac-color': '#E91E63' }}
           >
             <span className="home-mac-icon">{item.icon}</span>
@@ -463,6 +473,31 @@ function Home() {
           </button>
         ))}
       </section>
+
+      {/* 3-1. 더보기 드롭다운 */}
+      {showMoreMenus && (
+        <section className="home-main-actions home-more-actions">
+          {HOME_MORE_MENUS.map(item => (
+            <button
+              key={item.id}
+              className="home-main-action-card"
+              onClick={() => navigate(item.path)}
+              style={{ '--mac-color': '#E91E63' }}
+            >
+              <span className="home-mac-icon">{item.icon}</span>
+              <span className="home-mac-label">{item.label}</span>
+              <span className="home-mac-sub">{item.sub}</span>
+            </button>
+          ))}
+        </section>
+      )}
+
+      <button
+        className="home-more-toggle"
+        onClick={() => setShowMoreMenus(v => !v)}
+      >
+        {showMoreMenus ? '접기 ▲' : '더보기 ▼'}
+      </button>
 
 
       {/* 5. 스타 운세 (컴팩트) */}
@@ -520,6 +555,22 @@ function Home() {
             <span className="home-star-card-arrow">›</span>
           </button>
         </div>
+      </section>
+
+      {/* 5.4 오늘의 운세 배너 */}
+      <section style={{ padding: '0 4px', marginBottom: 8 }}>
+        <button className="home-year-banner home-today-banner" onClick={() => navigate('/my')}>
+          <span className="home-year-banner-bg" />
+          <span className="home-year-banner-sparkles">✦✦✦</span>
+          <div className="home-year-banner-content">
+            <span className="home-year-banner-icon">🔮</span>
+            <div className="home-year-banner-text">
+              <span className="home-year-banner-title">오늘의 운세</span>
+              <span className="home-year-banner-desc">오늘 하루 총운·애정·재물·건강을 확인하세요</span>
+            </div>
+            <span className="home-year-banner-arrow">›</span>
+          </div>
+        </button>
       </section>
 
       {/* 5.5 신년운세 배너 */}

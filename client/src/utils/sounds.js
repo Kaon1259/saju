@@ -285,3 +285,172 @@ export function playClockChime() {
   [0,0.2,0.4].forEach(t => noise(c, t, 0.02, 0.10));
   note(c,783.99,0.55,0.4,0.10); note(c,1046.5,0.7,0.5,0.07);
 }
+
+// ─── 타로 버리기 회전: 하이라이트 틱 (박력있게) ───
+export function playSpotlightTick() {
+  const c = ctx(); if (!c) return;
+  // 저음 드럼 킥
+  kick(c, 0, 0.22);
+  // 중간 임팩트 (카드 노이즈)
+  cardNoise(c, 0, 0.03, 0.11, 1800, 1.2);
+  // 날카로운 고음 틱 (E6)
+  note(c, 1318.5, 0.005, 0.08, 0.09, 'square');
+}
+
+// ─── 타로 버리기 최종 선택: 박력있는 임팩트 ───
+export function playSpotlightFinal() {
+  const c = ctx(); if (!c) return;
+  // 큰 드럼 킥 (2번 연속으로 무게감)
+  kick(c, 0, 0.32);
+  kick(c, 0.03, 0.28);
+  // 크래시 (와이드 노이즈)
+  noise(c, 0, 0.25, 0.18);
+  // 하강 톤 (운명적 느낌)
+  note(c, 880, 0.02, 0.4, 0.12, 'sawtooth');
+  note(c, 659.25, 0.06, 0.5, 0.10, 'sawtooth');
+  note(c, 523.25, 0.12, 0.6, 0.09, 'sawtooth');
+  // 저음 붐
+  const now = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(110, now);
+  osc.frequency.exponentialRampToValueAtTime(55, now + 0.5);
+  g.gain.setValueAtTime(0.18, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(now); osc.stop(now + 0.65);
+  // 반짝이는 고음 여운
+  note(c, 1568, 0.25, 0.5, 0.07, 'triangle');
+  note(c, 2093, 0.3, 0.6, 0.05, 'triangle');
+}
+
+// ─── 타로 자동선택: 카드 차르르륵 돌아가는 스핀 사운드 ───
+export function playCardSpin(duration = 0.8) {
+  const c = ctx(); if (!c) return;
+  // 연속적인 카드 넘김 사운드 — 루프로 여러 번 cardNoise 재생
+  const stepCount = Math.floor(duration / 0.04);
+  for (let i = 0; i < stepCount; i++) {
+    const t = i * 0.04;
+    const progress = i / stepCount;
+    // 진행에 따라 볼륨이 살짝 줄어듦 (감속 느낌)
+    const vol = 0.11 * (1 - progress * 0.35);
+    // 주파수 살짝 변화 (리듬감)
+    const freq = 2800 + Math.sin(i * 0.8) * 400 + Math.random() * 300;
+    cardNoise(c, t, 0.03, vol, freq, 1.8);
+  }
+  // 마지막 정리 탁
+  cardSlap(c, duration * 0.95, 0.08);
+}
+
+// ─── 타로 카드 선택: 딸깍 + 둥 ───
+export function playCardPick() {
+  const c = ctx(); if (!c) return;
+  // 선택 임팩트 — 슬랩 + 짧은 톤
+  cardSlap(c, 0, 0.14);
+  note(c, 659.25, 0.02, 0.25, 0.10, 'triangle');  // E5
+  note(c, 987.77, 0.08, 0.3, 0.08, 'triangle');   // B5
+  // 반짝 — 높은 톤 살짝
+  note(c, 1568, 0.12, 0.25, 0.05, 'sine');        // G6
+}
+
+// ─── AI 분석 시작: 컴퓨터 부팅/인증 전자음 ───
+export function playAnalyzeStart() {
+  const c = ctx(); if (!c) return;
+
+  // 1) 빠른 상승 데이터 스캔 비프 (square wave — 디지털한 느낌)
+  const startBeeps = [
+    [440, 0.00, 0.06], // A4
+    [554.37, 0.07, 0.06], // C#5
+    [659.25, 0.14, 0.06], // E5
+    [880, 0.21, 0.06],    // A5
+  ];
+  startBeeps.forEach(([f, s, d]) => note(c, f, s, d, 0.09, 'square'));
+
+  // 2) 확정 체크음 (Star Trek ack 느낌)
+  note(c, 1318.5, 0.30, 0.08, 0.10, 'square'); // E6
+  note(c, 1760, 0.30, 0.08, 0.08, 'square');   // A6 (2nd voice)
+
+  // 3) 저음 서브베이스 임팩트 (시스템 기동)
+  const now = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(80, now + 0.02);
+  osc.frequency.exponentialRampToValueAtTime(55, now + 0.45);
+  g.gain.setValueAtTime(0.15, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(now + 0.02); osc.stop(now + 0.55);
+
+  // 4) 디지털 글리치 틱 (데이터 처리 시작)
+  [0.45, 0.5, 0.55, 0.62].forEach(t => note(c, 2093 + Math.random() * 800, t, 0.03, 0.05, 'square'));
+
+  // 5) 홀드 톤 (lock on)
+  note(c, 1046.5, 0.65, 0.35, 0.06, 'square'); // C6 hold
+}
+
+// ─── AI 분석 루프: CPU 작동 중 전자 앰비언트 ───
+export function startAnalyzeAmbient() {
+  const c = ctx(); if (!c) return null;
+  let stopped = false;
+  let timer = null;
+
+  function playLoop() {
+    if (stopped) return;
+    const now = c.currentTime;
+
+    // 1) 저음 펄스 드론 (CPU heartbeat) — sawtooth 로 전자적 느낌
+    const drone = c.createOscillator();
+    const droneG = c.createGain();
+    const droneFilt = c.createBiquadFilter();
+    drone.type = 'sawtooth';
+    drone.frequency.setValueAtTime(55, now);  // A1
+    droneFilt.type = 'lowpass';
+    droneFilt.frequency.setValueAtTime(400, now);
+    droneFilt.Q.setValueAtTime(2, now);
+    droneG.gain.setValueAtTime(0, now);
+    droneG.gain.linearRampToValueAtTime(0.035, now + 0.3);
+    droneG.gain.linearRampToValueAtTime(0.035, now + 2.7);
+    droneG.gain.exponentialRampToValueAtTime(0.001, now + 3.1);
+    drone.connect(droneFilt); droneFilt.connect(droneG); droneG.connect(c.destination);
+    drone.start(now); drone.stop(now + 3.2);
+
+    // 2) 주기적 데이터 처리 비프 (일정한 리듬)
+    // 0.35초 간격으로 짧은 square 비프 — 규칙적인 CPU 작동음
+    for (let i = 0; i < 8; i++) {
+      const t = 0.1 + i * 0.35;
+      // 살짝 다른 주파수로 "데이터 스트림" 느낌
+      const freqs = [1568, 1760, 1396.9, 1864.7, 2093, 1760, 1568, 1760];
+      note(c, freqs[i], t, 0.035, 0.042, 'square');
+    }
+
+    // 3) 랜덤 고속 글리치 틱 (데이터 패킷 전송)
+    for (let i = 0; i < 4; i++) {
+      const t = 0.5 + Math.random() * 2.2;
+      const f = 2500 + Math.random() * 1500;
+      note(c, f, t, 0.015, 0.025, 'square');
+    }
+
+    // 4) 저주파 펄스 (rhythm) — 2Hz 심장박동 같은
+    [0.5, 1.5, 2.5].forEach(t => {
+      const p = c.createOscillator();
+      const pg = c.createGain();
+      p.type = 'sine';
+      p.frequency.setValueAtTime(80, now + t);
+      pg.gain.setValueAtTime(0.06, now + t);
+      pg.gain.exponentialRampToValueAtTime(0.001, now + t + 0.08);
+      p.connect(pg); pg.connect(c.destination);
+      p.start(now + t); p.stop(now + t + 0.1);
+    });
+
+    timer = setTimeout(() => { if (!stopped) playLoop(); }, 3100);
+  }
+
+  playLoop();
+
+  return () => {
+    stopped = true;
+    if (timer) clearTimeout(timer);
+  };
+}
