@@ -4,6 +4,7 @@ import { getSpecialLoveFortune, getHourlyFortune, getTimeblockFortune } from '..
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './SpecialFortune.css';
 
 const LOVE_TYPES = [
@@ -74,6 +75,8 @@ function SpecialFortune() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   useEffect(() => {
     const t = searchParams.get('tab');
@@ -89,6 +92,9 @@ function SpecialFortune() {
   const handleAnalyze = async () => {
     if (!birthDate) return;
     setLoading(true); setResult(null);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     try {
       let data;
       if (tab === 'love' && loveType) {
@@ -105,7 +111,10 @@ function SpecialFortune() {
       setResult(data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    finally {
+      setLoading(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    }
   };
 
   const switchTab = (t) => { setTab(t); setResult(null); setLoveType(null); };

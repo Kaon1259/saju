@@ -164,6 +164,7 @@ function PsychTest() {
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onError: (err) => {
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           console.error('심리테스트 분석 실패:', err);
           setResult({
             type: selectedTest.id === 'love-style' ? '로맨틱 이상주의자' : selectedTest.id === 'hidden-self' ? '조용한 모험가' : '긍정 행운아',
