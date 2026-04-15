@@ -168,6 +168,40 @@ public class BloodTypeFortuneService {
     }
 
     /**
+     * 혈액형 궁합 — 기본(점수/등급/성격)만, AI 없음 (스트리밍 플로우용)
+     */
+    public Map<String, Object> getCompatibilityBasic(String type1, String type2) {
+        int idx2 = Arrays.asList(BLOOD_TYPES).indexOf(type2);
+        int score = COMPAT_SCORE.getOrDefault(type1, new int[]{70,70,70,70})[Math.max(idx2, 0)];
+        String grade;
+        if (score >= 85) grade = "천생연분 💕";
+        else if (score >= 75) grade = "좋은 궁합 💛";
+        else if (score >= 65) grade = "보통 궁합 💚";
+        else grade = "노력 필요 💪";
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("type1", type1); result.put("type2", type2);
+        result.put("score", score); result.put("grade", grade);
+        result.put("personality1", PERSONALITY.getOrDefault(type1, ""));
+        result.put("personality2", PERSONALITY.getOrDefault(type2, ""));
+        return result;
+    }
+
+    /**
+     * 혈액형 궁합 AI 스트리밍
+     */
+    public SseEmitter streamCompatibility(String type1, String type2) {
+        String system = "카페에서 친한 친구한테 수다 떨듯이 자연스러운 대화체 반말로 혈액형 궁합을 상담해주는 전문가야. " +
+            "오행과 혈액형 기질을 융합해서 분석하되, 딱딱한 보고서 톤이나 고전적 표현은 절대 금지. " +
+            "반드시 아래 형식의 JSON만 출력해 (마크다운 코드블록 금지, 설명 금지): " +
+            "{\"summary\":\"한 줄 요약 (30자 이내)\",\"overall\":\"종합 분석 (4~5문장)\",\"loveCompat\":\"연애 궁합 (3~4문장)\",\"advice\":\"관계 조언 (3문장)\",\"caution\":\"주의할 점 (2~3문장)\"}";
+        String user = promptBuilder.compatibilityPrompt("bloodtype", type1, type2, LocalDate.now()) +
+            "\n\n위 내용을 정확히 다음 JSON 형식으로만 답해: " +
+            "{\"summary\":\"...\",\"overall\":\"...\",\"loveCompat\":\"...\",\"advice\":\"...\",\"caution\":\"...\"}";
+        return claudeApiService.generateStream(system, user, 1200);
+    }
+
+    /**
      * 궁합
      */
     public Map<String, Object> getCompatibility(String type1, String type2) {

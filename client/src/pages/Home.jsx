@@ -430,20 +430,26 @@ function Home() {
               {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
             </p>
             <p className="home-hero-new__msg">{msg}</p>
-            {/* 로그인 사용자: 오늘 운세 한줄 요약 */}
+            {/* 로그인 사용자: 오늘 운세 한줄 요약 (AI 분석 캐시가 있을 때만) */}
             {userId && fortuneLoading && !myData?.saju && (
               <div className="home-hero-fortune-summary skeleton-pulse">
                 <span className="hero-fortune-badge">🔮 --</span>
                 <span className="hero-fortune-text">운세를 불러오는 중...</span>
               </div>
             )}
-            {userId && myData?.saju?.score != null && myData?.saju?.overall && (
+            {userId && myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall && (
               <div className="home-hero-fortune-summary" onClick={() => navigate('/my')}>
                 <span className={`hero-fortune-badge ${myData.saju.score >= 80 ? 'badge-great' : myData.saju.score >= 60 ? 'badge-good' : myData.saju.score >= 40 ? 'badge-normal' : 'badge-low'}`}>
                   {myData.saju.score >= 80 ? '🌟' : myData.saju.score >= 60 ? '☀️' : myData.saju.score >= 40 ? '🌤️' : '🌙'} {myData.saju.score}
                 </span>
                 <span className="hero-fortune-text">{myData.saju.overall.split('.')[0] + '.'}</span>
               </div>
+            )}
+            {/* AI 분석 캐시가 없으면 CTA */}
+            {userId && !fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed && (
+              <button className="home-hero-fortune-cta" onClick={() => navigate('/my')}>
+                ✨ 오늘의 운세 분석받기 <span>›</span>
+              </button>
             )}
           </section>
         );
@@ -457,6 +463,25 @@ function Home() {
           </button>
         </section>
       )}
+
+      {/* 2-1. 나의 연인 배너 */}
+      <section style={{ padding: '0 4px', marginBottom: 4 }}>
+        <button className="home-lover-banner" onClick={() => navigate('/my-love-compat')}>
+          <div className="home-lover-banner-sparkles">
+            {[...Array(6)].map((_, i) => <span key={i} style={{ '--hlb-i': i }}>✦</span>)}
+          </div>
+          <div className="home-lover-banner-icon">
+            <span className="home-lover-banner-m">♂</span>
+            <span className="home-lover-banner-heart">♥</span>
+            <span className="home-lover-banner-f">♀</span>
+          </div>
+          <div className="home-lover-banner-text">
+            <span className="home-lover-banner-title">나의 연인</span>
+            <span className="home-lover-banner-sub">정통 · MBTI · 혈액형 궁합 한 번에</span>
+          </div>
+          <span className="home-lover-banner-arrow">›</span>
+        </button>
+      </section>
 
       {/* 3. 핵심 동선 9개 그리드 */}
       <section className="home-main-actions">

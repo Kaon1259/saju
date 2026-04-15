@@ -287,6 +287,23 @@ export const getBloodTypeCompatibility = async (type1, type2) => {
   return response.data;
 };
 
+export const getBloodTypeCompatibilityBasic = async (type1, type2) => {
+  const response = await api.get('/bloodtype/compatibility/basic', { params: { type1, type2 } });
+  return response.data;
+};
+
+export const getBloodTypeCompatibilityStream = (type1, type2, { onChunk, onDone, onError }) => {
+  const params = new URLSearchParams({ type1, type2 });
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/bloodtype/compatibility/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
+};
+
 // ─── MBTI 운세 ───
 export const getMbtiTypes = async () => {
   const response = await api.get('/mbti/types');
@@ -321,6 +338,23 @@ export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError,
 export const getMbtiCompatibility = async (type1, type2) => {
   const response = await api.get('/mbti/compatibility', { params: { type1, type2 } });
   return response.data;
+};
+
+export const getMbtiCompatibilityBasic = async (type1, type2) => {
+  const response = await api.get('/mbti/compatibility/basic', { params: { type1, type2 } });
+  return response.data;
+};
+
+export const getMbtiCompatibilityStream = (type1, type2, { onChunk, onDone, onError }) => {
+  const params = new URLSearchParams({ type1, type2 });
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/mbti/compatibility/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  return () => eventSource.close();
 };
 
 // ─── 만세력 ───

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getPsychTests, analyzePsychTestStream } from '../api/fortune';
 
 import StreamText from '../components/StreamText';
+import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import './PsychTest.css';
 
@@ -204,6 +205,7 @@ function PsychTest() {
   // ═══ 렌더링 ═══
   return (
     <div className="pt-page">
+      <PageTopBar onReset={goToOtherTest} color={selectedTest?.color || '#9B59B6'} />
       {/* 배경 */}
       <div className="pt-bg">
         {Array.from({ length: 25 }).map((_, i) => (

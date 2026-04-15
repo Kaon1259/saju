@@ -181,6 +181,48 @@ public class MbtiFortuneService {
     }
 
     /**
+     * MBTI 궁합 — 기본(스코어/성격/등급)만, AI 없음 (스트리밍 플로우용)
+     */
+    public Map<String, Object> getCompatibilityBasic(String t1, String t2) {
+        final String type1 = (t1 != null ? t1 : "INTJ").toUpperCase();
+        final String type2 = (t2 != null ? t2 : "ENFP").toUpperCase();
+        int score = COMPAT.containsKey(type1) && COMPAT.get(type1).containsKey(type2) ? COMPAT.get(type1).get(type2) : 70;
+        String grade;
+        if (score >= 88) grade = "천생연분 💕";
+        else if (score >= 78) grade = "좋은 궁합 💛";
+        else if (score >= 68) grade = "보통 궁합 💚";
+        else grade = "노력 필요 💪";
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("type1", type1); result.put("type2", type2);
+        result.put("score", score); result.put("grade", grade);
+        result.put("personality1", PERSONALITY.getOrDefault(type1, ""));
+        result.put("personality2", PERSONALITY.getOrDefault(type2, ""));
+        if (COMPAT.containsKey(type1)) {
+            result.put("bestMatch", COMPAT.get(type1).entrySet().stream()
+                .filter(e -> !e.getKey().equals(type1)).max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey).orElse(""));
+        }
+        return result;
+    }
+
+    /**
+     * MBTI 궁합 AI 스트리밍 — 정통궁합과 동일한 구조의 JSON 스트림
+     */
+    public SseEmitter streamCompatibility(String t1, String t2) {
+        final String type1 = (t1 != null ? t1 : "INTJ").toUpperCase();
+        final String type2 = (t2 != null ? t2 : "ENFP").toUpperCase();
+        String system = "카페에서 친한 친구한테 수다 떨듯이 자연스러운 대화체 반말로 MBTI 궁합을 상담해주는 전문가야. " +
+            "오행과 인지기능을 융합해서 분석하되, 딱딱한 보고서 톤이나 고전적 표현은 절대 금지. " +
+            "반드시 아래 형식의 JSON만 출력해 (마크다운 코드블록 금지, 설명 금지): " +
+            "{\"summary\":\"한 줄 요약 (30자 이내)\",\"overall\":\"종합 분석 (4~5문장)\",\"loveCompat\":\"연애 궁합 (3~4문장)\",\"advice\":\"관계 조언 (3문장)\",\"caution\":\"주의할 점 (2~3문장)\"}";
+        String user = promptBuilder.compatibilityPrompt("mbti", type1, type2, LocalDate.now()) +
+            "\n\n위 내용을 정확히 다음 JSON 형식으로만 답해: " +
+            "{\"summary\":\"...\",\"overall\":\"...\",\"loveCompat\":\"...\",\"advice\":\"...\",\"caution\":\"...\"}";
+        return claudeApiService.generateStream(system, user, 1200);
+    }
+
+    /**
      * MBTI 궁합
      */
     public Map<String, Object> getCompatibility(String t1, String t2) {

@@ -47,6 +47,20 @@ public class MbtiController {
         return ResponseEntity.ok(mbtiFortuneService.getCompatibility(type1, type2));
     }
 
+    @GetMapping("/compatibility/basic")
+    public ResponseEntity<Map<String, Object>> getCompatibilityBasic(
+            @RequestParam String type1,
+            @RequestParam String type2) {
+        return ResponseEntity.ok(mbtiFortuneService.getCompatibilityBasic(type1, type2));
+    }
+
+    @GetMapping(value = "/compatibility/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamCompatibility(
+            @RequestParam String type1,
+            @RequestParam String type2) {
+        return mbtiFortuneService.streamCompatibility(type1, type2);
+    }
+
     /**
      * MBTI 운세 스트리밍 엔드포인트
      * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장

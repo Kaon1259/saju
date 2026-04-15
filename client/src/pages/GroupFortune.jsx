@@ -339,7 +339,17 @@ function GroupFortune() {
               <label className="form-label">생년월일</label>
               <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
             </div>
-            <button className="btn-gold" onClick={handleCompat} disabled={!myBirth} style={{ width: '100%', opacity: myBirth ? 1 : 0.5 }}>
+            {!selectedMember && (
+              <p className="gf-compat-group-hint">
+                ⚠️ 그룹 전체와의 궁합은 분석할 수 없어요. 위에서 멤버를 선택해주세요.
+              </p>
+            )}
+            <button
+              className="btn-gold"
+              onClick={handleCompat}
+              disabled={!myBirth || !selectedMember}
+              style={{ width: '100%', opacity: (myBirth && selectedMember) ? 1 : 0.5 }}
+            >
               💕 {compatTargetName}와(과) 궁합 분석하기
             </button>
           </div>

@@ -1,0 +1,36 @@
+.ptb-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 4px 0;
+  position: relative;
+  z-index: 5;
+}
+.ptb-topbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text, #fff);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ptb-topbtn:hover {
+  border-color: var(--ptb-color, #E91E63);
+  background: color-mix(in srgb, var(--ptb-color, #E91E63) 10%, transparent);
+  transform: translateY(-1px);
+}
+.ptb-topbtn:active { transform: scale(0.96); }
+.ptb-topbtn span { font-size: 16px; line-height: 1; }
+[data-theme="light"] .ptb-topbtn {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+  color: #1e293b;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}

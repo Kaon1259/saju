@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 
 import StreamText from '../components/StreamText';
+import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import './BloodType.css';
 
@@ -78,6 +79,19 @@ function BloodType() {
     streamCleanupRef.current = cleanup;
   };
 
+  const handleReset = () => {
+    streamCleanupRef.current?.();
+    setSelected(null);
+    setFortune(null);
+    setStreamText('');
+    setLoading(false);
+    setType1(null);
+    setType2(null);
+    setCompat(null);
+    setTab('fortune');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleCompat = async () => {
     if (!type1 || !type2) return;
     setCompat(null);
@@ -93,6 +107,7 @@ function BloodType() {
 
   return (
     <div className="bt-page">
+      <PageTopBar onReset={handleReset} color="#EF4444" />
       <div className="bt-hero">
         <h1 className="bt-title">혈액형 운세</h1>
         <p className="bt-subtitle">혈액형으로 보는 오늘의 운세와 궁합</p>

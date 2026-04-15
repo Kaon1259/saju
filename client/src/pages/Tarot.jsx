@@ -174,66 +174,30 @@ const TAROT_QUOTES = [
 ];
 
 function TarotIntro({ onDone }) {
-  const [fadeOut, setFadeOut] = useState(false);
-  const [flipped, setFlipped] = useState(false);
-  const [spinning, setSpinning] = useState(false);
   const [selected] = useState(() => {
     const validDecks = DECK_LIST.filter(d => d?.backs?.length && d?.img);
-    // 이전에 선택한 덱이 있으면 그걸 사용, 없으면 첫 번째 유효 덱
     const savedDeckId = localStorage.getItem('tarotDeck');
     const d = validDecks.find(x => x.id === savedDeckId) || validDecks[0] || DECK_LIST[0];
-    const back = d?.backs?.length ? d.backs[Math.floor(Math.random() * d.backs.length)] : null;
-    // 선택된 덱의 대표 이미지(커버)를 고정 사용 — 랜덤 메이저 아르카나 아님
-    const frontImg = d?.img || '/shuffle-start.png';
-    // 랜덤 프레임 오버레이
-    const fset = Math.floor(Math.random() * 10);
-    const fv = Math.floor(Math.random() * 4);
-    const frameOverlay = `/tarot-frames/frame_${fset}_${fv}.png`;
-    return { deck: d, back, frontImg, frameOverlay };
+    return { deck: d, bgImg: d?.img || '/shuffle-start.png' };
   });
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
   useEffect(() => {
-    // 0: 뒷면 노출
-    // 1200: 플립 시작 (1.2s → 2400에 완료)
-    // 2500: Y축 느린 회전 시작
-    // 5600: 페이드아웃
-    // 6300: onDone — 인트로 배경 이미지 경로를 parent로 전달
-    const t1 = setTimeout(() => setFlipped(true), 1200);
-    const t2 = setTimeout(() => setSpinning(true), 2500);
-    const t3 = setTimeout(() => setFadeOut(true), 5600);
-    const t4 = setTimeout(() => onDoneRef.current?.(selected.frontImg), 6300);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
-  }, [selected.frontImg]);
+    // 카드 제거 — 배경 + 빠른 문구만 → 1s 후 onDone (부모가 플립 트리거)
+    const t = setTimeout(() => onDoneRef.current?.(selected.bgImg), 1000);
+    return () => clearTimeout(t);
+  }, [selected.bgImg]);
 
   return (
-    <div
-      className={`tarot-intro-v2${fadeOut ? ' fade-out' : ''}`}
-      onClick={() => onDoneRef.current?.(selected.frontImg)}
-    >
-      <img src={selected.frontImg} alt="" className="tarot-intro-v2-bg" />
+    <div className="tarot-intro-v2 tarot-intro-v2--simple" onClick={() => onDoneRef.current?.(selected.bgImg)}>
+      <img src={selected.bgImg} alt="" className="tarot-intro-v2-bg" />
       <div className="tarot-intro-v2-overlay" />
-      <div className="tarot-intro-wrap">
-        <div className={`tarot-intro-card${flipped ? ' flipped' : ''}${spinning ? ' spinning' : ''}`}>
-          <div className="tarot-intro-face tarot-intro-face--back">
-            {selected.back ? (
-              <img src={selected.back} alt="" draggable={false} />
-            ) : (
-              <div className="tarot-card-back">
-                <div className="tarot-card-back-inner">
-                  <div className="tarot-card-back-star">✦</div>
-                  <div className="tarot-card-back-border" />
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="tarot-intro-face tarot-intro-face--front">
-            <img src={selected.frontImg} alt={selected.deck?.name} draggable={false} />
-          </div>
-        </div>
+      <div className="tarot-intro-simple-content">
+        <span className="tarot-intro-simple-star">✦</span>
+        <h1 className="tarot-intro-simple-title">타로의 문이 열립니다</h1>
+        <p className="tarot-intro-simple-sub">운명의 카드를 펼쳐보세요</p>
       </div>
-      <p className="tarot-intro-label">{selected.deck?.name}</p>
     </div>
   );
 }
@@ -243,7 +207,31 @@ function Tarot() {
   const [heroCardId] = useState(() => Math.floor(Math.random() * 78));
   const [showIntro, setShowIntro] = useState(true);
   const [introBg, setIntroBg] = useState(null);
+  // 덱 갤러리 (이름 클릭 시 해당 덱 전체 카드 필름릴 회전)
+  const [galleryDeck, setGalleryDeck] = useState(null);
+  const [galleryProgress, setGalleryProgress] = useState(0); // 0~78 (실수)
+  const [gallerySpeed, setGallerySpeed] = useState('normal'); // slow | normal | fast
+  const [galleryPaused, setGalleryPaused] = useState(false);
+  const [galleryFin, setGalleryFin] = useState(false);
+  const [galleryBgIdx] = useState(() => Math.floor(Math.random() * 78));
+  const [galleryFocusIdx, setGalleryFocusIdx] = useState(null); // 선택된 카드 인덱스
+  const galleryRafRef = useRef(null);
+  const galleryLastTsRef = useRef(0);
   const [step, setStep] = useState('deck'); // deck → tone → setup → shuffle → pick → reveal → result
+
+  // ─── Y축 페이지 플립 헬퍼 (step 변경을 플립 애니메이션으로 감싸기) ───
+  const [flipPhase, setFlipPhase] = useState(null); // null | 'out' | 'in'
+  const flipPhaseRef = useRef(null);
+  flipPhaseRef.current = flipPhase;
+  const flipToStep = useCallback((swapFn) => {
+    if (flipPhaseRef.current) return;
+    setFlipPhase('out');
+    setTimeout(() => {
+      try { swapFn?.(); } catch (e) { console.error(e); }
+      setFlipPhase('in');
+    }, 420);
+    setTimeout(() => { setFlipPhase(null); }, 860);
+  }, []);
   const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'custom');
   const [deckVariant, setDeckVariant] = useState(() => {
     const saved = localStorage.getItem('tarotDeckVariant');
@@ -325,7 +313,9 @@ function Tarot() {
         driftId.current = null;
         return;
       }
-      cPos.current += 0.012; // 아주 느린 이동
+      // pick: 자동 선택(0.5)의 3/4 속도 / reveal·result(AI 분석·결과): 카드 감상용 느린 속도
+      // pick 단계: 기존 0.144 → 0.072 (추가 50% 감속)
+      cPos.current += (stepRef.current === 'pick') ? 0.072 : 0.02;
       setCTick(n => n + 1);
       driftId.current = requestAnimationFrame(driftTick);
     };
@@ -353,8 +343,10 @@ function Tarot() {
         cPos.current = Math.round(cPos.current);
         setCTick(n => n + 1);
         cAnimId.current = null;
-        // 관성 멈춘 뒤 1초 후 드리프트 재시작
-        if (stepRef.current === 'pick' || stepRef.current === 'reveal' || stepRef.current === 'result') setTimeout(() => startDrift(), 1000);
+        // 관성 끝나면 드리프트 즉시 복귀 (공백 없이 계속 회전)
+        if (stepRef.current === 'pick' || stepRef.current === 'reveal' || stepRef.current === 'result') {
+          startDrift();
+        }
         return;
       }
       cPos.current += cVel.current;
@@ -382,14 +374,23 @@ function Tarot() {
       if (!cDrag.current.active) return;
       cDrag.current.active = false;
       const s = cDrag.current.samples;
+      // 드래그 거리가 거의 없으면(탭) 관성/정지 없이 드리프트 유지
+      const totalDrag = s.length >= 2 ? Math.abs(s[0].x - s[s.length - 1].x) : 0;
+      if (totalDrag < 5) {
+        cVel.current = 0;
+        if (!driftId.current && (stepRef.current === 'pick' || stepRef.current === 'reveal' || stepRef.current === 'result')) {
+          startDrift();
+        }
+        return;
+      }
       if (s.length >= 2) {
         const dt = s[s.length - 1].t - s[0].t;
         if (dt > 0) {
           const raw = (s[0].x - s[s.length - 1].x) / CSLIDE / (dt / 16.67);
-          cVel.current = Math.max(-2.5, Math.min(2.5, raw));
+          cVel.current = Math.max(-4.5, Math.min(4.5, raw * 1.4));
         }
       }
-      runMomentum();
+      runMomentum(0.93);
     };
     return {
       onTouchStart: e => start(e.touches[0].clientX),
@@ -400,7 +401,7 @@ function Tarot() {
       onMouseUp: end,
       onMouseLeave: () => { if (cDrag.current.active) end(); },
     };
-  }, [runMomentum]);
+  }, [runMomentum, startDrift]);
 
   // 캐러셀 무한 루프 렌더 데이터
   const getCarouselItems = useCallback((total) => {
@@ -453,9 +454,73 @@ function Tarot() {
     const ts = setTimeout(() => { try { playCardShuffle(); } catch {} }, 2000);
     const t1 = setTimeout(() => setShufflePhase('gather'), 3400);
     const t2 = setTimeout(() => setShufflePhase('scatter'), 4100);
-    const t3 = setTimeout(() => setStep('pick'), 4800);
+    // 셔플 완료 → pick 화면으로 페이지 플립
+    const t3 = setTimeout(() => flipToStep(() => setStep('pick')), 4800);
     return () => { clearTimeout(ts); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [step, shuffledCards.length]);
+  }, [step, shuffledCards.length, flipToStep]);
+
+  // 덱 갤러리: 필름릴 rAF 루프 (일시정지/속도 조절/Fin/포커스 처리)
+  useEffect(() => {
+    if (!galleryDeck || galleryPaused || galleryFin || galleryFocusIdx !== null) {
+      if (galleryRafRef.current) { cancelAnimationFrame(galleryRafRef.current); galleryRafRef.current = null; }
+      return;
+    }
+    const speedMap = { slow: 0.4, normal: 0.9, fast: 1.8 }; // 카드/초
+    const step = (ts) => {
+      if (!galleryLastTsRef.current) galleryLastTsRef.current = ts;
+      const dt = (ts - galleryLastTsRef.current) / 1000;
+      galleryLastTsRef.current = ts;
+      setGalleryProgress(prev => {
+        const next = prev + dt * (speedMap[gallerySpeed] || 0.9);
+        if (next >= 78) {
+          setGalleryFin(true);
+          return 78;
+        }
+        return next;
+      });
+      galleryRafRef.current = requestAnimationFrame(step);
+    };
+    galleryLastTsRef.current = 0;
+    galleryRafRef.current = requestAnimationFrame(step);
+    return () => { if (galleryRafRef.current) { cancelAnimationFrame(galleryRafRef.current); galleryRafRef.current = null; } };
+  }, [galleryDeck, gallerySpeed, galleryPaused, galleryFin, galleryFocusIdx]);
+
+  const openDeckGallery = (d) => {
+    setGalleryDeck(d);
+    setGalleryProgress(0);
+    setGalleryPaused(false);
+    setGalleryFin(false);
+    setGallerySpeed('normal');
+    setGalleryFocusIdx(null);
+  };
+  const closeDeckGallery = () => {
+    setGalleryDeck(null);
+    setGalleryProgress(0);
+    setGalleryPaused(false);
+    setGalleryFin(false);
+    setGalleryFocusIdx(null);
+  };
+  const toggleGalleryPause = () => {
+    if (galleryFocusIdx !== null) {
+      // 포커스된 카드 보는 중 → 스테이지 탭하면 포커스 해제하고 회전 복귀
+      setGalleryFocusIdx(null);
+      galleryLastTsRef.current = 0;
+      return;
+    }
+    if (galleryFin) {
+      // Fin 상태에서 클릭 → 처음부터 재생
+      setGalleryFin(false);
+      setGalleryProgress(0);
+      setGalleryPaused(false);
+      galleryLastTsRef.current = 0;
+    } else {
+      setGalleryPaused(p => !p);
+    }
+  };
+  const selectGalleryCard = (idx, e) => {
+    if (e) e.stopPropagation();
+    setGalleryFocusIdx(idx);
+  };
 
   // tone → setup 자동 전환 (2.5초)
   useEffect(() => {
@@ -546,15 +611,23 @@ function Tarot() {
       }
     } catch {}
 
-    // 카드 즉시 섞기 (셔플 화면에서 보여주기 위해)
+    // 카드 즉시 섞기 — crypto.getRandomValues 기반 Fisher-Yates (Math.random보다 균일)
+    const secureRandInt = (max) => {
+      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        crypto.getRandomValues(buf);
+        return buf[0] % max;
+      }
+      return Math.floor(Math.random() * max);
+    };
     const indices = Array.from({ length: 78 }, (_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = secureRandInt(i + 1);
       [indices[i], indices[j]] = [indices[j], indices[i]];
     }
     const cards = indices.map(idx => ({
       ...ALL_CARDS[idx],
-      reversed: Math.random() > 0.5,
+      reversed: secureRandInt(2) === 0,
     }));
     setShuffledCards(cards);
 
@@ -572,7 +645,8 @@ function Tarot() {
     pickBusy.current = false;
     setAutoPickRunning(false);
     autoPickRef.current = false;
-    cPos.current = 0;
+    // 시작 위치를 매번 랜덤하게 → 탭만 하는 사용자도 다른 카드를 보게 됨
+    cPos.current = secureRandInt(78);
     cVel.current = 0;
 
     // selectedBack이 현재 덱에 속하지 않으면 랜덤 재선택
@@ -581,9 +655,12 @@ function Tarot() {
       setSelectedBack(deckData.backs[Math.floor(Math.random() * deckData.backs.length)]);
     }
 
-    setStep('shuffle');
-    setShuffleAnim(true);
-  }, [deck, selectedBack, deckVariant, setupBgIdx]);
+    // setup → shuffle 플립 전환
+    flipToStep(() => {
+      setStep('shuffle');
+      setShuffleAnim(true);
+    });
+  }, [deck, selectedBack, deckVariant, setupBgIdx, flipToStep]);
 
   // 카드 선택 — ref 기반 (stale closure 방지)
   const [pickingCard, setPickingCard] = useState(null);
@@ -604,13 +681,15 @@ function Tarot() {
     if (selectedRef.current.includes(index)) return;
     if (selectedRef.current.length >= pickLimit) return;
 
-    // 캐러셀 정지
+    // 관성(momentum)만 정지 — 드리프트는 끊지 않음 (계속 회전)
     if (cAnimId.current) { cancelAnimationFrame(cAnimId.current); cAnimId.current = null; }
     cVel.current = 0;
     pickBusy.current = true;
+    // 드리프트가 어떤 이유로 꺼져 있었다면 즉시 재시작
+    if (!driftId.current) startDrift();
 
     const card = shuffledCards[index];
-    const pickOrder = filledRef.current.length + 1;
+    const pickOrder = filledRef.current.filter(c => c !== null).length + 1;
 
     // 즉시 슬롯에 추가 (앞면 안 보여줌, 뒷면으로 슬롯에 들어감)
     const newSelected = [...selectedRef.current, index];
@@ -661,24 +740,25 @@ function Tarot() {
     }, 400);
   };
 
-  // 카드 버리기
+  // 카드 버리기 — 선택한 슬롯은 그 자리에서 비워짐 (재정렬 안 함)
   const handleDiscard = (slotIdx) => {
     setDiscardingIdx(slotIdx);
 
     setTimeout(() => {
-      const newFilled = filledRef.current.filter((_, i) => i !== slotIdx);
-      const newSelected = selectedRef.current.filter((_, i) => i !== slotIdx);
-      filledRef.current = newFilled;
-      selectedRef.current = newSelected;
-      setFilledSlots(newFilled);
-      setSelectedIndices(newSelected);
+      // null 로 치환해 빈 슬롯이 제자리에 남도록 유지
+      const newFilledWithNull = filledRef.current.map((c, i) => (i === slotIdx ? null : c));
+      const newSelectedWithNull = selectedRef.current.map((s, i) => (i === slotIdx ? null : s));
+      filledRef.current = newFilledWithNull;
+      selectedRef.current = newSelectedWithNull;
+      setFilledSlots(newFilledWithNull);
+      setSelectedIndices(newSelectedWithNull);
       setDiscardingIdx(null);
-      // discardPhase는 재정렬 트랜지션 동안 유지
 
       setTimeout(() => {
         setDiscardPhase(false);
         setAllFilled(false);
-        revealCards(newSelected);
+        // reveal 단계에는 null 제외
+        revealCards(newSelectedWithNull.filter(v => v !== null));
       }, 600);
     }, 900);
   };
@@ -821,8 +901,11 @@ function Tarot() {
       const elapsed = Date.now() - revealStartTime;
       const wait = Math.max(0, MIN_REVEAL_MS - elapsed);
       setTimeout(() => {
-        setStep('result');
-        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+        // reveal → result 페이지 플립 전환
+        flipToStep(() => {
+          setStep('result');
+          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+        });
       }, wait);
     };
 
@@ -905,35 +988,45 @@ function Tarot() {
     setSelectedFrame({ set: Math.floor(Math.random() * 10), v: Math.floor(Math.random() * 4) });
   };
 
+  const selectDeckWithFlip = (d) => {
+    flipToStep(() => {
+      handleDeckChange(d);
+      setStep('setup');
+    });
+  };
+
   const handleVariantChange = (v) => {
     setDeckVariant(v);
     localStorage.setItem('tarotDeckVariant', String(v));
   };
 
   const resetAll = () => {
-    cleanupRef.current?.();
-    setStep('deck');
-    setSpread('three');
-    setCategory('relationship');
-    setQuestion('');
-    setShuffledCards([]);
-    setSelectedIndices([]);
-    setRevealedCards([]);
-    setReading(null);
-    setFlipIndex(-1);
-    setFocusCard(null);
-    setStreamText('');
-    setShuffleFlipping(false);
-    setAiStreaming(false);
-    setPickingCard(null);
-    setFilledSlots([]);
-    setFlyingToSlot(false);
-    setAllFilled(false);
-    setPickSwipeIdx(0);
-    setSheetExpanded(false);
-    setCarouselIndex(0);
-    setResultDetailIdx(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // AI 분석 결과 → 덱 선택으로 페이지 플립
+    flipToStep(() => {
+      cleanupRef.current?.();
+      setStep('deck');
+      setSpread('three');
+      setCategory('relationship');
+      setQuestion('');
+      setShuffledCards([]);
+      setSelectedIndices([]);
+      setRevealedCards([]);
+      setReading(null);
+      setFlipIndex(-1);
+      setFocusCard(null);
+      setStreamText('');
+      setShuffleFlipping(false);
+      setAiStreaming(false);
+      setPickingCard(null);
+      setFilledSlots([]);
+      setFlyingToSlot(false);
+      setAllFilled(false);
+      setPickSwipeIdx(0);
+      setSheetExpanded(false);
+      setCarouselIndex(0);
+      setResultDetailIdx(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   };
 
   const handleShare = () => {
@@ -952,15 +1045,162 @@ function Tarot() {
     }
   };
 
-  // ═══ 인트로 ═══
-  if (showIntro) {
-    return <TarotIntro onDone={(bg) => { if (bg) setIntroBg(bg); setShowIntro(false); }} />;
-  }
-
   // ═══ 렌더링 ═══
   return (
-    <div className="tarot-page" data-deck={deck}>
+    <div className="tarot-flip-parent">
+    <div className={`tarot-page${flipPhase ? ` tarot-page--flip-${flipPhase}` : ''}`} data-deck={deck}>
 
+      {/* ═══ 덱 갤러리 — 필름릴 방식 ═══ */}
+      {galleryDeck && (() => {
+        const isMulti = ['oriental','western','dark','romantic','classic_rws','girl','boy','cartoon_girl','cats','dogs'].includes(galleryDeck.id);
+        const deckPaths = { classic_rws:'/tarot-classic-rws', dark:'/tarot-dark', romantic:'/tarot-romantic', oriental:'/tarot-oriental', western:'/tarot-western', girl:'/tarot-girl', boy:'/tarot-boy', cartoon_girl:'/tarot-cartoon-girl', cats:'/tarot-cats', dogs:'/tarot-dogs' };
+        const basePath = deckPaths[galleryDeck.id] || '/tarot';
+        const variant = deckVariant;
+        const cardSrcFixed = (i) => {
+          const num = String(i).padStart(2, '0');
+          const v = (galleryDeck.id === 'classic_rws' && i === 77 && variant === 2) ? 0 : variant;
+          return isMulti ? `${basePath}/m${num}_v${v}.jpg` : `${basePath}/m${num}.jpg`;
+        };
+        const center = galleryProgress; // 실수 인덱스
+        // 중심 주변 ±4장 렌더 (총 9장)
+        const visible = [];
+        for (let off = -4; off <= 4; off++) {
+          const idx = Math.round(center) + off;
+          if (idx < 0 || idx >= 78) continue;
+          const delta = idx - center; // 중심에서의 거리
+          visible.push({ idx, delta });
+        }
+        return (
+          <div className="deck-gallery-overlay fade-in">
+            <img src={cardSrcFixed(galleryBgIdx)} alt="" className="deck-gallery-bg" draggable={false} />
+            <div className="deck-gallery-overlay-dim" />
+            <button className="deck-gallery-back" onClick={closeDeckGallery}>
+              <span>‹</span> 돌아가기
+            </button>
+            <div className="deck-gallery-header">
+              <h2 className="deck-gallery-title">
+                {galleryDeck.name}<span className="deck-gallery-title-en">({galleryDeck.sub})</span>
+              </h2>
+              <span className="deck-gallery-count">
+                {galleryFin ? '78 / 78' : `${Math.min(78, Math.floor(galleryProgress) + 1)} / 78`}
+              </span>
+            </div>
+            {/* 카드 포커스 뷰 — 갤러리 오버레이 전체의 중앙에 고정 표시 */}
+            {galleryFocusIdx !== null && (
+              <div className="deck-gallery-focus-overlay" onClick={toggleGalleryPause}>
+                <div className="deck-gallery-focus">
+                  <div className="deck-gallery-focus-card">
+                    <img
+                      src={cardSrcFixed(galleryFocusIdx)}
+                      alt={`card ${galleryFocusIdx}`}
+                      className="deck-gallery-focus-img"
+                      draggable={false}
+                    />
+                  </div>
+                  <div className="deck-gallery-focus-info">
+                    <div className="deck-gallery-focus-num">#{String(galleryFocusIdx).padStart(2, '0')}</div>
+                    <h3 className="deck-gallery-focus-name-kr">{ALL_CARDS[galleryFocusIdx]?.nameKr || ''}</h3>
+                    <p className="deck-gallery-focus-name-en">{ALL_CARDS[galleryFocusIdx]?.nameEn || ''}</p>
+                    <p className="deck-gallery-focus-msg">{ALL_CARDS[galleryFocusIdx]?.msg || ''}</p>
+                    <p className="deck-gallery-focus-hint">탭하면 회전 화면으로 돌아갑니다</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 필름릴 스테이지 — 클릭 시 일시정지/재생 토글 */}
+            <div className="deck-gallery-stage deck-gallery-stage--film" onClick={toggleGalleryPause}>
+              {galleryFin ? (
+                <div className="deck-gallery-fin">
+                  <div className="deck-gallery-fin-frame">
+                    <span className="deck-gallery-fin-text">Fin</span>
+                  </div>
+                  <p className="deck-gallery-fin-sub">탭하면 다시 재생</p>
+                </div>
+              ) : (
+                <div className="deck-gallery-film">
+                  {/* 필름 스프로킷 상단/하단 */}
+                  <div className="deck-gallery-film-sprockets deck-gallery-film-sprockets--top">
+                    {Array.from({ length: 14 }).map((_, i) => <span key={i} />)}
+                  </div>
+                  <div className="deck-gallery-film-sprockets deck-gallery-film-sprockets--bottom">
+                    {Array.from({ length: 14 }).map((_, i) => <span key={i} />)}
+                  </div>
+                  {/* 카드들 — 필름 롤처럼 수평 이동 */}
+                  <div className="deck-gallery-film-strip">
+                    {visible.map(({ idx, delta }) => {
+                      const SLIDE = 220; // 카드 간격 px
+                      const x = delta * SLIDE;
+                      const absD = Math.abs(delta);
+                      const scale = Math.max(0.55, 1 - absD * 0.14);
+                      const opacity = Math.max(0.15, 1 - absD * 0.28);
+                      const rotY = delta * -18; // 필름 휘어짐 효과
+                      const z = 10 - Math.round(absD);
+                      return (
+                        <div
+                          key={`g-${idx}`}
+                          className="deck-gallery-film-card"
+                          style={{
+                            transform: `translate3d(calc(-50% + ${x}px), -50%, 0) scale(${scale}) rotateY(${rotY}deg)`,
+                            opacity,
+                            zIndex: z,
+                            cursor: 'pointer',
+                          }}
+                          onClick={(e) => selectGalleryCard(idx, e)}
+                        >
+                          <img
+                            src={cardSrcFixed(idx)}
+                            alt={`card ${idx}`}
+                            className="deck-gallery-card-img"
+                            draggable={false}
+                            onError={(e) => { e.currentTarget.style.opacity = 0.2; }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* 일시정지 오버레이 */}
+                  {galleryPaused && (
+                    <div className="deck-gallery-pause-badge">
+                      <span>⏸</span>
+                      <p>일시정지 — 탭하면 재생</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            {/* 속도 컨트롤 */}
+            <div className="deck-gallery-speed-bar" onClick={(e) => e.stopPropagation()}>
+              <button
+                className={`deck-gallery-speed-btn ${gallerySpeed === 'slow' ? 'active' : ''}`}
+                onClick={() => setGallerySpeed('slow')}
+              >🐢 느리게</button>
+              <button
+                className={`deck-gallery-speed-btn ${gallerySpeed === 'normal' ? 'active' : ''}`}
+                onClick={() => setGallerySpeed('normal')}
+              >▶ 보통</button>
+              <button
+                className={`deck-gallery-speed-btn ${gallerySpeed === 'fast' ? 'active' : ''}`}
+                onClick={() => setGallerySpeed('fast')}
+              >⚡ 빠르게</button>
+            </div>
+            {/* 진행 바 */}
+            <div className="deck-gallery-dots">
+              <div className="deck-gallery-progress" style={{ width: `${Math.min(100, (galleryProgress / 78) * 100)}%` }} />
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ═══ 인트로 — 간소화 배경 + 문구, 끝나면 플립으로 덱 화면 전환 ═══ */}
+      {showIntro && (
+        <TarotIntro onDone={(bg) => {
+          if (bg) setIntroBg(bg);
+          flipToStep(() => setShowIntro(false));
+        }} />
+      )}
+
+      {!showIntro && <>
       {/* ── 신비로운 배경 ── */}
       <div className="tarot-mystical-bg">
         {/* 떠다니는 카드 실루엣 */}
@@ -1022,7 +1262,13 @@ function Tarot() {
             )}
             {/* 상단 덱 이름 */}
             <div className="deck-top-header">
-              <h1 className="deck-info-name">{curDeck.name}</h1>
+              <h1
+                className="deck-info-name deck-info-name--clickable"
+                onClick={() => openDeckGallery(curDeck)}
+                title="이 덱의 카드 전체 보기"
+              >
+                {curDeck.name} <span className="deck-info-name-icon">🔍</span>
+              </h1>
               <p className="deck-info-sub">{curDeck.sub}</p>
             </div>
 
@@ -1063,9 +1309,7 @@ function Tarot() {
                     '--border-intensity': borderIntensity,
                   }} onClick={() => {
                     if (off === 0 && !deckSliding && Math.abs(deckDragX) < 10) {
-                      handleDeckChange(d.id);
-                      if (d.hasVariants) setStep('tone');
-                      else setStep('setup');
+                      selectDeckWithFlip(d.id);
                     }
                   }}>
                     <div className={`deck-cover-wrap${off === 0 ? ' deck-cover-active' : ''}`}>
@@ -1097,11 +1341,7 @@ function Tarot() {
                   <span key={d.id} className={`deck-dot ${i === deckSwipeIdx ? 'active' : ''}`} />
                 ))}
               </div>
-              <button className="deck-select-btn" onClick={() => {
-                handleDeckChange(curDeck.id);
-                if (curDeck.hasVariants) setStep('tone');
-                else setStep('setup');
-              }}>
+              <button className="deck-select-btn" onClick={() => selectDeckWithFlip(curDeck.id)}>
                 이 덱으로 시작하기
               </button>
             </div>
@@ -1150,7 +1390,7 @@ function Tarot() {
             <div className="tarot-setup-content">
               {/* 상단 바 — 덱 변경 */}
               <div className="setup-top-bar">
-                <button className="setup-deck-change" onClick={() => setStep('deck')}>
+                <button className="setup-deck-change" onClick={() => flipToStep(() => setStep('deck'))}>
                   ← 덱 변경
                 </button>
                 <span className="setup-deck-name">{curDeck.name}</span>
@@ -1244,11 +1484,16 @@ function Tarot() {
           shufflePhase === 'gather'  ? '카드가 모이고 있습니다...' :
                                        '당신의 카드를 펼치는 중...';
         return (
-          <div className="tarot-shuffle-stage-v2">
+          <div
+            className="tarot-shuffle-stage-v2"
+            onClick={() => { if (!flipPhaseRef.current) flipToStep(() => setStep('pick')); }}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="shuffle-bg">
               <img src={shuffleBgSrc || curDeck?.img || '/shuffle-start.png'} alt="" className="shuffle-bg-static" />
             </div>
             <p className="shuffle-top-text shuffle-top-text-v2">{phaseText}</p>
+            <p className="shuffle-skip-hint">탭하면 바로 카드 선택으로</p>
             <div className={`shuffle-field shuffle-phase-${shufflePhase}`}>
               {shuffleCardsMeta.map((c) => (
                 <div
@@ -1311,6 +1556,33 @@ function Tarot() {
               <span className="pick-top-counter">{filledSlots.length}/{pickLimit}</span>
             </div>
 
+            {/* 카드 선택 안내 회전 오버레이 — 자동/수동 선택 전까지만 */}
+            {!discardPhase && filledSlots.length === 0 && !autoPickRunning && (
+              <div className="pick-select-hint">
+                <div className="pick-select-hint-orb">
+                  <span className="pick-select-hint-ring pick-select-hint-ring--1" />
+                  <span className="pick-select-hint-ring pick-select-hint-ring--2" />
+                  <span className="pick-select-hint-ring pick-select-hint-ring--3" />
+                  <span className="pick-select-hint-icon">✦</span>
+                </div>
+                <p className="pick-select-hint-text">카드를 선택하세요</p>
+                <p className="pick-select-hint-sub">직감이 이끄는 카드를 탭 · 또는 자동 선택</p>
+              </div>
+            )}
+
+            {/* 버리기 안내 회전 오버레이 — 버리기 단계 + 자동 회전/선택 전 */}
+            {discardPhase && discardingIdx === null && spotlightIdx === null && (
+              <div className="pick-select-hint pick-select-hint--discard">
+                <div className="pick-select-hint-orb">
+                  <span className="pick-select-hint-ring pick-select-hint-ring--1" />
+                  <span className="pick-select-hint-ring pick-select-hint-ring--2" />
+                  <span className="pick-select-hint-icon">✕</span>
+                </div>
+                <p className="pick-select-hint-text">버릴 한 장을 선택하세요</p>
+                <p className="pick-select-hint-sub">뽑은 카드 중 하나를 탭하면 사라집니다</p>
+              </div>
+            )}
+
             {/* 무한 캐러셀 — 버리기 단계에선 숨김 */}
             {!discardPhase && (
               <div className="pick-carousel" {...cHandlers}>
@@ -1350,24 +1622,32 @@ function Tarot() {
             {/* 하단 슬롯 — 뒷면만 표시, 버리기 모드에서만 ✕ */}
             <div className={`tarot-deck-slots ${discardPhase ? `discard-mode${filledSlots.length >= 6 ? ' discard-cols-3' : ''}` : ''}`}>
               {filledSlots.map((card, i) => (
-                <div key={`slot-${card.id}-${i}`}
-                  className={`tarot-deck-slot slot-filled ${discardPhase ? 'slot-discard-tap' : ''} ${discardingIdx === i ? 'slot-fly-away' : ''} ${spotlightIdx === i ? 'slot-spotlight' : ''} ${spotlightIdx !== null && spotlightIdx !== i ? 'slot-dim' : ''}`}
-                  onClick={() => discardPhase && discardingIdx === null && handleDiscard(i)}
-                >
-                  <div className="tarot-slot-card">
-                    {selectedBack ? (
-                      <img src={selectedBack} alt="" className="slot-card-back-img" draggable={false} />
-                    ) : (
-                      <div className="tarot-card-back">
-                        <div className="tarot-card-back-inner">
-                          <div className="tarot-card-back-star">✦</div>
-                          <div className="tarot-card-back-border" />
-                        </div>
-                      </div>
-                    )}
-                    <div className="tarot-slot-badge">{card._pickOrder || (i + 1)}</div>
+                card === null ? (
+                  <div key={`slot-empty-${i}`} className="tarot-deck-slot slot-empty slot-discarded-placeholder">
+                    <div className="tarot-slot-placeholder">
+                      <span className="tarot-slot-num">✕</span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div key={`slot-${card.id}-${i}`}
+                    className={`tarot-deck-slot slot-filled ${discardPhase ? 'slot-discard-tap' : ''} ${discardingIdx === i ? 'slot-fly-away' : ''} ${spotlightIdx === i ? 'slot-spotlight' : ''} ${spotlightIdx !== null && spotlightIdx !== i ? 'slot-dim' : ''}`}
+                    onClick={() => discardPhase && discardingIdx === null && handleDiscard(i)}
+                  >
+                    <div className="tarot-slot-card">
+                      {selectedBack ? (
+                        <img src={selectedBack} alt="" className="slot-card-back-img" draggable={false} />
+                      ) : (
+                        <div className="tarot-card-back">
+                          <div className="tarot-card-back-inner">
+                            <div className="tarot-card-back-star">✦</div>
+                            <div className="tarot-card-back-border" />
+                          </div>
+                        </div>
+                      )}
+                      <div className="tarot-slot-badge">{card._pickOrder || (i + 1)}</div>
+                    </div>
+                  </div>
+                )
               ))}
               {!discardPhase && Array.from({ length: Math.max(0, pickLimit - filledSlots.length) }).map((_, i) => (
                 <div key={`empty-${i}`} className="tarot-deck-slot slot-empty">
@@ -1632,6 +1912,8 @@ function Tarot() {
       })()}
 
       {/* 덱 모달 제거 — 스와이프로 대체 */}
+      </>}
+    </div>
     </div>
   );
 }

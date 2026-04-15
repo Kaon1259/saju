@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSajuCompatibilityBasic, getCompatibilityStream } from '../api/fortune';
+import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
-import FortuneLoading from '../components/FortuneLoading';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
+import parseAiJson from '../utils/parseAiJson';
 import './Compatibility.css';
 
 // JSON 잔여물 제거
@@ -49,6 +49,8 @@ function Compatibility() {
   const [loading, setLoading] = useState(false);
   const [aiStreaming, setAiStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const [showStarPicker, setShowStarPicker] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [showMoreCards, setShowMoreCards] = useState(false);
@@ -56,11 +58,22 @@ function Compatibility() {
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
 
+  useEffect(() => {
+    if (result && matrixShown && !aiStreaming) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [result, matrixShown, aiStreaming]);
+
   const handleAnalyze = async () => {
     if (!bd1 || !bd2) return;
     setLoading(true);
     setStreamText('');
     setResult(null);
+    setMatrixShown(true);
+    setMatrixExiting(false);
+
     try {
       // 1단계: 사주 계산 (캐시에 AI 있으면 즉시 반환)
       const data = await getSajuCompatibilityBasic(bd1, bd2, bt1 || undefined, bt2 || undefined, calType1, calType2, g1, g2);
@@ -73,8 +86,7 @@ function Compatibility() {
         return;
       }
 
-      // 2단계: 사주 결과 즉시 표시 + AI 스트리밍
-      setResult(data);
+      // 2단계: AI 스트리밍 — 매트릭스에 실시간 텍스트 공급
       setLoading(false);
       setAiStreaming(true);
 
@@ -86,43 +98,35 @@ function Compatibility() {
           onDone: (fullText) => {
             setAiStreaming(false);
             setStreamText('');
-            try {
-              let json = fullText;
-              if (json.includes('```')) {
-                const s = json.indexOf('\n', json.indexOf('```'));
-                const e = json.lastIndexOf('```');
-                if (s > 0 && e > s) json = json.substring(s + 1, e);
-              }
-              const bs = json.indexOf('{');
-              const be = json.lastIndexOf('}');
-              if (bs >= 0 && be > bs) json = json.substring(bs, be + 1);
-              const parsed = JSON.parse(json);
-              setResult(prev => ({
-                ...prev,
-                aiSummary: parsed.summary || null,
-                aiAnalysis: parsed.overall || null,
-                aiLoveCompat: parsed.loveCompat || null,
-                aiWorkCompat: parsed.workCompat || null,
-                aiConflictPoint: parsed.conflictPoint || null,
-                aiAdvice: parsed.advice || null,
-              }));
-            } catch {
-              setResult(prev => ({ ...prev, aiAnalysis: fullText }));
-            }
+            const parsed = parseAiJson(fullText);
+            const merged = parsed ? {
+              ...data,
+              aiSummary: parsed.summary || null,
+              aiAnalysis: parsed.overall || null,
+              aiLoveCompat: parsed.loveCompat || null,
+              aiWorkCompat: parsed.workCompat || null,
+              aiConflictPoint: parsed.conflictPoint || null,
+              aiAdvice: parsed.advice || null,
+            } : { ...data, aiAnalysis: fullText };
+            setResult(merged);
+            saveCompatCache({
+              birthDate1: bd1, birthDate2: bd2,
+              birthTime1: bt1 || null, birthTime2: bt2 || null,
+              gender1: g1, gender2: g2,
+              score: merged.score,
+              aiSummary: merged.aiSummary,
+              aiAnalysis: merged.aiAnalysis,
+              aiLoveCompat: merged.aiLoveCompat,
+              aiWorkCompat: merged.aiWorkCompat,
+              aiConflictPoint: merged.aiConflictPoint,
+              aiAdvice: merged.aiAdvice,
+            }).catch(() => {});
           },
-          onError: () => { setAiStreaming(false); setStreamText(''); },
+          onError: () => { setAiStreaming(false); setStreamText(''); setMatrixShown(false); },
         }
       );
-    } catch (err) { console.error(err); setLoading(false); }
+    } catch (err) { console.error(err); setLoading(false); setMatrixShown(false); }
   };
-
-  if (loading) {
-    return (
-      <div className="compat-page">
-        <FortuneLoading type="compatibility" />
-      </div>
-    );
-  }
 
   if (result) {
     const score = result.score;
@@ -134,6 +138,9 @@ function Compatibility() {
 
     return (
       <div className="compat-page">
+        {matrixShown && (
+          <AnalysisMatrix theme="love" label="AI가 사주 궁합을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+        )}
         {/* 결과 히어로 */}
         <section className="compat-result-hero">
           <h1 className="compat-hero-title">사주 궁합</h1>
@@ -191,13 +198,6 @@ function Compatibility() {
             {result.grade}
           </div>
         </section>
-
-        {/* AI 스트리밍 중 표시 */}
-        {aiStreaming && streamText && (
-          <section className="compat-stream">
-            <StreamText text={streamText} icon="🔮" label="AI가 궁합을 분석하고 있어요..." color="#FBBF24" />
-          </section>
-        )}
 
         {/* 분석 카드 */}
         <section className="compat-cards">
@@ -274,6 +274,9 @@ function Compatibility() {
 
   return (
     <div className="compat-page">
+      {matrixShown && (
+        <AnalysisMatrix theme="love" label="AI가 사주 궁합을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+      )}
       <section className="compat-intro compat-intro--compact">
         <span className="compat-intro-icon">💕</span>
         <h1 className="compat-intro-title">사주 궁합</h1>

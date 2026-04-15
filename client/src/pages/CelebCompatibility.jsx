@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, searchCeleb, analyzeSajuStream } from '../api/fortune';
+import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
@@ -66,6 +66,10 @@ function CelebCompatibility() {
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [matrixLabel, setMatrixLabel] = useState('');
+  const [streamText, setStreamText] = useState('');
+  const compatCleanupRef = useRef(null);
+
+  useEffect(() => () => compatCleanupRef.current?.(), []);
 
   // state 소비 후 제거 (뒤로가기 중복 방지)
   useEffect(() => {
@@ -196,20 +200,68 @@ function CelebCompatibility() {
   const handleAnalyze = async () => {
     if (!myBirth || !selectedCeleb) return;
     setStep('loading');
+    setStreamText('');
     setMatrixLabel(`AI가 나와 ${selectedCeleb.name}의 운명을 분석하고 있어요`);
     setMatrixShown(true);
     setMatrixExiting(false);
+
     try {
-      const data = await getSajuCompatibility(
+      // 1) 기본(사주 계산) — 캐시에 AI 있으면 즉시 반환
+      const myG = myGender || 'M';
+      const celebG = selectedCeleb.gender || 'F';
+      const data = await getSajuCompatibilityBasic(
         myBirth, selectedCeleb.birth,
         myBirthTime || undefined, undefined,
-        myCalType, 'SOLAR'
+        myCalType, 'SOLAR', myG, celebG
       );
       data._celebName = selectedCeleb.name;
       data._celebGroup = selectedCeleb.group;
-      setResult(data);
-      setStep('result');
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+
+      if (data.aiAnalysis || data.aiSummary) {
+        setResult(data);
+        setStep('result');
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        return;
+      }
+
+      // 2) AI 스트리밍 — 매트릭스에 실시간 텍스트 공급
+      compatCleanupRef.current = getCompatibilityStream(
+        myBirth, selectedCeleb.birth, myBirthTime || '', '',
+        myCalType, 'SOLAR', myG, celebG,
+        data.score, data.elementRelation || '', data.branchRelation || '',
+        {
+          onChunk: (text) => setStreamText((prev) => prev + text),
+          onDone: (fullText) => {
+            setStreamText('');
+            const parsed = parseAiJson(fullText);
+            const merged = parsed ? {
+              ...data,
+              aiSummary: parsed.summary || null,
+              aiAnalysis: parsed.overall || null,
+              aiLoveCompat: parsed.loveCompat || null,
+              aiWorkCompat: parsed.workCompat || null,
+              aiConflictPoint: parsed.conflictPoint || null,
+              aiAdvice: parsed.advice || null,
+            } : { ...data, aiAnalysis: fullText };
+            setResult(merged);
+            setStep('result');
+            saveCompatCache({
+              birthDate1: myBirth, birthDate2: selectedCeleb.birth,
+              birthTime1: myBirthTime || null, birthTime2: null,
+              gender1: myG, gender2: celebG,
+              score: merged.score,
+              aiSummary: merged.aiSummary,
+              aiAnalysis: merged.aiAnalysis,
+              aiLoveCompat: merged.aiLoveCompat,
+              aiWorkCompat: merged.aiWorkCompat,
+              aiConflictPoint: merged.aiConflictPoint,
+              aiAdvice: merged.aiAdvice,
+            }).catch(() => {});
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          },
+          onError: () => { setStreamText(''); setStep('input'); setMatrixShown(false); },
+        }
+      );
     } catch (e) {
       console.error(e);
       setStep('input');
@@ -480,7 +532,7 @@ function CelebCompatibility() {
     return (
       <div className="celeb-page">
         {matrixShown && (
-          <AnalysisMatrix theme="star" label={matrixLabel} exiting={matrixExiting} />
+          <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
         )}
       </div>
     );
@@ -493,7 +545,7 @@ function CelebCompatibility() {
     return (
       <div className="celeb-page analysis-result-reveal" ref={resultRef}>
         {matrixShown && (
-          <AnalysisMatrix theme="star" label={matrixLabel} exiting={matrixExiting} />
+          <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
         )}
         <button className="celeb-back-btn" onClick={handleReset}>← 스타 목록으로</button>
         <section className="celeb-result-hero">

@@ -44,6 +44,20 @@ public class BloodTypeController {
         return ResponseEntity.ok(bloodTypeFortuneService.getCompatibility(type1.toUpperCase(), type2.toUpperCase()));
     }
 
+    @GetMapping("/compatibility/basic")
+    public ResponseEntity<Map<String, Object>> getCompatibilityBasic(
+            @RequestParam String type1,
+            @RequestParam String type2) {
+        return ResponseEntity.ok(bloodTypeFortuneService.getCompatibilityBasic(type1.toUpperCase(), type2.toUpperCase()));
+    }
+
+    @GetMapping(value = "/compatibility/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamCompatibility(
+            @RequestParam String type1,
+            @RequestParam String type2) {
+        return bloodTypeFortuneService.streamCompatibility(type1.toUpperCase(), type2.toUpperCase());
+    }
+
     /**
      * 혈액형 운세 스트리밍 엔드포인트
      * 캐시 있으면 cached 이벤트로 즉시 응답, 없으면 AI 스트리밍 후 서버에서 캐시 저장

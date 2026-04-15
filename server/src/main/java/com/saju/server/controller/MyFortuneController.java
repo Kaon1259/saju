@@ -60,8 +60,10 @@ public class MyFortuneController {
             ? fortuneService.getCachedFortune(user.getZodiacAnimal(), today) : null;
 
         Map<String, Object> sajuFortune = new LinkedHashMap<>();
+        boolean aiAnalyzed = false;
         if (cachedFortune != null && cachedFortune.getOverall() != null && !cachedFortune.getOverall().isBlank()) {
-            // 스트리밍 캐시 히트 → 운세 페이지와 동일한 데이터
+            // 스트리밍 캐시 히트 → 운세 페이지와 동일한 데이터 (AI 분석 결과)
+            aiAnalyzed = true;
             sajuFortune.put("overall", cachedFortune.getOverall());
             sajuFortune.put("love", cachedFortune.getLove());
             sajuFortune.put("money", cachedFortune.getMoney());
@@ -95,6 +97,7 @@ public class MyFortuneController {
         }
         sajuFortune.put("zodiacAnimal", user.getZodiacAnimal());
         sajuFortune.put("fortuneDate", today.toString());
+        sajuFortune.put("aiAnalyzed", aiAnalyzed); // 홈 미리보기 조건부 표시용
         result.put("saju", sajuFortune);
 
         // 2. 혈액형/MBTI는 각 페이지에서 개별 호출 (홈 로딩 속도 개선)
@@ -155,7 +158,7 @@ public class MyFortuneController {
         }
 
         // AI 스트리밍 (연애상태 + 날짜 반영)
-        String systemPrompt = promptBuilder.fortuneStreamSystemPrompt();
+        String systemPrompt = promptBuilder.fortuneStreamSystemPrompt(promptBuilder.dateLabel(targetDate));
         String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), targetDate, user.getRelationshipStatus());
         final LocalDate finalDate = targetDate;
         final Long uid = userId;

@@ -2556,6 +2556,69 @@
   position: relative; z-index: 1;
 }
 
+/* ─── 간소화 인트로 (카드 제거, 배경 + 빠른 문구) ─── */
+.tarot-intro-v2--simple {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: tarotIntroSimpleFade 0.6s ease-out both;
+}
+@keyframes tarotIntroSimpleFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.tarot-intro-simple-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  animation: tarotIntroSimpleRise 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes tarotIntroSimpleRise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tarot-intro-simple-star {
+  font-size: 42px;
+  color: #fbbf24;
+  text-shadow:
+    0 0 20px rgba(251, 191, 36, 0.9),
+    0 0 40px rgba(251, 191, 36, 0.5);
+  animation: tarotIntroStarPulse 1.2s ease-in-out infinite;
+}
+@keyframes tarotIntroStarPulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.18); }
+}
+.tarot-intro-simple-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow:
+    0 0 16px rgba(251, 191, 36, 0.6),
+    0 2px 16px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, #fde68a, #fbbf24, #ff6b9d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tarot-intro-simple-sub {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
 /* ═══ 타로 인트로 — 랜덤 덱 뒷면 → Y축 플립 → 앞면 ═══ */
 .tarot-intro-screen {
   position: fixed; inset: 0;
@@ -2775,13 +2838,27 @@
 
 /* ═══ 리빌 ═══ */
 .tarot-reveal-stage {
-  position: fixed; inset: 0; z-index: 10;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100dvh;
+  z-index: 10;
   display: flex; flex-direction: column; align-items: center;
   justify-content: center;
+  padding-bottom: 190px; /* 중심을 추가 1.5cm(57px) 더 위로 이동 — 총 ≈2.5cm */
   overflow: hidden;
   touch-action: none;
   overscroll-behavior: none;
-  background: #050510;
+  background: #000;
+}
+/* 배경 꽉 채움 — parent의 플립/perspective 영향 제거 */
+.tarot-reveal-stage::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: -1;
 }
 
 /* 리빌 캐러셀 — 카드 앞면 슬라이드 */
@@ -3678,6 +3755,568 @@
 [data-theme="light"] .pick-big-name { color: #2d1b69; text-shadow: none; }
 [data-theme="light"] .pick-big-name-en { color: rgba(0,0,0,0.5); }
 
+/* ─── 덱 갤러리 (덱 이름 클릭 시 전체 카드 순차 회전) ─── */
+.deck-info-name--clickable {
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+}
+.deck-info-name--clickable:hover {
+  color: #fbbf24;
+  transform: scale(1.02);
+}
+.deck-info-name-icon {
+  font-size: 0.7em;
+  margin-left: 6px;
+  opacity: 0.6;
+}
+.deck-gallery-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background: #050510;
+  padding: 0;
+  box-sizing: border-box;
+}
+.deck-gallery-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(22px) brightness(0.4) saturate(1.2);
+  transform: scale(1.15);
+}
+.deck-gallery-overlay-dim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(10,5,25,0.5), rgba(0,0,0,0.85) 85%);
+}
+.deck-gallery-back {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+.deck-gallery-back:hover {
+  background: rgba(251,191,36,0.2);
+  border-color: rgba(251,191,36,0.5);
+  color: #fbbf24;
+}
+.deck-gallery-back span { font-size: 18px; line-height: 1; }
+
+.deck-gallery-header {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  text-align: center;
+  padding: 84px 60px 6px; /* 상단 ≈2cm 아래로 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.deck-gallery-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+  background: linear-gradient(135deg, #fde68a, #fbbf24, #ff6b9d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+.deck-gallery-sub {
+  margin: 0;
+  font-size: 10px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.3px;
+}
+.deck-gallery-title-en {
+  margin-left: 6px;
+  font-size: 0.72em;
+  font-weight: 700;
+  color: rgba(255,255,255,0.65);
+  -webkit-text-fill-color: rgba(255,255,255,0.65);
+  letter-spacing: 0.3px;
+}
+.deck-gallery-count {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: rgba(251,191,36,0.15);
+  border: 1px solid rgba(251,191,36,0.35);
+  color: #fbbf24;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.deck-gallery-stage {
+  position: relative;
+  z-index: 5;
+  flex: 0 0 auto; /* 필름 고정 높이 유지 — 가용 공간은 프로그레스 바가 흡수 */
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: 38px; /* 카운트 뱃지와 필름 상단선 사이 ≈1cm */
+}
+.deck-gallery-stage--film { cursor: pointer; }
+
+/* ─── 필름릴 ─── */
+.deck-gallery-film {
+  position: relative;
+  width: 100%;
+  /* 카드 높이 기준: 41vw × 500/261 → +38px(스프로킷+0.5cm 여유) */
+  height: calc(min(41vw, 180px) * 500 / 261 + 38px);
+  max-height: 56vh;
+  perspective: 1800px;
+  transform-style: preserve-3d;
+  background: rgba(0, 0, 0, 0.75);
+  border-top: 2px solid rgba(255,255,255,0.08);
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+}
+.deck-gallery-film-sprockets {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 3;
+}
+.deck-gallery-film-sprockets--top { top: 0; }
+.deck-gallery-film-sprockets--bottom { bottom: 0; }
+.deck-gallery-film-sprockets span {
+  width: 12px;
+  height: 8px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.6);
+}
+.deck-gallery-film-strip {
+  position: absolute;
+  top: 14px;    /* 상단 스프로킷 바로 아래 */
+  bottom: 14px; /* 하단 스프로킷 바로 위 */
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+.deck-gallery-film-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(41vw, 180px); /* 기존 대비 20% 크게 */
+  aspect-ratio: 261/500;
+  will-change: transform, opacity;
+  transition: none;
+}
+.deck-gallery-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow:
+    0 0 24px rgba(251,191,36,0.25),
+    0 10px 30px rgba(0,0,0,0.7);
+}
+.deck-gallery-pause-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  padding: 14px 22px;
+  border-radius: 16px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(251,191,36,0.4);
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  animation: pauseFadeIn 0.3s ease-out;
+}
+@keyframes pauseFadeIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.deck-gallery-pause-badge span {
+  font-size: 32px;
+  color: #fbbf24;
+  display: block;
+  margin-bottom: 4px;
+}
+.deck-gallery-pause-badge p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  font-weight: 600;
+}
+
+/* 카드 포커스 뷰 — 갤러리 오버레이 전체의 중앙에 고정 */
+.deck-gallery-focus-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  animation: pauseFadeIn 0.3s ease-out;
+}
+.deck-gallery-focus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 16px;
+  animation: galleryFocusIn 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  max-width: 94vw;
+}
+@keyframes galleryFocusIn {
+  from { opacity: 0; transform: scale(0.8) rotateY(-25deg); filter: blur(6px); }
+  to   { opacity: 1; transform: scale(1) rotateY(0deg); filter: blur(0); }
+}
+.deck-gallery-focus-card {
+  width: min(52vw, 230px);
+  aspect-ratio: 261/500;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 0 50px rgba(251,191,36,0.45),
+    0 16px 48px rgba(0,0,0,0.7);
+  flex-shrink: 0;
+}
+.deck-gallery-focus-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.deck-gallery-focus-info {
+  text-align: center;
+  padding: 10px 14px 12px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(251,191,36,0.3);
+  backdrop-filter: blur(10px);
+  max-width: 90vw;
+}
+.deck-gallery-focus-num {
+  display: inline-block;
+  padding: 2px 10px;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  background: rgba(251,191,36,0.2);
+  color: #fbbf24;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+.deck-gallery-focus-name-kr {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+}
+.deck-gallery-focus-name-en {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.deck-gallery-focus-msg {
+  margin: 8px 0 4px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.9);
+  max-width: 320px;
+}
+.deck-gallery-focus-hint {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: rgba(251,191,36,0.7);
+  font-weight: 600;
+  animation: pauseFadeIn 1.2s ease-in-out infinite alternate;
+}
+
+/* Fin 화면 */
+.deck-gallery-fin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: galleryFinIn 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes galleryFinIn {
+  from { opacity: 0; transform: scale(0.7); filter: blur(10px); }
+  to   { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+.deck-gallery-fin-frame {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 5px solid #fbbf24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 50px rgba(251, 191, 36, 0.5),
+    inset 0 0 24px rgba(251, 191, 36, 0.2);
+  background: radial-gradient(circle at center, rgba(251,191,36,0.1), transparent);
+}
+.deck-gallery-fin-text {
+  font-family: 'Times New Roman', serif;
+  font-size: 58px;
+  font-weight: 900;
+  font-style: italic;
+  color: #fbbf24;
+  text-shadow:
+    0 0 24px rgba(251, 191, 36, 0.8),
+    0 4px 16px rgba(0, 0, 0, 0.7);
+  letter-spacing: 2px;
+}
+.deck-gallery-fin-sub {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  animation: pauseFadeIn 1.2s ease-in-out infinite alternate;
+}
+
+/* 속도 컨트롤 바 — 필름 아래 ≈1cm 띄움 */
+.deck-gallery-speed-bar {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 2px 14px 0;
+  margin-top: 38px;
+  justify-content: center;
+}
+.deck-gallery-speed-btn {
+  padding: 7px 12px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.55);
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+.deck-gallery-speed-btn:hover {
+  border-color: rgba(251,191,36,0.4);
+  color: #fff;
+}
+.deck-gallery-speed-btn.active {
+  background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(255,107,157,0.2));
+  border-color: rgba(251,191,36,0.7);
+  color: #fbbf24;
+}
+.deck-gallery-dots {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  width: min(72vw, 320px);
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.12);
+  margin-top: auto; /* 가용 공간 흡수 → 프로그레스 바를 맨 아래로 */
+  margin-bottom: calc(env(safe-area-inset-bottom, 0) + 14px); /* 프로그레스 바 1cm 더 내려감 */
+  overflow: hidden;
+}
+.deck-gallery-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #ff6b9d);
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+}
+
+/* 셔플 화면 스킵 힌트 */
+.shuffle-skip-hint {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  animation: shuffleSkipPulse 1.6s ease-in-out infinite;
+  z-index: 30;
+  pointer-events: none;
+}
+@keyframes shuffleSkipPulse {
+  0%,100% { opacity: 0.5; }
+  50%     { opacity: 1; }
+}
+
+/* ─── 덱 선택 Y축 페이지 플립 ───
+   phase 'out': 덱 화면 0→-90deg (엣지 온) → 사라짐
+   phase 'in' : 새 화면 90→0deg (엣지 온에서 정면으로 회전) → 나타남
+   두 페이즈 사이에 step이 스왑됨 */
+.tarot-flip-parent {
+  perspective: 1800px;
+  perspective-origin: center center;
+  min-height: 100vh;
+  position: relative;
+}
+.tarot-page {
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.tarot-page--flip-out {
+  animation: tarotPageFlipOut 0.42s cubic-bezier(0.55, 0, 0.85, 0.35) forwards;
+  will-change: transform, filter;
+}
+.tarot-page--flip-in {
+  animation: tarotPageFlipIn 0.44s cubic-bezier(0.15, 0.65, 0.45, 1) forwards;
+  will-change: transform, filter;
+}
+@keyframes tarotPageFlipOut {
+  0% {
+    transform: rotateY(0deg);
+    filter: brightness(1);
+  }
+  100% {
+    transform: rotateY(-92deg);
+    filter: brightness(0.45);
+  }
+}
+@keyframes tarotPageFlipIn {
+  0% {
+    transform: rotateY(92deg);
+    filter: brightness(0.45);
+  }
+  100% {
+    transform: rotateY(0deg);
+    filter: brightness(1);
+  }
+}
+
+/* 카드 선택 안내 오버레이 — 자동/수동 선택 전까지 카드 상단에
+   (GPU 레이어 분리 + 최소한의 애니메이션으로 카드 드래그 성능 보호) */
+.pick-select-hint {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  z-index: 45;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transform: translate3d(-50%, 0, 0);
+  will-change: opacity;
+  contain: layout paint;
+  animation: pickSelectHintFade 0.6s ease-out both;
+}
+@keyframes pickSelectHintFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.pick-select-hint-orb {
+  position: relative;
+  width: 48px; height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateZ(0);
+}
+.pick-select-hint-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #fbbf24;
+  will-change: transform;
+  transform: translateZ(0);
+}
+.pick-select-hint-ring--1 { animation: pickSelectSpin 2.4s linear infinite; }
+.pick-select-hint-ring--2 {
+  inset: 8px;
+  border-top-color: #ff6b9d;
+  animation: pickSelectSpin 1.8s linear infinite reverse;
+}
+/* ring--3 제거 — 3개 동시 회전이 저사양에서 탁탁 끊김 원인 */
+@keyframes pickSelectSpin {
+  from { transform: translateZ(0) rotate(0deg); }
+  to   { transform: translateZ(0) rotate(360deg); }
+}
+.pick-select-hint-icon {
+  font-size: 16px;
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251,191,36,0.7);
+}
+.pick-select-hint-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: #fbbf24;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  white-space: nowrap;
+}
+.pick-select-hint-sub {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+}
+[data-theme="light"] .pick-select-hint-sub { color: rgba(255,255,255,0.95); }
+
+/* 버리기 안내 오버레이 — 빨강/핑크 계열 */
+.pick-select-hint--discard .pick-select-hint-ring {
+  border-top-color: #ff3d7f;
+}
+.pick-select-hint--discard .pick-select-hint-ring--2 {
+  border-top-color: #fbbf24;
+}
+.pick-select-hint--discard .pick-select-hint-icon {
+  color: #ff3d7f;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 61, 127, 0.8);
+}
+.pick-select-hint--discard .pick-select-hint-text {
+  color: #ff6b9d;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+}
+
 /* 슬라이드 캐러셀 */
 .pick-carousel {
   position: relative;
@@ -3686,8 +4325,15 @@
   cursor: grab; touch-action: pan-y;
   user-select: none; -webkit-user-select: none;
   overflow: hidden;
+  transform: translateZ(0);
+  contain: layout paint;
 }
 .pick-carousel:active { cursor: grabbing; }
+.pick-slide-card {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
 .pick-slide-card {
   position: absolute;
   width: min(48vw, 190px); aspect-ratio: 261/500;

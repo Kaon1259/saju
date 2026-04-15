@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 
 import StreamText from '../components/StreamText';
+import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import './Mbti.css';
 
@@ -99,6 +100,19 @@ function Mbti() {
     streamCleanupRef.current = cleanup;
   };
 
+  const handleReset = () => {
+    streamCleanupRef.current?.();
+    setSelected(null);
+    setFortune(null);
+    setStreamText('');
+    setLoading(false);
+    setType1(null);
+    setType2(null);
+    setCompat(null);
+    setTab('fortune');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleCompat = async () => {
     if (!type1 || !type2) return;
     setCompat(null);
@@ -112,6 +126,7 @@ function Mbti() {
 
   return (
     <div className="mbti-page">
+      <PageTopBar onReset={handleReset} color="#8B5CF6" />
       <div className="mbti-hero">
         <h1 className="mbti-title">MBTI 운세</h1>
         <p className="mbti-subtitle">16가지 성격 유형으로 보는 오늘의 운세</p>

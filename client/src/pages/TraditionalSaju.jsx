@@ -3,6 +3,7 @@ import './TraditionalSaju.css';
 
 const MAIN_MENUS = [
   { path: '/saju', icon: '☯️', label: '사주분석', desc: '사주팔자 평생 분석', color: '#E879F9', cost: 5 },
+  { path: '/compatibility', icon: '💑', label: '사주궁합', desc: '나와 상대 궁합 분석', color: '#EC4899', cost: 5 },
   { path: '/tojeong', icon: '📜', label: '토정비결', desc: '월별 운세 풀이', color: '#F472B6', cost: 5 },
   { path: '/manseryeok', icon: '📅', label: '만세력', desc: '천간 지지 조회', color: '#FBBF24', cost: 5 },
   { path: '/face-reading', icon: '👤', label: 'AI 관상', desc: '얼굴로 보는 운세', color: '#DAA520', cost: 5 },
