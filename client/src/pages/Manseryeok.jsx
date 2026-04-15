@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { getManseryeok, getManseryeokStream } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Manseryeok.css';
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -26,11 +27,24 @@ function Manseryeok() {
   const [streamText, setStreamText] = useState('');
   const [aiStreaming, setAiStreaming] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => {
     return () => cleanupRef.current?.();
   }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // AI 해석 결과 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (aiResult && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [aiResult, matrixShown]);
 
   // 사용자 생년월일 가져오기
   const getUserBirthDate = () => {
@@ -51,6 +65,11 @@ function Manseryeok() {
     setStreamText('');
     setAiStreaming(false);
     setAiLoading(true);
+    setMatrixShown(true);
+    setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const birthDate = getUserBirthDate();
 
@@ -58,6 +77,7 @@ function Manseryeok() {
       onCached: (cached) => {
         setAiResult(cached);
         setAiLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onChunk: (text) => {
         setAiLoading(false);
@@ -67,6 +87,7 @@ function Manseryeok() {
       onDone: (fullText) => {
         setAiStreaming(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
           setAiResult(parsed);
@@ -80,9 +101,13 @@ function Manseryeok() {
         setAiStreaming(false);
         setStreamText('');
         setAiLoading(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onInsufficientHearts: () => {
         setAiLoading(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
     cleanupRef.current = cleanup;
@@ -146,6 +171,9 @@ function Manseryeok() {
 
   return (
     <div className="ms-page">
+      {matrixShown && (
+        <AnalysisMatrix theme="saju" label="AI가 만세력을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+      )}
       <section className="ms-hero">
         <h1 className="ms-title">만세력</h1>
         <p className="ms-subtitle">날짜별 천간지지 조회</p>
@@ -180,15 +208,6 @@ function Manseryeok() {
             </div>
           </section>
 
-          {/* AI 스트리밍 해석 */}
-          {aiStreaming && streamText && (
-            <StreamText
-              text={streamText}
-              icon="📖"
-              label="만세력 AI 해석 중..."
-            />
-          )}
-
           {/* AI 해석 완료 결과 */}
           {aiResult && !aiStreaming && (
             <section className="ms-ai-interp glass-card fade-in">
@@ -208,13 +227,6 @@ function Manseryeok() {
             </section>
           )}
 
-          {/* AI 로딩 중 (스트리밍 시작 전) */}
-          {aiLoading && !aiStreaming && (
-            <div className="ms-ai-loading glass-card">
-              <div className="ms-ai-loading-spinner" />
-              <span>AI 해석을 준비하고 있어요...</span>
-            </div>
-          )}
 
           {/* 기존 서버 해석 (AI 스트리밍 결과가 없을 때 폴백) */}
           {!aiResult && !aiStreaming && !aiLoading && data.interpretation && (

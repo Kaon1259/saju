@@ -8,6 +8,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './CelebCompatibility.css';
 
 const GRADE_COLORS = { '천생연분': '#ff3d7f', '좋은 인연': '#ff6b9d', '보통': '#fbbf24', '노력 필요': '#94a3b8', '상극': '#64748b' };
@@ -68,8 +69,10 @@ function CelebCompatibility() {
   const [matrixLabel, setMatrixLabel] = useState('');
   const [streamText, setStreamText] = useState('');
   const compatCleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => () => compatCleanupRef.current?.(), []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // state 소비 후 제거 (뒤로가기 중복 방지)
   useEffect(() => {
@@ -204,6 +207,8 @@ function CelebCompatibility() {
     setMatrixLabel(`AI가 나와 ${selectedCeleb.name}의 운명을 분석하고 있어요`);
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     try {
       // 1) 기본(사주 계산) — 캐시에 AI 있으면 즉시 반환
@@ -220,6 +225,7 @@ function CelebCompatibility() {
       if (data.aiAnalysis || data.aiSummary) {
         setResult(data);
         setStep('result');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         return;
       }
@@ -233,6 +239,7 @@ function CelebCompatibility() {
           onChunk: (text) => setStreamText((prev) => prev + text),
           onDone: (fullText) => {
             setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const merged = parsed ? {
               ...data,
@@ -259,13 +266,17 @@ function CelebCompatibility() {
             }).catch(() => {});
             setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
           },
-          onError: () => { setStreamText(''); setStep('input'); setMatrixShown(false); },
+          onError: () => {
+            setStreamText(''); setStep('input'); setMatrixShown(false);
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          },
         }
       );
     } catch (e) {
       console.error(e);
       setStep('input');
       setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     }
   };
 
@@ -295,11 +306,15 @@ function CelebCompatibility() {
     setMatrixShown(true);
     setMatrixExiting(false);
     starCleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     starCleanupRef.current = analyzeSajuStream(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender, {
       onCached: (data) => {
         setStarFortune(data.todayFortune || data);
         setStarFortuneLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onChunk: (text) => {
         setStarStreaming(true);
@@ -308,13 +323,17 @@ function CelebCompatibility() {
       onDone: (fullText) => {
         setStarStreaming(false);
         setStarStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
           setStarFortune({ overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor });
         }
         setStarFortuneLoading(false);
       },
-      onError: () => { setStarStreaming(false); setStarStreamText(''); setStarFortuneLoading(false); },
+      onError: () => {
+        setStarStreaming(false); setStarStreamText(''); setStarFortuneLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
     });
   };
 

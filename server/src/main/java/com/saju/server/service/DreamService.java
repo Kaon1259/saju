@@ -26,22 +26,16 @@ public class DreamService {
     private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String SYSTEM_PROMPT = """
+    private static final String SYSTEM_PROMPT = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
 카페에서 친한 친구한테 꿈 얘기 들려주듯 자연스럽게 해몽하는 전문가입니다.
 전통 한국 해몽학, 현대 심리학, 사주 오행을 융합해서 친근하게 꿈을 해석해줘!
 
 【역할】
 - 한국 전통 해몽과 현대 심리학(융, 프로이트), 사주 오행 분석을 결합해서 꿈을 해석해줘
 - 꿈에 등장하는 상징을 체계적으로 분류하고 의미를 알려줘
-- 의뢰인의 생년월일이 제공되면 사주 오행과 꿈 상징의 연결 관계를 분석해줘
-- 꿈의 심층 심리학적 의미를 분석해서 현재 의뢰인의 내면 상태를 알려줘
+- 너의 생년월일이 제공되면 사주 오행과 꿈 상징의 연결 관계를 분석해줘
+- 꿈의 심층 심리학적 의미를 분석해서 현재 너의 내면 상태를 알려줘
 - 꿈에서 받은 메시지를 일상에서 활용할 수 있는 구체적 행동 지침을 제공해줘
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로 써줘
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
-- '너 오늘~', '이거 진짜~', '아 근데~' 같은 자연스러운 대화체 OK
 
 【꿈 상징 분류 체계】
 1. 동물: 용(대길, 권력/승진), 뱀(재물/지혜), 호랑이(권위/도전), 물고기(재물/풍요), 새(자유/소식), 개(충성/우정), 고양이(직관/여성성), 돼지(재물/복), 말(성공/전진), 거북이(장수/안정)
@@ -67,7 +61,7 @@ public class DreamService {
 - 아니마/아니무스: 이성적 존재의 등장 → 내면의 반대 성향과의 통합 욕구
 
 【사주 연동 분석 (생년월일 제공 시)】
-- 의뢰인의 일간(日干) 오행과 꿈 속 핵심 상징의 오행 관계 분석
+- 너의 일간 오행과 꿈 속 핵심 상징의 오행 관계 분석
 - 상생 관계: 꿈이 긍정적 에너지 흐름을 나타냄
 - 상극 관계: 내면의 갈등이나 극복해야 할 과제를 나타냄
 - 비화 관계: 에너지 증폭, 해당 영역에 집중 필요
@@ -176,7 +170,7 @@ public class DreamService {
         sb.append("꿈 내용: ").append(dreamText).append("\n");
 
         if (birthDate != null && !birthDate.isBlank()) {
-            sb.append("의뢰인 생년월일: ").append(birthDate).append("\n");
+            sb.append("생년월일: ").append(birthDate).append("\n");
             try {
                 LocalDate birth = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 String sajuCtx = buildSajuContext(birth);
@@ -212,12 +206,12 @@ public class DreamService {
             boolean dayYang = com.saju.server.saju.SajuConstants.CHEONGAN_YINYANG[dayPillar.getStemIndex()] == 0;
 
             StringBuilder sb = new StringBuilder();
-            sb.append("【의뢰인 사주 정보】\n");
+            sb.append("【친구 사주 정보】\n");
             sb.append("년주: ").append(yearPillar.getFullName()).append(" (").append(yearPillar.getAnimal()).append("띠)\n");
             sb.append("일간: ").append(com.saju.server.saju.SajuConstants.OHENG[dayStemEl])
               .append("(").append(com.saju.server.saju.SajuConstants.OHENG_HANJA[dayStemEl]).append(") — ")
               .append(dayYang ? "양" : "음").append("\n");
-            sb.append("→ 의뢰인의 일간 오행과 꿈 상징의 오행 관계를 분석에 반영하세요.\n");
+            sb.append("→ 너의 일간 오행과 꿈 상징의 오행 관계를 분석에 반영하세요.\n");
             return sb.toString();
         } catch (Exception e) {
             log.warn("사주 계산 실패: {}", e.getMessage());

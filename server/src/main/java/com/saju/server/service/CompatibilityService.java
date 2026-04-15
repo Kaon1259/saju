@@ -101,9 +101,9 @@ public class CompatibilityService {
         // AI 상세 분석
         if (claudeApiService.isAvailable()) {
             try {
-                String systemPrompt = "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 대화하는 사주 궁합 전문가.\n"
+                String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
+                        + "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 대화하는 사주 궁합 전문가.\n"
                         + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n"
-                        + "딱딱한 분석 보고서가 아니라 옆에서 수다 떠는 느낌으로. 고전적 표현 절대 금지.\n"
                         + "JSON만 응답:\n"
                         + "- summary: 한 줄 요약\n"
                         + "- overall: 전반적 궁합 3-4문장\n"
@@ -367,16 +367,11 @@ public class CompatibilityService {
         SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
         SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
 
-        String systemPrompt = "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 얘기하는 사주 궁합 전문가야.\n"
+        String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
+                + "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 얘기하는 사주 궁합 전문가야.\n"
                 + "20대가 이해하기 쉽게 친근한 반말로 풀어줘.\n"
-                + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n\n"
-                + "⚠️ 어려운 한자어, 사자성어, 고사성어 절대 금지 (금상첨화, 유비무환, 전화위복 등)\n"
-                + "⚠️ 한자 병기 금지 (天干, 日辰, 命理 등)\n"
-                + "⚠️ 고전적 어미 금지 (~하옵소서, ~이로다, ~을지니)\n"
-                + "⚠️ '오행/일간/상생상극/사주명리' 같은 한자 용어 그대로 쓰지 말고 의미만 풀어서\n"
-                + "⚠️ '귀하/의뢰인/내담자' 같은 호칭 금지 — '너네 둘이', '이 남자', '이 여자'로\n"
-                + "✅ 일상 단어: 분위기, 텐션, 에너지, 케미, 썸, 바이브 같은 20대 친화적 표현 OK\n"
-                + "✅ 딱딱한 보고서 말투 금지, 옆에서 수다 떠는 느낌으로\n\n"
+                + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n"
+                + "'오행/일간/상생상극/사주명리' 같은 한자 용어 그대로 쓰지 말고 의미만 풀어서.\n\n"
                 + "JSON만 응답:\n"
                 + "- summary: 한 줄 요약 (30자 이내, 임팩트 있게)\n"
                 + "- overall: 전반적 궁합 3-4문장\n"

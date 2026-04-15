@@ -185,16 +185,10 @@ public class MonthlyFortuneService {
     }
 
     private String buildSystemPrompt() {
-        return """
-당신은 월별 운세 분석에 빠삭한 운세 전문가야!
-이번 달 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로 써줘
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
-- "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
-
+        return "당신은 월별 운세 분석에 빠삭한 운세 전문가야!\n" +
+"이번 달 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.\n\n" +
+FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+"""
 【역할】
 - 해당 월의 월주와 일간의 십성 관계를 분석해
 - 월지와 일지의 합충형파해를 파악해
@@ -234,7 +228,7 @@ public class MonthlyFortuneService {
         sb.append("월간 오행: ").append(SajuConstants.OHENG[monthPillar.getStemElement()]).append("(").append(SajuConstants.OHENG_HANJA[monthPillar.getStemElement()]).append(")\n");
         sb.append("월지 오행: ").append(SajuConstants.OHENG[monthPillar.getBranchElement()]).append("(").append(SajuConstants.OHENG_HANJA[monthPillar.getBranchElement()]).append(")\n\n");
 
-        sb.append("【의뢰인 사주 정보】\n");
+        sb.append("【친구 사주 정보】\n");
         sb.append("생년월일: ").append(birthDate).append("\n");
         if (gender != null) sb.append("성별: ").append("M".equals(gender) ? "남" : "여").append("\n");
         if (birthTime != null && !birthTime.isBlank()) sb.append("태어난 시간: ").append(birthTime).append("\n");
@@ -242,7 +236,7 @@ public class MonthlyFortuneService {
         sb.append("일주: ").append(dayPillar.getFullHanja()).append("(").append(dayPillar.getFullName()).append(")\n");
         sb.append("일간 오행: ").append(dayPillar.getStemElementName()).append("(").append(SajuConstants.OHENG_HANJA[dayPillar.getStemElement()]).append(") — ").append(dayPillar.isStemYang() ? "양" : "음").append("\n\n");
 
-        sb.append(month).append("월 월주와 의뢰인 사주의 상호작용을 분석하여 월별 운세를 작성하세요.\n");
+        sb.append(month).append("월 월주와 친구 사주의 상호작용을 분석하여 월별 운세를 작성하세요.\n");
         sb.append("각 카테고리는 3-4문장으로 상세하게 작성하세요.\n");
         sb.append("반드시 아래 JSON 형식으로만 응답:\n");
         sb.append("{\"month\":").append(month).append(",")

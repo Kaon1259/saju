@@ -5,6 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Compatibility.css';
 
 // JSON 잔여물 제거
@@ -55,8 +56,10 @@ function Compatibility() {
   const [showTime, setShowTime] = useState(false);
   const [showMoreCards, setShowMoreCards] = useState(false);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   useEffect(() => {
     if (result && matrixShown && !aiStreaming) {
@@ -73,6 +76,8 @@ function Compatibility() {
     setResult(null);
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     try {
       // 1단계: 사주 계산 (캐시에 AI 있으면 즉시 반환)
@@ -83,6 +88,7 @@ function Compatibility() {
       if (data.aiAnalysis || data.aiSummary) {
         setResult(data);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         return;
       }
 
@@ -98,6 +104,7 @@ function Compatibility() {
           onDone: (fullText) => {
             setAiStreaming(false);
             setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const merged = parsed ? {
               ...data,
@@ -122,10 +129,16 @@ function Compatibility() {
               aiAdvice: merged.aiAdvice,
             }).catch(() => {});
           },
-          onError: () => { setAiStreaming(false); setStreamText(''); setMatrixShown(false); },
+          onError: () => {
+            setAiStreaming(false); setStreamText(''); setMatrixShown(false);
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          },
         }
       );
-    } catch (err) { console.error(err); setLoading(false); setMatrixShown(false); }
+    } catch (err) {
+      console.error(err); setLoading(false); setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    }
   };
 
   if (result) {

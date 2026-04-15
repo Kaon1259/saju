@@ -99,15 +99,9 @@ public class DeepAnalysisService {
     }
 
     private String buildSystemPrompt(String type) {
-        String base = """
+        String base = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
             당신은 사주명리학과 동양 역학에 빠삭한 심화 분석 전문가야!
             프리미엄 심화 분석을 친근하고 알기 쉽게 풀어주는 게 특기거든.
-
-            【말투 규칙】
-            - 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-            - 분석 보고서가 아니라 대화하는 느낌으로 써줘
-            - 딱딱한 문장, 고전적 표현, 격식체 절대 금지
-            - "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
             [분석 원칙]
             1. 모든 분석은 오행·십성의 이론적 근거를 제시해

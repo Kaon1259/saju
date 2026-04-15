@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MonthlyFortune.css';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -59,10 +60,12 @@ function MonthlyFortune() {
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => {
     return () => { cleanupRef.current?.(); };
   }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   const handleAutofill = () => {
     try {
@@ -82,12 +85,16 @@ function MonthlyFortune() {
     setStreamText('');
     setResult(null);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
     cleanupRef.current = getMonthlyFortuneStream(birthDate, m, birthTime, gender, {
       onCached: (data) => {
         setResult({ ...data, month: m });
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
       },
       onChunk: (chunk) => {
@@ -97,6 +104,7 @@ function MonthlyFortune() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
           setResult({ ...parsed, month: m });
@@ -108,6 +116,7 @@ function MonthlyFortune() {
         console.error('월별운세 스트림 실패:', err);
         setLoading(false);
         setStreaming(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
   };

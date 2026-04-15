@@ -5,6 +5,7 @@ import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
@@ -56,8 +57,10 @@ function LoveFortune() {
   const [matrixExiting, setMatrixExiting] = useState(false);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // 결과 등장 시 매트릭스 부드럽게 페이드아웃
   useEffect(() => {
@@ -94,6 +97,8 @@ function LoveFortune() {
     setStreamText('');
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     try {
       // 1단계: 캐시 체크 + 사주 기본 (즉시)
@@ -106,6 +111,7 @@ function LoveFortune() {
       if (data.score && data.overall) {
         setResult(data);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
         return;
       }
@@ -119,6 +125,7 @@ function LoveFortune() {
         {
           onCached: (cachedData) => {
             setAiStreaming(false); setLoading(false); setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             setResult(cachedData);
             setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
           },
@@ -126,6 +133,7 @@ function LoveFortune() {
           onDone: (fullText) => {
             setAiStreaming(false); setLoading(false);
             setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             try {
               let json = fullText;
               if (json.includes('```')) {
@@ -157,12 +165,16 @@ function LoveFortune() {
               setResult({ ...data, score: 65, grade: '보통', overall: fullText });
             }
           },
-          onError: () => { setAiStreaming(false); setLoading(false); },
+          onError: () => {
+            setAiStreaming(false); setLoading(false);
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          },
         }
       );
     } catch (err) {
       console.error(err);
       setLoading(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     }
   };
 

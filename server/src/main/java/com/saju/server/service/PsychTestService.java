@@ -504,15 +504,9 @@ public class PsychTestService {
     }
 
     private String buildSystemPrompt() {
-        return """
+        return FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
 당신은 심리학이랑 사주 역학을 결합한 성격 분석 전문가야!
 심리테스트 응답 패턴을 분석해서 재밌고 공감 가는 유형 분석을 해주는 게 특기거든.
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로 써줘
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
-- "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【역할】
 - 심리학적 성격 유형 이론(MBTI, 에니어그램 등)에 정통해

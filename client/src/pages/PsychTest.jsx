@@ -4,6 +4,7 @@ import { getPsychTests, analyzePsychTestStream } from '../api/fortune';
 import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -79,6 +80,8 @@ function PsychTest() {
   const [streamText, setStreamText] = useState('');
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
 
   // cleanup on unmount
@@ -126,6 +129,9 @@ function PsychTest() {
     setStep('loading');
     setLoading(true);
     setStreamText('');
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const answersStr = finalAnswers.join(',');
     const cleanup = analyzePsychTestStream(
@@ -142,9 +148,11 @@ function PsychTest() {
           setResult(data);
           setStep('result');
           setLoading(false);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onDone: (fullText) => {
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const parsed = parseAiJson(fullText);
           if (parsed) {
             setResult(parsed);

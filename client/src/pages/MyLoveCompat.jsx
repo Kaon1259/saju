@@ -14,6 +14,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyLoveCompat.css';
 
 const TABS = [
@@ -76,8 +77,10 @@ function MyLoveCompat() {
   const [result, setResult] = useState(null);
   const cleanupRef = useRef(null);
   const resultRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => () => cleanupRef.current?.(), []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   useEffect(() => {
     if (result && matrixShown) {
@@ -113,10 +116,12 @@ function MyLoveCompat() {
     setMatrixShown(false);
     setMatrixExiting(false);
     cleanupRef.current?.();
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
   };
 
   const handleReset = () => {
     cleanupRef.current?.();
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     setResult(null);
     setStreamText('');
     setAiStreaming(false);
@@ -137,6 +142,8 @@ function MyLoveCompat() {
     setStreamText('');
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     try {
       const data = await getSajuCompatibilityBasic(
@@ -148,6 +155,7 @@ function MyLoveCompat() {
       if (data.aiAnalysis || data.aiSummary) {
         setResult(data);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         return;
       }
@@ -163,6 +171,7 @@ function MyLoveCompat() {
           onDone: (fullText) => {
             setAiStreaming(false);
             setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const finalResult = parsed ? {
               ...data,
@@ -188,13 +197,17 @@ function MyLoveCompat() {
             }).catch(() => {});
             setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
           },
-          onError: () => { setAiStreaming(false); setStreamText(''); },
+          onError: () => {
+            setAiStreaming(false); setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          },
         }
       );
     } catch (err) {
       console.error(err);
       setLoading(false);
       setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     }
   };
 
@@ -206,6 +219,8 @@ function MyLoveCompat() {
     setStreamText('');
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     try {
       const base = await getMbtiCompatibilityBasic(myMbti, partnerMbti);
@@ -217,6 +232,7 @@ function MyLoveCompat() {
         onDone: (fullText) => {
           setAiStreaming(false);
           setStreamText('');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const parsed = parseAiJson(fullText);
           const merged = parsed ? {
             _kind: 'mbti',
@@ -230,13 +246,17 @@ function MyLoveCompat() {
           setResult(merged);
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
-        onError: () => { setAiStreaming(false); setStreamText(''); },
+        onError: () => {
+          setAiStreaming(false); setStreamText('');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        },
       });
     } catch (e) {
       console.error(e);
       setLoading(false);
       setAiStreaming(false);
       setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     }
   };
 
@@ -248,6 +268,8 @@ function MyLoveCompat() {
     setStreamText('');
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     try {
       const base = await getBloodTypeCompatibilityBasic(myBlood, partnerBlood);
@@ -259,6 +281,7 @@ function MyLoveCompat() {
         onDone: (fullText) => {
           setAiStreaming(false);
           setStreamText('');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const parsed = parseAiJson(fullText);
           const merged = parsed ? {
             _kind: 'blood',
@@ -272,13 +295,17 @@ function MyLoveCompat() {
           setResult(merged);
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
-        onError: () => { setAiStreaming(false); setStreamText(''); },
+        onError: () => {
+          setAiStreaming(false); setStreamText('');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        },
       });
     } catch (e) {
       console.error(e);
       setLoading(false);
       setAiStreaming(false);
       setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     }
   };
 

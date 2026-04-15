@@ -239,7 +239,7 @@ public class MbtiFortuneService {
         if (claudeApiService.isAvailable()) {
             try {
                 String prompt = promptBuilder.compatibilityPrompt("mbti", type1, type2, LocalDate.now());
-                String aiAdvice = claudeApiService.generate("카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 MBTI 궁합 전문가야! 오행과 인지기능을 융합해서 자연스러운 대화체 반말로 분석해줘. 딱딱한 보고서 톤이나 고전적 표현은 절대 금지!", prompt, 400);
+                String aiAdvice = claudeApiService.generate(FortunePromptBuilder.COMMON_TONE_RULES + "\n카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 MBTI 궁합 전문가야! 쉬운 말로 풀어줘.", prompt, 400);
                 if (aiAdvice != null && !aiAdvice.isBlank()) advice = aiAdvice;
             } catch (Exception e) { log.warn("AI MBTI compat failed: {}", e.getMessage()); }
         }

@@ -5,8 +5,9 @@ import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Constellation.css';
 
 const SIGN_DATA = {
@@ -48,9 +49,22 @@ function Constellation() {
   const [fortune, setFortune] = useState(null);
   const [loading, setLoading] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const [mySign, setMySign] = useState(null);
   const resultRef = useRef(null);
   const streamCleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 운세 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (fortune && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [fortune, matrixShown]);
 
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
@@ -78,7 +92,12 @@ function Constellation() {
     setFortune(null);
     setStreamText('');
     setLoading(true);
+    setMatrixShown(true);
+    setMatrixExiting(false);
     streamCleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const cleanup = getConstellationFortuneStream(sign, {
       onChunk: (chunk) => setStreamText((prev) => prev + chunk),
@@ -86,9 +105,11 @@ function Constellation() {
         setFortune(data);
         setStreamText('');
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onDone: (fullText) => {
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
           setFortune({ sign, ...parsed });
@@ -101,6 +122,8 @@ function Constellation() {
         console.error('stream error', err);
         setLoading(false);
         setStreamText('');
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
     streamCleanupRef.current = cleanup;
@@ -146,12 +169,8 @@ function Constellation() {
         </div>
       )}
 
-      {loading && !streamText && (
-        <div className="cs-loading"><div className="cs-spinner" /><p>별의 메시지를 읽는 중...</p></div>
-      )}
-
-      {loading && streamText && (
-        <StreamText text={streamText} icon="⭐" label="AI가 별자리 운세를 분석하고 있어요..." color="#FF9800" />
+      {matrixShown && (
+        <AnalysisMatrix theme="star" label="AI가 별자리 운세를 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
 
       {fortune && !loading && (

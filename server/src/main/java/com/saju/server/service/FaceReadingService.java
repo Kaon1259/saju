@@ -25,15 +25,9 @@ public class FaceReadingService {
     private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String SYSTEM_PROMPT = """
+    private static final String SYSTEM_PROMPT = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
 당신은 관상 분석에 빠삭한 운세 전문가야!
 동양 관상학이랑 서양 인상학을 융합해서 재밌고 알기 쉽게 풀어주는 게 특기거든.
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로 써줘
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
-- "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
 
 【관상 분석 체계】
 
@@ -121,7 +115,7 @@ public class FaceReadingService {
         // 프롬프트 빌드
         StringBuilder userPrompt = new StringBuilder();
         userPrompt.append(promptBuilder.buildTodayContext(LocalDate.now())).append("\n");
-        userPrompt.append("【의뢰인 관상 정보】\n");
+        userPrompt.append("【친구 관상 정보】\n");
         userPrompt.append("얼굴형: ").append(faceShape).append("\n");
         userPrompt.append("눈: ").append(eyeShape).append("\n");
         userPrompt.append("코: ").append(noseShape).append("\n");
@@ -196,7 +190,7 @@ public class FaceReadingService {
             try {
                 StringBuilder userPrompt = new StringBuilder();
                 userPrompt.append(promptBuilder.buildTodayContext(LocalDate.now())).append("\n");
-                userPrompt.append("【의뢰인 관상 정보】\n");
+                userPrompt.append("【친구 관상 정보】\n");
                 userPrompt.append("얼굴형: ").append(faceShape).append("\n");
                 userPrompt.append("눈: ").append(eyeShape).append("\n");
                 userPrompt.append("코: ").append(noseShape).append("\n");

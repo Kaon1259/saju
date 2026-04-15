@@ -215,7 +215,7 @@ public class BloodTypeFortuneService {
         if (claudeApiService.isAvailable()) {
             try {
                 String prompt = promptBuilder.compatibilityPrompt("bloodtype", type1, type2, LocalDate.now());
-                String aiDesc = claudeApiService.generate("카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 혈액형 궁합 전문가야! 오행과 혈액형 기질을 융합해서 자연스러운 대화체 반말로 분석해줘. 딱딱한 보고서 톤이나 고전적 표현은 절대 금지!", prompt, 400);
+                String aiDesc = claudeApiService.generate(FortunePromptBuilder.COMMON_TONE_RULES + "\n카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 혈액형 궁합 전문가야! 오행과 혈액형 기질을 융합해서 쉽게 풀어줘.", prompt, 400);
                 if (aiDesc != null && !aiDesc.isBlank()) desc = aiDesc;
             } catch (Exception e) { log.warn("AI compat failed: {}", e.getMessage()); }
         }

@@ -3,8 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getTojeongStream } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Tojeong.css';
 
 const RATING_STYLE = {
@@ -24,10 +25,15 @@ function Tojeong() {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const [showInput, setShowInput] = useState(true);
   const [birthDate, setBirthDate] = useState('');
   const [calendarType, setCalendarType] = useState('SOLAR');
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  const baseRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   const userId = localStorage.getItem('userId');
   const location = useLocation();
@@ -37,13 +43,27 @@ function Tojeong() {
     return () => { cleanupRef.current?.(); };
   }, []);
 
+  // 결과 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (result && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [result, matrixShown]);
+
   const loadUserTojeong = () => {
     if (!userId) return;
     setShowInput(false);
     setLoading(true);
     setStreaming(false);
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let userBirthDate = '';
     let userCalendarType = 'SOLAR';
@@ -53,13 +73,18 @@ function Tojeong() {
       if (profile.calendarType) { userCalendarType = profile.calendarType; setCalendarType(profile.calendarType); }
     } catch {}
 
-    if (!userBirthDate) { setShowInput(true); setLoading(false); return; }
+    if (!userBirthDate) { setShowInput(true); setLoading(false); setMatrixShown(false); return; }
 
     let firstChunk = true;
     cleanupRef.current = getTojeongStream(userBirthDate, userCalendarType, {
       onCached: (data) => {
         setResult(data);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
+      onBase: (base) => {
+        // 기본 계산값(sangsu/jungsu/hasu/totalGwae/gwaeName/monthlyFortunes) 먼저 저장
+        baseRef.current = base;
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
@@ -68,17 +93,36 @@ function Tojeong() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
+        const base = baseRef.current || {};
         if (parsed) {
+          // AI 월별 운세 배열과 base 월별 배열 병합 (AI가 더 풍부하면 사용)
+          const aiMonths = parsed.months || parsed.monthlyFortunes || [];
+          const baseMonths = base.monthlyFortunes || [];
+          const mergedMonths = baseMonths.length === 12
+            ? baseMonths.map((bm, i) => {
+                const am = aiMonths.find(x => Number(x.month) === i + 1) || aiMonths[i];
+                return {
+                  ...bm,
+                  fortune: am?.fortune || bm.fortune,
+                  rating: am?.rating || bm.rating,
+                };
+              })
+            : (aiMonths.length ? aiMonths : baseMonths);
           const mapped = {
+            ...base,
             yearSummary: parsed.yearSummary,
             yearKeywords: parsed.yearKeywords,
             bestMonth: parsed.bestMonth,
             cautionMonth: parsed.cautionMonth,
             yearAdvice: parsed.yearAdvice,
-            monthlyFortunes: parsed.months || parsed.monthlyFortunes || [],
+            monthlyFortunes: mergedMonths,
           };
           setResult(mapped);
+        } else if (base && base.totalGwae) {
+          // AI 실패해도 기본 계산 결과는 표시
+          setResult(base);
         } else {
           setShowInput(true);
         }
@@ -88,7 +132,9 @@ function Tojeong() {
         console.error('토정비결 스트림 실패:', err);
         setLoading(false);
         setStreaming(false);
+        setMatrixShown(false);
         setShowInput(true);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
   };
@@ -104,14 +150,24 @@ function Tojeong() {
     setLoading(true);
     setStreaming(false);
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
     setShowInput(false);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
     cleanupRef.current = getTojeongStream(birthDate, calendarType, {
       onCached: (data) => {
         setResult(data);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
+      onBase: (base) => {
+        // 기본 계산값(sangsu/jungsu/hasu/totalGwae/gwaeName/monthlyFortunes) 먼저 저장
+        baseRef.current = base;
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
@@ -120,17 +176,36 @@ function Tojeong() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
+        const base = baseRef.current || {};
         if (parsed) {
+          // AI 월별 운세 배열과 base 월별 배열 병합 (AI가 더 풍부하면 사용)
+          const aiMonths = parsed.months || parsed.monthlyFortunes || [];
+          const baseMonths = base.monthlyFortunes || [];
+          const mergedMonths = baseMonths.length === 12
+            ? baseMonths.map((bm, i) => {
+                const am = aiMonths.find(x => Number(x.month) === i + 1) || aiMonths[i];
+                return {
+                  ...bm,
+                  fortune: am?.fortune || bm.fortune,
+                  rating: am?.rating || bm.rating,
+                };
+              })
+            : (aiMonths.length ? aiMonths : baseMonths);
           const mapped = {
+            ...base,
             yearSummary: parsed.yearSummary,
             yearKeywords: parsed.yearKeywords,
             bestMonth: parsed.bestMonth,
             cautionMonth: parsed.cautionMonth,
             yearAdvice: parsed.yearAdvice,
-            monthlyFortunes: parsed.months || parsed.monthlyFortunes || [],
+            monthlyFortunes: mergedMonths,
           };
           setResult(mapped);
+        } else if (base && base.totalGwae) {
+          // AI 실패해도 기본 계산 결과는 표시
+          setResult(base);
         } else {
           setShowInput(true);
         }
@@ -140,48 +215,19 @@ function Tojeong() {
         console.error('토정비결 스트림 실패:', err);
         setLoading(false);
         setStreaming(false);
+        setMatrixShown(false);
         setShowInput(true);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
   };
 
   const currentMonth = new Date().getMonth(); // 0-indexed
 
-  if (loading && !streaming) {
+  if ((loading || streaming) && !result) {
     return (
       <div className="tj-page">
-        <div className="tj-loading">
-          <div className="tj-book">
-            <div className="tj-book-cover">
-              <span className="tj-book-title">土亭秘訣</span>
-            </div>
-            <div className="tj-book-page tj-book-page--1"><span>卦</span></div>
-            <div className="tj-book-page tj-book-page--2"><span>運</span></div>
-            <div className="tj-book-page tj-book-page--3"><span>命</span></div>
-            <div className="tj-book-page tj-book-page--4"><span>福</span></div>
-            <div className="tj-book-page tj-book-page--5"><span>祿</span></div>
-          </div>
-          <p className="tj-loading-text">AI가 고서를 펼쳐 운세를 풀이하고 있어요</p>
-          <div className="tj-loading-dots"><span>.</span><span>.</span><span>.</span></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (streaming) {
-    return (
-      <div className="tj-page">
-        <div className="tj-loading">
-          <div className="tj-book">
-            <div className="tj-book-cover">
-              <span className="tj-book-title">土亭秘訣</span>
-            </div>
-            <div className="tj-book-page tj-book-page--1"><span>卦</span></div>
-            <div className="tj-book-page tj-book-page--2"><span>運</span></div>
-            <div className="tj-book-page tj-book-page--3"><span>命</span></div>
-          </div>
-        </div>
-        <StreamText text={streamText} icon="☯️" label="AI가 토정비결을 분석하고 있어요..." color="#E879F9" />
+        <AnalysisMatrix theme="saju" label="AI가 토정비결을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       </div>
     );
   }

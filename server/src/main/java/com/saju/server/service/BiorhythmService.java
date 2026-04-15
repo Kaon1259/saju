@@ -248,8 +248,8 @@ public class BiorhythmService {
         String intellectualPhase = determinePhase(daysSinceBirth, INTELLECTUAL_CYCLE);
         String intuitionPhase = determinePhase(daysSinceBirth, INTUITION_CYCLE);
 
-        String systemPrompt = "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 바이오리듬 전문가.\n"
-            + "자연스러운 대화체 반말로 작성. 딱딱한 보고서 톤이나 격식체 절대 금지.\n"
+        String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
+            + "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 바이오리듬 전문가.\n"
             + "반드시 JSON으로만 응답.\n\n"
             + "【규칙】\n"
             + "1. overall: 오늘 바이오리듬 종합 해석 3-4문장\n"

@@ -86,6 +86,7 @@ public class TojeongController {
         String userPrompt = (String) ctx[1];
         @SuppressWarnings("unchecked")
         Map<String, Object> cached = (Map<String, Object>) ctx[3];
+        TojeongResult base = ctx.length >= 5 ? (TojeongResult) ctx[4] : null;
 
         if (cached != null) {
             SseEmitter emitter = new SseEmitter(5000L);
@@ -108,9 +109,19 @@ public class TojeongController {
         }
 
         final Long uid = userId;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
+        SseEmitter emitter = claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
             tojeongService.saveStreamResult(finalBirthDate, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "TOJEONG", "토정비결");
         });
+
+        // AI 스트림 시작 전에 base 이벤트 전송 (sangsu/jungsu/hasu/totalGwae/gwaeName/monthlyFortunes 기본값)
+        if (base != null) {
+            try {
+                emitter.send(SseEmitter.event().name("base").data(objectMapper.writeValueAsString(base)));
+            } catch (Exception e) {
+                // ignore — base 누락돼도 AI 스트림은 진행
+            }
+        }
+        return emitter;
     }
 }

@@ -401,7 +401,7 @@ export const getUserTojeong = async (userId) => {
   return response.data;
 };
 
-export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onBase, onDone, onError, onInsufficientHearts }) => {
   const params = new URLSearchParams({ birthDate });
   if (calendarType) params.set('calendarType', calendarType);
   appendUserId(params);
@@ -409,6 +409,9 @@ export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, o
   const url = `${baseURL}/tojeong/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
+  eventSource.addEventListener('base', (e) => {
+    try { onBase?.(JSON.parse(e.data)); } catch {}
+  });
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }

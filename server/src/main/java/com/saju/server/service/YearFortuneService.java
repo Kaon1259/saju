@@ -175,16 +175,10 @@ public class YearFortuneService {
     }
 
     private String buildSystemPrompt() {
-        return """
-당신은 사주명리학에 빠삭한 신년 운세 전문가야!
-올해 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로 써줘
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
-- "~하옵소서", "~이로다", "~하시오" 같은 고전적/격식체 표현 절대 금지
-
+        return "당신은 사주명리학에 빠삭한 신년 운세 전문가야!\n" +
+"올해 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.\n\n" +
+FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+"""
 【역할】
 - 2026년 세운과 사주의 상호작용을 분석해
 - 대운 흐름에서 올해의 위치를 파악하고 종합적으로 해석해
@@ -224,7 +218,7 @@ public class YearFortuneService {
         sb.append("세운 천간 오행: ").append(SajuConstants.OHENG[year2026Pillar.getStemElement()]).append("(").append(SajuConstants.OHENG_HANJA[year2026Pillar.getStemElement()]).append(")\n");
         sb.append("세운 지지 오행: ").append(SajuConstants.OHENG[year2026Pillar.getBranchElement()]).append("(").append(SajuConstants.OHENG_HANJA[year2026Pillar.getBranchElement()]).append(")\n\n");
 
-        sb.append("【의뢰인 사주 정보】\n");
+        sb.append("【친구 사주 정보】\n");
         sb.append("생년월일: ").append(birthDate).append("\n");
         if (gender != null) sb.append("성별: ").append("M".equals(gender) ? "남" : "여").append("\n");
         if (birthTime != null && !birthTime.isBlank()) sb.append("태어난 시간: ").append(birthTime).append("\n");

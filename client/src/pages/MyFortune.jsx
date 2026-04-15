@@ -6,6 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyFortune.css';
 
 function MyFortune() {
@@ -17,6 +18,8 @@ function MyFortune() {
   const [streamText, setStreamText] = useState('');
   const [streaming, setStreaming] = useState(false);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
   const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'partner' | 'other'
   const [dateMode, setDateMode] = useState('today'); // 'today' | 'tomorrow' | 'pick'
   const [pickDate, setPickDate] = useState('');
@@ -82,11 +85,18 @@ function MyFortune() {
     const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef } = setters;
     sL(true); sST(''); sS(false);
     cRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     cRef.current = analyzeSajuStream(birthDate, birthTime || undefined, calendarType, gender || undefined, {
-      onCached: (cached) => { sD(cached); sL(false); },
+      onCached: (cached) => {
+        sD(cached); sL(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
       onChunk: (text) => { sS(true); sST(prev => prev + text); },
       onDone: () => {
         sS(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         (async () => {
           try { const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined); sD(r); }
           catch (e) { console.error(e); }
@@ -95,6 +105,7 @@ function MyFortune() {
       },
       onError: () => {
         sS(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         (async () => {
           try { const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined); sD(r); }
           catch (e) { console.error(e); }
@@ -127,11 +138,18 @@ function MyFortune() {
     if (!userId) { setLoading(false); return; }
     setData(null); setLoading(true); setStreamText(''); setStreaming(false);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     cleanupRef.current = getMyFortuneStream(userId, {
-      onCached: (d) => { setData(d); setLoading(false); },
+      onCached: (d) => {
+        setData(d); setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
       onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
       onDone: (fullText) => {
         setStreaming(false); setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         // 스트리밍 텍스트에서 직접 파싱 → 즉시 표시
         const parsed = parseAiJson(fullText);
         if (parsed) {
@@ -146,6 +164,7 @@ function MyFortune() {
       onError: () => {
         setStreaming(false); setStreamText('');
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     }, targetDate);
     return () => cleanupRef.current?.();

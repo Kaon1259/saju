@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { interpretDreamStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
-import FortuneLoading from '../components/FortuneLoading';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -54,9 +54,22 @@ function Dream() {
   const [showPersonal, setShowPersonal] = useState(false);
   const [result, setResult] = useState(null);
   const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const resultRef = useRef(null);
   const textareaRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 결과 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (result && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [result, matrixShown]);
 
 
   // ── 키워드 클릭 ──
@@ -80,6 +93,11 @@ function Dream() {
     if (!dreamText.trim()) return;
     setStep('loading');
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const cleanup = interpretDreamStream(
       dreamText.trim(),
@@ -93,9 +111,11 @@ function Dream() {
         onCached: (data) => {
           setResult(data);
           setStep('result');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onDone: (fullText) => {
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const parsed = parseAiJson(fullText);
           if (parsed) {
             setResult(parsed);
@@ -107,6 +127,8 @@ function Dream() {
         },
         onError: (err) => {
           console.error('꿈해몽 스트리밍 실패:', err);
+          setMatrixShown(false);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           setResult({
             category: '일반',
             symbol: '🌙',
@@ -146,6 +168,9 @@ function Dream() {
     setStep('input');
     setDreamText('');
     setResult(null);
+    setMatrixShown(false);
+    setMatrixExiting(false);
+    setStreamText('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -271,16 +296,9 @@ function Dream() {
         </div>
       )}
 
-      {/* ═══ STEP: 로딩 ═══ */}
-      {step === 'loading' && (
-        <FortuneLoading type="dream" />
-      )}
-
-      {/* ═══ STEP: 스트리밍 중 ═══ */}
-      {step === 'streaming' && (
-        <div className="dream-streaming fade-in">
-          <StreamText text={streamText} icon="🌙" label="AI가 꿈을 해몽하고 있어요..." color="#6C3483" />
-        </div>
+      {/* ═══ 매트릭스 오버레이 (로딩/스트리밍 중) ═══ */}
+      {matrixShown && (step === 'loading' || step === 'streaming') && (
+        <AnalysisMatrix theme="saju" label="AI가 꿈을 해석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
 
       {/* ═══ STEP: 결과 ═══ */}

@@ -9,10 +9,10 @@
   transition: opacity 0.7s ease;
 }
 
-/* 페이지 안에 떠 있는 효과 — 상단 헤더(50px) 바로 아래부터 시작 */
+/* 페이지 안에 떠 있는 효과 — 상단 헤더(50px) ~ 하단 네비(76px) */
 .analysis-matrix--page {
   top: 50px;
-  bottom: 80px;
+  bottom: 76px;
   z-index: 50;
 }
 
@@ -29,7 +29,7 @@
 }
 
 @media (max-width: 600px) {
-  .analysis-matrix--page { top: 50px; bottom: 88px; }
+  .analysis-matrix--page { top: 50px; bottom: 76px; }
 }
 
 @keyframes analysisMatrixFadeIn {

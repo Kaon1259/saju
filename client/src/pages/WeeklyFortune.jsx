@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './WeeklyFortune.css';
 
 const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -56,10 +57,12 @@ function WeeklyFortune() {
   const resultRef = useRef(null);
   const daysScrollRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => {
     return () => { cleanupRef.current?.(); };
   }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   const handleAutofill = () => {
     try {
@@ -78,12 +81,16 @@ function WeeklyFortune() {
     setStreamText('');
     setResult(null);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
     cleanupRef.current = getWeeklyFortuneStream(birthDate, birthTime, gender, {
       onCached: (data) => {
         setResult(data);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
       },
       onChunk: (chunk) => {
@@ -93,6 +100,7 @@ function WeeklyFortune() {
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         {
           const parsed = parseAiJson(fullText);
           if (parsed) {
@@ -106,6 +114,7 @@ function WeeklyFortune() {
         console.error('주간운세 스트림 실패:', err);
         setLoading(false);
         setStreaming(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
   };

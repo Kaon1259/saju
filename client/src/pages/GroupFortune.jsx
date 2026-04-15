@@ -9,6 +9,7 @@ import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './GroupFortune.css';
 
 const CATEGORY_CONFIG = [
@@ -47,6 +48,9 @@ function GroupFortune() {
   const [fortuneStreamText, setFortuneStreamText] = useState('');
   const [fortuneStreaming, setFortuneStreaming] = useState(false);
   const fortuneCleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // 궁합
   const [myBirth, setMyBirth] = useState('');
@@ -103,13 +107,20 @@ function GroupFortune() {
     setMatrixShown(true);
     setMatrixExiting(false);
     fortuneCleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, { context: 'idol',
-      onCached: (data) => { setFortuneResult(data); setFortuneLoading(false); },
+      onCached: (data) => {
+        setFortuneResult(data); setFortuneLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
       onChunk: (text) => { setFortuneStreaming(true); setFortuneStreamText(prev => prev + text); },
       onDone: (fullText) => {
         setFortuneStreaming(false);
         setFortuneStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
           // AI JSON에서 todayFortune 구조 생성
@@ -117,7 +128,10 @@ function GroupFortune() {
         }
         setFortuneLoading(false);
       },
-      onError: () => { setFortuneStreaming(false); setFortuneStreamText(''); setFortuneLoading(false); },
+      onError: () => {
+        setFortuneStreaming(false); setFortuneStreamText(''); setFortuneLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+      },
     });
   };
 
@@ -157,6 +171,9 @@ function GroupFortune() {
     setMatrixLabel(`AI가 나와 ${compatTargetName} 궁합을 분석하고 있어요`);
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     try {
       const data = await getSajuCompatibility(myBirth, compatTargetBirth, undefined, undefined, myCalType, 'SOLAR');
       data._groupName = selectedGroup.name;
@@ -164,7 +181,10 @@ function GroupFortune() {
       setCompatResult(data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     } catch (e) { console.error(e); }
-    finally { setCompatLoading(false); }
+    finally {
+      setCompatLoading(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    }
   };
 
   const handleAutoFill = () => {

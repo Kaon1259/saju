@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './YearFortune.css';
 
 const BIRTH_TIMES = [
@@ -54,10 +55,12 @@ function YearFortune() {
   const otherCleanupRef = useRef(null);
 
   const resultRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => {
     return () => { mineCleanupRef.current?.(); partnerCleanupRef.current?.(); otherCleanupRef.current?.(); };
   }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   const getProfile = () => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } };
   const getPartnerInfo = () => {
@@ -70,6 +73,9 @@ function YearFortune() {
     const { setResult, setLoading, setStreamText, setStreaming, cleanupRef } = setters;
     setLoading(true); setStreamText(''); setStreaming(false); setResult(null);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     let firstChunk = true;
     let gotResult = false;
 
@@ -87,6 +93,7 @@ function YearFortune() {
         console.error('[YearFortune] fallback failed:', e);
       } finally {
         setLoading(false); setStreaming(false); setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       }
     };
 
@@ -94,6 +101,7 @@ function YearFortune() {
       onCached: (data) => {
         gotResult = true;
         setResult(data); setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
       },
       onChunk: (chunk) => {
@@ -105,6 +113,7 @@ function YearFortune() {
         if (parsed) {
           gotResult = true;
           setStreaming(false); setLoading(false); setStreamText('');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           setResult(parsed);
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         } else {

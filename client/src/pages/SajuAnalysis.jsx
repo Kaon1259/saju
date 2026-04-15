@@ -5,8 +5,9 @@ import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneLoading from '../components/FortuneLoading';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -62,7 +63,20 @@ function SajuAnalysis() {
   const [dailyFortunes, setDailyFortunes] = useState(null);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 결과 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (result && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [result, matrixShown]);
 
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
@@ -106,13 +120,19 @@ function SajuAnalysis() {
     setLoading(true);
     setStreaming(false);
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
     cleanupRef.current = analyzeSajuStream(userBd, userBt || undefined, userCalendar, userGender || undefined, {
       onCached: (cached) => {
         setResult(cached);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
       },
       onChunk: (chunk) => {
@@ -121,6 +141,7 @@ function SajuAnalysis() {
       },
       onDone: () => {
         setStreaming(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         // 스트리밍 완료 후 서버 캐시에서 전체 결과 가져오기
         (async () => {
           try {
@@ -134,6 +155,8 @@ function SajuAnalysis() {
       onError: (err) => {
         console.error('사주 스트림 실패:', err);
         setStreaming(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         // 폴백: REST로 결과 가져오기
         (async () => {
           try {
@@ -147,7 +170,9 @@ function SajuAnalysis() {
       onInsufficientHearts: () => {
         setLoading(false);
         setStreaming(false);
+        setMatrixShown(false);
         setShowInput(true);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
   };
@@ -165,13 +190,19 @@ function SajuAnalysis() {
     setShowInput(false);
     setStreaming(false);
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
     cleanupRef.current = analyzeSajuStream(birthDate, birthTime || undefined, calendarType, gender || undefined, {
       onCached: (cached) => {
         setResult(cached);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
       },
       onChunk: (chunk) => {
@@ -180,6 +211,7 @@ function SajuAnalysis() {
       },
       onDone: () => {
         setStreaming(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         // 스트리밍 완료 후 서버 캐시에서 전체 결과 가져오기
         (async () => {
           try {
@@ -193,6 +225,8 @@ function SajuAnalysis() {
       onError: (err) => {
         console.error('사주 스트림 실패:', err);
         setStreaming(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         // 폴백: REST로 결과 가져오기
         (async () => {
           try {
@@ -206,7 +240,9 @@ function SajuAnalysis() {
       onInsufficientHearts: () => {
         setLoading(false);
         setStreaming(false);
+        setMatrixShown(false);
         setShowInput(true);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
   };
@@ -217,6 +253,8 @@ function SajuAnalysis() {
     setShowInput(true);
     setStreaming(false);
     setStreamText('');
+    setMatrixShown(false);
+    setMatrixExiting(false);
     setBirthDate('');
     setBirthTime('');
   };
@@ -226,18 +264,14 @@ function SajuAnalysis() {
     return () => { cleanupRef.current?.(); };
   }, []);
 
-  if (loading && !streaming) {
+  if ((loading || streaming) && !result) {
     return (
       <div className="saju-page">
-        <FortuneLoading type="default" />
-      </div>
-    );
-  }
-
-  if (streaming) {
-    return (
-      <div className="saju-page">
-        <StreamText text={streamText} icon="☯" label="사주를 분석하고 있어요..." />
+        {matrixShown ? (
+          <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+        ) : (
+          <FortuneLoading type="default" />
+        )}
       </div>
     );
   }

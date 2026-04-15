@@ -7,6 +7,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Mbti.css';
 
 const TYPES_DATA = {
@@ -48,6 +49,8 @@ function Mbti() {
   const [compatLoading, setCompatLoading] = useState(false);
   const resultRef = useRef(null);
   const streamCleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   const location = useLocation();
   const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
@@ -73,6 +76,9 @@ function Mbti() {
     setStreamText('');
     setLoading(true);
     streamCleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const cleanup = getMbtiFortuneStream(type, {
       onChunk: (chunk) => setStreamText((prev) => prev + chunk),
@@ -80,9 +86,11 @@ function Mbti() {
         setFortune(data);
         setStreamText('');
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onDone: (fullText) => {
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
           setFortune({ mbtiType: type, ...parsed });
@@ -95,6 +103,7 @@ function Mbti() {
         console.error('stream error', err);
         setLoading(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
     streamCleanupRef.current = cleanup;
@@ -117,11 +126,17 @@ function Mbti() {
     if (!type1 || !type2) return;
     setCompat(null);
     setCompatLoading(true);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     try {
       const data = await getMbtiCompatibility(type1, type2);
       setCompat(data);
     } catch (e) { console.error(e); }
-    finally { setCompatLoading(false); }
+    finally {
+      setCompatLoading(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    }
   };
 
   return (

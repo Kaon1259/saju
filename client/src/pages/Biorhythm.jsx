@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { getBiorhythm, getBiorhythmStream } from '../api/fortune';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Biorhythm.css';
 
 // ═══════════════════════════════════════════════════
@@ -128,7 +129,20 @@ function Biorhythm() {
   const [streamText, setStreamText] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [aiResult, setAiResult] = useState(null);
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // AI 결과 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (aiResult && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [aiResult, matrixShown]);
 
   // 로그인 사용자 정보 가져오기
   useEffect(() => {
@@ -160,7 +174,12 @@ function Biorhythm() {
     setStreamText('');
     setStreaming(false);
     setAiResult(null);
+    setMatrixShown(true);
+    setMatrixExiting(false);
     cleanupRef.current?.();
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     // 클라이언트 사이드 계산 (즉시)
     const todayStr = new Date().toISOString().split('T')[0];
@@ -183,10 +202,12 @@ function Biorhythm() {
         setStreaming(false);
         setStreamText('');
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) setAiResult(parsed);
         setLoading(false);
@@ -194,10 +215,14 @@ function Biorhythm() {
       onError: () => {
         setStreaming(false);
         setLoading(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onInsufficientHearts: () => {
         setStreaming(false);
         setLoading(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
 
@@ -248,6 +273,9 @@ function Biorhythm() {
   // ═══ 렌더링 ═══
   return (
     <div className="bio-page">
+      {matrixShown && (
+        <AnalysisMatrix theme="saju" label="AI가 바이오리듬을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+      )}
       {/* 배경 */}
       <div className="bio-bg">
         <div className="bio-grid-lines" />
@@ -439,11 +467,6 @@ function Biorhythm() {
             </div>
           )}
 
-          {/* AI 스트리밍 분석 */}
-          {streaming && streamText && (
-            <StreamText text={streamText} icon="📈" label="AI가 바이오리듬을 분석하고 있어요..." color="#3498DB" />
-          )}
-
           {/* AI 분석 결과 */}
           {aiResult && (
             <div className="bio-ai-result">
@@ -505,7 +528,7 @@ function Biorhythm() {
           {/* 리셋 */}
           <button className="bio-reset-btn" onClick={() => {
             cleanupRef.current?.();
-            setResult(null); setServerData(null); setAiResult(null); setStreamText(''); setStreaming(false);
+            setResult(null); setServerData(null); setAiResult(null); setStreamText(''); setStreaming(false); setMatrixShown(false); setMatrixExiting(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}>
             {'\uD83D\uDD04'} 다시 분석

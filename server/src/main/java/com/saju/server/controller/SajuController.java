@@ -107,21 +107,15 @@ public class SajuController {
         String sajuSummary = sajuService.getSajuSummary(basicResult, birthDate, birthTime, LocalDate.now());
         String todayContext = promptBuilder.buildTodayContext(LocalDate.now());
 
-        String systemPrompt = """
+        String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
 카페에서 친한 친구한테 수다 떨듯이 자연스럽게 대화하는 사주 전문가야.
 사주 정보를 바탕으로 성격 분석과 오늘의 운세를 함께 봐줘!
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
 2. personalityReading: 핵심 성격(장점+단점), 대인관계 스타일, 연애 스타일을 6-8문장으로
 3. overall~work 각 항목은 3-4문장, 구체적 시간/행동/색상 포함
-4. 점수는 45-98 사이
-5. 대화하듯 자연스러운 반말 구어체""";
+4. 점수는 45-98 사이""";
 
         boolean isIdol = "idol".equals(context);
         String workLabel = isIdol ? "활동운 (무대·팬·컨텐츠·그룹 활동 관련, 3-4문장)" : "직장운 (3-4문장)";
@@ -244,14 +238,9 @@ public class SajuController {
             pillarInfo.append("【생년월일】 ").append(birthDateStr).append("\n");
         }
 
-        String systemPrompt = """
+        String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
 카페에서 친한 친구한테 수다 떨듯이 자연스럽게 대화하는 사주 전문가야.
-만세력(천간지지) 데이터를 기반으로 해석해줘!
-
-【말투 규칙】
-- 카페에서 친한 친구한테 수다 떨듯이 자연스러운 반말
-- 분석 보고서가 아니라 대화하는 느낌으로
-- 딱딱한 문장, 고전적 표현, 격식체 절대 금지
+만세력 데이터를 기반으로 해석해줘!
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
@@ -320,7 +309,7 @@ public class SajuController {
                     dayPillar.getStemHanja(), dayPillar.getBranchHanja(), dayPillar.getStemElement(), dayPillar.getBranchElement(),
                     yearPillar.getAnimal());
 
-                String systemPrompt = "당신은 40년 경력의 사주명리학 전문가입니다. 만세력 데이터를 해석합니다. 반드시 JSON만 응답하세요.";
+                String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n카페에서 친한 친구한테 수다 떨듯이 자연스럽게 대화하는 사주 전문가야. 만세력 데이터를 쉬운 말로 해석해줘. 반드시 JSON만 응답하세요.";
                 String userPrompt = pillarInfo + "\n\n위 만세력 정보를 해석하세요. JSON 형식:\n" +
                     "{\"dayAnalysis\":\"일간 특성과 오늘의 기운 (3문장)\"," +
                     "\"elementBalance\":\"오행 분포와 상생/상극 관계 (3문장)\"," +

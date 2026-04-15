@@ -6,6 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveTypeFortune.css';
 
 const LOVE_TYPES = {
@@ -69,8 +70,10 @@ function LoveTypeFortune() {
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   useEffect(() => () => cleanupRef.current?.(), []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   useEffect(() => {
     if (result && matrixShown) {
@@ -137,6 +140,8 @@ function LoveTypeFortune() {
     setStreamText('');
     setMatrixShown(true);
     setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const pDate = showPartner && partnerDate ? partnerDate : null;
     const pGender = showPartner && partnerGender ? partnerGender : null;
@@ -148,6 +153,7 @@ function LoveTypeFortune() {
       if (basic.score && basic.overall) {
         setResult(basic);
         setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         return;
       }
 
@@ -157,12 +163,14 @@ function LoveTypeFortune() {
         {
           onCached: (cachedData) => {
             setStreaming(false); setLoading(false); setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             setResult(cachedData);
           },
           onChunk: (text) => setStreamText(prev => prev + text),
           onDone: (fullText) => {
             setStreaming(false); setLoading(false);
             setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText || '');
             if (parsed) {
               const finalResult = { ...basic, ...parsed, score: parsed.score || basic.score || 65, grade: parsed.grade || basic.grade || '보통', overall: parsed.overall || '' };
@@ -172,12 +180,16 @@ function LoveTypeFortune() {
               setResult({ ...basic, score: 65, grade: '보통', overall: fullText || '' });
             }
           },
-          onError: () => { setStreaming(false); setLoading(false); setStreamText(''); },
+          onError: () => {
+            setStreaming(false); setLoading(false); setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          },
         }
       );
     } catch (e) {
       console.error(e);
       setLoading(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     }
   };
 

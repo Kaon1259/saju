@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { analyzeFaceReadingStream } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
-import StreamText from '../components/StreamText';
+import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -88,13 +89,26 @@ function FaceReading() {
   const [result, setResult] = useState(null);
   const [scanPhase, setScanPhase] = useState(0);
   const [streamText, setStreamText] = useState('');
+  const [matrixShown, setMatrixShown] = useState(false);
+  const [matrixExiting, setMatrixExiting] = useState(false);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
+  const stopAmbientRef = useRef(null);
 
   // cleanup on unmount
   useEffect(() => {
     return () => { cleanupRef.current?.(); };
   }, []);
+  useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 결과 등장 시 매트릭스 페이드아웃
+  useEffect(() => {
+    if (result && matrixShown) {
+      setMatrixExiting(true);
+      const t = setTimeout(() => setMatrixShown(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [result, matrixShown]);
 
   const allSelected = FACE_FEATURES.every(f => selections[f.id]);
 
@@ -113,6 +127,11 @@ function FaceReading() {
     setLoading(true);
     setScanPhase(0);
     setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     // 스캔 애니메이션 단계 (로딩 중 표시)
     let phaseIdx = 0;
@@ -138,6 +157,7 @@ function FaceReading() {
         },
         onCached: (data) => {
           clearInterval(phaseTimer);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           // 서버 필드명 → 프론트 필드명 매핑
           const mapped = {
             overallType: data.overallType,
@@ -163,6 +183,7 @@ function FaceReading() {
         },
         onDone: (fullText) => {
           clearInterval(phaseTimer);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const data = parseAiJson(fullText);
           if (data) {
             const mapped = {
@@ -192,7 +213,9 @@ function FaceReading() {
         },
         onError: (err) => {
           clearInterval(phaseTimer);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           console.error('관상 분석 실패:', err);
+          setMatrixShown(false);
           setResult({
             overallType: '복덕상',
             emoji: '😊',
@@ -226,6 +249,9 @@ function FaceReading() {
     setGender('');
     setResult(null);
     setScanPhase(0);
+    setMatrixShown(false);
+    setMatrixExiting(false);
+    setStreamText('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -418,11 +444,9 @@ function FaceReading() {
         </div>
       )}
 
-      {/* ═══ STEP 2-5: 스트리밍 중 ═══ */}
-      {step === 'streaming' && (
-        <div className="fr-streaming fade-in">
-          <StreamText text={streamText} icon="👤" label="AI가 관상을 분석하고 있어요..." color="#DAA520" />
-        </div>
+      {/* ═══ 매트릭스 오버레이 (로딩/스트리밍 중) ═══ */}
+      {matrixShown && (step === 'loading' || step === 'streaming') && (
+        <AnalysisMatrix theme="saju" label="AI가 관상을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
 
       {/* ═══ STEP 3: 결과 ═══ */}

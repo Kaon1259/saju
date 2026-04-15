@@ -110,7 +110,7 @@ public class ConstellationFortuneService {
         if (!claudeApiService.isAvailable()) return null;
         try {
             String todayCtx = promptBuilder.buildTodayContext(date);
-            String prompt = todayCtx + "\n【의뢰인】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
+            String prompt = todayCtx + "\n【친구 별자리】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
                 "성격: " + PERSONALITY.get(sign) + "\n\n" +
                 "위 천기와 별자리 특성을 종합하여 오늘의 운세를 작성하세요.\n" +
                 "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
@@ -122,11 +122,10 @@ public class ConstellationFortuneService {
                 "\"planetInfluence\":\"오늘 행성 영향 분석 (수호성과 오늘 기운의 상호작용, 2-3문장)\"," +
                 "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
             String resp = claudeApiService.generate(
+                FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
                 "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
                 "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
                 "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
-                "자연스러운 대화체 반말로 작성하고, " +
-                "딱딱한 보고서 톤이나 고전적 표현은 절대 금지! " +
                 "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.", prompt, 1200);
 
             String json = ClaudeApiService.extractJson(resp);
@@ -242,15 +241,14 @@ public class ConstellationFortuneService {
         LocalDate today = LocalDate.now();
         int idx = getSignIndex(sign);
 
-        String systemPrompt = "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
+        String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+            "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
             "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
             "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
-            "자연스러운 대화체 반말로 작성하고, " +
-            "딱딱한 보고서 톤이나 고전적 표현은 절대 금지! " +
             "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.";
 
         String todayCtx = promptBuilder.buildTodayContext(today);
-        String userPrompt = todayCtx + "\n【의뢰인】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
+        String userPrompt = todayCtx + "\n【친구 별자리】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
             "성격: " + PERSONALITY.get(sign) + "\n\n" +
             "위 천기와 별자리 특성을 종합하여 오늘의 운세를 작성하세요.\n" +
             "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
