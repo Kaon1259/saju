@@ -165,12 +165,7 @@ const POSITION_LABELS = {
 };
 
 const DECK_LIST = [
-  { id: 'classic_rws', name: '클래식 타로', sub: 'Classic RWS', img: '/tarot-effects/deck-intro/classic_cover.jpg', gif: '/tarot-effects/deck-intro/classic_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/classic_rws_${i}.png`), hasVariants: true },
-  { id: 'dark', name: '다크 고딕', sub: 'Dark Gothic', img: '/tarot-effects/deck-intro/dark_cover.jpg', gif: '/tarot-effects/deck-intro/dark_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/dark_${i}.png`), hasVariants: true },
-  { id: 'romantic', name: '로맨틱 로즈', sub: 'Romantic Rose', img: '/tarot-effects/deck-intro/romantic_cover.jpg', gif: '/tarot-effects/deck-intro/romantic_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/romantic_${i}.png`), hasVariants: true },
-  { id: 'western', name: '웨스턴 클래식', sub: 'Western Classic', img: '/tarot-effects/deck-intro/western_cover.jpg', gif: '/tarot-effects/deck-intro/western_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/western_${i}.png`), hasVariants: true },
   { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', gif: '/tarot-effects/deck-intro/girl_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/girl_${i}.png`), hasVariants: true },
-  { id: 'boy', name: '소년 타로', sub: 'Boy Tarot', img: '/tarot-effects/deck-intro/boy_cover.jpg', gif: '/tarot-effects/deck-intro/boy_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/boy_${i}.png`), hasVariants: true },
   { id: 'cartoon_girl', name: '카툰 걸', sub: 'Cartoon Girl', img: '/tarot-effects/deck-intro/cartoon_girl_cover.jpg', gif: '/tarot-effects/deck-intro/cartoon_girl_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_girl_${i}.jpg`), hasVariants: true },
   { id: 'cats', name: '고양이 타로', sub: 'Cat Tarot', img: '/tarot-effects/deck-intro/cats_cover.jpg', gif: '/tarot-effects/deck-intro/cats_0.gif', backs: Array.from({length: 11}, (_, i) => `/tarot-backs/cats_${i}.jpg`), hasVariants: true },
   { id: 'dogs', name: '강아지 타로', sub: 'Dog Tarot', img: '/tarot-effects/deck-intro/dogs_cover.jpg', gif: '/tarot-effects/deck-intro/dogs_0.gif', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/dogs_${i}.jpg`), hasVariants: true },
@@ -252,7 +247,7 @@ function Tarot() {
     }, 420);
     setTimeout(() => { setFlipPhase(null); }, 860);
   }, []);
-  const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'custom');
+  const [deck, setDeck] = useState(() => localStorage.getItem('tarotDeck') || 'girl');
   const [deckVariant, setDeckVariant] = useState(() => {
     const saved = localStorage.getItem('tarotDeckVariant');
     return saved !== null ? parseInt(saved, 10) : 0;
@@ -279,7 +274,7 @@ function Tarot() {
   const [sheetExpanded, setSheetExpanded] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [deckSwipeIdx, setDeckSwipeIdx] = useState(() => {
-    const saved = localStorage.getItem('tarotDeck') || 'custom';
+    const saved = localStorage.getItem('tarotDeck') || 'girl';
     return Math.max(0, DECK_LIST.findIndex(d => d.id === saved));
   });
   const [deckDragX, setDeckDragX] = useState(0);
@@ -296,7 +291,7 @@ function Tarot() {
   });
   const frameSrc = `/tarot-frames/frame_${selectedFrame.set}_${selectedFrame.v}.png`;
   const [selectedBack, setSelectedBack] = useState(() => {
-    const saved = localStorage.getItem('tarotDeck') || 'custom';
+    const saved = localStorage.getItem('tarotDeck') || 'girl';
     const deckData = DECK_LIST.find(d => d.id === saved);
     if (deckData?.backs?.length) return deckData.backs[Math.floor(Math.random() * deckData.backs.length)];
     return null;
@@ -609,14 +604,7 @@ function Tarot() {
   const deckAt = (offset) => DECK_LIST[(deckSwipeIdx + offset + DECK_LIST.length) % DECK_LIST.length];
 
   // ── 덱 캐러셀 자동 회전 (3초마다 다음 덱) ──
-  // 인트로 표시 중에는 자동 회전 금지 — 저장된 덱 위치가 밀리면 안 됨
-  useEffect(() => {
-    if (step !== 'deck' || showIntro) return;
-    const timer = setInterval(() => {
-      if (!deckDragRef.current.dragging) deckSlide(1);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [step, showIntro, deckSwipeIdx, deckSliding]);
+  // 덱 자동 회전 제거 — 좌우 버튼/스와이프로만 이동
 
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
 
