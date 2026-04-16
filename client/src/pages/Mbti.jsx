@@ -8,6 +8,7 @@ import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './Mbti.css';
 
 const TYPES_DATA = {
@@ -181,7 +182,7 @@ function Mbti() {
           {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
               <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
-                🔮 내 MBTI 운세 보기
+                🔮 내 MBTI 운세 보기 <HeartCost category="MBTI" />
               </button>
             </div>
           )}
@@ -279,7 +280,7 @@ function Mbti() {
             );
           })}
           <button className="mbti-compat-submit" onClick={handleCompat} disabled={!type1 || !type2 || compatLoading}>
-            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'}
+            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'} <HeartCost category="MBTI" />
           </button>
           {compat && !compatLoading && (
             <div className="mbti-compat-result fade-in glass-card">

@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './YearFortune.css';
 
@@ -265,7 +266,7 @@ function YearFortune() {
                   </div>
                   <button className="yf-submit" onClick={() => startAnalysis(profile.birthDate, profile.birthTime, profile.gender, profile.calendarType || 'solar', {
                     setResult: setMineResult, setLoading: setMineLoading, setStreamText: setMineStreamText, setStreaming: setMineStreaming, cleanupRef: mineCleanupRef
-                  })}>🎊 내 신년운세 보기</button>
+                  })}>🎊 내 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
               ) : (
                 <>
@@ -295,7 +296,7 @@ function YearFortune() {
                   </div>
                   <button className="yf-submit" onClick={() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, partnerInfo.gender, 'solar', {
                     setResult: setPartnerResult, setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming, cleanupRef: partnerCleanupRef
-                  })}>💕 연인 신년운세 보기</button>
+                  })}>💕 연인 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
               ) : (
                 <>
@@ -342,7 +343,7 @@ function YearFortune() {
               <button className="yf-submit" style={{ marginTop: 8 }} disabled={!birthDate || otherLoading} onClick={() => startAnalysis(birthDate, birthTime, gender, calendarType, {
                 setResult: setOtherResult, setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming, cleanupRef: otherCleanupRef
               })}>
-                {otherLoading || otherStreaming ? 'AI 분석중...' : '🎊 2026 운세 보기'}
+                {otherLoading || otherStreaming ? 'AI 분석중...' : '🎊 2026 운세 보기'} <HeartCost category="YEAR_FORTUNE" />
               </button>
             </div>
           ) : renderResult(otherResult, birthDate, birthTime, gender, calendarType, () => { otherCleanupRef.current?.(); setOtherResult(null); setBirthDate(''); setBirthTime(''); setGender(''); setOtherStreamText(''); setOtherStreaming(false); window.scrollTo({ top: 0, behavior: 'smooth' }); })

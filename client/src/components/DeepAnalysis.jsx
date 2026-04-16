@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDeepAnalysis, getDeepAnalysisStream } from '../api/fortune';
 import AnalysisMatrix from './AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import HeartCost from './HeartCost';
 import './DeepAnalysis.css';
 
 // 필드별 표시 설정
@@ -175,7 +176,7 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
     <div className="deep-wrap">
       {!autoOpen && (
         <button className="deep-toggle-btn" onClick={handleLoad}>
-          {open ? '심화분석 접기 ▲' : '🔍 심화분석 보기 ▼'}
+          {open ? '심화분석 접기 ▲' : <><span>🔍 심화분석 보기 ▼</span> <HeartCost category={`DEEP_${(type || 'today').toUpperCase()}`} /></>}
         </button>
       )}
       {(open || autoOpen) && (

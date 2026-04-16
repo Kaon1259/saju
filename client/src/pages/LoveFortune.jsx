@@ -5,6 +5,7 @@ import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveFortune.css';
 
@@ -316,7 +317,7 @@ function LoveFortune() {
           </div>
 
           <button className="lf-submit" onClick={handleAnalyze} disabled={!birthDate || !relationStatus}>
-            💕 오늘의 연애운 보기
+            💕 오늘의 연애운 보기 <HeartCost category="LOVE_RELATIONSHIP" />
           </button>
         </div>
       )}

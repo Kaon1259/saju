@@ -8,6 +8,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './Constellation.css';
 
 const SIGN_DATA = {
@@ -164,7 +165,7 @@ function Constellation() {
       {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
         <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
           <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
-            🔮 내 별자리 운세 보기
+            🔮 내 별자리 운세 보기 <HeartCost category="CONSTELLATION" />
           </button>
         </div>
       )}

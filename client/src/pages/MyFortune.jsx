@@ -7,6 +7,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './MyFortune.css';
 
 function MyFortune() {
@@ -351,7 +352,7 @@ function MyFortune() {
                         setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
                         setData: setPartnerData, cleanupRef: partnerCleanupRef,
                       })}>
-                      💕 연인 운세 보기
+                      💕 연인 운세 보기 <HeartCost category="TODAY_FORTUNE" />
                     </button>
                   </>
                 ) : (
@@ -447,7 +448,7 @@ function MyFortune() {
                     setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming,
                     setData: setOtherData, cleanupRef: otherCleanupRef,
                   })}>
-                  {otherLoading || otherStreaming ? 'AI 분석중...' : '운세 보기'}
+                  {otherLoading || otherStreaming ? 'AI 분석중...' : '운세 보기'} <HeartCost category="TODAY_FORTUNE" />
                 </button>
               </div>
             ) : (

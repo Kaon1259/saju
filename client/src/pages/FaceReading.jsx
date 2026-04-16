@@ -5,6 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -407,6 +408,7 @@ function FaceReading() {
           >
             <span className="fr-analyze-icon">&#128100;</span>
             <span>{allSelected ? '관상 분석 시작' : `${FACE_FEATURES.length - Object.keys(selections).length}개 더 선택해주세요`}</span>
+            {allSelected && <HeartCost category="FACE_READING" />}
             {allSelected && <span className="fr-analyze-glow" />}
           </button>
         </div>

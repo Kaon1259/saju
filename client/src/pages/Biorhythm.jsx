@@ -4,6 +4,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './Biorhythm.css';
 
 // ═══════════════════════════════════════════════════
@@ -307,7 +308,7 @@ function Biorhythm() {
               onClick={handleAnalyze}
               disabled={!birthDate || loading}
             >
-              {loading ? 'AI 분석중...' : '\uD83D\uDCC8 바이오리듬 분석'}
+              {loading ? 'AI 분석중...' : '\uD83D\uDCC8 바이오리듬 분석'} <HeartCost category="BIORHYTHM" />
             </button>
           </div>
         </div>

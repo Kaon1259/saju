@@ -6,6 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveTypeFortune.css';
 
@@ -22,6 +23,22 @@ const LOVE_TYPES = {
   marriage:          { label: '결혼운',     icon: '💒', desc: '결혼 시기와 인연', color: '#F472B6', particles: ['💒','💍','💐','✨','👰'] },
   remarriage:        { label: '재혼운',     icon: '💍', desc: '새로운 인연의 가능성', color: '#A78BFA', particles: ['💍','💒','✨','🌹','💫'] },
   ideal_type:        { label: '이상형',     icon: '👩‍❤️‍👨', desc: '사주로 보는 나의 이상형', color: '#E91E63', particles: ['💕','💗','✨','💖','💘'] },
+};
+
+const HEART_MAP = {
+  relationship: 'LOVE_RELATIONSHIP',
+  crush: 'LOVE_CRUSH',
+  some_check: 'LOVE_SOME_CHECK',
+  blind_date: 'LOVE_BLIND_DATE',
+  couple_fortune: 'LOVE_COUPLE',
+  confession_timing: 'LOVE_CONFESSION',
+  ideal_type: 'LOVE_IDEAL_TYPE',
+  reunion: 'LOVE_REUNION',
+  remarriage: 'LOVE_REMARRIAGE',
+  marriage: 'LOVE_MARRIAGE',
+  past_life: 'LOVE_PAST_LIFE',
+  meeting_timing: 'LOVE_MEETING_TIMING',
+  contact_fortune: 'LOVE_CONTACT',
 };
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
@@ -290,7 +307,7 @@ function LoveTypeFortune() {
           )}
 
           <button className="ltf-submit" onClick={handleAnalyze} disabled={!birth}>
-            {info.icon} {info.label} 보기
+            {info.icon} {info.label} 보기 <HeartCost category={HEART_MAP[type] || 'LOVE_RELATIONSHIP'} />
           </button>
         </div>
       )}

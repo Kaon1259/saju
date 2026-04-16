@@ -6,6 +6,7 @@ import { playTarotReveal, playCardShuffle, playCardSpin, playCardPick, playAnaly
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
+import HeartCost from '../components/HeartCost';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
@@ -1508,6 +1509,7 @@ function Tarot() {
               {/* 시작 버튼 */}
               <button className="tarot-start-btn" ref={startBtnRef} onClick={startShuffle}>
                 <span>카드 셔플 시작</span>
+                <HeartCost category={spread === 'one' ? 'TAROT_ONE' : spread === 'five' ? 'TAROT_FIVE' : 'TAROT_THREE'} />
                 <span className="tarot-start-glow" />
               </button>
 

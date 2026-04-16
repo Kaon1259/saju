@@ -8,6 +8,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './CelebCompatibility.css';
 
@@ -517,7 +518,7 @@ function CelebCompatibility() {
         {/* 스타 운세 보기 */}
         <div className="celeb-star-fortune glass-card">
           <button className="celeb-star-fortune-btn" onClick={handleStarFortune} disabled={starFortuneLoading || starStreaming}>
-            {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : `🌟 ${selectedCeleb.name}의 오늘 운세 보기`}
+            {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : <>{`🌟 ${selectedCeleb.name}의 오늘 운세 보기`} <HeartCost category="CELEB_FORTUNE" /></>}
           </button>
           {starFortune && (
             <div className="celeb-star-fortune-result fade-in">
@@ -555,7 +556,7 @@ function CelebCompatibility() {
             <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
           </div>
           <button className="btn-gold" onClick={handleAnalyze} disabled={!myBirth} style={{ opacity: myBirth ? 1 : 0.5 }}>
-            💫 {selectedCeleb.name}와(과) 궁합 분석하기
+            💫 {selectedCeleb.name}와(과) 궁합 분석하기 <HeartCost category="CELEB_COMPAT" />
           </button>
         </div>
       </div>

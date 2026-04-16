@@ -8,6 +8,7 @@ import FortuneLoading from '../components/FortuneLoading';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -291,7 +292,7 @@ function SajuAnalysis() {
         {localStorage.getItem('userId') && !autoLoad && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
             <button className="btn-gold" onClick={loadUserSaju} style={{ width: '100%' }}>
-              🔮 내 사주 운세 보기
+              🔮 내 사주 운세 보기 <HeartCost category="SAJU_ANALYSIS" />
             </button>
           </div>
         )}
@@ -363,7 +364,7 @@ function SajuAnalysis() {
             disabled={!birthDate}
             style={{ opacity: birthDate ? 1 : 0.5 }}
           >
-            ☯ 사주 분석하기
+            ☯ 사주 분석하기 <HeartCost category="SAJU_ANALYSIS" />
           </button>
         </div>
       </div>

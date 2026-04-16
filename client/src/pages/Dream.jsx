@@ -5,6 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -291,6 +292,7 @@ function Dream() {
             disabled={!dreamText.trim()}>
             <span className="dream-submit-icon">🌙</span>
             <span>꿈 해석하기</span>
+            <HeartCost category="DREAM" />
             <span className="dream-submit-glow" />
           </button>
         </div>

@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MonthlyFortune.css';
 
@@ -222,7 +223,7 @@ function MonthlyFortune() {
             </div>
 
             <button className="mf-submit" onClick={() => handleAnalyze()} disabled={!birthDate}>
-              {getSeasonEmoji(selectedMonth)} {selectedMonth}월 운세 보기
+              {getSeasonEmoji(selectedMonth)} {selectedMonth}월 운세 보기 <HeartCost category="MONTHLY_FORTUNE" />
             </button>
           </div>
         </div>

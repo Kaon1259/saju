@@ -5,6 +5,7 @@ import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -257,6 +258,7 @@ function PsychTest() {
                 <p className="pt-test-desc">{test.description}</p>
                 <div className="pt-test-meta">
                   <span className="pt-test-count">{test.questionCount || test.questions?.length || 8}문항</span>
+                  <HeartCost category="PSYCH_TEST" />
                   <span className="pt-test-arrow">{'\u2192'}</span>
                 </div>
               </button>

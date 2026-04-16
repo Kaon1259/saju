@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './WeeklyFortune.css';
 
@@ -198,7 +199,7 @@ function WeeklyFortune() {
           </div>
 
           <button className="wf-submit" onClick={handleAnalyze} disabled={!birthDate}>
-            &#128198; 이번 주 운세 보기
+            &#128198; 이번 주 운세 보기 <HeartCost category="WEEKLY_FORTUNE" />
           </button>
         </div>
       )}

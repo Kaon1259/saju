@@ -8,6 +8,7 @@ import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeartCost from '../components/HeartCost';
 import './BloodType.css';
 
 const TYPES = [
@@ -159,7 +160,7 @@ function BloodType() {
           {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
               <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
-                🔮 내 혈액형 운세 보기
+                🔮 내 혈액형 운세 보기 <HeartCost category="BLOOD_TYPE" />
               </button>
             </div>
           )}
@@ -262,7 +263,7 @@ function BloodType() {
             })}
           </div>
           <button className="bt-compat-submit" onClick={handleCompat} disabled={!type1 || !type2 || compatLoading}>
-            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'}
+            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'} <HeartCost category="BLOOD_TYPE" />
           </button>
           {compat && !compatLoading && (
             <div className="bt-compat-result fade-in glass-card">

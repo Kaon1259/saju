@@ -14,6 +14,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
 import parseAiJson from '../utils/parseAiJson';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyLoveCompat.css';
 
@@ -395,7 +396,7 @@ function MyLoveCompat() {
               </div>
 
               <button className="mlc-submit" onClick={analyzeSaju} disabled={!bd1 || !bd2}>
-                🔮 사주 궁합 보기
+                🔮 사주 궁합 보기 <HeartCost category="COMPATIBILITY" />
               </button>
             </>
           )}
@@ -430,7 +431,7 @@ function MyLoveCompat() {
               </div>
 
               <button className="mlc-submit" onClick={analyzeMbti} disabled={!myMbti || !partnerMbti}>
-                🧠 MBTI 궁합 보기
+                🧠 MBTI 궁합 보기 <HeartCost category="MBTI_COMPAT" />
               </button>
             </>
           )}
@@ -467,7 +468,7 @@ function MyLoveCompat() {
               </div>
 
               <button className="mlc-submit" onClick={analyzeBlood} disabled={!myBlood || !partnerBlood}>
-                🩸 혈액형 궁합 보기
+                🩸 혈액형 궁합 보기 <HeartCost category="BLOODTYPE_COMPAT" />
               </button>
             </>
           )}

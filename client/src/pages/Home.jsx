@@ -7,6 +7,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import parseAiJson from '../utils/parseAiJson';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import HeartCost from '../components/HeartCost';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -56,6 +57,8 @@ const LOVE_GROUPS = [
   { key: 'marriage', label: '결혼/인연', emoji: '💒', status: ['IN_RELATIONSHIP', 'COMPLICATED'] },
   { key: 'solo', label: '솔로를 위한', emoji: '✨', status: ['SINGLE'] },
 ];
+
+const LOVE_HEART_MAP = { relationship: 'LOVE_RELATIONSHIP', crush: 'LOVE_CRUSH', some_check: 'LOVE_SOME_CHECK', blind_date: 'LOVE_BLIND_DATE', couple_fortune: 'LOVE_COUPLE', confession_timing: 'LOVE_CONFESSION', ideal_type: 'LOVE_IDEAL_TYPE', reunion: 'LOVE_REUNION', remarriage: 'LOVE_REMARRIAGE', marriage: 'LOVE_MARRIAGE', past_life: 'LOVE_PAST_LIFE', meeting_timing: 'LOVE_MEETING_TIMING', contact_fortune: 'LOVE_CONTACT' };
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
 
@@ -718,6 +721,7 @@ function Home() {
 
                   <button className="love-modal-submit" onClick={handleLoveAnalyze} disabled={!loveBirth}>
                     {loveInfo?.icon === 'couple' ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span> : loveInfo?.icon === 'wedding' ? '💒' : loveInfo?.icon} {loveInfo?.label} 보기
+                    <HeartCost category={LOVE_HEART_MAP[loveModal] || 'LOVE_RELATIONSHIP'} />
                   </button>
                 </div>
               )}

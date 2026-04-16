@@ -5,6 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Compatibility.css';
 
@@ -428,7 +429,7 @@ function Compatibility() {
         )}
 
         <button className="btn-gold" onClick={handleAnalyze} disabled={!bd1 || !bd2} style={{ opacity: bd1 && bd2 ? 1 : 0.5 }}>
-          💕 궁합 분석하기
+          💕 궁합 분석하기 <HeartCost category="COMPATIBILITY" />
         </button>
       </div>
     </div>

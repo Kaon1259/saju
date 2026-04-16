@@ -5,6 +5,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Tojeong.css';
 
@@ -256,7 +257,7 @@ function Tojeong() {
         {userId && !autoLoad && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
             <button className="btn-gold" onClick={loadUserTojeong} style={{ width: '100%' }}>
-              🔮 내 토정비결 보기
+              🔮 내 토정비결 보기 <HeartCost category="TOJEONG" />
             </button>
           </div>
         )}
@@ -284,7 +285,7 @@ function Tojeong() {
             <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
           </div>
           <button className="btn-gold" onClick={handleAnalyze} disabled={!birthDate} style={{ opacity: birthDate ? 1 : 0.5 }}>
-            토정비결 보기
+            토정비결 보기 <HeartCost category="TOJEONG" />
           </button>
         </div>
       </div>

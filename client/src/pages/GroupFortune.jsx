@@ -9,6 +9,7 @@ import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
+import HeartCost from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './GroupFortune.css';
 
@@ -330,7 +331,7 @@ function GroupFortune() {
           <div style={{ minHeight: 120 }} />
         ) : (
           <button className="btn-gold" onClick={handleGroupFortune} style={{ width: '100%' }}>
-            🌟 {fortuneTargetName} 오늘의 운세 보기
+            🌟 {fortuneTargetName} 오늘의 운세 보기 <HeartCost category="GROUP_FORTUNE" />
           </button>
         )}
       </section>
@@ -372,7 +373,7 @@ function GroupFortune() {
               disabled={!myBirth || !selectedMember}
               style={{ width: '100%', opacity: (myBirth && selectedMember) ? 1 : 0.5 }}
             >
-              💕 {compatTargetName}와(과) 궁합 분석하기
+              💕 {compatTargetName}와(과) 궁합 분석하기 <HeartCost category="GROUP_COMPAT" />
             </button>
           </div>
         )}
