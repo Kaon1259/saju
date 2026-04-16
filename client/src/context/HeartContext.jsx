@@ -43,6 +43,13 @@ export function HeartProvider({ children }) {
     return () => window.removeEventListener('heart:insufficient', handler);
   }, [showInsufficientPopup]);
 
+  // 로그인 필요 이벤트 수신 → 로그인 페이지로 이동
+  useEffect(() => {
+    const handler = () => navigate('/register', { state: { from: window.location.pathname } });
+    window.addEventListener('auth:required', handler);
+    return () => window.removeEventListener('auth:required', handler);
+  }, [navigate]);
+
   // 로그인/로그아웃 시 갱신
   useEffect(() => {
     const handler = () => refreshHearts();

@@ -14,6 +14,17 @@ const appendUserId = (params) => {
   if (userId) params.set('userId', userId);
 };
 
+// 유료 API 호출 전 로그인 체크 — false 반환 시 호출 중단
+const requireLogin = (onError) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    window.dispatchEvent(new CustomEvent('auth:required'));
+    onError?.('로그인이 필요합니다.');
+    return false;
+  }
+  return true;
+};
+
 const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
   eventSource.addEventListener('insufficient_hearts', (e) => {
     try {
@@ -67,6 +78,7 @@ export const getFortuneByZodiac = async (zodiac) => {
 };
 
 export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ zodiac });
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
@@ -87,6 +99,7 @@ export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, on
 };
 
 export const getFortuneByUserStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
   appendUserId(params);
@@ -159,6 +172,7 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
 };
 
 export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, context, targetType, targetName, freeMode } = {}) => {
+  if (!freeMode && !requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (calendarType) params.set('calendarType', calendarType);
@@ -206,6 +220,7 @@ export const getConstellationFortune = async (sign) => {
 };
 
 export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ sign });
   if (birthDate) params.set('birthDate', birthDate);
   if (gender) params.set('gender', gender);
@@ -246,6 +261,7 @@ export const getMyFortune = async (userId) => {
 };
 
 export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}, date) => {
+  if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
   if (date) params.set('date', date);
@@ -276,6 +292,7 @@ export const getBloodTypeFortune = async (type) => {
 };
 
 export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type });
   if (birthDate) params.set('birthDate', birthDate);
   if (gender) params.set('gender', gender);
@@ -315,6 +332,7 @@ export const getBloodTypeCompatibilityBasic = async (type1, type2) => {
 };
 
 export const getBloodTypeCompatibilityStream = (type1, type2, { onChunk, onDone, onError }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type1, type2 });
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/bloodtype/compatibility/stream?${params.toString()}`;
@@ -338,6 +356,7 @@ export const getMbtiFortune = async (type) => {
 };
 
 export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type });
   if (birthDate) params.set('birthDate', birthDate);
   if (gender) params.set('gender', gender);
@@ -372,6 +391,7 @@ export const getMbtiCompatibilityBasic = async (type1, type2) => {
 };
 
 export const getMbtiCompatibilityStream = (type1, type2, { onChunk, onDone, onError }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type1, type2 });
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/mbti/compatibility/stream?${params.toString()}`;
@@ -393,6 +413,7 @@ export const getManseryeok = async (date, calendarType) => {
 
 // ─── 만세력 AI 해석 스트리밍 ───
 export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ date });
   if (calendarType) params.set('calendarType', calendarType);
   if (birthDate) params.set('birthDate', birthDate);
@@ -428,6 +449,7 @@ export const getUserTojeong = async (userId) => {
 };
 
 export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onBase, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (calendarType) params.set('calendarType', calendarType);
   appendUserId(params);
@@ -479,6 +501,7 @@ export const saveCompatCache = async (data) => {
 };
 
 export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate1, birthDate2 });
   if (birthTime1) params.set('birthTime1', birthTime1);
   if (birthTime2) params.set('birthTime2', birthTime2);
@@ -525,6 +548,7 @@ export const getTarotReading = async (cardIds, reversals, spread, category, ques
 };
 
 export const getTarotReadingStream = (cardIds, reversals, spread, category, question, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ cardIds, reversals, spread, category });
   if (question) params.set('question', question);
   appendUserId(params);
@@ -588,6 +612,7 @@ export const saveLoveFortuneCache = async (data) => {
 };
 
 export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams();
   params.set('type', type);
   params.set('birthDate', birthDate);
@@ -659,6 +684,7 @@ export const interpretDream = async (dreamText, birthDate, gender) => {
 };
 
 export const interpretDreamStream = (dreamText, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
   params.set('dreamText', dreamText);
@@ -698,6 +724,7 @@ export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthSh
 };
 
 export const analyzeFaceReadingStream = (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams({ faceShape, eyeShape, noseShape, mouthShape, foreheadShape });
   if (birthDate) params.set('birthDate', birthDate);
@@ -738,6 +765,7 @@ export const analyzePsychTest = async (testId, answers, birthDate, gender) => {
 };
 
 export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams({ testId, answers });
   if (birthDate) params.set('birthDate', birthDate);
@@ -766,6 +794,7 @@ export const getBiorhythm = async (birthDate) => {
 };
 
 export const getBiorhythmStream = (birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
@@ -794,6 +823,7 @@ export const getYearFortune = async (birthDate, birthTime, gender, calendarType)
 };
 
 export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
@@ -826,6 +856,7 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
 };
 
 export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate, month });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
@@ -857,6 +888,7 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
 };
 
 export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
@@ -891,6 +923,7 @@ export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calend
 
 // ─── 심화분석 스트리밍 ───
 export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type, birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
