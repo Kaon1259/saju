@@ -26,11 +26,21 @@ export function AppProvider({ children }) {
       if (data.heartCosts) setHeartCosts(data.heartCosts);
       if (data.user) {
         setAppUser(data.user);
-        // Guest인 경우 userId를 localStorage에 저장 (하트 차감용)
+
         if (data.user.isGuest && !userId) {
+          // Guest: userId 저장
           localStorage.setItem('userId', String(data.user.id));
           localStorage.setItem('userName', 'Guest');
+        } else if (!data.user.isGuest) {
+          // 로그인 사용자: 서버 프로필로 localStorage 갱신 (자동 로그인 지원)
+          localStorage.setItem('userName', data.user.name || '');
+          localStorage.setItem('userProfile', JSON.stringify(data.user));
         }
+      } else if (userId) {
+        // 서버에 사용자가 없음 → 잘못된 userId → 정리
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userProfile');
       }
     } catch (e) {
       console.error('[AppInit] failed:', e);

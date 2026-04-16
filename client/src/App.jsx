@@ -158,7 +158,7 @@ function useFontSize() {
   }, []);
 }
 
-// 프로필 미완성 사용자 리다이렉트
+// 프로필 미완성 사용자 리다이렉트 (Guest는 건너뜀)
 function useProfileGuard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -169,6 +169,10 @@ function useProfileGuard() {
 
     const userId = localStorage.getItem('userId');
     if (!userId) return;
+
+    // Guest는 프로필 가드 건너뜀
+    const userName = localStorage.getItem('userName');
+    if (userName === 'Guest') return;
 
     try {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
