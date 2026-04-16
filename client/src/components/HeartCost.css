@@ -14,3 +14,19 @@
   border-color: rgba(219,39,119,0.2);
   color: #db2777;
 }
+/* 하트 부족 상태 */
+.heart-cost-badge--low {
+  background: rgba(239,68,68,0.2);
+  border-color: rgba(239,68,68,0.4);
+  color: #ef4444;
+  animation: heartLowPulse 1.5s ease-in-out infinite;
+}
+@keyframes heartLowPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+[data-theme="light"] .heart-cost-badge--low {
+  background: rgba(220,38,38,0.1);
+  border-color: rgba(220,38,38,0.3);
+  color: #dc2626;
+}

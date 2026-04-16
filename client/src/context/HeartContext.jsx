@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getHeartBalance } from '../api/fortune';
 
 const HeartContext = createContext();
 
 export function HeartProvider({ children }) {
+  const navigate = useNavigate();
   const [heartPoints, setHeartPoints] = useState(null);
   const [showInsufficient, setShowInsufficient] = useState(null);
 
@@ -89,8 +91,11 @@ export function HeartProvider({ children }) {
               <div>필요: <strong>{showInsufficient.required}</strong> 하트</div>
               <div>보유: <strong>{showInsufficient.available}</strong> 하트</div>
             </div>
-            <p className="heart-insufficient-desc">하트가 부족하여 분석을 진행할 수 없습니다.</p>
-            <button className="heart-insufficient-btn" onClick={dismissInsufficient}>확인</button>
+            <p className="heart-insufficient-desc">하트를 충전하고 다시 시도해보세요!</p>
+            <button className="heart-insufficient-btn heart-insufficient-btn--charge" onClick={() => { dismissInsufficient(); navigate('/my-menu'); }}>
+              💗 하트 충전하러 가기
+            </button>
+            <button className="heart-insufficient-btn heart-insufficient-btn--close" onClick={dismissInsufficient}>닫기</button>
           </div>
         </div>
       )}

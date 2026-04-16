@@ -24,10 +24,20 @@
 }
 .heart-insufficient-info strong { color: #FBBF24; }
 .heart-insufficient-desc { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
-.heart-insufficient-btn {
+.heart-insufficient-btn--charge {
   background: linear-gradient(135deg, #F472B6, #E91E63);
-  border: none; border-radius: 12px; padding: 12px 40px;
+  border: none; border-radius: 12px; padding: 14px 40px;
   color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+  width: 100%; margin-bottom: 8px;
+}
+.heart-insufficient-btn--close {
+  background: none; border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; padding: 10px 40px;
+  color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; cursor: pointer;
+  width: 100%;
+}
+[data-theme="light"] .heart-insufficient-btn--close {
+  border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.4);
 }
 
 /* 하트 차감 버블 */
