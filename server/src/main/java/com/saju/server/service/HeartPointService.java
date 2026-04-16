@@ -151,6 +151,10 @@ public class HeartPointService {
         User guest = new User();
         guest.setKakaoId("guest_" + guestUuid);
         guest.setName("Guest");
+        guest.setBirthDate(java.time.LocalDate.of(2000, 1, 1));
+        guest.setCalendarType("SOLAR");
+        guest.setGender("M");
+        guest.setZodiacAnimal("용띠");
         guest.setHeartPoints(GUEST_BONUS);
         userRepository.save(guest);
 
