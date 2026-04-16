@@ -14,12 +14,12 @@ const appendUserId = (params) => {
   if (userId) params.set('userId', userId);
 };
 
-// 유료 API 호출 전 로그인 체크 — false 반환 시 호출 중단
+// 유료 API 호출 전 로그인 체크 — false 반환 시 즉시 로그인 페이지 이동
 const requireLogin = (onError) => {
   const userId = localStorage.getItem('userId');
   if (!userId) {
-    window.dispatchEvent(new CustomEvent('auth:required'));
     onError?.('로그인이 필요합니다.');
+    window.location.replace('/register');
     return false;
   }
   return true;
