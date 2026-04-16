@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { analyzeSaju, analyzeSajuStream, getUserSaju, getDailyFortunes } from '../api/fortune';
+import { analyzeSaju, analyzeSajuStream, getUserSaju, getDailyFortunes, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -186,6 +186,7 @@ function SajuAnalysis() {
   }, []);
 
   const handleAnalyze = () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setShowInput(false);

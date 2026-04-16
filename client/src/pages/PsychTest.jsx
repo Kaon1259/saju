@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { getPsychTests, analyzePsychTestStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { getPsychTests, analyzePsychTestStream, isGuest } from '../api/fortune';
 
 import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
@@ -69,6 +70,7 @@ const FALLBACK_TESTS = [
 ];
 
 function PsychTest() {
+  const navigate = useNavigate();
   // ─── 상태 ───
   const [step, setStep] = useState('select'); // select | quiz | loading | result
   const [tests, setTests] = useState(FALLBACK_TESTS);
@@ -102,6 +104,7 @@ function PsychTest() {
   }, []);
 
   const startTest = (test) => {
+    if (isGuest()) { navigate('/register'); return; }
     setSelectedTest(test);
     setCurrentQ(0);
     setAnswers([]);

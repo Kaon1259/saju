@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { analyzeFaceReadingStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { analyzeFaceReadingStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -80,6 +81,7 @@ const ELEMENT_COLORS = {
 };
 
 function FaceReading() {
+  const navigate = useNavigate();
   // ─── 상태 ───
   const [step, setStep] = useState('select'); // select | loading | result
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -123,6 +125,7 @@ function FaceReading() {
   };
 
   const handleAnalyze = () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!allSelected) return;
     setStep('loading');
     setLoading(true);

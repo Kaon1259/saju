@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { getMonthlyFortuneStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { getMonthlyFortuneStream, isGuest } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -49,6 +50,7 @@ function getScoreColor(score) {
 }
 
 function MonthlyFortune() {
+  const navigate = useNavigate();
   const currentMonth = new Date().getMonth() + 1;
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [calendarType, setCalendarType] = useState('SOLAR');
@@ -79,6 +81,7 @@ function MonthlyFortune() {
   };
 
   const handleAnalyze = (month) => {
+    if (isGuest()) { navigate('/register'); return; }
     const m = month || selectedMonth;
     if (!birthDate) return;
     setLoading(true);

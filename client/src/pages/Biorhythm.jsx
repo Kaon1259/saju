@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { getBiorhythm, getBiorhythmStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { getBiorhythm, getBiorhythmStream, isGuest } from '../api/fortune';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson from '../utils/parseAiJson';
@@ -120,6 +121,7 @@ function buildSvgPath(data, cycleId, chartW, chartH, padX, padY) {
 }
 
 function Biorhythm() {
+  const navigate = useNavigate();
   // ─── 상태 ───
   const [birthDate, setBirthDate] = useState('');
   const [result, setResult] = useState(null);
@@ -170,6 +172,7 @@ function Biorhythm() {
   };
 
   const handleAnalyze = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setStreamText('');

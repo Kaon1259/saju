@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { getTarotReadingStream, drawTarotCards } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { getTarotReadingStream, drawTarotCards, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import TarotCardArt from '../components/TarotCardArt';
 import { playTarotReveal, playCardShuffle, playCardSpin, playCardPick, playAnalyzeStart, startAnalyzeAmbient, playSpotlightTick, playSpotlightFinal } from '../utils/sounds';
@@ -218,6 +219,7 @@ function TarotIntro({ onDone }) {
 }
 
 function Tarot() {
+  const navigate = useNavigate();
   // ─── 상태 ───
   const [heroCardId] = useState(() => Math.floor(Math.random() * 78));
   const [showIntro, setShowIntro] = useState(true);
@@ -610,6 +612,7 @@ function Tarot() {
 
   // ─── 카드 셔플 ───
   const startShuffle = useCallback(() => {
+    if (isGuest()) { navigate('/register'); return; }
     // 셋업 화면에서 현재 보여지던 배경을 셔플 화면에도 그대로 유지
     try {
       const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cats: '/tarot-cats', dogs: '/tarot-dogs' };

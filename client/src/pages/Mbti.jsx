@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { getMbtiTypes, getMbtiFortuneStream, getMbtiCompatibility, getUser } from '../api/fortune';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getMbtiTypes, getMbtiFortuneStream, getMbtiCompatibility, getUser, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 
@@ -38,6 +38,7 @@ const GROUPS = [
 ];
 
 function Mbti() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState('fortune');
   const [allTypes, setAllTypes] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -72,6 +73,7 @@ function Mbti() {
   }, []);
 
   const handleSelect = (type) => {
+    if (isGuest()) { navigate('/register'); return; }
     setSelected(type);
     setFortune(null);
     setStreamText('');
@@ -124,6 +126,7 @@ function Mbti() {
   };
 
   const handleCompat = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!type1 || !type2) return;
     setCompat(null);
     setCompatLoading(true);

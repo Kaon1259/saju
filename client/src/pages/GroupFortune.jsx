@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, analyzeSajuStream } from '../api/fortune';
+import { getSajuCompatibility, analyzeSajuStream, isGuest } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import GROUPS, { GROUP_TYPES } from '../data/groups';
 import CELEBRITIES from '../data/celebrities';
@@ -96,6 +96,7 @@ function GroupFortune() {
 
   // 오늘의 운세 (멤버 또는 그룹, 스트리밍)
   const handleGroupFortune = () => {
+    if (isGuest()) { navigate('/register'); return; }
     const bd = fortuneTargetBirth;
     const g = fortuneTargetGender;
     if (!bd) return;
@@ -166,6 +167,7 @@ function GroupFortune() {
 
   // 궁합 분석 (그룹이든 멤버든 통합)
   const handleCompat = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!myBirth || !compatTargetBirth) return;
     setCompatLoading(true);
     setMatrixTheme('group');

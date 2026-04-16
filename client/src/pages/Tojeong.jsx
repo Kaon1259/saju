@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getTojeongStream } from '../api/fortune';
+import { getTojeongStream, isGuest } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -147,6 +147,7 @@ function Tojeong() {
   }, [userId]);
 
   const handleAnalyze = () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setStreaming(false);

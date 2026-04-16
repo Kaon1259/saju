@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { getAllConstellations, getConstellationFortuneStream, getUser } from '../api/fortune';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getAllConstellations, getConstellationFortuneStream, getUser, isGuest } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -45,6 +45,7 @@ function getSignFromDate(birthDate) {
 }
 
 function Constellation() {
+  const navigate = useNavigate();
   const [signs, setSigns] = useState([]);
   const [selected, setSelected] = useState(null);
   const [fortune, setFortune] = useState(null);
@@ -89,6 +90,7 @@ function Constellation() {
   }, []);
 
   const handleSelect = (sign) => {
+    if (isGuest()) { navigate('/register'); return; }
     setSelected(sign);
     setFortune(null);
     setStreamText('');

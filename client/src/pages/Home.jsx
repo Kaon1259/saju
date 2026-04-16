@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
-import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune } from '../api/fortune';
+import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 // sounds (kept for potential future use)
 import { shareResult } from '../utils/share';
@@ -299,6 +299,7 @@ function Home() {
   }, [loveResult, loveMatrixShown]);
 
   const handleLoveAnalyze = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!loveBirth || !loveModal) return;
     setLoveLoading(true); setLoveResult(null); setLoveStreamText(''); setLoveMatrixShown(true); setLoveMatrixExiting(false);
 

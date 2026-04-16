@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream } from '../api/fortune';
+import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -83,6 +83,7 @@ function MyFortune() {
 
   // 스트리밍 분석 공통 함수
   const startAnalysis = (birthDate, birthTime, calendarType, gender, setters) => {
+    if (isGuest()) { navigate('/register'); return; }
     const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef } = setters;
     sL(true); sST(''); sS(false);
     cRef.current?.();

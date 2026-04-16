@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream } from '../api/fortune';
+import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream, isGuest } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
@@ -202,6 +202,7 @@ function CelebCompatibility() {
   };
 
   const handleAnalyze = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!myBirth || !selectedCeleb) return;
     setStep('loading');
     setStreamText('');
@@ -305,6 +306,7 @@ function CelebCompatibility() {
   };
 
   const handleStarFortune = () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!selectedCeleb) return;
     setStarFortuneLoading(true);
     setStarStreamText('');

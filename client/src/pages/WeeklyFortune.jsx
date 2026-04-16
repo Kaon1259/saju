@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { getWeeklyFortuneStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { getWeeklyFortuneStream, isGuest } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -47,6 +48,7 @@ function getWeekRange() {
 }
 
 function WeeklyFortune() {
+  const navigate = useNavigate();
   const [calendarType, setCalendarType] = useState('SOLAR');
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
@@ -76,6 +78,7 @@ function WeeklyFortune() {
   };
 
   const handleAnalyze = () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setStreaming(false);

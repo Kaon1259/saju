@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { interpretDreamStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { interpretDreamStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -47,6 +48,7 @@ function getScoreColor(score) {
 }
 
 function Dream() {
+  const navigate = useNavigate();
   // ─── 상태 ───
   const [step, setStep] = useState('input');     // 'input' | 'loading' | 'streaming' | 'result'
   const [dreamText, setDreamText] = useState('');
@@ -91,6 +93,7 @@ function Dream() {
 
   // ── 꿈 해석 요청 (스트리밍) ──
   const handleSubmit = () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!dreamText.trim()) return;
     setStep('loading');
     setStreamText('');

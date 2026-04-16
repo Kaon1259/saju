@@ -8,6 +8,7 @@ import {
   getMbtiCompatibilityStream,
   getBloodTypeCompatibilityBasic,
   getBloodTypeCompatibilityStream,
+  isGuest,
 } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -137,6 +138,7 @@ function MyLoveCompat() {
 
   // ─── 사주 궁합 ───
   const analyzeSaju = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!bd1 || !bd2) return;
     setLoading(true);
     setResult(null);
@@ -214,6 +216,7 @@ function MyLoveCompat() {
 
   // ─── MBTI 궁합 ───
   const analyzeMbti = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!myMbti || !partnerMbti) return;
     setLoading(true);
     setResult(null);
@@ -263,6 +266,7 @@ function MyLoveCompat() {
 
   // ─── 혈액형 궁합 ───
   const analyzeBlood = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!myBlood || !partnerBlood) return;
     setLoading(true);
     setResult(null);

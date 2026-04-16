@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { getManseryeok, getManseryeokStream } from '../api/fortune';
+import { useNavigate } from 'react-router-dom';
+import { getManseryeok, getManseryeokStream, isGuest } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
@@ -18,6 +19,7 @@ const AI_SECTIONS = [
 ];
 
 function Manseryeok() {
+  const navigate = useNavigate();
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [calendarType, setCalendarType] = useState('SOLAR');
   const [data, setData] = useState(null);
@@ -115,6 +117,7 @@ function Manseryeok() {
   };
 
   const handleSearch = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!date) return;
     setLoading(true);
     setAiResult(null);

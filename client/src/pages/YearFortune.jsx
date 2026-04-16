@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getYearFortuneStream, getYearFortune } from '../api/fortune';
+import { getYearFortuneStream, getYearFortune, isGuest } from '../api/fortune';
 import parseAiJson from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -71,6 +71,7 @@ function YearFortune() {
   };
 
   const startAnalysis = (bd, bt, g, ct, setters) => {
+    if (isGuest()) { navigate('/register'); return; }
     const { setResult, setLoading, setStreamText, setStreaming, cleanupRef } = setters;
     setLoading(true); setStreamText(''); setStreaming(false); setResult(null);
     cleanupRef.current?.();

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache } from '../api/fortune';
+import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -151,6 +151,7 @@ function LoveTypeFortune() {
   };
 
   const handleAnalyze = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!birth) return;
     setLoading(true);
     setResult(null);

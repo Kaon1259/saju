@@ -21,14 +21,14 @@ export function AppProvider({ children }) {
         localStorage.setItem('userName', data.user.name || '');
         localStorage.setItem('userProfile', JSON.stringify(data.user));
         window.dispatchEvent(new Event('heart:refresh'));
-      } else if (userId && !data.user) {
-        // 서버에 사용자 없음 → 잘못된 userId → 정리
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userProfile');
-        setAppUser(null);
       } else {
-        // Guest: 서버 유저 없이 클라이언트만 Guest 상태
+        // Guest 또는 서버에 사용자 없음 또는 Guest 유저 → userId 정리
+        if (userId) {
+          localStorage.removeItem('userId');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userProfile');
+          localStorage.removeItem('guestId');
+        }
         setAppUser(null);
       }
     } catch (e) {

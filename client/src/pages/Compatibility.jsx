@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache } from '../api/fortune';
+import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -71,6 +71,7 @@ function Compatibility() {
   }, [result, matrixShown, aiStreaming]);
 
   const handleAnalyze = async () => {
+    if (isGuest()) { navigate('/register'); return; }
     if (!bd1 || !bd2) return;
     setLoading(true);
     setStreamText('');
