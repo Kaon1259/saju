@@ -525,61 +525,29 @@ function Home() {
       </button>
 
 
-      {/* 5. 스타 운세 (컴팩트) */}
-      <section className="home-star-section">
-        <div className="home-star-bubbles">
-          {[...Array(8)].map((_, i) => <span key={i} className="home-star-bubble" style={{ '--sb-i': i }}>✦</span>)}
-        </div>
-        <div className="home-star-header">
-          <span className="home-star-badge">✨ SPECIAL</span>
-          <h2 className="home-star-title">스타 운세</h2>
-          <p className="home-star-desc">좋아하는 스타와 사주로 통하는 운명을 확인해보세요</p>
-        </div>
-        <div className="home-star-cards">
-          <button className="home-star-card" onClick={() => navigate('/my-star')} style={{ '--sc-color': '#FF9800' }}>
-            <div className="home-star-card-icon">
-              <span>⭐</span>
-              <span className="home-star-card-sub">MY</span>
+      {/* 5. 스타 운세 배너 */}
+      <section style={{ padding: '0 4px', marginBottom: 8 }}>
+        <button className="home-year-banner home-star-banner" onClick={() => navigate('/star-fortune')}>
+          <span className="home-year-banner-bg" />
+          <div className="star-banner-particles">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span key={i} className="star-banner-particle" style={{
+                '--sp-x': `${5 + (i * 8.3) % 90}%`,
+                '--sp-delay': `${i * 0.4}s`,
+                '--sp-dur': `${2 + (i % 4) * 0.6}s`,
+                '--sp-size': `${8 + (i % 3) * 4}px`,
+              }}>✦</span>
+            ))}
+          </div>
+          <div className="home-year-banner-content">
+            <span className="home-year-banner-icon star-banner-icon-anim">⭐</span>
+            <div className="home-year-banner-text">
+              <span className="home-year-banner-title">스타 운세</span>
+              <span className="home-year-banner-desc">최애 스타와 사주로 통하는 운명을 확인하세요</span>
             </div>
-            <div className="home-star-card-info">
-              <span className="home-star-card-label">나의 스타</span>
-              <span className="home-star-card-desc">즐겨찾기한 최애 스타 관리</span>
-            </div>
-            <span className="home-star-card-arrow">›</span>
-          </button>
-          <button className="home-star-card" onClick={() => navigate('/celeb-compatibility')} style={{ '--sc-color': '#E91E63' }}>
-            <div className="home-star-card-icon">
-              <span>💫</span>
-              <span className="home-star-card-sub">♥</span>
-            </div>
-            <div className="home-star-card-info">
-              <span className="home-star-card-label">스타와 나의 궁합</span>
-              <span className="home-star-card-desc">최애와 사주 궁합 분석</span>
-            </div>
-            <span className="home-star-card-arrow">›</span>
-          </button>
-          <button className="home-star-card" onClick={() => navigate('/celeb-fortune')} style={{ '--sc-color': '#9B59B6' }}>
-            <div className="home-star-card-icon">
-              <span>🌟</span>
-            </div>
-            <div className="home-star-card-info">
-              <span className="home-star-card-label">보이그룹, 걸그룹과 나의 궁합</span>
-              <span className="home-star-card-desc">좋아하는 그룹과 사주 궁합</span>
-            </div>
-            <span className="home-star-card-arrow">›</span>
-          </button>
-          <button className="home-star-card" onClick={() => navigate('/celeb-match')} style={{ '--sc-color': '#FF6B6B' }}>
-            <div className="home-star-card-icon">
-              <span>🔮</span>
-              <span className="home-star-card-sub">⭐</span>
-            </div>
-            <div className="home-star-card-info">
-              <span className="home-star-card-label">나와 궁합이 맞는 스타</span>
-              <span className="home-star-card-desc">사주로 찾는 운명의 스타</span>
-            </div>
-            <span className="home-star-card-arrow">›</span>
-          </button>
-        </div>
+            <span className="home-year-banner-arrow">›</span>
+          </div>
+        </button>
       </section>
 
       {/* 5.4 오늘의 운세 배너 */}

@@ -35,6 +35,11 @@ public class WeeklyFortuneService {
      * 스트리밍용 컨텍스트 빌드
      */
     public Object[] buildStreamContext(String birthDate, String birthTime, String gender) {
+        return buildStreamContext(birthDate, birthTime, gender, null, null);
+    }
+
+    public Object[] buildStreamContext(String birthDate, String birthTime, String gender,
+                                       String targetType, String targetName) {
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
@@ -52,7 +57,7 @@ public class WeeklyFortuneService {
             weekDayPillars.add(SajuCalculator.calculateDayPillar(weekStart.plusDays(i)));
         }
         String system = buildSystemPrompt();
-        String user = buildUserPrompt(date, birthTime, gender, yearPillar, dayPillar, weekStart, weekEnd, weekDayPillars, today);
+        String user = buildUserPrompt(date, birthTime, gender, yearPillar, dayPillar, weekStart, weekEnd, weekDayPillars, today, targetType, targetName);
         return new Object[]{ system, user, cacheKey, null };
     }
 
@@ -190,6 +195,7 @@ public class WeeklyFortuneService {
         return "당신은 주간 운세 분석에 빠삭한 운세 전문가야!\n" +
 "이번 주 7일간의 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.\n\n" +
 FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+FortunePromptBuilder.TARGET_AWARE_RULES + "\n" +
 """
 【역할】
 - 이번 주 7일간의 일주 천간지지를 일간과 대조해
@@ -222,11 +228,23 @@ FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
                                     SajuPillar yearPillar, SajuPillar dayPillar,
                                     LocalDate weekStart, LocalDate weekEnd,
                                     List<SajuPillar> weekDayPillars, LocalDate today) {
+        return buildUserPrompt(birthDate, birthTime, gender, yearPillar, dayPillar, weekStart, weekEnd, weekDayPillars, today, null, null);
+    }
+
+    private String buildUserPrompt(LocalDate birthDate, String birthTime, String gender,
+                                    SajuPillar yearPillar, SajuPillar dayPillar,
+                                    LocalDate weekStart, LocalDate weekEnd,
+                                    List<SajuPillar> weekDayPillars, LocalDate today,
+                                    String targetType, String targetName) {
         String todayCtx = promptBuilder.buildTodayContext(today);
+        String personCtx = promptBuilder.buildPersonContext(birthDate.toString(), gender);
+        String targetCtx = promptBuilder.buildTargetContext(targetType, targetName);
         DateTimeFormatter mmdd = DateTimeFormatter.ofPattern("M/d");
 
         StringBuilder sb = new StringBuilder();
         sb.append(todayCtx).append("\n");
+        if (!personCtx.isEmpty()) sb.append(personCtx).append("\n");
+        if (!targetCtx.isEmpty()) sb.append(targetCtx).append("\n");
         sb.append("【이번 주 일진 정보 (").append(weekStart.format(mmdd)).append(" ~ ").append(weekEnd.format(mmdd)).append(")】\n");
         for (int i = 0; i < 7; i++) {
             LocalDate d = weekStart.plusDays(i);

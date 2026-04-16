@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TojeongService {
 
     private final ClaudeApiService claudeApiService;
+    private final FortunePromptBuilder promptBuilder;
     private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,6 +37,10 @@ public class TojeongService {
      * [0]=systemPrompt, [1]=userPrompt, [2]=cacheKey, [3]=cached(있으면)
      */
     public Object[] buildStreamContext(LocalDate birthDate) {
+        return buildStreamContext(birthDate, null, null, null);
+    }
+
+    public Object[] buildStreamContext(LocalDate birthDate, String gender, String targetType, String targetName) {
         int currentYear = LocalDate.now().getYear();
         String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear));
         Map<String, Object> dbCached = getFromCache("tojeong", dbCacheKey);
@@ -59,6 +64,7 @@ public class TojeongService {
         String systemPrompt = "당신은 토정비결에 빠삭한 운세 전문가야. 괘의 의미를 쉽고 재밌게 풀어주는 게 특기거든!\n"
             + "단순히 '좋다/나쁘다'가 아니라, 구체적인 상황이랑 이유를 설명해서 실생활에 바로 써먹을 수 있는 조언을 해줘.\n\n"
             + FortunePromptBuilder.COMMON_TONE_RULES + "\n"
+            + FortunePromptBuilder.TARGET_AWARE_RULES + "\n"
             + "【규칙】\n"
             + "1. 반드시 JSON만 응답 (설명 텍스트 없이)\n"
             + "2. yearSummary는 6-8문장으로 작성\n"
@@ -77,15 +83,19 @@ public class TojeongService {
             + "\"yearAdvice\":\"올해 핵심 조언 2-3문장\","
             + "\"months\":[{\"month\":1,\"fortune\":\"1월 운세 5-6문장\",\"rating\":\"길\"},...12개월 모두]}";
 
+        String personCtx = promptBuilder.buildPersonContext(birthDate.toString(), gender);
+        String targetCtx = promptBuilder.buildTargetContext(targetType, targetName);
         String userPrompt = String.format(
             "토정비결 괘 번호: %d (%s)\n"
             + "상수(태세수): %d, 중수(월건수): %d, 하수(일진수): %d\n"
-            + "올해 간지: %d년 %s\n"
-            + "위 정보를 바탕으로 토정비결 월별 운세를 JSON으로 작성해주세요.",
+            + "올해 간지: %d년 %s\n",
             base.getTotalGwae(), base.getGwaeName(),
             base.getSangsu(), base.getJungsu(), base.getHasu(),
             currentYear, currentGanji
-        );
+        )
+            + (personCtx.isEmpty() ? "" : personCtx + "\n")
+            + (targetCtx.isEmpty() ? "" : targetCtx + "\n")
+            + "위 정보를 바탕으로 토정비결 월별 운세를 JSON으로 작성해주세요.";
         return new Object[]{ systemPrompt, userPrompt, dbCacheKey, null, base };
     }
 

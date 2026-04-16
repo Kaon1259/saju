@@ -157,8 +157,11 @@ function Header({ onHomeSplash, onTabIntro }) {
         </button>
 
         <div className="top-bar-right">
-          {userId && heartPoints != null && (
-            <div className="top-bar-hearts">
+          <span className="top-bar-user" onClick={() => navigate(userId ? '/profile' : '/register')}>
+            {userId ? (localStorage.getItem('userName') || '사용자') : 'Guest'}
+          </span>
+          {heartPoints != null && (
+            <div className="top-bar-hearts" onClick={() => navigate('/my-menu')}>
               <span className="top-bar-hearts-icon">💗</span>
               <span className="top-bar-hearts-count">{heartPoints}</span>
             </div>

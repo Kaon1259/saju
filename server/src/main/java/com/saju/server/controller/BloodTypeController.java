@@ -66,7 +66,11 @@ public class BloodTypeController {
     public SseEmitter streamFortune(
             @RequestParam String type,
             @RequestParam(required = false) String zodiac,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String birthDate,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false, defaultValue = "me") String targetType,
+            @RequestParam(required = false) String targetName) {
         String bloodType = type.toUpperCase();
         String zodiacAnimal = (zodiac != null && !zodiac.isBlank()) ? zodiac : "용";
         SseEmitter emitter = new SseEmitter(180000L);
@@ -95,7 +99,7 @@ public class BloodTypeController {
 
         // 캐시 없으면 AI 스트리밍
         final Long uid = userId;
-        return bloodTypeFortuneService.streamFortune(bloodType, zodiacAnimal, () -> {
+        return bloodTypeFortuneService.streamFortune(bloodType, zodiacAnimal, birthDate, gender, targetType, targetName, () -> {
             if (uid != null) heartPointService.deductPoints(uid, "BLOOD_TYPE", "혈액형 운세");
         });
     }

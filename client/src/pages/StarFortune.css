@@ -1,0 +1,133 @@
+.star-fortune-page {
+  position: relative;
+  padding: 0 0 40px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══ 전체 화면 별 날아오르기 ═══ */
+.star-fortune-flying-stars {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.star-fortune-fly {
+  position: absolute;
+  bottom: -20px;
+  left: var(--sf-x);
+  font-size: var(--sf-size);
+  color: #fbbf24;
+  opacity: 0;
+  animation: starFlyUp var(--sf-dur) ease-out infinite;
+  animation-delay: var(--sf-delay);
+  text-shadow: 0 0 8px rgba(251,191,36,0.5);
+}
+.star-fortune-fly:nth-child(3n+1) { color: #fbbf24; text-shadow: 0 0 8px rgba(251,191,36,0.5); }
+.star-fortune-fly:nth-child(3n+2) { color: #a78bfa; text-shadow: 0 0 8px rgba(167,139,250,0.5); }
+.star-fortune-fly:nth-child(3n) { color: #f472b6; text-shadow: 0 0 8px rgba(244,114,182,0.5); }
+
+@keyframes starFlyUp {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 0.8; }
+  40% { opacity: 0.5; }
+  100% {
+    transform: translateY(calc(-100vh - 30px)) translateX(var(--sf-drift)) scale(1.2) rotate(120deg);
+    opacity: 0;
+  }
+}
+[data-theme="light"] .star-fortune-fly:nth-child(3n+1) { color: #d97706; text-shadow: 0 0 6px rgba(217,119,6,0.3); }
+[data-theme="light"] .star-fortune-fly:nth-child(3n+2) { color: #7c3aed; text-shadow: 0 0 6px rgba(124,58,237,0.3); }
+[data-theme="light"] .star-fortune-fly:nth-child(3n) { color: #db2777; text-shadow: 0 0 6px rgba(219,39,119,0.3); }
+
+/* ═══ 히어로 ═══ */
+.star-fortune-hero {
+  position: relative; overflow: hidden;
+  text-align: center; padding: 48px 20px 36px;
+  background: linear-gradient(135deg, rgba(147,51,234,0.18) 0%, rgba(236,72,153,0.12) 50%, rgba(251,146,60,0.08) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  z-index: 1;
+}
+.star-fortune-hero-glow {
+  position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+  width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(251,191,36,0.2) 0%, rgba(147,51,234,0.1) 40%, transparent 70%);
+  animation: heroGlowPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes heroGlowPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+}
+.star-fortune-badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  color: #fbbf24; letter-spacing: 1px; margin-bottom: 10px;
+  animation: badgeShimmer 2s ease-in-out infinite;
+}
+@keyframes badgeShimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; text-shadow: 0 0 8px rgba(251,191,36,0.5); }
+}
+.star-fortune-title {
+  font-size: 28px; font-weight: 900; color: var(--color-text);
+  margin: 0 0 8px;
+  background: linear-gradient(135deg, #fbbf24, #a78bfa, #f472b6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleGradientShift 4s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+@keyframes titleGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.star-fortune-desc {
+  font-size: 14px; color: var(--color-text-muted); margin: 0;
+  position: relative; z-index: 1;
+}
+
+/* ═══ 메뉴 리스트 ═══ */
+.star-fortune-list {
+  position: relative; z-index: 1;
+  padding: 16px 12px; display: flex; flex-direction: column; gap: 10px;
+}
+.star-fortune-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--color-surface, rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 16px 14px;
+  cursor: pointer; transition: all 0.3s; text-align: left;
+  color: inherit; width: 100%;
+  animation: cardSlideIn 0.5s ease-out both;
+  animation-delay: var(--card-delay, 0ms);
+}
+@keyframes cardSlideIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.star-fortune-card:active { transform: scale(0.97); }
+[data-theme="light"] .star-fortune-card {
+  background: #fff; border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.star-fortune-card-icon {
+  width: 50px; height: 50px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--sf-color), color-mix(in srgb, var(--sf-color) 60%, #000));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--sf-color) 30%, transparent);
+}
+.star-fortune-card-info {
+  flex: 1; display: flex; flex-direction: column; gap: 3px;
+}
+.star-fortune-card-label {
+  font-size: 16px; font-weight: 700; color: var(--color-text);
+}
+.star-fortune-card-desc {
+  font-size: 12px; color: var(--color-text-muted);
+}
+.star-fortune-card-arrow {
+  font-size: 22px; color: var(--color-text-muted); opacity: 0.5;
+}

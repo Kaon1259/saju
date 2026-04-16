@@ -31,6 +31,11 @@ public class MonthlyFortuneService {
      * [0]=systemPrompt, [1]=userPrompt, [2]=cacheKey, [3]=cached(있으면)
      */
     public Object[] buildStreamContext(String birthDate, int month, String birthTime, String gender) {
+        return buildStreamContext(birthDate, month, birthTime, gender, null, null);
+    }
+
+    public Object[] buildStreamContext(String birthDate, int month, String birthTime, String gender,
+                                       String targetType, String targetName) {
         if (month < 1 || month > 12) month = LocalDate.now().getMonthValue();
         String cacheKey = buildCacheKey("monthly", birthDate, birthTime, gender, String.valueOf(month));
         Map<String, Object> cached = getFromCache("monthly", cacheKey);
@@ -47,7 +52,7 @@ public class MonthlyFortuneService {
         SajuPillar targetYearPillar = SajuCalculator.calculateYearPillar(targetYearSaju);
         SajuPillar targetMonthPillar = SajuCalculator.calculateMonthPillar(targetMonthDate, targetYearPillar.getStemIndex());
         String system = buildSystemPrompt();
-        String user = buildUserPrompt(date, month, birthTime, gender, yearPillar, dayPillar, targetMonthPillar, today);
+        String user = buildUserPrompt(date, month, birthTime, gender, yearPillar, dayPillar, targetMonthPillar, today, targetType, targetName);
         return new Object[]{ system, user, cacheKey, null };
     }
 
@@ -188,6 +193,7 @@ public class MonthlyFortuneService {
         return "당신은 월별 운세 분석에 빠삭한 운세 전문가야!\n" +
 "이번 달 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.\n\n" +
 FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+FortunePromptBuilder.TARGET_AWARE_RULES + "\n" +
 """
 【역할】
 - 해당 월의 월주와 일간의 십성 관계를 분석해
@@ -219,10 +225,21 @@ FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
     private String buildUserPrompt(LocalDate birthDate, int month, String birthTime, String gender,
                                     SajuPillar yearPillar, SajuPillar dayPillar,
                                     SajuPillar monthPillar, LocalDate today) {
+        return buildUserPrompt(birthDate, month, birthTime, gender, yearPillar, dayPillar, monthPillar, today, null, null);
+    }
+
+    private String buildUserPrompt(LocalDate birthDate, int month, String birthTime, String gender,
+                                    SajuPillar yearPillar, SajuPillar dayPillar,
+                                    SajuPillar monthPillar, LocalDate today,
+                                    String targetType, String targetName) {
         String todayCtx = promptBuilder.buildTodayContext(today);
+        String personCtx = promptBuilder.buildPersonContext(birthDate.toString(), gender);
+        String targetCtx = promptBuilder.buildTargetContext(targetType, targetName);
 
         StringBuilder sb = new StringBuilder();
         sb.append(todayCtx).append("\n");
+        if (!personCtx.isEmpty()) sb.append(personCtx).append("\n");
+        if (!targetCtx.isEmpty()) sb.append(targetCtx).append("\n");
         sb.append("【").append(month).append("월 월운 정보】\n");
         sb.append("월주: ").append(monthPillar.getFullHanja()).append("(").append(monthPillar.getFullName()).append("월)\n");
         sb.append("월간 오행: ").append(SajuConstants.OHENG[monthPillar.getStemElement()]).append("(").append(SajuConstants.OHENG_HANJA[monthPillar.getStemElement()]).append(")\n");

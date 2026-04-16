@@ -229,15 +229,19 @@ public class ConstellationFortuneService {
     /**
      * 별자리 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
      */
+    public SseEmitter streamFortune(String sign, String birthDate, String gender, String targetType, String targetName, Runnable onSuccess) {
+        return doStreamFortune(sign, birthDate, gender, targetType, targetName, onSuccess);
+    }
+
     public SseEmitter streamFortune(String sign, Runnable onSuccess) {
-        return doStreamFortune(sign, onSuccess);
+        return doStreamFortune(sign, null, null, null, null, onSuccess);
     }
 
     public SseEmitter streamFortune(String sign) {
-        return doStreamFortune(sign, null);
+        return doStreamFortune(sign, null, null, null, null, null);
     }
 
-    private SseEmitter doStreamFortune(String sign, Runnable onSuccess) {
+    private SseEmitter doStreamFortune(String sign, String birthDate, String gender, String targetType, String targetName, Runnable onSuccess) {
         LocalDate today = LocalDate.now();
         int idx = getSignIndex(sign);
 
@@ -245,7 +249,8 @@ public class ConstellationFortuneService {
             "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
             "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
             "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
-            "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.";
+            "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.\n" +
+            FortunePromptBuilder.TARGET_AWARE_RULES;
 
         String todayCtx = promptBuilder.buildTodayContext(today);
         String userPrompt = todayCtx + "\n【친구 별자리】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
@@ -256,7 +261,9 @@ public class ConstellationFortuneService {
             "\"love\":\"애정운 (구체적 행동 조언, 3-4문장)\"," +
             "\"money\":\"재물운 (금전 방향과 시기별 조언, 3-4문장)\"," +
             "\"health\":\"건강운 (주의 부위와 운동/식이 조언, 3문장)\"," +
-            "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
+            "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}"
+            + promptBuilder.buildPersonContext(birthDate, gender)
+            + promptBuilder.buildTargetContext(targetType, targetName);
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1200, (fullText) -> {
             try {

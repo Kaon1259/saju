@@ -281,13 +281,20 @@ function CelebCompatibility() {
   };
 
   // 결과 도착 시 매트릭스 페이드아웃
+  // 궁합 결과: step이 'result'로 변할 때 (loading 중에는 숨기지 않음)
+  // 스타 운세: starFortune이 실제로 도착했을 때
+  const [prevStep, setPrevStep] = useState('select');
   useEffect(() => {
-    if ((step === 'result' || starFortune) && matrixShown) {
+    const stepJustChanged = step === 'result' && prevStep === 'loading';
+    const starJustArrived = starFortune && !starFortuneLoading;
+    if ((stepJustChanged || starJustArrived) && matrixShown) {
       setMatrixExiting(true);
       const t = setTimeout(() => setMatrixShown(false), 700);
+      setPrevStep(step);
       return () => clearTimeout(t);
     }
-  }, [step, starFortune, matrixShown]);
+    setPrevStep(step);
+  }, [step, starFortune, starFortuneLoading, matrixShown]);
 
   const handleShare = async () => {
     if (!result) return;
@@ -311,6 +318,7 @@ function CelebCompatibility() {
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     starCleanupRef.current = analyzeSajuStream(selectedCeleb.birth, undefined, 'SOLAR', selectedCeleb.gender, {
+      context: 'idol', targetType: 'celebrity', targetName: selectedCeleb.name,
       onCached: (data) => {
         setStarFortune(data.todayFortune || data);
         setStarFortuneLoading(false);
@@ -330,9 +338,17 @@ function CelebCompatibility() {
         }
         setStarFortuneLoading(false);
       },
-      onError: () => {
-        setStarStreaming(false); setStarStreamText(''); setStarFortuneLoading(false);
+      onInsufficientHearts: () => {
+        setMatrixShown(false);
+        setStarFortuneLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        alert('하트가 부족합니다. 하트를 충전해주세요!');
+      },
+      onError: (err) => {
+        setStarStreaming(false); setStarStreamText(''); setStarFortuneLoading(false);
+        setMatrixShown(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        console.error('[StarFortune] error:', err);
       },
     });
   };
@@ -564,7 +580,7 @@ function CelebCompatibility() {
     return (
       <div className="celeb-page analysis-result-reveal" ref={resultRef}>
         {matrixShown && (
-          <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
+          <AnalysisMatrix theme="star" label={matrixLabel} streamText={starStreaming ? starStreamText : streamText} exiting={matrixExiting} />
         )}
         <button className="celeb-back-btn" onClick={handleReset}>← 스타 목록으로</button>
         <section className="celeb-result-hero">

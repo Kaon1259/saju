@@ -56,7 +56,7 @@ function MyStar() {
   if (!isLoggedIn) {
     return (
       <div className="mystar-page">
-        <button className="mystar-back-btn" onClick={() => navigate('/')}>← 홈으로</button>
+        <button className="mystar-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
         <StarHero
           icon="⭐"
           title="나의 스타"
@@ -91,6 +91,7 @@ function MyStar() {
   // ─── 로그인 상태: 나의 스타 목록 ───
   return (
     <div className="mystar-page">
+      <button className="mystar-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
       <StarHero
         icon="⭐"
         title="나의 스타"

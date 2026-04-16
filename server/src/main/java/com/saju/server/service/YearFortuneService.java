@@ -33,6 +33,11 @@ public class YearFortuneService {
      * [0] = systemPrompt, [1] = userPrompt, [2] = cacheKey (캐시 있으면 null)
      */
     public Object[] buildStreamContext(String birthDate, String birthTime, String gender, String calendarType) {
+        return buildStreamContext(birthDate, birthTime, gender, calendarType, null, null);
+    }
+
+    public Object[] buildStreamContext(String birthDate, String birthTime, String gender, String calendarType,
+                                       String targetType, String targetName) {
         String cacheKey = buildCacheKey("yearly", birthDate, birthTime, gender, calendarType);
         Map<String, Object> cached = getFromCache("yearly", cacheKey);
         if (cached != null) {
@@ -47,7 +52,7 @@ public class YearFortuneService {
         int year2026Saju = SajuCalculator.getSajuYear(LocalDate.of(YEAR, 6, 1));
         SajuPillar year2026Pillar = SajuCalculator.calculateYearPillar(year2026Saju);
         String system = buildSystemPrompt();
-        String user = buildUserPrompt(date, birthTime, gender, yearPillar, monthPillar, dayPillar, year2026Pillar, today);
+        String user = buildUserPrompt(date, birthTime, gender, yearPillar, monthPillar, dayPillar, year2026Pillar, today, targetType, targetName);
         return new Object[]{ system, user, cacheKey, null };
     }
 
@@ -178,6 +183,7 @@ public class YearFortuneService {
         return "당신은 사주명리학에 빠삭한 신년 운세 전문가야!\n" +
 "올해 운세를 재밌고 알기 쉽게 풀어주는 게 특기거든.\n\n" +
 FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+FortunePromptBuilder.TARGET_AWARE_RULES + "\n" +
 """
 【역할】
 - 2026년 세운과 사주의 상호작용을 분석해
@@ -209,10 +215,21 @@ FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
     private String buildUserPrompt(LocalDate birthDate, String birthTime, String gender,
                                     SajuPillar yearPillar, SajuPillar monthPillar, SajuPillar dayPillar,
                                     SajuPillar year2026Pillar, LocalDate today) {
+        return buildUserPrompt(birthDate, birthTime, gender, yearPillar, monthPillar, dayPillar, year2026Pillar, today, null, null);
+    }
+
+    private String buildUserPrompt(LocalDate birthDate, String birthTime, String gender,
+                                    SajuPillar yearPillar, SajuPillar monthPillar, SajuPillar dayPillar,
+                                    SajuPillar year2026Pillar, LocalDate today,
+                                    String targetType, String targetName) {
         String todayCtx = promptBuilder.buildTodayContext(today);
+        String personCtx = promptBuilder.buildPersonContext(birthDate.toString(), gender);
+        String targetCtx = promptBuilder.buildTargetContext(targetType, targetName);
 
         StringBuilder sb = new StringBuilder();
         sb.append(todayCtx).append("\n");
+        if (!personCtx.isEmpty()) sb.append(personCtx).append("\n");
+        if (!targetCtx.isEmpty()) sb.append(targetCtx).append("\n");
         sb.append("【2026년 세운 정보】\n");
         sb.append("2026년 년주: ").append(year2026Pillar.getFullHanja()).append("(").append(year2026Pillar.getFullName()).append("년)\n");
         sb.append("세운 천간 오행: ").append(SajuConstants.OHENG[year2026Pillar.getStemElement()]).append("(").append(SajuConstants.OHENG_HANJA[year2026Pillar.getStemElement()]).append(")\n");

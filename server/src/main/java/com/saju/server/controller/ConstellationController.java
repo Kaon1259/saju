@@ -47,7 +47,11 @@ public class ConstellationController {
      */
     @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamFortune(@RequestParam String sign,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String birthDate,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false, defaultValue = "me") String targetType,
+            @RequestParam(required = false) String targetName) {
         SseEmitter emitter = new SseEmitter(180000L);
 
         // 캐시 확인
@@ -74,7 +78,7 @@ public class ConstellationController {
 
         // 캐시 없으면 AI 스트리밍
         final Long uid = userId;
-        return service.streamFortune(sign, () -> {
+        return service.streamFortune(sign, birthDate, gender, targetType, targetName, () -> {
             if (uid != null) heartPointService.deductPoints(uid, "CONSTELLATION", "별자리 운세");
         });
     }

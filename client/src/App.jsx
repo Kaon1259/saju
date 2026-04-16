@@ -33,6 +33,7 @@ import MyLoveCompat from './pages/MyLoveCompat';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
 import MyMenu from './pages/MyMenu';
+import StarFortune from './pages/StarFortune';
 import Settings from './pages/Settings';
 import { HeartProvider } from './context/HeartContext';
 import './context/HeartContext.css';
@@ -256,6 +257,7 @@ function App() {
               <Route path="/love/:type" element={<LoveTypeFortune />} />
               <Route path="/my-love-compat" element={<MyLoveCompat />} />
               <Route path="/my-menu" element={<MyMenu />} />
+              <Route path="/star-fortune" element={<StarFortune />} />
               <Route path="/my-star" element={<MyStar />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>

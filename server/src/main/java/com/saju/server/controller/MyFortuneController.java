@@ -157,9 +157,10 @@ public class MyFortuneController {
             return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
         }
 
-        // AI 스트리밍 (연애상태 + 날짜 반영)
-        String systemPrompt = promptBuilder.fortuneStreamSystemPrompt(promptBuilder.dateLabel(targetDate));
-        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), targetDate, user.getRelationshipStatus());
+        // AI 스트리밍 (연애상태 + 날짜 반영 + 나이/성별 맞춤)
+        String systemPrompt = promptBuilder.fortuneStreamSystemPrompt(promptBuilder.dateLabel(targetDate)) + "\n" + FortunePromptBuilder.TARGET_AWARE_RULES;
+        String personContext = promptBuilder.buildPersonContext(user.getBirthDate().toString(), user.getGender());
+        String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), targetDate, user.getRelationshipStatus()) + personContext;
         final LocalDate finalDate = targetDate;
         final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {

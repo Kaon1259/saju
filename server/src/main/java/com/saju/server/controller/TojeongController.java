@@ -73,7 +73,10 @@ public class TojeongController {
     public SseEmitter streamTojeong(
             @RequestParam("birthDate") String birthDateStr,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String targetType,
+            @RequestParam(required = false) String targetName) {
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
@@ -81,7 +84,7 @@ public class TojeongController {
         }
         final LocalDate finalBirthDate = birthDate;
 
-        Object[] ctx = tojeongService.buildStreamContext(finalBirthDate);
+        Object[] ctx = tojeongService.buildStreamContext(finalBirthDate, gender, targetType, targetName);
         String systemPrompt = (String) ctx[0];
         String userPrompt = (String) ctx[1];
         @SuppressWarnings("unchecked")

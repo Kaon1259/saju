@@ -39,9 +39,11 @@ public class WeeklyFortuneController {
             @RequestParam String birthDate,
             @RequestParam(required = false) String birthTime,
             @RequestParam(required = false) String gender,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String targetType,
+            @RequestParam(required = false) String targetName) {
 
-        Object[] ctx = weeklyFortuneService.buildStreamContext(birthDate, birthTime, gender);
+        Object[] ctx = weeklyFortuneService.buildStreamContext(birthDate, birthTime, gender, targetType, targetName);
         String systemPrompt = (String) ctx[0];
         String userPrompt = (String) ctx[1];
         @SuppressWarnings("unchecked")

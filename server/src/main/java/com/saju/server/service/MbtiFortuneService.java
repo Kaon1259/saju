@@ -299,18 +299,24 @@ public class MbtiFortuneService {
     /**
      * MBTI 운세 스트리밍 (캐시 없을 때 호출, 완료 후 서버에서 DB 저장)
      */
+    public SseEmitter streamFortune(String mbtiType, String zodiacAnimal, String birthDate, String gender, String targetType, String targetName, Runnable onSuccess) {
+        return doStreamFortune(mbtiType, zodiacAnimal, birthDate, gender, targetType, targetName, onSuccess);
+    }
+
     public SseEmitter streamFortune(String mbtiType, String zodiacAnimal, Runnable onSuccess) {
-        return doStreamFortune(mbtiType, zodiacAnimal, onSuccess);
+        return doStreamFortune(mbtiType, zodiacAnimal, null, null, null, null, onSuccess);
     }
 
     public SseEmitter streamFortune(String mbtiType, String zodiacAnimal) {
-        return doStreamFortune(mbtiType, zodiacAnimal, null);
+        return doStreamFortune(mbtiType, zodiacAnimal, null, null, null, null, null);
     }
 
-    private SseEmitter doStreamFortune(String mbtiType, String zodiacAnimal, Runnable onSuccess) {
+    private SseEmitter doStreamFortune(String mbtiType, String zodiacAnimal, String birthDate, String gender, String targetType, String targetName, Runnable onSuccess) {
         LocalDate today = LocalDate.now();
-        String system = promptBuilder.mbtiSystemPrompt();
-        String user = promptBuilder.mbtiUserPrompt(mbtiType, zodiacAnimal, today);
+        String system = promptBuilder.mbtiSystemPrompt() + "\n" + FortunePromptBuilder.TARGET_AWARE_RULES;
+        String user = promptBuilder.mbtiUserPrompt(mbtiType, zodiacAnimal, today)
+            + promptBuilder.buildPersonContext(birthDate, gender)
+            + promptBuilder.buildTargetContext(targetType, targetName);
 
         return claudeApiService.generateStream(system, user, 2500, (fullText) -> {
             try {

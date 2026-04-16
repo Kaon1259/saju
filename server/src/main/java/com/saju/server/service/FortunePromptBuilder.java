@@ -6,6 +6,7 @@ import com.saju.server.saju.SajuPillar;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -365,4 +366,77 @@ public class FortunePromptBuilder {
             default -> "";
         };
     }
+
+    // ═══════════════════════════════════════════════════
+    // 공통 헬퍼: 대상·나이·성별 컨텍스트
+    // ═══════════════════════════════════════════════════
+
+    /**
+     * 분석 대상 컨텍스트 생성 (나/다른사람/스타)
+     * @param targetType "me" | "other" | "celebrity"
+     * @param targetName 대상 이름 (스타인 경우 연예인 이름)
+     */
+    public String buildTargetContext(String targetType, String targetName) {
+        if (targetType == null || targetType.isBlank() || "me".equals(targetType)) return "";
+        if ("celebrity".equals(targetType)) {
+            return "\n※ 이 분석은 연예인/유명인 '" + (targetName != null ? targetName : "스타") + "'에 대한 것이야." +
+                   "\n'너'가 아니라 '" + (targetName != null ? targetName : "이 스타") + "'의 운세를 분석해줘." +
+                   "\n팬이 좋아하는 스타의 운세를 궁금해하는 느낌으로, 재밌고 친근하게 해석해줘.";
+        }
+        if ("other".equals(targetType)) {
+            String name = (targetName != null && !targetName.isBlank()) ? targetName : "이 사람";
+            return "\n※ 이 분석은 본인이 아닌 다른 사람 '" + name + "'에 대한 것이야." +
+                   "\n'너'가 아니라 '" + name + "'의 운세를 분석해줘." +
+                   "\n제3자 관점에서 객관적이면서도 친근하게 해석해줘.";
+        }
+        return "";
+    }
+
+    /**
+     * 나이·성별 컨텍스트 (생년월일에서 자동 계산)
+     */
+    public String buildPersonContext(String birthDate, String gender) {
+        StringBuilder sb = new StringBuilder();
+        if (birthDate != null && !birthDate.isBlank()) {
+            try {
+                LocalDate bd = LocalDate.parse(birthDate);
+                int age = Period.between(bd, LocalDate.now()).getYears();
+                sb.append("\n대상: ").append(age).append("세");
+                if (gender != null && !gender.isBlank()) {
+                    sb.append(gender.equals("F") ? " 여성" : " 남성");
+                }
+                // 나이대별 톤 가이드
+                if (age < 20) {
+                    sb.append("\n※ 10대에게 맞는 톤: 학교생활, 친구, 진로 고민 위주로 공감해줘. 쉽고 귀여운 표현 사용.");
+                } else if (age < 30) {
+                    sb.append("\n※ 20대에게 맞는 톤: 연애, 취업, 자기실현 고민에 공감. 트렌디하고 솔직한 표현.");
+                } else if (age < 40) {
+                    sb.append("\n※ 30대에게 맞는 톤: 커리어, 결혼/육아, 인간관계 고민에 현실적 조언. 공감하면서도 실용적으로.");
+                } else if (age < 50) {
+                    sb.append("\n※ 40대에게 맞는 톤: 인생 경험이 쌓인 사람에게 맞는 깊이 있는 조언. 존중하면서 친근하게.");
+                } else {
+                    sb.append("\n※ 50대 이상에게 맞는 톤: 인생 지혜를 존중하면서 건강·가족·재테크 위주로 따뜻하게.");
+                }
+                // 성별별 가이드
+                if ("F".equals(gender)) {
+                    sb.append("\n※ 여성 관점: 공감·감정 표현을 풍부하게, 워라밸·자기관리·관계 균형에 초점.");
+                } else if ("M".equals(gender)) {
+                    sb.append("\n※ 남성 관점: 실질적·구체적 조언 위주, 성취·목표·전략적 방향에 초점.");
+                }
+            } catch (Exception ignored) {}
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 시스템 프롬프트에 공통으로 붙이는 대상/나이/성별 가이드
+     */
+    public static final String TARGET_AWARE_RULES = """
+【대상 맞춤 규칙】
+- 분석 대상이 '나(본인)'이면 '너'로 호칭하고 직접적으로 말해줘
+- 분석 대상이 '다른 사람'이면 그 사람 이름이나 '이 사람'으로 지칭, 제3자 관점으로 분석
+- 분석 대상이 '연예인/스타'이면 팬 관점에서 재밌게, 스타 이름으로 지칭
+- 나이대에 맞는 현실적 상황과 고민을 반영해서 해석
+- 성별에 따라 관점과 표현을 자연스럽게 조절
+""";
 }

@@ -148,13 +148,15 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
   return response.data;
 };
 
-export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, context }) => {
+export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, context, targetType, targetName, freeMode } = {}) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (calendarType) params.set('calendarType', calendarType);
   if (gender) params.set('gender', gender);
   if (context) params.set('context', context);
-  appendUserId(params);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
+  if (!freeMode) appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/saju/analyze/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
@@ -193,8 +195,12 @@ export const getConstellationFortune = async (sign) => {
   return response.data;
 };
 
-export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ sign });
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/constellation/fortune/stream?${params.toString()}`;
@@ -229,10 +235,12 @@ export const getMyFortune = async (userId) => {
   return response.data;
 };
 
-export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts }, date) => {
+export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}, date) => {
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
   if (date) params.set('date', date);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const paramStr = params.toString();
   const url = `${baseURL}/my/fortune/${userId}/stream${paramStr ? '?' + paramStr : ''}`;
@@ -257,8 +265,12 @@ export const getBloodTypeFortune = async (type) => {
   return response.data;
 };
 
-export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ type });
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/bloodtype/fortune/stream?${params.toString()}`;
@@ -315,8 +327,12 @@ export const getMbtiFortune = async (type) => {
   return response.data;
 };
 
-export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ type });
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/mbti/fortune/stream?${params.toString()}`;
@@ -767,11 +783,13 @@ export const getYearFortune = async (birthDate, birthTime, gender, calendarType)
   return response.data;
 };
 
-export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
   if (calendarType) params.set('calendarType', calendarType);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/year-fortune/stream?${params.toString()}`;
@@ -797,10 +815,12 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
   return response.data;
 };
 
-export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ birthDate, month });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/monthly-fortune/stream?${params.toString()}`;
@@ -826,10 +846,12 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
   return response.data;
 };
 
-export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/weekly-fortune/stream?${params.toString()}`;
@@ -858,12 +880,14 @@ export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calend
 };
 
 // ─── 심화분석 스트리밍 ───
-export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
   const params = new URLSearchParams({ type, birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
   if (calendarType) params.set('calendarType', calendarType);
   if (extra) params.set('extra', extra);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
   appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';

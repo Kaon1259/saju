@@ -4,6 +4,7 @@ import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.repository.*;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.DeepAnalysisService;
+import com.saju.server.service.FortunePromptBuilder;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class DeepAnalysisController {
     private final DeepAnalysisService deepAnalysisService;
     private final ClaudeApiService claudeApiService;
     private final HeartPointService heartPointService;
+    private final FortunePromptBuilder promptBuilder;
     private final SpecialFortuneRepository specialFortuneRepository;
     private final DailyFortuneRepository dailyFortuneRepository;
     private final BloodTypeFortuneRepository bloodTypeFortuneRepository;
@@ -51,7 +53,9 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String calendarType,
             @RequestParam(required = false) String extra,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(value = "targetType", defaultValue = "me") String targetType,
+            @RequestParam(value = "targetName", required = false) String targetName) {
         // 캐시 확인 - ��으면 즉시 완료 (무료)
         Map<String, Object> cached = deepAnalysisService.getCached(type, birthDate, birthTime, gender, calendarType, extra);
         if (cached != null) {
@@ -78,8 +82,10 @@ public class DeepAnalysisController {
             configKey = null;
         }
 
-        String systemPrompt = deepAnalysisService.getSystemPrompt(type);
-        String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
+        String systemPrompt = deepAnalysisService.getSystemPrompt(type) + "\n" + FortunePromptBuilder.TARGET_AWARE_RULES;
+        String personContext = promptBuilder.buildPersonContext(birthDate, gender);
+        String targetContext = promptBuilder.buildTargetContext(targetType, targetName);
+        String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra) + personContext + targetContext;
         final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 4000, (fullText) -> {
             deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);

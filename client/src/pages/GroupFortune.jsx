@@ -111,7 +111,7 @@ function GroupFortune() {
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
-    fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, { context: 'idol',
+    fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, { context: 'idol', targetType: 'celebrity', targetName: fortuneTargetName,
       onCached: (data) => {
         setFortuneResult(data); setFortuneLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -251,6 +251,9 @@ function GroupFortune() {
       {matrixShown && (
         <AnalysisMatrix theme={matrixTheme} label={matrixLabel} streamText={fortuneStreamText} exiting={matrixExiting} />
       )}
+      {/* 뒤로가기 */}
+      <button className="celeb-back-btn" onClick={() => { setMode('list'); setSelectedGroup(null); setFortuneResult(null); setCompatResult(null); }}>← 그룹 목록으로</button>
+
       {/* 그룹 헤더 */}
       <section className="gf-group-header glass-card">
         <span className={`gf-item-badge gf-badge--lg ${selectedGroup.type === 'boy' ? 'gf-badge--boy' : 'gf-badge--girl'}`}>
@@ -263,7 +266,6 @@ function GroupFortune() {
             데뷔: {selectedGroup.debut}
           </span>
         </div>
-        <button className="gf-back-btn" onClick={() => { setMode('list'); setSelectedGroup(null); }}>목록</button>
       </section>
 
       {/* 궁합 대상 선택 (그룹 + 멤버) */}

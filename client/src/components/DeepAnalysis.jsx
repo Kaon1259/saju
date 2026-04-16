@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDeepAnalysis, getDeepAnalysisStream } from '../api/fortune';
-import FortuneLoading from './FortuneLoading';
-import StreamText from './StreamText';
+import AnalysisMatrix from './AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import './DeepAnalysis.css';
 
@@ -182,11 +181,7 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
       {(open || autoOpen) && (
         <div className="deep-content glass-card fade-in">
           {loading && !data ? (
-            streamText ? (
-              <StreamText text={streamText} icon="🔍" label="심화분석 중..." color="#C084FC" />
-            ) : (
-              <FortuneLoading type={loadingType} />
-            )
+            <AnalysisMatrix theme={type === 'love' || type === 'reunion' || type === 'remarriage' || type === 'blind_date' ? 'love' : 'saju'} label="AI가 심화분석을 진행하고 있어요" streamText={streamText} />
           ) : data ? (
             <div className="deep-result">
               {/* 핵심 요약 */}

@@ -66,6 +66,20 @@
   align-items: center;
   gap: 8px;
 }
+.top-bar-user {
+  font-size: 12px; font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer; padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.2s; white-space: nowrap;
+  max-width: 80px; overflow: hidden; text-overflow: ellipsis;
+}
+.top-bar-user:hover { background: rgba(255,255,255,0.12); color: #fff; }
+[data-theme="light"] .top-bar-user {
+  color: rgba(0,0,0,0.6); background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08);
+}
 
 /* 하트 잔액 */
 .top-bar-hearts {

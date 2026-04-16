@@ -107,35 +107,54 @@ const SPREADS = [
   { id: 'five',  label: '켈틱',     count: 5, icon: '✨', desc: '상황·장애·조언·결과', color: '#E91E63', cost: 5 },
 ];
 
-const TAROT_LOVE_TYPES = [
-  // 솔로
-  { id: 'crush',              label: '짝사랑운',   icon: '💘', group: 'solo' },
-  { id: 'blind_date',         label: '소개팅운',   icon: '🤝', group: 'solo' },
-  { id: 'meeting_timing',     label: '만남의 시기', icon: '🔮', group: 'solo' },
-  { id: 'ideal_type',         label: '이상형 분석', icon: '👩‍❤️‍👨', group: 'solo' },
-  // 썸/연애
-  { id: 'relationship',       label: '연애운',     icon: '💕', group: 'love' },
-  { id: 'confession_timing',  label: '고백 타이밍', icon: '💌', group: 'love' },
-  { id: 'mind_reading',       label: '속마음 타로', icon: '🔍', group: 'love' },
-  { id: 'couple_fortune',     label: '데이트 운세', icon: 'couple', group: 'love' },
-  // 결혼/인연
-  { id: 'marriage',           label: '결혼운',     icon: 'wedding', group: 'marriage' },
-  { id: 'remarriage',         label: '재혼운',     icon: '💍', group: 'marriage' },
-  { id: 'reunion',            label: '재회운',     icon: '💔', group: 'marriage' },
-  { id: 'past_life',          label: '전생 인연',   icon: '🌌', group: 'marriage' },
+// ── 타로 메인 카테고리 (기본 표시) ──
+const TAROT_MAIN_CATS = [
+  { id: 'relationship', label: '연애운',     icon: '💕' },
+  { id: 'mind_reading', label: '속마음',     icon: '🔍' },
+  { id: 'general',      label: '종합운',     icon: '🔮' },
+  { id: 'money',        label: '재물운',     icon: '💰' },
+  { id: 'career',       label: '직업운',     icon: '💼' },
+  { id: 'health',       label: '건강운',     icon: '💚' },
+  { id: 'marriage',     label: '결혼·인연',  icon: '💒' },
 ];
 
+// ── 타로 세부 카테고리 (더보기) ──
+const TAROT_MORE_CATS = [
+  { id: 'crush',              label: '짝사랑',     icon: '💘' },
+  { id: 'confession_timing',  label: '고백타이밍',  icon: '💌' },
+  { id: 'blind_date',         label: '소개팅',     icon: '🤝' },
+  { id: 'couple_fortune',     label: '데이트',     icon: '💑' },
+  { id: 'meeting_timing',     label: '만남시기',   icon: '⏳' },
+  { id: 'reunion',            label: '재회운',     icon: '💔' },
+  { id: 'past_life',          label: '전생인연',   icon: '🌌' },
+  { id: 'ideal_type',         label: '이상형',     icon: '👩‍❤️‍👨' },
+];
+
+// 하위호환용 (서버/AI에서 참조)
+const TAROT_LOVE_TYPES = [
+  { id: 'crush', label: '짝사랑운', icon: '💘', group: 'solo' },
+  { id: 'blind_date', label: '소개팅운', icon: '🤝', group: 'solo' },
+  { id: 'meeting_timing', label: '만남의 시기', icon: '🔮', group: 'solo' },
+  { id: 'ideal_type', label: '이상형 분석', icon: '👩‍❤️‍👨', group: 'solo' },
+  { id: 'relationship', label: '연애운', icon: '💕', group: 'love' },
+  { id: 'confession_timing', label: '고백 타이밍', icon: '💌', group: 'love' },
+  { id: 'mind_reading', label: '속마음 타로', icon: '🔍', group: 'love' },
+  { id: 'couple_fortune', label: '데이트 운세', icon: 'couple', group: 'love' },
+  { id: 'marriage', label: '결혼운', icon: 'wedding', group: 'marriage' },
+  { id: 'remarriage', label: '재혼운', icon: '💍', group: 'marriage' },
+  { id: 'reunion', label: '재회운', icon: '💔', group: 'marriage' },
+  { id: 'past_life', label: '전생 인연', icon: '🌌', group: 'marriage' },
+];
 const TAROT_LOVE_GROUPS = [
   { key: 'solo', label: '솔로를 위한', emoji: '✨' },
   { key: 'love', label: '썸/연애 중', emoji: '💗' },
   { key: 'marriage', label: '결혼/인연', emoji: '💒' },
 ];
-
 const OTHER_CATEGORIES = [
-  { id: 'general',    label: '종합운',    icon: '🔮', color: '#9B59B6' },
-  { id: 'money',      label: '재물운',    icon: '💰', color: '#F4D03F' },
-  { id: 'career',     label: '직업운',    icon: '💼', color: '#3498DB' },
-  { id: 'health',     label: '건강운',    icon: '💚', color: '#2ECC71' },
+  { id: 'general', label: '종합운', icon: '🔮', color: '#9B59B6' },
+  { id: 'money', label: '재물운', icon: '💰', color: '#F4D03F' },
+  { id: 'career', label: '직업운', icon: '💼', color: '#3498DB' },
+  { id: 'health', label: '건강운', icon: '💚', color: '#2ECC71' },
 ];
 
 const POSITION_LABELS = {
@@ -252,6 +271,8 @@ function Tarot() {
   const [shufflePhase, setShufflePhase] = useState('chaos'); // chaos → gather → scatter
   const [shuffleCardsMeta, setShuffleCardsMeta] = useState([]);
   const [flipIndex, setFlipIndex] = useState(-1);
+  const [slotsRevealed, setSlotsRevealed] = useState(false); // 버리기 후 남은 카드 앞면 표시
+  const [showAnalyzeMsg, setShowAnalyzeMsg] = useState(false); // "AI 분석 시작" 메시지
   const [focusCard, setFocusCard] = useState(null);
   const [showDeckModal, setShowDeckModal] = useState(false);
   const [sheetExpanded, setSheetExpanded] = useState(false);
@@ -280,6 +301,7 @@ function Tarot() {
     return null;
   }); // 선택된 뒷면 이미지 경로
   const resultRef = useRef(null);
+  const startBtnRef = useRef(null);
   const cleanupRef = useRef(null);
   const analyzeAmbientRef = useRef(null);
   const carouselTouchRef = useRef({ startX: 0 });
@@ -704,37 +726,35 @@ function Tarot() {
 
       if (newFilled.length >= pickLimit) {
         setAllFilled(true);
-        setDiscardPhase(true);
         if (autoPickRef.current) {
-          // 자동 버리기: 각 슬롯 하이라이트 회전 → 최종 선택 → 날아가기
+          // 자동: 하이라이트 회전 → 랜덤 선택 → 자동 버리기
+          setDiscardPhase(true);
           const slotCount = newFilled.length;
           const finalIdx = Math.floor(Math.random() * slotCount);
-          const rounds = 3; // 3바퀴 회전
-          // 회전이 자연스럽게 finalIdx에서 끝나도록 총 스텝 계산
-          // (마지막 보여지는 위치 = (totalSteps-1) % slotCount === finalIdx)
+          const rounds = 3;
           const totalSteps = slotCount * rounds + finalIdx + 1;
           const stepDelay = 180;
           let stepN = 0;
           const rotate = () => {
             if (stepN >= totalSteps) {
-              // 마지막 회전 위치 = finalIdx. 박력 있는 최종 사운드
               try { playSpotlightFinal(); } catch {}
               setTimeout(() => {
+                setSpotlightIdx(null);
                 handleDiscard(finalIdx);
-                setTimeout(() => setSpotlightIdx(null), 100);
-              }, 1000);
+              }, 800);
               return;
             }
             setSpotlightIdx(stepN % slotCount);
-            // 각 스텝마다 드럼 틱
             try { playSpotlightTick(); } catch {}
             stepN++;
-            // 마지막 몇 스텝은 느려지는 감속 효과
             const remaining = totalSteps - stepN;
             const delay = remaining <= 3 ? stepDelay * (1 + (3 - remaining) * 0.4) : stepDelay;
             setTimeout(rotate, delay);
           };
           setTimeout(rotate, 500);
+        } else {
+          // 수동: 사용자가 버릴 카드 탭
+          setDiscardPhase(true);
         }
       }
     }, 400);
@@ -834,6 +854,7 @@ function Tarot() {
     setAllFilled(false);
     setDiscardPhase(false);
     setDiscardingIdx(null);
+    setSlotsRevealed(false);
     pickBusy.current = false;
     setPickSwipeIdx(0);
     setAutoPickRunning(false);
@@ -1025,6 +1046,8 @@ function Tarot() {
       setSheetExpanded(false);
       setCarouselIndex(0);
       setResultDetailIdx(null);
+      setSlotsRevealed(false);
+      setShowAnalyzeMsg(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   };
@@ -1049,6 +1072,12 @@ function Tarot() {
   return (
     <div className="tarot-flip-parent">
     <div className={`tarot-page${flipPhase ? ` tarot-page--flip-${flipPhase}` : ''}`} data-deck={deck}>
+      {/* 플립 전환 시 배경 — 덱 이미지 블러 */}
+      {(introBg || shuffleBgSrc) && (
+        <div className="tarot-page-bg">
+          <img src={shuffleBgSrc || introBg} alt="" draggable={false} />
+        </div>
+      )}
 
       {/* ═══ 덱 갤러리 — 필름릴 방식 ═══ */}
       {galleryDeck && (() => {
@@ -1387,7 +1416,21 @@ function Tarot() {
             </div>
             <div className="tarot-setup-overlay" />
 
+            {/* 별 파티클 */}
+            <div className="tarot-setup-stars">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span key={i} className="tarot-setup-star" style={{
+                  '--ts-x': `${2 + (i * 5.1) % 96}%`,
+                  '--ts-delay': `${i * 0.35}s`,
+                  '--ts-dur': `${3 + (i % 5) * 0.8}s`,
+                  '--ts-size': `${8 + (i % 4) * 4}px`,
+                  '--ts-drift': `${-12 + (i % 6) * 5}px`,
+                }}>{i % 4 === 0 ? '✦' : i % 4 === 1 ? '✧' : i % 4 === 2 ? '⭐' : '✵'}</span>
+              ))}
+            </div>
+
             <div className="tarot-setup-content">
+              <div className="tarot-setup-spacer" />
               {/* 상단 바 — 덱 변경 */}
               <div className="setup-top-bar">
                 <button className="setup-deck-change" onClick={() => flipToStep(() => setStep('deck'))}>
@@ -1405,47 +1448,31 @@ function Tarot() {
               <div className="setup-section">
                 <div className="setup-section-label">☽ 무엇을 물어볼까요?</div>
                 <div className="setup-chips-wrap">
-                  {[...TAROT_LOVE_TYPES.slice(0, 6), ...OTHER_CATEGORIES.slice(0, 2)].map(item => (
+                  {TAROT_MAIN_CATS.map(item => (
                     <button key={item.id}
                       className={`setup-chip ${category === item.id ? 'active' : ''}`}
                       onClick={() => setCategory(item.id)}>
-                      {typeof item.icon === 'string' && item.icon.length <= 2 ? item.icon : '💕'} {item.label}
+                      {item.icon} {item.label}
                     </button>
                   ))}
                   <button className="setup-chip setup-chip-more"
-                    onClick={() => setSheetExpanded(!sheetExpanded)}>
+                    onClick={() => {
+                      const next = !sheetExpanded;
+                      setSheetExpanded(next);
+                      if (next) setTimeout(() => startBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+                    }}>
                     {sheetExpanded ? '접기 −' : '더보기 +'}
                   </button>
                 </div>
-                {/* 더보기 확장 */}
                 {sheetExpanded && (
-                  <div className="tarot-expanded-cats fade-in" style={{ marginTop: '10px' }}>
-                    {TAROT_LOVE_GROUPS.map(group => (
-                      <div key={group.key} className="tarot-love-group">
-                        <h3 className="tarot-love-group-title"><span>{group.emoji}</span> {group.label}</h3>
-                        <div className="tarot-love-cards">
-                          {TAROT_LOVE_TYPES.filter(l => l.group === group.key).map(lt => (
-                            <button key={lt.id}
-                              className={`tarot-love-card ${category === lt.id ? 'active' : ''}`}
-                              onClick={() => { setCategory(lt.id); setSheetExpanded(false); }}>
-                              <span className="tarot-love-icon">{typeof lt.icon === 'string' && lt.icon.length <= 2 ? lt.icon : '💕'}</span>
-                              <span className="tarot-love-label">{lt.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                  <div className="tarot-more-grid fade-in">
+                    {TAROT_MORE_CATS.map(item => (
+                      <button key={item.id}
+                        className={`setup-chip ${category === item.id ? 'active' : ''}`}
+                        onClick={() => { setCategory(item.id); setSheetExpanded(false); }}>
+                        {item.icon} {item.label}
+                      </button>
                     ))}
-                    <div className="tarot-cat-grid" style={{ marginTop: '8px' }}>
-                      {OTHER_CATEGORIES.map(cat => (
-                        <button key={cat.id}
-                          className={`tarot-cat-btn ${category === cat.id ? 'active' : ''}`}
-                          style={{ '--cat-color': cat.color }}
-                          onClick={() => { setCategory(cat.id); setSheetExpanded(false); }}>
-                          <span className="tarot-cat-icon">{cat.icon}</span>
-                          <span className="tarot-cat-label">{cat.label}</span>
-                        </button>
-                      ))}
-                    </div>
                   </div>
                 )}
               </div>
@@ -1465,8 +1492,21 @@ function Tarot() {
                 </div>
               </div>
 
+              {/* ─ 3. 질문 입력 (선택) ─ */}
+              <div className="setup-section">
+                <div className="setup-section-label">☽ 카드에게 물어볼 질문 <span className="setup-optional">(선택)</span></div>
+                <input
+                  type="text"
+                  className="setup-question-input"
+                  placeholder="예) 이 사람과 잘 될 수 있을까?"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
               {/* 시작 버튼 */}
-              <button className="tarot-start-btn" onClick={startShuffle}>
+              <button className="tarot-start-btn" ref={startBtnRef} onClick={startShuffle}>
                 <span>카드 셔플 시작</span>
                 <span className="tarot-start-glow" />
               </button>
@@ -1570,18 +1610,6 @@ function Tarot() {
               </div>
             )}
 
-            {/* 버리기 안내 회전 오버레이 — 버리기 단계 + 자동 회전/선택 전 */}
-            {discardPhase && discardingIdx === null && spotlightIdx === null && (
-              <div className="pick-select-hint pick-select-hint--discard">
-                <div className="pick-select-hint-orb">
-                  <span className="pick-select-hint-ring pick-select-hint-ring--1" />
-                  <span className="pick-select-hint-ring pick-select-hint-ring--2" />
-                  <span className="pick-select-hint-icon">✕</span>
-                </div>
-                <p className="pick-select-hint-text">버릴 한 장을 선택하세요</p>
-                <p className="pick-select-hint-sub">뽑은 카드 중 하나를 탭하면 사라집니다</p>
-              </div>
-            )}
 
             {/* 무한 캐러셀 — 버리기 단계에선 숨김 */}
             {!discardPhase && (
@@ -1619,7 +1647,7 @@ function Tarot() {
               <button className="pick-auto-btn" onClick={handleRandomPick}>✦ 자동 선택</button>
             )}
 
-            {/* 하단 슬롯 — 뒷면만 표시, 버리기 모드에서만 ✕ */}
+            {/* 하단 슬롯 — 버리기 모드 or 남은 카드 앞면 공개 */}
             <div className={`tarot-deck-slots ${discardPhase ? `discard-mode${filledSlots.length >= 6 ? ' discard-cols-3' : ''}` : ''}`}>
               {filledSlots.map((card, i) => (
                 card === null ? (
@@ -1631,25 +1659,30 @@ function Tarot() {
                 ) : (
                   <div key={`slot-${card.id}-${i}`}
                     className={`tarot-deck-slot slot-filled ${discardPhase ? 'slot-discard-tap' : ''} ${discardingIdx === i ? 'slot-fly-away' : ''} ${spotlightIdx === i ? 'slot-spotlight' : ''} ${spotlightIdx !== null && spotlightIdx !== i ? 'slot-dim' : ''}`}
-                    onClick={() => discardPhase && discardingIdx === null && handleDiscard(i)}
+                    onClick={() => discardPhase && discardingIdx === null && spotlightIdx === null && handleDiscard(i)}
                   >
-                    <div className="tarot-slot-card">
-                      {selectedBack ? (
-                        <img src={selectedBack} alt="" className="slot-card-back-img" draggable={false} />
-                      ) : (
-                        <div className="tarot-card-back">
-                          <div className="tarot-card-back-inner">
-                            <div className="tarot-card-back-star">✦</div>
-                            <div className="tarot-card-back-border" />
+                    <div className={`tarot-slot-card slot-flip-wrap${slotsRevealed ? ' slot-flipped' : ''}`} style={{ '--slot-flip-delay': `${i * 300}ms` }}>
+                      <div className="slot-flip-back">
+                        {selectedBack ? (
+                          <img src={selectedBack} alt="" className="slot-card-back-img" draggable={false} />
+                        ) : (
+                          <div className="tarot-card-back">
+                            <div className="tarot-card-back-inner">
+                              <div className="tarot-card-back-star">✦</div>
+                              <div className="tarot-card-back-border" />
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      <div className="tarot-slot-badge">{card._pickOrder || (i + 1)}</div>
+                        )}
+                      </div>
+                      <div className="slot-flip-front">
+                        <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
+                      </div>
+                      {!slotsRevealed && <div className="tarot-slot-badge">{card._pickOrder || (i + 1)}</div>}
                     </div>
                   </div>
                 )
               ))}
-              {!discardPhase && Array.from({ length: Math.max(0, pickLimit - filledSlots.length) }).map((_, i) => (
+              {!discardPhase && !slotsRevealed && Array.from({ length: Math.max(0, pickLimit - filledSlots.length) }).map((_, i) => (
                 <div key={`empty-${i}`} className="tarot-deck-slot slot-empty">
                   <div className="tarot-slot-placeholder">
                     <span className="tarot-slot-num">{filledSlots.length + i + 1}</span>
@@ -1658,15 +1691,13 @@ function Tarot() {
               ))}
             </div>
 
-            {/* 안내 */}
             {discardPhase && !discardingIdx && (
-              <p className="discard-hint fade-in">
-                버릴 카드 한 장을 선택하세요
-              </p>
+              <p className="discard-hint fade-in">버릴 카드 한 장을 탭하세요</p>
             )}
-            {!allFilled && !autoPickRunning && !discardPhase && (
+            {!allFilled && !autoPickRunning && !discardPhase && !slotsRevealed && (
               <p className="tarot-pick-hint">직감을 믿고 가운데 카드를 탭하세요</p>
             )}
+
           </div>
         );
       })()}
@@ -1827,32 +1858,34 @@ function Tarot() {
           )}
 
           {/* 카드 상세보기 모달 */}
-          {resultDetailIdx !== null && (() => {
-            const card = revealedCards[resultDetailIdx];
-            const posLabel = POSITION_LABELS[spread]?.[resultDetailIdx] || '';
-            const readingCard = reading?.cards?.[resultDetailIdx];
-            if (!card) return null;
-            return (
-              <div className="result-card-detail-overlay fade-in" onClick={() => setResultDetailIdx(null)}>
-                <div className="result-card-detail">
-                  <div className={`result-card-detail-img ${card.reversed ? 'reversed' : ''}`}>
-                    <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
-                    {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
-                  </div>
-                  <div className="result-card-detail-info">
-                    <span className="result-card-detail-pos">{posLabel}</span>
-                    <h3 className="result-card-detail-name">{card.nameKr}{card.reversed ? ' (역)' : ''}</h3>
-                    <p className="result-card-detail-name-en">{card.nameEn}</p>
-                    <p className="result-card-detail-msg">
-                      {readingCard?.meaning || card.msg}
-                    </p>
-                  </div>
-                  <p className="result-card-detail-dismiss">탭하여 돌아가기</p>
-                </div>
-              </div>
-            );
-          })()}
         </div>
+        );
+      })()}
+
+      {/* ═══ 결과 카드 상세보기 모달 (result-stage 밖) ═══ */}
+      {resultDetailIdx !== null && (() => {
+        const card = revealedCards[resultDetailIdx];
+        const posLabel = POSITION_LABELS[spread]?.[resultDetailIdx] || '';
+        const readingCard = reading?.cards?.[resultDetailIdx];
+        if (!card) return null;
+        return (
+          <div className="result-card-detail-overlay fade-in" onClick={() => setResultDetailIdx(null)}>
+            <div className="result-card-detail">
+              <div className={`result-card-detail-img ${card.reversed ? 'reversed' : ''}`}>
+                <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
+                {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
+              </div>
+              <div className="result-card-detail-info">
+                <span className="result-card-detail-pos">{posLabel}</span>
+                <h3 className="result-card-detail-name">{card.nameKr}{card.reversed ? ' (역)' : ''}</h3>
+                <p className="result-card-detail-name-en">{card.nameEn}</p>
+                <p className="result-card-detail-msg">
+                  {readingCard?.meaning || card.msg}
+                </p>
+              </div>
+              <p className="result-card-detail-dismiss">탭하여 돌아가기</p>
+            </div>
+          </div>
         );
       })()}
 

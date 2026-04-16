@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './AnalysisMatrix.css';
 
 const THEMES = {
@@ -144,7 +145,7 @@ export default function AnalysisMatrix({
     '--am-inner-shadow': t.innerShadow,
   };
 
-  return (
+  const content = (
     <div
       className={`analysis-matrix analysis-matrix--${variant}${exiting ? ' analysis-matrix-exit' : ''}`}
       style={styleVars}
@@ -179,4 +180,7 @@ export default function AnalysisMatrix({
       </div>
     </div>
   );
+
+  // Portal로 body에 직접 렌더링 — 부모 stacking context 영향 제거
+  return createPortal(content, document.body);
 }
