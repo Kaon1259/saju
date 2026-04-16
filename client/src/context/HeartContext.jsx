@@ -9,15 +9,14 @@ export function HeartProvider({ children }) {
   const [heartPoints, setHeartPoints] = useState(null);
   const [showInsufficient, setShowInsufficient] = useState(null);
 
-  const userId = localStorage.getItem('userId');
-
   const refreshHearts = useCallback(async () => {
-    if (!userId) { setHeartPoints(null); return; }
+    const uid = localStorage.getItem('userId');
+    if (!uid) { setHeartPoints(null); return; }
     try {
-      const data = await getHeartBalance(userId);
+      const data = await getHeartBalance(uid);
       setHeartPoints(data.heartPoints);
     } catch { /* ignore */ }
-  }, [userId]);
+  }, []);
 
   const deductLocal = useCallback((amount) => {
     setHeartPoints(prev => prev != null ? Math.max(0, prev - amount) : prev);

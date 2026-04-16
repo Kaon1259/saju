@@ -28,13 +28,15 @@ export function AppProvider({ children }) {
         setAppUser(data.user);
 
         if (data.user.isGuest && !userId) {
-          // Guest: userId 저장
+          // Guest: userId 저장 → 하트 잔액 갱신 트리거
           localStorage.setItem('userId', String(data.user.id));
           localStorage.setItem('userName', 'Guest');
+          window.dispatchEvent(new Event('heart:refresh'));
         } else if (!data.user.isGuest) {
           // 로그인 사용자: 서버 프로필로 localStorage 갱신 (자동 로그인 지원)
           localStorage.setItem('userName', data.user.name || '');
           localStorage.setItem('userProfile', JSON.stringify(data.user));
+          window.dispatchEvent(new Event('heart:refresh'));
         }
       } else if (userId) {
         // 서버에 사용자가 없음 → 잘못된 userId → 정리
