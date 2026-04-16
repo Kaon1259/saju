@@ -36,6 +36,7 @@ import MyMenu from './pages/MyMenu';
 import StarFortune from './pages/StarFortune';
 import Settings from './pages/Settings';
 import { HeartProvider } from './context/HeartContext';
+import { AppProvider } from './context/AppContext';
 import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
@@ -217,6 +218,7 @@ function App() {
   };
 
   return (
+    <AppProvider>
     <HeartProvider>
     <>
       {showSplash && <Splash key={splashKey} onDone={handleSplashDone} />}
@@ -267,6 +269,7 @@ function App() {
       </div>
     </>
     </HeartProvider>
+    </AppProvider>
   );
 }
 

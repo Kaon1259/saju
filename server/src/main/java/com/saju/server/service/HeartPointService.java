@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,6 +27,7 @@ public class HeartPointService {
     private static final int DEFAULT_BASIC_COST = 5;
     private static final int DEFAULT_DEEP_COST = 15;
     private static final int DEFAULT_SIGNUP_BONUS = 500;
+    private static final int GUEST_BONUS = 10;
 
     public int getBalance(Long userId) {
         User user = userRepository.findById(userId)
@@ -128,5 +132,37 @@ public class HeartPointService {
                 .build());
 
         log.info("관리자 하트 조정: userId={}, amount={}, balance={}", userId, amount, user.getHeartPoints());
+    }
+
+    public Map<String, Integer> getAllCosts() {
+        Map<String, Integer> costs = new LinkedHashMap<>();
+        heartPointConfigRepository.findAll().forEach(config ->
+            costs.put(config.getAnalysisCategory(), config.getCost())
+        );
+        return costs;
+    }
+
+    @Transactional
+    public User createGuestUser(String guestUuid) {
+        // Check if guest already exists
+        User existing = userRepository.findByKakaoId("guest_" + guestUuid).orElse(null);
+        if (existing != null) return existing;
+
+        User guest = new User();
+        guest.setKakaoId("guest_" + guestUuid);
+        guest.setName("Guest");
+        guest.setHeartPoints(GUEST_BONUS);
+        userRepository.save(guest);
+
+        heartPointLogRepository.save(HeartPointLog.builder()
+                .userId(guest.getId())
+                .transactionType("GUEST_BONUS")
+                .amount(GUEST_BONUS)
+                .balanceAfter(GUEST_BONUS)
+                .description("게스트 보너스")
+                .build());
+
+        log.info("게스트 생성: guestUuid={}, userId={}, bonus={}", guestUuid, guest.getId(), GUEST_BONUS);
+        return guest;
     }
 }

@@ -37,6 +37,16 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
   });
 };
 
+// 앱 초기화 데이터
+export const appInit = async (userId, guestId) => {
+  const params = new URLSearchParams();
+  if (userId) params.set('userId', userId);
+  if (guestId) params.set('guestId', guestId);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const response = await axios.get(`${baseURL}/app/init?${params.toString()}`);
+  return response.data;
+};
+
 // 하트 잔액 조회
 export const getHeartBalance = async (userId) => {
   const response = await api.get('/hearts/balance', { params: { userId } });

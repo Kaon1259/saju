@@ -1,0 +1,16 @@
+.heart-cost-badge {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 2px 6px; border-radius: 10px;
+  background: rgba(244,114,182,0.15);
+  border: 1px solid rgba(244,114,182,0.25);
+  font-size: 11px; font-weight: 700;
+  color: #f472b6; white-space: nowrap;
+  vertical-align: middle; margin-left: 4px;
+}
+.heart-cost-icon { font-size: 10px; }
+.heart-cost-num { font-size: 11px; }
+[data-theme="light"] .heart-cost-badge {
+  background: rgba(219,39,119,0.08);
+  border-color: rgba(219,39,119,0.2);
+  color: #db2777;
+}

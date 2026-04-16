@@ -55,6 +55,17 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("MBTI",                 3,  "운세종합",    "MBTI 운세");
         init("CONSTELLATION",        1,  "운세종합",    "별자리 운세");
 
+        // ── 운세종합 (추가) ──
+        init("BIORHYTHM",              3,  "운세종합",    "바이오리듬");
+        init("MBTI_COMPAT",            3,  "궁합",       "MBTI 궁합");
+        init("BLOODTYPE_COMPAT",       3,  "궁합",       "혈액형 궁합");
+
+        // ── 스타 운세 ──
+        init("CELEB_FORTUNE",          3,  "스타운세",    "스타 오늘의 운세");
+        init("GROUP_FORTUNE",          3,  "스타운세",    "그룹 운세");
+        init("GROUP_COMPAT",           3,  "스타운세",    "그룹 궁합");
+        init("CELEB_MATCH",            3,  "스타운세",    "나와 궁합 맞는 스타");
+
         // ── 기간별 운세 ──
         init("YEAR_FORTUNE",         5,  "기간별운세",  "신년운세");
         init("MONTHLY_FORTUNE",      5,  "기간별운세",  "월간운세");
