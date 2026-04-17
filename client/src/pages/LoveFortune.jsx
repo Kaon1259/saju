@@ -5,7 +5,7 @@ import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveFortune.css';
 
@@ -91,8 +91,9 @@ function LoveFortune() {
     } catch {}
   };
 
+  const { guardedAction: guardLoveFortune } = useHeartGuard('LOVE_RELATIONSHIP');
+
   const handleAnalyze = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate || !relationStatus) return;
     setLoading(true);
     setResult(null);
@@ -317,7 +318,7 @@ function LoveFortune() {
             </div>
           </div>
 
-          <button className="lf-submit" onClick={handleAnalyze} disabled={!birthDate || !relationStatus}>
+          <button className="lf-submit" onClick={() => guardLoveFortune(handleAnalyze)} disabled={!birthDate || !relationStatus}>
             💕 오늘의 연애운 보기 <HeartCost category="LOVE_RELATIONSHIP" />
           </button>
         </div>

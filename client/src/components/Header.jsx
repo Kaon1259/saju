@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from './PageTransition';
 import { useHearts } from '../context/HeartContext';
+import { useApp } from '../context/AppContext';
 import {
   playHomeChime, playLovebeat, playCrystalBall, playHarmony, playOriental,
   playProfilePing, playTarotReveal, playStarTwinkle, playBloodDrop,
@@ -88,7 +89,8 @@ function Header({ onHomeSplash, onTabIntro }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { triggerTransition } = useTransition();
-  const userId = localStorage.getItem('userId');
+  const { isLoggedIn, appUser } = useApp();
+  const userId = isLoggedIn ? localStorage.getItem('userId') : null;
   const { heartPoints } = useHearts();
   const [showMore, setShowMore] = useState(false);
   // 다크모드 고정
@@ -157,8 +159,8 @@ function Header({ onHomeSplash, onTabIntro }) {
         </button>
 
         <div className="top-bar-right">
-          <span className="top-bar-user" onClick={() => navigate(userId ? '/profile' : '/register')}>
-            {userId ? (localStorage.getItem('userName') || '사용자') : 'Guest'}
+          <span className="top-bar-user" onClick={() => navigate(isLoggedIn ? '/profile' : '/register')}>
+            {isLoggedIn ? (appUser?.name || localStorage.getItem('userName') || '사용자') : 'Guest'}
           </span>
           {heartPoints != null && (
             <div className="top-bar-hearts" onClick={() => navigate('/my-menu')}>

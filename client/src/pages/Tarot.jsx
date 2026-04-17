@@ -7,7 +7,7 @@ import { playTarotReveal, playCardShuffle, playCardSpin, playCardPick, playAnaly
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
@@ -611,9 +611,12 @@ function Tarot() {
 
   const requiredCount = SPREADS.find(s => s.id === spread)?.count || 3;
 
+  // 현재 스프레드별 하트 카테고리
+  const tarotCategory = spread === 'one' ? 'TAROT_ONE' : spread === 'five' ? 'TAROT_FIVE' : 'TAROT_THREE';
+  const { guardedAction: guardedShuffleStart } = useHeartGuard(tarotCategory);
+
   // ─── 카드 셔플 ───
   const startShuffle = useCallback(() => {
-    if (isGuest()) { navigate('/register'); return; }
     // 셋업 화면에서 현재 보여지던 배경을 셔플 화면에도 그대로 유지
     try {
       const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
@@ -1512,9 +1515,9 @@ function Tarot() {
               </div>
 
               {/* 시작 버튼 */}
-              <button className="tarot-start-btn" ref={startBtnRef} onClick={startShuffle}>
+              <button className="tarot-start-btn" ref={startBtnRef} onClick={() => guardedShuffleStart(startShuffle)}>
                 <span>카드 셔플 시작</span>
-                <HeartCost category={spread === 'one' ? 'TAROT_ONE' : spread === 'five' ? 'TAROT_FIVE' : 'TAROT_THREE'} />
+                <HeartCost category={tarotCategory} />
                 <span className="tarot-start-glow" />
               </button>
 

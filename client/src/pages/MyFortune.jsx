@@ -7,7 +7,7 @@ import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './MyFortune.css';
 
 function MyFortune() {
@@ -82,9 +82,11 @@ function MyFortune() {
     } catch { return null; }
   };
 
-  // 스트리밍 분석 공통 함수
+  // 하트 가드 — 가드를 통과한 후에만 startAnalysis 호출 (onClick에서 사용)
+  const { guardedAction: guardTodayFortune } = useHeartGuard('TODAY_FORTUNE');
+
+  // 스트리밍 분석 공통 함수 (호출 전에 guardTodayFortune으로 감쌀 것)
   const startAnalysis = (birthDate, birthTime, calendarType, gender, setters) => {
-    if (isGuest()) { navigate('/register'); return; }
     const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef } = setters;
     sL(true); sST(''); sS(false);
     cRef.current?.();
@@ -354,10 +356,10 @@ function MyFortune() {
                       {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
                     </div>
                     <button className="btn-gold" style={{ width: '100%', marginBottom: 8 }}
-                      onClick={() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, 'SOLAR', partnerInfo.gender, {
+                      onClick={() => guardTodayFortune(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, 'SOLAR', partnerInfo.gender, {
                         setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
                         setData: setPartnerData, cleanupRef: partnerCleanupRef,
-                      })}>
+                      }))}>
                       💕 연인 운세 보기 <HeartCost category="TODAY_FORTUNE" />
                     </button>
                   </>
@@ -450,10 +452,10 @@ function MyFortune() {
                   </div>
                 </div>
                 <button className="btn-gold" style={{ width: '100%', marginTop: 16, marginBottom: 24 }} disabled={!otherBirthDate || otherLoading || otherStreaming}
-                  onClick={() => startAnalysis(otherBirthDate, otherBirthTime, otherCalendarType, otherGender, {
+                  onClick={() => guardTodayFortune(() => startAnalysis(otherBirthDate, otherBirthTime, otherCalendarType, otherGender, {
                     setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming,
                     setData: setOtherData, cleanupRef: otherCleanupRef,
-                  })}>
+                  }))}>
                   {otherLoading || otherStreaming ? 'AI 분석중...' : '운세 보기'} <HeartCost category="TODAY_FORTUNE" />
                 </button>
               </div>

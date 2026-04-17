@@ -5,7 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Compatibility.css';
 
@@ -70,8 +70,9 @@ function Compatibility() {
     }
   }, [result, matrixShown, aiStreaming]);
 
+  const { guardedAction: guardCompat } = useHeartGuard('COMPATIBILITY');
+
   const handleAnalyze = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!bd1 || !bd2) return;
     setLoading(true);
     setStreamText('');
@@ -429,7 +430,7 @@ function Compatibility() {
           </div>
         )}
 
-        <button className="btn-gold" onClick={handleAnalyze} disabled={!bd1 || !bd2} style={{ opacity: bd1 && bd2 ? 1 : 0.5 }}>
+        <button className="btn-gold" onClick={() => guardCompat(handleAnalyze)} disabled={!bd1 || !bd2} style={{ opacity: bd1 && bd2 ? 1 : 0.5 }}>
           💕 궁합 분석하기 <HeartCost category="COMPATIBILITY" />
         </button>
       </div>
