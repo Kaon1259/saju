@@ -111,7 +111,7 @@ public class ClaudeApiService {
      * Claude API 스트리밍 호출 + 완료 콜백 (캐시 저장 등)
      */
     public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens, java.util.function.Consumer<String> onComplete) {
-        SseEmitter emitter = new SseEmitter(180000L); // 3분 타임아웃
+        SseEmitter emitter = new SseEmitter(300000L); // 5분 타임아웃
 
         if (!isAvailable()) {
             streamExecutor.execute(() -> {

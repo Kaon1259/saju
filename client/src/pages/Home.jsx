@@ -489,14 +489,14 @@ function Home() {
 
       {/* 3. 핵심 동선 9개 그리드 */}
       <section className="home-main-actions">
-        {HOME_MAIN_MENUS.map(item => (
+        {HOME_MAIN_MENUS.map((item, idx) => (
           <button
             key={item.id}
             className="home-main-action-card"
             onClick={() => navigate(item.path)}
-            style={{ '--mac-color': '#E91E63' }}
+            style={{ '--mac-color': '#E91E63', '--card-idx': idx }}
           >
-            <span className="home-mac-icon">{item.icon}</span>
+            <span className={`home-mac-icon home-mac-anim--${item.id}`}>{item.icon}</span>
             <span className="home-mac-label">{item.label}</span>
             <span className="home-mac-sub">{item.sub}</span>
           </button>
@@ -506,14 +506,14 @@ function Home() {
       {/* 3-1. 더보기 드롭다운 */}
       {showMoreMenus && (
         <section className="home-main-actions home-more-actions">
-          {HOME_MORE_MENUS.map(item => (
+          {HOME_MORE_MENUS.map((item, idx) => (
             <button
               key={item.id}
               className="home-main-action-card"
               onClick={() => navigate(item.path)}
-              style={{ '--mac-color': '#E91E63' }}
+              style={{ '--mac-color': '#E91E63', '--card-idx': idx }}
             >
-              <span className="home-mac-icon">{item.icon}</span>
+              <span className={`home-mac-icon home-mac-anim--${item.id}`}>{item.icon}</span>
               <span className="home-mac-label">{item.label}</span>
               <span className="home-mac-sub">{item.sub}</span>
             </button>

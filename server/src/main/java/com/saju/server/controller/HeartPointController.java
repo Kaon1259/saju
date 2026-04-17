@@ -120,6 +120,34 @@ public class HeartPointController {
     }
 
     /**
+     * 하트 차감 (클라이언트 직접 호출용)
+     * POST /api/hearts/deduct?userId=1&category=DAILY_FORTUNE_EXTRA
+     */
+    @PostMapping("/deduct")
+    public ResponseEntity<Map<String, Object>> deductHearts(
+            @RequestParam Long userId,
+            @RequestParam String category) {
+        try {
+            heartPointService.deductPoints(userId, category, category);
+            int balance = heartPointService.getBalance(userId);
+            return ResponseEntity.ok(Map.of(
+                    "status", "ok",
+                    "balance", balance,
+                    "category", category
+            ));
+        } catch (Exception e) {
+            int balance = heartPointService.getBalance(userId);
+            int cost = heartPointService.getCost(category);
+            return ResponseEntity.status(400).body(Map.of(
+                    "status", "insufficient",
+                    "balance", balance,
+                    "cost", cost,
+                    "message", "하트가 부족합니다"
+            ));
+        }
+    }
+
+    /**
      * 전체 유저 일괄 하트 지급
      * POST /api/hearts/bulk-grant?amount=1000&description=일괄지급
      */

@@ -19,13 +19,17 @@
 [data-theme="light"] .myf-date-action-btn { border-color: rgba(184,134,11,0.2); background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(124,58,237,0.03)); color: #96700a; }
 [data-theme="light"] .myf-date-action-btn--pick { border-color: rgba(124,58,237,0.2); color: #7c3aed; }
 
-/* 날짜 선택 팝업 */
-.myf-date-picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.myf-date-picker-popup { padding: 24px; max-width: 320px; width: 90%; }
-.myf-date-picker-input { width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(251,191,36,0.3); background: rgba(30,10,50,0.95); color: #fff; font-size: 16px; font-family: inherit; color-scheme: dark; margin-bottom: 12px; }
-.myf-date-picker-close { width: 100%; padding: 12px; border-radius: 12px; border: none; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 700; cursor: pointer; }
-[data-theme="light"] .myf-date-picker-input { background: #fff; border-color: rgba(184,134,11,0.3); color: #111; color-scheme: light; }
-[data-theme="light"] .myf-date-picker-close { background: rgba(0,0,0,0.05); color: #333; }
+/* 날짜 선택 (인라인) */
+.myf-date-picker-inline { padding: 16px; margin-bottom: 14px; }
+.myf-date-picker-title { text-align: center; margin-bottom: 14px; font-size: 16px; font-weight: 800; color: #fff; }
+.myf-date-picker-buttons { display: flex; gap: 8px; margin-top: 14px; }
+.myf-date-picker-cancel { flex: 1; padding: 12px; border-radius: 12px; border: none; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 700; cursor: pointer; }
+.myf-date-picker-confirm { flex: 2; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #1a1a2e; font-size: 14px; font-weight: 800; cursor: pointer; transition: transform 0.2s; }
+.myf-date-picker-confirm:active { transform: scale(0.97); }
+.myf-date-picker-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+[data-theme="light"] .myf-date-picker-title { color: #111; }
+[data-theme="light"] .myf-date-picker-cancel { background: rgba(0,0,0,0.05); color: #333; }
+[data-theme="light"] .myf-date-picker-confirm { background: linear-gradient(135deg, #F59E0B, #D97706); color: #fff; }
 
 /* 다른 사람 운세 */
 .myf-other-view { padding: 0 0 60px; }
@@ -36,6 +40,8 @@
 /* 헤더 */
 .myf-header { text-align: center; padding: 8px 0 16px; }
 .myf-title { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, var(--color-accent-gold), #fff, var(--color-accent-gold)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; }
+.myf-deep-badge { font-size: 11px; font-weight: 800; padding: 2px 8px; margin-left: 6px; border-radius: 8px; background: rgba(251,191,36,0.15); -webkit-text-fill-color: #FBBF24; vertical-align: middle; }
+[data-theme="light"] .myf-deep-badge { background: rgba(184,134,11,0.1); -webkit-text-fill-color: #b8860b; }
 .myf-badges { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
 .myf-badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
 .myf-badge--saju { border-color: rgba(251,191,36,0.4); color: #FBBF24; background: rgba(251,191,36,0.1); }

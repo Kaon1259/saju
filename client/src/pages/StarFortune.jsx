@@ -38,7 +38,7 @@ function StarFortune() {
       <div className="star-fortune-list">
         {STAR_MENUS.map((item, idx) => (
           <button key={item.id} className="star-fortune-card" onClick={() => navigate(item.path)} style={{ '--sf-color': item.color, '--card-delay': `${idx * 100}ms` }}>
-            <div className="star-fortune-card-icon">
+            <div className={`star-fortune-card-icon sf-anim--${item.id}`}>
               <span>{item.icon}</span>
             </div>
             <div className="star-fortune-card-info">

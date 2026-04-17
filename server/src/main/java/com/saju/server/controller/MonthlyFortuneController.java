@@ -43,7 +43,8 @@ public class MonthlyFortuneController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String targetType,
-            @RequestParam(required = false) String targetName) {
+            @RequestParam(required = false) String targetName,
+            @RequestParam(required = false, defaultValue = "false") boolean extra) {
 
         Object[] ctx = monthlyFortuneService.buildStreamContext(birthDate, month, birthTime, gender, targetType, targetName);
         String systemPrompt = (String) ctx[0];
@@ -62,10 +63,12 @@ public class MonthlyFortuneController {
             return emitter;
         }
 
+        String heartCategory = extra ? "MONTHLY_FORTUNE_EXTRA" : "MONTHLY_FORTUNE";
+
         // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {
-                heartPointService.checkPoints(userId, "MONTHLY_FORTUNE");
+                heartPointService.checkPoints(userId, heartCategory);
             } catch (InsufficientHeartsException e) {
                 return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
             }
@@ -73,9 +76,10 @@ public class MonthlyFortuneController {
 
         final int finalMonth = month;
         final Long uid = userId;
+        final String finalCategory = heartCategory;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) -> {
             monthlyFortuneService.saveStreamResult(birthDate, finalMonth, birthTime, gender, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "MONTHLY_FORTUNE", "월간운세");
+            if (uid != null) heartPointService.deductPoints(uid, finalCategory, "월간운세");
         });
     }
 }

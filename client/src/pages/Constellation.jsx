@@ -237,7 +237,7 @@ function Constellation() {
             const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
             const bd = profile.birthDate;
             return bd ? (
-              <DeepAnalysis type="constellation" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} />
+              <DeepAnalysis type="constellation" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} previousResult={result} />
             ) : null;
           })()}
         </div>

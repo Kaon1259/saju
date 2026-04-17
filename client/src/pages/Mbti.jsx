@@ -254,7 +254,7 @@ function Mbti() {
                 const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
                 const bd = profile.birthDate;
                 return bd ? (
-                  <DeepAnalysis type="mbti" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} />
+                  <DeepAnalysis type="mbti" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} previousResult={result} />
                 ) : null;
               })()}
             </div>

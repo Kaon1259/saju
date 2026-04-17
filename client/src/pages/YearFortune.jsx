@@ -209,7 +209,7 @@ function YearFortune() {
           </div>
         )}
         {rAdvice && <FortuneCard icon="💡" title="2026년 조언" description={rAdvice} delay={400} />}
-        {bd && <DeepAnalysis type="yearly" birthDate={bd} birthTime={bt} gender={g} calendarType={ct} />}
+        {bd && <DeepAnalysis type="yearly" birthDate={bd} birthTime={bt} gender={g} calendarType={ct} previousResult={result} />}
         <div className="yf-actions">
           <button className="yf-action-btn yf-share-btn" onClick={() => handleShare(result)}>{copied ? '✅ 복사됨' : '📤 공유하기'}</button>
           <button className="yf-action-btn yf-reset-btn" onClick={onReset}>🔄 다시 보기</button>

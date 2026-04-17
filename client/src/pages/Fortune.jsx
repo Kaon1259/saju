@@ -291,7 +291,7 @@ function Fortune() {
         const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
         const bd = profile.birthDate;
         return bd ? (
-          <DeepAnalysis type="today" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} />
+          <DeepAnalysis type="today" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} previousResult={fortune} />
         ) : null;
       })()}
 

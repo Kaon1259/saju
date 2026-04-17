@@ -72,6 +72,12 @@ export const checkHeartSufficient = async (userId, category = 'BASIC_ANALYSIS') 
   return response.data;
 };
 
+// 하트 차감
+export const deductHearts = async (userId, category) => {
+  const response = await api.post('/hearts/deduct', null, { params: { userId, category } });
+  return response.data;
+};
+
 export const getFortuneByZodiac = async (zodiac) => {
   const response = await api.get('/fortune/today', {
     params: { zodiac },
@@ -857,13 +863,14 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
   return response.data;
 };
 
-export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, extra } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate, month });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
   if (targetType) params.set('targetType', targetType);
   if (targetName) params.set('targetName', targetName);
+  if (extra) params.set('extra', 'true');
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/monthly-fortune/stream?${params.toString()}`;
@@ -913,18 +920,19 @@ export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, 
 };
 
 // ─── 심화분석 ───
-export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calendarType, extra) => {
+export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calendarType, extra, context) => {
   const params = { type, birthDate };
   if (birthTime) params.birthTime = birthTime;
   if (gender) params.gender = gender;
   if (calendarType) params.calendarType = calendarType;
   if (extra) params.extra = extra;
+  if (context) params.context = context;
   const response = await api.get('/deep/fortune', { params });
   return response.data;
 };
 
-// ─── 심화분석 스트리밍 ───
-export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+// ─── 심화분석 스트리밍 (POST fetch + ReadableStream) ───
+export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, context } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type, birthDate });
   if (birthTime) params.set('birthTime', birthTime);
@@ -937,28 +945,66 @@ export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calend
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/deep/fortune/stream?${params.toString()}`;
-  const eventSource = new EventSource(url);
-  addHeartListener(eventSource, { onInsufficientHearts, onError });
+  const controller = new AbortController();
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
-  eventSource.addEventListener('cached', (e) => {
-    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
-    eventSource.close();
-  });
-  eventSource.addEventListener('done', (e) => {
-    onDone?.(e.data);
-    eventSource.close();
-  });
-  eventSource.addEventListener('error', (e) => {
-    onError?.(e.data || 'Stream error');
-    eventSource.close();
-  });
-  eventSource.onerror = () => {
-    onError?.('Connection lost');
-    eventSource.close();
-  };
+  (async () => {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: context || '',
+        signal: controller.signal,
+      });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-  return () => eventSource.close(); // cleanup function
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE 이벤트는 빈 줄(\n\n)로 구분
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+
+        for (const event of events) {
+          if (!event.trim()) continue;
+          const lines = event.split('\n');
+          let eventName = '';
+          let dataLines = [];
+          for (const line of lines) {
+            if (line.startsWith('event:')) eventName = line.slice(6).trim();
+            else if (line.startsWith('data:')) dataLines.push(line.slice(5));
+          }
+          const data = dataLines.join('\n');
+
+          if (eventName === 'insufficient_hearts') {
+            try { window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: JSON.parse(data) })); } catch {}
+            onError?.('insufficient_hearts');
+            return;
+          } else if (eventName === 'cached') {
+            try { onCached?.(JSON.parse(data)); } catch { onDone?.(data); }
+            return;
+          } else if (eventName === 'chunk') {
+            onChunk?.(data);
+          } else if (eventName === 'done') {
+            window.dispatchEvent(new CustomEvent('heart:refresh'));
+            window.dispatchEvent(new CustomEvent('heart:deducted'));
+            onDone?.(data);
+            return;
+          } else if (eventName === 'error') {
+            onError?.(data);
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') onError?.(e.message || 'Connection lost');
+    }
+  })();
+
+  return () => controller.abort();
 };
 
 // ─── YouTube Shorts ───

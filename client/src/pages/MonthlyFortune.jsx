@@ -61,9 +61,18 @@ function MonthlyFortune() {
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [result, setResult] = useState(null);
+  const [showAllMonths, setShowAllMonths] = useState(false);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+
+  // 기본 3개월: 이전달, 이번달, 다음달
+  const freeMonths = [
+    currentMonth === 1 ? 12 : currentMonth - 1,
+    currentMonth,
+    currentMonth === 12 ? 1 : currentMonth + 1,
+  ];
+  const isExtraMonth = (m) => !freeMonths.includes(m);
 
   useEffect(() => {
     return () => { cleanupRef.current?.(); };
@@ -95,6 +104,7 @@ function MonthlyFortune() {
 
     let firstChunk = true;
     cleanupRef.current = getMonthlyFortuneStream(birthDate, m, birthTime, gender, {
+      extra: isExtraMonth(m),
       onCached: (data) => {
         setResult({ ...data, month: m });
         setLoading(false);
@@ -173,18 +183,24 @@ function MonthlyFortune() {
         <div className="mf-form-section fade-in">
           {/* 월 선택 그리드 */}
           <div className="mf-month-grid">
-            {MONTHS.map(m => (
+            {MONTHS.filter(m => showAllMonths || freeMonths.includes(m)).map(m => (
               <button
                 key={m}
-                className={`mf-month-btn ${selectedMonth === m ? 'active' : ''} ${m === currentMonth ? 'current' : ''}`}
+                className={`mf-month-btn ${selectedMonth === m ? 'active' : ''} ${m === currentMonth ? 'current' : ''} ${isExtraMonth(m) ? 'extra' : ''}`}
                 onClick={() => setSelectedMonth(m)}
               >
                 <span className="mf-month-num">{m}</span>
                 <span className="mf-month-label">월</span>
                 {m === currentMonth && <span className="mf-month-now">NOW</span>}
+                {isExtraMonth(m) && <span className="mf-month-heart">💗</span>}
               </button>
             ))}
           </div>
+          {!showAllMonths && (
+            <button className="mf-show-more-btn" onClick={() => setShowAllMonths(true)}>
+              🔓 다른 월 더보기 <HeartCost category="MONTHLY_FORTUNE_EXTRA" />
+            </button>
+          )}
 
           <div className="mf-form glass-card">
             {localStorage.getItem('userId') && (
@@ -337,7 +353,7 @@ function MonthlyFortune() {
 
           {/* 심화분석 */}
           {birthDate && (
-            <DeepAnalysis type="monthly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+            <DeepAnalysis type="monthly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} previousResult={result} />
           )}
 
           {/* 월 이동 버튼 */}

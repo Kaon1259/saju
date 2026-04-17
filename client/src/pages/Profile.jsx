@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUser, getDailyFortunes } from '../api/fortune';
+import { getUser, getDailyFortunes, deductHearts } from '../api/fortune';
+import HeartCost from '../components/HeartCost';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import ConstellationMap from '../components/ConstellationMap';
 import './Profile.css';
@@ -53,6 +54,8 @@ function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dailyFortunes, setDailyFortunes] = useState(null);
+  const [showAllDaily, setShowAllDaily] = useState(false);
+  const [dailyUnlocking, setDailyUnlocking] = useState(false);
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -183,7 +186,7 @@ function Profile() {
         <section className="profile-daily glass-card">
           <h3 className="profile-section-title">📆 {new Date().getMonth() + 1}월 일운</h3>
           <div className="profile-daily-list">
-            {dailyFortunes.map((day) => {
+            {(showAllDaily ? dailyFortunes : dailyFortunes.slice(0, 3)).map((day) => {
               const score = day.rating === '대길' ? 95 : day.rating === '길' ? 78 : day.rating === '보통' ? 55 : day.rating === '소길' ? 42 : 30;
               const scoreColor = score >= 80 ? '#ff3d7f' : score >= 60 ? '#fbbf24' : score >= 45 ? '#94a3b8' : '#64748b';
               return (
@@ -198,6 +201,23 @@ function Profile() {
               );
             })}
           </div>
+          {!showAllDaily && dailyFortunes.length > 3 && (
+            <button className="profile-daily-more-btn" disabled={dailyUnlocking} onClick={async () => {
+              const userId = localStorage.getItem('userId');
+              if (!userId) return;
+              setDailyUnlocking(true);
+              try {
+                await deductHearts(userId, 'DAILY_FORTUNE_EXTRA');
+                setShowAllDaily(true);
+                window.dispatchEvent(new CustomEvent('heart:refresh'));
+              } catch {
+                alert('하트가 부족합니다. 충전 후 다시 시도해주세요.');
+              }
+              setDailyUnlocking(false);
+            }}>
+              {dailyUnlocking ? '처리 중...' : <>🔓 일운 더보기 ({dailyFortunes.length - 3}일) <HeartCost category="DAILY_FORTUNE_EXTRA" /></>}
+            </button>
+          )}
         </section>
       )}
 

@@ -361,7 +361,7 @@ function Tojeong() {
 
       {/* 심화분석 */}
       {birthDate && (
-        <DeepAnalysis type="tojeong" birthDate={birthDate} calendarType={calendarType} />
+        <DeepAnalysis type="tojeong" birthDate={birthDate} calendarType={calendarType} previousResult={result} />
       )}
 
       {/* 다시하기 */}

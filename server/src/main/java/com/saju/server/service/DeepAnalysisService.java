@@ -25,6 +25,11 @@ public class DeepAnalysisService {
 
     @Transactional
     public Map<String, Object> analyze(String type, String birthDate, String birthTime, String gender, String calendarType, String extra) {
+        return analyze(type, birthDate, birthTime, gender, calendarType, extra, null);
+    }
+
+    @Transactional
+    public Map<String, Object> analyze(String type, String birthDate, String birthTime, String gender, String calendarType, String extra, String context) {
         String fortuneType = "deep-" + type;
         String cacheKey = buildCacheKey(type, birthDate, birthTime, gender, calendarType, extra);
 
@@ -34,7 +39,7 @@ public class DeepAnalysisService {
 
         // 프롬프트 빌드
         String systemPrompt = buildSystemPrompt(type);
-        String userPrompt = buildUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
+        String userPrompt = buildUserPrompt(type, birthDate, birthTime, gender, calendarType, extra, context);
 
         // AI 호출
         Map<String, Object> result = new LinkedHashMap<>();
@@ -95,13 +100,25 @@ public class DeepAnalysisService {
 
     /** 사용자 프롬프트 외부 접근 */
     public String getUserPrompt(String type, String birthDate, String birthTime, String gender, String calendarType, String extra) {
-        return buildUserPrompt(type, birthDate, birthTime, gender, calendarType, extra);
+        return buildUserPrompt(type, birthDate, birthTime, gender, calendarType, extra, null);
+    }
+
+    public String getUserPrompt(String type, String birthDate, String birthTime, String gender, String calendarType, String extra, String context) {
+        return buildUserPrompt(type, birthDate, birthTime, gender, calendarType, extra, context);
     }
 
     private String buildSystemPrompt(String type) {
         String base = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
             당신은 사주명리학과 동양 역학에 빠삭한 심화 분석 전문가야!
             프리미엄 심화 분석을 친근하고 알기 쉽게 풀어주는 게 특기거든.
+
+            [핵심 역할]
+            사용자가 이미 기본 분석(운세)을 받은 상태야.
+            만약 [기존 분석 결과]가 제공되면, 그 분석을 기반으로 더 깊이 파고들어야 해.
+            - 기본 분석에서 언급된 키워드(오행, 기운, 조언 등)를 구체적으로 확장해줘
+            - 기본 분석이 "좋다/나쁘다"로 요약한 부분을 "왜 그런지, 어떻게 활용/대처할지"로 심화해줘
+            - 기본 분석과 모순되면 절대 안 돼
+            - 기본 분석을 그대로 반복하지 마 — 새로운 깊이의 인사이트를 줘
 
             [분석 원칙]
             1. 모든 분석은 오행·십성의 이론적 근거를 제시해
@@ -114,13 +131,14 @@ public class DeepAnalysisService {
         return switch (type) {
             case "today" -> base + """
                 [오늘의 운세 프리미엄 심화분석]
-                - 2시간 단위 시간대별 운세 (새벽/오전/점심/오후/저녁/밤 6구간)
-                - 오행 기반 방위·음식·색상·향기·활동 추천 (각각 구체적 이유 포함)
-                - 오늘의 감정/심리 깊이 분석 — 무의식 패턴, 대처법, 명상 키워드
-                - 대인관계별 조언 (직장 상사, 동료, 연인, 가족, 친구 각각)
-                - 재물 에너지 흐름 — 소비/투자/저축 각각의 적합도
-                - 건강 주의 부위와 오행 기반 보양법
-                - 오늘 피해야 할 행동/장소/사람 유형 상세
+                이미 제공된 기본 운세(총운/애정운/재물운/직장운/건강운)를 같은 항목 구조로 더 깊게 확장하는 것이 핵심이야.
+                - 총운 심화: 기본 총운의 오행 근거를 밝히고, 시간대별 구체 행동 지침 추가
+                - 애정운 심화: 도화살·홍염살 관점 추가, 만남 시기/장소/행동 전략
+                - 재물운 심화: 돈이 들어오는 방위·시간, 투자/소비/저축 구체적 수치·행동
+                - 직장운 심화: 상사/동료 관계별 전략, 회의·보고 최적 시간
+                - 건강운 심화: 오행 기반 장기 분석, 보양 음식·운동·색상 처방
+                - 행동 지침: 기본 분석의 조언을 실행 가능한 구체적 행동으로
+                - 천기누설: 기본 분석에서 드러나지 않은 숨은 기운
                 """;
             case "love" -> base + """
                 [연애운 프리미엄 심화분석]
@@ -246,7 +264,7 @@ public class DeepAnalysisService {
         };
     }
 
-    private String buildUserPrompt(String type, String birthDate, String birthTime, String gender, String calendarType, String extra) {
+    private String buildUserPrompt(String type, String birthDate, String birthTime, String gender, String calendarType, String extra, String context) {
         StringBuilder sb = new StringBuilder();
         sb.append("생년월일: ").append(birthDate);
         if (birthTime != null && !birthTime.isEmpty()) sb.append(", 태어난 시간: ").append(birthTime);
@@ -259,23 +277,32 @@ public class DeepAnalysisService {
         }
         sb.append(", 분석 대상 날짜: ").append(targetDate);
 
+        // 기존 분석 결과가 있으면 심화의 기반으로 포함
+        if (context != null && !context.isEmpty()) {
+            sb.append("\n\n═══ [기존 분석 결과 — 심화분석의 기반] ═══\n");
+            sb.append("아래는 사용자가 이미 받은 기본 분석이야. 심화분석은 반드시 이 내용을 기반으로 더 깊이 파고들어야 해!\n\n");
+            sb.append(context);
+            sb.append("\n\n═══ [심화분석 지침] ═══\n");
+            sb.append("1. 위 기본 분석에서 언급된 오행·기운·키워드를 반드시 참조해서 더 구체적으로 풀어줘\n");
+            sb.append("2. 기본 분석이 '좋다/나쁘다'로만 말한 부분 → 왜 그런지 사주학적 근거와 실전 행동 지침으로 확장해줘\n");
+            sb.append("3. 기본 분석과 모순되는 내용은 절대 쓰지 마\n");
+            sb.append("4. 기본 분석을 그대로 반복하지 마 — 새로운 인사이트와 실행 가능한 조언을 줘\n");
+        }
+
         sb.append("\n\n[중요] 프리미엄 분석입니다. 각 항목을 간결하되 구체적으로 작성하세요. 추상적 표현 금지.\n다음 JSON 형식으로 응답하세요:\n");
 
         String jsonTemplate = switch (type) {
             case "today" -> """
                 {
-                  "deepSummary": "핵심 메시지 1-2문장",
-                  "morningFortune": "오전 운세 — 업무/대인관계/행동지침 (3문장)",
-                  "afternoonFortune": "오후 운세 — 재물/미팅/활동 (3문장)",
-                  "eveningFortune": "저녁 운세 — 휴식/연애/자기계발 (3문장)",
-                  "elementAdvice": "오행 조언 — 방위, 음식, 색상, 활동 추천 (3문장)",
-                  "emotionAnalysis": "감정/심리 분석 — 대처법, 명상 키워드 (3문장)",
-                  "relationshipAdvice": "대인관계 핵심 조언 (3문장)",
-                  "wealthFlow": "재물 에너지 — 소비/투자/저축 조언 (3문장)",
-                  "healthGuide": "건강 — 주의 부위와 보양법 (2문장)",
-                  "actionGuide": "오늘 꼭 해야 할 행동 3가지",
-                  "avoidList": "오늘 피해야 할 것 2가지",
-                  "hiddenMessage": "천기누설 메시지 (2문장)"
+                  "deepSummary": "기본 분석의 핵심을 한 단계 더 깊게 해석한 메시지 (2문장)",
+                  "overallDeep": "총운 심화 — 기본 총운에서 언급된 기운을 사주학적으로 왜 그런지 근거를 밝히고, 시간대별(오전/오후/저녁) 구체적 행동 지침 (5문장)",
+                  "loveDeep": "애정운 심화 — 기본 애정운을 더 깊게, 도화살·홍염살 관점, 구체적 만남 시기/장소/행동 전략 (5문장)",
+                  "moneyDeep": "재물운 심화 — 기본 재물운을 확장, 오행 기반 돈이 들어오는 방위·시간·행동, 투자/소비/저축 각각 구체적 조언 (5문장)",
+                  "careerDeep": "직장운 심화 — 기본 직장운을 확장, 상사/동료/부하 관계별 전략, 회의·보고·결정 최적 시간 (5문장)",
+                  "healthDeep": "건강운 심화 — 기본 건강운을 확장, 오행 기반 주의 장기/부위, 보양 음식·운동·색상 구체적 처방 (4문장)",
+                  "actionGuide": "오늘 꼭 해야 할 행동 3가지 (기본 분석의 조언을 실행 가능하게 구체화)",
+                  "avoidList": "오늘 피해야 할 것 2가지 (기본 분석에서 주의라고 한 부분의 구체적 상황)",
+                  "hiddenMessage": "천기누설 — 기본 분석에서 드러나지 않은 숨은 기운 (2문장)"
                 }""";
             case "love", "reunion", "remarriage", "blind_date" -> """
                 {

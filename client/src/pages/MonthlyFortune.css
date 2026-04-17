@@ -142,6 +142,56 @@
   letter-spacing: 0.5px;
 }
 
+.mf-month-heart {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  font-size: 8px;
+  line-height: 1;
+}
+
+.mf-month-btn.extra {
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.mf-month-btn.extra.active {
+  opacity: 1;
+}
+
+/* 더보기 버튼 */
+.mf-show-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--mf-accent, rgba(96,165,250,0.4));
+  background: var(--mf-accent-dim, rgba(96,165,250,0.06));
+  color: var(--mf-accent, #60a5fa);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  z-index: 1;
+}
+.mf-show-more-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px var(--mf-accent-glow, rgba(96,165,250,0.15));
+}
+.mf-show-more-btn:active {
+  transform: scale(0.98);
+}
+[data-theme="light"] .mf-show-more-btn {
+  border-color: rgba(0,0,0,0.15);
+  background: rgba(0,0,0,0.02);
+  color: #555;
+}
+
 /* ═══ 입력 폼 ═══ */
 .mf-form-section {
   position: relative;

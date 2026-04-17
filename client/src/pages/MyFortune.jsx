@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
-import DeepAnalysis from '../components/DeepAnalysis';
+import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -25,6 +25,7 @@ function MyFortune() {
   const [dateMode, setDateMode] = useState('today'); // 'today' | 'tomorrow' | 'pick'
   const [pickDate, setPickDate] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempPickDate, setTempPickDate] = useState('');
 
   // 연인 운세
   const [partnerData, setPartnerData] = useState(null);
@@ -220,7 +221,7 @@ function MyFortune() {
   const renderResult = (rd, onReset, onShare, label, birthInfo) => (
     <>
       <div className="myf-header">
-        <h1 className="myf-title">{label}</h1>
+        <h1 className="myf-title">{label}{birthInfo?.birthDate && hasDeepResult('today', birthInfo.birthDate) && <span className="myf-deep-badge">+ 심화</span>}</h1>
         {rd.dayMaster && (
           <div className="myf-badges">
             <span className="myf-badge myf-badge--saju">{rd.dayMasterHanja} {rd.dayMaster} 일간</span>
@@ -270,7 +271,7 @@ function MyFortune() {
         )}
       </div>
       {birthInfo?.birthDate && (
-        <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} />
+        <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} previousResult={rd} />
       )}
       <div className="myf-actions">
         <button className="myf-share-btn" onClick={onShare}>{copied ? '✅ 복사 완료!' : '📤 공유하기'}</button>
@@ -302,29 +303,33 @@ function MyFortune() {
           {dateMode === 'today' ? (
             <div className="myf-date-actions">
               <button className="myf-date-action-btn" onClick={() => { setDateMode('tomorrow'); setPickDate(''); }}>
-                🌙 내일의 운세 보기
+                🌙 내일의 운세
               </button>
-              <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => setShowDatePicker(true)}>
-                📅 날짜 지정 운세 보기
+              <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => {
+                setTempPickDate('');
+                setShowDatePicker(true);
+              }}>
+                📅 날짜 지정 운세
               </button>
             </div>
           ) : (
             <div className="myf-date-actions">
-              <button className="myf-date-action-btn" onClick={() => { setDateMode('today'); setPickDate(''); }}>
+              <button className="myf-date-action-btn" onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}>
                 ☀️ 오늘의 운세로 돌아가기
               </button>
             </div>
           )}
           {showDatePicker && (
-            <div className="myf-date-picker-overlay" onClick={() => setShowDatePicker(false)}>
-              <div className="myf-date-picker-popup glass-card" onClick={e => e.stopPropagation()}>
-                <h3 style={{ textAlign: 'center', marginBottom: 12, fontSize: 16, fontWeight: 800 }}>📅 날짜 선택</h3>
-                <input type="date" className="myf-date-picker-input"
-                  value={pickDate}
-                  min={(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })()}
-                  max={(() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().slice(0, 10); })()}
-                  onChange={(e) => { setPickDate(e.target.value); setDateMode('pick'); setShowDatePicker(false); }} />
-                <button className="myf-date-picker-close" onClick={() => setShowDatePicker(false)}>닫기</button>
+            <div className="myf-date-picker-inline glass-card">
+              <h3 className="myf-date-picker-title">📅 날짜 선택</h3>
+              <BirthDatePicker value={tempPickDate} onChange={setTempPickDate} />
+              <div className="myf-date-picker-buttons">
+                <button className="myf-date-picker-cancel" onClick={() => setShowDatePicker(false)}>취소</button>
+                <button className="myf-date-picker-confirm" disabled={!tempPickDate} onClick={() => {
+                  setPickDate(tempPickDate);
+                  setDateMode('pick');
+                  setShowDatePicker(false);
+                }}>이 날짜로 보기</button>
               </div>
             </div>
           )}
@@ -537,7 +542,7 @@ function MyFortune() {
             try {
               const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
               if (!profile.birthDate) return null;
-              return <DeepAnalysis key={dateMode + pickDate} type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={getTargetDate() || new Date().toISOString().slice(0, 10)} />;
+              return <DeepAnalysis key={dateMode + pickDate} type="today" birthDate={profile.birthDate} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={getTargetDate() || new Date().toISOString().slice(0, 10)} previousResult={data} />;
             } catch { return null; }
           })()}
         </div>

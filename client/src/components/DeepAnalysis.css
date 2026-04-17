@@ -62,6 +62,30 @@
   transform: translateY(0);
 }
 
+/* 인라인 모드 (심화 완료 후 합쳐서 표시) */
+.deep-inline { margin-top: 0; }
+.deep-inline-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 16px 0 12px; padding: 0;
+}
+.deep-inline-divider::before,
+.deep-inline-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent);
+}
+.deep-inline-badge {
+  font-size: 12px; font-weight: 800; color: #FBBF24;
+  padding: 3px 12px; border-radius: 20px;
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.25);
+  white-space: nowrap;
+}
+[data-theme="light"] .deep-inline-divider::before,
+[data-theme="light"] .deep-inline-divider::after {
+  background: linear-gradient(90deg, transparent, rgba(184,134,11,0.3), transparent);
+}
+[data-theme="light"] .deep-inline-badge { color: #b8860b; background: rgba(251,191,36,0.06); border-color: rgba(184,134,11,0.2); }
+
 /* 라이트 모드 */
 [data-theme="light"] .deep-toggle-btn { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(124,58,237,0.05)); border-color: rgba(184,134,11,0.3); color: #b8860b; }
 [data-theme="light"] .deep-summary { color: #b8860b; background: rgba(251,191,36,0.06); }

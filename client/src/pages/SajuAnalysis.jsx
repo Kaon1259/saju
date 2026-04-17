@@ -755,7 +755,7 @@ function SajuAnalysis() {
         const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
         const useBd = bd || profile.birthDate;
         return useBd ? (
-          <DeepAnalysis type="today" birthDate={useBd} birthTime={birthTime || profile.birthTime} gender={gender || profile.gender} calendarType={calendarType || profile.calendarType} />
+          <DeepAnalysis type="today" birthDate={useBd} birthTime={birthTime || profile.birthTime} gender={gender || profile.gender} calendarType={calendarType || profile.calendarType} previousResult={result} />
         ) : null;
       })()}
 

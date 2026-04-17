@@ -403,6 +403,38 @@
 }
 [data-theme="light"] .tarot-deck-screen { background: #f0eef5; }
 
+/* ─── 덱 선택 화면: 벚꽃 흩날림 ─── */
+.deck-sakura {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+.deck-sakura-petal {
+  position: absolute;
+  top: -30px;
+  font-size: var(--sk-size, 18px);
+  left: var(--sk-x, 50%);
+  opacity: 0;
+  animation: sakuraFall var(--sk-dur, 5s) ease-in infinite;
+  animation-delay: var(--sk-delay, 0s);
+  filter: drop-shadow(0 2px 3px rgba(255,183,197,0.4));
+  will-change: transform, opacity;
+}
+@keyframes sakuraFall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg) scale(0.7); opacity: 0; }
+  8%   { opacity: 0.9; }
+  40%  { opacity: 0.7; }
+  100% {
+    transform:
+      translateY(105vh)
+      translateX(var(--sk-drift, 50px))
+      rotate(calc(var(--sk-rot, 0deg) + 360deg))
+      scale(0.5);
+    opacity: 0;
+  }
+}
+
 /* 덱 선택 배경 영상 */
 .deck-bg-video {
   position: absolute; inset: 0; z-index: 0;
@@ -418,8 +450,8 @@
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  opacity: 0.4;
-  filter: brightness(0.45) saturate(1.3);
+  opacity: 0.65;
+  filter: brightness(0.65) saturate(1.25);
 }
 .deck-bg-video video { z-index: 1; }
 .deck-bg-video img { z-index: 0; }
@@ -438,8 +470,8 @@
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: blur(8px) brightness(0.5) saturate(1.35) contrast(1.05);
-  transform: scale(1.12);
+  filter: blur(2px) brightness(0.7) saturate(1.25) contrast(1.05);
+  transform: scale(1.06);
   animation: deckBgIntroZoom 16s ease-in-out infinite alternate;
 }
 @keyframes deckBgIntroZoom {
@@ -449,8 +481,8 @@
 .deck-bg-intro-overlay {
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse at center, rgba(255, 200, 80, 0.12) 0%, rgba(212, 170, 60, 0.06) 40%, transparent 75%),
-    radial-gradient(ellipse at center, transparent 0%, rgba(10, 5, 21, 0.2) 70%, rgba(0, 0, 0, 0.4) 100%);
+    radial-gradient(ellipse at center, rgba(255, 200, 80, 0.08) 0%, rgba(212, 170, 60, 0.03) 40%, transparent 75%),
+    radial-gradient(ellipse at center, transparent 0%, rgba(10, 5, 21, 0.1) 70%, rgba(0, 0, 0, 0.2) 100%);
   pointer-events: none;
   animation: deckBgIntroPulse 5s ease-in-out infinite alternate;
 }
@@ -477,12 +509,12 @@
 /* 슬라이드 캐러셀 */
 .deck-carousel {
   position: relative; z-index: 2;
-  width: 100%; height: min(50vh, 380px);
+  width: 100%; height: min(60vh, 460px);
   display: flex; align-items: center; justify-content: center;
   cursor: grab;
   touch-action: pan-y;
   user-select: none; -webkit-user-select: none;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
 }
 .deck-carousel:active { cursor: grabbing; }
@@ -541,11 +573,18 @@
 .deck-cover-wrap img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition: opacity 0.8s ease;
 }
 .deck-cover-static { z-index: 1; }
 .deck-cover-gif { z-index: 2; }
+/* GIF/커버는 호흡 스케일 애니메이션 대상에서 제외 (잘림 방지) */
+.deck-slide-card .deck-cover-wrap img {
+  animation: none !important;
+  transform: none !important;
+  filter: contrast(1.05) saturate(1.05);
+}
 .deck-cover-frame {
   z-index: 4;
   mix-blend-mode: screen;
@@ -1865,9 +1904,9 @@
 .shuffle-back-card {
   position: absolute;
   top: 50%; left: 50%;
-  width: min(26vw, 130px);
+  width: min(36vw, 182px);
   aspect-ratio: 2 / 3;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow:
     0 10px 28px rgba(0,0,0,0.6),
@@ -2974,9 +3013,10 @@
   z-index: 10;
   display: flex; flex-direction: column; align-items: center;
   justify-content: center;
-  padding-top: 40px;
-  padding-bottom: 190px; /* 중심을 추가 1.5cm(57px) 더 위로 이동 — 총 ≈2.5cm */
-  overflow: hidden;
+  padding-top: 30px;
+  padding-bottom: 140px;
+  overflow-x: hidden;
+  overflow-y: hidden;
   touch-action: none;
   overscroll-behavior: none;
   background: #050510;
@@ -2993,12 +3033,12 @@
 /* 리빌 캐러셀 — 카드 앞면 슬라이드 */
 .reveal-carousel {
   position: relative; z-index: 2;
-  width: 100%; height: min(50vh, 360px);
+  width: 100%; height: min(55vh, 400px);
   display: flex; align-items: center; justify-content: center;
   cursor: grab; touch-action: pan-y;
   user-select: none; -webkit-user-select: none;
-  overflow: hidden;
-  margin-top: 16px;
+  overflow: visible;
+  margin-top: 24px;
 }
 .reveal-carousel:active { cursor: grabbing; }
 
@@ -3007,7 +3047,7 @@
   width: min(48vw, 190px); aspect-ratio: 261/500;
   will-change: transform, opacity;
   text-align: center;
-  perspective: 1400px;
+  perspective: 800px;
 }
 .reveal-slide-active {
   filter: drop-shadow(0 0 24px rgba(222,169,87,0.3)) drop-shadow(0 12px 40px rgba(0,0,0,0.4));
@@ -3218,6 +3258,35 @@
   50%  { opacity: 0.8; transform: rotate(420deg) translateX(70px) rotate(-420deg) scale(1.2); }
   100% { transform: rotate(600deg) translateX(70px) rotate(-600deg) scale(0.9); opacity: 0.5; }
 }
+
+/* 카드별 해석 테이블 */
+.tarot-cards-table { margin-bottom: 12px; }
+.tarot-cards-table-body { display: flex; flex-direction: column; gap: 0; }
+.tarot-card-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 4px 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.tarot-card-row:last-child { border-bottom: none; }
+.tarot-card-row-pos {
+  font-size: 11px; font-weight: 800; color: rgba(222,169,87,0.9);
+  grid-column: 1; grid-row: 1 / 3;
+  display: flex; align-items: center;
+}
+.tarot-card-row-name {
+  font-size: 14px; font-weight: 700; color: #fff;
+  grid-column: 2; grid-row: 1;
+}
+.tarot-card-row-meaning {
+  font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.75);
+  grid-column: 2; grid-row: 2;
+}
+[data-theme="light"] .tarot-card-row { border-bottom-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .tarot-card-row-pos { color: #b8860b; }
+[data-theme="light"] .tarot-card-row-name { color: #222; }
+[data-theme="light"] .tarot-card-row-meaning { color: #444; }
 
 /* 결과 카드 상세보기 모달 */
 .result-card-detail-overlay {
@@ -4590,8 +4659,12 @@
   position: relative;
   display: flex; flex-direction: column; align-items: center;
   min-height: 100vh;
-  padding-top: 40px;
+  padding-top: 30px;
   background: #050510;
+}
+.tarot-result-stage .reveal-carousel {
+  margin-top: 40px;
+  overflow: visible;
 }
 [data-theme="light"] .tarot-result-stage { background: #f0eef5; }
 
@@ -4601,7 +4674,7 @@
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 20px 0;
+  padding: 30px 0 20px;
   margin-bottom: 16px;
 }
 .tarot-result-grid.spread-one { gap: 0; }

@@ -311,7 +311,7 @@ function WeeklyFortune() {
 
           {/* 심화분석 */}
           {birthDate && (
-            <DeepAnalysis type="weekly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+            <DeepAnalysis type="weekly" birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} previousResult={result} />
           )}
 
           {/* 리셋 */}

@@ -312,7 +312,7 @@ function SpecialFortune() {
               </div>
 
               {birthDate && loveType && (
-                <DeepAnalysis type={loveType === 'relationship' ? 'love' : loveType} birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} />
+                <DeepAnalysis type={loveType === 'relationship' ? 'love' : loveType} birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} previousResult={result} />
               )}
 
               <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}>🔄 다시 보기</button>

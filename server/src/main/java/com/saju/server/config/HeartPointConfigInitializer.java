@@ -19,6 +19,7 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         // ── 기본 운세 ──
         init("TODAY_FORTUNE",        5,  "기본운세",    "오늘의 운세");
         init("SAJU_ANALYSIS",       5,  "기본운세",    "사주분석");
+        init("DAILY_FORTUNE_EXTRA", 10,  "기본운세",    "일운 더보기");
 
         // ── 1:1연애운 (13개 서브타입) ──
         init("LOVE_RELATIONSHIP",    5,  "1:1연애운",   "연애운");
@@ -42,10 +43,10 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("MANSERYEOK",          5,  "기본운세",    "만세력 AI해석");
 
         // ── 특수분석 ──
-        init("TAROT",                5,  "특수분석",    "타로");
-        init("TAROT_ONE",            1,  "특수분석",    "타로 원카드");
-        init("TAROT_THREE",          3,  "특수분석",    "타로 쓰리카드");
-        init("TAROT_FIVE",           5,  "특수분석",    "타로 켈틱크로스");
+        init("TAROT",                20, "특수분석",    "타로");
+        init("TAROT_ONE",            20, "특수분석",    "타로 원카드");
+        init("TAROT_THREE",          50, "특수분석",    "타로 쓰리카드");
+        init("TAROT_FIVE",           100,"특수분석",    "타로 켈틱크로스");
         init("DREAM",                5,  "특수분석",    "꿈해몽");
         init("FACE_READING",         5,  "특수분석",    "관상분석");
         init("PSYCH_TEST",           5,  "특수분석",    "심리테스트");
@@ -69,6 +70,7 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         // ── 기간별 운세 ──
         init("YEAR_FORTUNE",         5,  "기간별운세",  "신년운세");
         init("MONTHLY_FORTUNE",      5,  "기간별운세",  "월간운세");
+        init("MONTHLY_FORTUNE_EXTRA", 5,  "기간별운세",  "월간운세 더보기");
         init("WEEKLY_FORTUNE",       5,  "기간별운세",  "주간운세");
         init("TOJEONG",              5,  "기간별운세",  "토정비결");
 

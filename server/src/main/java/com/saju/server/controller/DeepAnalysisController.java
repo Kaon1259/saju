@@ -19,6 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/deep")
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class DeepAnalysisController {
 
     private final DeepAnalysisService deepAnalysisService;
@@ -38,15 +39,16 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String birthTime,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String calendarType,
-            @RequestParam(required = false) String extra) {
-        return ResponseEntity.ok(deepAnalysisService.analyze(type, birthDate, birthTime, gender, calendarType, extra));
+            @RequestParam(required = false) String extra,
+            @RequestParam(required = false) String context) {
+        return ResponseEntity.ok(deepAnalysisService.analyze(type, birthDate, birthTime, gender, calendarType, extra, context));
     }
 
     /**
-     * 스트리밍 심화분석 - SSE
+     * 스트리밍 심화분석 - SSE (GET - 하위호환)
      */
     @GetMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter deepFortuneStream(
+    public SseEmitter deepFortuneStreamGet(
             @RequestParam String type,
             @RequestParam String birthDate,
             @RequestParam(required = false) String birthTime,
@@ -55,8 +57,35 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String extra,
             @RequestParam(required = false) Long userId,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
-            @RequestParam(value = "targetName", required = false) String targetName) {
-        // 캐시 확인 - ��으면 즉시 완료 (무료)
+            @RequestParam(value = "targetName", required = false) String targetName,
+            @RequestParam(required = false) String context) {
+        return deepFortuneStream(type, birthDate, birthTime, gender, calendarType, extra, userId, targetType, targetName, context);
+    }
+
+    /**
+     * 스트리밍 심화분석 - SSE (POST - context를 body로 전달)
+     */
+    @PostMapping(value = "/fortune/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter deepFortuneStreamPost(
+            @RequestParam String type,
+            @RequestParam String birthDate,
+            @RequestParam(required = false) String birthTime,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String calendarType,
+            @RequestParam(required = false) String extra,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(value = "targetType", defaultValue = "me") String targetType,
+            @RequestParam(value = "targetName", required = false) String targetName,
+            @RequestBody(required = false) String context) {
+        return deepFortuneStream(type, birthDate, birthTime, gender, calendarType, extra, userId, targetType, targetName, context);
+    }
+
+    private SseEmitter deepFortuneStream(
+            String type, String birthDate, String birthTime, String gender,
+            String calendarType, String extra, Long userId,
+            String targetType, String targetName, String context) {
+        log.info("심화분석 요청: type={}, birthDate={}, context길이={}", type, birthDate, context != null ? context.length() : 0);
+        // 캐시 확인 - 있으면 즉시 완료 (무료)
         Map<String, Object> cached = deepAnalysisService.getCached(type, birthDate, birthTime, gender, calendarType, extra);
         if (cached != null) {
             SseEmitter emitter = new SseEmitter(5000L);
@@ -85,7 +114,7 @@ public class DeepAnalysisController {
         String systemPrompt = deepAnalysisService.getSystemPrompt(type) + "\n" + FortunePromptBuilder.TARGET_AWARE_RULES;
         String personContext = promptBuilder.buildPersonContext(birthDate, gender);
         String targetContext = promptBuilder.buildTargetContext(targetType, targetName);
-        String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra) + personContext + targetContext;
+        String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra, context) + personContext + targetContext;
         final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 4000, (fullText) -> {
             deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);
