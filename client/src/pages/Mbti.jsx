@@ -8,7 +8,7 @@ import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Mbti.css';
 
 const TYPES_DATA = {
@@ -72,8 +72,9 @@ function Mbti() {
     return () => { streamCleanupRef.current?.(); };
   }, []);
 
+  const { guardedAction: guardMbti } = useHeartGuard('MBTI');
+
   const handleSelect = (type) => {
-    if (isGuest()) { navigate('/register'); return; }
     setSelected(type);
     setFortune(null);
     setStreamText('');
@@ -126,7 +127,6 @@ function Mbti() {
   };
 
   const handleCompat = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!type1 || !type2) return;
     setCompat(null);
     setCompatLoading(true);
@@ -184,7 +184,7 @@ function Mbti() {
 
           {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-              <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
+              <button className="btn-gold" onClick={() => guardMbti(() => handleSelect(selected))} style={{ width: '100%' }}>
                 🔮 내 MBTI 운세 보기 <HeartCost category="MBTI" />
               </button>
             </div>
@@ -282,7 +282,7 @@ function Mbti() {
               </div>
             );
           })}
-          <button className="mbti-compat-submit" onClick={handleCompat} disabled={!type1 || !type2 || compatLoading}>
+          <button className="mbti-compat-submit" onClick={() => guardMbti(handleCompat)} disabled={!type1 || !type2 || compatLoading}>
             {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'} <HeartCost category="MBTI" />
           </button>
           {compat && !compatLoading && (

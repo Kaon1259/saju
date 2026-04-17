@@ -6,7 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './WeeklyFortune.css';
 
@@ -77,8 +77,9 @@ function WeeklyFortune() {
     } catch {}
   };
 
+  const { guardedAction: guardWeekly } = useHeartGuard('WEEKLY_FORTUNE');
+
   const handleAnalyze = () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setStreaming(false);
@@ -201,7 +202,7 @@ function WeeklyFortune() {
             </select>
           </div>
 
-          <button className="wf-submit" onClick={handleAnalyze} disabled={!birthDate}>
+          <button className="wf-submit" onClick={() => guardWeekly(handleAnalyze)} disabled={!birthDate}>
             &#128198; 이번 주 운세 보기 <HeartCost category="WEEKLY_FORTUNE" />
           </button>
         </div>

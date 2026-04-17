@@ -8,7 +8,7 @@ import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './BloodType.css';
 
 const TYPES = [
@@ -51,8 +51,9 @@ function BloodType() {
     return () => { streamCleanupRef.current?.(); };
   }, []);
 
+  const { guardedAction: guardBlood } = useHeartGuard('BLOOD_TYPE');
+
   const handleSelect = (type) => {
-    if (isGuest()) { navigate('/register'); return; }
     setSelected(type);
     setFortune(null);
     setStreamText('');
@@ -105,7 +106,6 @@ function BloodType() {
   };
 
   const handleCompat = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!type1 || !type2) return;
     setCompat(null);
     setCompatLoading(true);
@@ -162,7 +162,7 @@ function BloodType() {
 
           {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-              <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
+              <button className="btn-gold" onClick={() => guardBlood(() => handleSelect(selected))} style={{ width: '100%' }}>
                 🔮 내 혈액형 운세 보기 <HeartCost category="BLOOD_TYPE" />
               </button>
             </div>
@@ -265,7 +265,7 @@ function BloodType() {
               );
             })}
           </div>
-          <button className="bt-compat-submit" onClick={handleCompat} disabled={!type1 || !type2 || compatLoading}>
+          <button className="bt-compat-submit" onClick={() => guardBlood(handleCompat)} disabled={!type1 || !type2 || compatLoading}>
             {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'} <HeartCost category="BLOOD_TYPE" />
           </button>
           {compat && !compatLoading && (

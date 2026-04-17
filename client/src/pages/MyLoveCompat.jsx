@@ -15,7 +15,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
 import parseAiJson from '../utils/parseAiJson';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyLoveCompat.css';
 
@@ -136,9 +136,12 @@ function MyLoveCompat() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const { guardedAction: guardSajuCompat } = useHeartGuard('COMPATIBILITY');
+  const { guardedAction: guardMbtiCompat } = useHeartGuard('MBTI_COMPAT');
+  const { guardedAction: guardBloodCompat } = useHeartGuard('BLOODTYPE_COMPAT');
+
   // ─── 사주 궁합 ───
   const analyzeSaju = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!bd1 || !bd2) return;
     setLoading(true);
     setResult(null);
@@ -216,7 +219,6 @@ function MyLoveCompat() {
 
   // ─── MBTI 궁합 ───
   const analyzeMbti = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!myMbti || !partnerMbti) return;
     setLoading(true);
     setResult(null);
@@ -266,7 +268,6 @@ function MyLoveCompat() {
 
   // ─── 혈액형 궁합 ───
   const analyzeBlood = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!myBlood || !partnerBlood) return;
     setLoading(true);
     setResult(null);
@@ -399,7 +400,7 @@ function MyLoveCompat() {
                 </div>
               </div>
 
-              <button className="mlc-submit" onClick={analyzeSaju} disabled={!bd1 || !bd2}>
+              <button className="mlc-submit" onClick={() => guardSajuCompat(analyzeSaju)} disabled={!bd1 || !bd2}>
                 🔮 사주 궁합 보기 <HeartCost category="COMPATIBILITY" />
               </button>
             </>
@@ -434,7 +435,7 @@ function MyLoveCompat() {
                 </div>
               </div>
 
-              <button className="mlc-submit" onClick={analyzeMbti} disabled={!myMbti || !partnerMbti}>
+              <button className="mlc-submit" onClick={() => guardMbtiCompat(analyzeMbti)} disabled={!myMbti || !partnerMbti}>
                 🧠 MBTI 궁합 보기 <HeartCost category="MBTI_COMPAT" />
               </button>
             </>
@@ -471,7 +472,7 @@ function MyLoveCompat() {
                 </div>
               </div>
 
-              <button className="mlc-submit" onClick={analyzeBlood} disabled={!myBlood || !partnerBlood}>
+              <button className="mlc-submit" onClick={() => guardBloodCompat(analyzeBlood)} disabled={!myBlood || !partnerBlood}>
                 🩸 혈액형 궁합 보기 <HeartCost category="BLOODTYPE_COMPAT" />
               </button>
             </>

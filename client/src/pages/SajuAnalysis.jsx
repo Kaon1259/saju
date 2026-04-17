@@ -8,7 +8,7 @@ import FortuneLoading from '../components/FortuneLoading';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -185,8 +185,9 @@ function SajuAnalysis() {
     }
   }, []);
 
+  const { guardedAction: guardSaju } = useHeartGuard('SAJU_ANALYSIS');
+
   const handleAnalyze = () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setShowInput(false);
@@ -292,7 +293,7 @@ function SajuAnalysis() {
 
         {localStorage.getItem('userId') && !autoLoad && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
-            <button className="btn-gold" onClick={loadUserSaju} style={{ width: '100%' }}>
+            <button className="btn-gold" onClick={() => guardSaju(loadUserSaju)} style={{ width: '100%' }}>
               🔮 내 사주 운세 보기 <HeartCost category="SAJU_ANALYSIS" />
             </button>
           </div>
@@ -361,7 +362,7 @@ function SajuAnalysis() {
           </div>
           <button
             className="btn-gold"
-            onClick={handleAnalyze}
+            onClick={() => guardSaju(handleAnalyze)}
             disabled={!birthDate}
             style={{ opacity: birthDate ? 1 : 0.5 }}
           >

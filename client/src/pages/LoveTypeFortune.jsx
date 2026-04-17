@@ -6,7 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveTypeFortune.css';
 
@@ -150,8 +150,10 @@ function LoveTypeFortune() {
     } catch {}
   };
 
+  const loveCategory = HEART_MAP[type] || 'LOVE_RELATIONSHIP';
+  const { guardedAction: guardLoveType } = useHeartGuard(loveCategory);
+
   const handleAnalyze = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!birth) return;
     setLoading(true);
     setResult(null);
@@ -307,8 +309,8 @@ function LoveTypeFortune() {
             </div>
           )}
 
-          <button className="ltf-submit" onClick={handleAnalyze} disabled={!birth}>
-            {info.icon} {info.label} 보기 <HeartCost category={HEART_MAP[type] || 'LOVE_RELATIONSHIP'} />
+          <button className="ltf-submit" onClick={() => guardLoveType(handleAnalyze)} disabled={!birth}>
+            {info.icon} {info.label} 보기 <HeartCost category={loveCategory} />
           </button>
         </div>
       )}

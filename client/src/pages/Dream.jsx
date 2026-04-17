@@ -6,7 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -91,9 +91,10 @@ function Dream() {
     return () => { cleanupRef.current?.(); };
   }, []);
 
+  const { guardedAction: guardDream } = useHeartGuard('DREAM');
+
   // ── 꿈 해석 요청 (스트리밍) ──
   const handleSubmit = () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!dreamText.trim()) return;
     setStep('loading');
     setStreamText('');
@@ -291,7 +292,7 @@ function Dream() {
           {/* 제출 버튼 */}
           <button
             className="dream-submit-btn"
-            onClick={handleSubmit}
+            onClick={() => guardDream(handleSubmit)}
             disabled={!dreamText.trim()}>
             <span className="dream-submit-icon">🌙</span>
             <span>꿈 해석하기</span>

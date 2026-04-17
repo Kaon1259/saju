@@ -9,7 +9,7 @@ import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './GroupFortune.css';
 
@@ -94,9 +94,11 @@ function GroupFortune() {
   const compatTargetName = fortuneTargetName;
   const compatTargetBirth = fortuneTargetBirth;
 
+  const { guardedAction: guardGroupFortune } = useHeartGuard('GROUP_FORTUNE');
+  const { guardedAction: guardGroupCompat } = useHeartGuard('GROUP_COMPAT');
+
   // 오늘의 운세 (멤버 또는 그룹, 스트리밍)
   const handleGroupFortune = () => {
-    if (isGuest()) { navigate('/register'); return; }
     const bd = fortuneTargetBirth;
     const g = fortuneTargetGender;
     if (!bd) return;
@@ -167,7 +169,6 @@ function GroupFortune() {
 
   // 궁합 분석 (그룹이든 멤버든 통합)
   const handleCompat = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!myBirth || !compatTargetBirth) return;
     setCompatLoading(true);
     setMatrixTheme('group');
@@ -332,7 +333,7 @@ function GroupFortune() {
         ) : fortuneLoading || fortuneStreaming ? (
           <div style={{ minHeight: 120 }} />
         ) : (
-          <button className="btn-gold" onClick={handleGroupFortune} style={{ width: '100%' }}>
+          <button className="btn-gold" onClick={() => guardGroupFortune(handleGroupFortune)} style={{ width: '100%' }}>
             🌟 {fortuneTargetName} 오늘의 운세 보기 <HeartCost category="GROUP_FORTUNE" />
           </button>
         )}
@@ -371,7 +372,7 @@ function GroupFortune() {
             )}
             <button
               className="btn-gold"
-              onClick={handleCompat}
+              onClick={() => guardGroupCompat(handleCompat)}
               disabled={!myBirth || !selectedMember}
               style={{ width: '100%', opacity: (myBirth && selectedMember) ? 1 : 0.5 }}
             >

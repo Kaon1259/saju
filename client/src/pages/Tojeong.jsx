@@ -5,7 +5,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Tojeong.css';
 
@@ -146,8 +146,9 @@ function Tojeong() {
     }
   }, [userId]);
 
+  const { guardedAction: guardTojeong } = useHeartGuard('TOJEONG');
+
   const handleAnalyze = () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setStreaming(false);
@@ -285,7 +286,7 @@ function Tojeong() {
             <label className="form-label">생년월일</label>
             <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
           </div>
-          <button className="btn-gold" onClick={handleAnalyze} disabled={!birthDate} style={{ opacity: birthDate ? 1 : 0.5 }}>
+          <button className="btn-gold" onClick={() => guardTojeong(handleAnalyze)} disabled={!birthDate} style={{ opacity: birthDate ? 1 : 0.5 }}>
             토정비결 보기 <HeartCost category="TOJEONG" />
           </button>
         </div>

@@ -6,7 +6,7 @@ import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -103,8 +103,9 @@ function PsychTest() {
       .catch(() => { /* 폴백 사용 */ });
   }, []);
 
+  const { guardedAction: guardPsych } = useHeartGuard('PSYCH_TEST');
+
   const startTest = (test) => {
-    if (isGuest()) { navigate('/register'); return; }
     setSelectedTest(test);
     setCurrentQ(0);
     setAnswers([]);
@@ -253,7 +254,7 @@ function PsychTest() {
                 key={test.id}
                 className="pt-test-card glass-card"
                 style={{ '--test-color': test.color }}
-                onClick={() => startTest(test)}
+                onClick={() => guardPsych(() => startTest(test))}
               >
                 <div className="pt-test-card-glow" />
                 <span className="pt-test-icon">{test.icon}</span>

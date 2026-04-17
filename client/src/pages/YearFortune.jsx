@@ -6,7 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './YearFortune.css';
 
@@ -70,8 +70,9 @@ function YearFortune() {
     return { birthDate: p.partnerBirthDate, birthTime: p.partnerBirthTime || '', gender: p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : '' };
   };
 
+  const { guardedAction: guardYear } = useHeartGuard('YEAR_FORTUNE');
+
   const startAnalysis = (bd, bt, g, ct, setters) => {
-    if (isGuest()) { navigate('/register'); return; }
     const { setResult, setLoading, setStreamText, setStreaming, cleanupRef } = setters;
     setLoading(true); setStreamText(''); setStreaming(false); setResult(null);
     cleanupRef.current?.();
@@ -265,9 +266,9 @@ function YearFortune() {
                     {profile.birthTime && <span className="myf-badge">{profile.birthTime}</span>}
                     {profile.gender && <span className="myf-badge">{profile.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
                   </div>
-                  <button className="yf-submit" onClick={() => startAnalysis(profile.birthDate, profile.birthTime, profile.gender, profile.calendarType || 'solar', {
+                  <button className="yf-submit" onClick={() => guardYear(() => startAnalysis(profile.birthDate, profile.birthTime, profile.gender, profile.calendarType || 'solar', {
                     setResult: setMineResult, setLoading: setMineLoading, setStreamText: setMineStreamText, setStreaming: setMineStreaming, cleanupRef: mineCleanupRef
-                  })}>🎊 내 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
+                  }))}>🎊 내 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
               ) : (
                 <>
@@ -295,9 +296,9 @@ function YearFortune() {
                     {partnerInfo.birthTime && <span className="myf-badge">{partnerInfo.birthTime}</span>}
                     {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
                   </div>
-                  <button className="yf-submit" onClick={() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, partnerInfo.gender, 'solar', {
+                  <button className="yf-submit" onClick={() => guardYear(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, partnerInfo.gender, 'solar', {
                     setResult: setPartnerResult, setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming, cleanupRef: partnerCleanupRef
-                  })}>💕 연인 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
+                  }))}>💕 연인 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
               ) : (
                 <>
@@ -341,9 +342,9 @@ function YearFortune() {
                   <button className={`yf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
                 </div>
               </div>
-              <button className="yf-submit" style={{ marginTop: 8 }} disabled={!birthDate || otherLoading} onClick={() => startAnalysis(birthDate, birthTime, gender, calendarType, {
+              <button className="yf-submit" style={{ marginTop: 8 }} disabled={!birthDate || otherLoading} onClick={() => guardYear(() => startAnalysis(birthDate, birthTime, gender, calendarType, {
                 setResult: setOtherResult, setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming, cleanupRef: otherCleanupRef
-              })}>
+              }))}>
                 {otherLoading || otherStreaming ? 'AI 분석중...' : '🎊 2026 운세 보기'} <HeartCost category="YEAR_FORTUNE" />
               </button>
             </div>

@@ -8,7 +8,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Constellation.css';
 
 const SIGN_DATA = {
@@ -89,8 +89,9 @@ function Constellation() {
     return () => { streamCleanupRef.current?.(); };
   }, []);
 
+  const { guardedAction: guardConst } = useHeartGuard('CONSTELLATION');
+
   const handleSelect = (sign) => {
-    if (isGuest()) { navigate('/register'); return; }
     setSelected(sign);
     setFortune(null);
     setStreamText('');
@@ -166,7 +167,7 @@ function Constellation() {
 
       {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
         <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-          <button className="btn-gold" onClick={() => handleSelect(selected)} style={{ width: '100%' }}>
+          <button className="btn-gold" onClick={() => guardConst(() => handleSelect(selected))} style={{ width: '100%' }}>
             🔮 내 별자리 운세 보기 <HeartCost category="CONSTELLATION" />
           </button>
         </div>

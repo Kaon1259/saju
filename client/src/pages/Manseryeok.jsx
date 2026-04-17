@@ -5,7 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Manseryeok.css';
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -116,8 +116,9 @@ function Manseryeok() {
     cleanupRef.current = cleanup;
   };
 
+  const { guardedAction: guardMan } = useHeartGuard('MANSERYEOK');
+
   const handleSearch = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!date) return;
     setLoading(true);
     setAiResult(null);
@@ -195,7 +196,7 @@ function Manseryeok() {
           <label className="form-label">조회할 날짜</label>
           <BirthDatePicker value={date} onChange={setDate} calendarType={calendarType} />
         </div>
-        <button className="ms-search-btn" onClick={handleSearch} disabled={loading}>
+        <button className="ms-search-btn" onClick={() => guardMan(handleSearch)} disabled={loading}>
           {loading ? '조회 중...' : '만세력 조회'} <HeartCost category="MANSERYEOK" />
         </button>
       </div>

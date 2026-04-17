@@ -5,7 +5,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Biorhythm.css';
 
 // ═══════════════════════════════════════════════════
@@ -171,8 +171,9 @@ function Biorhythm() {
     }
   };
 
+  const { guardedAction: guardBio } = useHeartGuard('BIORHYTHM');
+
   const handleAnalyze = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!birthDate) return;
     setLoading(true);
     setStreamText('');
@@ -308,7 +309,7 @@ function Biorhythm() {
             </div>
             <button
               className="bio-analyze-btn"
-              onClick={handleAnalyze}
+              onClick={() => guardBio(handleAnalyze)}
               disabled={!birthDate || loading}
             >
               {loading ? 'AI 분석중...' : '\uD83D\uDCC8 바이오리듬 분석'} <HeartCost category="BIORHYTHM" />

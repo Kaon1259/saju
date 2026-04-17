@@ -6,7 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -124,8 +124,9 @@ function FaceReading() {
     }
   };
 
+  const { guardedAction: guardFace } = useHeartGuard('FACE_READING');
+
   const handleAnalyze = () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!allSelected) return;
     setStep('loading');
     setLoading(true);
@@ -406,7 +407,7 @@ function FaceReading() {
           {/* 분석 버튼 */}
           <button
             className="fr-analyze-btn"
-            onClick={handleAnalyze}
+            onClick={() => guardFace(handleAnalyze)}
             disabled={!allSelected}
           >
             <span className="fr-analyze-icon">&#128100;</span>

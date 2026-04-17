@@ -6,7 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MonthlyFortune.css';
 
@@ -89,8 +89,10 @@ function MonthlyFortune() {
     } catch {}
   };
 
+  const { guardedAction: guardMonthly } = useHeartGuard('MONTHLY_FORTUNE');
+  const { guardedAction: guardMonthlyExtra } = useHeartGuard('MONTHLY_FORTUNE_EXTRA');
+
   const handleAnalyze = (month) => {
-    if (isGuest()) { navigate('/register'); return; }
     const m = month || selectedMonth;
     if (!birthDate) return;
     setLoading(true);
@@ -139,8 +141,11 @@ function MonthlyFortune() {
     const newMonth = direction === 'prev'
       ? (selectedMonth === 1 ? 12 : selectedMonth - 1)
       : (selectedMonth === 12 ? 1 : selectedMonth + 1);
-    setSelectedMonth(newMonth);
-    handleAnalyze(newMonth);
+    const guard = isExtraMonth(newMonth) ? guardMonthlyExtra : guardMonthly;
+    guard(() => {
+      setSelectedMonth(newMonth);
+      handleAnalyze(newMonth);
+    });
   };
 
   const resetAll = () => {
@@ -241,7 +246,7 @@ function MonthlyFortune() {
               </select>
             </div>
 
-            <button className="mf-submit" onClick={() => handleAnalyze()} disabled={!birthDate}>
+            <button className="mf-submit" onClick={() => guardMonthly(() => handleAnalyze())} disabled={!birthDate}>
               {getSeasonEmoji(selectedMonth)} {selectedMonth}월 운세 보기 <HeartCost category="MONTHLY_FORTUNE" />
             </button>
           </div>

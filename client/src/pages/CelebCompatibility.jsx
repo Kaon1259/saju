@@ -8,7 +8,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
-import HeartCost from '../components/HeartCost';
+import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './CelebCompatibility.css';
 
@@ -201,8 +201,10 @@ function CelebCompatibility() {
     } catch {}
   };
 
+  const { guardedAction: guardCelebCompat } = useHeartGuard('CELEB_COMPAT');
+  const { guardedAction: guardCelebFortune } = useHeartGuard('CELEB_FORTUNE');
+
   const handleAnalyze = async () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!myBirth || !selectedCeleb) return;
     setStep('loading');
     setStreamText('');
@@ -306,7 +308,6 @@ function CelebCompatibility() {
   };
 
   const handleStarFortune = () => {
-    if (isGuest()) { navigate('/register'); return; }
     if (!selectedCeleb) return;
     setStarFortuneLoading(true);
     setStarStreamText('');
@@ -519,7 +520,7 @@ function CelebCompatibility() {
 
         {/* 스타 운세 보기 */}
         <div className="celeb-star-fortune glass-card">
-          <button className="celeb-star-fortune-btn" onClick={handleStarFortune} disabled={starFortuneLoading || starStreaming}>
+          <button className="celeb-star-fortune-btn" onClick={() => guardCelebFortune(handleStarFortune)} disabled={starFortuneLoading || starStreaming}>
             {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : <>{`🌟 ${selectedCeleb.name}의 오늘 운세 보기`} <HeartCost category="CELEB_FORTUNE" /></>}
           </button>
           {starFortune && (
@@ -557,7 +558,7 @@ function CelebCompatibility() {
             <label className="form-label">생년월일</label>
             <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
           </div>
-          <button className="btn-gold" onClick={handleAnalyze} disabled={!myBirth} style={{ opacity: myBirth ? 1 : 0.5 }}>
+          <button className="btn-gold" onClick={() => guardCelebCompat(handleAnalyze)} disabled={!myBirth} style={{ opacity: myBirth ? 1 : 0.5 }}>
             💫 {selectedCeleb.name}와(과) 궁합 분석하기 <HeartCost category="CELEB_COMPAT" />
           </button>
         </div>
