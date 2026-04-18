@@ -91,6 +91,8 @@ function Register() {
     localStorage.setItem('userId', user.id);
     localStorage.setItem('userName', user.name);
     localStorage.setItem('userProfile', JSON.stringify(user));
+    window.dispatchEvent(new Event('heart:refresh'));
+    window.dispatchEvent(new Event('auth:changed')); // AppContext 재초기화
     navigate(redirectTo, { replace: true });
   };
 
@@ -118,6 +120,7 @@ function Register() {
         localStorage.setItem('userName', user.name);
         localStorage.setItem('userProfile', JSON.stringify(user));
         window.dispatchEvent(new Event('heart:refresh'));
+        window.dispatchEvent(new Event('auth:changed')); // AppContext 재초기화 (isLoggedIn 상태 갱신)
 
         if (result.profileComplete) {
           // 프로필 완성됨 → 바로 이동

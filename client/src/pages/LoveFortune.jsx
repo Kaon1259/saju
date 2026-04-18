@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCelebMatch, getSajuCompatibility, isGuest } from '../api/fortune';
+import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCelebMatch, getSajuCompatibility, isGuest, getHistory } from '../api/fortune';
+import HistoryDrawer from '../components/HistoryDrawer';
 import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -450,6 +451,22 @@ function LoveFortune() {
             </div>
           )}
         </div>
+      )}
+
+      {/* 하단 pull-up drawer — 최근 본 연애 운세 */}
+      {!isGuest() && (
+        <HistoryDrawer
+          type="love_11"
+          label="📚 최근 본 연애 운세"
+          limit={10}
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              const subType = full?.payload?.type || 'relationship';
+              navigate(`/love/${subType}`, { state: { restoreHistoryId: item.id } });
+            } catch {}
+          }}
+        />
       )}
     </div>
   );

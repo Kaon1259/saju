@@ -536,8 +536,11 @@ public class TarotService {
     private SseEmitter doStreamReading(String cardIds, String reversals,
                                     String spread, String category, String question,
                                     String birthDate, String gender, Long userId, Runnable onSuccess) {
-        // 캐시 체크
-        String cacheKey = buildCacheKey(cardIds, reversals, spread, category, question != null ? question : "");
+        // 캐시 체크 — 카드 조합 + 카테고리 + 질문 + 연령대 + 성별 기반 (D안 demographic segmentation)
+        String ageBucket = computeAgeBucket(birthDate);
+        String genderKey = (gender != null && !gender.isBlank()) ? gender : "X";
+        String cacheKey = buildCacheKey(cardIds, reversals, spread, category,
+            question != null ? question : "", ageBucket, genderKey);
         Map<String, Object> cached = getFromCache("tarot", cacheKey);
         if (cached != null) {
             // 캐시 히트도 '본 타로'이므로 히스토리에 1회 저장 (중복 시 스킵)
@@ -616,8 +619,9 @@ public class TarotService {
         final String finalSpread = spread;
         final String finalCategory = category;
         final String finalQuestion = question;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1200, (fullText) -> {
-            // 스트리밍 완료 → 결과 구성 후 서버에서 직접 캐시 저장
+        return claudeApiService.generateStreamWithDoneData(systemPrompt, userPrompt, 1200, (fullText) -> {
+            // 스트리밍 완료 → 결과 구성 후 서버에서 직접 캐시 저장 + done 이벤트에 enriched JSON 반환
+            String donePayload = null;
             try {
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("spread", finalSpread);
@@ -641,10 +645,14 @@ public class TarotService {
                     String summary = finalQuestion != null && !finalQuestion.isBlank() ? finalQuestion : null;
                     fortuneHistoryService.saveIfAbsent(finalUserId, "tarot", title, summary, payload);
                 }
+
+                // done 이벤트 payload — 클라이언트가 바로 풍부한 결과 렌더 가능
+                donePayload = objectMapper.writeValueAsString(result);
             } catch (Exception e) {
                 log.warn("Failed to save tarot stream cache: {}", e.getMessage());
             }
             if (onSuccess != null) onSuccess.run();
+            return donePayload;
         });
     }
 
@@ -791,6 +799,24 @@ public class TarotService {
     }
 
     // ── 캐싱 헬퍼 ──
+
+    /**
+     * 생년월일 → 연령대 bucket ("10s", "20s", ..., "50s+").
+     * 캐시 키 demographic segmentation용 — 전체 나이 대신 구간으로만 저장.
+     */
+    private String computeAgeBucket(String birthDate) {
+        if (birthDate == null || birthDate.isBlank()) return "X";
+        try {
+            int age = java.time.Period.between(LocalDate.parse(birthDate), LocalDate.now()).getYears();
+            if (age < 20) return "10s";
+            if (age < 30) return "20s";
+            if (age < 40) return "30s";
+            if (age < 50) return "40s";
+            return "50s+";
+        } catch (Exception e) {
+            return "X";
+        }
+    }
 
     private String buildCacheKey(String... parts) {
         String raw = String.join("|", java.util.Arrays.stream(parts).map(p -> p != null ? p : "").toArray(String[]::new));

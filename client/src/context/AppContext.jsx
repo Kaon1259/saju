@@ -9,10 +9,15 @@ export function AppProvider({ children }) {
   const [appUser, setAppUser] = useState(() => {
     try {
       const uid = localStorage.getItem('userId');
+      if (!uid) return null;
       const raw = localStorage.getItem('userProfile');
-      if (!uid || !raw) return null;
-      const parsed = JSON.parse(raw);
-      if (parsed && !parsed.isGuest) return parsed;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && !parsed.isGuest) return parsed;
+      }
+      // userProfile 캐시는 없지만 userId 있으면 최소 객체로라도 로그인 처리
+      const name = localStorage.getItem('userName') || '';
+      return { id: Number(uid) || uid, name, isGuest: false };
     } catch {}
     return null;
   });

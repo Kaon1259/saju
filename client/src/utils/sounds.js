@@ -167,6 +167,27 @@ export function playCardShuffle() {
   cardSlap(c, 1.93, 0.06);
 }
 
+// ─── 타로: 카드 와류(정신없이 흩어졌다 합쳐짐) — chaos + whoosh + impact ───
+export function playCardChaosGather() {
+  const c = ctx(); if (!c) return;
+  // 0~2.4s: 빠른 ripple + 간헐적 slap (카드가 정신없이 날아다니는 카오스)
+  rippleShuffle(c, 0.00, 0.35, 0.13);
+  cardSlap(c, 0.30, 0.07);
+  rippleShuffle(c, 0.40, 0.35, 0.14);
+  cardSlap(c, 0.72, 0.08);
+  rippleShuffle(c, 0.85, 0.45, 0.13);
+  cardSlap(c, 1.28, 0.09);
+  rippleShuffle(c, 1.40, 0.40, 0.12);
+  cardSlap(c, 1.78, 0.08);
+  rippleShuffle(c, 1.90, 0.35, 0.14);
+  cardSlap(c, 2.22, 0.09);
+  // 2.6~3.2s: whoosh (카드들이 중앙으로 빨려 들어가는 바람소리)
+  cardNoise(c, 2.55, 0.55, 0.12, 1400, 0.8);
+  // 3.25s: 한 덩어리로 합쳐지는 최종 임팩트
+  cardSlap(c, 3.25, 0.18);
+  cardSlap(c, 3.32, 0.11);
+}
+
 // ─── 타로: 배경 ASMR 루프 ───
 export function startTarotAmbient() {
   const c = ctx(); if (!c) return null;

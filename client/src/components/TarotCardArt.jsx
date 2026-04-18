@@ -1,6 +1,6 @@
 /**
  * 타로 78장 — 덱 선택 지원
- * - classic, skt, custom: 단일 이미지
+ * - skt, custom: 단일 이미지
  * - dark, romantic, oriental, western: 4벌 변형 (m00_v0~v3.jpg)
  */
 
@@ -25,7 +25,8 @@ function preloadFrame(src) {
 })();
 
 const DECK_PATHS = {
-  classic: '/tarot',
+  newclassic: '/tarot-newclassic',
+  jester: '/tarot-jester',
   skt: '/tarot-skt',
   custom: '/tarot-custom',
   dark: '/tarot-dark',
@@ -42,7 +43,7 @@ const DECK_PATHS = {
 };
 
 // 4벌 변형 덱 (각 카드마다 _v0~v3)
-const MULTI_VARIANT_DECKS = new Set(['oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy', 'cartoon_girl', 'cartoon_boy', 'cats', 'dogs']);
+const MULTI_VARIANT_DECKS = new Set(['newclassic', 'jester', 'oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy', 'cartoon_girl', 'cartoon_boy', 'cats', 'dogs']);
 
 // 메이저 아르카나 이름
 const MAJOR_NAMES = [
@@ -101,7 +102,7 @@ function MinorArcanaCard({ info }) {
 const FRAME_SETS = 10;
 const FRAME_VARIANTS = 4;
 
-function TarotCardArt({ cardId, deck = 'classic', variant: propVariant, frameSet: propFrameSet, frameV: propFrameV, noFrame = false }) {
+function TarotCardArt({ cardId, deck = 'newclassic', variant: propVariant, frameSet: propFrameSet, frameV: propFrameV, noFrame = false }) {
   const id = Math.min(Math.max(cardId || 0, 0), 77);
   const isMajor = id <= 21;
 
@@ -132,8 +133,11 @@ function TarotCardArt({ cardId, deck = 'classic', variant: propVariant, frameSet
     );
   }
 
-  const num = String(id).padStart(2, '0');
-  const basePath = DECK_PATHS[deck] || DECK_PATHS.classic;
+  // jester 덱: 76장만 존재 (m00~m75) → id 76/77은 id%76으로 폴백
+  let effectiveId = id;
+  if (deck === 'jester' && id >= 76) effectiveId = id % 76;
+  const num = String(effectiveId).padStart(2, '0');
+  const basePath = DECK_PATHS[deck] || DECK_PATHS.newclassic;
 
   // 4벌 변형 덱: prop으로 받으면 고정, 없으면 랜덤
   const randomVariant = useMemo(() => Math.floor(Math.random() * 4), [id, deck]);

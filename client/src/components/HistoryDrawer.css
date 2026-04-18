@@ -1,0 +1,109 @@
+/* ─── 공용 하단 pull-up 히스토리 drawer ─── */
+.history-drawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  z-index: 101;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-drawer-handle {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  background: rgba(15, 15, 35, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px 14px 0 0;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+  position: relative;
+}
+.history-drawer-handle:hover {
+  background: rgba(25, 25, 50, 0.96);
+}
+
+.history-drawer-grip {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.history-drawer-label {
+  margin-top: 6px;
+  flex: 1;
+}
+
+.history-drawer-chev {
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.history-drawer-chev.open { transform: rotate(180deg); }
+
+.history-drawer-content {
+  max-height: 0;
+  overflow: hidden;
+  background: rgba(15, 15, 35, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 10px;
+}
+.history-drawer.open .history-drawer-content {
+  max-height: 48vh;
+  overflow-y: auto;
+  padding: 10px;
+}
+.history-drawer.open .history-drawer-handle {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.history-drawer .recent-history {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+[data-theme="light"] .history-drawer-handle {
+  background: rgba(255, 255, 255, 0.94);
+  color: #4c1d46;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .history-drawer-handle:hover {
+  background: rgba(250, 245, 250, 0.98);
+}
+[data-theme="light"] .history-drawer-grip {
+  background: rgba(76, 29, 70, 0.28);
+}
+[data-theme="light"] .history-drawer-chev {
+  color: rgba(76, 29, 70, 0.75);
+}
+[data-theme="light"] .history-drawer-content {
+  background: rgba(255, 255, 255, 0.94);
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}

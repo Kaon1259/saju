@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory } from '../api/fortune';
 import RecentHistory from '../components/RecentHistory';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -38,6 +38,7 @@ const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '
 
 function Compatibility() {
   const navigate = useNavigate();
+  const location = useLocation();
   const userId = localStorage.getItem('userId');
   const [shareMsg, setShareMsg] = useState('');
   const [bd1, setBd1] = useState('');
@@ -62,6 +63,19 @@ function Compatibility() {
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 홈 드로어에서 넘어온 restoreHistoryId 복원
+  useEffect(() => {
+    const hid = location.state?.restoreHistoryId;
+    if (!hid) return;
+    (async () => {
+      try {
+        const full = await getHistory(hid);
+        if (full?.payload) setResult(full.payload);
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?.restoreHistoryId]);
 
   useEffect(() => {
     if (result && matrixShown && !aiStreaming) {

@@ -108,9 +108,27 @@ public class ClaudeApiService {
     }
 
     /**
+     * Claude API 스트리밍 호출 + Function 완료 콜백 — 반환값을 done 이벤트 payload로 사용.
+     * 캐시/enriched 데이터를 done 이벤트에 실어보내고 싶을 때 사용.
+     */
+    public SseEmitter generateStreamWithDoneData(String systemPrompt, String userPrompt, int maxTokens,
+            java.util.function.Function<String, String> onCompleteWithData) {
+        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, onCompleteWithData);
+    }
+
+    /**
      * Claude API 스트리밍 호출 + 완료 콜백 (캐시 저장 등)
      */
     public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens, java.util.function.Consumer<String> onComplete) {
+        java.util.function.Function<String, String> wrapped = (onComplete == null) ? null : (fullText) -> {
+            onComplete.accept(fullText);
+            return null; // null → 기본값(fullText)을 done payload로 사용
+        };
+        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, wrapped);
+    }
+
+    private SseEmitter generateStreamInternal(String systemPrompt, String userPrompt, int maxTokens,
+            java.util.function.Function<String, String> onComplete) {
         SseEmitter emitter = new SseEmitter(300000L); // 5분 타임아웃
 
         if (!isAvailable()) {
@@ -175,16 +193,19 @@ public class ClaudeApiService {
 
                 String fullResult = fullText.toString();
 
-                // 완료 콜백을 먼저 실행 (캐시 저장 등) - emitter 에러로 콜백 누락 방지
+                // 완료 콜백을 먼저 실행 (캐시 저장 등) - emitter 에러로 콜백 누락 방지.
+                // Function이 non-null 반환하면 그 값을 done 이벤트 payload로 사용.
+                String donePayload = fullResult;
                 if (onComplete != null) {
                     try {
-                        onComplete.accept(fullResult);
+                        String customPayload = onComplete.apply(fullResult);
+                        if (customPayload != null) donePayload = customPayload;
                     } catch (Exception e) {
                         log.error("스트리밍 완료 콜백 실패: {}", e.getMessage(), e);
                     }
                 }
 
-                emitter.send(SseEmitter.event().name("done").data(fullResult));
+                emitter.send(SseEmitter.event().name("done").data(donePayload));
                 emitter.complete();
                 reader.close();
 

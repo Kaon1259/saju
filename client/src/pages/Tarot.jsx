@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getTarotReadingStream, drawTarotCards, isGuest, getHistory } from '../api/fortune';
 import RecentHistory from '../components/RecentHistory';
 import FortuneCard from '../components/FortuneCard';
 import TarotCardArt from '../components/TarotCardArt';
-import { playTarotReveal, playCardShuffle, playCardSpin, playCardPick, playAnalyzeStart, startAnalyzeAmbient, playSpotlightTick, playSpotlightFinal } from '../utils/sounds';
+import { playTarotReveal, playCardShuffle, playCardChaosGather, playCardSpin, playCardPick, playAnalyzeStart, startAnalyzeAmbient, playSpotlightTick, playSpotlightFinal } from '../utils/sounds';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
@@ -167,6 +167,8 @@ const POSITION_LABELS = {
 };
 
 const DECK_LIST = [
+  { id: 'newclassic', name: '뉴클래식', sub: 'New Classic · Mystical Neoclassical', img: '/tarot-effects/deck-intro/newclassic_cover.jpg', gif: '/tarot-effects/deck-intro/newclassic_0.webp', backs: Array.from({length: 8}, (_, i) => `/tarot-backs/newclassic_${i}.jpg`), hasVariants: true },
+  { id: 'jester', name: '광대 타로', sub: 'Renaissance Jester', img: '/tarot-effects/deck-intro/jester_cover.jpg', gif: '/tarot-effects/deck-intro/jester_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/jester_${i}.jpg`), hasVariants: true },
   { id: 'girl', name: '소녀 타로', sub: 'Girl Tarot', img: '/tarot-effects/deck-intro/girl_cover.jpg', gif: '/tarot-effects/deck-intro/girl_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/girl_${i}.png`), hasVariants: true },
   { id: 'cartoon_girl', name: '카툰 걸', sub: 'Cartoon Girl', img: '/tarot-effects/deck-intro/cartoon_girl_cover.jpg', gif: '/tarot-effects/deck-intro/cartoon_girl_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_girl_${i}.jpg`), hasVariants: true },
   { id: 'cartoon_boy', name: '카툰 보이', sub: 'Cartoon Boy', img: '/tarot-effects/deck-intro/cartoon_boy_cover.jpg', gif: '/tarot-effects/deck-intro/cartoon_boy_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_boy_${i}.jpg`), hasVariants: true },
@@ -222,6 +224,7 @@ function TarotIntro({ onDone }) {
 
 function Tarot() {
   const navigate = useNavigate();
+  const location = useLocation();
   // ─── 상태 ───
   const [heroCardId] = useState(() => Math.floor(Math.random() * 78));
   const [showIntro, setShowIntro] = useState(true);
@@ -269,7 +272,7 @@ function Tarot() {
   const [aiStreaming, setAiStreaming] = useState(false);
   const [shuffleAnim, setShuffleAnim] = useState(false);
   const [shuffleFlipping, setShuffleFlipping] = useState(false);
-  const [shufflePhase, setShufflePhase] = useState('chaos'); // chaos → gather → scatter
+  const [shufflePhase, setShufflePhase] = useState('chaos'); // chaos(사방 흩어짐) → gather(한 덩어리로 합쳐짐)
   const [shuffleCardsMeta, setShuffleCardsMeta] = useState([]);
   const [flipIndex, setFlipIndex] = useState(-1);
   const [slotsRevealed, setSlotsRevealed] = useState(false); // 버리기 후 남은 카드 앞면 표시
@@ -304,6 +307,27 @@ function Tarot() {
   const resultRef = useRef(null);
   const startBtnRef = useRef(null);
   const cleanupRef = useRef(null);
+
+  // 홈 드로어에서 넘어온 restoreHistoryId 복원 — 인트로 건너뛰고 result로 점프
+  useEffect(() => {
+    const hid = location.state?.restoreHistoryId;
+    if (!hid) return;
+    (async () => {
+      try {
+        const full = await getHistory(hid);
+        const p = full?.payload;
+        if (!p) return;
+        const cards = Array.isArray(p.cards) ? p.cards : [];
+        setShowIntro(false);
+        setRevealedCards(cards);
+        setReading(p);
+        if (p.spread) setSpread(p.spread);
+        if (p.category) setCategory(p.category);
+        setStep('result');
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?.restoreHistoryId]);
   const analyzeAmbientRef = useRef(null);
   const carouselTouchRef = useRef({ startX: 0 });
   const pickTouchRef = useRef({ startX: 0 });
@@ -447,39 +471,44 @@ function Tarot() {
   }, [cTick]); // eslint-disable-line
 
 
-  // 셔플 페이즈 타이머 — 오버핸드 셔플 → 모임 → 사방 분산 → pick 전환
+  // 셔플 페이즈 타이머 — 카오스(사방으로 마구 날아다님) → gather(한 덩어리로 모임) → pick 전환
   useEffect(() => {
     if (step !== 'shuffle' || shuffledCards.length === 0) return;
     const rand = (min, max) => Math.random() * (max - min) + min;
     const N = 14;
     setShuffleCardsMeta(Array.from({ length: N }, (_, i) => {
-      // 스택에서의 Y 오프셋 (깊이감) — 카드 인덱스에 따라 1px씩 차이
+      // 스택 최종 Y 오프셋 (gather 후 깊이감)
       const stackY = (i - N / 2) * 0.9;
-      // 순차적 딜레이 — 카드 14장을 1.4초 주기에 골고루 분산 (한 장씩 이어달리듯)
-      const delay = (i * 0.1) % 1.4;
-      // 회전 방향 — 홀짝 교대로 좌/우 분할
-      const side = i % 2 === 0 ? 1 : -1;
+      // 각 카드 고유 chaos 주기(1.2~1.9s)와 딜레이 — 동기화 깨서 마구잡이 느낌
+      const dur = rand(1.2, 1.9);
+      const delay = rand(-dur, 0); // 음수 딜레이로 이미 진행 중인 상태로 시작
+      // 카오스 경로: 3개 waypoint (바닥에 흩뿌려진 듯 각자 다른 위치)
+      const waypoint = () => ({
+        x: rand(-200, 200),
+        y: rand(-180, 180),
+        r: rand(-720, 720), // 두 바퀴까지 회전
+        z: rand(-80, 120),
+      });
+      const p1 = waypoint();
+      const p2 = waypoint();
+      const p3 = waypoint();
       return {
         id: i,
         stackY: `${stackY.toFixed(1)}px`,
+        dur: `${dur.toFixed(2)}s`,
         delay: `${delay.toFixed(2)}s`,
-        side,
-        // scatter 단계용
-        sx: rand(-160, 160),
-        sy: rand(-140, 140),
-        sr: rand(-540, 540),
-        sDelay: `${(Math.random() * 0.25).toFixed(2)}s`,
+        cx1: `${p1.x.toFixed(0)}px`, cy1: `${p1.y.toFixed(0)}px`, cr1: `${p1.r.toFixed(0)}deg`, cz1: `${p1.z.toFixed(0)}px`,
+        cx2: `${p2.x.toFixed(0)}px`, cy2: `${p2.y.toFixed(0)}px`, cr2: `${p2.r.toFixed(0)}deg`, cz2: `${p2.z.toFixed(0)}px`,
+        cx3: `${p3.x.toFixed(0)}px`, cy3: `${p3.y.toFixed(0)}px`, cr3: `${p3.r.toFixed(0)}deg`, cz3: `${p3.z.toFixed(0)}px`,
       };
     }));
     setShufflePhase('chaos');
-    // 카드 셔플 사운드 — 카오스 단계 동안 2번 연속 재생 (약 4초 커버)
-    try { playCardShuffle(); } catch {}
-    const ts = setTimeout(() => { try { playCardShuffle(); } catch {} }, 2000);
-    const t1 = setTimeout(() => setShufflePhase('gather'), 3400);
-    const t2 = setTimeout(() => setShufflePhase('scatter'), 4100);
-    // 셔플 완료 → pick 화면으로 페이지 플립
-    const t3 = setTimeout(() => flipToStep(() => setStep('pick')), 4800);
-    return () => { clearTimeout(ts); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    // 카오스+게더 일체형 사운드 (총 ~3.4s)
+    try { playCardChaosGather(); } catch {}
+    const t1 = setTimeout(() => setShufflePhase('gather'), 2600);
+    // gather 완료 후 pick 화면으로 페이지 플립
+    const t2 = setTimeout(() => flipToStep(() => setStep('pick')), 3600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [step, shuffledCards.length, flipToStep]);
 
   // 덱 갤러리: 필름릴 rAF 루프 (일시정지/속도 조절/Fin/포커스 처리)
@@ -621,7 +650,7 @@ function Tarot() {
   const startShuffle = useCallback(() => {
     // 셋업 화면에서 현재 보여지던 배경을 셔플 화면에도 그대로 유지
     try {
-      const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
+      const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
       const curDeckData = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
       const bgBase = bgPaths[deck] || '';
       const bgSuffix = curDeckData.hasVariants ? `_v${deckVariant}` : '';
@@ -874,8 +903,7 @@ function Tarot() {
       await new Promise(r => setTimeout(r, 1000));
     }
 
-    // 카드 다 펼친 후 잠시 감상
-    await new Promise(r => setTimeout(r, 1500));
+    // 카드 전면이 모두 보이면 바로 AI 분석 효과 시작 (대기 없음)
     setLoading(true);
     setStreamText('');
     setAiStreaming(false);
@@ -961,22 +989,38 @@ function Tarot() {
         setAiStreaming(true);
         setStreamText(prev => prev + text);
       },
-      onDone: (fullText) => {
+      onDone: (donePayload) => {
         try {
           setAiStreaming(false);
           setStreamText('');
-          // 스트리밍 텍스트를 해석 텍스트로 읽딩에 저장
-          setReading({
-            ...fallbackReading,
-            cards: cards.map((c, i) => ({
-              ...c,
-              position: POSITION_LABELS[spread]?.[i] || '카드',
-              meaning: c.reversed
-                ? '내면의 성찰이 필요한 시기입니다.'
-                : '긍정적인 에너지가 당신을 감싸고 있습니다.',
-            })),
-            interpretation: (fullText || '').trim() || fallbackReading.interpretation,
-          });
+          // 서버가 enriched JSON 반환 시도 — 파싱 성공하면 풍부한 데이터 그대로 사용
+          let enriched = null;
+          if (donePayload && typeof donePayload === 'string') {
+            const trimmed = donePayload.trim();
+            if (trimmed.startsWith('{')) {
+              try { enriched = JSON.parse(trimmed); } catch {}
+            }
+          }
+          if (enriched && enriched.interpretation) {
+            // 서버의 카드별 meaning/overallMessage/advice/luckyElement 모두 사용
+            setReading({
+              ...fallbackReading,
+              ...enriched,
+            });
+          } else {
+            // 구버전 호환: plain text만 온 경우 → fallback + interpretation
+            setReading({
+              ...fallbackReading,
+              cards: cards.map((c, i) => ({
+                ...c,
+                position: POSITION_LABELS[spread]?.[i] || '카드',
+                meaning: c.reversed
+                  ? '내면의 성찰이 필요한 시기입니다.'
+                  : '긍정적인 에너지가 당신을 감싸고 있습니다.',
+              })),
+              interpretation: (donePayload || '').trim() || fallbackReading.interpretation,
+            });
+          }
           setLoading(false);
           setCarouselIndex(0);
         } catch (e) {
@@ -1079,8 +1123,8 @@ function Tarot() {
 
       {/* ═══ 덱 갤러리 — 필름릴 방식 ═══ */}
       {galleryDeck && (() => {
-        const isMulti = ['oriental','western','dark','romantic','classic_rws','girl','boy','cartoon_girl','cartoon_boy','cats','dogs'].includes(galleryDeck.id);
-        const deckPaths = { classic_rws:'/tarot-classic-rws', dark:'/tarot-dark', romantic:'/tarot-romantic', oriental:'/tarot-oriental', western:'/tarot-western', girl:'/tarot-girl', boy:'/tarot-boy', cartoon_girl:'/tarot-cartoon-girl', cats:'/tarot-cats', dogs:'/tarot-dogs' };
+        const isMulti = ['newclassic','jester','oriental','western','dark','romantic','classic_rws','girl','boy','cartoon_girl','cartoon_boy','cats','dogs'].includes(galleryDeck.id);
+        const deckPaths = { newclassic:'/tarot-newclassic', jester:'/tarot-jester', classic_rws:'/tarot-classic-rws', dark:'/tarot-dark', romantic:'/tarot-romantic', oriental:'/tarot-oriental', western:'/tarot-western', girl:'/tarot-girl', boy:'/tarot-boy', cartoon_girl:'/tarot-cartoon-girl', cats:'/tarot-cats', dogs:'/tarot-dogs' };
         const basePath = deckPaths[galleryDeck.id] || '/tarot';
         const variant = deckVariant;
         const cardSrcFixed = (i) => {
@@ -1448,7 +1492,7 @@ function Tarot() {
       {/* ═══ STEP 1: 메뉴 화면 (타로 스타일) ═══ */}
       {step === 'setup' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const bgPaths = { classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
+        const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
         const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];
@@ -1566,9 +1610,8 @@ function Tarot() {
       {step === 'shuffle' && shuffledCards.length > 0 && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck);
         const phaseText =
-          shufflePhase === 'chaos'   ? <>카드를 섞고 있습니다<span className="tarot-dots" /></> :
-          shufflePhase === 'gather'  ? '카드가 모이고 있습니다...' :
-                                       '당신의 카드를 펼치는 중...';
+          shufflePhase === 'chaos'   ? <>카드를 마구 섞고 있습니다<span className="tarot-dots" /></> :
+                                       '한 덩어리로 모이고 있습니다...';
         return (
           <div
             className="tarot-shuffle-stage-v2"
@@ -1584,14 +1627,14 @@ function Tarot() {
               {shuffleCardsMeta.map((c) => (
                 <div
                   key={c.id}
-                  className={`shuffle-back-card shuffle-back-card--side${c.side > 0 ? 'R' : 'L'}`}
+                  className="shuffle-back-card"
                   style={{
                     '--stack-y': c.stackY,
+                    '--dur': c.dur,
                     '--delay': c.delay,
-                    '--sx': `${c.sx}vw`,
-                    '--sy': `${c.sy}vh`,
-                    '--sr': `${c.sr}deg`,
-                    '--sDelay': c.sDelay,
+                    '--cx1': c.cx1, '--cy1': c.cy1, '--cr1': c.cr1, '--cz1': c.cz1,
+                    '--cx2': c.cx2, '--cy2': c.cy2, '--cr2': c.cr2, '--cz2': c.cz2,
+                    '--cx3': c.cx3, '--cy3': c.cy3, '--cr3': c.cr3, '--cz3': c.cz3,
                     zIndex: c.id,
                   }}
                 >
@@ -1871,6 +1914,10 @@ function Tarot() {
             <div className="reveal-ai-area fade-in" ref={resultRef}>
               <div className="tarot-overall glass-card tarot-framed-card">
                 <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
+                <button className="tarot-overall-retry" onClick={resetAll} aria-label="다시하기">
+                  <span className="tarot-overall-retry-icon">↻</span>
+                  <span className="tarot-overall-retry-label">다시하기</span>
+                </button>
                 <div className="tarot-overall-icon">🌟</div>
                 <p className="tarot-overall-text">{reading.overallMessage}</p>
               </div>

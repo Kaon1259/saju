@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
-import RecentHistory from '../components/RecentHistory';
+import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
@@ -13,6 +13,7 @@ import './MyFortune.css';
 
 function MyFortune() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cacheChecking, setCacheChecking] = useState(true); // 페이지/날짜 전환 직후 캐시 확인중 표시
@@ -24,6 +25,22 @@ function MyFortune() {
   const stopAmbientRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
   const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'partner' | 'other'
+
+  // 홈 드로어에서 넘어온 restoreHistoryId 복원
+  useEffect(() => {
+    const hid = location.state?.restoreHistoryId;
+    if (!hid) return;
+    (async () => {
+      try {
+        const full = await getHistory(hid);
+        if (full?.payload) {
+          setViewMode('mine');
+          setData(full.payload);
+        }
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?.restoreHistoryId]);
   const [dateMode, setDateMode] = useState('today'); // 'today' | 'tomorrow' | 'pick'
   const [pickDate, setPickDate] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -480,10 +497,9 @@ function MyFortune() {
       )}
 
       {viewMode === 'mine' && !cacheChecking && (
-        <RecentHistory
+        <HistoryDrawer
           type="today_fortune"
-          title="📚 최근 본 내 운세"
-          emptyText={!data ? "아직 저장된 운세가 없어요. 운세를 보면 이곳에 기록돼요." : undefined}
+          label="📚 최근 본 내 운세"
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);

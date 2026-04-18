@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
-import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest } from '../api/fortune';
+import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 // sounds (kept for potential future use)
 import { shareResult } from '../utils/share';
 import parseAiJson from '../utils/parseAiJson';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import HeartCost from '../components/HeartCost';
+import HistoryDrawer from '../components/HistoryDrawer';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -789,6 +790,40 @@ function Home() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 하단 pull-up drawer — 오늘 본 모든 운세 히스토리 (타입 무관) */}
+      {!isGuest() && (
+        <HistoryDrawer
+          label="📚 오늘 본 운세"
+          limit={20}
+          onOpen={async (item) => {
+            try {
+              let subType = null;
+              if (item.type === 'love_11') {
+                const full = await getHistory(item.id);
+                subType = full?.payload?.type || 'relationship';
+              }
+              const state = { restoreHistoryId: item.id };
+              switch (item.type) {
+                case 'today_fortune':
+                  navigate('/my', { state });
+                  break;
+                case 'love_11':
+                  navigate(`/love/${subType || 'relationship'}`, { state });
+                  break;
+                case 'tarot':
+                  navigate('/tarot', { state });
+                  break;
+                case 'compatibility':
+                  navigate('/compatibility', { state });
+                  break;
+                default:
+                  break;
+              }
+            } catch {}
+          }}
+        />
       )}
     </div>
   );

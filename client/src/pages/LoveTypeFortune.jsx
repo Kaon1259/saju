@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest, getHistory } from '../api/fortune';
-import RecentHistory from '../components/RecentHistory';
+import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -12,6 +12,7 @@ import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveTypeFortune.css';
 
 const LOVE_TYPES = {
+  relationship:      { label: '연애 진단',   icon: '💕', desc: '지금 연애 상태 총 진단', color: '#EC4899', particles: ['💕','💗','✨','💖','💘'] },
   some_check:        { label: '썸진단',     icon: '🎯', desc: '이 썸, 연애로 발전할까?', color: '#FF9800', particles: ['💗','💭','✨','🎯','💫'] },
   past_life:         { label: '전생인연',   icon: '🌌', desc: '전생에서의 우리 이야기', color: '#8B5CF6', particles: ['🌌','✨','⭐','💫','🔮'] },
   crush:             { label: '짝사랑',     icon: '💘', desc: '내 마음이 이루어질까?', color: '#F472B6', particles: ['💘','💗','💓','💞','✨'] },
@@ -70,6 +71,7 @@ function FloatingHearts({ score, color }) {
 function LoveTypeFortune() {
   const { type } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const userId = localStorage.getItem('userId');
   const info = LOVE_TYPES[type];
 
@@ -91,6 +93,19 @@ function LoveTypeFortune() {
   const stopAmbientRef = useRef(null);
 
   useEffect(() => () => cleanupRef.current?.(), []);
+
+  // 홈 드로어에서 넘어온 restoreHistoryId 복원
+  useEffect(() => {
+    const hid = location.state?.restoreHistoryId;
+    if (!hid) return;
+    (async () => {
+      try {
+        const full = await getHistory(hid);
+        if (full?.payload) setResult(full.payload);
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?.restoreHistoryId]);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   useEffect(() => {
@@ -246,12 +261,11 @@ function LoveTypeFortune() {
         <p className="ltf-hero-desc">{info.desc}</p>
       </div>
 
-      {/* ═══ 최근 본 기록 ═══ (결과/로딩 중에도 항상 표시) */}
+      {/* ═══ 최근 본 기록 ═══ (하단 pull-up drawer — 로딩/스트리밍 중엔 숨김) */}
       {userId && !loading && !streaming && (
-        <RecentHistory
+        <HistoryDrawer
           type="love_11"
-          title="📚 최근 본 연애 운세"
-          emptyText={!result ? "아직 저장된 연애 운세가 없어요. 분석을 해보면 이곳에 기록돼요." : undefined}
+          label="📚 최근 본 연애 운세"
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);
