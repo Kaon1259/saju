@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest } from '../api/fortune';
+import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
+import RecentHistory from '../components/RecentHistory';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
@@ -14,6 +15,7 @@ function MyFortune() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [cacheChecking, setCacheChecking] = useState(true); // 페이지/날짜 전환 직후 캐시 확인중 표시
   const [activeTab, setActiveTab] = useState('saju');
   const [copied, setCopied] = useState(false);
   const [streamText, setStreamText] = useState('');
@@ -175,10 +177,19 @@ function MyFortune() {
     return () => cleanupRef.current?.();
   };
 
-  // 날짜 변경 시 결과 리셋 (자동 호출하지 않고 버튼 다시 보이게)
+  // 날짜/사용자 변경 시: 결과 리셋 + "캐시 확인중" → 캐시 있으면 자동 표시, 없으면 버튼 노출
   useEffect(() => {
     cleanupRef.current?.();
     setData(null); setStreamText(''); setStreaming(false); setLoading(false);
+    if (!userId) { setCacheChecking(false); return; }
+    setCacheChecking(true);
+    cleanupRef.current = getMyFortuneStream(userId, {
+      cacheOnly: true,
+      onCached: (d) => { setData(d); setCacheChecking(false); },
+      onNoCache: () => { setCacheChecking(false); }, // 캐시 없음 → 버튼 노출
+      onError: () => { setCacheChecking(false); },   // 에러 → 버튼 노출
+    }, getTargetDate());
+    return () => cleanupRef.current?.();
   }, [userId, dateMode, pickDate]);
 
   if (!userId) {
@@ -196,9 +207,10 @@ function MyFortune() {
 
   // 내 운세 탭에서 분석 중이면 로딩 화면 (다른 탭은 자기 렌더링으로)
   if (viewMode === 'mine' && (loading || streaming)) {
+    const dateLabel = dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`;
     return (
       <div className="myf-page">
-        <AnalysisMatrix theme="saju" label="AI가 오늘의 운세를 분석하고 있어요" streamText={streamText} />
+        <AnalysisMatrix theme="saju" label={`AI가 ${dateLabel} 운세를 분석하고 있어요`} streamText={streamText} />
       </div>
     );
   }
@@ -460,17 +472,35 @@ function MyFortune() {
       )}
 
       {/* ════════ 내 운세 ════════ */}
-      {viewMode === 'mine' && !data && (
-        <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
-          <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
-          <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
-            버튼을 누르면 AI가 {userName || '당신'}님의 사주를 분석해드려요
-          </p>
-          <button className="btn-gold" style={{ width: '100%' }}
-            onClick={() => guardTodayFortune(() => loadMyFortune(getTargetDate()))}>
-            {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
-          </button>
+      {viewMode === 'mine' && !data && cacheChecking && (
+        <div className="myf-other-form glass-card myf-cache-check">
+          <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+          <p className="myf-cache-check-text">저장된 운세 확인중</p>
         </div>
+      )}
+
+      {viewMode === 'mine' && !data && !cacheChecking && (
+        <>
+          <RecentHistory
+            type="today_fortune"
+            title="📚 최근 본 내 운세"
+            onOpen={async (item) => {
+              try {
+                const full = await getHistory(item.id);
+                if (full?.payload) setData(full.payload);
+              } catch {}
+            }} />
+          <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
+            <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
+              버튼을 누르면 AI가 {userName || '당신'}님의 사주를 분석해드려요
+            </p>
+            <button className="btn-gold" style={{ width: '100%' }}
+              onClick={() => guardTodayFortune(() => loadMyFortune(getTargetDate()))}>
+              {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
+            </button>
+          </div>
+        </>
       )}
 
       {viewMode === 'mine' && data && (

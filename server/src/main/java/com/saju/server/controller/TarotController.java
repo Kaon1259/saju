@@ -102,7 +102,7 @@ public class TarotController {
         final String finalHeartCategory = heartCategory;
         final String finalBirthDate = birthDate;
         final String finalGender = gender;
-        return tarotService.streamReading(cardIds, reversals, spread, category, question, finalBirthDate, finalGender, () -> {
+        return tarotService.streamReading(cardIds, reversals, spread, category, question, finalBirthDate, finalGender, uid, () -> {
             if (uid != null) heartPointService.deductPoints(uid, finalHeartCategory, "타로");
         });
     }

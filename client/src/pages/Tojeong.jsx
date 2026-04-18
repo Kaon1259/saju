@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getTojeongStream, isGuest } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -37,8 +37,6 @@ function Tojeong() {
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   const userId = localStorage.getItem('userId');
-  const location = useLocation();
-  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
 
   useEffect(() => {
     return () => { cleanupRef.current?.(); };
@@ -139,12 +137,6 @@ function Tojeong() {
       },
     });
   };
-
-  useEffect(() => {
-    if (userId && autoLoad) {
-      loadUserTojeong();
-    }
-  }, [userId]);
 
   const { guardedAction: guardTojeong } = useHeartGuard('TOJEONG');
 
@@ -256,7 +248,7 @@ function Tojeong() {
           </p>
         </section>
 
-        {userId && !autoLoad && (
+        {userId && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
             <button className="btn-gold" onClick={loadUserTojeong} style={{ width: '100%' }}>
               🔮 내 토정비결 보기 <HeartCost category="TOJEONG" />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getMbtiTypes, getMbtiFortuneStream, getMbtiCompatibility, getUser, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -54,9 +54,6 @@ function Mbti() {
   const stopAmbientRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
-  const location = useLocation();
-  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
-
   useEffect(() => {
     getMbtiTypes().then(setAllTypes).catch(() => {});
     const userId = localStorage.getItem('userId');
@@ -65,7 +62,6 @@ function Mbti() {
         if (u.mbtiType) {
           setSelected(u.mbtiType);
           setType1(u.mbtiType);
-          if (autoLoad) handleSelect(u.mbtiType);
         }
       }).catch(() => {});
     }
@@ -182,7 +178,7 @@ function Mbti() {
             </div>
           ))}
 
-          {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
+          {selected && !fortune && !loading && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
               <button className="btn-gold" onClick={() => guardMbti(() => handleSelect(selected))} style={{ width: '100%' }}>
                 🔮 내 MBTI 운세 보기 <HeartCost category="MBTI" />

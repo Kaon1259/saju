@@ -176,7 +176,8 @@ public class SajuController {
             @RequestParam("date") String dateStr,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
             @RequestParam(value = "birthDate", required = false) String birthDateStr,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
 
         LocalDate date = LocalDate.parse(dateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
@@ -212,6 +213,16 @@ public class SajuController {
                 } catch (Exception e) {
                     log.warn("Failed to send cached manseryeok result: {}", e.getMessage());
                 }
+            }).start();
+            return emitter;
+        }
+
+        // cacheOnly 모드: 캐시 없으면 AI 호출 없이 no-cache 이벤트로 종료
+        if (cacheOnly) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try { emitter.send(SseEmitter.event().name("no-cache").data("{}")); emitter.complete(); }
+                catch (Exception ignored) {}
             }).start();
             return emitter;
         }

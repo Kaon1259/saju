@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getAllConstellations, getConstellationFortuneStream, getUser, isGuest } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
@@ -68,9 +68,6 @@ function Constellation() {
     }
   }, [fortune, matrixShown]);
 
-  const location = useLocation();
-  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
-
   useEffect(() => {
     getAllConstellations().then(setSigns).catch(() => {});
     const userId = localStorage.getItem('userId');
@@ -79,10 +76,7 @@ function Constellation() {
         if (u.birthDate) {
           const sign = getSignFromDate(u.birthDate);
           setMySign(sign);
-          if (sign) {
-            setSelected(sign);
-            if (autoLoad) handleSelect(sign);
-          }
+          if (sign) setSelected(sign);
         }
       }).catch(() => {});
     }
@@ -165,7 +159,7 @@ function Constellation() {
         })}
       </div>
 
-      {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
+      {selected && !fortune && !loading && localStorage.getItem('userId') && (
         <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
           <button className="btn-gold" onClick={() => guardConst(() => handleSelect(selected))} style={{ width: '100%' }}>
             🔮 내 별자리 운세 보기 <HeartCost category="CONSTELLATION" />

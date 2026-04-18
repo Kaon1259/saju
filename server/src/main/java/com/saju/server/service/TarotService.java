@@ -23,6 +23,7 @@ public class TarotService {
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
     private final SpecialFortuneRepository specialFortuneRepository;
+    private final FortuneHistoryService fortuneHistoryService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // ═══════════════════════════════════════════════════
@@ -512,23 +513,29 @@ public class TarotService {
      */
     public SseEmitter streamReading(String cardIds, String reversals,
                                     String spread, String category, String question,
+                                    String birthDate, String gender, Long userId, Runnable onSuccess) {
+        return doStreamReading(cardIds, reversals, spread, category, question, birthDate, gender, userId, onSuccess);
+    }
+
+    public SseEmitter streamReading(String cardIds, String reversals,
+                                    String spread, String category, String question,
                                     String birthDate, String gender, Runnable onSuccess) {
-        return doStreamReading(cardIds, reversals, spread, category, question, birthDate, gender, onSuccess);
+        return doStreamReading(cardIds, reversals, spread, category, question, birthDate, gender, null, onSuccess);
     }
 
     public SseEmitter streamReading(String cardIds, String reversals,
                                     String spread, String category, String question, Runnable onSuccess) {
-        return doStreamReading(cardIds, reversals, spread, category, question, null, null, onSuccess);
+        return doStreamReading(cardIds, reversals, spread, category, question, null, null, null, onSuccess);
     }
 
     public SseEmitter streamReading(String cardIds, String reversals,
                                     String spread, String category, String question) {
-        return doStreamReading(cardIds, reversals, spread, category, question, null, null, null);
+        return doStreamReading(cardIds, reversals, spread, category, question, null, null, null, null);
     }
 
     private SseEmitter doStreamReading(String cardIds, String reversals,
                                     String spread, String category, String question,
-                                    String birthDate, String gender, Runnable onSuccess) {
+                                    String birthDate, String gender, Long userId, Runnable onSuccess) {
         // 캐시 체크
         String cacheKey = buildCacheKey(cardIds, reversals, spread, category, question != null ? question : "");
         Map<String, Object> cached = getFromCache("tarot", cacheKey);
@@ -586,21 +593,37 @@ public class TarotService {
         final String finalCacheKey = cacheKey;
         final String finalCategoryKr = categoryKr;
 
+        final Long finalUserId = userId;
+        final String finalCardIdsStr = cardIds;
+        final String finalReversalsStr = reversals;
+        final String finalSpread = spread;
+        final String finalCategory = category;
+        final String finalQuestion = question;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1200, (fullText) -> {
             // 스트리밍 완료 → 결과 구성 후 서버에서 직접 캐시 저장
             try {
                 Map<String, Object> result = new LinkedHashMap<>();
-                result.put("spread", spread);
-                result.put("category", category);
+                result.put("spread", finalSpread);
+                result.put("category", finalCategory);
                 result.put("categoryKr", finalCategoryKr);
-                result.put("question", question);
+                result.put("question", finalQuestion);
                 result.put("cards", finalCardDetails);
                 result.put("interpretation", fullText.trim());
                 result.put("overallMessage", generateOverallMessage(finalCardDetails));
-                result.put("advice", generateAdvice(finalCardDetails, category));
+                result.put("advice", generateAdvice(finalCardDetails, finalCategory));
                 result.put("luckyElement", determineLuckyElement(finalCardDetails));
                 result.put("date", LocalDate.now().toString());
                 saveToCache("tarot", finalCacheKey, result);
+
+                // 히스토리 저장 — 재현용 입력값도 함께
+                if (finalUserId != null) {
+                    Map<String, Object> payload = new LinkedHashMap<>(result);
+                    payload.put("cardIds", finalCardIdsStr);
+                    payload.put("reversals", finalReversalsStr);
+                    String title = finalCategoryKr + " 타로 (" + finalCardDetails.size() + "장)";
+                    String summary = finalQuestion != null && !finalQuestion.isBlank() ? finalQuestion : null;
+                    fortuneHistoryService.save(finalUserId, "tarot", title, summary, payload);
+                }
             } catch (Exception e) {
                 log.warn("Failed to save tarot stream cache: {}", e.getMessage());
             }

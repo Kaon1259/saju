@@ -77,7 +77,7 @@ function FloatingMenu() {
 
   const path = location.pathname;
   const items = [
-    path !== '/my' && { id: 'fortune', icon: '🔮', label: '오늘운세', path: '/my', state: { autoLoad: true } },
+    path !== '/my' && { id: 'fortune', icon: '🔮', label: '오늘운세', path: '/my' },
     path !== '/' && { id: 'love', icon: '💕', label: '연애운', path: '/', state: { openLove: 'relationship' } },
     path !== '/compatibility' && { id: 'compat', icon: '💑', label: '궁합', path: '/compatibility' },
   ].filter(Boolean);

@@ -29,6 +29,7 @@ public class MyFortuneController {
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
     private final HeartPointService heartPointService;
+    private final FortuneHistoryService fortuneHistoryService;
 
     /**
      * 나의 통합 운세 (사주 AI + 혈액형 + MBTI)
@@ -110,7 +111,8 @@ public class MyFortuneController {
      */
     @GetMapping(value = "/fortune/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamMyFortune(@PathVariable Long userId,
-            @RequestParam(value = "date", required = false) String dateStr) {
+            @RequestParam(value = "date", required = false) String dateStr,
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
         UserResponse user = userService.getUser(userId);
         if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
             SseEmitter emitter = new SseEmitter(5000L);
@@ -150,6 +152,16 @@ public class MyFortuneController {
             return emitter;
         }
 
+        // cacheOnly 모드: 캐시 없으면 AI 호출 없이 no-cache 이벤트로 종료
+        if (cacheOnly) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try { emitter.send(SseEmitter.event().name("no-cache").data("{}")); emitter.complete(); }
+                catch (Exception ignored) {}
+            }).start();
+            return emitter;
+        }
+
         // 하트 잔액 확인 (차감은 AI 완료 후)
         try {
             heartPointService.checkPoints(userId, "TODAY_FORTUNE");
@@ -163,9 +175,26 @@ public class MyFortuneController {
         String userPrompt = promptBuilder.fortuneStreamUserPrompt(user.getZodiacAnimal(), targetDate, user.getRelationshipStatus()) + personContext;
         final LocalDate finalDate = targetDate;
         final Long uid = userId;
+        final UserResponse finalUser = user;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
             if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
+            // 히스토리 저장 — 사용자가 나중에 "최근 본 운세"에서 다시 볼 수 있게
+            if (uid != null) {
+                java.time.LocalDate today = java.time.LocalDate.now();
+                String dayLabel = finalDate.equals(today) ? "오늘"
+                    : finalDate.equals(today.plusDays(1)) ? "내일"
+                    : finalDate.toString();
+                var saved = fortuneService.getCachedFortune(finalUser.getZodiacAnimal(), finalDate);
+                Map<String, Object> payload = buildMyFortuneData(finalUser, saved);
+                payload.put("targetDate", finalDate.toString());
+                String summary = saved != null && saved.getOverall() != null
+                    ? (saved.getScore() + "점 · " + saved.getOverall())
+                    : null;
+                fortuneHistoryService.save(uid, "today_fortune",
+                    (finalUser.getName() != null ? finalUser.getName() + "님의 " : "") + dayLabel + " 운세 (" + finalDate + ")",
+                    summary, payload);
+            }
         });
     }
 

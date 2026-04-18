@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest } from '../api/fortune';
+import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest, getHistory } from '../api/fortune';
+import RecentHistory from '../components/RecentHistory';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -244,6 +245,20 @@ function LoveTypeFortune() {
         <h1 className="ltf-hero-title">{info.label}</h1>
         <p className="ltf-hero-desc">{info.desc}</p>
       </div>
+
+      {/* ═══ 최근 본 기록 ═══ */}
+      {!result && !loading && !streaming && userId && (
+        <RecentHistory
+          type="love_11"
+          title="📚 최근 본 연애 운세"
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              if (full?.payload) setResult(full.payload);
+            } catch {}
+          }}
+        />
+      )}
 
       {/* ═══ 입력 폼 ═══ */}
       {!result && !loading && !streaming && (

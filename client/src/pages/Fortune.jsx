@@ -5,6 +5,8 @@ import FortuneLoading from '../components/FortuneLoading';
 import { getFortuneByZodiacStream, getFortuneByUserStream } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import StreamText from '../components/StreamText';
+import HeartCost from '../components/HeartCost';
+import './MyFortune.css';
 import './Fortune.css';
 
 const ZODIAC_EMOJI = {
@@ -27,18 +29,20 @@ function Fortune() {
   const zodiacParam = searchParams.get('zodiac');
 
   const [fortune, setFortune] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [aiStreaming, setAiStreaming] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [cacheChecking, setCacheChecking] = useState(true);
   const cleanupRef = useRef(null);
 
   useEffect(() => {
     return () => cleanupRef.current?.();
   }, []);
 
-  useEffect(() => {
+  // AI 스트리밍 시작 (버튼 클릭 시 호출)
+  const startStreaming = () => {
     setLoading(true);
     setError(null);
     setFortune(null);
@@ -47,26 +51,12 @@ function Fortune() {
 
     const userId = !zodiacParam ? localStorage.getItem('userId') : null;
 
-    if (!zodiacParam && !userId) {
-      navigate('/');
-      return;
-    }
-
     const handlers = {
-      onCached: (data) => {
-        setFortune(data);
-        setLoading(false);
-      },
-      onChunk: (text) => {
-        setLoading(false);
-        setAiStreaming(true);
-        setStreamText(prev => prev + text);
-      },
+      onCached: (data) => { setFortune(data); setLoading(false); },
+      onChunk: (text) => { setLoading(false); setAiStreaming(true); setStreamText(prev => prev + text); },
       onDone: (fullText) => {
         setAiStreaming(false);
         setStreamText('');
-        // 스트리밍 완료 후 서버에서 캐시 저장됨 → 재조회로 최신 데이터 가져오기
-        // 스트리밍 텍스트가 JSON이면 파싱, 아니면 텍스트로 표시
         try {
           let json = fullText;
           if (json.includes('```')) {
@@ -113,6 +103,32 @@ function Fortune() {
     } else {
       cleanupRef.current = getFortuneByUserStream(userId, handlers);
     }
+  };
+
+  // 페이지 진입 시: 캐시 확인 → 있으면 자동 표시, 없으면 버튼 노출
+  useEffect(() => {
+    cleanupRef.current?.();
+    setFortune(null); setStreamText(''); setAiStreaming(false); setError(null);
+    setCacheChecking(true);
+
+    const userId = !zodiacParam ? localStorage.getItem('userId') : null;
+    if (!zodiacParam && !userId) {
+      navigate('/');
+      return;
+    }
+
+    const cacheHandlers = {
+      cacheOnly: true,
+      onCached: (data) => { setFortune(data); setCacheChecking(false); },
+      onNoCache: () => { setCacheChecking(false); },
+      onError: () => { setCacheChecking(false); },
+    };
+    if (zodiacParam) {
+      cleanupRef.current = getFortuneByZodiacStream(zodiacParam, cacheHandlers);
+    } else {
+      cleanupRef.current = getFortuneByUserStream(userId, cacheHandlers);
+    }
+    return () => cleanupRef.current?.();
   }, [zodiacParam, navigate]);
 
   const handleShare = async () => {
@@ -183,6 +199,39 @@ function Fortune() {
           <p>{error}</p>
           <button className="btn-gold" onClick={() => navigate('/')}>
             홈으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 캐시 확인중 — 모래시계 애니메이션
+  if (cacheChecking && !fortune) {
+    return (
+      <div className="fortune-page">
+        <div className="myf-other-form glass-card myf-cache-check">
+          <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+          <p className="myf-cache-check-text">저장된 운세 확인중</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 캐시 없음 → "운세 보기" 버튼 노출
+  if (!fortune && !cacheChecking) {
+    return (
+      <div className="fortune-page">
+        <button className="fortune-back" onClick={() => navigate(-1)}>
+          <span>&#x2190;</span> 뒤로
+        </button>
+        <div className="glass-card" style={{ padding: '28px 20px', textAlign: 'center', marginTop: 16 }}>
+          <div style={{ fontSize: 36, marginBottom: 10 }}>🔮</div>
+          <h2 style={{ marginBottom: 12 }}>오늘의 {zodiacParam ? `${zodiacParam}띠 ` : ''}운세</h2>
+          <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
+            버튼을 누르면 AI가 오늘의 운세를 분석해드려요
+          </p>
+          <button className="btn-gold" style={{ width: '100%' }} onClick={startStreaming}>
+            오늘의 운세 보기 <HeartCost category="TODAY_FORTUNE" />
           </button>
         </div>
       </div>

@@ -3,6 +3,7 @@ package com.saju.server.controller;
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.CompatibilityService;
+import com.saju.server.service.FortuneHistoryService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.LunarCalendarService;
 import com.saju.server.util.SseEmitterUtils;
@@ -23,6 +24,7 @@ public class CompatibilityController {
     private final LunarCalendarService lunarCalendarService;
     private final ClaudeApiService claudeApiService;
     private final HeartPointService heartPointService;
+    private final FortuneHistoryService fortuneHistoryService;
 
     @GetMapping("/saju/basic")
     public ResponseEntity<Map<String, Object>> analyzeSajuBasic(
@@ -110,6 +112,23 @@ public class CompatibilityController {
             compatibilityService.parseAndSaveStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
                 score, grade(score), elementRelation, branchRelation, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "COMPATIBILITY", "사주궁합");
+
+            // 히스토리 저장
+            if (uid != null) {
+                Map<String, Object> result = compatibilityService.analyzeSajuBasic(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2);
+                Map<String, Object> payload = new LinkedHashMap<>(result);
+                payload.put("birthDate1", fbd1.toString());
+                payload.put("birthTime1", birthTime1);
+                payload.put("gender1", gender1);
+                payload.put("calendarType1", calendarType1);
+                payload.put("birthDate2", fbd2.toString());
+                payload.put("birthTime2", birthTime2);
+                payload.put("gender2", gender2);
+                payload.put("calendarType2", calendarType2);
+                String title = "사주 궁합 (" + fbd1 + " × " + fbd2 + ")";
+                String summary = score + "점 · " + grade(score);
+                fortuneHistoryService.save(uid, "compatibility", title, summary, payload);
+            }
         });
     }
 

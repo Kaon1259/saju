@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest } from '../api/fortune';
+import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory } from '../api/fortune';
+import RecentHistory from '../components/RecentHistory';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -303,6 +304,25 @@ function Compatibility() {
         <button className="home-cta-btn" style={{ margin: '0 0 8px' }} onClick={() => navigate('/register', { state: { from: '/compatibility' } })}>
           카카오 로그인하고 맞춤 궁합 받기
         </button>
+      )}
+
+      {/* 최근 본 궁합 */}
+      {userId && (
+        <RecentHistory
+          type="compatibility"
+          title="📚 최근 본 사주 궁합"
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              const p = full?.payload;
+              if (p) {
+                p._g1 = p.gender1 || 'M';
+                p._g2 = p.gender2 || 'F';
+                setResult(p);
+              }
+            } catch {}
+          }}
+        />
       )}
 
       <div className="compat-form glass-card">

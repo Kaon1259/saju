@@ -7,7 +7,6 @@ function Settings() {
   const navigate = useNavigate();
   const [fontSize, setFontSize] = useState(localStorage.getItem('fontSize') || 'normal');
   const [autoLogin, setAutoLogin] = useState(localStorage.getItem('autoLogin') !== 'off');
-  const [autoFortune, setAutoFortune] = useState(localStorage.getItem('autoFortune') === 'on');
   const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
   const [theme, setTheme] = useState(isDark ? 'dark' : 'light');
 
@@ -96,26 +95,6 @@ function Settings() {
         }}>
           로그아웃
         </button>
-      </section>
-
-      {/* 운세 설정 */}
-      <section className="settings-section glass-card animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-        <h3 className="settings-section-title">운세</h3>
-
-        <div className="settings-row">
-          <span className="settings-label">자동 운세 보기</span>
-          <label className="settings-toggle">
-            <input type="checkbox" checked={autoFortune}
-              onChange={(e) => {
-                const val = e.target.checked;
-                setAutoFortune(val);
-                localStorage.setItem('autoFortune', val ? 'on' : 'off');
-                window.dispatchEvent(new Event('storage'));
-              }} />
-            <span className="settings-toggle-slider" />
-          </label>
-        </div>
-        <p className="settings-desc">각 운세 페이지 진입 시 자동으로 운세를 조회합니다</p>
       </section>
 
       {/* 하트 비용 관리 (관리자 전용) */}

@@ -85,9 +85,10 @@ export const getFortuneByZodiac = async (zodiac) => {
   return response.data;
 };
 
-export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onNoCache, onDone, onError, onInsufficientHearts, cacheOnly } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ zodiac });
+  if (cacheOnly) params.set('cacheOnly', 'true');
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/fortune/today/stream?${params.toString()}`;
@@ -99,6 +100,7 @@ export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, on
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
+  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
   eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
   eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
   eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
@@ -106,10 +108,11 @@ export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onDone, on
   return () => eventSource.close();
 };
 
-export const getFortuneByUserStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getFortuneByUserStream = (userId, { onChunk, onCached, onNoCache, onDone, onError, onInsufficientHearts, cacheOnly } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
+  if (cacheOnly) params.set('cacheOnly', 'true');
   appendUserId(params);
   const paramStr = params.toString();
   const url = `${baseURL}/fortune/user/${userId}/stream${paramStr ? '?' + paramStr : ''}`;
@@ -121,6 +124,7 @@ export const getFortuneByUserStream = (userId, { onChunk, onCached, onDone, onEr
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
+  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
   eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
   eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
   eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
@@ -268,13 +272,14 @@ export const getMyFortune = async (userId) => {
   return response.data;
 };
 
-export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}, date) => {
+export const getMyFortuneStream = (userId, { onChunk, onCached, onNoCache, onDone, onError, onInsufficientHearts, targetType, targetName, cacheOnly } = {}, date) => {
   if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
   if (date) params.set('date', date);
   if (targetType) params.set('targetType', targetType);
   if (targetName) params.set('targetName', targetName);
+  if (cacheOnly) params.set('cacheOnly', 'true');
   appendUserId(params);
   const paramStr = params.toString();
   const url = `${baseURL}/my/fortune/${userId}/stream${paramStr ? '?' + paramStr : ''}`;
@@ -286,6 +291,7 @@ export const getMyFortuneStream = (userId, { onChunk, onCached, onDone, onError,
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
+  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
   eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
   eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
   eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
@@ -420,11 +426,12 @@ export const getManseryeok = async (date, calendarType) => {
 };
 
 // ─── 만세력 AI 해석 스트리밍 ───
-export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, onCached, onNoCache, onDone, onError, onInsufficientHearts, cacheOnly } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ date });
   if (calendarType) params.set('calendarType', calendarType);
   if (birthDate) params.set('birthDate', birthDate);
+  if (cacheOnly) params.set('cacheOnly', 'true');
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/saju/manseryeok/stream?${params.toString()}`;
@@ -436,6 +443,7 @@ export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, on
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
+  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
   eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
   eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
   eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
@@ -1018,6 +1026,29 @@ export const getFortuneShorts = async (context) => {
 export const searchCeleb = async (name) => {
   const response = await api.post('/celeb/search', { name });
   return response.data;
+};
+
+// ─── 운세 히스토리 ───
+export const listHistory = async (type, limit = 20) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) return [];
+  const params = { userId, limit };
+  if (type) params.type = type;
+  const response = await api.get('/history', { params });
+  return response.data;
+};
+
+export const getHistory = async (id) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) throw new Error('login required');
+  const response = await api.get(`/history/${id}`, { params: { userId } });
+  return response.data;
+};
+
+export const deleteHistory = async (id) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) throw new Error('login required');
+  await api.delete(`/history/${id}`, { params: { userId } });
 };
 
 export default api;

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTarotReadingStream, drawTarotCards, isGuest } from '../api/fortune';
+import { getTarotReadingStream, drawTarotCards, isGuest, getHistory } from '../api/fortune';
+import RecentHistory from '../components/RecentHistory';
 import FortuneCard from '../components/FortuneCard';
 import TarotCardArt from '../components/TarotCardArt';
 import { playTarotReveal, playCardShuffle, playCardSpin, playCardPick, playAnalyzeStart, startAnalyzeAmbient, playSpotlightTick, playSpotlightFinal } from '../utils/sounds';
@@ -453,8 +454,8 @@ function Tarot() {
     setShuffleCardsMeta(Array.from({ length: N }, (_, i) => {
       // 스택에서의 Y 오프셋 (깊이감) — 카드 인덱스에 따라 1px씩 차이
       const stackY = (i - N / 2) * 0.9;
-      // 순차적 딜레이 — 0.08초씩 차이나서 카드가 줄줄이 미끄러짐
-      const delay = (i * 0.085) % 1.1;
+      // 순차적 딜레이 — 카드 14장을 1.4초 주기에 골고루 분산 (한 장씩 이어달리듯)
+      const delay = (i * 0.1) % 1.4;
       // 회전 방향 — 홀짝 교대로 좌/우 분할
       const side = i % 2 === 0 ? 1 : -1;
       return {
@@ -1382,6 +1383,27 @@ function Tarot() {
               <button className="deck-select-btn" onClick={() => selectDeckWithFlip(curDeck.id)}>
                 이 덱으로 시작하기
               </button>
+            </div>
+
+            {/* 최근 본 타로 — 덱 스테이지 아래 고정 */}
+            <div className="tarot-history-overlay">
+              <RecentHistory
+                type="tarot"
+                title="📚 최근 본 타로"
+                onOpen={async (item) => {
+                  try {
+                    const full = await getHistory(item.id);
+                    const p = full?.payload;
+                    if (!p) return;
+                    const cards = Array.isArray(p.cards) ? p.cards : [];
+                    setRevealedCards(cards);
+                    setReading(p);
+                    if (p.spread) setSpread(p.spread);
+                    if (p.category) setCategory(p.category);
+                    setStep('result');
+                  } catch {}
+                }}
+              />
             </div>
           </div>
         );

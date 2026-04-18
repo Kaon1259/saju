@@ -9,11 +9,11 @@
   transition: opacity 0.7s ease;
 }
 
-/* 페이지 안에 떠 있는 효과 — 전체 화면 */
+/* 페이지 안에 떠 있는 효과 — 상단 Header(64px) / 하단 탭바(80px) 사이만 덮음 */
 .analysis-matrix--page {
-  top: 0;
-  bottom: 0;
-  z-index: 9000;
+  top: 64px;
+  bottom: 80px;
+  z-index: 900;
 }
 
 /* 모달/오버레이 위에 올릴 때 — 전체화면 */
@@ -28,8 +28,8 @@
   pointer-events: none;
 }
 
-@media (max-width: 600px) {
-  .analysis-matrix--page { top: 0; bottom: 0; z-index: 9000; }
+@media (min-width: 481px) {
+  .analysis-matrix--page { top: 68px; bottom: 88px; }
 }
 
 @keyframes analysisMatrixFadeIn {

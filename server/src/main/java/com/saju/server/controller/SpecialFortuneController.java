@@ -2,6 +2,7 @@ package com.saju.server.controller;
 
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
+import com.saju.server.service.FortuneHistoryService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.SpecialFortuneService;
 import com.saju.server.util.SseEmitterUtils;
@@ -21,6 +22,7 @@ public class SpecialFortuneController {
     private final SpecialFortuneService specialFortuneService;
     private final ClaudeApiService claudeApiService;
     private final HeartPointService heartPointService;
+    private final FortuneHistoryService fortuneHistoryService;
 
     /**
      * 오늘의 연애 온도 (만20세 기준, 로그인 불필요)
@@ -146,7 +148,50 @@ public class SpecialFortuneController {
             specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
                 partnerDate, partnerGender, breakupDate, meetDate, fullText);
             if (uid != null) heartPointService.deductPoints(uid, configKey, "1:1연애운 - " + type);
+
+            // 히스토리 저장 — 재열람 시 동일 입력값으로 캐시 히트
+            if (uid != null) {
+                Map<String, Object> result = specialFortuneService.getLoveFortuneBasic(
+                    type, birthDate, birthTime, gender, calendarType,
+                    partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus);
+                Map<String, Object> payload = new java.util.LinkedHashMap<>(result);
+                payload.put("type", type);
+                payload.put("birthDate", birthDate);
+                payload.put("birthTime", birthTime);
+                payload.put("gender", gender);
+                payload.put("calendarType", calendarType);
+                payload.put("partnerDate", partnerDate);
+                payload.put("partnerGender", partnerGender);
+                payload.put("breakupDate", breakupDate);
+                payload.put("meetDate", meetDate);
+                payload.put("relationshipStatus", relationshipStatus);
+                String title = loveTypeLabel(type);
+                Object score = result.get("score");
+                Object overall = result.get("overall");
+                String summary = (score != null ? score + "점" : null)
+                    + (overall != null ? " · " + overall : "");
+                fortuneHistoryService.save(uid, "love_11", title, summary, payload);
+            }
         });
+    }
+
+    private String loveTypeLabel(String type) {
+        return switch (type) {
+            case "relationship" -> "연애 진단";
+            case "crush" -> "짝사랑 분석";
+            case "some_check" -> "썸 진단";
+            case "blind_date" -> "소개팅 궁합";
+            case "couple_fortune" -> "데이트운";
+            case "confession_timing" -> "고백 타이밍";
+            case "ideal_type" -> "이상형 분석";
+            case "reunion" -> "재회 가능성";
+            case "remarriage" -> "재혼 운세";
+            case "marriage" -> "결혼 운세";
+            case "past_life" -> "전생 인연";
+            case "meeting_timing" -> "만남 타이밍";
+            case "contact_fortune" -> "연락 운세";
+            default -> "1:1 연애 운세";
+        };
     }
 
     /**

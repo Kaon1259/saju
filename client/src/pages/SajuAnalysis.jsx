@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { analyzeSaju, analyzeSajuStream, getUserSaju, getDailyFortunes, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -78,9 +78,6 @@ function SajuAnalysis() {
       return () => clearTimeout(t);
     }
   }, [result, matrixShown]);
-
-  const location = useLocation();
-  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
 
   const loadUserSaju = () => {
     const userId = localStorage.getItem('userId');
@@ -177,13 +174,6 @@ function SajuAnalysis() {
       },
     });
   };
-
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (userId && autoLoad) {
-      loadUserSaju();
-    }
-  }, []);
 
   const { guardedAction: guardSaju } = useHeartGuard('SAJU_ANALYSIS');
 
@@ -291,7 +281,7 @@ function SajuAnalysis() {
           </p>
         </section>
 
-        {localStorage.getItem('userId') && !autoLoad && (
+        {localStorage.getItem('userId') && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
             <button className="btn-gold" onClick={() => guardSaju(loadUserSaju)} style={{ width: '100%' }}>
               🔮 내 사주 운세 보기 <HeartCost category="SAJU_ANALYSIS" />

@@ -57,7 +57,8 @@ public class FortuneController {
             @RequestParam(value = "birthDate", required = false) String birthDate,
             @RequestParam(value = "gender", required = false) String gender,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
-            @RequestParam(value = "targetName", required = false) String targetName) {
+            @RequestParam(value = "targetName", required = false) String targetName,
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
         SseEmitter emitter = new SseEmitter(180000L);
 
         // 캐시 체크 (읽기 전용, INSERT 없음)
@@ -68,6 +69,17 @@ public class FortuneController {
             try {
                 String json = objectMapper.writeValueAsString(existing);
                 emitter.send(SseEmitter.event().name("cached").data(json));
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        // cacheOnly 모드: 캐시 없으면 AI 호출 없이 no-cache 이벤트로 종료
+        if (cacheOnly) {
+            try {
+                emitter.send(SseEmitter.event().name("no-cache").data("{}"));
                 emitter.complete();
             } catch (Exception e) {
                 emitter.completeWithError(e);
@@ -101,8 +113,9 @@ public class FortuneController {
      * 유저 기반 운세 스트리밍 엔드포인트
      */
     @GetMapping(value = "/user/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamUserFortune(@PathVariable Long userId) {
+    public SseEmitter streamUserFortune(@PathVariable Long userId,
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
         UserResponse user = userService.getUser(userId);
-        return streamTodayFortune(user.getZodiacAnimal(), userId, null, null, "me", null);
+        return streamTodayFortune(user.getZodiacAnimal(), userId, null, null, "me", null, cacheOnly);
     }
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getBloodTypeFortuneStream, getBloodTypeCompatibility, getUser, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -34,9 +34,6 @@ function BloodType() {
   const stopAmbientRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
-  const location = useLocation();
-  const autoLoad = localStorage.getItem('autoFortune') === 'on' || location.state?.autoLoad;
-
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     if (userId) {
@@ -44,7 +41,6 @@ function BloodType() {
         if (u.bloodType) {
           setSelected(u.bloodType);
           setType1(u.bloodType);
-          if (autoLoad) handleSelect(u.bloodType);
         }
       }).catch(() => {});
     }
@@ -160,7 +156,7 @@ function BloodType() {
             ))}
           </div>
 
-          {selected && !fortune && !loading && !autoLoad && localStorage.getItem('userId') && (
+          {selected && !fortune && !loading && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
               <button className="btn-gold" onClick={() => guardBlood(() => handleSelect(selected))} style={{ width: '100%' }}>
                 🔮 내 혈액형 운세 보기 <HeartCost category="BLOOD_TYPE" />
