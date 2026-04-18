@@ -35,12 +35,61 @@ public class CompatibilityController {
             @RequestParam(value = "calendarType1", defaultValue = "SOLAR") String calendarType1,
             @RequestParam(value = "calendarType2", defaultValue = "SOLAR") String calendarType2,
             @RequestParam(value = "gender1", defaultValue = "M") String gender1,
-            @RequestParam(value = "gender2", defaultValue = "F") String gender2) {
+            @RequestParam(value = "gender2", defaultValue = "F") String gender2,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(value = "historyType", required = false) String historyType,
+            @RequestParam(value = "celebName", required = false) String celebName) {
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
         if ("LUNAR".equalsIgnoreCase(calendarType2)) bd2 = lunarCalendarService.lunarToSolar(bd2);
-        return ResponseEntity.ok(compatibilityService.analyzeSajuBasic(bd1, birthTime1, bd2, birthTime2, gender1, gender2));
+        Map<String, Object> result = compatibilityService.analyzeSajuBasic(bd1, birthTime1, bd2, birthTime2, gender1, gender2);
+
+        // 캐시 히트(aiAnalysis/aiSummary 존재)인 경우에도 히스토리 저장 (saveIfAbsent로 dedupe)
+        if (userId != null && (result.get("aiAnalysis") != null || result.get("aiSummary") != null)) {
+            saveCompatibilityHistory(userId, bd1, birthTime1, gender1, calendarType1,
+                bd2, birthTime2, gender2, calendarType2,
+                result, historyType, celebName);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 3가지 궁합 페이지 공용 히스토리 저장 헬퍼.
+     * historyType: "compatibility" (사주) / "celeb_compatibility" (스타) / "my_love_compat" (연인)
+     * celebName: celeb_compatibility일 때 연예인 이름 (title/payload에 포함)
+     */
+    private void saveCompatibilityHistory(Long uid, LocalDate bd1, String bt1, String g1, String cal1,
+            LocalDate bd2, String bt2, String g2, String cal2,
+            Map<String, Object> result, String historyType, String celebName) {
+        try {
+            String type = (historyType == null || historyType.isBlank()) ? "compatibility" : historyType;
+            Map<String, Object> payload = new LinkedHashMap<>(result);
+            payload.put("birthDate1", bd1.toString());
+            payload.put("birthTime1", bt1);
+            payload.put("gender1", g1);
+            payload.put("calendarType1", cal1);
+            payload.put("birthDate2", bd2.toString());
+            payload.put("birthTime2", bt2);
+            payload.put("gender2", g2);
+            payload.put("calendarType2", cal2);
+            if (celebName != null && !celebName.isBlank()) payload.put("celebName", celebName);
+
+            int sc = result.get("score") instanceof Number ? ((Number) result.get("score")).intValue() : 0;
+            String title;
+            switch (type) {
+                case "celeb_compatibility":
+                    title = "스타궁합 · " + (celebName != null ? celebName : "-") + " (" + bd1 + " × " + bd2 + ")";
+                    break;
+                case "my_love_compat":
+                    title = "내 연인 궁합 (" + bd1 + " × " + bd2 + ")";
+                    break;
+                default:
+                    title = "사주 궁합 (" + bd1 + " × " + bd2 + ")";
+            }
+            String summary = (sc > 0 ? sc + "점 · " + grade(sc) : grade(sc));
+            fortuneHistoryService.saveIfAbsent(uid, type, title, summary, payload);
+        } catch (Exception ignored) {}
     }
 
     @GetMapping("/saju")
@@ -89,7 +138,9 @@ public class CompatibilityController {
             @RequestParam(value = "score", defaultValue = "60") int score,
             @RequestParam(value = "elementRelation", defaultValue = "") String elementRelation,
             @RequestParam(value = "branchRelation", defaultValue = "") String branchRelation,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(value = "historyType", required = false) String historyType,
+            @RequestParam(value = "celebName", required = false) String celebName) {
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
@@ -113,21 +164,12 @@ public class CompatibilityController {
                 score, grade(score), elementRelation, branchRelation, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "COMPATIBILITY", "사주궁합");
 
-            // 히스토리 저장
+            // 히스토리 저장 (3가지 타입 공용 헬퍼)
             if (uid != null) {
                 Map<String, Object> result = compatibilityService.analyzeSajuBasic(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2);
-                Map<String, Object> payload = new LinkedHashMap<>(result);
-                payload.put("birthDate1", fbd1.toString());
-                payload.put("birthTime1", birthTime1);
-                payload.put("gender1", gender1);
-                payload.put("calendarType1", calendarType1);
-                payload.put("birthDate2", fbd2.toString());
-                payload.put("birthTime2", birthTime2);
-                payload.put("gender2", gender2);
-                payload.put("calendarType2", calendarType2);
-                String title = "사주 궁합 (" + fbd1 + " × " + fbd2 + ")";
-                String summary = score + "점 · " + grade(score);
-                fortuneHistoryService.save(uid, "compatibility", title, summary, payload);
+                saveCompatibilityHistory(uid, fbd1, birthTime1, gender1, calendarType1,
+                    fbd2, birthTime2, gender2, calendarType2,
+                    result, historyType, celebName);
             }
         });
     }

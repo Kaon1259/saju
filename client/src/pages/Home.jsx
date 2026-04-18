@@ -795,7 +795,7 @@ function Home() {
       {/* 하단 pull-up drawer — 오늘 본 모든 운세 히스토리 (타입 무관) */}
       {!isGuest() && (
         <HistoryDrawer
-          label="📚 오늘 본 운세"
+          label="📚 최근 본 운세"
           limit={20}
           onOpen={async (item) => {
             try {
@@ -807,6 +807,8 @@ function Home() {
               const state = { restoreHistoryId: item.id };
               switch (item.type) {
                 case 'today_fortune':
+                case 'partner_fortune':
+                case 'other_fortune':
                   navigate('/my', { state });
                   break;
                 case 'love_11':
@@ -817,6 +819,12 @@ function Home() {
                   break;
                 case 'compatibility':
                   navigate('/compatibility', { state });
+                  break;
+                case 'celeb_compatibility':
+                  navigate('/celeb-compatibility', { state });
+                  break;
+                case 'my_love_compat':
+                  navigate('/my-love-compat', { state });
                   break;
                 default:
                   break;

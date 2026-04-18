@@ -183,7 +183,7 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
   return response.data;
 };
 
-export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, context, targetType, targetName, freeMode } = {}) => {
+export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, onNoCache, context, targetType, targetName, freeMode, cacheOnly } = {}) => {
   if (!freeMode && !requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
@@ -192,6 +192,7 @@ export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { 
   if (context) params.set('context', context);
   if (targetType) params.set('targetType', targetType);
   if (targetName) params.set('targetName', targetName);
+  if (cacheOnly) params.set('cacheOnly', 'true');
   if (!freeMode) appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/saju/analyze/stream?${params.toString()}`;
@@ -201,6 +202,10 @@ export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('no-cache', () => {
+    onNoCache?.();
     eventSource.close();
   });
   eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
@@ -488,7 +493,7 @@ export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, o
 };
 
 // ─── 사주 궁합 ───
-export const getSajuCompatibilityBasic = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2) => {
+export const getSajuCompatibilityBasic = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, extra = {}) => {
   const params = { birthDate1, birthDate2 };
   if (birthTime1) params.birthTime1 = birthTime1;
   if (birthTime2) params.birthTime2 = birthTime2;
@@ -496,6 +501,10 @@ export const getSajuCompatibilityBasic = async (birthDate1, birthDate2, birthTim
   if (calendarType2) params.calendarType2 = calendarType2;
   if (gender1) params.gender1 = gender1;
   if (gender2) params.gender2 = gender2;
+  const uid = localStorage.getItem('userId');
+  if (uid) params.userId = uid;
+  if (extra.historyType) params.historyType = extra.historyType;
+  if (extra.celebName) params.celebName = extra.celebName;
   const response = await api.get('/compatibility/saju/basic', { params });
   return response.data;
 };
@@ -516,7 +525,7 @@ export const saveCompatCache = async (data) => {
   await api.post('/compatibility/saju/cache', data);
 };
 
-export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts }) => {
+export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts, historyType, celebName }) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate1, birthDate2 });
   if (birthTime1) params.set('birthTime1', birthTime1);
@@ -528,6 +537,8 @@ export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birth
   if (score) params.set('score', score);
   if (elementRelation) params.set('elementRelation', elementRelation);
   if (branchRelation) params.set('branchRelation', branchRelation);
+  if (historyType) params.set('historyType', historyType);
+  if (celebName) params.set('celebName', celebName);
   appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';

@@ -9,7 +9,9 @@ import {
   getBloodTypeCompatibilityBasic,
   getBloodTypeCompatibilityStream,
   isGuest,
+  getHistory,
 } from '../api/fortune';
+import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
@@ -153,7 +155,8 @@ function MyLoveCompat() {
 
     try {
       const data = await getSajuCompatibilityBasic(
-        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2
+        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        { historyType: 'my_love_compat' }
       );
       data._g1 = g1;
       data._g2 = g2;
@@ -173,6 +176,7 @@ function MyLoveCompat() {
         bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
+          historyType: 'my_love_compat',
           onChunk: (text) => setStreamText((prev) => prev + text),
           onDone: (fullText) => {
             setAiStreaming(false);
@@ -622,6 +626,25 @@ function MyLoveCompat() {
 
           <button className="mlc-reset-btn" onClick={handleReset}>🔄 다시 보기</button>
         </div>
+      )}
+
+      {/* 하단 pull-up drawer — 최근 본 연인 궁합 */}
+      {!isGuest() && (
+        <HistoryDrawer
+          type="my_love_compat"
+          label="📚 최근 본 연인 궁합"
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              const p = full?.payload;
+              if (p) {
+                p._g1 = p.gender1 || 'M';
+                p._g2 = p.gender2 || 'F';
+                setResult(p);
+              }
+            } catch {}
+          }}
+        />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory } from '../api/fortune';
-import RecentHistory from '../components/RecentHistory';
+import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -99,7 +99,7 @@ function Compatibility() {
 
     try {
       // 1단계: 사주 계산 (캐시에 AI 있으면 즉시 반환)
-      const data = await getSajuCompatibilityBasic(bd1, bd2, bt1 || undefined, bt2 || undefined, calType1, calType2, g1, g2);
+      const data = await getSajuCompatibilityBasic(bd1, bd2, bt1 || undefined, bt2 || undefined, calType1, calType2, g1, g2, { historyType: 'compatibility' });
       data._g1 = g1;
       data._g2 = g2;
 
@@ -118,6 +118,7 @@ function Compatibility() {
         bd1, bd2, bt1 || '', bt2 || '', calType1, calType2, g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
+          historyType: 'compatibility',
           onChunk: (text) => setStreamText(prev => prev + text),
           onDone: (fullText) => {
             setAiStreaming(false);
@@ -320,11 +321,11 @@ function Compatibility() {
         </button>
       )}
 
-      {/* 최근 본 궁합 */}
+      {/* 하단 pull-up drawer — 최근 본 사주 궁합 */}
       {userId && (
-        <RecentHistory
+        <HistoryDrawer
           type="compatibility"
-          title="📚 최근 본 사주 궁합"
+          label="📚 최근 본 사주 궁합"
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);

@@ -30,6 +30,7 @@ public class SajuController {
     private final ClaudeApiService claudeApiService;
     private final FortunePromptBuilder promptBuilder;
     private final HeartPointService heartPointService;
+    private final FortuneHistoryService fortuneHistoryService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -67,18 +68,49 @@ public class SajuController {
             @RequestParam(required = false) Long userId,
             @RequestParam(value = "context", required = false) String context,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
-            @RequestParam(value = "targetName", required = false) String targetName) {
+            @RequestParam(value = "targetName", required = false) String targetName,
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
             birthDate = lunarCalendarService.lunarToSolar(birthDate);
         }
 
+        // 히스토리 저장 대상 여부 (연인/다른사람 운세 전용)
+        final boolean savePartnerHistory = "partner".equals(targetType) && userId != null;
+        final boolean saveOtherHistory = "other".equals(targetType) && userId != null;
+        final String partnerInputBirthDate = birthDateStr;
+        final String partnerInputBirthTime = birthTime;
+        final String partnerInputGender = gender;
+        final String partnerInputCalendarType = calendarType;
+
         // 1. DB 캐시 체크
         SajuResult cached = sajuService.getCachedResult(birthDate, birthTime, gender);
         if (cached != null && cached.getTodayFortune() != null
                 && cached.getTodayFortune().getOverall() != null
                 && !cached.getTodayFortune().getOverall().isBlank()) {
+            // 연인/다른사람 운세 캐시 히트 — 히스토리 1회 저장 (대상+오늘 날짜 기준 dedupe)
+            if (savePartnerHistory || saveOtherHistory) {
+                try {
+                    String histType = savePartnerHistory ? "partner_fortune" : "other_fortune";
+                    String prefix = savePartnerHistory ? "연인" : "다른사람";
+                    String fieldPrefix = savePartnerHistory ? "partner" : "other";
+                    java.util.Map<String, Object> payload = objectMapper.convertValue(cached, new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>>() {});
+                    payload.put(fieldPrefix + "BirthDate", partnerInputBirthDate);
+                    payload.put(fieldPrefix + "BirthTime", partnerInputBirthTime);
+                    payload.put(fieldPrefix + "Gender", partnerInputGender);
+                    payload.put(fieldPrefix + "CalendarType", partnerInputCalendarType);
+                    String today = LocalDate.now().toString();
+                    String title = prefix + " " + partnerInputBirthDate + " 운세 (" + today + ")";
+                    int sc = cached.getTodayFortune().getScore();
+                    String overall = cached.getTodayFortune().getOverall();
+                    String summary = (sc > 0 ? sc + "점" : "") + (overall != null ? " · " + overall : "");
+                    fortuneHistoryService.saveIfAbsent(userId, histType, title, summary, payload);
+                } catch (Exception e) {
+                    log.warn("{} cache-hit history save failed: {}",
+                        savePartnerHistory ? "partner_fortune" : "other_fortune", e.getMessage());
+                }
+            }
             SseEmitter emitter = new SseEmitter(5000L);
             final SajuResult result = cached;
             new Thread(() -> {
@@ -89,6 +121,18 @@ public class SajuController {
                 } catch (Exception e) {
                     log.warn("Failed to send cached saju result: {}", e.getMessage());
                 }
+            }).start();
+            return emitter;
+        }
+
+        // cacheOnly 모드: 캐시 미스 시 AI 호출 없이 no-cache 이벤트로 종료
+        if (cacheOnly) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try {
+                    emitter.send(SseEmitter.event().name("no-cache").data("{}"));
+                    emitter.complete();
+                } catch (Exception ignored) {}
             }).start();
             return emitter;
         }
@@ -146,6 +190,32 @@ public class SajuController {
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
             sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "SAJU_ANALYSIS", "사주분석");
+
+            // 연인/다른사람 운세 히스토리 저장 (AI 완료 경로)
+            if (savePartnerHistory || saveOtherHistory) {
+                try {
+                    SajuResult saved = sajuService.getCachedResult(finalBd, birthTime, gender);
+                    if (saved != null) {
+                        String histType = savePartnerHistory ? "partner_fortune" : "other_fortune";
+                        String prefix = savePartnerHistory ? "연인" : "다른사람";
+                        String fieldPrefix = savePartnerHistory ? "partner" : "other";
+                        java.util.Map<String, Object> payload = objectMapper.convertValue(saved, new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>>() {});
+                        payload.put(fieldPrefix + "BirthDate", partnerInputBirthDate);
+                        payload.put(fieldPrefix + "BirthTime", partnerInputBirthTime);
+                        payload.put(fieldPrefix + "Gender", partnerInputGender);
+                        payload.put(fieldPrefix + "CalendarType", partnerInputCalendarType);
+                        String today = LocalDate.now().toString();
+                        String title = prefix + " " + partnerInputBirthDate + " 운세 (" + today + ")";
+                        int sc = saved.getTodayFortune() != null ? saved.getTodayFortune().getScore() : 0;
+                        String overall = saved.getTodayFortune() != null ? saved.getTodayFortune().getOverall() : null;
+                        String summary = (sc > 0 ? sc + "점" : "") + (overall != null ? " · " + overall : "");
+                        fortuneHistoryService.saveIfAbsent(uid, histType, title, summary, payload);
+                    }
+                } catch (Exception e) {
+                    log.warn("{} AI-complete history save failed: {}",
+                        savePartnerHistory ? "partner_fortune" : "other_fortune", e.getMessage());
+                }
+            }
         });
     }
 

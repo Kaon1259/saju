@@ -7,6 +7,7 @@ const TYPE_ICON = {
   today_fortune: '☀️',
   love_11: '💕',
   compatibility: '💑',
+  celeb_compatibility: '🌟',
   my_love_compat: '💗',
   partner_fortune: '👫',
   other_fortune: '👤',

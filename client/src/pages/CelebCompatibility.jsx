@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream, isGuest } from '../api/fortune';
+import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
+import HistoryDrawer from '../components/HistoryDrawer';
 import parseAiJson from '../utils/parseAiJson';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
@@ -221,7 +222,8 @@ function CelebCompatibility() {
       const data = await getSajuCompatibilityBasic(
         myBirth, selectedCeleb.birth,
         myBirthTime || undefined, undefined,
-        myCalType, 'SOLAR', myG, celebG
+        myCalType, 'SOLAR', myG, celebG,
+        { historyType: 'celeb_compatibility', celebName: selectedCeleb.name }
       );
       data._celebName = selectedCeleb.name;
       data._celebGroup = selectedCeleb.group;
@@ -240,6 +242,8 @@ function CelebCompatibility() {
         myCalType, 'SOLAR', myG, celebG,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
+          historyType: 'celeb_compatibility',
+          celebName: selectedCeleb.name,
           onChunk: (text) => setStreamText((prev) => prev + text),
           onDone: (fullText) => {
             setStreamText('');
@@ -558,10 +562,30 @@ function CelebCompatibility() {
             <label className="form-label">생년월일</label>
             <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
           </div>
-          <button className="btn-gold" onClick={() => guardCelebCompat(handleAnalyze)} disabled={!myBirth} style={{ opacity: myBirth ? 1 : 0.5 }}>
+          <button className="btn-gold" onClick={() => guardCelebCompat(handleAnalyze)} disabled={!myBirth || !selectedCeleb} style={{ opacity: (myBirth && selectedCeleb) ? 1 : 0.5 }}>
             💫 {selectedCeleb.name}와(과) 궁합 분석하기 <HeartCost category="CELEB_COMPAT" />
           </button>
         </div>
+        {/* 하단 pull-up drawer — 최근 본 스타궁합 */}
+        {!isGuest() && (
+          <HistoryDrawer
+            type="celeb_compatibility"
+            label="📚 최근 본 스타궁합"
+            onOpen={async (item) => {
+              try {
+                const full = await getHistory(item.id);
+                const p = full?.payload;
+                if (p) {
+                  p._celebName = p.celebName || '';
+                  p._g1 = p.gender1 || 'M';
+                  p._g2 = p.gender2 || 'F';
+                  setResult(p);
+                  setStep('result');
+                }
+              } catch {}
+            }}
+          />
+        )}
       </div>
     );
   }

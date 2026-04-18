@@ -33,9 +33,26 @@ function MyFortune() {
     (async () => {
       try {
         const full = await getHistory(hid);
-        if (full?.payload) {
+        const p = full?.payload;
+        if (!p) return;
+        if (full?.type === 'partner_fortune') {
+          setViewMode('partner');
+          setPartnerOverride({
+            birthDate: p.partnerBirthDate || '',
+            birthTime: p.partnerBirthTime || '',
+            gender: p.partnerGender || '',
+          });
+          setPartnerData(p);
+        } else if (full?.type === 'other_fortune') {
+          setViewMode('other');
+          setOtherBirthDate(p.otherBirthDate || '');
+          setOtherBirthTime(p.otherBirthTime || '');
+          setOtherGender(p.otherGender || '');
+          setOtherCalendarType(p.otherCalendarType || 'SOLAR');
+          setOtherData(p);
+        } else {
           setViewMode('mine');
-          setData(full.payload);
+          setData(p);
         }
       } catch {}
     })();
@@ -51,6 +68,8 @@ function MyFortune() {
   const [partnerLoading, setPartnerLoading] = useState(false);
   const [partnerStreamText, setPartnerStreamText] = useState('');
   const [partnerStreaming, setPartnerStreaming] = useState(false);
+  const [partnerCacheChecking, setPartnerCacheChecking] = useState(false);
+  const [partnerOverride, setPartnerOverride] = useState(null); // 히스토리 복원으로 덮어쓰인 파트너 정보
   const partnerCleanupRef = useRef(null);
 
   // 다른 사람 운세
@@ -66,6 +85,32 @@ function MyFortune() {
 
   const userId = localStorage.getItem('userId');
   const userName = localStorage.getItem('userName');
+
+  // 연인 운세 탭 진입 시 캐시 선조회 (있으면 자동 표시, 없으면 버튼만 노출)
+  useEffect(() => {
+    if (viewMode !== 'partner') return;
+    if (partnerData) return;
+    if (partnerLoading || partnerStreaming) return;
+    const info = getPartnerInfo();
+    if (!info?.birthDate) return;
+    setPartnerCacheChecking(true);
+    const cleanup = analyzeSajuStream(info.birthDate, info.birthTime || undefined, 'SOLAR', info.gender || undefined, {
+      cacheOnly: true,
+      targetType: 'partner',
+      onCached: (cached) => {
+        setPartnerData(cached);
+        setPartnerCacheChecking(false);
+      },
+      onNoCache: () => {
+        setPartnerCacheChecking(false);
+      },
+      onError: () => {
+        setPartnerCacheChecking(false);
+      },
+    });
+    return () => { try { cleanup?.(); } catch {} };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, partnerOverride]);
 
   // 날짜 계산
   const getTargetDate = () => {
@@ -88,8 +133,9 @@ function MyFortune() {
     return '오늘';
   };
 
-  // 프로필에서 연인 정보 가져오기
+  // 프로필에서 연인 정보 가져오기 (히스토리 복원 시 override 우선)
   const getPartnerInfo = () => {
+    if (partnerOverride) return partnerOverride;
     try {
       const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
       if (!p.partnerBirthDate) return null;
@@ -105,7 +151,7 @@ function MyFortune() {
   const { guardedAction: guardTodayFortune } = useHeartGuard('TODAY_FORTUNE');
 
   // 스트리밍 분석 공통 함수 (호출 전에 guardTodayFortune으로 감쌀 것)
-  const startAnalysis = (birthDate, birthTime, calendarType, gender, setters) => {
+  const startAnalysis = (birthDate, birthTime, calendarType, gender, setters, extraOpts = {}) => {
     const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef } = setters;
     sL(true); sST(''); sS(false);
     cRef.current?.();
@@ -113,6 +159,7 @@ function MyFortune() {
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     cRef.current = analyzeSajuStream(birthDate, birthTime || undefined, calendarType, gender || undefined, {
+      ...extraOpts,
       onCached: (cached) => {
         sD(cached); sL(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -361,46 +408,75 @@ function MyFortune() {
       {/* ════════ 연인 운세 ════════ */}
       {viewMode === 'partner' && (
         <div className="myf-other-view">
-          {renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData) || (
-            !partnerData ? (
-              <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
-                <h2 style={{ marginBottom: 12 }}>💕 연인 운세</h2>
-                {partnerInfo ? (
-                  <>
-                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 16 }}>
-                      프로필에 등록된 연인 정보로 운세를 분석합니다
-                    </p>
-                    <div className="myf-badges" style={{ justifyContent: 'center', marginBottom: 20 }}>
-                      <span className="myf-badge">{partnerInfo.birthDate}</span>
-                      {partnerInfo.birthTime && <span className="myf-badge">{partnerInfo.birthTime}</span>}
-                      {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
-                    </div>
-                    <button className="btn-gold" style={{ width: '100%', marginBottom: 8 }}
-                      onClick={() => guardTodayFortune(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, 'SOLAR', partnerInfo.gender, {
-                        setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
-                        setData: setPartnerData, cleanupRef: partnerCleanupRef,
-                      }))}>
-                      💕 연인 운세 보기 <HeartCost category="TODAY_FORTUNE" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 48, margin: '20px 0' }}>💔</div>
-                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
-                      등록된 연인 정보가 없습니다.<br />프로필에서 연인 정보를 먼저 입력해주세요.
-                    </p>
-                    <button className="btn-gold" style={{ width: '100%' }} onClick={() => navigate('/profile/edit')}>
-                      프로필에서 연인 등록하기
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              renderResult(partnerData, () => {
-                partnerCleanupRef.current?.(); setPartnerData(null); setPartnerStreamText(''); setPartnerStreaming(false);
-              }, () => handleShare(partnerData, '연인 운세'), '연인 운세 분석 결과', partnerInfo ? { birthDate: partnerInfo.birthDate, birthTime: partnerInfo.birthTime, gender: partnerInfo.gender, calendarType: 'SOLAR' } : null)
+          {/* 저장된 운세 확인중 */}
+          {partnerCacheChecking && !partnerData && !partnerLoading && !partnerStreaming && (
+            <div className="myf-other-form glass-card myf-cache-check">
+              <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+              <p className="myf-cache-check-text">저장된 연인 운세 확인중</p>
+            </div>
+          )}
+
+          {!partnerCacheChecking && (
+            renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData) || (
+              !partnerData ? (
+                <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
+                  <h2 style={{ marginBottom: 12 }}>💕 연인 운세</h2>
+                  {partnerInfo ? (
+                    <>
+                      <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 16 }}>
+                        프로필에 등록된 연인 정보로 운세를 분석합니다
+                      </p>
+                      <div className="myf-badges" style={{ justifyContent: 'center', marginBottom: 20 }}>
+                        <span className="myf-badge">{partnerInfo.birthDate}</span>
+                        {partnerInfo.birthTime && <span className="myf-badge">{partnerInfo.birthTime}</span>}
+                        {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
+                      </div>
+                      <button className="btn-gold" style={{ width: '100%', marginBottom: 8 }}
+                        onClick={() => guardTodayFortune(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, 'SOLAR', partnerInfo.gender, {
+                          setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
+                          setData: setPartnerData, cleanupRef: partnerCleanupRef,
+                        }, { targetType: 'partner' }))}>
+                        💕 연인 운세 보기 <HeartCost category="TODAY_FORTUNE" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 48, margin: '20px 0' }}>💔</div>
+                      <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
+                        등록된 연인 정보가 없습니다.<br />프로필에서 연인 정보를 먼저 입력해주세요.
+                      </p>
+                      <button className="btn-gold" style={{ width: '100%' }} onClick={() => navigate('/profile/edit')}>
+                        프로필에서 연인 등록하기
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                renderResult(partnerData, () => {
+                  partnerCleanupRef.current?.(); setPartnerData(null); setPartnerStreamText(''); setPartnerStreaming(false); setPartnerOverride(null);
+                }, () => handleShare(partnerData, '연인 운세'), '연인 운세 분석 결과', partnerInfo ? { birthDate: partnerInfo.birthDate, birthTime: partnerInfo.birthTime, gender: partnerInfo.gender, calendarType: 'SOLAR' } : null)
+              )
             )
           )}
+
+          {/* 하단 pull-up drawer — 최근 본 연인 운세 */}
+          <HistoryDrawer
+            type="partner_fortune"
+            label="📚 최근 본 연인 운세"
+            onOpen={async (item) => {
+              try {
+                const full = await getHistory(item.id);
+                const p = full?.payload;
+                if (!p) return;
+                setPartnerOverride({
+                  birthDate: p.partnerBirthDate || '',
+                  birthTime: p.partnerBirthTime || '',
+                  gender: p.partnerGender || '',
+                });
+                setPartnerData(p);
+              } catch {}
+            }}
+          />
         </div>
       )}
 
@@ -475,7 +551,7 @@ function MyFortune() {
                   onClick={() => guardTodayFortune(() => startAnalysis(otherBirthDate, otherBirthTime, otherCalendarType, otherGender, {
                     setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming,
                     setData: setOtherData, cleanupRef: otherCleanupRef,
-                  }))}>
+                  }, { targetType: 'other' }))}>
                   {otherLoading || otherStreaming ? 'AI 분석중...' : '운세 보기'} <HeartCost category="TODAY_FORTUNE" />
                 </button>
               </div>
@@ -485,6 +561,24 @@ function MyFortune() {
               }, () => handleShare(otherData, '사주 운세 분석'), '운세 분석 결과', otherBirthDate ? { birthDate: otherBirthDate, birthTime: otherBirthTime, gender: otherGender, calendarType: otherCalendarType } : null)
             )
           )}
+
+          {/* 하단 pull-up drawer — 최근 본 다른사람 운세 */}
+          <HistoryDrawer
+            type="other_fortune"
+            label="📚 최근 본 다른사람 운세"
+            onOpen={async (item) => {
+              try {
+                const full = await getHistory(item.id);
+                const p = full?.payload;
+                if (!p) return;
+                setOtherBirthDate(p.otherBirthDate || '');
+                setOtherBirthTime(p.otherBirthTime || '');
+                setOtherGender(p.otherGender || '');
+                setOtherCalendarType(p.otherCalendarType || 'SOLAR');
+                setOtherData(p);
+              } catch {}
+            }}
+          />
         </div>
       )}
 
