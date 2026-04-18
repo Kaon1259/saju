@@ -392,14 +392,16 @@
 /* ═══ 덱 선택 풀스크린 ═══ */
 .tarot-deck-screen {
   position: fixed; inset: 0; z-index: 10;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   background: #050510;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 0 0 100px;
   gap: 0;
-  touch-action: none;
-  overscroll-behavior: none;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
 }
 [data-theme="light"] .tarot-deck-screen { background: #f0eef5; }
 

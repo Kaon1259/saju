@@ -246,11 +246,12 @@ function LoveTypeFortune() {
         <p className="ltf-hero-desc">{info.desc}</p>
       </div>
 
-      {/* ═══ 최근 본 기록 ═══ */}
-      {!result && !loading && !streaming && userId && (
+      {/* ═══ 최근 본 기록 ═══ (결과/로딩 중에도 항상 표시) */}
+      {userId && !loading && !streaming && (
         <RecentHistory
           type="love_11"
           title="📚 최근 본 연애 운세"
+          emptyText={!result ? "아직 저장된 연애 운세가 없어요. 분석을 해보면 이곳에 기록돼요." : undefined}
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);

@@ -540,6 +540,23 @@ public class TarotService {
         String cacheKey = buildCacheKey(cardIds, reversals, spread, category, question != null ? question : "");
         Map<String, Object> cached = getFromCache("tarot", cacheKey);
         if (cached != null) {
+            // 캐시 히트도 '본 타로'이므로 히스토리에 1회 저장 (중복 시 스킵)
+            if (userId != null) {
+                try {
+                    Map<String, Object> payload = new LinkedHashMap<>(cached);
+                    payload.put("cardIds", cardIds);
+                    payload.put("reversals", reversals);
+                    Object cardsObj = cached.get("cards");
+                    int cardCount = (cardsObj instanceof java.util.List) ? ((java.util.List<?>) cardsObj).size() : 0;
+                    String categoryKr = CATEGORY_KR.getOrDefault(category, "종합운");
+                    // tarot은 카드 조합 자체가 reading — cardIds로 unique 식별
+                    String title = categoryKr + " 타로 (" + cardCount + "장) #" + cardIds;
+                    String summary = question != null && !question.isBlank() ? question : null;
+                    fortuneHistoryService.saveIfAbsent(userId, "tarot", title, summary, payload);
+                } catch (Exception e) {
+                    log.warn("tarot cache-hit history save failed: {}", e.getMessage());
+                }
+            }
             SseEmitter emitter = new SseEmitter(30000L);
             try {
                 String json = objectMapper.writeValueAsString(cached);
@@ -620,9 +637,9 @@ public class TarotService {
                     Map<String, Object> payload = new LinkedHashMap<>(result);
                     payload.put("cardIds", finalCardIdsStr);
                     payload.put("reversals", finalReversalsStr);
-                    String title = finalCategoryKr + " 타로 (" + finalCardDetails.size() + "장)";
+                    String title = finalCategoryKr + " 타로 (" + finalCardDetails.size() + "장) #" + finalCardIdsStr;
                     String summary = finalQuestion != null && !finalQuestion.isBlank() ? finalQuestion : null;
-                    fortuneHistoryService.save(finalUserId, "tarot", title, summary, payload);
+                    fortuneHistoryService.saveIfAbsent(finalUserId, "tarot", title, summary, payload);
                 }
             } catch (Exception e) {
                 log.warn("Failed to save tarot stream cache: {}", e.getMessage());

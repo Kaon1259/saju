@@ -16,3 +16,5 @@ management/.gradle/
 management/build/
 client_app/
 _origin/
+client/.env
+.env

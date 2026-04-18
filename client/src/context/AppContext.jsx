@@ -5,7 +5,17 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [heartCosts, setHeartCosts] = useState({});
-  const [appUser, setAppUser] = useState(null);
+  // 깜빡임 방지: localStorage에 캐시된 프로필이 있으면 낙관적으로 세팅 (appInit 완료 전까지 유효)
+  const [appUser, setAppUser] = useState(() => {
+    try {
+      const uid = localStorage.getItem('userId');
+      const raw = localStorage.getItem('userProfile');
+      if (!uid || !raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && !parsed.isGuest) return parsed;
+    } catch {}
+    return null;
+  });
   const [appReady, setAppReady] = useState(false);
 
   const initApp = useCallback(async () => {

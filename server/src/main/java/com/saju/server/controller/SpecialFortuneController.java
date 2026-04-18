@@ -115,6 +115,26 @@ public class SpecialFortuneController {
             type, birthDate, birthTime, gender, calendarType,
             partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus);
         if (cached.containsKey("score") && cached.containsKey("overall")) {
+            // 캐시 히트도 '본 운세'이므로 히스토리에 1회 저장 (중복 시 스킵)
+            if (userId != null) {
+                Map<String, Object> payload = new java.util.LinkedHashMap<>(cached);
+                payload.put("type", type);
+                payload.put("birthDate", birthDate);
+                payload.put("birthTime", birthTime);
+                payload.put("gender", gender);
+                payload.put("calendarType", calendarType);
+                payload.put("partnerDate", partnerDate);
+                payload.put("partnerGender", partnerGender);
+                payload.put("breakupDate", breakupDate);
+                payload.put("meetDate", meetDate);
+                payload.put("relationshipStatus", relationshipStatus);
+                String title = buildLoveTitle(type, birthDate, partnerDate);
+                Object score = cached.get("score");
+                Object overall = cached.get("overall");
+                String summary = (score != null ? score + "점" : "")
+                    + (overall != null ? " · " + overall : "");
+                fortuneHistoryService.saveIfAbsent(userId, "love_11", title, summary, payload);
+            }
             // 캐시 히트 → cached 이벤트로 즉시 반환
             SseEmitter emitter = new SseEmitter(5000L);
             new Thread(() -> {
@@ -165,14 +185,27 @@ public class SpecialFortuneController {
                 payload.put("breakupDate", breakupDate);
                 payload.put("meetDate", meetDate);
                 payload.put("relationshipStatus", relationshipStatus);
-                String title = loveTypeLabel(type);
+                String title = buildLoveTitle(type, birthDate, partnerDate);
                 Object score = result.get("score");
                 Object overall = result.get("overall");
                 String summary = (score != null ? score + "점" : null)
                     + (overall != null ? " · " + overall : "");
-                fortuneHistoryService.save(uid, "love_11", title, summary, payload);
+                fortuneHistoryService.saveIfAbsent(uid, "love_11", title, summary, payload);
             }
         });
+    }
+
+    /**
+     * 히스토리 dedupe용 unique 타이틀.
+     * 같은 타입+같은 입력 조합이면 같은 타이틀 → saveIfAbsent로 중복 방지.
+     * 파트너 정보가 있으면 파트너 생년월일로 구분 (다른 파트너면 다른 기록).
+     */
+    private String buildLoveTitle(String type, String birthDate, String partnerDate) {
+        String base = loveTypeLabel(type);
+        if (partnerDate != null && !partnerDate.isBlank()) {
+            return base + " · " + partnerDate;
+        }
+        return base;
     }
 
     private String loveTypeLabel(String type) {

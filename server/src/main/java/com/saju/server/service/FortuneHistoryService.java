@@ -50,6 +50,18 @@ public class FortuneHistoryService {
     }
 
     /**
+     * 동일 (userId, type, title) 기록이 이미 있으면 저장하지 않음.
+     * 캐시 히트 시 '이미 본 적 있는 운세'를 히스토리에 1회만 기록하기 위한 용도.
+     */
+    @Transactional
+    public void saveIfAbsent(Long userId, String type, String title, String summary, Object payload) {
+        if (userId == null || type == null || title == null) return;
+        String clippedTitle = title.length() > 120 ? title.substring(0, 120) : title;
+        if (repository.existsByUserIdAndTypeAndTitle(userId, type, clippedTitle)) return;
+        save(userId, type, title, summary, payload);
+    }
+
+    /**
      * 유저당 MAX_PER_USER 초과분을 오래된 순으로 삭제.
      */
     private void trimOldEntries(Long userId) {

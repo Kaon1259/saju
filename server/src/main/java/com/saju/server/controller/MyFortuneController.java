@@ -143,6 +143,19 @@ public class MyFortuneController {
                 sajuMap.put("dayMaster", sajuResult.getDayMasterHanja() + " " + sajuResult.getDayMaster());
                 sajuMap.put("personalityReading", sajuResult.getPersonalityReading());
             }
+            // 캐시 히트도 '본 운세'이므로 히스토리에 1회 저장 (중복 시 스킵)
+            if (userId != null) {
+                java.time.LocalDate today2 = java.time.LocalDate.now();
+                String dayLabel = targetDate.equals(today2) ? "오늘"
+                    : targetDate.equals(today2.plusDays(1)) ? "내일"
+                    : targetDate.toString();
+                Map<String, Object> payload = new java.util.LinkedHashMap<>(data);
+                payload.put("targetDate", targetDate.toString());
+                String summary = (cached.getScore() != null ? cached.getScore() + "점" : "")
+                    + (cached.getOverall() != null ? " · " + cached.getOverall() : "");
+                String title = (user.getName() != null ? user.getName() + "님의 " : "") + dayLabel + " 운세 (" + targetDate + ")";
+                fortuneHistoryService.saveIfAbsent(userId, "today_fortune", title, summary, payload);
+            }
             new Thread(() -> {
                 try {
                     emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(data)));

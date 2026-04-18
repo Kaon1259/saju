@@ -479,28 +479,30 @@ function MyFortune() {
         </div>
       )}
 
+      {viewMode === 'mine' && !cacheChecking && (
+        <RecentHistory
+          type="today_fortune"
+          title="📚 최근 본 내 운세"
+          emptyText={!data ? "아직 저장된 운세가 없어요. 운세를 보면 이곳에 기록돼요." : undefined}
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              if (full?.payload) setData(full.payload);
+            } catch {}
+          }} />
+      )}
+
       {viewMode === 'mine' && !data && !cacheChecking && (
-        <>
-          <RecentHistory
-            type="today_fortune"
-            title="📚 최근 본 내 운세"
-            onOpen={async (item) => {
-              try {
-                const full = await getHistory(item.id);
-                if (full?.payload) setData(full.payload);
-              } catch {}
-            }} />
-          <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
-            <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
-            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
-              버튼을 누르면 AI가 {userName || '당신'}님의 사주를 분석해드려요
-            </p>
-            <button className="btn-gold" style={{ width: '100%' }}
-              onClick={() => guardTodayFortune(() => loadMyFortune(getTargetDate()))}>
-              {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
-            </button>
-          </div>
-        </>
+        <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
+          <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
+          <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
+            버튼을 누르면 AI가 {userName || '당신'}님의 사주를 분석해드려요
+          </p>
+          <button className="btn-gold" style={{ width: '100%' }}
+            onClick={() => guardTodayFortune(() => loadMyFortune(getTargetDate()))}>
+            {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
+          </button>
+        </div>
       )}
 
       {viewMode === 'mine' && data && (

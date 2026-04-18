@@ -21,6 +21,8 @@ public interface FortuneHistoryRepository extends JpaRepository<FortuneHistory, 
 
     Optional<FortuneHistory> findByIdAndUserId(Long id, Long userId);
 
+    boolean existsByUserIdAndTypeAndTitle(Long userId, String type, String title);
+
     @Query("SELECT h.id FROM FortuneHistory h WHERE h.userId = :userId ORDER BY h.createdAt DESC")
     List<Long> findIdsByUserIdOrderedDesc(@Param("userId") Long userId, Pageable pageable);
 
