@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory } from '../api/fortune';
+import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory, getUser } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
@@ -63,6 +63,22 @@ function Compatibility() {
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 페이지 진입 시 최신 프로필로 localStorage 리프레시 (파트너 정보 캐시 갱신)
+  const [profileTick, setProfileTick] = useState(0);
+  useEffect(() => {
+    const uid = localStorage.getItem('userId');
+    if (!uid) return;
+    (async () => {
+      try {
+        const fresh = await getUser(uid);
+        if (fresh) {
+          localStorage.setItem('userProfile', JSON.stringify(fresh));
+          setProfileTick(t => t + 1); // 재렌더 유발 → hasPartner 재평가
+        }
+      } catch {}
+    })();
+  }, []);
 
   // 홈 드로어에서 넘어온 restoreHistoryId 복원
   useEffect(() => {

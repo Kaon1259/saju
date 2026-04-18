@@ -48,12 +48,19 @@ public class AppInitController {
             profile.put("id", user.getId());
             profile.put("name", user.getName());
             profile.put("birthDate", user.getBirthDate() != null ? user.getBirthDate().toString() : null);
+            profile.put("birthTime", user.getBirthTime());
+            profile.put("calendarType", user.getCalendarType());
             profile.put("gender", user.getGender());
             profile.put("bloodType", user.getBloodType());
             profile.put("mbtiType", user.getMbtiType());
             profile.put("zodiacAnimal", user.getZodiacAnimal());
             profile.put("relationshipStatus", user.getRelationshipStatus());
             profile.put("profileImage", user.getProfileImage());
+            // 파트너 정보 — 연인 관련 페이지 "연인 정보로 채우기" 버튼 동작에 필수
+            profile.put("partnerBirthDate", user.getPartnerBirthDate() != null ? user.getPartnerBirthDate().toString() : null);
+            profile.put("partnerBirthTime", user.getPartnerBirthTime());
+            profile.put("partnerBloodType", user.getPartnerBloodType());
+            profile.put("partnerMbtiType", user.getPartnerMbtiType());
             profile.put("isGuest", user.getKakaoId() != null && user.getKakaoId().startsWith("guest_"));
             result.put("user", profile);
             result.put("heartPoints", user.getHeartPoints() != null ? user.getHeartPoints() : 0);
