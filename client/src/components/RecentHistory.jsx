@@ -37,7 +37,7 @@ function formatDate(iso) {
  * - emptyText: 아직 기록 없을 때 노출할 안내 (없으면 섹션 자체 숨김)
  * - limit: 표시 개수 (기본 5)
  */
-function RecentHistory({ type, onOpen, title = '최근 본 기록', emptyText, limit = 5 }) {
+function RecentHistory({ type, onOpen, title = '최근 본 기록', emptyText, limit = 5, hideTitle = false }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,7 +63,7 @@ function RecentHistory({ type, onOpen, title = '최근 본 기록', emptyText, l
     if (!emptyText) return null;
     return (
       <div className="recent-history glass-card">
-        <h3 className="recent-history-title">{title}</h3>
+        {!hideTitle && <h3 className="recent-history-title">{title}</h3>}
         <p className="recent-history-empty">{emptyText}</p>
       </div>
     );
@@ -71,7 +71,7 @@ function RecentHistory({ type, onOpen, title = '최근 본 기록', emptyText, l
 
   return (
     <div className="recent-history glass-card">
-      <h3 className="recent-history-title">{title}</h3>
+      {!hideTitle && <h3 className="recent-history-title">{title}</h3>}
       <ul className="recent-history-list">
         {items.map(item => (
           <li key={item.id} className="recent-history-item" onClick={() => onOpen?.(item)}>

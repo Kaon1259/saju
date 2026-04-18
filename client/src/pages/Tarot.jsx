@@ -237,6 +237,7 @@ function Tarot() {
   const galleryRafRef = useRef(null);
   const galleryLastTsRef = useRef(0);
   const [step, setStep] = useState('deck'); // deck → tone → setup → shuffle → pick → reveal → result
+  const [historyOpen, setHistoryOpen] = useState(false); // 덱 화면 하단 "최근 본 타로" drawer 토글
 
   // ─── Y축 페이지 플립 헬퍼 (step 변경을 플립 애니메이션으로 감싸기) ───
   const [flipPhase, setFlipPhase] = useState(null); // null | 'out' | 'in'
@@ -1385,25 +1386,38 @@ function Tarot() {
               </button>
             </div>
 
-            {/* 최근 본 타로 — 덱 스테이지 아래 고정 */}
-            <div className="tarot-history-overlay">
-              <RecentHistory
-                type="tarot"
-                title="📚 최근 본 타로"
-                onOpen={async (item) => {
-                  try {
-                    const full = await getHistory(item.id);
-                    const p = full?.payload;
-                    if (!p) return;
-                    const cards = Array.isArray(p.cards) ? p.cards : [];
-                    setRevealedCards(cards);
-                    setReading(p);
-                    if (p.spread) setSpread(p.spread);
-                    if (p.category) setCategory(p.category);
-                    setStep('result');
-                  } catch {}
-                }}
-              />
+            {/* 최근 본 타로 — 하단 drawer: 헤더 탭하면 위로 올라옴 */}
+            <div className={`tarot-history-drawer ${historyOpen ? 'open' : ''}`}>
+              <button
+                type="button"
+                className="tarot-history-handle"
+                onClick={() => setHistoryOpen(v => !v)}
+                aria-expanded={historyOpen}
+                aria-label="최근 본 타로 토글">
+                <span className="tarot-history-handle-grip" aria-hidden="true" />
+                <span className="tarot-history-handle-label">📚 최근 본 타로</span>
+                <span className={`tarot-history-handle-chev ${historyOpen ? 'open' : ''}`} aria-hidden="true">▲</span>
+              </button>
+              <div className="tarot-history-content">
+                <RecentHistory
+                  type="tarot"
+                  hideTitle
+                  onOpen={async (item) => {
+                    try {
+                      const full = await getHistory(item.id);
+                      const p = full?.payload;
+                      if (!p) return;
+                      const cards = Array.isArray(p.cards) ? p.cards : [];
+                      setRevealedCards(cards);
+                      setReading(p);
+                      if (p.spread) setSpread(p.spread);
+                      if (p.category) setCategory(p.category);
+                      setHistoryOpen(false);
+                      setStep('result');
+                    } catch {}
+                  }}
+                />
+              </div>
             </div>
           </div>
         );
