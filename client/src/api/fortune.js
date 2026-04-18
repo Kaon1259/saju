@@ -563,10 +563,12 @@ export const getTarotReading = async (cardIds, reversals, spread, category, ques
   return response.data;
 };
 
-export const getTarotReadingStream = (cardIds, reversals, spread, category, question, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getTarotReadingStream = (cardIds, reversals, spread, category, question, { onChunk, onCached, onDone, onError, onInsufficientHearts, deck, deckVariant }) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ cardIds, reversals, spread, category });
   if (question) params.set('question', question);
+  if (deck) params.set('deck', deck);
+  if (deckVariant != null) params.set('deckVariant', String(deckVariant));
   appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';

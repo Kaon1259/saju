@@ -68,6 +68,8 @@ public class TarotController {
             @RequestParam(defaultValue = "three") String spread,
             @RequestParam(defaultValue = "general") String category,
             @RequestParam(required = false) String question,
+            @RequestParam(required = false) String deck,
+            @RequestParam(required = false) Integer deckVariant,
             @RequestParam(required = false) Long userId) {
         // spread 파라미터에 따라 하트 카테고리 결정
         String heartCategory = switch (spread) {
@@ -102,7 +104,7 @@ public class TarotController {
         final String finalHeartCategory = heartCategory;
         final String finalBirthDate = birthDate;
         final String finalGender = gender;
-        return tarotService.streamReading(cardIds, reversals, spread, category, question, finalBirthDate, finalGender, uid, () -> {
+        return tarotService.streamReading(cardIds, reversals, spread, category, question, finalBirthDate, finalGender, deck, deckVariant, uid, () -> {
             if (uid != null) heartPointService.deductPoints(uid, finalHeartCategory, "타로");
         });
     }

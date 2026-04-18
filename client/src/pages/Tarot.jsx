@@ -323,6 +323,9 @@ function Tarot() {
         setReading(p);
         if (p.spread) setSpread(p.spread);
         if (p.category) setCategory(p.category);
+        // 사용했던 덱/변형 복원 — 카드 이미지가 정확히 당시 뽑은 덱으로 보임
+        if (p.deck) setDeck(p.deck);
+        if (p.deckVariant != null) setDeckVariant(p.deckVariant);
         setStep('result');
       } catch {}
     })();
@@ -978,6 +981,8 @@ function Tarot() {
     }, 240000);
 
     cleanupRef.current = getTarotReadingStream(cardIds, reversals, spread, category, question, {
+      deck,
+      deckVariant,
       onCached: (data) => {
         setReading(data);
         setLoading(false);
@@ -1456,6 +1461,8 @@ function Tarot() {
                       setReading(p);
                       if (p.spread) setSpread(p.spread);
                       if (p.category) setCategory(p.category);
+                      if (p.deck) setDeck(p.deck);
+                      if (p.deckVariant != null) setDeckVariant(p.deckVariant);
                       setHistoryOpen(false);
                       setStep('result');
                     } catch {}
