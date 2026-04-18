@@ -989,10 +989,17 @@ public class SpecialFortuneService {
         }
     }
 
+    /**
+     * 1:1연애/재회/재혼/소개팅 등 스페셜 운세는 생년월일+상태 기반 영속.
+     * fortuneDate는 고정 anchor로 저장 (날짜 바뀌어도 캐시 히트).
+     * createdAt 기준 1시간 TTL은 세션 내 반복 호출 방지용.
+     */
+    private static final LocalDate CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getFromCache(String type, String cacheKey) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (cached.isPresent()) {
                 // 1시간 지나면 캐시 만료 → 재질의
                 LocalDateTime createdAt = cached.get().getCreatedAt();
@@ -1013,7 +1020,7 @@ public class SpecialFortuneService {
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
             // 중복 키 방지: 이미 존재하면 저장 안 함
-            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (existing.isPresent()) {
                 log.info("캐시 이미 존재: {} / {}", type, cacheKey);
                 return;
@@ -1022,7 +1029,7 @@ public class SpecialFortuneService {
             SpecialFortune entity = SpecialFortune.builder()
                 .fortuneType(type)
                 .cacheKey(cacheKey)
-                .fortuneDate(LocalDate.now())
+                .fortuneDate(CACHE_ANCHOR)
                 .resultJson(json)
                 .build();
             specialFortuneRepository.save(entity);

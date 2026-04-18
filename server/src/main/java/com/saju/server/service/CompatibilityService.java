@@ -144,10 +144,16 @@ public class CompatibilityService {
         }
     }
 
+    /**
+     * 사주 궁합은 두 사람의 생년월일 기반으로 영속적. fortuneDate는 고정 anchor 사용.
+     * TTL은 createdAt 기준 1시간 — 세션 내 반복 호출만 막는 용도.
+     */
+    private static final LocalDate CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getFromCache(String type, String cacheKey) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (cached.isPresent()) {
                 java.time.LocalDateTime createdAt = cached.get().getCreatedAt();
                 if (createdAt != null && createdAt.plusHours(1).isBefore(java.time.LocalDateTime.now())) {
@@ -162,10 +168,10 @@ public class CompatibilityService {
 
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
-            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (existing.isPresent()) return;
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(CACHE_ANCHOR)
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
     }

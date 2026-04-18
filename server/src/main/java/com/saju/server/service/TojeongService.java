@@ -42,13 +42,13 @@ public class TojeongService {
 
     public Object[] buildStreamContext(LocalDate birthDate, String gender, String targetType, String targetName) {
         int currentYear = LocalDate.now().getYear();
-        String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear));
-        Map<String, Object> dbCached = getFromCache("tojeong", dbCacheKey);
+        String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear), gender, targetType, targetName);
+        Map<String, Object> dbCached = getFromCache("tojeong", dbCacheKey, currentYear);
         if (dbCached != null) {
             return new Object[]{ null, null, dbCacheKey, dbCached };
         }
         // 메모리 캐시 체크
-        String memKey = birthDate + "|" + currentYear;
+        String memKey = birthDate + "|" + currentYear + "|" + nz(gender) + "|" + nz(targetType) + "|" + nz(targetName);
         TojeongResult memoryCached = cache.get(memKey);
         if (memoryCached != null) {
             try {
@@ -104,9 +104,14 @@ public class TojeongService {
      */
     @Transactional
     public Map<String, Object> saveStreamResult(LocalDate birthDate, String fullText) {
+        return saveStreamResult(birthDate, null, null, null, fullText);
+    }
+
+    @Transactional
+    public Map<String, Object> saveStreamResult(LocalDate birthDate, String gender, String targetType, String targetName, String fullText) {
         try {
             int currentYear = LocalDate.now().getYear();
-            String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear));
+            String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear), gender, targetType, targetName);
 
             // 기본 계산 결과
             TojeongResult base = TojeongCalculator.calculate(birthDate);
@@ -118,18 +123,20 @@ public class TojeongService {
             }
 
             // 메모리 캐시 저장
-            String memKey = birthDate + "|" + currentYear;
+            String memKey = birthDate + "|" + currentYear + "|" + nz(gender) + "|" + nz(targetType) + "|" + nz(targetName);
             cache.put(memKey, base);
 
             // DB 캐시 저장
             Map<String, Object> resultMap = objectMapper.convertValue(base, new TypeReference<Map<String, Object>>() {});
-            saveToCache("tojeong", dbCacheKey, resultMap);
+            saveToCache("tojeong", dbCacheKey, resultMap, currentYear);
             return resultMap;
         } catch (Exception e) {
             log.warn("Tojeong stream cache save failed: {}", e.getMessage());
             return null;
         }
     }
+
+    private static String nz(String s) { return s == null ? "" : s; }
 
     /**
      * 토정비결 분석 수행 (Claude API 사용 가능하면 AI 해석, 아니면 기본 해석)
@@ -138,9 +145,9 @@ public class TojeongService {
     public TojeongResult analyze(LocalDate birthDate) {
         int currentYear = LocalDate.now().getYear();
 
-        // DB 캐시 체크
-        String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear));
-        Map<String, Object> dbCached = getFromCache("tojeong", dbCacheKey);
+        // DB 캐시 체크 (analyze는 gender/target 없음)
+        String dbCacheKey = buildCacheKey("tojeong", birthDate.toString(), String.valueOf(currentYear), null, null, null);
+        Map<String, Object> dbCached = getFromCache("tojeong", dbCacheKey, currentYear);
         if (dbCached != null) {
             try {
                 TojeongResult dbResult = objectMapper.convertValue(dbCached, TojeongResult.class);
@@ -157,8 +164,8 @@ public class TojeongService {
             cacheYear = currentYear;
         }
 
-        // 메모리 캐시 키 생성
-        String cacheKey = birthDate + "|" + currentYear;
+        // 메모리 캐시 키 생성 (analyze는 gender/target 없음)
+        String cacheKey = birthDate + "|" + currentYear + "|||";
         TojeongResult cached = cache.get(cacheKey);
         if (cached != null) {
             log.debug("Tojeong memory cache hit: {}", cacheKey);
@@ -179,7 +186,7 @@ public class TojeongService {
         // DB 캐시 저장
         try {
             Map<String, Object> resultMap = objectMapper.convertValue(result, new TypeReference<Map<String, Object>>() {});
-            saveToCache("tojeong", dbCacheKey, resultMap);
+            saveToCache("tojeong", dbCacheKey, resultMap, currentYear);
         } catch (Exception e) {
             log.warn("Failed to save tojeong result to DB cache: {}", e.getMessage());
         }
@@ -202,10 +209,18 @@ public class TojeongService {
         }
     }
 
+    /**
+     * 토정비결은 연간 단위 캐시 — fortuneDate를 해당 연도의 1월 1일로 고정해서
+     * 연중 같은 키로 조회/저장되도록 한다. (LocalDate.now()로 저장 시 매일 캐시 미스 발생)
+     */
+    private static LocalDate cacheAnchorDate(int year) {
+        return LocalDate.of(year, 1, 1);
+    }
+
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getFromCache(String type, String cacheKey) {
+    private Map<String, Object> getFromCache(String type, String cacheKey, int year) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, cacheAnchorDate(year));
             if (cached.isPresent()) {
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
@@ -213,10 +228,10 @@ public class TojeongService {
         return null;
     }
 
-    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result, int year) {
         try {
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(cacheAnchorDate(year))
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
     }

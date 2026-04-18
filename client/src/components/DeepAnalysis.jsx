@@ -6,6 +6,9 @@ import HeartCost from './HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './DeepAnalysis.css';
 
+// 심화분석 토큰 비용이 커서 UI에서 버튼+자동호출 차단. 캐시된 결과는 계속 노출.
+const DEEP_ANALYSIS_HIDDEN = true;
+
 // 필드별 표시 설정
 const FIELD_CONFIG = {
   deepSummary: null, // 별도 렌더링
@@ -240,7 +243,7 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
   }, [type, birthDate, birthTime, gender, calendarType, extra, previousResult, saveAndSet]);
 
   useEffect(() => {
-    if (autoOpen && birthDate && !calledRef.current && !data) {
+    if (!DEEP_ANALYSIS_HIDDEN && autoOpen && birthDate && !calledRef.current && !data) {
       loadData();
     }
     return () => {
@@ -280,6 +283,9 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
       </div>
     );
   }
+
+  // 심화분석 숨김 플래그: 버튼/스트리밍 전부 차단 (캐시된 결과는 위 alreadyDone 분기에서 이미 렌더링됨)
+  if (DEEP_ANALYSIS_HIDDEN) return null;
 
   // 아직 심화분석 안 함 → 버튼 + 로딩/스트리밍
   return (

@@ -38,7 +38,7 @@ public class MonthlyFortuneService {
                                        String targetType, String targetName) {
         if (month < 1 || month > 12) month = LocalDate.now().getMonthValue();
         String cacheKey = buildCacheKey("monthly", birthDate, birthTime, gender, String.valueOf(month));
-        Map<String, Object> cached = getFromCache("monthly", cacheKey);
+        Map<String, Object> cached = getFromCache("monthly", cacheKey, month);
         if (cached != null) {
             return new Object[]{ null, null, cacheKey, cached };
         }
@@ -88,7 +88,7 @@ public class MonthlyFortuneService {
             full.put("zodiacAnimal", yearPillar.getAnimal());
             full.putAll(aiResult);
             full.put("source", "ai");
-            saveToCache("monthly", cacheKey, full);
+            saveToCache("monthly", cacheKey, full, month);
         } catch (Exception e) {
             log.warn("MonthlyFortune stream cache save failed: {}", e.getMessage());
         }
@@ -101,7 +101,7 @@ public class MonthlyFortuneService {
 
         // DB cache check
         String cacheKey = buildCacheKey("monthly", birthDate, birthTime, gender, String.valueOf(month));
-        Map<String, Object> cached = getFromCache("monthly", cacheKey);
+        Map<String, Object> cached = getFromCache("monthly", cacheKey, month);
         if (cached != null) {
             log.debug("Monthly fortune DB cache hit: {}", cacheKey);
             return cached;
@@ -141,7 +141,7 @@ public class MonthlyFortuneService {
                     Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
                     result.putAll(aiResult);
                     result.put("source", "ai");
-                    saveToCache("monthly", cacheKey, result);
+                    saveToCache("monthly", cacheKey, result, month);
                     return result;
                 }
             } catch (Exception e) {
@@ -153,7 +153,7 @@ public class MonthlyFortuneService {
         Map<String, Object> fallback = generateFallback(month, dayPillar, targetMonthPillar);
         result.putAll(fallback);
         result.put("source", "fallback");
-        saveToCache("monthly", cacheKey, result);
+        saveToCache("monthly", cacheKey, result, month);
         return result;
     }
 
@@ -170,10 +170,19 @@ public class MonthlyFortuneService {
         }
     }
 
+    /**
+     * 월간 운세는 해당 월 전체 동안 같은 결과 — fortuneDate를 그 달의 1일로 고정.
+     */
+    private static LocalDate monthAnchor(int month) {
+        int year = LocalDate.now().getYear();
+        if (month < 1 || month > 12) month = LocalDate.now().getMonthValue();
+        return LocalDate.of(year, month, 1);
+    }
+
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getFromCache(String type, String cacheKey) {
+    private Map<String, Object> getFromCache(String type, String cacheKey, int month) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, monthAnchor(month));
             if (cached.isPresent()) {
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
@@ -181,10 +190,10 @@ public class MonthlyFortuneService {
         return null;
     }
 
-    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result, int month) {
         try {
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(monthAnchor(month))
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
     }

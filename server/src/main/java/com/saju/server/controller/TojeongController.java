@@ -112,8 +112,11 @@ public class TojeongController {
         }
 
         final Long uid = userId;
+        final String finalGender = gender;
+        final String finalTargetType = targetType;
+        final String finalTargetName = targetName;
         SseEmitter emitter = claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
-            tojeongService.saveStreamResult(finalBirthDate, fullText);
+            tojeongService.saveStreamResult(finalBirthDate, finalGender, finalTargetType, finalTargetName, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "TOJEONG", "토정비결");
         });
 

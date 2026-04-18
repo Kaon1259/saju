@@ -44,7 +44,7 @@ public class WeeklyFortuneService {
         LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
         String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
-        Map<String, Object> cached = getFromCache("weekly", cacheKey);
+        Map<String, Object> cached = getFromCache("weekly", cacheKey, weekStart);
         if (cached != null) {
             return new Object[]{ null, null, cacheKey, cached };
         }
@@ -88,7 +88,7 @@ public class WeeklyFortuneService {
             full.put("zodiacAnimal", yearPillar.getAnimal());
             full.putAll(aiResult);
             full.put("source", "ai");
-            saveToCache("weekly", cacheKey, full);
+            saveToCache("weekly", cacheKey, full, weekStart);
         } catch (Exception e) {
             log.warn("WeeklyFortune stream cache save failed: {}", e.getMessage());
         }
@@ -104,7 +104,7 @@ public class WeeklyFortuneService {
 
         // DB cache check
         String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
-        Map<String, Object> cached = getFromCache("weekly", cacheKey);
+        Map<String, Object> cached = getFromCache("weekly", cacheKey, weekStart);
         if (cached != null) {
             log.debug("Weekly fortune DB cache hit: {}", cacheKey);
             return cached;
@@ -143,7 +143,7 @@ public class WeeklyFortuneService {
                     Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
                     result.putAll(aiResult);
                     result.put("source", "ai");
-                    saveToCache("weekly", cacheKey, result);
+                    saveToCache("weekly", cacheKey, result, weekStart);
                     return result;
                 }
             } catch (Exception e) {
@@ -155,7 +155,7 @@ public class WeeklyFortuneService {
         Map<String, Object> fallback = generateFallback(dayPillar, weekStart, weekEnd, weekDayPillars);
         result.putAll(fallback);
         result.put("source", "fallback");
-        saveToCache("weekly", cacheKey, result);
+        saveToCache("weekly", cacheKey, result, weekStart);
         return result;
     }
 
@@ -172,10 +172,13 @@ public class WeeklyFortuneService {
         }
     }
 
+    /**
+     * 주간 운세는 해당 주 동안 같은 결과 — fortuneDate를 그 주의 월요일로 고정.
+     */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getFromCache(String type, String cacheKey) {
+    private Map<String, Object> getFromCache(String type, String cacheKey, LocalDate anchor) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, anchor);
             if (cached.isPresent()) {
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
@@ -183,10 +186,10 @@ public class WeeklyFortuneService {
         return null;
     }
 
-    private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
+    private void saveToCache(String type, String cacheKey, Map<String, Object> result, LocalDate anchor) {
         try {
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(anchor)
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
     }

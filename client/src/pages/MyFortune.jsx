@@ -13,7 +13,7 @@ import './MyFortune.css';
 function MyFortune() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('saju');
   const [copied, setCopied] = useState(false);
   const [streamText, setStreamText] = useState('');
@@ -175,9 +175,10 @@ function MyFortune() {
     return () => cleanupRef.current?.();
   };
 
+  // 날짜 변경 시 결과 리셋 (자동 호출하지 않고 버튼 다시 보이게)
   useEffect(() => {
-    loadMyFortune(getTargetDate());
-    return () => cleanupRef.current?.();
+    cleanupRef.current?.();
+    setData(null); setStreamText(''); setStreaming(false); setLoading(false);
   }, [userId, dateMode, pickDate]);
 
   if (!userId) {
@@ -193,7 +194,8 @@ function MyFortune() {
     );
   }
 
-  if (loading || streaming) {
+  // 내 운세 탭에서 분석 중이면 로딩 화면 (다른 탭은 자기 렌더링으로)
+  if (viewMode === 'mine' && (loading || streaming)) {
     return (
       <div className="myf-page">
         <AnalysisMatrix theme="saju" label="AI가 오늘의 운세를 분석하고 있어요" streamText={streamText} />
@@ -201,19 +203,8 @@ function MyFortune() {
     );
   }
 
-  if (!data) return (
-    <div className="myf-page">
-      <div className="myf-empty">
-        <div className="myf-empty-icon">⏳</div>
-        <h2>운세를 불러오지 못했습니다</h2>
-        <p>AI가 사주를 분석하는 데 시간이 걸릴 수 있습니다.<br />잠시 후 다시 시도해주세요.</p>
-        <button className="myf-register-btn" onClick={() => window.location.reload()}>다시 시도</button>
-      </div>
-    </div>
-  );
-
-  const user = data.user || {};
-  const saju = data.saju;
+  const user = (data && data.user) || {};
+  const saju = data && data.saju;
   const tabs = [{ id: 'saju', label: '사주 운세', icon: '☯️', data: saju }];
   const active = tabs.find(t => t.id === activeTab) || tabs[0];
   const f = active?.data;
@@ -469,7 +460,20 @@ function MyFortune() {
       )}
 
       {/* ════════ 내 운세 ════════ */}
-      {viewMode === 'mine' && (
+      {viewMode === 'mine' && !data && (
+        <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
+          <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
+          <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
+            버튼을 누르면 AI가 {userName || '당신'}님의 사주를 분석해드려요
+          </p>
+          <button className="btn-gold" style={{ width: '100%' }}
+            onClick={() => guardTodayFortune(() => loadMyFortune(getTargetDate()))}>
+            {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
+          </button>
+        </div>
+      )}
+
+      {viewMode === 'mine' && data && (
       <>
       <div className="myf-header">
         <h1 className="myf-title">{userName || user.name}님의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h1>

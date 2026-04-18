@@ -577,10 +577,16 @@ public class PsychTestService {
         }
     }
 
+    /**
+     * 심리테스트는 답변(cacheKey) 기반 영속 — 같은 답변은 항상 같은 결과.
+     * fortuneDate는 고정 anchor로 저장해 날짜 무관 캐시 히트.
+     */
+    private static final LocalDate CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getFromCache(String type, String cacheKey) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (cached.isPresent()) {
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
@@ -591,7 +597,7 @@ public class PsychTestService {
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(CACHE_ANCHOR)
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
     }

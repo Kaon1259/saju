@@ -160,10 +160,18 @@ public class YearFortuneService {
         }
     }
 
+    /**
+     * 신년운세는 연간 단위 — fortuneDate를 해당 연도 1월 1일로 고정해서
+     * 연중 동일 키로 조회/저장되도록 한다.
+     */
+    private static LocalDate yearAnchor() {
+        return LocalDate.of(LocalDate.now().getYear(), 1, 1);
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getFromCache(String type, String cacheKey) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, yearAnchor());
             if (cached.isPresent()) {
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
@@ -174,7 +182,7 @@ public class YearFortuneService {
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(yearAnchor())
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) { /* ignore duplicate */ }
     }

@@ -1,3 +1,12 @@
+[완료] Claude API 비용 최적화 Phase 1 (2026-04-18)
+- 심화분석 UI 완전 차단: DeepAnalysis.jsx에 DEEP_ANALYSIS_HIDDEN 플래그 → 버튼/자동호출 모두 차단 (캐시 결과는 계속 노출)
+- 오늘의 운세(내 운세 탭) 자동 호출 제거 → 수동 버튼 ("오늘의 운세 보기" 클릭 시만 AI 호출)
+- 스트리밍 캐시 anchor 전수 수정 (핵심 버그: SpecialFortune.fortuneDate = LocalDate.now()로 저장되어 매일 미스)
+  - 주기 anchor: 토정비결/신년운세(연도1월1일), 월간운세(월1일), 주간운세(주 월요일)
+  - 영속 anchor: 사주궁합/꿈해몽/심리테스트/1:1연애등/타로 (LocalDate.of(2000,1,1) 고정)
+  - 캐시 키 보강: 토정비결에 gender/targetType/targetName 추가
+  - 일간 anchor 유지: 혈액형/별자리/MBTI/띠/바이오리듬/관상/사주 오늘운세 (매일 바뀌는 설계)
+
 [완료] 라이트 모드 전면 가독성 개선 - 흰색 배경 기반, glass-card 불투명도 88%, 텍스트 대비 강화, 시간대별 배경 흰색 기반
 
 [완료] AI 엔진 Haiku → Sonnet 4.6 변경 (model: claude-sonnet-4-6)
