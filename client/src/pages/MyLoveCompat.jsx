@@ -10,6 +10,7 @@ import {
   getBloodTypeCompatibilityStream,
   isGuest,
   getHistory,
+  getUser,
 } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -94,21 +95,30 @@ function MyLoveCompat() {
     }
   }, [result, matrixShown]);
 
-  const handleAutoFill = () => {
+  const handleAutoFill = async () => {
+    // 서버에서 최신 프로필 조회 (localStorage 캐시가 파트너 정보 미포함일 수 있어 우선)
+    let p = null;
     try {
-      const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      if (p.birthDate) setBd1(p.birthDate);
-      if (p.birthTime) setBt1(p.birthTime);
-      if (p.gender) setG1(p.gender);
-      if (p.mbtiType) setMyMbti(p.mbtiType);
-      if (p.bloodType) setMyBlood(p.bloodType);
-      if (p.partnerBirthDate) setBd2(p.partnerBirthDate);
-      if (p.partnerBirthTime) setBt2(p.partnerBirthTime);
-      const partnerG = p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : 'F';
-      setG2(partnerG);
-      if (p.partnerMbtiType) setPartnerMbti(p.partnerMbtiType);
-      if (p.partnerBloodType) setPartnerBlood(p.partnerBloodType);
+      const uid = localStorage.getItem('userId');
+      if (uid) {
+        p = await getUser(uid);
+        if (p) localStorage.setItem('userProfile', JSON.stringify(p));
+      }
     } catch {}
+    if (!p) {
+      try { p = JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { p = {}; }
+    }
+    if (p.birthDate) setBd1(p.birthDate);
+    if (p.birthTime) setBt1(p.birthTime);
+    if (p.gender) setG1(p.gender);
+    if (p.mbtiType) setMyMbti(p.mbtiType);
+    if (p.bloodType) setMyBlood(p.bloodType);
+    if (p.partnerBirthDate) setBd2(p.partnerBirthDate);
+    if (p.partnerBirthTime) setBt2(p.partnerBirthTime);
+    const partnerG = p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : 'F';
+    setG2(partnerG);
+    if (p.partnerMbtiType) setPartnerMbti(p.partnerMbtiType);
+    if (p.partnerBloodType) setPartnerBlood(p.partnerBloodType);
   };
 
   const handleTabChange = (id) => {
