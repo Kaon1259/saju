@@ -636,7 +636,7 @@ public class TarotService {
         final String finalQuestion = question;
         final String finalDeck = deck;
         final Integer finalDeckVariant = deckVariant;
-        return claudeApiService.generateStreamWithDoneData(systemPrompt, userPrompt, 1200, (fullText) -> {
+        return claudeApiService.generateStreamWithDoneData(systemPrompt, userPrompt, 2500, (fullText) -> {
             // 스트리밍 완료 → 결과 구성 후 서버에서 직접 캐시 저장 + done 이벤트에 enriched JSON 반환
             String donePayload = null;
             try {

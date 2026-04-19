@@ -586,18 +586,22 @@ export const getTarotReadingStream = (cardIds, reversals, spread, category, ques
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/tarot/reading/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
-  addHeartListener(eventSource, { onInsufficientHearts, onError });
+  // done/cached 이후 발생하는 connection-closed onerror가 onError로 올라가
+  // setReading(fallback)으로 덮어쓰는 race 방지
+  let finished = false;
+  addHeartListener(eventSource, { onInsufficientHearts, onError: (e) => { if (!finished) onError?.(e); } });
 
   eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
   eventSource.addEventListener('cached', (e) => {
+    finished = true;
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { finished = true; onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { if (!finished) { onError?.(e.data || 'Stream error'); eventSource.close(); } });
+  eventSource.onerror = () => { if (!finished) { onError?.('Connection lost'); eventSource.close(); } };
 
-  return () => eventSource.close();
+  return () => { finished = true; eventSource.close(); };
 };
 
 // ─── 오늘의 연애 온도 ───
