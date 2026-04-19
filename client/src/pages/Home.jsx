@@ -483,7 +483,7 @@ function Home() {
           </div>
           <div className="home-lover-banner-text">
             <span className="home-lover-banner-title">나의 연인</span>
-            <span className="home-lover-banner-sub">정통 · MBTI · 혈액형 궁합 한 번에</span>
+            <span className="home-lover-banner-sub">정통 · 결혼 · 스킨십 궁합 한 번에</span>
           </div>
           <span className="home-lover-banner-arrow">›</span>
         </button>
