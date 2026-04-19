@@ -43,10 +43,11 @@ const DECK_PATHS = {
   dogs: '/tarot-dogs',
   kdrama: '/tarot-kdrama',
   celestial: '/tarot-celestial',
+  lady: '/tarot-lady',
 };
 
 // 4벌 변형 덱 (각 카드마다 _v0~v3)
-const MULTI_VARIANT_DECKS = new Set(['newclassic', 'jester', 'masterpiece', 'oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy', 'cartoon_girl', 'cartoon_boy', 'cats', 'dogs', 'kdrama', 'celestial']);
+const MULTI_VARIANT_DECKS = new Set(['newclassic', 'jester', 'masterpiece', 'oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy', 'cartoon_girl', 'cartoon_boy', 'cats', 'dogs', 'kdrama', 'celestial', 'lady']);
 
 // 메이저 아르카나 이름
 const MAJOR_NAMES = [
