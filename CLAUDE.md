@@ -214,3 +214,107 @@
 - GIF 파일 7개(~100MB) 삭제, boy_cover.jpg 신규 생성
 - Tarot.css: GIF 관련 클래스 제거, CSS 애니메이션 추가
 [완료]client_app은 현재 GIF 버전 그대로 유지 (GIF 7개 보존)
+
+═══════════════════════════════════════════════════════════════
+[규칙] 타로 덱 추가 파이프라인 (Deck Creation Guide)
+═══════════════════════════════════════════════════════════════
+
+## 📦 1. 입력 폴더 구조
+- 원본 폴더: `saju/{한글이름}/` 또는 `saju/{영문id}/` (예: `kdrama/`, `스텔라/`, `lady/`)
+- 미드저니 파일명 패턴: `u{user_id}_{prompt_prefix}_{uuid}_{variant}.png`
+- 각 UUID는 4변형 (_0, _1, _2, _3), 일부는 GIF 변형 (_1.gif 등)
+- 필요 파일 유형:
+  - **앞면 (fronts)**: 카드 프롬프트 시작 prefix로 구분 (예: `cinematic_still`, `celestial_cosmic`, `vintage_tarot_card`)
+  - **뒷면 (backs)**: `ornate_tarot_card_back` 프롬프트
+  - **커버 (cover)**: `cinematic_key_art` 또는 `hyperrealistic_cinematic_key_art` 프롬프트. **⚠️ 반드시 프레임 있는 카드 스타일로 생성** (레이디 덱 사고: 프레임 없는 key_art로 생성해서 재작업 필요했음)
+  - **인트로 GIF (선택)**: 같은 prefix의 GIF 1개. 없으면 기존 덱 webp 재사용 가능
+
+## ⚙️ 2. 변환 스크립트 (convert_{deckid}.py)
+- 기준 파일: `convert_masterpiece.py` / `convert_kdrama.py` / `convert_celestial.py` / `convert_lady.py`
+- 새 덱 추가 시 해당 스크립트 복사 → 상수 4개만 교체:
+  - `SRC = BASE / "{원본폴더명}"`
+  - `DST_FRONT = BASE / "client/public/tarot-{deckid}"`
+  - `DECK_ID = "{deckid}"`
+  - `classify()` 안의 prompt prefix 매칭 문자열 3개 (fronts/backs/covers)
+
+### 공통 스펙
+- **카드 사이즈**: 261×500 (2:3 비율), JPEG
+- **앞면 Quality**: 85
+- **뒷면 Quality**: 88 (뒷면이 항상 보이므로 약간 고화질)
+- **커버 width**: 600 (원본 896~1024 폭에서 리사이즈), Quality 88~90
+- **WebP 변환**: quality 75, method 6, 애니메이션 유지 (`save_all=True, append_images=frames[1:]`)
+
+### 분류 로직 핵심
+```python
+# mtime 기준 정렬 + complete-first 우선순위 (4변형 모두 있는 UUID 먼저)
+sorted_uuids = sorted(fronts.keys(), key=lambda u: mtime(fronts[u]))
+complete = [u for u in sorted_uuids if len(fronts[u]) == 4]
+partial = [u for u in sorted_uuids if len(fronts[u]) < 4]
+prioritized = (complete + partial)[:78]
+```
+- 사용자는 대개 프롬프트 파일 순서대로 생성 → mtime 순서 ≈ 프롬프트 순서
+- 4변형 완전한 UUID 우선 → 빠진 변형 때문에 카드 번호 밀림 방지
+- 상위 78개만 m00~m77로 매핑. 초과분(79+개)은 버림
+
+## 📁 3. 출력 경로
+- 앞면: `client/public/tarot-{deckid}/m{NN}_v{0-3}.jpg` (312장 = 78×4)
+- 뒷면: `client/public/tarot-backs/{deckid}_{N}.jpg` (보통 12~16장)
+- 커버: `client/public/tarot-effects/deck-intro/{deckid}_cover.jpg` (600 width)
+- 인트로 WebP: `client/public/tarot-effects/deck-intro/{deckid}_0.webp`
+
+## 📝 4. 코드 등록 (5개소)
+
+### A. `client/src/pages/Tarot.jsx` DECK_LIST (line ~169)
+```js
+{ id: '{deckid}', name: '{한글명}', sub: '{English sub}',
+  img: '/tarot-effects/deck-intro/{deckid}_cover.jpg',
+  gif: '/tarot-effects/deck-intro/{deckid}_0.webp',
+  backs: Array.from({length: N}, (_, i) => `/tarot-backs/{deckid}_${i}.jpg`),
+  hasVariants: true },
+```
+
+### B. `Tarot.jsx` bgPaths (2개소, line ~657, ~1503)
+`cartoon_boy: '/tarot-cartoon-boy', ..., {deckid}: '/tarot-{deckid}' }`
+
+### C. `Tarot.jsx` 갤러리 isMulti (line ~1133)
+`['newclassic', ..., '{deckid}'].includes(galleryDeck.id)`
+
+### D. `Tarot.jsx` 갤러리 deckPaths (line ~1134)
+`{deckid}: '/tarot-{deckid}'`
+
+### E. `client/src/components/TarotCardArt.jsx` (line ~30, 47)
+- `DECK_PATHS`에 `{deckid}: '/tarot-{deckid}'` 추가
+- `MULTI_VARIANT_DECKS` Set에 `'{deckid}'` 추가
+
+## 🗂️ 5. 원본 이동 (필수 마감 작업)
+```bash
+mv saju/{원본폴더} saju/_origin/{영문id}
+```
+- `_origin/`은 `.gitignore`에 등록되어 있어 Git 추적 안 됨
+- 한글 폴더명은 영문으로 변경해 이동 (예: `스텔라/` → `_origin/stellar/`)
+
+## ⚠️ 6. 미드저니 프롬프트 작성 규칙
+- **URL 끝 `&` 절대 금지**: 디스코드 attachment URL 복사 시 자동 추가되는 `&`는 미드저니가 인자 구분자로 오인 → `Invalid parameter` 에러. 반드시 삭제.
+- **URL 중간 공백 금지**: 복사 후 확인 필수 (이전 반복 사고 있음)
+- **프레임 강조 문법**: 프레임 없이 나오는 문제 방지
+  - "vintage tarot card design with thick ornate rose gold decorative frame border surrounding central illustration" 같이 **prefix 맨 앞**에 배치
+  - "full view of tarot card showing all four frame edges" 문구 추가
+  - "clear visible gold filigree edge on top bottom left right" 명시
+- **--cref 고정값**: `--cw 60` 권장 (80+ 얼굴만 복제되어 장면 다양성 부족, 40- 얼굴 변함)
+- **--style raw 유지**: artistic 모드는 프레임 무시 경향
+
+## 🎨 7. 커버 이미지 품질 기준
+- **반드시 프레임 있어야 함** (다른 덱들과 일관성 — 레이디 덱 재작업 사례 주의)
+- key_art 프롬프트도 프레임 명시 필요. 프레임 없이 생성됐으면 카드 중 하나를 원본 PNG에서 600폭으로 리사이즈해 커버로 사용
+- 커버는 카드 한 장 영웅샷 또는 "fanned spread + 제목" 레이아웃 둘 다 허용
+
+## ✅ 8. 완료 체크리스트
+- [ ] `convert_{deckid}.py` 실행 성공 (`fronts=78 backs=N cover=1` 확인)
+- [ ] `client/public/tarot-{deckid}/` 에 312개 파일
+- [ ] `tarot-backs/{deckid}_*.jpg` 존재
+- [ ] `deck-intro/{deckid}_cover.jpg` + `{deckid}_0.webp` 존재
+- [ ] 커버에 프레임 보임 (다른 덱과 일관성)
+- [ ] DECK_LIST + bgPaths 2개소 + 갤러리 isMulti/deckPaths + TarotCardArt 2개소 등록
+- [ ] `npm run build` 성공
+- [ ] 원본 → `_origin/` 이동
+- [ ] 커밋 + Railway 푸시 (서버 수정 없으면 Railway 재배포 불필요)
