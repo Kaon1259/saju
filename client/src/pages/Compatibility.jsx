@@ -87,7 +87,11 @@ function Compatibility() {
     (async () => {
       try {
         const full = await getHistory(hid);
-        if (full?.payload) setResult(full.payload);
+        const p = full?.payload;
+        if (p) {
+          if (p.aiOverall && !p.aiAnalysis) p.aiAnalysis = p.aiOverall;
+          setResult(p);
+        }
       } catch {}
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -349,6 +353,7 @@ function Compatibility() {
               if (p) {
                 p._g1 = p.gender1 || 'M';
                 p._g2 = p.gender2 || 'F';
+                if (p.aiOverall && !p.aiAnalysis) p.aiAnalysis = p.aiOverall;
                 setResult(p);
               }
             } catch {}

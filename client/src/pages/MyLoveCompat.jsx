@@ -110,6 +110,8 @@ function MyLoveCompat() {
         // marriage/saju 공용 payload 복원
         p._g1 = p.gender1 || 'M';
         p._g2 = p.gender2 || 'F';
+        // 레거시 필드 정규화 (aiOverall 저장분 → aiAnalysis로)
+        if (p.aiOverall && !p.aiAnalysis) p.aiAnalysis = p.aiOverall;
         if (full?.type === 'marriage_compat') {
           p._kind = 'marriage';
           setTab('marriage');
@@ -790,6 +792,7 @@ function MyLoveCompat() {
               }
               p._g1 = p.gender1 || 'M';
               p._g2 = p.gender2 || 'F';
+              if (p.aiOverall && !p.aiAnalysis) p.aiAnalysis = p.aiOverall;
               if (full?.type === 'marriage_compat') {
                 p._kind = 'marriage';
                 setTab('marriage');

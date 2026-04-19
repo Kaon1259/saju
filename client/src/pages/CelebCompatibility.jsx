@@ -579,6 +579,7 @@ function CelebCompatibility() {
                   p._celebName = p.celebName || '';
                   p._g1 = p.gender1 || 'M';
                   p._g2 = p.gender2 || 'F';
+                  if (p.aiOverall && !p.aiAnalysis) p.aiAnalysis = p.aiOverall;
                   setResult(p);
                   setStep('result');
                 }
