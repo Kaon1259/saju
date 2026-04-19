@@ -78,6 +78,30 @@
 .myf-tip { display: flex; align-items: flex-start; gap: 10px; padding: 14px; margin-bottom: 16px; }
 .myf-tip p { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.85); }
 
+/* 시간대별 운세 타임라인 */
+.myf-hourly { padding: 16px; margin-bottom: 16px; }
+.myf-hourly-title { font-size: 15px; font-weight: 800; margin-bottom: 14px; color: var(--color-accent-gold); display: flex; align-items: center; gap: 6px; }
+.myf-hourly-list { display: flex; flex-direction: column; gap: 12px; }
+.myf-hourly-row { display: flex; gap: 12px; opacity: 0; animation: myfHourlyIn 0.45s ease forwards; }
+@keyframes myfHourlyIn { from { opacity: 0; transform: translateX(-8px);} to { opacity: 1; transform: translateX(0);} }
+.myf-hourly-icon { font-size: 24px; width: 36px; text-align: center; flex-shrink: 0; }
+.myf-hourly-main { flex: 1; min-width: 0; }
+.myf-hourly-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.myf-hourly-time { font-size: 14px; font-weight: 800; color: #fff; }
+.myf-hourly-range { font-size: 11px; color: var(--color-text-muted); }
+.myf-hourly-score { margin-left: auto; font-size: 13px; font-weight: 800; color: var(--color-accent-gold); }
+.myf-hourly-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.myf-hourly-bar-fill { height: 100%; background: linear-gradient(90deg, #ff8fb3, #f5c46e); border-radius: 3px; transition: width 0.6s ease; }
+.myf-hourly-desc { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.82); margin: 0; }
+
+/* 라이트 모드 가독성 */
+.light-mode .myf-hourly-title { color: #c2185b; }
+.light-mode .myf-hourly-time { color: #2b1a3a; }
+.light-mode .myf-hourly-range { color: #7a6a82; }
+.light-mode .myf-hourly-score { color: #c2185b; }
+.light-mode .myf-hourly-desc { color: #3a2a48; }
+.light-mode .myf-hourly-bar { background: rgba(0,0,0,0.06); }
+
 /* 럭키 */
 .myf-lucky { display: flex; align-items: center; padding: 16px; }
 .myf-lucky-item { flex: 1; text-align: center; }

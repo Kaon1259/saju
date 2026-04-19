@@ -40,6 +40,9 @@ public class DailyFortune {
     @Column(columnDefinition = "TEXT")
     private String work;
 
+    @Column(name = "hourly_fortune_json", columnDefinition = "TEXT")
+    private String hourlyFortuneJson;
+
     private Integer luckyNumber;
 
     private String luckyColor;

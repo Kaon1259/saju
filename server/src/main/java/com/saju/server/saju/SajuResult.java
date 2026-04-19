@@ -104,6 +104,7 @@ public class SajuResult {
         private String food;         // 오행 기반 추천 음식/차
         private String avoid;        // 오늘 피해야 할 것
         private String emotion;      // 감정/심리 상태 진단과 조언
+        private java.util.List<java.util.Map<String, Object>> hourlyFortune; // 시간대별 운세 (5구간)
     }
 
     @Getter

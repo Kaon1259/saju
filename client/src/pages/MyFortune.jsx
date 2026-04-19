@@ -11,6 +11,36 @@ import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './MyFortune.css';
 
+const TIME_ICON = { '아침': '🌅', '점심': '☀️', '오후': '🌤️', '저녁': '🌆', '밤': '🌙' };
+
+function HourlyTimeline({ items }) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  return (
+    <div className="myf-hourly glass-card">
+      <h4 className="myf-hourly-title">⏰ 오늘의 시간대 흐름</h4>
+      <div className="myf-hourly-list">
+        {items.map((it, i) => {
+          const score = Number(it.score) || 70;
+          return (
+            <div className="myf-hourly-row" key={i} style={{ animationDelay: `${i * 80}ms` }}>
+              <div className="myf-hourly-icon">{TIME_ICON[it.time] || '⏰'}</div>
+              <div className="myf-hourly-main">
+                <div className="myf-hourly-head">
+                  <span className="myf-hourly-time">{it.time}</span>
+                  <span className="myf-hourly-range">{it.range}</span>
+                  <span className="myf-hourly-score">{score}점</span>
+                </div>
+                <div className="myf-hourly-bar"><div className="myf-hourly-bar-fill" style={{ width: `${score}%` }} /></div>
+                <p className="myf-hourly-desc">{it.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function MyFortune() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -227,7 +257,7 @@ function MyFortune() {
           const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
           setData({
             user: { name: profile.name || '', zodiacAnimal: profile.zodiacAnimal || '', bloodType: profile.bloodType || '', mbtiType: profile.mbtiType || '' },
-            saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor }
+            saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor, hourlyFortune: Array.isArray(parsed.hourlyFortune) ? parsed.hourlyFortune : null }
           });
         }
         setLoading(false);
@@ -318,6 +348,8 @@ function MyFortune() {
             {rd.todayFortune.work && <FortuneCard icon="💼" title="직장운" description={rd.todayFortune.work} delay={320} />}
           </div>
         )}
+        <HourlyTimeline items={rd.todayFortune?.hourlyFortune} />
+
         {rd.personalityReading && (
           <div className="myf-analysis glass-card">
             <span className="myf-analysis-icon">☯️</span>
@@ -663,6 +695,7 @@ function MyFortune() {
             {f.health && <FortuneCard icon="💪" title="건강운" description={f.health} delay={240} />}
             {f.work && <FortuneCard icon="💼" title="직장운" description={f.work} delay={320} />}
           </div>
+          <HourlyTimeline items={f.hourlyFortune} />
 
           {activeTab === 'saju' && saju?.personalityReading && (
             <div className="myf-analysis glass-card">

@@ -20,6 +20,7 @@ public class FortuneResponse {
     private String money;
     private String health;
     private String work;
+    private String hourlyFortuneJson;
     private Integer luckyNumber;
     private String luckyColor;
     private Integer score;
@@ -34,6 +35,7 @@ public class FortuneResponse {
                 .money(fortune.getMoney())
                 .health(fortune.getHealth())
                 .work(fortune.getWork())
+                .hourlyFortuneJson(fortune.getHourlyFortuneJson())
                 .luckyNumber(fortune.getLuckyNumber())
                 .luckyColor(fortune.getLuckyColor())
                 .score(fortune.getScore())

@@ -215,6 +215,9 @@ public class FortuneService {
 
             JsonNode node = objectMapper.readTree(json);
 
+            String hourlyJson = node.has("hourlyFortune") && node.get("hourlyFortune").isArray()
+                ? node.get("hourlyFortune").toString() : null;
+
             Optional<DailyFortune> existing = dailyFortuneRepository.findByZodiacAnimalAndFortuneDate(zodiacAnimal, targetDate);
             if (existing.isPresent()) {
                 DailyFortune fortune = existing.get();
@@ -226,6 +229,7 @@ public class FortuneService {
                 if (node.has("score")) fortune.setScore(node.get("score").asInt(fortune.getScore()));
                 if (node.has("luckyNumber")) fortune.setLuckyNumber(node.get("luckyNumber").asInt(fortune.getLuckyNumber()));
                 if (node.has("luckyColor")) fortune.setLuckyColor(node.get("luckyColor").asText());
+                if (hourlyJson != null) fortune.setHourlyFortuneJson(hourlyJson);
                 dailyFortuneRepository.save(fortune);
                 log.info("Daily fortune cache updated: zodiac={}, date={}", zodiacAnimal, targetDate);
             } else {
@@ -240,6 +244,7 @@ public class FortuneService {
                     .money(node.has("money") ? node.get("money").asText() : "")
                     .health(node.has("health") ? node.get("health").asText() : "")
                     .work(node.has("work") ? node.get("work").asText() : "")
+                    .hourlyFortuneJson(hourlyJson)
                     .score(node.has("score") ? node.get("score").asInt() : random.nextInt(61) + 40)
                     .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : random.nextInt(99) + 1)
                     .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : LUCKY_COLORS[random.nextInt(LUCKY_COLORS.length)])

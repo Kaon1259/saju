@@ -237,6 +237,13 @@ public class SajuService {
             if (node.has("personalityReading")) {
                 basicResult.setPersonalityReading(node.get("personalityReading").asText());
             }
+            java.util.List<java.util.Map<String, Object>> hourly = null;
+            if (node.has("hourlyFortune") && node.get("hourlyFortune").isArray()) {
+                try {
+                    hourly = objectMapper.convertValue(node.get("hourlyFortune"),
+                        new TypeReference<java.util.List<java.util.Map<String, Object>>>() {});
+                } catch (Exception ignored) {}
+            }
             SajuResult.CategoryFortune fortune = SajuResult.CategoryFortune.builder()
                 .overall(node.has("overall") ? node.get("overall").asText() : "")
                 .love(node.has("love") ? node.get("love").asText() : "")
@@ -246,6 +253,7 @@ public class SajuService {
                 .score(node.has("score") ? node.get("score").asInt() : 70)
                 .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : 7)
                 .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : "파랑")
+                .hourlyFortune(hourly)
                 .build();
             basicResult.setTodayFortune(fortune);
 

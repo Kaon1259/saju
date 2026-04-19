@@ -73,6 +73,7 @@ public class MyFortuneController {
             sajuFortune.put("score", cachedFortune.getScore());
             sajuFortune.put("luckyNumber", cachedFortune.getLuckyNumber());
             sajuFortune.put("luckyColor", cachedFortune.getLuckyColor());
+            sajuFortune.put("hourlyFortune", parseHourly(cachedFortune.getHourlyFortuneJson()));
         } else {
             // 캐시 없음 → 사주 기반 AI 분석 (첫 방문)
             LocalDate birthDate = user.getBirthDate();
@@ -233,8 +234,20 @@ public class MyFortuneController {
         saju.put("score", fortune.getScore());
         saju.put("luckyNumber", fortune.getLuckyNumber());
         saju.put("luckyColor", fortune.getLuckyColor());
+        saju.put("hourlyFortune", parseHourly(fortune.getHourlyFortuneJson()));
         saju.put("zodiacAnimal", user.getZodiacAnimal());
         result.put("saju", saju);
         return result;
+    }
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper HOURLY_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    private Object parseHourly(String json) {
+        if (json == null || json.isBlank()) return null;
+        try {
+            return HOURLY_MAPPER.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<java.util.List<java.util.Map<String, Object>>>() {});
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
