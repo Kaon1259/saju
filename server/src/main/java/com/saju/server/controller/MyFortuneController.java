@@ -62,7 +62,10 @@ public class MyFortuneController {
 
         Map<String, Object> sajuFortune = new LinkedHashMap<>();
         boolean aiAnalyzed = false;
-        if (cachedFortune != null && cachedFortune.getOverall() != null && !cachedFortune.getOverall().isBlank()) {
+        boolean cacheFresh2 = cachedFortune != null
+            && cachedFortune.getOverall() != null && !cachedFortune.getOverall().isBlank()
+            && cachedFortune.getHourlyFortuneJson() != null && !cachedFortune.getHourlyFortuneJson().isBlank();
+        if (cacheFresh2) {
             // 스트리밍 캐시 히트 → 운세 페이지와 동일한 데이터 (AI 분석 결과)
             aiAnalyzed = true;
             sajuFortune.put("overall", cachedFortune.getOverall());
@@ -130,9 +133,12 @@ public class MyFortuneController {
 
         LocalDate targetDate = (dateStr != null && !dateStr.isBlank()) ? LocalDate.parse(dateStr) : LocalDate.now();
 
-        // 캐시 체크
+        // 캐시 체크 — 구버전 캐시(hourlyFortune 없음)는 stale로 간주하여 재생성
         var cached = fortuneService.getCachedFortune(user.getZodiacAnimal(), targetDate);
-        if (cached != null && cached.getOverall() != null && !cached.getOverall().isBlank()) {
+        boolean cacheFresh = cached != null
+            && cached.getOverall() != null && !cached.getOverall().isBlank()
+            && cached.getHourlyFortuneJson() != null && !cached.getHourlyFortuneJson().isBlank();
+        if (cacheFresh) {
             // 빠른 사주 기본 계산 (AI 호출 없음)
             LocalDate bd = user.getBirthDate();
             if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
@@ -194,7 +200,7 @@ public class MyFortuneController {
         final LocalDate finalDate = targetDate;
         final Long uid = userId;
         final UserResponse finalUser = user;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
             if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
             // 히스토리 저장 — 사용자가 나중에 "최근 본 운세"에서 다시 볼 수 있게
@@ -204,9 +210,13 @@ public class MyFortuneController {
                     : finalDate.equals(today.plusDays(1)) ? "내일"
                     : finalDate.toString();
                 var saved = fortuneService.getCachedFortune(finalUser.getZodiacAnimal(), finalDate);
+                if (saved == null) {
+                    // AI 응답 파싱/저장 실패 (토큰 부족으로 JSON 잘렸을 가능성) — 히스토리 저장 스킵
+                    return;
+                }
                 Map<String, Object> payload = buildMyFortuneData(finalUser, saved);
                 payload.put("targetDate", finalDate.toString());
-                String summary = saved != null && saved.getOverall() != null
+                String summary = saved.getOverall() != null
                     ? (saved.getScore() + "점 · " + saved.getOverall())
                     : null;
                 fortuneHistoryService.save(uid, "today_fortune",
