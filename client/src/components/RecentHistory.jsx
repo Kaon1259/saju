@@ -40,17 +40,17 @@ function formatDate(iso) {
  * - emptyText: 아직 기록 없을 때 노출할 안내 (없으면 섹션 자체 숨김)
  * - limit: 표시 개수 (기본 5)
  */
-function RecentHistory({ type, onOpen, title = '최근 본 기록', emptyText, limit = 5, hideTitle = false }) {
+function RecentHistory({ type, subType, onOpen, title = '최근 본 기록', emptyText, limit = 5, hideTitle = false }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(() => {
     setLoading(true);
-    listHistory(type, limit)
+    listHistory(type, limit, subType)
       .then(rs => setItems(Array.isArray(rs) ? rs : []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
-  }, [type, limit]);
+  }, [type, subType, limit]);
 
   useEffect(() => { refresh(); }, [refresh]);
 

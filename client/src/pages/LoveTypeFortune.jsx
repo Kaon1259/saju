@@ -265,11 +265,12 @@ function LoveTypeFortune() {
         <p className="ltf-hero-desc">{info.desc}</p>
       </div>
 
-      {/* ═══ 최근 본 기록 ═══ (하단 pull-up drawer — 로딩/스트리밍 중엔 숨김) */}
+      {/* ═══ 최근 본 기록 ═══ (세부 페이지 — 현재 타입만 필터) */}
       {userId && !loading && !streaming && (
         <HistoryDrawer
           type="love_11"
-          label="📚 최근 본 연애 운세"
+          subType={type}
+          label={`📚 최근 본 ${info.label}`}
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);

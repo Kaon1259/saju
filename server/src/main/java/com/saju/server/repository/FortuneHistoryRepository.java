@@ -17,6 +17,20 @@ public interface FortuneHistoryRepository extends JpaRepository<FortuneHistory, 
 
     List<FortuneHistory> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
+    /**
+     * type + payload_json → $.type 서브타입 기준 필터 (love_11 세부 페이지용).
+     * MySQL JSON_EXTRACT로 payload의 subType 매칭.
+     */
+    @Query(value = "SELECT * FROM fortune_history WHERE user_id = :userId AND type = :type "
+        + "AND JSON_UNQUOTE(JSON_EXTRACT(payload_json, '$.type')) = :subType "
+        + "ORDER BY created_at DESC LIMIT :limit",
+        nativeQuery = true)
+    List<FortuneHistory> findByUserIdAndTypeAndSubTypeOrderByCreatedAtDesc(
+        @Param("userId") Long userId,
+        @Param("type") String type,
+        @Param("subType") String subType,
+        @Param("limit") int limit);
+
     long countByUserId(Long userId);
 
     Optional<FortuneHistory> findByIdAndUserId(Long id, Long userId);

@@ -35,13 +35,20 @@ public class FortuneHistoryController {
     public ResponseEntity<List<Map<String, Object>>> list(
             @RequestParam("userId") Long userId,
             @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "subType", required = false) String subType,
             @RequestParam(value = "limit", defaultValue = "20") int limit) {
         if (limit < 1) limit = 1;
         if (limit > 100) limit = 100;
 
-        List<FortuneHistory> rows = (type != null && !type.isBlank())
-            ? repository.findByUserIdAndTypeOrderByCreatedAtDesc(userId, type, PageRequest.of(0, limit))
-            : repository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, limit));
+        List<FortuneHistory> rows;
+        if (type != null && !type.isBlank() && subType != null && !subType.isBlank()) {
+            // type + payload.type 서브타입 필터 (세부 페이지용)
+            rows = repository.findByUserIdAndTypeAndSubTypeOrderByCreatedAtDesc(userId, type, subType, limit);
+        } else if (type != null && !type.isBlank()) {
+            rows = repository.findByUserIdAndTypeOrderByCreatedAtDesc(userId, type, PageRequest.of(0, limit));
+        } else {
+            rows = repository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, limit));
+        }
 
         List<Map<String, Object>> result = rows.stream().map(r -> {
             Map<String, Object> m = new LinkedHashMap<>();

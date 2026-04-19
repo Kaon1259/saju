@@ -1047,11 +1047,12 @@ export const searchCeleb = async (name) => {
 };
 
 // ─── 운세 히스토리 ───
-export const listHistory = async (type, limit = 20) => {
+export const listHistory = async (type, limit = 20, subType = null) => {
   const userId = localStorage.getItem('userId');
   if (!userId) return [];
   const params = { userId, limit };
   if (type) params.type = type;
+  if (subType) params.subType = subType;
   const response = await api.get('/history', { params });
   return response.data;
 };

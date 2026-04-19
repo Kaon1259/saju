@@ -8,7 +8,7 @@ import './HistoryDrawer.css';
  * - 탭하면 48vh 슬라이드 업 → RecentHistory 리스트 노출
  * - 항목 탭 시 onOpen 호출 + drawer 자동 닫힘
  */
-function HistoryDrawer({ type, label = '📚 최근 본 기록', onOpen, limit = 5 }) {
+function HistoryDrawer({ type, subType, label = '📚 최근 본 기록', onOpen, limit = 5 }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,6 +26,7 @@ function HistoryDrawer({ type, label = '📚 최근 본 기록', onOpen, limit =
       <div className="history-drawer-content">
         <RecentHistory
           type={type}
+          subType={subType}
           hideTitle
           limit={limit}
           onOpen={(item) => {
