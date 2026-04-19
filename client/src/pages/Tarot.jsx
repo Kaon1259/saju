@@ -175,6 +175,8 @@ const DECK_LIST = [
   { id: 'cartoon_boy', name: '카툰 보이', sub: 'Cartoon Boy', img: '/tarot-effects/deck-intro/cartoon_boy_cover.jpg', gif: '/tarot-effects/deck-intro/cartoon_boy_0.gif', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_boy_${i}.jpg`), hasVariants: true },
   { id: 'cats', name: '고양이 타로', sub: 'Cat Tarot', img: '/tarot-effects/deck-intro/cats_cover.jpg', gif: '/tarot-effects/deck-intro/cats_0.gif', backs: Array.from({length: 11}, (_, i) => `/tarot-backs/cats_${i}.jpg`), hasVariants: true },
   { id: 'dogs', name: '강아지 타로', sub: 'Dog Tarot', img: '/tarot-effects/deck-intro/dogs_cover.jpg', gif: '/tarot-effects/deck-intro/dogs_0.gif', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/dogs_${i}.jpg`), hasVariants: true },
+  { id: 'kdrama', name: 'K-드라마 타로', sub: 'Korean Romance Drama', img: '/tarot-effects/deck-intro/kdrama_cover.jpg', gif: '/tarot-effects/deck-intro/kdrama_0.webp', backs: Array.from({length: 12}, (_, i) => `/tarot-backs/kdrama_${i}.jpg`), hasVariants: true },
+  { id: 'celestial', name: '셀레스티얼 타로', sub: 'Celestial · Zodiac Cosmos', img: '/tarot-effects/deck-intro/celestial_cover.jpg', gif: '/tarot-effects/deck-intro/celestial_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/celestial_${i}.jpg`), hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
@@ -654,7 +656,7 @@ function Tarot() {
   const startShuffle = useCallback(() => {
     // 셋업 화면에서 현재 보여지던 배경을 셔플 화면에도 그대로 유지
     try {
-      const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
+      const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial' };
       const curDeckData = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
       const bgBase = bgPaths[deck] || '';
       const bgSuffix = curDeckData.hasVariants ? `_v${deckVariant}` : '';
@@ -1129,8 +1131,8 @@ function Tarot() {
 
       {/* ═══ 덱 갤러리 — 필름릴 방식 ═══ */}
       {galleryDeck && (() => {
-        const isMulti = ['newclassic','jester','masterpiece','oriental','western','dark','romantic','classic_rws','girl','boy','cartoon_girl','cartoon_boy','cats','dogs'].includes(galleryDeck.id);
-        const deckPaths = { newclassic:'/tarot-newclassic', jester:'/tarot-jester', masterpiece:'/tarot-masterpiece', classic_rws:'/tarot-classic-rws', dark:'/tarot-dark', romantic:'/tarot-romantic', oriental:'/tarot-oriental', western:'/tarot-western', girl:'/tarot-girl', boy:'/tarot-boy', cartoon_girl:'/tarot-cartoon-girl', cats:'/tarot-cats', dogs:'/tarot-dogs' };
+        const isMulti = ['newclassic','jester','masterpiece','oriental','western','dark','romantic','classic_rws','girl','boy','cartoon_girl','cartoon_boy','cats','dogs','kdrama','celestial'].includes(galleryDeck.id);
+        const deckPaths = { newclassic:'/tarot-newclassic', jester:'/tarot-jester', masterpiece:'/tarot-masterpiece', classic_rws:'/tarot-classic-rws', dark:'/tarot-dark', romantic:'/tarot-romantic', oriental:'/tarot-oriental', western:'/tarot-western', girl:'/tarot-girl', boy:'/tarot-boy', cartoon_girl:'/tarot-cartoon-girl', cartoon_boy:'/tarot-cartoon-boy', cats:'/tarot-cats', dogs:'/tarot-dogs', kdrama:'/tarot-kdrama', celestial:'/tarot-celestial' };
         const basePath = deckPaths[galleryDeck.id] || '/tarot';
         const variant = deckVariant;
         const cardSrcFixed = (i) => {
@@ -1500,7 +1502,7 @@ function Tarot() {
       {/* ═══ STEP 1: 메뉴 화면 (타로 스타일) ═══ */}
       {step === 'setup' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs' };
+        const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial' };
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
         const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];
