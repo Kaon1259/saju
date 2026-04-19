@@ -13,6 +13,49 @@ import './MyFortune.css';
 
 const TIME_ICON = { '아침': '🌅', '점심': '☀️', '오후': '🌤️', '저녁': '🌆', '밤': '🌙' };
 
+function scoreToStars(score) {
+  const half = Math.max(0, Math.min(10, Math.round((Number(score) || 70) / 10)));
+  const full = Math.floor(half / 2);
+  const isHalf = half % 2 === 1;
+  const empty = 5 - full - (isHalf ? 1 : 0);
+  return { full, isHalf, empty };
+}
+
+function StarRating({ score }) {
+  const { full, isHalf, empty } = scoreToStars(score);
+  return (
+    <span className="myf-stars" aria-label={`${score}점 (5점 만점)`}>
+      {Array.from({ length: full }).map((_, i) => <span key={'f' + i} className="myf-star myf-star--full">★</span>)}
+      {isHalf && <span className="myf-star myf-star--half">★</span>}
+      {Array.from({ length: empty }).map((_, i) => <span key={'e' + i} className="myf-star myf-star--empty">★</span>)}
+    </span>
+  );
+}
+
+function LuckyGrid({ f }) {
+  if (!f) return null;
+  const items = [
+    { icon: '🎨', label: '행운의 색', value: f.luckyColor },
+    { icon: '🔢', label: '행운의 숫자', value: f.luckyNumber },
+    { icon: '🧭', label: '길한 방위', value: f.luckyDirection },
+    { icon: '🍀', label: '행운의 음식', value: f.luckyFood },
+    { icon: '👕', label: '추천 스타일', value: f.luckyFashion },
+    { icon: '🎁', label: '행운의 아이템', value: f.luckyItem },
+  ].filter(it => it.value !== undefined && it.value !== null && it.value !== '');
+  if (items.length === 0) return null;
+  return (
+    <div className="myf-lucky-grid glass-card">
+      {items.map((it, i) => (
+        <div className="myf-lucky-cell" key={i} style={{ animationDelay: `${i * 60}ms` }}>
+          <div className="myf-lucky-cell-icon">{it.icon}</div>
+          <div className="myf-lucky-cell-label">{it.label}</div>
+          <div className="myf-lucky-cell-value">{it.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function HourlyTimeline({ items }) {
   if (!Array.isArray(items) || items.length === 0) return null;
   return (
@@ -223,7 +266,11 @@ function MyFortune() {
       `운세 점수: ${tf?.score || 70}점`,
       '', `🌟 총운: ${tf?.overall || ''}`, `💕 애정운: ${tf?.love || ''}`,
       `💰 재물운: ${tf?.money || ''}`, `💪 건강운: ${tf?.health || ''}`, `💼 직장운: ${tf?.work || ''}`,
-      '', `🍀 행운의 숫자: ${tf?.luckyNumber || '-'}`, `🎨 행운의 색상: ${tf?.luckyColor || '-'}`,
+      '', `🔢 행운의 숫자: ${tf?.luckyNumber || '-'}`, `🎨 행운의 색: ${tf?.luckyColor || '-'}`,
+      tf?.luckyDirection ? `🧭 길한 방위: ${tf.luckyDirection}` : '',
+      tf?.luckyFood ? `🍀 추천 음식: ${tf.luckyFood}` : '',
+      tf?.luckyFashion ? `👕 추천 스타일: ${tf.luckyFashion}` : '',
+      tf?.luckyItem ? `🎁 행운의 아이템: ${tf.luckyItem}` : '',
       '', '- 연애 앱에서 확인하세요 -',
     ].join('\n');
     try {
@@ -257,7 +304,7 @@ function MyFortune() {
           const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
           setData({
             user: { name: profile.name || '', zodiacAnimal: profile.zodiacAnimal || '', bloodType: profile.bloodType || '', mbtiType: profile.mbtiType || '' },
-            saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor, hourlyFortune: Array.isArray(parsed.hourlyFortune) ? parsed.hourlyFortune : null }
+            saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor, luckyDirection: parsed.luckyDirection, luckyFood: parsed.luckyFood, luckyFashion: parsed.luckyFashion, luckyItem: parsed.luckyItem, hourlyFortune: Array.isArray(parsed.hourlyFortune) ? parsed.hourlyFortune : null }
           });
         }
         setLoading(false);
@@ -339,6 +386,7 @@ function MyFortune() {
             <span className="myf-score-unit">점</span>
           </div>
         </div>
+        <div className="myf-stars-wrap"><StarRating score={rd.todayFortune?.score || 70} /></div>
         {rd.todayFortune && (
           <div className="myf-cards">
             {rd.todayFortune.overall && <FortuneCard icon="🌟" title="총운" description={rd.todayFortune.overall} delay={0} />}
@@ -357,19 +405,7 @@ function MyFortune() {
             <p>{rd.personalityReading}</p>
           </div>
         )}
-        {rd.todayFortune?.luckyNumber && (
-          <div className="myf-lucky glass-card">
-            <div className="myf-lucky-item">
-              <span className="myf-lucky-label">행운의 숫자</span>
-              <span className="myf-lucky-value">{rd.todayFortune.luckyNumber}</span>
-            </div>
-            <div className="myf-lucky-divider" />
-            <div className="myf-lucky-item">
-              <span className="myf-lucky-label">행운의 색</span>
-              <span className="myf-lucky-value">{rd.todayFortune.luckyColor}</span>
-            </div>
-          </div>
-        )}
+        <LuckyGrid f={rd.todayFortune} />
       </div>
       {birthInfo?.birthDate && (
         <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} previousResult={rd} />
@@ -683,6 +719,7 @@ function MyFortune() {
               <span className="myf-score-unit">점</span>
             </div>
           </div>
+          <div className="myf-stars-wrap"><StarRating score={f.score || 70} /></div>
 
           {activeTab === 'blood' && f.dayAnalysis && (
             <div className="myf-analysis glass-card"><span className="myf-analysis-icon">☯️</span><p>{f.dayAnalysis}</p></div>
@@ -707,17 +744,7 @@ function MyFortune() {
 
           {f.tip && (<div className="myf-tip glass-card"><span>💡</span><p>{f.tip}</p></div>)}
 
-          <div className="myf-lucky glass-card">
-            <div className="myf-lucky-item">
-              <span className="myf-lucky-label">행운의 숫자</span>
-              <span className="myf-lucky-value">{f.luckyNumber}</span>
-            </div>
-            <div className="myf-lucky-divider" />
-            <div className="myf-lucky-item">
-              <span className="myf-lucky-label">행운의 색</span>
-              <span className="myf-lucky-value">{f.luckyColor}</span>
-            </div>
-          </div>
+          <LuckyGrid f={f} />
 
           {activeTab === 'saju' && (() => {
             try {

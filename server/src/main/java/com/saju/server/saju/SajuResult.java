@@ -105,6 +105,10 @@ public class SajuResult {
         private String avoid;        // 오늘 피해야 할 것
         private String emotion;      // 감정/심리 상태 진단과 조언
         private java.util.List<java.util.Map<String, Object>> hourlyFortune; // 시간대별 운세 (5구간)
+        private String luckyDirection; // 오늘 길한 방위
+        private String luckyFood;      // 오늘 추천 음식/차
+        private String luckyFashion;   // 오늘 추천 옷차림
+        private String luckyItem;      // 오늘 추천 소품/아이템
     }
 
     @Getter

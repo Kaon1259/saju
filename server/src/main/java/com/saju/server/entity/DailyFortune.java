@@ -47,6 +47,18 @@ public class DailyFortune {
 
     private String luckyColor;
 
+    @Column(name = "lucky_direction")
+    private String luckyDirection;
+
+    @Column(name = "lucky_food", columnDefinition = "TEXT")
+    private String luckyFood;
+
+    @Column(name = "lucky_fashion", columnDefinition = "TEXT")
+    private String luckyFashion;
+
+    @Column(name = "lucky_item", columnDefinition = "TEXT")
+    private String luckyItem;
+
     private Integer score;
 
     @Column(nullable = false, updatable = false)

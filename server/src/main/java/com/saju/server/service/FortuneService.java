@@ -229,6 +229,10 @@ public class FortuneService {
                 if (node.has("score")) fortune.setScore(node.get("score").asInt(fortune.getScore()));
                 if (node.has("luckyNumber")) fortune.setLuckyNumber(node.get("luckyNumber").asInt(fortune.getLuckyNumber()));
                 if (node.has("luckyColor")) fortune.setLuckyColor(node.get("luckyColor").asText());
+                if (node.has("luckyDirection")) fortune.setLuckyDirection(node.get("luckyDirection").asText());
+                if (node.has("luckyFood")) fortune.setLuckyFood(node.get("luckyFood").asText());
+                if (node.has("luckyFashion")) fortune.setLuckyFashion(node.get("luckyFashion").asText());
+                if (node.has("luckyItem")) fortune.setLuckyItem(node.get("luckyItem").asText());
                 if (hourlyJson != null) fortune.setHourlyFortuneJson(hourlyJson);
                 dailyFortuneRepository.save(fortune);
                 log.info("Daily fortune cache updated: zodiac={}, date={}", zodiacAnimal, targetDate);
@@ -248,6 +252,10 @@ public class FortuneService {
                     .score(node.has("score") ? node.get("score").asInt() : random.nextInt(61) + 40)
                     .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : random.nextInt(99) + 1)
                     .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : LUCKY_COLORS[random.nextInt(LUCKY_COLORS.length)])
+                    .luckyDirection(node.has("luckyDirection") ? node.get("luckyDirection").asText() : null)
+                    .luckyFood(node.has("luckyFood") ? node.get("luckyFood").asText() : null)
+                    .luckyFashion(node.has("luckyFashion") ? node.get("luckyFashion").asText() : null)
+                    .luckyItem(node.has("luckyItem") ? node.get("luckyItem").asText() : null)
                     .build();
                 dailyFortuneRepository.save(fortune);
                 log.info("Daily fortune cache created: zodiac={}, date={}", zodiacAnimal, targetDate);

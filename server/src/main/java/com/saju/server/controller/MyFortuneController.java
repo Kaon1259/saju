@@ -73,6 +73,10 @@ public class MyFortuneController {
             sajuFortune.put("score", cachedFortune.getScore());
             sajuFortune.put("luckyNumber", cachedFortune.getLuckyNumber());
             sajuFortune.put("luckyColor", cachedFortune.getLuckyColor());
+            sajuFortune.put("luckyDirection", cachedFortune.getLuckyDirection());
+            sajuFortune.put("luckyFood", cachedFortune.getLuckyFood());
+            sajuFortune.put("luckyFashion", cachedFortune.getLuckyFashion());
+            sajuFortune.put("luckyItem", cachedFortune.getLuckyItem());
             sajuFortune.put("hourlyFortune", parseHourly(cachedFortune.getHourlyFortuneJson()));
         } else {
             // 캐시 없음 → 사주 기반 AI 분석 (첫 방문)
@@ -234,6 +238,10 @@ public class MyFortuneController {
         saju.put("score", fortune.getScore());
         saju.put("luckyNumber", fortune.getLuckyNumber());
         saju.put("luckyColor", fortune.getLuckyColor());
+        saju.put("luckyDirection", fortune.getLuckyDirection());
+        saju.put("luckyFood", fortune.getLuckyFood());
+        saju.put("luckyFashion", fortune.getLuckyFashion());
+        saju.put("luckyItem", fortune.getLuckyItem());
         saju.put("hourlyFortune", parseHourly(fortune.getHourlyFortuneJson()));
         saju.put("zodiacAnimal", user.getZodiacAnimal());
         result.put("saju", saju);

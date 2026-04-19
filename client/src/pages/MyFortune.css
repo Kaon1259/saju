@@ -102,12 +102,35 @@
 .light-mode .myf-hourly-desc { color: #3a2a48; }
 .light-mode .myf-hourly-bar { background: rgba(0,0,0,0.06); }
 
-/* 럭키 */
+/* 럭키 (기존 2칸 버전 — 하위 호환용) */
 .myf-lucky { display: flex; align-items: center; padding: 16px; }
 .myf-lucky-item { flex: 1; text-align: center; }
 .myf-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
 .myf-lucky-value { font-size: 18px; font-weight: 800; color: var(--color-accent-gold); }
 .myf-lucky-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.08); }
+
+/* 럭키 그리드 6칸 */
+.myf-lucky-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px; margin-bottom: 16px; }
+.myf-lucky-cell { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 6px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); opacity: 0; animation: myfLuckyIn 0.45s ease forwards; }
+@keyframes myfLuckyIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+.myf-lucky-cell-icon { font-size: 22px; margin-bottom: 4px; }
+.myf-lucky-cell-label { font-size: 10.5px; color: var(--color-text-muted); margin-bottom: 4px; letter-spacing: 0.2px; }
+.myf-lucky-cell-value { font-size: 13px; font-weight: 800; color: var(--color-accent-gold); line-height: 1.35; word-break: keep-all; }
+@media (max-width: 360px) { .myf-lucky-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.light-mode .myf-lucky-cell { background: rgba(255, 230, 240, 0.55); border-color: rgba(194, 24, 91, 0.15); }
+.light-mode .myf-lucky-cell-label { color: #7a6a82; }
+.light-mode .myf-lucky-cell-value { color: #c2185b; }
+
+/* 별점 */
+.myf-stars-wrap { text-align: center; margin-top: -6px; margin-bottom: 12px; }
+.myf-stars { display: inline-flex; gap: 2px; font-size: 20px; line-height: 1; letter-spacing: 1px; }
+.myf-star { color: rgba(255,255,255,0.15); position: relative; }
+.myf-star--full { color: #f5c46e; text-shadow: 0 0 6px rgba(245,196,110,0.5); }
+.myf-star--half { color: rgba(255,255,255,0.15); background: linear-gradient(90deg, #f5c46e 50%, rgba(255,255,255,0.15) 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: none; }
+.light-mode .myf-star { color: rgba(0,0,0,0.14); }
+.light-mode .myf-star--full { color: #d4b049; text-shadow: 0 0 4px rgba(212,176,73,0.35); }
+.light-mode .myf-star--half { background: linear-gradient(90deg, #d4b049 50%, rgba(0,0,0,0.14) 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
 /* 빈 상태 */
 .myf-empty { text-align: center; padding: 60px 20px; }

@@ -253,6 +253,10 @@ public class SajuService {
                 .score(node.has("score") ? node.get("score").asInt() : 70)
                 .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : 7)
                 .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : "파랑")
+                .luckyDirection(node.has("luckyDirection") ? node.get("luckyDirection").asText() : null)
+                .luckyFood(node.has("luckyFood") ? node.get("luckyFood").asText() : null)
+                .luckyFashion(node.has("luckyFashion") ? node.get("luckyFashion").asText() : null)
+                .luckyItem(node.has("luckyItem") ? node.get("luckyItem").asText() : null)
                 .hourlyFortune(hourly)
                 .build();
             basicResult.setTodayFortune(fortune);

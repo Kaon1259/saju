@@ -23,6 +23,10 @@ public class FortuneResponse {
     private String hourlyFortuneJson;
     private Integer luckyNumber;
     private String luckyColor;
+    private String luckyDirection;
+    private String luckyFood;
+    private String luckyFashion;
+    private String luckyItem;
     private Integer score;
 
     public static FortuneResponse from(DailyFortune fortune) {
@@ -38,6 +42,10 @@ public class FortuneResponse {
                 .hourlyFortuneJson(fortune.getHourlyFortuneJson())
                 .luckyNumber(fortune.getLuckyNumber())
                 .luckyColor(fortune.getLuckyColor())
+                .luckyDirection(fortune.getLuckyDirection())
+                .luckyFood(fortune.getLuckyFood())
+                .luckyFashion(fortune.getLuckyFashion())
+                .luckyItem(fortune.getLuckyItem())
                 .score(fortune.getScore())
                 .build();
     }
