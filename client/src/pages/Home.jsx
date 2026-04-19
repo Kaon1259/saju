@@ -824,6 +824,7 @@ function Home() {
                   navigate('/celeb-compatibility', { state });
                   break;
                 case 'my_love_compat':
+                case 'marriage_compat':
                   navigate('/my-love-compat', { state });
                   break;
                 default:

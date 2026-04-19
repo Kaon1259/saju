@@ -525,7 +525,7 @@ export const saveCompatCache = async (data) => {
   await api.post('/compatibility/saju/cache', data);
 };
 
-export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts, historyType, celebName }) => {
+export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts, historyType, celebName, mode }) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate1, birthDate2 });
   if (birthTime1) params.set('birthTime1', birthTime1);
@@ -539,6 +539,7 @@ export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birth
   if (branchRelation) params.set('branchRelation', branchRelation);
   if (historyType) params.set('historyType', historyType);
   if (celebName) params.set('celebName', celebName);
+  if (mode) params.set('mode', mode);
   appendUserId(params);
 
   const baseURL = import.meta.env.VITE_API_URL || '/api';

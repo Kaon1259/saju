@@ -84,6 +84,9 @@ public class CompatibilityController {
                 case "my_love_compat":
                     title = "내 연인 궁합 (" + bd1 + " × " + bd2 + ")";
                     break;
+                case "marriage_compat":
+                    title = "결혼 궁합 (" + bd1 + " × " + bd2 + ")";
+                    break;
                 default:
                     title = "사주 궁합 (" + bd1 + " × " + bd2 + ")";
             }
@@ -140,7 +143,8 @@ public class CompatibilityController {
             @RequestParam(value = "branchRelation", defaultValue = "") String branchRelation,
             @RequestParam(required = false) Long userId,
             @RequestParam(value = "historyType", required = false) String historyType,
-            @RequestParam(value = "celebName", required = false) String celebName) {
+            @RequestParam(value = "celebName", required = false) String celebName,
+            @RequestParam(value = "mode", defaultValue = "general") String mode) {
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
@@ -155,18 +159,42 @@ public class CompatibilityController {
             }
         }
 
-        String[] prompts = compatibilityService.buildStreamPrompts(bd1, birthTime1, bd2, birthTime2, gender1, gender2, score, elementRelation, branchRelation);
+        String[] prompts = compatibilityService.buildStreamPrompts(bd1, birthTime1, bd2, birthTime2, gender1, gender2, score, elementRelation, branchRelation, mode);
         final LocalDate fbd1 = bd1, fbd2 = bd2;
         final Long uid = userId;
-        return claudeApiService.generateStream(prompts[0], prompts[1], 2000, (fullText) -> {
-            // 스트리밍 완료 → 서버에서 직접 캐시 저장
-            compatibilityService.parseAndSaveStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
-                score, grade(score), elementRelation, branchRelation, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "COMPATIBILITY", "사주궁합");
+        final boolean isMarriage = "marriage".equalsIgnoreCase(mode);
+        return claudeApiService.generateStream(prompts[0], prompts[1], 2500, (fullText) -> {
+            // 일반 궁합만 공용 캐시에 저장 (결혼궁합은 필드가 다르므로 캐시 미사용)
+            if (!isMarriage) {
+                compatibilityService.parseAndSaveStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
+                    score, grade(score), elementRelation, branchRelation, fullText);
+            }
+            if (uid != null) heartPointService.deductPoints(uid, "COMPATIBILITY",
+                isMarriage ? "결혼궁합" : "사주궁합");
 
-            // 히스토리 저장 (3가지 타입 공용 헬퍼)
+            // 히스토리 저장
             if (uid != null) {
                 Map<String, Object> result = compatibilityService.analyzeSajuBasic(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2);
+                if (isMarriage) {
+                    // 결혼궁합: AI 응답을 파싱해서 result에 직접 덮어쓰기 (공용 캐시 미사용)
+                    try {
+                        String json = com.saju.server.service.ClaudeApiService.extractJson(fullText);
+                        if (json != null) {
+                            var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+                            if (node.has("summary")) result.put("aiSummary", node.get("summary").asText());
+                            if (node.has("overall")) result.put("aiAnalysis", node.get("overall").asText());
+                            if (node.has("marriageTiming")) result.put("aiMarriageTiming", node.get("marriageTiming").asText());
+                            if (node.has("familyHarmony")) result.put("aiFamilyHarmony", node.get("familyHarmony").asText());
+                            if (node.has("childLuck")) result.put("aiChildLuck", node.get("childLuck").asText());
+                            if (node.has("spouseTrait")) result.put("aiSpouseTrait", node.get("spouseTrait").asText());
+                            if (node.has("inLawRelation")) result.put("aiInLawRelation", node.get("inLawRelation").asText());
+                            if (node.has("financeTogether")) result.put("aiFinanceTogether", node.get("financeTogether").asText());
+                            if (node.has("advice")) result.put("aiAdvice", node.get("advice").asText());
+                            if (node.has("score")) result.put("score", node.get("score").asInt());
+                            if (node.has("grade")) result.put("grade", node.get("grade").asText());
+                        }
+                    } catch (Exception ignored) {}
+                }
                 saveCompatibilityHistory(uid, fbd1, birthTime1, gender1, calendarType1,
                     fbd2, birthTime2, gender2, calendarType2,
                     result, historyType, celebName);

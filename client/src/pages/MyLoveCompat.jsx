@@ -23,9 +23,10 @@ import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyLoveCompat.css';
 
 const TABS = [
-  { id: 'saju',  icon: '🔮', label: '정통궁합' },
-  { id: 'mbti',  icon: '🧠', label: 'MBTI궁합' },
-  { id: 'blood', icon: '🩸', label: '혈액형궁합' },
+  { id: 'saju',     icon: '🔮', label: '정통궁합' },
+  { id: 'marriage', icon: '💒', label: '결혼궁합' },
+  { id: 'mbti',     icon: '🧠', label: 'MBTI궁합' },
+  { id: 'blood',    icon: '🩸', label: '혈액형궁합' },
 ];
 
 const MBTI_TYPES = [
@@ -149,6 +150,7 @@ function MyLoveCompat() {
   };
 
   const { guardedAction: guardSajuCompat } = useHeartGuard('COMPATIBILITY');
+  const { guardedAction: guardMarriageCompat } = useHeartGuard('COMPATIBILITY');
   const { guardedAction: guardMbtiCompat } = useHeartGuard('MBTI_COMPAT');
   const { guardedAction: guardBloodCompat } = useHeartGuard('BLOODTYPE_COMPAT');
 
@@ -215,6 +217,72 @@ function MyLoveCompat() {
               aiConflictPoint: finalResult.aiConflictPoint,
               aiAdvice: finalResult.aiAdvice,
             }).catch(() => {});
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          },
+          onError: () => {
+            setAiStreaming(false); setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    }
+  };
+
+  // ─── 결혼 궁합 ───
+  const analyzeMarriage = async () => {
+    if (!bd1 || !bd2) return;
+    setLoading(true);
+    setResult(null);
+    setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
+
+    try {
+      const data = await getSajuCompatibilityBasic(
+        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        { historyType: 'marriage_compat' }
+      );
+      data._g1 = g1;
+      data._g2 = g2;
+      data._kind = 'marriage';
+
+      setLoading(false);
+      setAiStreaming(true);
+
+      cleanupRef.current = getCompatibilityStream(
+        bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
+        data.score, data.elementRelation || '', data.branchRelation || '',
+        {
+          historyType: 'marriage_compat',
+          mode: 'marriage',
+          onChunk: (text) => setStreamText((prev) => prev + text),
+          onDone: (fullText) => {
+            setAiStreaming(false);
+            setStreamText('');
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+            const parsed = parseAiJson(fullText);
+            const finalResult = parsed ? {
+              ...data,
+              score: parsed.score || data.score,
+              grade: parsed.grade || data.grade,
+              aiSummary: parsed.summary || null,
+              aiAnalysis: parsed.overall || null,
+              aiMarriageTiming: parsed.marriageTiming || null,
+              aiFamilyHarmony: parsed.familyHarmony || null,
+              aiChildLuck: parsed.childLuck || null,
+              aiSpouseTrait: parsed.spouseTrait || null,
+              aiInLawRelation: parsed.inLawRelation || null,
+              aiFinanceTogether: parsed.financeTogether || null,
+              aiAdvice: parsed.advice || null,
+            } : { ...data, aiAnalysis: fullText };
+            setResult(finalResult);
             setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
           },
           onError: () => {
@@ -330,9 +398,10 @@ function MyLoveCompat() {
   };
 
   const matrixLabel =
-    tab === 'saju'  ? 'AI가 사주 궁합을 분석하고 있어요' :
-    tab === 'mbti'  ? 'AI가 MBTI 궁합을 분석하고 있어요' :
-                      'AI가 혈액형 궁합을 분석하고 있어요';
+    tab === 'saju'     ? 'AI가 사주 궁합을 분석하고 있어요' :
+    tab === 'marriage' ? 'AI가 결혼 궁합을 분석하고 있어요' :
+    tab === 'mbti'     ? 'AI가 MBTI 궁합을 분석하고 있어요' :
+                         'AI가 혈액형 궁합을 분석하고 있어요';
 
   return (
     <div className="mlc-page">
@@ -416,6 +485,43 @@ function MyLoveCompat() {
 
               <button className="mlc-submit" onClick={() => guardSajuCompat(analyzeSaju)} disabled={!bd1 || !bd2}>
                 🔮 사주 궁합 보기 <HeartCost category="COMPATIBILITY" />
+              </button>
+            </>
+          )}
+
+          {/* ═══ 결혼궁합 ═══ */}
+          {tab === 'marriage' && (
+            <>
+              <div className="mlc-person-block">
+                <h3 className="mlc-person-title">👤 내 정보</h3>
+                <BirthDatePicker value={bd1} onChange={setBd1} />
+                <div className="mlc-toggle">
+                  <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
+                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
+                  </button>
+                  <button className={`mlc-toggle-btn ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>
+                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="mlc-person-block">
+                <h3 className="mlc-person-title">💕 연인 정보</h3>
+                <BirthDatePicker value={bd2} onChange={setBd2} />
+                <div className="mlc-toggle">
+                  <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
+                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
+                  </button>
+                  <button className={`mlc-toggle-btn ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>
+                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
+                  </button>
+                </div>
+              </div>
+
+              <p className="mlc-marriage-hint">💒 결혼 시기·자녀운·양가관계·공동재물까지 결혼에 초점 맞춘 분석</p>
+
+              <button className="mlc-submit" onClick={() => guardMarriageCompat(analyzeMarriage)} disabled={!bd1 || !bd2}>
+                💒 결혼 궁합 보기 <HeartCost category="COMPATIBILITY" />
               </button>
             </>
           )}
@@ -553,6 +659,58 @@ function MyLoveCompat() {
             </>
           )}
 
+          {/* 결혼궁합 결과 */}
+          {tab === 'marriage' && result._kind === 'marriage' && result.person1 && (
+            <>
+              <div className="mlc-score-hero">
+                <div className="mlc-vs-row">
+                  <div className="mlc-person-card">
+                    <span className="mlc-person-icon" style={{ color: result._g1 === 'F' ? '#F472B6' : '#60A5FA' }}>
+                      {result._g1 === 'F' ? '♀' : '♂'}
+                    </span>
+                    <span className="mlc-person-pillar" style={{ color: ELEMENT_COLORS[result.person1.dayMasterElement] || '#fbbf24' }}>
+                      {result.person1.dayMaster}
+                    </span>
+                    <span className="mlc-person-date">{result.person1.birthDate}</span>
+                  </div>
+                  <div className="mlc-score-ring-wrap">
+                    <svg viewBox="0 0 100 100" className="mlc-score-ring">
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+                      <circle cx="50" cy="50" r="42" fill="none" stroke={getScoreColor(result.score)} strokeWidth="6" strokeLinecap="round"
+                        strokeDasharray={`${(result.score / 100) * 264} 264`} transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div className="mlc-score-inner">
+                      <span className="mlc-score-num">{result.score}</span>
+                      <span className="mlc-score-unit">점</span>
+                    </div>
+                  </div>
+                  <div className="mlc-person-card">
+                    <span className="mlc-person-icon" style={{ color: result._g2 === 'F' ? '#F472B6' : '#60A5FA' }}>
+                      {result._g2 === 'F' ? '♀' : '♂'}
+                    </span>
+                    <span className="mlc-person-pillar" style={{ color: ELEMENT_COLORS[result.person2.dayMasterElement] || '#a78bfa' }}>
+                      {result.person2.dayMaster}
+                    </span>
+                    <span className="mlc-person-date">{result.person2.birthDate}</span>
+                  </div>
+                </div>
+                <span className="mlc-grade-badge" style={{ color: GRADE_COLORS[result.grade] || getScoreColor(result.score) }}>
+                  💒 {result.grade}
+                </span>
+              </div>
+
+              {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
+              {result.aiAnalysis && <FortuneCard icon="💒" title="결혼궁합 총평" description={result.aiAnalysis} delay={80} />}
+              {result.aiMarriageTiming && <FortuneCard icon="📅" title="결혼 시기" description={result.aiMarriageTiming} delay={160} />}
+              {result.aiFamilyHarmony && <FortuneCard icon="🏡" title="가정 화합" description={result.aiFamilyHarmony} delay={240} />}
+              {result.aiChildLuck && <FortuneCard icon="👶" title="자녀운" description={result.aiChildLuck} delay={320} />}
+              {result.aiSpouseTrait && <FortuneCard icon="💼" title="배우자 성향" description={result.aiSpouseTrait} delay={400} />}
+              {result.aiInLawRelation && <FortuneCard icon="🏠" title="양가 관계" description={result.aiInLawRelation} delay={480} />}
+              {result.aiFinanceTogether && <FortuneCard icon="💰" title="공동 재물" description={result.aiFinanceTogether} delay={560} />}
+              {result.aiAdvice && <FortuneCard icon="💡" title="결혼 준비 조언" description={result.aiAdvice} delay={640} />}
+            </>
+          )}
+
           {/* MBTI 결과 */}
           {tab === 'mbti' && result._kind === 'mbti' && (
             <>
@@ -638,11 +796,11 @@ function MyLoveCompat() {
         </div>
       )}
 
-      {/* 하단 pull-up drawer — 최근 본 연인 궁합 */}
+      {/* 하단 pull-up drawer — 최근 본 연인 궁합 (사주/결혼 공통) */}
       {!isGuest() && (
         <HistoryDrawer
-          type="my_love_compat"
-          label="📚 최근 본 연인 궁합"
+          type={tab === 'marriage' ? 'marriage_compat' : 'my_love_compat'}
+          label={tab === 'marriage' ? '📚 최근 본 결혼 궁합' : '📚 최근 본 연인 궁합'}
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);
@@ -650,6 +808,10 @@ function MyLoveCompat() {
               if (p) {
                 p._g1 = p.gender1 || 'M';
                 p._g2 = p.gender2 || 'F';
+                if (full?.type === 'marriage_compat') {
+                  p._kind = 'marriage';
+                  setTab('marriage');
+                }
                 setResult(p);
               }
             } catch {}

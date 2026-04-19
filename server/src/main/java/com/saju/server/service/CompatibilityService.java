@@ -368,10 +368,38 @@ public class CompatibilityService {
      * 궁합 AI 스트리밍용 프롬프트 생성
      */
     public String[] buildStreamPrompts(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2, int score, String elementRelation, String branchRelation) {
+        return buildStreamPrompts(bd1, bt1, bd2, bt2, gender1, gender2, score, elementRelation, branchRelation, "general");
+    }
+
+    public String[] buildStreamPrompts(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2, int score, String elementRelation, String branchRelation, String mode) {
         String label1 = "M".equalsIgnoreCase(gender1) ? "남자" : "여자";
         String label2 = "M".equalsIgnoreCase(gender2) ? "남자" : "여자";
         SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
         SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
+
+        if ("marriage".equalsIgnoreCase(mode)) {
+            String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
+                    + "카페에서 친구 커플한테 결혼궁합 봐주듯이 자연스럽게 얘기하는 사주 전문가야.\n"
+                    + "20대 후반~30대가 '우리 결혼해도 될까?' 진지하게 물을 때 답하는 톤으로.\n"
+                    + "'너네 둘이~', '이 남자는~', '이 여자는~' 자연스러운 호칭 사용.\n"
+                    + "한자 용어(오행/일간/상생상극) 그대로 쓰지 말고 쉬운 말로 풀어서.\n\n"
+                    + "결혼궁합 특화 분석 — JSON만 응답:\n"
+                    + "- summary: 한 줄 요약 (30자 이내, 결혼에 초점)\n"
+                    + "- overall: 결혼 궁합 전반 3-4문장\n"
+                    + "- marriageTiming: 결혼 시기 분석 3-4문장 (언제가 좋을지, 구체적 나이대/연도·계절)\n"
+                    + "- familyHarmony: 가정 분위기·부부 화합 3-4문장\n"
+                    + "- childLuck: 자녀운 3-4문장 (자녀 수·터울·양육 스타일)\n"
+                    + "- spouseTrait: 배우자 성향·직업 성향 3-4문장\n"
+                    + "- inLawRelation: 양가(시댁/처가) 관계 2-3문장\n"
+                    + "- financeTogether: 공동 재물운 3-4문장 (돈 모으는 스타일·투자·소비)\n"
+                    + "- advice: 결혼 준비 실천 조언 3-4문장\n"
+                    + "- score: 1-100 (결혼궁합 점수), grade: 천생배필/좋은 짝/보통/고민 필요/어려움\n"
+                    + "{\"summary\":\"\",\"overall\":\"\",\"marriageTiming\":\"\",\"familyHarmony\":\"\",\"childLuck\":\"\",\"spouseTrait\":\"\",\"inLawRelation\":\"\",\"financeTogether\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
+
+            String userPrompt = buildCompatPrompt(r1, r2, score, elementRelation, branchRelation, label1, label2)
+                    + "\n\n⚠️ 이 분석은 '결혼 가능성'에 초점을 맞춘 결혼궁합이야. 단순 연애가 아닌 평생 함께할 가능성·가정 꾸리기 관점에서 답해줘.";
+            return new String[]{systemPrompt, userPrompt};
+        }
 
         String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
                 + "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 얘기하는 사주 궁합 전문가야.\n"

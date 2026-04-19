@@ -111,8 +111,8 @@
 }
 .mlc-tab {
   flex: 1;
-  padding: 13px 0;
-  font-size: 14px;
+  padding: 11px 0;
+  font-size: 13px;
   font-weight: 700;
   border: none;
   background: rgba(255,255,255,0.04);
@@ -126,8 +126,26 @@
   border-right: 1px solid rgba(255,255,255,0.08);
 }
 .mlc-tab:last-child { border-right: none; }
-.mlc-tab-icon { font-size: 18px; }
-.mlc-tab-label { font-size: 13px; }
+.mlc-tab-icon { font-size: 17px; }
+.mlc-tab-label { font-size: 12px; }
+
+/* 결혼궁합 힌트 */
+.mlc-marriage-hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.72);
+  background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(251,191,36,0.08));
+  border: 1px solid rgba(236,72,153,0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 12px 0 16px;
+  text-align: center;
+}
+[data-theme="light"] .mlc-marriage-hint {
+  color: #7a3a5a;
+  background: linear-gradient(135deg, rgba(236,72,153,0.10), rgba(251,191,36,0.10));
+  border-color: rgba(236,72,153,0.3);
+}
 .mlc-tab.active {
   background: linear-gradient(135deg, rgba(233,30,99,0.22), rgba(139,92,246,0.15));
   color: #ff3d7f;
