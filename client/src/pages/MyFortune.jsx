@@ -84,6 +84,20 @@ function HourlyTimeline({ items }) {
   );
 }
 
+function BiorhythmLink() {
+  const nav = useNavigate();
+  return (
+    <button className="myf-biolink glass-card" onClick={() => nav('/biorhythm')}>
+      <span className="myf-biolink-icon">📊</span>
+      <span className="myf-biolink-main">
+        <span className="myf-biolink-title">오늘의 바이오리듬</span>
+        <span className="myf-biolink-sub">신체·감정·지성·직관 4사이클 + 30일 곡선</span>
+      </span>
+      <span className="myf-biolink-chevron">›</span>
+    </button>
+  );
+}
+
 function MyFortune() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -406,6 +420,7 @@ function MyFortune() {
           </div>
         )}
         <LuckyGrid f={rd.todayFortune} />
+        <BiorhythmLink />
       </div>
       {birthInfo?.birthDate && (
         <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} previousResult={rd} />
@@ -745,6 +760,7 @@ function MyFortune() {
           {f.tip && (<div className="myf-tip glass-card"><span>💡</span><p>{f.tip}</p></div>)}
 
           <LuckyGrid f={f} />
+          <BiorhythmLink />
 
           {activeTab === 'saju' && (() => {
             try {

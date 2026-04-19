@@ -122,6 +122,20 @@
 .light-mode .myf-lucky-cell-label { color: #7a6a82; }
 .light-mode .myf-lucky-cell-value { color: #c2185b; }
 
+/* 바이오리듬 크로스링크 */
+.myf-biolink { display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 16px; width: 100%; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; text-align: left; transition: transform 0.15s ease, background 0.15s ease; }
+.myf-biolink:hover { transform: translateX(2px); background: rgba(255,255,255,0.04); }
+.myf-biolink:active { transform: scale(0.98); }
+.myf-biolink-icon { font-size: 26px; flex-shrink: 0; }
+.myf-biolink-main { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; }
+.myf-biolink-title { font-size: 14px; font-weight: 800; color: #fff; }
+.myf-biolink-sub { font-size: 11.5px; color: var(--color-text-muted); line-height: 1.4; }
+.myf-biolink-chevron { font-size: 22px; color: var(--color-accent-gold); flex-shrink: 0; font-weight: 800; }
+.light-mode .myf-biolink-title { color: #2b1a3a; }
+.light-mode .myf-biolink-sub { color: #7a6a82; }
+.light-mode .myf-biolink-chevron { color: #c2185b; }
+.light-mode .myf-biolink:hover { background: rgba(255, 230, 240, 0.45); }
+
 /* 별점 */
 .myf-stars-wrap { text-align: center; margin-top: -6px; margin-bottom: 12px; }
 .myf-stars { display: inline-flex; gap: 2px; font-size: 20px; line-height: 1; letter-spacing: 1px; }
