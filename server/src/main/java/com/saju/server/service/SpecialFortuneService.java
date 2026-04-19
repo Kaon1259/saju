@@ -337,6 +337,8 @@ public class SpecialFortuneService {
             result.put("timing", node.path("timing").asText(""));
             result.put("advice", node.path("advice").asText(""));
             result.put("caution", node.path("caution").asText(""));
+            result.put("mindsetBoost", node.path("mindsetBoost").asText(""));
+            result.put("oneLiner", node.path("oneLiner").asText(""));
             result.put("luckyDay", node.path("luckyDay").asText(""));
             result.put("luckyPlace", node.path("luckyPlace").asText(""));
             result.put("luckyColor", node.path("luckyColor").asText(""));
@@ -934,7 +936,10 @@ public class SpecialFortuneService {
                   "\"caution\":\"주의할 유형 2문장\"}"
                 : "{\"score\":0-100,\"grade\":\"대길/길/보통/흉\",\"overall\":\"종합 3-4문장\"," +
                   "\"timing\":\"최적시기 2문장\",\"advice\":\"행동조언 3문장\"," +
-                  "\"caution\":\"주의 2문장\",\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}");
+                  "\"caution\":\"주의 2문장\"," +
+                  "\"mindsetBoost\":\"오늘의 멘탈 부스터 조언 1-2문장 (친구가 든든하게 어깨 토닥이듯)\"," +
+                  "\"oneLiner\":\"마음에 새길 따뜻한 한마디 (20자 내외, 이모지 1개 포함)\"," +
+                  "\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}");
 
         return new String[]{system, user};
     }

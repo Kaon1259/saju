@@ -374,10 +374,17 @@ function LoveTypeFortune() {
             </div>
           )}
 
+          {type !== 'ideal_type' && result.oneLiner && (
+            <div className="ltf-oneliner" style={{ '--heart-color': heartColor }}>
+              <span className="ltf-oneliner-text">{result.oneLiner}</span>
+            </div>
+          )}
+
           <FortuneCard icon={info.icon} title={type === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'} description={result.overall} delay={0} />
           {type !== 'ideal_type' && result.timing && <FortuneCard icon="📅" title="최적 시기" description={result.timing} delay={80} />}
           {type !== 'ideal_type' && result.advice && <FortuneCard icon="💡" title="행동 조언" description={result.advice} delay={160} />}
           {result.caution && <FortuneCard icon="⚠️" title="주의사항" description={result.caution} delay={240} />}
+          {type !== 'ideal_type' && result.mindsetBoost && <FortuneCard icon="💪" title="오늘의 멘탈 부스터" description={result.mindsetBoost} delay={320} />}
 
           {(result.luckyDay || result.luckyPlace || result.luckyColor) && (
             <div className="ltf-lucky">

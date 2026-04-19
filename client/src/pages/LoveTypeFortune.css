@@ -430,6 +430,31 @@
 }
 [data-theme="light"] .ltf-ideal-title { color: #1e293b; }
 
+/* 한마디 배너 (oneLiner) */
+.ltf-oneliner {
+  margin: 10px 0 18px;
+  padding: 16px 18px;
+  text-align: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--heart-color) 22%, transparent), color-mix(in srgb, var(--heart-color) 8%, transparent));
+  border: 1px solid color-mix(in srgb, var(--heart-color) 35%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--heart-color) 20%, transparent);
+  animation: ltfOneLinerIn 0.6s ease;
+}
+@keyframes ltfOneLinerIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ltf-oneliner-text {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: #fff;
+  letter-spacing: -0.2px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+[data-theme="light"] .ltf-oneliner-text { color: #2b1a3a; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
+
 /* 럭키 */
 .ltf-lucky {
   display: flex;
