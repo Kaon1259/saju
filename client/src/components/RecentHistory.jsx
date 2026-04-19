@@ -10,6 +10,7 @@ const TYPE_ICON = {
   celeb_compatibility: '🌟',
   my_love_compat: '💗',
   marriage_compat: '💒',
+  skinship_compat: '💋',
   partner_fortune: '👫',
   other_fortune: '👤',
 };

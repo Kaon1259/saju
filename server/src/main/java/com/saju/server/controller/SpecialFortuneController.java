@@ -128,12 +128,16 @@ public class SpecialFortuneController {
                 payload.put("breakupDate", breakupDate);
                 payload.put("meetDate", meetDate);
                 payload.put("relationshipStatus", relationshipStatus);
-                String title = buildLoveTitle(type, birthDate, partnerDate);
+                boolean isSkinship = "skinship".equals(type);
+                String historyType = isSkinship ? "skinship_compat" : "love_11";
+                String title = isSkinship
+                    ? "스킨십 궁합 (" + birthDate + (partnerDate != null && !partnerDate.isBlank() ? " × " + partnerDate : "") + ")"
+                    : buildLoveTitle(type, birthDate, partnerDate);
                 Object score = cached.get("score");
                 Object overall = cached.get("overall");
                 String summary = (score != null ? score + "점" : "")
                     + (overall != null ? " · " + overall : "");
-                fortuneHistoryService.saveIfAbsent(userId, "love_11", title, summary, payload);
+                fortuneHistoryService.saveIfAbsent(userId, historyType, title, summary, payload);
             }
             // 캐시 히트 → cached 이벤트로 즉시 반환
             SseEmitter emitter = new SseEmitter(5000L);
@@ -162,7 +166,8 @@ public class SpecialFortuneController {
         String[] prompts = specialFortuneService.buildLoveStreamPrompts(
             type, birthDate, birthTime, gender, calendarType,
             partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus);
-        int maxTokens = "ideal_type".equals(type) ? 2500 : 1200;
+        int maxTokens = "ideal_type".equals(type) ? 2500
+            : "skinship".equals(type) ? 1800 : 1400;
         final Long uid = userId;
         return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens, (fullText) -> {
             specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
@@ -185,12 +190,16 @@ public class SpecialFortuneController {
                 payload.put("breakupDate", breakupDate);
                 payload.put("meetDate", meetDate);
                 payload.put("relationshipStatus", relationshipStatus);
-                String title = buildLoveTitle(type, birthDate, partnerDate);
+                boolean isSkinship = "skinship".equals(type);
+                String historyType = isSkinship ? "skinship_compat" : "love_11";
+                String title = isSkinship
+                    ? "스킨십 궁합 (" + birthDate + (partnerDate != null && !partnerDate.isBlank() ? " × " + partnerDate : "") + ")"
+                    : buildLoveTitle(type, birthDate, partnerDate);
                 Object score = result.get("score");
                 Object overall = result.get("overall");
                 String summary = (score != null ? score + "점" : null)
                     + (overall != null ? " · " + overall : "");
-                fortuneHistoryService.saveIfAbsent(uid, "love_11", title, summary, payload);
+                fortuneHistoryService.saveIfAbsent(uid, historyType, title, summary, payload);
             }
         });
     }
