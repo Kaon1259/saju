@@ -156,7 +156,9 @@ public class CompatibilityService {
             var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (cached.isPresent()) {
                 java.time.LocalDateTime createdAt = cached.get().getCreatedAt();
-                if (createdAt != null && createdAt.plusHours(1).isBefore(java.time.LocalDateTime.now())) {
+                // 24시간 TTL — 궁합은 태어난 날짜 기반 관계라 빈번히 재분석 불필요,
+                // 단 천기(오늘 일진) 변화를 반영하려면 하루 단위 재생성.
+                if (createdAt != null && createdAt.plusHours(24).isBefore(java.time.LocalDateTime.now())) {
                     specialFortuneRepository.delete(cached.get());
                     return null;
                 }
