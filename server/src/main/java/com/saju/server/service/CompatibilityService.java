@@ -155,13 +155,7 @@ public class CompatibilityService {
         try {
             var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (cached.isPresent()) {
-                java.time.LocalDateTime createdAt = cached.get().getCreatedAt();
-                // 24시간 TTL — 궁합은 태어난 날짜 기반 관계라 빈번히 재분석 불필요,
-                // 단 천기(오늘 일진) 변화를 반영하려면 하루 단위 재생성.
-                if (createdAt != null && createdAt.plusHours(24).isBefore(java.time.LocalDateTime.now())) {
-                    specialFortuneRepository.delete(cached.get());
-                    return null;
-                }
+                // 궁합/결혼궁합은 생년월일 쌍 기반이라 영속 캐시. 갱신 원하면 히스토리 × 버튼으로 수동 삭제.
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
         } catch (Exception e) { /* ignore */ }
@@ -219,6 +213,73 @@ public class CompatibilityService {
         } catch (Exception e) {
             log.warn("궁합 스트리밍 캐시 저장 실패: {}", e.getMessage());
         }
+    }
+
+    /**
+     * 결혼궁합 전용 스트리밍 파싱/캐시 저장. 일반 궁합과는 다른 필드 구조.
+     */
+    public void parseAndSaveMarriageStreamResult(LocalDate bd1, String bt1, LocalDate bd2, String bt2,
+                                                 String gender1, String gender2, int score,
+                                                 String elementRelation, String branchRelation, String fullText) {
+        try {
+            SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
+            SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
+
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("person1", buildPersonInfo(r1, bd1));
+            result.put("person2", buildPersonInfo(r2, bd2));
+            result.put("elementRelation", elementRelation);
+            result.put("branchRelation", branchRelation);
+
+            String cleanJson = ClaudeApiService.extractJson(fullText);
+            if (cleanJson != null) {
+                JsonNode node = objectMapper.readTree(cleanJson);
+                if (node.has("summary")) result.put("aiSummary", node.get("summary").asText());
+                if (node.has("overall")) result.put("aiAnalysis", node.get("overall").asText());
+                if (node.has("marriageTiming")) result.put("aiMarriageTiming", node.get("marriageTiming").asText());
+                if (node.has("familyHarmony")) result.put("aiFamilyHarmony", node.get("familyHarmony").asText());
+                if (node.has("childLuck")) result.put("aiChildLuck", node.get("childLuck").asText());
+                if (node.has("spouseTrait")) result.put("aiSpouseTrait", node.get("spouseTrait").asText());
+                if (node.has("inLawRelation")) result.put("aiInLawRelation", node.get("inLawRelation").asText());
+                if (node.has("financeTogether")) result.put("aiFinanceTogether", node.get("financeTogether").asText());
+                if (node.has("advice")) result.put("aiAdvice", node.get("advice").asText());
+                int aiScore = node.has("score") ? node.get("score").asInt(score) : score;
+                String aiGrade = node.has("grade") ? node.get("grade").asText("") : "";
+                result.put("score", aiScore);
+                result.put("grade", aiGrade.isBlank() ? grade(aiScore) : aiGrade);
+            } else {
+                result.put("score", score);
+                result.put("grade", grade(score));
+            }
+
+            String dbCacheKey = buildCacheKey("marriage", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+            saveToCache("marriage", dbCacheKey, result);
+            log.info("결혼궁합 스트리밍 캐시 저장 완료: key={}", dbCacheKey);
+        } catch (Exception e) {
+            log.warn("결혼궁합 스트리밍 캐시 저장 실패: {}", e.getMessage());
+        }
+    }
+
+    private String grade(int score) {
+        if (score >= 85) return "천생배필";
+        if (score >= 70) return "좋은 짝";
+        if (score >= 55) return "보통";
+        if (score >= 40) return "고민 필요";
+        return "어려움";
+    }
+
+    /**
+     * 결혼궁합 basic — 캐시 히트 시 마지막 AI 결과 포함 반환, 미스 시 기본 점수 계산.
+     */
+    public Map<String, Object> analyzeMarriageBasic(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
+        String dbCacheKey = buildCacheKey("marriage", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+        Map<String, Object> dbCached = getFromCache("marriage", dbCacheKey);
+        if (dbCached != null) {
+            log.info("결혼궁합 캐시 히트: key={}", dbCacheKey);
+            return dbCached;
+        }
+        // 미스 시 기본 점수/사주 정보만 반환
+        return analyzeSajuBasic(bd1, bt1, bd2, bt2, gender1, gender2);
     }
 
     /**

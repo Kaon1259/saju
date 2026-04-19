@@ -1014,9 +1014,9 @@ public class SpecialFortuneService {
     }
 
     /**
-     * 1:1연애/재회/재혼/소개팅 등 스페셜 운세는 생년월일+상태 기반 영속.
-     * fortuneDate는 고정 anchor로 저장 (날짜 바뀌어도 캐시 히트).
-     * createdAt 기준 1시간 TTL은 세션 내 반복 호출 방지용.
+     * 1:1연애/재회/재혼/소개팅/스킨십 등 스페셜 운세는 생년월일+상태 기반 영속.
+     * fortuneDate는 고정 anchor (2000-01-01)로 저장 (날짜 바뀌어도 캐시 히트).
+     * TTL 없음 — 같은 입력 = 같은 결과. 갱신 원하면 히스토리 × 버튼으로 수동 삭제.
      */
     private static final LocalDate CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
 
@@ -1025,13 +1025,6 @@ public class SpecialFortuneService {
         try {
             var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, CACHE_ANCHOR);
             if (cached.isPresent()) {
-                // 1시간 지나면 캐시 만료 → 재질의
-                LocalDateTime createdAt = cached.get().getCreatedAt();
-                if (createdAt != null && createdAt.plusHours(1).isBefore(LocalDateTime.now())) {
-                    log.info("캐시 만료(1시간 경과): {} / {}", type, cacheKey);
-                    specialFortuneRepository.delete(cached.get());
-                    return null;
-                }
                 log.debug("캐시 히트: {} / {}", type, cacheKey);
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }

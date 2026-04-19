@@ -274,11 +274,31 @@ function MyLoveCompat() {
     try {
       const data = await getSajuCompatibilityBasic(
         bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
-        { historyType: 'marriage_compat' }
+        { historyType: 'marriage_compat', mode: 'marriage' }
       );
       data._g1 = g1;
       data._g2 = g2;
       data._kind = 'marriage';
+
+      // 결혼궁합 캐시 히트 — AI 호출 없이 즉시 결과 표시
+      if (data.aiAnalysis || data.aiSummary || data.aiMarriageTiming) {
+        setResult({
+          ...data,
+          aiSummary: data.aiSummary || null,
+          aiAnalysis: data.aiAnalysis || null,
+          aiMarriageTiming: data.aiMarriageTiming || null,
+          aiFamilyHarmony: data.aiFamilyHarmony || null,
+          aiChildLuck: data.aiChildLuck || null,
+          aiSpouseTrait: data.aiSpouseTrait || null,
+          aiInLawRelation: data.aiInLawRelation || null,
+          aiFinanceTogether: data.aiFinanceTogether || null,
+          aiAdvice: data.aiAdvice || null,
+        });
+        setLoading(false);
+        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        return;
+      }
 
       setLoading(false);
       setAiStreaming(true);

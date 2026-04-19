@@ -38,12 +38,16 @@ public class CompatibilityController {
             @RequestParam(value = "gender2", defaultValue = "F") String gender2,
             @RequestParam(required = false) Long userId,
             @RequestParam(value = "historyType", required = false) String historyType,
-            @RequestParam(value = "celebName", required = false) String celebName) {
+            @RequestParam(value = "celebName", required = false) String celebName,
+            @RequestParam(value = "mode", defaultValue = "general") String mode) {
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
         if ("LUNAR".equalsIgnoreCase(calendarType2)) bd2 = lunarCalendarService.lunarToSolar(bd2);
-        Map<String, Object> result = compatibilityService.analyzeSajuBasic(bd1, birthTime1, bd2, birthTime2, gender1, gender2);
+        boolean isMarriage = "marriage".equalsIgnoreCase(mode);
+        Map<String, Object> result = isMarriage
+            ? compatibilityService.analyzeMarriageBasic(bd1, birthTime1, bd2, birthTime2, gender1, gender2)
+            : compatibilityService.analyzeSajuBasic(bd1, birthTime1, bd2, birthTime2, gender1, gender2);
 
         // 캐시 히트(aiAnalysis/aiSummary 존재)인 경우에도 히스토리 저장 (saveIfAbsent로 dedupe)
         if (userId != null && (result.get("aiAnalysis") != null || result.get("aiSummary") != null)) {
@@ -164,8 +168,11 @@ public class CompatibilityController {
         final Long uid = userId;
         final boolean isMarriage = "marriage".equalsIgnoreCase(mode);
         return claudeApiService.generateStream(prompts[0], prompts[1], 2500, (fullText) -> {
-            // 일반 궁합만 공용 캐시에 저장 (결혼궁합은 필드가 다르므로 캐시 미사용)
-            if (!isMarriage) {
+            // mode별 전용 캐시 저장
+            if (isMarriage) {
+                compatibilityService.parseAndSaveMarriageStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
+                    score, elementRelation, branchRelation, fullText);
+            } else {
                 compatibilityService.parseAndSaveStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
                     score, grade(score), elementRelation, branchRelation, fullText);
             }

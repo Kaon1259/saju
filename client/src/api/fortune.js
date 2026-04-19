@@ -505,6 +505,7 @@ export const getSajuCompatibilityBasic = async (birthDate1, birthDate2, birthTim
   if (uid) params.userId = uid;
   if (extra.historyType) params.historyType = extra.historyType;
   if (extra.celebName) params.celebName = extra.celebName;
+  if (extra.mode) params.mode = extra.mode;
   const response = await api.get('/compatibility/saju/basic', { params });
   return response.data;
 };
