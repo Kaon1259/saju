@@ -46,6 +46,7 @@ const LOVE_TYPES = [
   { id: 'confession_timing',  label: '고백타이밍',    icon: '💌', desc: '고백 타이밍은?', group: 'love' },
   { id: 'some_check',         label: '썸진단',    icon: '🎯', desc: '이 썸, 연애로 발전할까?', group: 'love' },
   { id: 'contact_fortune',    label: '연락운',    icon: '📱', desc: '먼저 연락해도 될까?', group: 'love' },
+  { id: 'skinship',           label: '스킨십궁합', icon: '💋', desc: '우리 스킨십 케미는?', group: 'love' },
   // 결혼/인연
   { id: 'marriage',           label: '결혼운',    icon: '💒', desc: '결혼 시기와 인연', group: 'marriage' },
   { id: 'remarriage',         label: '재혼운',    icon: '💍', desc: '새로운 인연의 가능성', group: 'marriage' },
@@ -59,7 +60,7 @@ const LOVE_GROUPS = [
   { key: 'solo', label: '솔로를 위한', emoji: '✨', status: ['SINGLE'] },
 ];
 
-const LOVE_HEART_MAP = { relationship: 'LOVE_RELATIONSHIP', crush: 'LOVE_CRUSH', some_check: 'LOVE_SOME_CHECK', blind_date: 'LOVE_BLIND_DATE', couple_fortune: 'LOVE_COUPLE', confession_timing: 'LOVE_CONFESSION', ideal_type: 'LOVE_IDEAL_TYPE', reunion: 'LOVE_REUNION', remarriage: 'LOVE_REMARRIAGE', marriage: 'LOVE_MARRIAGE', past_life: 'LOVE_PAST_LIFE', meeting_timing: 'LOVE_MEETING_TIMING', contact_fortune: 'LOVE_CONTACT' };
+const LOVE_HEART_MAP = { relationship: 'LOVE_RELATIONSHIP', crush: 'LOVE_CRUSH', some_check: 'LOVE_SOME_CHECK', blind_date: 'LOVE_BLIND_DATE', couple_fortune: 'LOVE_COUPLE', confession_timing: 'LOVE_CONFESSION', ideal_type: 'LOVE_IDEAL_TYPE', reunion: 'LOVE_REUNION', remarriage: 'LOVE_REMARRIAGE', marriage: 'LOVE_MARRIAGE', past_life: 'LOVE_PAST_LIFE', meeting_timing: 'LOVE_MEETING_TIMING', contact_fortune: 'LOVE_CONTACT', skinship: 'LOVE_COUPLE' };
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
 
@@ -86,6 +87,7 @@ const HOME_MAIN_MENUS = [
 ];
 
 const HOME_MORE_MENUS = [
+  { id: 'skinship', icon: '💋', label: '스킨십궁합', sub: '우리 스킨십 케미는?', path: '/love/skinship' },
   { id: 'contact', icon: '📱', label: '연락운', sub: '먼저 연락해도 될까?', path: '/love/contact_fortune' },
   { id: 'marriage', icon: '💒', label: '결혼운', sub: '결혼 시기와 인연', path: '/love/marriage' },
   { id: 'remarriage', icon: '💍', label: '재혼운', sub: '새로운 인연의 가능성', path: '/love/remarriage' },

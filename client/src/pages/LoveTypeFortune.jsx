@@ -25,6 +25,7 @@ const LOVE_TYPES = {
   marriage:          { label: '결혼운',     icon: '💒', desc: '결혼 시기와 인연', color: '#F472B6', particles: ['💒','💍','💐','✨','👰'] },
   remarriage:        { label: '재혼운',     icon: '💍', desc: '새로운 인연의 가능성', color: '#A78BFA', particles: ['💍','💒','✨','🌹','💫'] },
   ideal_type:        { label: '이상형',     icon: '👩‍❤️‍👨', desc: '사주로 보는 나의 이상형', color: '#E91E63', particles: ['💕','💗','✨','💖','💘'] },
+  skinship:          { label: '스킨십궁합', icon: '💋', desc: '우리 스킨십 케미는?', color: '#F43F5E', particles: ['💋','💕','✨','💗','💓'] },
 };
 
 const HEART_MAP = {
@@ -41,6 +42,7 @@ const HEART_MAP = {
   past_life: 'LOVE_PAST_LIFE',
   meeting_timing: 'LOVE_MEETING_TIMING',
   contact_fortune: 'LOVE_CONTACT',
+  skinship: 'LOVE_COUPLE',
 };
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
@@ -82,6 +84,7 @@ function LoveTypeFortune() {
   const [meetDate, setMeetDate] = useState('');
   const [breakupDate, setBreakupDate] = useState('');
   const [showPartner, setShowPartner] = useState(false);
+  useEffect(() => { if (type === 'skinship') setShowPartner(true); }, [type]);
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');

@@ -223,6 +223,7 @@ public class SpecialFortuneController {
             case "past_life" -> "전생 인연";
             case "meeting_timing" -> "만남 타이밍";
             case "contact_fortune" -> "연락 운세";
+            case "skinship" -> "스킨십 궁합";
             default -> "1:1 연애 운세";
         };
     }
@@ -270,6 +271,7 @@ public class SpecialFortuneController {
             case "past_life" -> "LOVE_PAST_LIFE";
             case "meeting_timing" -> "LOVE_MEETING_TIMING";
             case "contact_fortune" -> "LOVE_CONTACT";
+            case "skinship" -> "LOVE_COUPLE";
             default -> "LOVE_RELATIONSHIP";
         };
     }
