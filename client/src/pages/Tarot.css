@@ -452,14 +452,15 @@
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  opacity: 0.65;
-  filter: brightness(0.65) saturate(1.25);
+  opacity: 0.55;
+  filter: brightness(0.6) saturate(1.2) blur(6px);
+  transform: scale(1.04); /* blur 가장자리 가림 */
 }
 .deck-bg-video video { z-index: 1; }
 .deck-bg-video img { z-index: 0; }
 [data-theme="light"] .deck-bg-video video,
 [data-theme="light"] .deck-bg-video img {
-  opacity: 0.15; filter: brightness(0.7) saturate(0.8);
+  opacity: 0.18; filter: brightness(0.75) saturate(0.85) blur(8px);
 }
 
 /* 덱 선택 배경 — 인트로에서 선택된 카드 이미지 (연속성) */
@@ -472,8 +473,8 @@
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  filter: blur(2px) brightness(0.7) saturate(1.25) contrast(1.05);
-  transform: scale(1.06);
+  filter: blur(6px) brightness(0.65) saturate(1.2) contrast(1.02);
+  transform: scale(1.08);
   animation: deckBgIntroZoom 16s ease-in-out infinite alternate;
 }
 @keyframes deckBgIntroZoom {
