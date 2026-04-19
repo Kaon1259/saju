@@ -241,7 +241,7 @@ public class CompatibilityService {
             if (summary != null && !summary.isBlank()) result.put("aiSummary", summary);
 
             String overall = root.path("overall").asText(null);
-            if (overall != null && !overall.isBlank()) result.put("aiOverall", overall);
+            if (overall != null && !overall.isBlank()) result.put("aiAnalysis", overall);
 
             String loveCompat = root.path("loveCompat").asText(null);
             if (loveCompat != null && !loveCompat.isBlank()) result.put("aiLoveCompat", loveCompat);
