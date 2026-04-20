@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
+import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory, getScoreTrend, getFortuneByZodiac, getConstellationFortune, getConstellationByDate } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { mapLuckyOutfit } from '../utils/luckyOutfitTemplate';
+import { getZodiacByYearList, getZodiacOneLiner } from '../utils/zodiacByYearTemplate';
+import CELEBRITIES from '../data/celebrities';
 import './MyFortune.css';
 
 const TIME_ICON = { '아침': '🌅', '점심': '☀️', '오후': '🌤️', '저녁': '🌆', '밤': '🌙' };
@@ -41,6 +45,7 @@ function LuckyGrid({ f }) {
     { icon: '🍀', label: '행운의 음식', value: f.luckyFood },
     { icon: '👕', label: '추천 스타일', value: f.luckyFashion },
     { icon: '🎁', label: '행운의 아이템', value: f.luckyItem },
+    { icon: '👥', label: '행운의 사람', value: f.luckyPerson },
   ].filter(it => it.value !== undefined && it.value !== null && it.value !== '');
   if (items.length === 0) return null;
   return (
@@ -52,6 +57,130 @@ function LuckyGrid({ f }) {
           <div className="myf-lucky-cell-value">{it.value}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** 행운의 코디 카드 — luckyColor 1개로 정적 템플릿 매핑 (AI 호출 0) */
+function LuckyOutfitCard({ color }) {
+  const outfit = mapLuckyOutfit(color);
+  if (!outfit) return null;
+  return (
+    <div className="myf-outfit glass-card">
+      <div className="myf-outfit-header">
+        <span className="myf-outfit-swatch" style={{ background: outfit.hex }} />
+        <h4 className="myf-outfit-title">행운의 코디</h4>
+      </div>
+      <div className="myf-outfit-color">{outfit.color}</div>
+      <p className="myf-outfit-desc">{outfit.desc}</p>
+      <p className="myf-outfit-combo">💡 {outfit.combo}</p>
+    </div>
+  );
+}
+
+/** 일별 점수 그래프 — 캐시된 점수만, AI 호출 없음 */
+function ScoreTrendChart({ zodiac }) {
+  const [points, setPoints] = useState([]);
+  useEffect(() => {
+    if (!zodiac) return;
+    let cancelled = false;
+    getScoreTrend(zodiac, 7).then((data) => {
+      if (!cancelled) setPoints(data);
+    });
+    return () => { cancelled = true; };
+  }, [zodiac]);
+  if (points.length < 2) return null;
+
+  const W = 300, H = 100, P = 20;
+  const xs = (i) => P + (i * (W - P * 2)) / Math.max(1, points.length - 1);
+  const ys = (s) => H - P - ((s - 30) * (H - P * 2)) / 70;
+  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xs(i)} ${ys(p.score)}`).join(' ');
+  return (
+    <div className="myf-trend glass-card">
+      <h4 className="myf-trend-title">📈 최근 7일 점수 흐름</h4>
+      <svg viewBox={`0 0 ${W} ${H}`} className="myf-trend-svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#FBBF24" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={`${path} L ${xs(points.length - 1)} ${H - P} L ${xs(0)} ${H - P} Z`} fill="url(#trendGrad)" />
+        <path d={path} fill="none" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {points.map((p, i) => (
+          <g key={i}>
+            <circle cx={xs(i)} cy={ys(p.score)} r="3.5" fill="#fff" stroke="#FBBF24" strokeWidth="2" />
+            <text x={xs(i)} y={ys(p.score) - 8} textAnchor="middle" className="myf-trend-score">{p.score}</text>
+            <text x={xs(i)} y={H - 4} textAnchor="middle" className="myf-trend-date">{(p.date || '').slice(5)}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+/** 띠 × 출생연도별 오늘의 운세 (사주 일진 룰 기반) */
+function ZodiacByYearCard({ zodiac, userBirthYear, fullCard = false }) {
+  const list = getZodiacByYearList(zodiac);
+  if (list.length === 0) return null;
+  if (fullCard) {
+    // 점신 스타일 풀카드 — 출생연도별 제목 + 풍부한 4문장
+    return (
+      <div className="myf-zby-full">
+        {list.map((it, i) => {
+          const isMine = userBirthYear && it.birthYear === userBirthYear;
+          return (
+            <div className={`myf-zby-card glass-card ${isMine ? 'myf-zby-card--mine' : ''}`} key={i} style={{ animationDelay: `${i * 70}ms` }}>
+              <div className="myf-zby-card-header">
+                <span className="myf-zby-card-year">{it.year}</span>
+                {isMine && <span className="myf-zby-card-badge">내 운세</span>}
+                <span className="myf-zby-card-ganji">{it.ganji}</span>
+              </div>
+              <h4 className="myf-zby-card-title">{it.title}</h4>
+              <p className="myf-zby-card-text">{it.text}</p>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  // 컴팩트 (오늘운세 탭 하단용)
+  return (
+    <div className="myf-zby glass-card">
+      <h4 className="myf-zby-title">🐾 {zodiac}띠 출생연도별 운세</h4>
+      <div className="myf-zby-list">
+        {list.map((it, i) => (
+          <div className="myf-zby-row" key={i} style={{ animationDelay: `${i * 50}ms` }}>
+            <span className="myf-zby-year">{it.year}</span>
+            <span className="myf-zby-text">{it.text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 오늘 태어난 유명인 — 클라이언트 정적 DB에서 month/day 매칭 */
+function TodayCelebsCard() {
+  const today = new Date();
+  const m = today.getMonth() + 1, d = today.getDate();
+  const matches = CELEBRITIES.filter((c) => {
+    if (!c.birth) return false;
+    const [, mm, dd] = c.birth.split('-');
+    return parseInt(mm, 10) === m && parseInt(dd, 10) === d;
+  }).slice(0, 8);
+  if (matches.length === 0) return null;
+  return (
+    <div className="myf-celebs glass-card">
+      <h4 className="myf-celebs-title">🎂 오늘 태어난 유명인</h4>
+      <div className="myf-celebs-list">
+        {matches.map((c, i) => (
+          <div className="myf-celebs-chip" key={i} style={{ animationDelay: `${i * 60}ms` }}>
+            <span className="myf-celebs-name">{c.name}</span>
+            {c.group && <span className="myf-celebs-group">{c.group}</span>}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -105,9 +234,18 @@ function MyFortune() {
   const [loading, setLoading] = useState(false);
   const [cacheChecking, setCacheChecking] = useState(true); // 페이지/날짜 전환 직후 캐시 확인중 표시
   const [activeTab, setActiveTab] = useState('saju');
+  // mine 탭 하단 카테고리 (점신 스타일): today / zodiac / constellation
+  const [categoryTab, setCategoryTab] = useState('today');
+  const [zodiacFortune, setZodiacFortune] = useState(null);
+  const [constellationFortune, setConstellationFortune] = useState(null);
+  const [zodiacLoading, setZodiacLoading] = useState(false);
+  const [constellationLoading, setConstellationLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
+  const pendingSetterRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
@@ -173,6 +311,34 @@ function MyFortune() {
   const userId = localStorage.getItem('userId');
   const userName = localStorage.getItem('userName');
 
+  // mine 탭의 카테고리 sub-tab — 띠/별자리 데이터 lazy 로드 (캐시 hit이면 0원)
+  useEffect(() => {
+    if (viewMode !== 'mine' || !data?.user) return;
+    if (categoryTab === 'zodiac' && !zodiacFortune && !zodiacLoading) {
+      const zodiac = data.user.zodiacAnimal;
+      if (!zodiac) return;
+      setZodiacLoading(true);
+      getFortuneByZodiac(zodiac)
+        .then((res) => setZodiacFortune(res))
+        .catch(() => {})
+        .finally(() => setZodiacLoading(false));
+    }
+    if (categoryTab === 'constellation' && !constellationFortune && !constellationLoading) {
+      const bd = data.user.birthDate;
+      if (!bd) return;
+      setConstellationLoading(true);
+      // birthDate → 별자리 자동 매핑
+      getConstellationByDate(bd)
+        .then((res) => {
+          if (res?.sign) {
+            return getConstellationFortune(res.sign).then((cf) => setConstellationFortune({ ...cf, sign: res.sign, signName: res.signName }));
+          }
+        })
+        .catch(() => {})
+        .finally(() => setConstellationLoading(false));
+    }
+  }, [viewMode, categoryTab, data, zodiacFortune, constellationFortune, zodiacLoading, constellationLoading]);
+
   // 연인 운세 탭 진입 시 캐시 선조회 (있으면 자동 표시, 없으면 버튼만 노출)
   useEffect(() => {
     if (viewMode !== 'partner') return;
@@ -237,6 +403,13 @@ function MyFortune() {
   // 하트 가드 — 가드를 통과한 후에만 startAnalysis 호출 (onClick에서 사용)
   const { guardedAction: guardTodayFortune } = useHeartGuard('TODAY_FORTUNE');
 
+  // 완료 애니 → 결과 표시 (스트리밍 분석 후 공통)
+  const finishWithCompleteAnimation = (finalResult, setter) => {
+    pendingResultRef.current = finalResult;
+    pendingSetterRef.current = setter;
+    setCompleting(true);
+  };
+
   // 스트리밍 분석 공통 함수 (호출 전에 guardTodayFortune으로 감쌀 것)
   const startAnalysis = (birthDate, birthTime, calendarType, gender, setters, extraOpts = {}) => {
     const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef } = setters;
@@ -256,9 +429,12 @@ function MyFortune() {
         sS(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         (async () => {
-          try { const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined); sD(r); }
-          catch (e) { console.error(e); }
-          finally { sL(false); sST(''); }
+          try {
+            const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
+            sL(false); sST('');
+            finishWithCompleteAnimation(r, sD);
+          }
+          catch (e) { console.error(e); sL(false); sST(''); }
         })();
       },
       onError: () => {
@@ -312,16 +488,19 @@ function MyFortune() {
       onDone: (fullText) => {
         setStreaming(false); setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-        // 스트리밍 텍스트에서 직접 파싱 → 즉시 표시
+        // 스트리밍 텍스트에서 직접 파싱 → 완료 애니 후 표시
         const parsed = parseAiJson(fullText);
         if (parsed) {
           const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
-          setData({
+          const finalData = {
             user: { name: profile.name || '', zodiacAnimal: profile.zodiacAnimal || '', bloodType: profile.bloodType || '', mbtiType: profile.mbtiType || '' },
             saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor, luckyDirection: parsed.luckyDirection, luckyFood: parsed.luckyFood, luckyFashion: parsed.luckyFashion, luckyItem: parsed.luckyItem, hourlyFortune: Array.isArray(parsed.hourlyFortune) ? parsed.hourlyFortune : null }
-          });
+          };
+          setLoading(false);
+          finishWithCompleteAnimation(finalData, setData);
+        } else {
+          setLoading(false);
         }
-        setLoading(false);
       },
       onError: () => {
         setStreaming(false); setStreamText('');
@@ -361,7 +540,7 @@ function MyFortune() {
   }
 
   // 내 운세 탭에서 분석 중이면 로딩 화면 (다른 탭은 자기 렌더링으로)
-  if (viewMode === 'mine' && (loading || streaming)) {
+  if (viewMode === 'mine' && (loading || streaming) && !completing) {
     const dateLabel = dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`;
     return (
       <div className="myf-page">
@@ -408,6 +587,7 @@ function MyFortune() {
             {rd.todayFortune.money && <FortuneCard icon="💰" title="재물운" description={rd.todayFortune.money} delay={160} />}
             {rd.todayFortune.health && <FortuneCard icon="💪" title="건강운" description={rd.todayFortune.health} delay={240} />}
             {rd.todayFortune.work && <FortuneCard icon="💼" title="직장운" description={rd.todayFortune.work} delay={320} />}
+            {rd.todayFortune.academic && <FortuneCard icon="📚" title="학업·자기계발운" description={rd.todayFortune.academic} delay={400} />}
           </div>
         )}
         <HourlyTimeline items={rd.todayFortune?.hourlyFortune} />
@@ -420,6 +600,10 @@ function MyFortune() {
           </div>
         )}
         <LuckyGrid f={rd.todayFortune} />
+        <LuckyOutfitCard color={rd.todayFortune?.luckyColor} />
+        <ScoreTrendChart zodiac={rd.zodiacAnimal} />
+        <ZodiacByYearCard zodiac={rd.zodiacAnimal} />
+        <TodayCelebsCard />
         <BiorhythmLink />
       </div>
       {birthInfo?.birthDate && (
@@ -434,7 +618,7 @@ function MyFortune() {
 
   /* ── 스트리밍/로딩 표시 공통 ── */
   const renderLoading = (isLoading, isStreaming, sText, hasData) => {
-    if ((isLoading || isStreaming) && !hasData) {
+    if ((isLoading || isStreaming) && !hasData && !completing) {
       return <AnalysisMatrix theme="saju" label="AI가 오늘의 운세를 분석하고 있어요" streamText={sText} />;
     }
     return null;
@@ -710,7 +894,26 @@ function MyFortune() {
         </div>
       </div>
 
-      {tabs.length > 1 && (
+      {/* 점신 스타일 카테고리 sub-tab: 오늘 / 띠 / 별자리 */}
+      <div className="myf-cat-tabs">
+        <button className={`myf-cat-tab ${categoryTab === 'today' ? 'active' : ''}`} onClick={() => setCategoryTab('today')}>오늘의 운세</button>
+        <button className={`myf-cat-tab ${categoryTab === 'zodiac' ? 'active' : ''}`} onClick={() => setCategoryTab('zodiac')}>띠 운세</button>
+        <button className="myf-cat-tab" onClick={async () => {
+          const bd = data?.user?.birthDate;
+          if (bd) {
+            try {
+              const r = await getConstellationByDate(bd);
+              if (r?.sign) {
+                navigate('/constellation', { state: { autoStart: r.sign } });
+                return;
+              }
+            } catch {}
+          }
+          navigate('/constellation');
+        }}>별자리 운세</button>
+      </div>
+
+      {tabs.length > 1 && categoryTab === 'today' && (
         <div className="myf-tabs">
           {tabs.map(tab => (
             <button key={tab.id} className={`myf-tab ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
@@ -721,7 +924,7 @@ function MyFortune() {
         </div>
       )}
 
-      {f && (
+      {f && categoryTab === 'today' && (
         <div className="myf-content fade-in" key={activeTab}>
           <div className="myf-score-wrap">
             <svg viewBox="0 0 120 120" className="myf-score-circle">
@@ -746,6 +949,7 @@ function MyFortune() {
             {f.money && <FortuneCard icon="💰" title="재물운" description={f.money} delay={160} />}
             {f.health && <FortuneCard icon="💪" title="건강운" description={f.health} delay={240} />}
             {f.work && <FortuneCard icon="💼" title="직장운" description={f.work} delay={320} />}
+            {f.academic && <FortuneCard icon="📚" title="학업·자기계발운" description={f.academic} delay={400} />}
           </div>
           <HourlyTimeline items={f.hourlyFortune} />
 
@@ -760,6 +964,10 @@ function MyFortune() {
           {f.tip && (<div className="myf-tip glass-card"><span>💡</span><p>{f.tip}</p></div>)}
 
           <LuckyGrid f={f} />
+          <LuckyOutfitCard color={f.luckyColor} />
+          <ScoreTrendChart zodiac={user?.zodiacAnimal} />
+          {user?.zodiacAnimal && <ZodiacByYearCard zodiac={user.zodiacAnimal} />}
+          <TodayCelebsCard />
           <BiorhythmLink />
 
           {activeTab === 'saju' && (() => {
@@ -771,6 +979,23 @@ function MyFortune() {
           })()}
         </div>
       )}
+
+      {/* ═══ 띠 운세 탭 — 점신 스타일: 띠 한 줄 + 출생연도별 카드 ═══ */}
+      {categoryTab === 'zodiac' && user?.zodiacAnimal && (() => {
+        const myBirthYear = user.birthDate ? parseInt(user.birthDate.slice(0, 4), 10) : null;
+        const oneLiner = getZodiacOneLiner(user.zodiacAnimal);
+        return (
+          <div className="myf-content fade-in" key="zodiac">
+            <div className="myf-zodiac-hero glass-card">
+              <div className="myf-zodiac-hero-icon">🐾</div>
+              <div className="myf-zodiac-hero-name">{user.zodiacAnimal}띠</div>
+              {oneLiner && <p className="myf-zodiac-hero-line">{oneLiner}</p>}
+            </div>
+            <ZodiacByYearCard zodiac={user.zodiacAnimal} userBirthYear={myBirthYear} fullCard />
+          </div>
+        );
+      })()}
+
 
       {f && (
         <>
@@ -784,6 +1009,18 @@ function MyFortune() {
       )}
       </>
       )}
+      <AnalysisComplete
+        show={completing}
+        theme="star"
+        onDone={() => {
+          setCompleting(false);
+          const r = pendingResultRef.current;
+          const setter = pendingSetterRef.current;
+          pendingResultRef.current = null;
+          pendingSetterRef.current = null;
+          if (r && setter) setter(r);
+        }}
+      />
     </div>
   );
 }

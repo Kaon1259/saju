@@ -1,0 +1,77 @@
+.ana-complete {
+  position: fixed;
+  inset: 50px 0 76px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(20, 5, 25, 0.95) 0%, rgba(5, 2, 10, 0.98) 100%);
+  z-index: 9500;
+  padding: 28px 16px;
+  animation: anaCompleteFadeIn 0.4s ease-out;
+}
+[data-theme="light"] .ana-complete {
+  background: radial-gradient(ellipse at center, rgba(255, 248, 252, 0.97) 0%, rgba(248, 240, 250, 0.98) 100%);
+}
+@keyframes anaCompleteFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.ana-complete-burst {
+  position: relative;
+  width: 110px; height: 110px;
+  margin: 0 auto 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ana-complete-icon {
+  font-size: 64px;
+  display: inline-block;
+  animation: anaCompletePop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 0 24px rgba(255, 215, 0, 0.7));
+  z-index: 2;
+  position: relative;
+}
+@keyframes anaCompletePop {
+  0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(20deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.ana-complete-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 110px; height: 110px;
+  border: 3px solid var(--ac-c2, #ff3d7f);
+  opacity: 0.6;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: anaCompleteRing 1.4s ease-out infinite;
+}
+.ana-complete-ring-2 {
+  border-color: var(--ac-c1, #fbbf24);
+  animation-delay: 0.4s;
+}
+@keyframes anaCompleteRing {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+}
+.ana-complete-text {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  background: linear-gradient(135deg, var(--ac-c1, #fbbf24), var(--ac-c2, #ff3d7f));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: anaCompleteTextPop 0.5s ease-out 0.15s both;
+  text-align: center;
+}
+@keyframes anaCompleteTextPop {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ana-complete-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  animation: anaCompleteTextPop 0.5s ease-out 0.35s both;
+  text-align: center;
+}
+[data-theme="light"] .ana-complete-sub { color: #777; }

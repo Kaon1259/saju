@@ -6,6 +6,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 
 import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -29,6 +30,9 @@ function BloodType() {
   const [type2, setType2] = useState(null);
   const [compat, setCompat] = useState(null);
   const [compatLoading, setCompatLoading] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
+  const pendingCompatRef = useRef(null);
   const resultRef = useRef(null);
   const streamCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -72,11 +76,11 @@ function BloodType() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
-          setFortune({ bloodType: type, ...parsed });
+          pendingResultRef.current = { bloodType: type, ...parsed };
+          setCompleting(true);
         }
         setStreamText('');
         setLoading(false);
-        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onError: (err) => {
         console.error('stream error', err);
@@ -110,7 +114,8 @@ function BloodType() {
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     try {
       const data = await getBloodTypeCompatibility(type1, type2);
-      setCompat(data);
+      pendingCompatRef.current = data;
+      setCompleting(true);
     } catch (e) { console.error(e); }
     finally {
       setCompatLoading(false);
@@ -122,6 +127,22 @@ function BloodType() {
 
   return (
     <div className="bt-page">
+      <AnalysisComplete
+        show={completing}
+        theme="blood"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setFortune(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          }
+          if (pendingCompatRef.current) {
+            setCompat(pendingCompatRef.current);
+            pendingCompatRef.current = null;
+          }
+        }}
+      />
       <PageTopBar onReset={handleReset} color="#EF4444" />
       <div className="bt-hero">
         <h1 className="bt-title">혈액형 운세</h1>

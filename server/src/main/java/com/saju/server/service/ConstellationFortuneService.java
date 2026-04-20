@@ -106,6 +106,26 @@ public class ConstellationFortuneService {
         return toMap(fortune, idx);
     }
 
+    private static final String SIGN_JSON_TEMPLATE =
+        "{\"summary\":\"오늘의 한 줄 슬로건 (15자 이내)\"," +
+        "\"overall\":\"총운 (시간대별 기운 변화 포함, 4-5문장)\"," +
+        "\"love\":\"애정운 (구체적 행동 조언, 3-4문장)\"," +
+        "\"money\":\"재물운 (금전 방향·시기별 조언, 3-4문장)\"," +
+        "\"work\":\"직업운/사회운 (업무·대인관계 조언, 3-4문장)\"," +
+        "\"health\":\"건강운 (주의 부위·운동·식이 조언, 3문장)\"," +
+        "\"planetInfluence\":\"수호 행성과 오늘 기운의 상호작용 (2-3문장)\"," +
+        "\"emotionalTip\":\"오늘의 감정·심리 케어 팁 (2-3문장)\"," +
+        "\"timeAdvice\":\"시간대별 행운 조언 (오전/오후/저녁 각 한마디, 3문장)\"," +
+        "\"advice\":\"오늘의 핵심 행동 조언 (3-4문장)\"," +
+        "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
+
+    private static final String SIGN_SYSTEM_PROMPT =
+        FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
+        "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
+        "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
+        "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
+        "반드시 JSON만 응답. 각 카테고리는 충분한 분량으로 상세하게 작성해.";
+
     private ConstellationFortune generateWithAI(String sign, int idx, LocalDate date) {
         if (!claudeApiService.isAvailable()) return null;
         try {
@@ -113,44 +133,41 @@ public class ConstellationFortuneService {
             String prompt = todayCtx + "\n【친구 별자리】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
                 "성격: " + PERSONALITY.get(sign) + "\n\n" +
                 "위 천기와 별자리 특성을 종합하여 오늘의 운세를 작성하세요.\n" +
-                "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
-                "반드시 JSON만: {\"overall\":\"총운 (시간대별 기운 변화 포함, 4-5문장)\"," +
-                "\"love\":\"애정운 (구체적 행동 조언, 3-4문장)\"," +
-                "\"money\":\"재물운 (금전 방향과 시기별 조언, 3-4문장)\"," +
-                "\"health\":\"건강운 (주의 부위와 운동/식이 조언, 3문장)\"," +
-                "\"summary\":\"오늘의 한 줄 슬로건 (15자 이내)\"," +
-                "\"planetInfluence\":\"오늘 행성 영향 분석 (수호성과 오늘 기운의 상호작용, 2-3문장)\"," +
-                "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}";
-            String resp = claudeApiService.generate(
-                FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
-                "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
-                "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
-                "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
-                "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.", prompt, 1200);
+                "반드시 JSON만: " + SIGN_JSON_TEMPLATE;
+            String resp = claudeApiService.generate(SIGN_SYSTEM_PROMPT, prompt, 2500);
 
             String json = ClaudeApiService.extractJson(resp);
             if (json == null) return null;
-
-            var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
-            long seed = sign.hashCode() + date.hashCode();
-            Random r = new Random(seed);
-            String[] colors = {"빨강","파랑","노랑","초록","보라","흰색","분홍","금색","하늘색","민트"};
-
-            return ConstellationFortune.builder()
-                .sign(sign)
-                .fortuneDate(date)
-                .overall(node.path("overall").asText(""))
-                .love(node.path("love").asText(""))
-                .money(node.path("money").asText(""))
-                .health(node.path("health").asText(""))
-                .score(node.path("score").asInt(70))
-                .luckyNumber(node.path("luckyNumber").asInt(r.nextInt(99) + 1))
-                .luckyColor(node.path("luckyColor").asText(colors[r.nextInt(colors.length)]))
-                .build();
+            return parseToEntity(sign, date, json);
         } catch (Exception e) {
             log.warn("AI constellation fortune failed for {}: {}", sign, e.getMessage());
             return null;
         }
+    }
+
+    private ConstellationFortune parseToEntity(String sign, LocalDate date, String json) throws Exception {
+        var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+        long seed = sign.hashCode() + date.hashCode();
+        Random r = new Random(seed);
+        String[] colors = {"빨강","파랑","노랑","초록","보라","흰색","분홍","금색","하늘색","민트"};
+
+        return ConstellationFortune.builder()
+            .sign(sign)
+            .fortuneDate(date)
+            .overall(node.path("overall").asText(""))
+            .love(node.path("love").asText(""))
+            .money(node.path("money").asText(""))
+            .health(node.path("health").asText(""))
+            .work(node.path("work").asText(""))
+            .advice(node.path("advice").asText(""))
+            .summary(node.path("summary").asText(""))
+            .planetInfluence(node.path("planetInfluence").asText(""))
+            .emotionalTip(node.path("emotionalTip").asText(""))
+            .timeAdvice(node.path("timeAdvice").asText(""))
+            .score(node.path("score").asInt(70))
+            .luckyNumber(node.path("luckyNumber").asInt(r.nextInt(99) + 1))
+            .luckyColor(node.path("luckyColor").asText(colors[r.nextInt(colors.length)]))
+            .build();
     }
 
     private ConstellationFortune generateFallback(String sign, int idx, LocalDate date) {
@@ -179,10 +196,16 @@ public class ConstellationFortuneService {
         result.put("dates", SIGNS[idx][1].replace("-","/") + "~" + SIGNS[idx][2].replace("-","/"));
         result.put("personality", PERSONALITY.getOrDefault(f.getSign(), ""));
         result.put("date", f.getFortuneDate().toString());
+        result.put("summary", f.getSummary());
         result.put("overall", f.getOverall());
         result.put("love", f.getLove());
         result.put("money", f.getMoney());
+        result.put("work", f.getWork());
         result.put("health", f.getHealth());
+        result.put("planetInfluence", f.getPlanetInfluence());
+        result.put("emotionalTip", f.getEmotionalTip());
+        result.put("timeAdvice", f.getTimeAdvice());
+        result.put("advice", f.getAdvice());
         result.put("score", f.getScore());
         result.put("luckyNumber", f.getLuckyNumber());
         result.put("luckyColor", f.getLuckyColor());
@@ -245,46 +268,21 @@ public class ConstellationFortuneService {
         LocalDate today = LocalDate.now();
         int idx = getSignIndex(sign);
 
-        String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
-            "카페에서 친한 친구한테 수다 떨듯이 자연스럽게 상담하는 별자리 운세 전문가야! " +
-            "서양 별자리와 동양 역학을 융합해서 재밌게 분석해줘. " +
-            "각 별자리의 수호 행성이 오늘 일진의 오행과 어떻게 상호작용하는지 알려줘. " +
-            "반드시 JSON만 응답. 각 카테고리는 3-4문장으로 상세하게 작성해.\n" +
-            FortunePromptBuilder.TARGET_AWARE_RULES;
+        String systemPrompt = SIGN_SYSTEM_PROMPT + "\n" + FortunePromptBuilder.TARGET_AWARE_RULES;
 
         String todayCtx = promptBuilder.buildTodayContext(today);
         String userPrompt = todayCtx + "\n【친구 별자리】" + sign + " (" + SIGNS[idx][3] + " 원소)\n" +
             "성격: " + PERSONALITY.get(sign) + "\n\n" +
             "위 천기와 별자리 특성을 종합하여 오늘의 운세를 작성하세요.\n" +
-            "각 항목은 3-4문장으로 상세하게 작성하세요.\n" +
-            "반드시 JSON만: {\"overall\":\"총운 (시간대별 기운 변화 포함, 4-5문장)\"," +
-            "\"love\":\"애정운 (구체적 행동 조언, 3-4문장)\"," +
-            "\"money\":\"재물운 (금전 방향과 시기별 조언, 3-4문장)\"," +
-            "\"health\":\"건강운 (주의 부위와 운동/식이 조언, 3문장)\"," +
-            "\"score\":점수(50-95),\"luckyNumber\":숫자,\"luckyColor\":\"색상\"}"
+            "반드시 JSON만: " + SIGN_JSON_TEMPLATE
             + promptBuilder.buildPersonContext(birthDate, gender)
             + promptBuilder.buildTargetContext(targetType, targetName);
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1200, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json == null) return;
-                var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
-                long seed = sign.hashCode() + today.hashCode();
-                Random r = new Random(seed);
-                String[] colors = {"빨강","파랑","노랑","초록","보라","흰색","분홍","금색","하늘색","민트"};
-
-                ConstellationFortune fortune = ConstellationFortune.builder()
-                    .sign(sign)
-                    .fortuneDate(today)
-                    .overall(node.path("overall").asText(""))
-                    .love(node.path("love").asText(""))
-                    .money(node.path("money").asText(""))
-                    .health(node.path("health").asText(""))
-                    .score(node.path("score").asInt(70))
-                    .luckyNumber(node.path("luckyNumber").asInt(r.nextInt(99) + 1))
-                    .luckyColor(node.path("luckyColor").asText(colors[r.nextInt(colors.length)]))
-                    .build();
+                ConstellationFortune fortune = parseToEntity(sign, today, json);
                 repository.save(fortune);
             } catch (Exception e) {
                 log.warn("constellation stream cache save failed for {}: {}", sign, e.getMessage());

@@ -59,6 +59,12 @@ public class DailyFortune {
     @Column(name = "lucky_item", columnDefinition = "TEXT")
     private String luckyItem;
 
+    @Column(name = "academic_fortune", columnDefinition = "TEXT")
+    private String academicFortune;
+
+    @Column(name = "lucky_person")
+    private String luckyPerson;
+
     private Integer score;
 
     @Column(nullable = false, updatable = false)

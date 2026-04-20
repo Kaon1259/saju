@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getAllConstellations, getConstellationFortuneStream, getUser, isGuest } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -46,6 +47,7 @@ function getSignFromDate(birthDate) {
 
 function Constellation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [signs, setSigns] = useState([]);
   const [selected, setSelected] = useState(null);
   const [fortune, setFortune] = useState(null);
@@ -54,6 +56,8 @@ function Constellation() {
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [mySign, setMySign] = useState(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const streamCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -110,11 +114,12 @@ function Constellation() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
-          setFortune({ sign, ...parsed });
+          pendingResultRef.current = { sign, ...parsed };
+          setMatrixShown(false);
+          setCompleting(true);
         }
         setStreamText('');
         setLoading(false);
-        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       },
       onError: (err) => {
         console.error('stream error', err);
@@ -127,10 +132,34 @@ function Constellation() {
     streamCleanupRef.current = cleanup;
   };
 
+  // MyFortune 별자리 탭에서 navigate state.autoStart로 진입 시 자동 분석
+  // signs 로드 완료 후 1회만 실행 (race condition 방지)
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    const autoStart = location.state?.autoStart;
+    if (!autoStart || autoStartedRef.current) return;
+    if (!signs || signs.length === 0) return; // signs 로드 대기
+    autoStartedRef.current = true;
+    handleSelect(autoStart);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signs, location.state?.autoStart]);
+
   const getColor = (sign) => SIGN_DATA[sign]?.color || '#7C3AED';
 
   return (
     <div className="cs-page">
+      <AnalysisComplete
+        show={completing}
+        theme="star2"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setFortune(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          }
+        }}
+      />
       <div className="cs-hero">
         <h1 className="cs-title">별자리 운세</h1>
         <p className="cs-subtitle">12별자리로 보는 오늘의 운세</p>
@@ -232,7 +261,7 @@ function Constellation() {
             const profile = (() => { try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { return {}; } })();
             const bd = profile.birthDate;
             return bd ? (
-              <DeepAnalysis type="constellation" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} previousResult={result} />
+              <DeepAnalysis type="constellation" birthDate={bd} birthTime={profile.birthTime} gender={profile.gender} calendarType={profile.calendarType} extra={selected} previousResult={fortune} />
             ) : null;
           })()}
         </div>

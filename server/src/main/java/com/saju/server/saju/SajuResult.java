@@ -109,6 +109,8 @@ public class SajuResult {
         private String luckyFood;      // 오늘 추천 음식/차
         private String luckyFashion;   // 오늘 추천 옷차림
         private String luckyItem;      // 오늘 추천 소품/아이템
+        private String academic;       // 학업운/자기계발운
+        private String luckyPerson;    // 오늘 만나면 좋은 사람
     }
 
     @Getter

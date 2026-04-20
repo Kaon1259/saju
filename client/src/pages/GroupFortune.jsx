@@ -7,6 +7,7 @@ import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
 import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -50,6 +51,9 @@ function GroupFortune() {
   const [fortuneStreaming, setFortuneStreaming] = useState(false);
   const fortuneCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingFortuneRef = useRef(null);
+  const pendingCompatRef = useRef(null);
 
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
@@ -127,8 +131,9 @@ function GroupFortune() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
-          // AI JSON에서 todayFortune 구조 생성
-          setFortuneResult({ todayFortune: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor } });
+          pendingFortuneRef.current = { todayFortune: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor } };
+          setMatrixShown(false);
+          setCompleting(true);
         }
         setFortuneLoading(false);
       },
@@ -182,8 +187,9 @@ function GroupFortune() {
       const data = await getSajuCompatibility(myBirth, compatTargetBirth, undefined, undefined, myCalType, 'SOLAR');
       data._groupName = selectedGroup.name;
       data._celebName = compatTargetName;
-      setCompatResult(data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+      pendingCompatRef.current = data;
+      setMatrixShown(false);
+      setCompleting(true);
     } catch (e) { console.error(e); }
     finally {
       setCompatLoading(false);
@@ -252,6 +258,22 @@ function GroupFortune() {
   // ─── 그룹 상세 (운세 + 궁합 + 멤버) ───
   return (
     <div className="gf-page">
+      <AnalysisComplete
+        show={completing}
+        theme="group"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingFortuneRef.current) {
+            setFortuneResult(pendingFortuneRef.current);
+            pendingFortuneRef.current = null;
+          }
+          if (pendingCompatRef.current) {
+            setCompatResult(pendingCompatRef.current);
+            pendingCompatRef.current = null;
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        }}
+      />
       {matrixShown && (
         <AnalysisMatrix theme={matrixTheme} label={matrixLabel} streamText={fortuneStreamText} exiting={matrixExiting} />
       )}

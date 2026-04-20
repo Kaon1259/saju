@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MonthlyFortune.css';
@@ -62,6 +63,8 @@ function MonthlyFortune() {
   const [streamText, setStreamText] = useState('');
   const [result, setResult] = useState(null);
   const [showAllMonths, setShowAllMonths] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -123,8 +126,8 @@ function MonthlyFortune() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
-          setResult({ ...parsed, month: m });
-          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          pendingResultRef.current = { ...parsed, month: m };
+          setCompleting(true);
         }
         setLoading(false);
       },
@@ -162,6 +165,18 @@ function MonthlyFortune() {
 
   return (
     <div className={`mf-page ${seasonClass}`}>
+      <AnalysisComplete
+        show={completing}
+        theme="year"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setResult(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        }}
+      />
       {/* 배경 */}
       <div className="mf-bg">
         {Array.from({ length: 20 }).map((_, i) => (

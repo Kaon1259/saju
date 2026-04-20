@@ -4,6 +4,7 @@ import { analyzeFaceReadingStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -94,6 +95,8 @@ function FaceReading() {
   const [streamText, setStreamText] = useState('');
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -208,13 +211,13 @@ function FaceReading() {
               luckyDirection: data.luckyDirection,
               luckyNumber: data.luckyNumber,
             };
-            setResult(mapped);
+            pendingResultRef.current = mapped;
           } else {
-            setResult({ overallType: '분석 완료', personality: fullText, score: 75, grade: 'B' });
+            pendingResultRef.current = { overallType: '분석 완료', personality: fullText, score: 75, grade: 'B' };
           }
-          setStep('result');
+          setMatrixShown(false);
+          setCompleting(true);
           setLoading(false);
-          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onError: (err) => {
           clearInterval(phaseTimer);
@@ -292,6 +295,19 @@ function FaceReading() {
   // ═══ 렌더링 ═══
   return (
     <div className="fr-page">
+      <AnalysisComplete
+        show={completing}
+        theme="health"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setResult(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setStep('result');
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        }}
+      />
       {/* 배경 효과 */}
       <div className="fr-bg">
         {Array.from({ length: 20 }).map((_, i) => (

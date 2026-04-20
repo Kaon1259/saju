@@ -4,6 +4,7 @@ import { interpretDreamStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -59,6 +60,8 @@ function Dream() {
   const [streamText, setStreamText] = useState('');
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const textareaRef = useRef(null);
   const cleanupRef = useRef(null);
@@ -122,13 +125,11 @@ function Dream() {
         onDone: (fullText) => {
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const parsed = parseAiJson(fullText);
-          if (parsed) {
-            setResult(parsed);
-          } else {
-            setResult({ interpretation: fullText, score: 65, category: '일반', symbol: '🌙' });
-          }
-          setStep('result');
-          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          pendingResultRef.current = parsed
+            ? parsed
+            : { interpretation: fullText, score: 65, category: '일반', symbol: '🌙' };
+          setMatrixShown(false);
+          setCompleting(true);
         },
         onError: (err) => {
           console.error('꿈해몽 스트리밍 실패:', err);
@@ -182,6 +183,19 @@ function Dream() {
   // ═══ 렌더링 ═══
   return (
     <div className="dream-page">
+      <AnalysisComplete
+        show={completing}
+        theme="tarot"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setResult(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setStep('result');
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        }}
+      />
 
       {/* ── 신비로운 배경 ── */}
       <div className="dream-bg">

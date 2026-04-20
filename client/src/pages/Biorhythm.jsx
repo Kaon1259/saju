@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBiorhythm, getBiorhythmStream, isGuest } from '../api/fortune';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -136,6 +137,8 @@ function Biorhythm() {
   const [matrixExiting, setMatrixExiting] = useState(false);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingAiRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // AI 결과 등장 시 매트릭스 페이드아웃
@@ -214,7 +217,11 @@ function Biorhythm() {
         setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
-        if (parsed) setAiResult(parsed);
+        if (parsed) {
+          pendingAiRef.current = parsed;
+          setMatrixShown(false);
+          setCompleting(true);
+        }
         setLoading(false);
       },
       onError: () => {
@@ -278,6 +285,17 @@ function Biorhythm() {
   // ═══ 렌더링 ═══
   return (
     <div className="bio-page">
+      <AnalysisComplete
+        show={completing}
+        theme="health"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingAiRef.current) {
+            setAiResult(pendingAiRef.current);
+            pendingAiRef.current = null;
+          }
+        }}
+      />
       {matrixShown && (
         <AnalysisMatrix theme="saju" label="AI가 바이오리듬을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}

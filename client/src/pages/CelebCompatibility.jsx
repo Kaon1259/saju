@@ -7,6 +7,7 @@ import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -72,6 +73,9 @@ function CelebCompatibility() {
   const [streamText, setStreamText] = useState('');
   const compatCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingCompatRef = useRef(null);
+  const pendingStarRef = useRef(null);
 
   useEffect(() => () => compatCleanupRef.current?.(), []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
@@ -258,8 +262,9 @@ function CelebCompatibility() {
               aiConflictPoint: parsed.conflictPoint || null,
               aiAdvice: parsed.advice || null,
             } : { ...data, aiAnalysis: fullText };
-            setResult(merged);
-            setStep('result');
+            pendingCompatRef.current = merged;
+            setMatrixShown(false);
+            setCompleting(true);
             saveCompatCache({
               birthDate1: myBirth, birthDate2: selectedCeleb.birth,
               birthTime1: myBirthTime || null, birthTime2: null,
@@ -342,7 +347,9 @@ function CelebCompatibility() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
-          setStarFortune({ overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor });
+          pendingStarRef.current = { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor };
+          setMatrixShown(false);
+          setCompleting(true);
         }
         setStarFortuneLoading(false);
       },
@@ -507,6 +514,23 @@ function CelebCompatibility() {
   if (step === 'input') {
     return (
       <div className="celeb-page">
+        <AnalysisComplete
+          show={completing}
+          theme="star"
+          onDone={() => {
+            setCompleting(false);
+            if (pendingCompatRef.current) {
+              setResult(pendingCompatRef.current);
+              setStep('result');
+              pendingCompatRef.current = null;
+              setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            }
+            if (pendingStarRef.current) {
+              setStarFortune(pendingStarRef.current);
+              pendingStarRef.current = null;
+            }
+          }}
+        />
         <button className="celeb-back-btn" onClick={() => { setStep('select'); setStarFortune(null); }}>← 스타 목록으로</button>
         <section className="celeb-selected glass-card">
           <span className={`celeb-item-sym celeb-sym--lg ${selectedCeleb.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>
@@ -595,6 +619,23 @@ function CelebCompatibility() {
   if (step === 'loading') {
     return (
       <div className="celeb-page">
+        <AnalysisComplete
+          show={completing}
+          theme="star"
+          onDone={() => {
+            setCompleting(false);
+            if (pendingCompatRef.current) {
+              setResult(pendingCompatRef.current);
+              setStep('result');
+              pendingCompatRef.current = null;
+              setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            }
+            if (pendingStarRef.current) {
+              setStarFortune(pendingStarRef.current);
+              pendingStarRef.current = null;
+            }
+          }}
+        />
         {matrixShown && (
           <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
         )}
@@ -608,6 +649,17 @@ function CelebCompatibility() {
     const scoreColor = score >= 80 ? '#ff3d7f' : score >= 60 ? '#fbbf24' : '#94a3b8';
     return (
       <div className="celeb-page analysis-result-reveal" ref={resultRef}>
+        <AnalysisComplete
+          show={completing}
+          theme="star"
+          onDone={() => {
+            setCompleting(false);
+            if (pendingStarRef.current) {
+              setStarFortune(pendingStarRef.current);
+              pendingStarRef.current = null;
+            }
+          }}
+        />
         {matrixShown && (
           <AnalysisMatrix theme="star" label={matrixLabel} streamText={starStreaming ? starStreamText : streamText} exiting={matrixExiting} />
         )}

@@ -39,6 +39,17 @@ public class FortuneController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * 최근 N일 점수 트렌드 (캐시된 점수만 조회, AI 호출 없음 → 0원)
+     * 캐시 없는 날은 응답에서 제외
+     */
+    @GetMapping("/score-trend")
+    public ResponseEntity<List<java.util.Map<String, Object>>> getScoreTrend(
+            @RequestParam("zodiac") String zodiacAnimal,
+            @RequestParam(value = "days", defaultValue = "7") int days) {
+        return ResponseEntity.ok(fortuneService.getScoreTrend(zodiacAnimal, days));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<FortuneResponse> getUserFortune(@PathVariable Long userId) {
         UserResponse user = userService.getUser(userId);

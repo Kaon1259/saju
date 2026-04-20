@@ -6,6 +6,7 @@ import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './LoveFortune.css';
@@ -57,6 +58,8 @@ function LoveFortune() {
   const [streamText, setStreamText] = useState('');
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -72,6 +75,18 @@ function LoveFortune() {
       return () => clearTimeout(t);
     }
   }, [result, matrixShown]);
+
+  /** 스트리밍 완료 → matrix 페이드아웃(0.7s) → 완료 애니(1.6s) → 결과 */
+  const finishWithCompleteAnimation = (finalResult) => {
+    setMatrixExiting(true);
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setTimeout(() => {
+      setMatrixShown(false);
+      setStreamText('');
+      pendingResultRef.current = finalResult;
+      setCompleting(true);
+    }, 700);
+  };
 
   // 연예인 궁합 매칭
   const [celebListOpen, setCelebListOpen] = useState(false);
@@ -136,8 +151,6 @@ function LoveFortune() {
           onChunk: (text) => setStreamText(prev => prev + text),
           onDone: (fullText) => {
             setAiStreaming(false); setLoading(false);
-            setStreamText('');
-            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             try {
               let json = fullText;
               if (json.includes('```')) {
@@ -161,12 +174,11 @@ function LoveFortune() {
                 luckyPlace: parsed.luckyPlace || '',
                 luckyColor: parsed.luckyColor || '',
               };
-              setResult(finalResult);
               // 캐시 저장
               saveLoveFortuneCache({ ...finalResult, type: 'relationship', birthDate, gender }).catch(() => {});
-              setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+              finishWithCompleteAnimation(finalResult);
             } catch {
-              setResult({ ...data, score: 65, grade: '보통', overall: fullText });
+              finishWithCompleteAnimation({ ...data, score: 65, grade: '보통', overall: fullText });
             }
           },
           onError: () => {
@@ -326,7 +338,7 @@ function LoveFortune() {
       )}
 
       {/* 연애 매트릭스 로딩 — 완료 후 부드럽게 페이드아웃 */}
-      {matrixShown && (
+      {matrixShown && !completing && (
         <AnalysisMatrix theme="love" label="AI가 연애운을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
 
@@ -468,6 +480,19 @@ function LoveFortune() {
           }}
         />
       )}
+      <AnalysisComplete
+        show={completing}
+        theme="love"
+        onDone={() => {
+          setCompleting(false);
+          const r = pendingResultRef.current;
+          pendingResultRef.current = null;
+          if (r) {
+            setResult(r);
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+          }
+        }}
+      />
     </div>
   );
 }

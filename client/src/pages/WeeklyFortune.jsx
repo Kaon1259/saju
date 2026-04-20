@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
+import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './WeeklyFortune.css';
@@ -57,6 +58,8 @@ function WeeklyFortune() {
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [result, setResult] = useState(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const daysScrollRef = useRef(null);
   const cleanupRef = useRef(null);
@@ -109,8 +112,8 @@ function WeeklyFortune() {
         {
           const parsed = parseAiJson(fullText);
           if (parsed) {
-            setResult(parsed);
-            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            pendingResultRef.current = parsed;
+            setCompleting(true);
           }
         }
         setLoading(false);
@@ -142,6 +145,18 @@ function WeeklyFortune() {
 
   return (
     <div className="wf-page">
+      <AnalysisComplete
+        show={completing}
+        theme="year"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setResult(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        }}
+      />
       {/* 배경 */}
       <div className="wf-bg">
         {Array.from({ length: 15 }).map((_, i) => (

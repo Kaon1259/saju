@@ -146,6 +146,7 @@ public class FortunePromptBuilder {
 "money":"재물운 (금전 방향·조언, 3-4문장)",\
 "health":"건강운 (주의 부위·음식·운동 조언, 3-4문장)",\
 "work":"직장운 (업무 전략·대인관계 조언, 3-4문장)",\
+"academic":"학업운/자기계발운 (집중력·성취 조언, 3-4문장)",\
 "hourlyFortune":[\
 {"time":"아침","range":"06-10시","score":점수(45-98),"desc":"한 줄 조언(1문장)"},\
 {"time":"점심","range":"11-14시","score":점수(45-98),"desc":"한 줄 조언(1문장)"},\
@@ -154,11 +155,12 @@ public class FortunePromptBuilder {
 {"time":"밤","range":"22-02시","score":점수(45-98),"desc":"한 줄 조언(1문장)"}],\
 "score":점수(45-98),\
 "luckyNumber":행운숫자(1-99),\
-"luckyColor":"행운색상",\
+"luckyColor":"행운색상 (예: 상아색, 네이비, 버건디)",\
 "luckyDirection":"오늘 길한 방위 (예: 동쪽, 남동쪽)",\
 "luckyFood":"오늘 먹으면 좋은 음식/차 1-2가지",\
 "luckyFashion":"오늘 입으면 좋은 옷/액세서리 스타일",\
-"luckyItem":"오늘 지니면 좋은 소품/아이템"}""";
+"luckyItem":"오늘 지니면 좋은 소품/아이템",\
+"luckyPerson":"오늘 만나면 좋은 사람 (예: 옛친구, 상사, 동료, 가족)"}""";
     }
 
     /**

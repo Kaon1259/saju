@@ -5,6 +5,7 @@ import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -92,6 +93,8 @@ function LoveTypeFortune() {
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [result, setResult] = useState(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -214,11 +217,13 @@ function LoveTypeFortune() {
             const parsed = parseAiJson(fullText || '');
             if (parsed) {
               const finalResult = { ...basic, ...parsed, score: parsed.score || basic.score || 65, grade: parsed.grade || basic.grade || '보통', overall: parsed.overall || '' };
-              setResult(finalResult);
+              pendingResultRef.current = finalResult;
               saveLoveFortuneCache({ ...finalResult, type, birthDate: birth, gender }).catch(() => {});
             } else {
-              setResult({ ...basic, score: 65, grade: '보통', overall: fullText || '' });
+              pendingResultRef.current = { ...basic, score: 65, grade: '보통', overall: fullText || '' };
             }
+            setMatrixShown(false);
+            setCompleting(true);
           },
           onError: () => {
             setStreaming(false); setLoading(false); setStreamText('');
@@ -238,6 +243,17 @@ function LoveTypeFortune() {
 
   return (
     <div className="ltf-page" style={themeStyle}>
+      <AnalysisComplete
+        show={completing}
+        theme="love"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setResult(pendingResultRef.current);
+            pendingResultRef.current = null;
+          }
+        }}
+      />
       {/* 상단 버튼 */}
       <div className="ltf-topbar">
         <button className="ltf-topbtn ltf-topbtn--back" onClick={() => navigate(-1)} aria-label="뒤로">

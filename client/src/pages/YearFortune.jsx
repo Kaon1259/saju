@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './YearFortune.css';
@@ -57,6 +58,11 @@ function YearFortune() {
 
   const resultRef = useRef(null);
   const stopAmbientRef = useRef(null);
+
+  // 완료 애니
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
+  const pendingSetterRef = useRef(null);
 
   useEffect(() => {
     return () => { mineCleanupRef.current?.(); partnerCleanupRef.current?.(); otherCleanupRef.current?.(); };
@@ -117,8 +123,9 @@ function YearFortune() {
           gotResult = true;
           setStreaming(false); setLoading(false); setStreamText('');
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-          setResult(parsed);
-          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          pendingResultRef.current = parsed;
+          pendingSetterRef.current = setResult;
+          setCompleting(true);
         } else {
           // 파싱 실패 → 불완전 JSON(토큰 초과 등) → 폴백
           console.warn('[YearFortune] parseAiJson failed, fallback. raw length:', fullText?.length);
@@ -220,7 +227,7 @@ function YearFortune() {
   };
 
   const renderLoading = (isLoading, isStreaming, sText, hasResult) => {
-    if ((isLoading || isStreaming) && !hasResult) {
+    if ((isLoading || isStreaming) && !hasResult && !completing) {
       return <AnalysisMatrix theme="year" label="AI가 2026년 운세를 분석하고 있어요" streamText={sText} />;
     }
     return null;
@@ -351,6 +358,21 @@ function YearFortune() {
           ) : renderResult(otherResult, birthDate, birthTime, gender, calendarType, () => { otherCleanupRef.current?.(); setOtherResult(null); setBirthDate(''); setBirthTime(''); setGender(''); setOtherStreamText(''); setOtherStreaming(false); window.scrollTo({ top: 0, behavior: 'smooth' }); })
         )
       )}
+      <AnalysisComplete
+        show={completing}
+        theme="year"
+        onDone={() => {
+          setCompleting(false);
+          const r = pendingResultRef.current;
+          const setter = pendingSetterRef.current;
+          pendingResultRef.current = null;
+          pendingSetterRef.current = null;
+          if (r && setter) {
+            setter(r);
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+          }
+        }}
+      />
     </div>
   );
 }

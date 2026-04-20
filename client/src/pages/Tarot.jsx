@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import TarotCardArt from '../components/TarotCardArt';
 import { playTarotReveal, playCardShuffle, playCardChaosGather, playCardSpin, playCardPick, playAnalyzeStart, startAnalyzeAmbient, playSpotlightTick, playSpotlightFinal } from '../utils/sounds';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -266,19 +267,33 @@ function Tarot() {
   });
   const [spread, setSpread] = useState('three');
   const [category, setCategory] = useState('relationship');
+  // 카드 펼치기 방식: 'carousel'(기본) | 'line'(가로 일렬) | 'fan'(부채꼴)
+  const [pickMode, setPickMode] = useState(() => {
+    const saved = localStorage.getItem('tarotPickMode');
+    return ['carousel', 'line', 'fan'].includes(saved) ? saved : 'carousel';
+  });
+  // fan 모드 회전 오프셋 (deg) — 좌우 드래그로 변경
+  const [fanRotation, setFanRotation] = useState(0);
+  const fanDragRef = useRef({ active: false, startX: 0, startRot: 0, moved: false });
   const [question, setQuestion] = useState('');
   const [shuffledCards, setShuffledCards] = useState([]);
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [revealedCards, setRevealedCards] = useState([]);
   const [reading, setReading] = useState(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingReadingRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [aiStreaming, setAiStreaming] = useState(false);
   const [shuffleAnim, setShuffleAnim] = useState(false);
   const [shuffleFlipping, setShuffleFlipping] = useState(false);
-  const [shufflePhase, setShufflePhase] = useState('chaos'); // chaos(사방 흩어짐) → gather(한 덩어리로 합쳐짐)
+  const [shufflePhase, setShufflePhase] = useState('riffle'); // riffle(좌우 두 묶음 인터리브) → gather(한 덩어리로 모임) → fan(부채꼴 펼침)
   const [shuffleCardsMeta, setShuffleCardsMeta] = useState([]);
   const [flipIndex, setFlipIndex] = useState(-1);
+  // 리빌 Phase 1: 한 장씩 크게 보여줄 때의 현재 카드 인덱스 (-1 = 비활성)
+  const [revealSingleIdx, setRevealSingleIdx] = useState(-1);
+  // 리빌 Phase 2: 원래 캐러셀 + AI 분석 모드 진입 여부
+  const [revealCarouselMode, setRevealCarouselMode] = useState(false);
   const [slotsRevealed, setSlotsRevealed] = useState(false); // 버리기 후 남은 카드 앞면 표시
   const [showAnalyzeMsg, setShowAnalyzeMsg] = useState(false); // "AI 분석 시작" 메시지
   const [focusCard, setFocusCard] = useState(null);
@@ -478,44 +493,45 @@ function Tarot() {
   }, [cTick]); // eslint-disable-line
 
 
-  // 셔플 페이즈 타이머 — 카오스(사방으로 마구 날아다님) → gather(한 덩어리로 모임) → pick 전환
+  // 셔플 페이즈 타이머 — riffle(실제 섞기) → gather(한 덩어리) → fan(반원 펼침) → pick 전환
   useEffect(() => {
     if (step !== 'shuffle' || shuffledCards.length === 0) return;
-    const rand = (min, max) => Math.random() * (max - min) + min;
-    const N = 14;
+    const N = 24;
     setShuffleCardsMeta(Array.from({ length: N }, (_, i) => {
       // 스택 최종 Y 오프셋 (gather 후 깊이감)
-      const stackY = (i - N / 2) * 0.9;
-      // 각 카드 고유 chaos 주기(1.2~1.9s)와 딜레이 — 동기화 깨서 마구잡이 느낌
-      const dur = rand(1.2, 1.9);
-      const delay = rand(-dur, 0); // 음수 딜레이로 이미 진행 중인 상태로 시작
-      // 카오스 경로: 3개 waypoint (바닥에 흩뿌려진 듯 각자 다른 위치)
-      const waypoint = () => ({
-        x: rand(-200, 200),
-        y: rand(-180, 180),
-        r: rand(-720, 720), // 두 바퀴까지 회전
-        z: rand(-80, 120),
-      });
-      const p1 = waypoint();
-      const p2 = waypoint();
-      const p3 = waypoint();
+      const stackY = (i - N / 2) * 0.7;
+      // 리플: 짝수 인덱스=왼쪽(-1), 홀수=오른쪽(+1) — 두 묶음으로 나뉨
+      const rside = i % 2 === 0 ? -1 : 1;
+      const rpos = Math.floor(i / 2); // 묶음 내 순서
+      // 리플 주기 0.85s, 양쪽 인터리브 (왼쪽 0, 0.12, 0.24... / 오른쪽 0.06, 0.18, 0.30...)
+      const riffleDur = 0.85;
+      const interleaveStep = 0.06;
+      const interleaveDelay = rpos * (interleaveStep * 2) + (rside === 1 ? interleaveStep : 0);
+      // 음수 delay로 이미 진행 중으로 시작
+      const riffleDelay = -riffleDur + (interleaveDelay % riffleDur);
+      // Fan: 부채꼴 각도 (-55° ~ +55°), 왼쪽부터 순차 펼침
+      const fanAngle = -55 + (110 * i / (N - 1));
+      const fanDelay = (i / N) * 0.5; // 0 ~ 0.5s stagger
       return {
         id: i,
         stackY: `${stackY.toFixed(1)}px`,
-        dur: `${dur.toFixed(2)}s`,
-        delay: `${delay.toFixed(2)}s`,
-        cx1: `${p1.x.toFixed(0)}px`, cy1: `${p1.y.toFixed(0)}px`, cr1: `${p1.r.toFixed(0)}deg`, cz1: `${p1.z.toFixed(0)}px`,
-        cx2: `${p2.x.toFixed(0)}px`, cy2: `${p2.y.toFixed(0)}px`, cr2: `${p2.r.toFixed(0)}deg`, cz2: `${p2.z.toFixed(0)}px`,
-        cx3: `${p3.x.toFixed(0)}px`, cy3: `${p3.y.toFixed(0)}px`, cr3: `${p3.r.toFixed(0)}deg`, cz3: `${p3.z.toFixed(0)}px`,
+        rx: `${rside * 90}px`,
+        rxMid: `${rside * 45}px`,
+        rRotStart: `${rside * -7}deg`,
+        rRotMid: `${rside * -3}deg`,
+        riffleDur: `${riffleDur}s`,
+        riffleDelay: `${riffleDelay.toFixed(2)}s`,
+        fanAngle: `${fanAngle.toFixed(1)}deg`,
+        fanDelay: `${fanDelay.toFixed(2)}s`,
       };
     }));
-    setShufflePhase('chaos');
-    // 카오스+게더 일체형 사운드 (총 ~3.4s)
-    try { playCardChaosGather(); } catch {}
-    const t1 = setTimeout(() => setShufflePhase('gather'), 2600);
-    // gather 완료 후 pick 화면으로 페이지 플립
-    const t2 = setTimeout(() => flipToStep(() => setStep('pick')), 3600);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    setShufflePhase('riffle');
+    try { playCardShuffle(); } catch {}
+    const t1 = setTimeout(() => setShufflePhase('gather'), 2500);
+    const t2 = setTimeout(() => setShufflePhase('fan'), 3100);
+    // fan 펼침 + 0.3s 정지 후 pick 화면으로 플립
+    const t3 = setTimeout(() => flipToStep(() => setStep('pick')), 4600);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [step, shuffledCards.length, flipToStep]);
 
   // 덱 갤러리: 필름릴 rAF 루프 (일시정지/속도 조절/Fin/포커스 처리)
@@ -692,6 +708,8 @@ function Tarot() {
     setRevealedCards([]);
     setReading(null);
     setFlipIndex(-1);
+    setRevealSingleIdx(-1);
+    setRevealCarouselMode(false);
     setFilledSlots([]);
     filledRef.current = [];
     setAllFilled(false);
@@ -899,15 +917,28 @@ function Tarot() {
   const revealCards = async (indices) => {
     setStep('reveal');
     setFlipIndex(-1);
+    setRevealSingleIdx(-1);
+    setRevealCarouselMode(false);
     const cards = indices.map(i => shuffledCards[i]);
     setRevealedCards(cards);
     const revealStartTime = Date.now();
 
-    // 카드 한장씩 Y축 플립 (1초 간격)
-    await new Promise(r => setTimeout(r, 600));
+    // Phase 1: 카드 한 장씩 화면 중앙에 크게 확대 (카드당 1초)
+    await new Promise(r => setTimeout(r, 400));
+    for (let i = 0; i < cards.length; i++) {
+      setRevealSingleIdx(i);
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    // 마지막 카드 사라짐 (brief 블랭크)
+    setRevealSingleIdx(-1);
+    await new Promise(r => setTimeout(r, 300));
+
+    // Phase 2: 원래 AI 분석 화면으로 전환 (캐러셀 + 순차 플립)
+    setRevealCarouselMode(true);
+    await new Promise(r => setTimeout(r, 400));
     for (let i = 0; i < cards.length; i++) {
       setFlipIndex(i);
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 900));
     }
 
     // 카드 전면이 모두 보이면 바로 AI 분석 효과 시작 (대기 없음)
@@ -1010,15 +1041,11 @@ function Tarot() {
               try { enriched = JSON.parse(trimmed); } catch {}
             }
           }
+          let finalReading;
           if (enriched && enriched.interpretation) {
-            // 서버의 카드별 meaning/overallMessage/advice/luckyElement 모두 사용
-            setReading({
-              ...fallbackReading,
-              ...enriched,
-            });
+            finalReading = { ...fallbackReading, ...enriched };
           } else {
-            // 구버전 호환: plain text만 온 경우 → fallback + interpretation
-            setReading({
+            finalReading = {
               ...fallbackReading,
               cards: cards.map((c, i) => ({
                 ...c,
@@ -1028,14 +1055,16 @@ function Tarot() {
                   : '긍정적인 에너지가 당신을 감싸고 있습니다.',
               })),
               interpretation: (donePayload || '').trim() || fallbackReading.interpretation,
-            });
+            };
           }
+          setReading(finalReading);
           setLoading(false);
           setCarouselIndex(0);
+          goToResult();
         } catch (e) {
           console.error('[Tarot] onDone error:', e);
+          goToResult();
         }
-        goToResult();
       },
       onError: () => {
         setAiStreaming(false);
@@ -1085,6 +1114,8 @@ function Tarot() {
       setRevealedCards([]);
       setReading(null);
       setFlipIndex(-1);
+      setRevealSingleIdx(-1);
+      setRevealCarouselMode(false);
       setFocusCard(null);
       setStreamText('');
       setShuffleFlipping(false);
@@ -1592,6 +1623,37 @@ function Tarot() {
                 </div>
               </div>
 
+              {/* ─ 2.5. 펼치기 방식 ─ */}
+              <div className="setup-section">
+                <div className="setup-section-label">☾ 펼치기 방식</div>
+                <div className="setup-pickmode-row">
+                  <button
+                    className={`setup-pickmode ${pickMode === 'carousel' ? 'active' : ''}`}
+                    onClick={() => { setPickMode('carousel'); localStorage.setItem('tarotPickMode', 'carousel'); }}
+                  >
+                    <span className="setup-pickmode-icon">🎴</span>
+                    <span className="setup-pickmode-name">캐러셀</span>
+                    <span className="setup-pickmode-sub">한 장씩 넘기기</span>
+                  </button>
+                  <button
+                    className={`setup-pickmode ${pickMode === 'line' ? 'active' : ''}`}
+                    onClick={() => { setPickMode('line'); localStorage.setItem('tarotPickMode', 'line'); }}
+                  >
+                    <span className="setup-pickmode-icon">🃏</span>
+                    <span className="setup-pickmode-name">가로 일렬</span>
+                    <span className="setup-pickmode-sub">전체 펼쳐서 선택</span>
+                  </button>
+                  <button
+                    className={`setup-pickmode ${pickMode === 'fan' ? 'active' : ''}`}
+                    onClick={() => { setPickMode('fan'); localStorage.setItem('tarotPickMode', 'fan'); }}
+                  >
+                    <span className="setup-pickmode-icon">🌙</span>
+                    <span className="setup-pickmode-name">부채꼴</span>
+                    <span className="setup-pickmode-sub">전통 펼침</span>
+                  </button>
+                </div>
+              </div>
+
               {/* ─ 3. 질문 입력 (선택) ─ */}
               <div className="setup-section">
                 <div className="setup-section-label">☽ 카드에게 물어볼 질문 <span className="setup-optional">(선택)</span></div>
@@ -1621,8 +1683,10 @@ function Tarot() {
       {step === 'shuffle' && shuffledCards.length > 0 && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck);
         const phaseText =
-          shufflePhase === 'chaos'   ? <>카드를 마구 섞고 있습니다<span className="tarot-dots" /></> :
-                                       '한 덩어리로 모이고 있습니다...';
+          shufflePhase === 'riffle' ? <>카드를 섞고 있습니다<span className="tarot-dots" /></> :
+          shufflePhase === 'gather' ? '한 덩어리로 모이고 있습니다...' :
+          shufflePhase === 'fan'    ? '카드를 펼치고 있습니다...' :
+                                       '';
         return (
           <div
             className="tarot-shuffle-stage-v2"
@@ -1641,11 +1705,14 @@ function Tarot() {
                   className="shuffle-back-card"
                   style={{
                     '--stack-y': c.stackY,
-                    '--dur': c.dur,
-                    '--delay': c.delay,
-                    '--cx1': c.cx1, '--cy1': c.cy1, '--cr1': c.cr1, '--cz1': c.cz1,
-                    '--cx2': c.cx2, '--cy2': c.cy2, '--cr2': c.cr2, '--cz2': c.cz2,
-                    '--cx3': c.cx3, '--cy3': c.cy3, '--cr3': c.cr3, '--cz3': c.cz3,
+                    '--rx': c.rx,
+                    '--rx-mid': c.rxMid,
+                    '--r-rot-start': c.rRotStart,
+                    '--r-rot-mid': c.rRotMid,
+                    '--r-dur': c.riffleDur,
+                    '--r-delay': c.riffleDelay,
+                    '--fan-angle': c.fanAngle,
+                    '--fan-delay': c.fanDelay,
                     zIndex: c.id,
                   }}
                 >
@@ -1711,8 +1778,9 @@ function Tarot() {
             )}
 
 
-            {/* 무한 캐러셀 — 버리기 단계에선 숨김 */}
-            {!discardPhase && (
+            {/* 무한 캐러셀 모드 — 버리기 단계 / line·fan 모드(자동선택 외)에선 숨김
+                line·fan 모드에서도 자동선택 중에는 캐러셀로 전환 (회전 → 한 장씩 선택 연출 유지) */}
+            {!discardPhase && (pickMode === 'carousel' || ((pickMode === 'line' || pickMode === 'fan') && autoPickRunning)) && (
               <div className="pick-carousel" {...cHandlers}>
                 {items.map(({ off, idx, x, scale, opacity, z, isCenter }) => {
                   const isSelected = selectedIndices.includes(idx);
@@ -1741,6 +1809,121 @@ function Tarot() {
                 })}
               </div>
             )}
+
+            {/* 가로 일렬 모드 — 78장 전체를 가로 스크롤로 펼침, 직접 탭으로 선택
+                자동선택 중에는 캐러셀로 잠시 전환되므로 숨김 */}
+            {!discardPhase && pickMode === 'line' && !autoPickRunning && (
+              <div className="pick-line-wrap">
+                <div className="pick-line-scroll">
+                  {shuffledCards.map((_, idx) => {
+                    const isSelected = selectedIndices.includes(idx);
+                    // 78장을 살짝 겹치게 — 카드끼리 위로 약간 어긋나는 깊이감
+                    const overlap = idx % 2 === 0 ? 0 : -6;
+                    return (
+                      <div
+                        key={`line-${idx}`}
+                        className={`pick-line-card ${isSelected ? 'pick-line-done' : ''}`}
+                        style={{ marginTop: `${overlap}px` }}
+                        onClick={() => !isSelected && !allFilled && handleCardPick(idx)}
+                      >
+                        {selectedBack ? (
+                          <img src={selectedBack} alt="" className="pick-line-back-img" draggable={false} />
+                        ) : (
+                          <div className="tarot-card-back">
+                            <div className="tarot-card-back-inner">
+                              <div className="tarot-card-back-star">✦</div>
+                              <div className="tarot-card-back-border" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 부채꼴 모드 — 78장을 화면 하단을 회전축으로 펼침.
+                좌우 드래그로 회전, 탭으로 선택. 자동선택은 캐러셀로 잠시 전환.
+                centerIdx 카드가 정확히 수직(0°)에 위치하도록 고정. */}
+            {!discardPhase && pickMode === 'fan' && !autoPickRunning && (() => {
+              const totalFan = shuffledCards.length; // 78
+              const centerIdx = Math.floor(totalFan / 2); // 39번 카드가 가운데(수직)
+              const stepDeg = 6.5; // 카드당 6.5° → 시각적 간격 충분, 클릭 쉬움
+              const maxRotation = Math.max(centerIdx, totalFan - 1 - centerIdx) * stepDeg + 10;
+              return (
+                <div
+                  className="pick-fan-wrap"
+                  onTouchStart={(e) => {
+                    fanDragRef.current = { active: true, startX: e.touches[0].clientX, startRot: fanRotation, moved: false };
+                  }}
+                  onTouchMove={(e) => {
+                    if (!fanDragRef.current.active) return;
+                    const dx = e.touches[0].clientX - fanDragRef.current.startX;
+                    if (Math.abs(dx) > 4) fanDragRef.current.moved = true;
+                    // 1px = 0.32deg → 부드러우면서도 양 끝까지 도달 가능
+                    const newRot = fanDragRef.current.startRot + dx * 0.32;
+                    setFanRotation(Math.max(-maxRotation, Math.min(maxRotation, newRot)));
+                  }}
+                  onTouchEnd={() => { fanDragRef.current.active = false; }}
+                  onMouseDown={(e) => {
+                    fanDragRef.current = { active: true, startX: e.clientX, startRot: fanRotation, moved: false };
+                  }}
+                  onMouseMove={(e) => {
+                    if (!fanDragRef.current.active) return;
+                    const dx = e.clientX - fanDragRef.current.startX;
+                    if (Math.abs(dx) > 4) fanDragRef.current.moved = true;
+                    const newRot = fanDragRef.current.startRot + dx * 0.32;
+                    setFanRotation(Math.max(-maxRotation, Math.min(maxRotation, newRot)));
+                  }}
+                  onMouseUp={() => { fanDragRef.current.active = false; }}
+                  onMouseLeave={() => { fanDragRef.current.active = false; }}
+                >
+                  <div className="pick-fan-inner">
+                    {shuffledCards.map((_, idx) => {
+                      const isSelected = selectedIndices.includes(idx);
+                      // centerIdx 카드의 angle = fanRotation (0이면 정확히 수직)
+                      const cardAngle = (idx - centerIdx) * stepDeg + fanRotation;
+                      const distFromCenter = Math.abs(cardAngle);
+                      // 포커스: 카드 한 칸 폭(±stepDeg/2) 이내 → 항상 한 장만 강조
+                      const isFocus = distFromCenter < stepDeg / 2;
+                      // 가시 범위 ±70° (양옆 약 11~12장씩 보임, 너무 옆은 숨김)
+                      const visible = distFromCenter < 70;
+                      return (
+                        <div
+                          key={`fan-${idx}`}
+                          className={`pick-fan-card ${isSelected ? 'pick-fan-done' : ''} ${isFocus ? 'pick-fan-focus' : ''}`}
+                          style={{
+                            // translateY -36vh: 중앙 카드를 아래로 약 8vh(≈1.5cm) 내림 → 상단 힌트 오브와 겹침 해소
+                            transform: `translate(-50%, 0) rotate(${cardAngle.toFixed(2)}deg) translateY(-36vh)`,
+                            zIndex: 100 - Math.round(distFromCenter),
+                            opacity: visible ? (isSelected ? 0.18 : 1) : 0,
+                            pointerEvents: visible && !isSelected ? 'auto' : 'none',
+                          }}
+                          onClick={(e) => {
+                            // 드래그 중이었으면 클릭 무시
+                            if (fanDragRef.current.moved) { fanDragRef.current.moved = false; return; }
+                            if (isSelected || allFilled) return;
+                            handleCardPick(idx);
+                          }}
+                        >
+                          {selectedBack ? (
+                            <img src={selectedBack} alt="" className="pick-fan-back-img" draggable={false} />
+                          ) : (
+                            <div className="tarot-card-back">
+                              <div className="tarot-card-back-inner">
+                                <div className="tarot-card-back-star">✦</div>
+                                <div className="tarot-card-back-border" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* 자동 선택 버튼 — 캐러셀과 슬롯 사이 */}
             {!allFilled && !autoPickRunning && !pickBusy.current && !discardPhase && (
@@ -1815,46 +1998,70 @@ function Tarot() {
             </div>
           )}
 
-          {/* 카드 캐러셀 — 화면 중앙 */}
+          {/* Phase 1: 한 장씩 크게 순차 공개 (1초씩) */}
           <div className="reveal-center-wrap">
-            <div className="reveal-carousel" {...cHandlers}>
-              {revealedCards.length > 0 && revealItems.map(({ off, idx, x, scale, opacity, z }) => {
-                const cardIdx = idx % revealedCards.length;
-                const card = revealedCards[cardIdx];
-                if (!card) return null;
-                const posLabel = POSITION_LABELS[spread]?.[cardIdx] || '';
-                const isFlipped = flipIndex >= cardIdx;
-                return (
-                  <div key={`rev-${off}`} className={`reveal-slide-card ${off === 0 ? 'reveal-slide-active' : ''}`} style={{
-                    transform: `translateX(${x}px) scale(${scale})`,
-                    opacity, zIndex: z,
-                  }}>
-                    <div className={`reveal-card-flip${isFlipped ? ' flipped' : ''}`}>
-                      <div className="reveal-card-back-face">
-                        {selectedBack ? (
-                          <img src={selectedBack} alt="" draggable={false} />
-                        ) : (
-                          <div className="tarot-card-back">
-                            <div className="tarot-card-back-inner">
-                              <div className="tarot-card-back-star">✦</div>
-                              <div className="tarot-card-back-border" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div className={`reveal-card-front ${card.reversed ? 'reversed' : ''}`}>
+            {!revealCarouselMode && (
+              <div className="reveal-single-wrap">
+                {revealedCards.length > 0 && revealSingleIdx >= 0 && revealSingleIdx < revealedCards.length && (() => {
+                  const card = revealedCards[revealSingleIdx];
+                  if (!card) return null;
+                  const posLabel = POSITION_LABELS[spread]?.[revealSingleIdx] || '';
+                  return (
+                    <div key={`single-${revealSingleIdx}`} className="reveal-single-card">
+                      {posLabel && <div className="reveal-single-label">{posLabel}</div>}
+                      <div className={`reveal-single-flip ${card.reversed ? 'reversed' : ''}`}>
                         <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
                         {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
                       </div>
+                      <div className="reveal-single-name">{card.nameKr}</div>
+                      <div className="reveal-single-counter">{revealSingleIdx + 1} / {revealedCards.length}</div>
                     </div>
-                    <div className="reveal-card-label">{posLabel}</div>
-                    <div className="reveal-card-name">{isFlipped ? card.nameKr : ''}</div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })()}
+              </div>
+            )}
 
-            {/* AI 분석 — 매트릭스 + 분석중 문구 */}
+            {/* Phase 2: 원래 AI 분석 화면 — 캐러셀 + 순차 플립 */}
+            {revealCarouselMode && (
+              <div className="reveal-carousel" {...cHandlers}>
+                {revealedCards.length > 0 && revealItems.map(({ off, idx, x, scale, opacity, z }) => {
+                  const cardIdx = idx % revealedCards.length;
+                  const card = revealedCards[cardIdx];
+                  if (!card) return null;
+                  const posLabel = POSITION_LABELS[spread]?.[cardIdx] || '';
+                  const isFlipped = flipIndex >= cardIdx;
+                  return (
+                    <div key={`rev-${off}`} className={`reveal-slide-card ${off === 0 ? 'reveal-slide-active' : ''}`} style={{
+                      transform: `translateX(${x}px) scale(${scale})`,
+                      opacity, zIndex: z,
+                    }}>
+                      <div className={`reveal-card-flip${isFlipped ? ' flipped' : ''}`}>
+                        <div className="reveal-card-back-face">
+                          {selectedBack ? (
+                            <img src={selectedBack} alt="" draggable={false} />
+                          ) : (
+                            <div className="tarot-card-back">
+                              <div className="tarot-card-back-inner">
+                                <div className="tarot-card-back-star">✦</div>
+                                <div className="tarot-card-back-border" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className={`reveal-card-front ${card.reversed ? 'reversed' : ''}`}>
+                          <TarotCardArt cardId={card.id} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
+                          {card.reversed && <div className="tarot-card-reversed-tag">역방향</div>}
+                        </div>
+                      </div>
+                      <div className="reveal-card-label">{posLabel}</div>
+                      <div className="reveal-card-name">{isFlipped ? card.nameKr : ''}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* AI 분석 — 매트릭스 + 분석중 문구 (Phase 2에서만) */}
             {(loading || aiStreaming) && (
               <div className="reveal-ai-behind">
                 <div className="reveal-ai-orbit">

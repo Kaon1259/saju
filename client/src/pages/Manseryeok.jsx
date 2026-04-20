@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getManseryeok, getManseryeokStream, isGuest } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -37,6 +38,8 @@ function Manseryeok() {
   const cleanupRef = useRef(null);
   const cacheCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingAiRef = useRef(null);
 
   useEffect(() => {
     return () => cleanupRef.current?.();
@@ -95,12 +98,9 @@ function Manseryeok() {
         setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
-        if (parsed) {
-          setAiResult(parsed);
-        } else {
-          // 파싱 실패 시 텍스트를 advice에 넣어서 표시
-          setAiResult({ advice: fullText });
-        }
+        pendingAiRef.current = parsed ? parsed : { advice: fullText };
+        setMatrixShown(false);
+        setCompleting(true);
         setAiLoading(false);
       },
       onError: () => {
@@ -191,6 +191,17 @@ function Manseryeok() {
 
   return (
     <div className="ms-page">
+      <AnalysisComplete
+        show={completing}
+        theme="saju"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingAiRef.current) {
+            setAiResult(pendingAiRef.current);
+            pendingAiRef.current = null;
+          }
+        }}
+      />
       {matrixShown && (
         <AnalysisMatrix theme="saju" label="AI가 만세력을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}

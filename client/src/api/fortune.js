@@ -1155,4 +1155,14 @@ export const deleteHistory = async (id) => {
   await api.delete(`/history/${id}`, { params: { userId } });
 };
 
+// ─── 최근 N일 점수 트렌드 (캐시 활용, AI 호출 없음) ───
+export const getScoreTrend = async (zodiacAnimal, days = 7) => {
+  try {
+    const res = await api.get('/fortune/score-trend', { params: { zodiac: zodiacAnimal, days } });
+    return Array.isArray(res.data) ? res.data : [];
+  } catch {
+    return [];
+  }
+};
+
 export default api;

@@ -233,6 +233,8 @@ public class FortuneService {
                 if (node.has("luckyFood")) fortune.setLuckyFood(node.get("luckyFood").asText());
                 if (node.has("luckyFashion")) fortune.setLuckyFashion(node.get("luckyFashion").asText());
                 if (node.has("luckyItem")) fortune.setLuckyItem(node.get("luckyItem").asText());
+                if (node.has("academic")) fortune.setAcademicFortune(node.get("academic").asText());
+                if (node.has("luckyPerson")) fortune.setLuckyPerson(node.get("luckyPerson").asText());
                 if (hourlyJson != null) fortune.setHourlyFortuneJson(hourlyJson);
                 dailyFortuneRepository.save(fortune);
                 log.info("Daily fortune cache updated: zodiac={}, date={}", zodiacAnimal, targetDate);
@@ -256,6 +258,8 @@ public class FortuneService {
                     .luckyFood(node.has("luckyFood") ? node.get("luckyFood").asText() : null)
                     .luckyFashion(node.has("luckyFashion") ? node.get("luckyFashion").asText() : null)
                     .luckyItem(node.has("luckyItem") ? node.get("luckyItem").asText() : null)
+                    .academicFortune(node.has("academic") ? node.get("academic").asText() : null)
+                    .luckyPerson(node.has("luckyPerson") ? node.get("luckyPerson").asText() : null)
                     .build();
                 dailyFortuneRepository.save(fortune);
                 log.info("Daily fortune cache created: zodiac={}, date={}", zodiacAnimal, targetDate);
@@ -294,6 +298,26 @@ public class FortuneService {
     }
 
     @Transactional
+    /**
+     * 최근 N일 점수 트렌드 — 캐시된 점수만 반환 (AI 호출 없음)
+     * 캐시 없는 날은 결과에서 제외 → 클라가 그대로 차트로 그림
+     */
+    public List<java.util.Map<String, Object>> getScoreTrend(String zodiacAnimal, int days) {
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusDays(Math.max(1, days) - 1);
+        List<DailyFortune> records = dailyFortuneRepository
+            .findByZodiacAnimalAndFortuneDateBetweenOrderByFortuneDateAsc(zodiacAnimal, start, end);
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        for (DailyFortune f : records) {
+            if (f.getScore() == null) continue;
+            java.util.Map<String, Object> point = new java.util.LinkedHashMap<>();
+            point.put("date", f.getFortuneDate().toString());
+            point.put("score", f.getScore());
+            out.add(point);
+        }
+        return out;
+    }
+
     public List<FortuneResponse> getAllTodayFortunes() {
         LocalDate today = LocalDate.now();
         List<DailyFortune> existing = dailyFortuneRepository.findByFortuneDate(today);

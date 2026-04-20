@@ -14,4 +14,7 @@ public interface DailyFortuneRepository extends JpaRepository<DailyFortune, Long
     Optional<DailyFortune> findByZodiacAnimalAndFortuneDate(String zodiacAnimal, LocalDate fortuneDate);
 
     List<DailyFortune> findByFortuneDate(LocalDate fortuneDate);
+
+    List<DailyFortune> findByZodiacAnimalAndFortuneDateBetweenOrderByFortuneDateAsc(
+        String zodiacAnimal, LocalDate startDate, LocalDate endDate);
 }

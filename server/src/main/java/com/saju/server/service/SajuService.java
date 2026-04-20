@@ -257,6 +257,8 @@ public class SajuService {
                 .luckyFood(node.has("luckyFood") ? node.get("luckyFood").asText() : null)
                 .luckyFashion(node.has("luckyFashion") ? node.get("luckyFashion").asText() : null)
                 .luckyItem(node.has("luckyItem") ? node.get("luckyItem").asText() : null)
+                .academic(node.has("academic") ? node.get("academic").asText() : null)
+                .luckyPerson(node.has("luckyPerson") ? node.get("luckyPerson").asText() : null)
                 .hourlyFortune(hourly)
                 .build();
             basicResult.setTodayFortune(fortune);

@@ -6,6 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneLoading from '../components/FortuneLoading';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -68,6 +69,9 @@ function SajuAnalysis() {
   const [matrixExiting, setMatrixExiting] = useState(false);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
+  const pendingDailyRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // 결과 등장 시 매트릭스 페이드아웃
@@ -144,8 +148,10 @@ function SajuAnalysis() {
         (async () => {
           try {
             const r = await analyzeSaju(userBd, userBt || undefined, userCalendar, userGender || undefined);
-            setResult(r);
-            getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+            pendingResultRef.current = r;
+            setMatrixShown(false);
+            setCompleting(true);
+            getDailyFortunes(userBd).then((d) => { pendingDailyRef.current = d; }).catch(() => {});
           } catch (e) { console.error('사주 결과 로드 실패:', e); }
           finally { setLoading(false); setStreamText(''); }
         })();
@@ -209,8 +215,10 @@ function SajuAnalysis() {
         (async () => {
           try {
             const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
-            setResult(r);
-            getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
+            pendingResultRef.current = r;
+            setMatrixShown(false);
+            setCompleting(true);
+            getDailyFortunes(birthDate).then((d) => { pendingDailyRef.current = d; }).catch(() => {});
           } catch (e) { console.error('사주 결과 로드 실패:', e); }
           finally { setLoading(false); setStreamText(''); }
         })();
@@ -260,6 +268,21 @@ function SajuAnalysis() {
   if ((loading || streaming) && !result) {
     return (
       <div className="saju-page">
+        <AnalysisComplete
+          show={completing}
+          theme="saju"
+          onDone={() => {
+            setCompleting(false);
+            if (pendingResultRef.current) {
+              setResult(pendingResultRef.current);
+              pendingResultRef.current = null;
+            }
+            if (pendingDailyRef.current) {
+              setDailyFortunes(pendingDailyRef.current);
+              pendingDailyRef.current = null;
+            }
+          }}
+        />
         {matrixShown ? (
           <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
         ) : (

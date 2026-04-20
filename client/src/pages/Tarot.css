@@ -1144,6 +1144,33 @@
 [data-theme="light"] .setup-spread-num { -webkit-text-fill-color: #9B59B6; opacity: 0.4; }
 [data-theme="light"] .setup-spread.active .setup-spread-num { opacity: 1; }
 
+/* ── 펼치기 방식 선택 ── */
+.setup-pickmode-row { display: flex; gap: 10px; }
+.setup-pickmode {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 14px 8px; border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.05);
+  cursor: pointer; transition: all 0.3s;
+  backdrop-filter: blur(8px);
+}
+.setup-pickmode:hover { border-color: rgba(218,165,32,0.3); background: rgba(218,165,32,0.08); }
+.setup-pickmode.active {
+  border-color: #DAA520; background: rgba(218,165,32,0.15);
+  box-shadow: 0 4px 20px rgba(218,165,32,0.25);
+}
+.setup-pickmode-icon { font-size: 22px; line-height: 1; opacity: 0.7; transition: opacity 0.3s; }
+.setup-pickmode.active .setup-pickmode-icon { opacity: 1; }
+.setup-pickmode-name { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.78); }
+.setup-pickmode.active .setup-pickmode-name { color: #F5DEB3; }
+.setup-pickmode-sub { font-size: 10px; color: rgba(255,255,255,0.45); }
+.setup-pickmode.active .setup-pickmode-sub { color: rgba(245,222,179,0.7); }
+[data-theme="light"] .setup-pickmode { background: rgba(255,255,255,0.45); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .setup-pickmode.active { background: rgba(147,51,234,0.1); border-color: rgba(147,51,234,0.3); box-shadow: 0 4px 16px rgba(147,51,234,0.12); }
+[data-theme="light"] .setup-pickmode-name { color: rgba(0,0,0,0.6); }
+[data-theme="light"] .setup-pickmode.active .setup-pickmode-name { color: #6C3483; }
+[data-theme="light"] .setup-pickmode-sub { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .setup-pickmode.active .setup-pickmode-sub { color: rgba(108,52,131,0.7); }
+
 /* ── 질문 입력 ── */
 .setup-question {
   width: 100%; padding: 12px 16px; border-radius: 14px;
@@ -1932,61 +1959,81 @@
   height: 100%;
 }
 
-/* CHAOS — 카드가 사방으로 마구 흩어져 정신없이 돌아다님.
-   각 카드마다 고유 주기(--dur), 고유 경로(--cx/--cy/--cr 3 waypoints). */
-.shuffle-phase-chaos .shuffle-back-card {
-  animation: chaoticFly var(--dur, 1.5s) cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-  animation-delay: var(--delay, 0s);
+/* RIFFLE — 카드가 좌/우 두 묶음으로 나뉘어 중앙에서 인터리브 섞임.
+   각 카드는 pile 위치(--rx)에서 중앙으로 떨어진 뒤 다시 pile로 돌아가는 주기를 반복.
+   짝수 인덱스=왼쪽(--rside=-1), 홀수=오른쪽(+1) → 교차 delay로 진짜 리플 셔플 느낌 */
+.shuffle-phase-riffle .shuffle-back-card {
+  animation: riffleShuffle var(--r-dur, 0.85s) cubic-bezier(0.33, 0, 0.67, 1) infinite;
+  animation-delay: var(--r-delay, 0s);
 }
 
-@keyframes chaoticFly {
+@keyframes riffleShuffle {
   0% {
     transform: translate(-50%, -50%)
-      translate3d(var(--cx1, 0), var(--cy1, 0), var(--cz1, 0))
-      rotate(var(--cr1, 0deg)) scale(1);
-    filter: brightness(0.95);
+      translate3d(var(--rx, 0), 0, -10px)
+      rotate(var(--r-rot-start, 0deg));
+    filter: brightness(0.92);
   }
-  33% {
+  30% {
+    /* 카드가 pile에서 살짝 들린 채 중앙으로 날아감 */
     transform: translate(-50%, -50%)
-      translate3d(var(--cx2, 0), var(--cy2, 0), var(--cz2, 0))
-      rotate(var(--cr2, 0deg)) scale(1);
+      translate3d(var(--rx-mid, 0), -44px, 18px)
+      rotate(var(--r-rot-mid, 0deg));
     filter: brightness(1.12);
   }
-  66% {
+  60% {
+    /* 중앙 스택에 안착 (인터리브 포인트) */
     transform: translate(-50%, -50%)
-      translate3d(var(--cx3, 0), var(--cy3, 0), var(--cz3, 0))
-      rotate(var(--cr3, 0deg)) scale(1);
-    filter: brightness(0.82);
+      translate3d(0, var(--stack-y, 0), 0)
+      rotate(0deg);
+    filter: brightness(1.02);
   }
   100% {
+    /* 다시 pile로 복귀 */
     transform: translate(-50%, -50%)
-      translate3d(var(--cx1, 0), var(--cy1, 0), var(--cz1, 0))
-      rotate(var(--cr1, 0deg)) scale(1);
-    filter: brightness(0.95);
+      translate3d(var(--rx, 0), 0, -10px)
+      rotate(var(--r-rot-start, 0deg));
+    filter: brightness(0.92);
   }
 }
 
-/* 카오스 상태에서 판 전체에 강한 떨림 효과 */
-.shuffle-phase-chaos .shuffle-field {
-  animation: shuffleStackJitter 0.18s ease-in-out infinite;
+/* 리플 중 판 전체 미세 떨림 — 섞는 손의 진동 느낌 */
+.shuffle-phase-riffle .shuffle-field {
+  animation: shuffleStackJitter 0.22s ease-in-out infinite;
 }
 @keyframes shuffleStackJitter {
   0%, 100% { transform: translate(0, 0); }
-  20%      { transform: translate(-2px, 1px); }
-  40%      { transform: translate(2px, -2px); }
-  60%      { transform: translate(-1px, -2px); }
-  80%      { transform: translate(2px, 1px); }
+  25%      { transform: translate(-1.5px, 1px); }
+  50%      { transform: translate(1.5px, -1px); }
+  75%      { transform: translate(-1px, -1.5px); }
 }
 
-/* GATHER — 사방에 흩어진 카드들이 중앙 스택으로 빨려 들어가 합쳐짐 */
+/* GATHER — 중앙 스택으로 모든 카드가 정렬됨 (리플 후 자연스럽게 한 덩어리로) */
 .shuffle-phase-gather .shuffle-back-card {
   transform: translate(-50%, -50%) translate3d(0, var(--stack-y, 0), 0) rotate(0deg) scale(1);
-  box-shadow: none;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.55);
   filter: brightness(1.05);
   transition:
-    transform 0.85s cubic-bezier(0.2, 0.9, 0.25, 1.05),
-    box-shadow 0.6s ease,
-    filter 0.6s ease;
+    transform 0.6s cubic-bezier(0.22, 0.9, 0.3, 1.02),
+    box-shadow 0.5s ease,
+    filter 0.5s ease;
+}
+
+/* FAN — 중앙 스택에서 부채꼴(반원)로 펼쳐짐.
+   transform 순서: rotate(fan-angle) → translateY(-140px) 로 회전축이 카드 아래에 위치한 듯한 부채꼴 효과.
+   각 카드마다 fan-delay로 stagger → 왼쪽부터 좌→우 순차 펼침 */
+.shuffle-phase-fan .shuffle-back-card {
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--fan-angle, 0deg))
+    translateY(-140px);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.7);
+  filter: brightness(1.08);
+  transition:
+    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.7s ease,
+    filter 0.7s ease;
+  transition-delay: var(--fan-delay, 0s);
 }
 
 /* 셔플 배경 — 정적 이미지 */
@@ -3118,6 +3165,73 @@
   justify-content: center;
   z-index: 3;
 }
+
+/* ── 한 장씩 확대 공개 ── */
+.reveal-single-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.reveal-single-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  /* 새 카드 등장 애니메이션: 플립+스케일+페이드 */
+  animation: revealSingleEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+@keyframes revealSingleEnter {
+  0%   { opacity: 0; transform: scale(0.55) rotateY(180deg); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+.reveal-single-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(218,165,32,0.85);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.reveal-single-flip {
+  position: relative;
+  width: min(72vw, 280px);
+  aspect-ratio: 261/500;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.85),
+    0 0 32px rgba(218,165,32,0.35);
+}
+.reveal-single-flip.reversed { transform: rotate(180deg); }
+.reveal-single-flip.reversed .tarot-card-reversed-tag { transform: rotate(180deg); }
+.reveal-single-flip .tarot-card-art,
+.reveal-single-flip .tarot-minor-card {
+  width: 100%; height: 100%;
+  border-radius: 16px;
+}
+.reveal-single-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  letter-spacing: 0.3px;
+}
+.reveal-single-counter {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(218,165,32,0.25);
+}
+[data-theme="light"] .reveal-single-label { color: #8B6B1F; }
+[data-theme="light"] .reveal-single-name { color: #2d1b3c; text-shadow: 0 2px 8px rgba(255,255,255,0.4); }
+[data-theme="light"] .reveal-single-counter { background: rgba(255,255,255,0.6); color: rgba(0,0,0,0.6); }
 
 /* AI 분석 — 카드 뒤에서 텍스트가 흘러가는 연출 */
 .reveal-ai-behind {
@@ -4535,6 +4649,95 @@
   color: #ff6b9d;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
 }
+
+/* ── 가로 일렬 모드 — 78장 전체 가로 스크롤 ── */
+.pick-line-wrap {
+  position: relative;
+  width: 100%; height: min(60vh, 420px);
+  display: flex; align-items: center;
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 12px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(218,165,32,0.4) transparent;
+}
+.pick-line-wrap::-webkit-scrollbar { height: 6px; }
+.pick-line-wrap::-webkit-scrollbar-thumb { background: rgba(218,165,32,0.4); border-radius: 3px; }
+.pick-line-wrap::-webkit-scrollbar-track { background: transparent; }
+.pick-line-scroll {
+  display: flex; align-items: center;
+  gap: 4px; padding: 0 12px;
+}
+.pick-line-card {
+  flex: 0 0 auto;
+  width: min(28vw, 110px); aspect-ratio: 261/500;
+  border-radius: 10px; overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.3s ease;
+  scroll-snap-align: center;
+  background: #1a1530;
+}
+.pick-line-card:hover {
+  transform: translateY(-10px) scale(1.04);
+  border-color: rgba(222,169,87,0.55);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.6), 0 0 18px rgba(222,169,87,0.35);
+  z-index: 2;
+}
+.pick-line-card:active { transform: translateY(-4px) scale(0.99); }
+.pick-line-card.pick-line-done {
+  opacity: 0.18;
+  pointer-events: none;
+  transform: translateY(0) scale(0.92);
+}
+.pick-line-back-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ── 부채꼴 모드 — 78장이 화면 하단을 회전축으로 펼쳐짐 ── */
+.pick-fan-wrap {
+  position: relative;
+  width: 100%; height: min(60vh, 460px);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none; -webkit-user-select: none;
+}
+.pick-fan-wrap:active { cursor: grabbing; }
+/* inner: 회전축 위치(화면 하단 중앙) */
+.pick-fan-inner {
+  position: absolute;
+  left: 50%; bottom: -8vh;
+  width: 0; height: 0;
+}
+.pick-fan-card {
+  position: absolute;
+  /* 회전축은 카드 아래 (transform translateY가 위로 끌어올려 부채꼴 형성) */
+  left: 0; bottom: 0;
+  width: min(22vw, 92px); aspect-ratio: 261/500;
+  margin-left: calc(min(22vw, 92px) / -2);
+  border-radius: 9px; overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.55);
+  transform-origin: 50% 100%;
+  border: 2px solid transparent;
+  transition: transform 0.18s ease-out, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.3s ease;
+  background: #1a1530;
+}
+.pick-fan-card:hover {
+  border-color: rgba(222,169,87,0.4);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.65), 0 0 16px rgba(222,169,87,0.3);
+}
+.pick-fan-card.pick-fan-focus {
+  /* 가운데 카드 강조 — 살짝 들리고 글로우 */
+  border-color: rgba(222,169,87,0.65);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.7), 0 0 22px rgba(222,169,87,0.5);
+  z-index: 200 !important;
+}
+.pick-fan-card.pick-fan-done {
+  opacity: 0.18 !important;
+  pointer-events: none;
+}
+.pick-fan-back-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* 슬라이드 캐러셀 */
 .pick-carousel {

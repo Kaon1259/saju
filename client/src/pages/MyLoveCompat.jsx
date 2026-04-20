@@ -16,6 +16,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
 import StreamText from '../components/StreamText';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -66,6 +67,8 @@ function MyLoveCompat() {
   const [deepStreaming, setDeepStreaming] = useState(false);
   const [deepStreamText, setDeepStreamText] = useState('');
   const [deepCompleting, setDeepCompleting] = useState(false);
+  // 일반 분석 완료 애니 (matrix 페이드아웃 후 → 애니 1.6s → 결과)
+  const [completing, setCompleting] = useState(false);
   // 접기/펼치기 (true=펼침)
   const [basicExpanded, setBasicExpanded] = useState(true);
   const [deepExpanded, setDeepExpanded] = useState(true);
@@ -146,12 +149,28 @@ function MyLoveCompat() {
   }, [location.state?.restoreHistoryId]);
 
   useEffect(() => {
-    if (result && matrixShown) {
+    if (result && matrixShown && !completing) {
       setMatrixExiting(true);
       const t = setTimeout(() => setMatrixShown(false), 700);
       return () => clearTimeout(t);
     }
-  }, [result, matrixShown]);
+  }, [result, matrixShown, completing]);
+
+  /** 일반 분석 onDone 공통 흐름: matrix 페이드아웃(0.7s) → 완료 애니(1.6s) → 결과 표시 */
+  const finishWithCompleteAnimation = (finalResult) => {
+    setMatrixExiting(true);
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setTimeout(() => {
+      setMatrixShown(false);
+      setStreamText('');
+      setCompleting(true);
+      setTimeout(() => {
+        setCompleting(false);
+        setResult(finalResult);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      }, 1600);
+    }, 700);
+  };
 
   const handleAutoFill = async () => {
     // 서버에서 최신 프로필 조회 (localStorage 캐시가 파트너 정보 미포함일 수 있어 우선)
@@ -187,6 +206,7 @@ function MyLoveCompat() {
     setDeepStreaming(false);
     setDeepStreamText('');
     setDeepCompleting(false);
+    setCompleting(false);
     cleanupRef.current?.();
     deepCleanupRef.current?.();
     try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -206,6 +226,7 @@ function MyLoveCompat() {
     setDeepStreaming(false);
     setDeepStreamText('');
     setDeepCompleting(false);
+    setCompleting(false);
     setBd1(''); setBd2(''); setBt1(''); setBt2('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -217,6 +238,7 @@ function MyLoveCompat() {
   const { guardedAction: guardDeepMarriageCompat } = useHeartGuard('DEEP_MARRIAGE_COMPAT');
 
   // 심화분석 시작 (사주 or 결혼)
+  const [deepStreamingType, setDeepStreamingType] = useState(null);
   const startDeepCompat = (deepType) => {
     if (!result || !bd1 || !bd2) return;
     // 캐시에 이미 있으면 스트리밍 없이 즉시 노출
@@ -247,7 +269,13 @@ function MyLoveCompat() {
 
     setDeepStreaming(true);
     setDeepStreamText('');
-    setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    setDeepStreamingType(deepType);
+    // 일반 분석과 동일한 AnalysisMatrix 효과 발동
+    setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     deepCleanupRef.current = getCompatibilityDeepStream(
       deepType, bd1, bt1 || '', g1, bd2, bt2 || '', g2,
@@ -255,23 +283,42 @@ function MyLoveCompat() {
         context,
         onCached: (cached) => {
           setDeepStreaming(false); setDeepStreamText('');
+          setMatrixExiting(true);
+          setTimeout(() => { setMatrixShown(false); setStreamText(''); }, 700);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           setDeepResult(cached);
         },
-        onChunk: (text) => setDeepStreamText((prev) => prev + text),
+        onChunk: (text) => {
+          setDeepStreamText((prev) => prev + text);
+          setStreamText((prev) => prev + text); // matrix 안에도 텍스트 흐름
+        },
         onDone: (fullText) => {
           const parsed = parseAiJson(fullText);
           const finalData = parsed || { detailAnalysis: fullText };
-          // 스트리밍 종료 → 완료 애니메이션 1.6초 → 결과 표시
           setDeepStreaming(false);
-          setDeepCompleting(true);
+          // matrix 페이드아웃
+          setMatrixExiting(true);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           setTimeout(() => {
-            setDeepCompleting(false);
-            setDeepStreamText('');
-            setDeepResult(finalData);
-            setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-          }, 1600);
+            setMatrixShown(false);
+            setStreamText('');
+            // 완료 애니 1.6초 → 결과
+            setDeepCompleting(true);
+            setTimeout(() => {
+              setDeepCompleting(false);
+              setDeepStreamText('');
+              setDeepResult(finalData);
+              setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }, 1600);
+          }, 700);
         },
-        onError: () => { setDeepStreaming(false); setDeepStreamText(''); setDeepCompleting(false); },
+        onError: () => {
+          setDeepStreaming(false); setDeepStreamText('');
+          setDeepCompleting(false);
+          setMatrixExiting(true);
+          setTimeout(() => { setMatrixShown(false); setStreamText(''); }, 700);
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        },
       }
     );
   };
@@ -315,8 +362,6 @@ function MyLoveCompat() {
           onChunk: (text) => setStreamText((prev) => prev + text),
           onDone: (fullText) => {
             setAiStreaming(false);
-            setStreamText('');
-            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const finalResult = parsed ? {
               ...data,
@@ -327,7 +372,6 @@ function MyLoveCompat() {
               aiConflictPoint: parsed.conflictPoint || null,
               aiAdvice: parsed.advice || null,
             } : { ...data, aiAnalysis: fullText };
-            setResult(finalResult);
             saveCompatCache({
               birthDate1: bd1, birthDate2: bd2,
               birthTime1: bt1 || null, birthTime2: bt2 || null,
@@ -340,7 +384,7 @@ function MyLoveCompat() {
               aiConflictPoint: finalResult.aiConflictPoint,
               aiAdvice: finalResult.aiAdvice,
             }).catch(() => {});
-            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            finishWithCompleteAnimation(finalResult);
           },
           onError: () => {
             setAiStreaming(false); setStreamText('');
@@ -409,8 +453,6 @@ function MyLoveCompat() {
           onChunk: (text) => setStreamText((prev) => prev + text),
           onDone: (fullText) => {
             setAiStreaming(false);
-            setStreamText('');
-            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const finalResult = parsed ? {
               ...data,
@@ -426,8 +468,7 @@ function MyLoveCompat() {
               aiFinanceTogether: parsed.financeTogether || null,
               aiAdvice: parsed.advice || null,
             } : { ...data, aiAnalysis: fullText };
-            setResult(finalResult);
-            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            finishWithCompleteAnimation(finalResult);
           },
           onError: () => {
             setAiStreaming(false); setStreamText('');
@@ -488,8 +529,7 @@ function MyLoveCompat() {
         },
         onChunk: (text) => setStreamText((prev) => prev + text),
         onDone: (fullText) => {
-          setAiStreaming(false); setStreamText('');
-          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          setAiStreaming(false);
           const parsed = parseAiJson(fullText);
           const merged = parsed ? {
             ...base,
@@ -505,8 +545,7 @@ function MyLoveCompat() {
             aiLuckyPlace: parsed.luckyPlace || null,
             aiLuckyColor: parsed.luckyColor || null,
           } : { ...base, aiAnalysis: fullText };
-          setResult(merged);
-          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          finishWithCompleteAnimation(merged);
         },
         onError: () => {
           setAiStreaming(false); setStreamText('');
@@ -521,10 +560,13 @@ function MyLoveCompat() {
     }
   };
 
-  const matrixLabel =
-    tab === 'saju'     ? 'AI가 사주 궁합을 분석하고 있어요' :
-    tab === 'marriage' ? 'AI가 결혼 궁합을 분석하고 있어요' :
-                         'AI가 스킨십 궁합을 분석하고 있어요';
+  const matrixLabel = deepStreaming
+    ? (deepStreamingType === 'marriage_compat'
+        ? 'AI가 결혼 궁합을 더 깊이 분석하고 있어요'
+        : 'AI가 사주 궁합을 더 깊이 분석하고 있어요')
+    : (tab === 'saju'     ? 'AI가 사주 궁합을 분석하고 있어요' :
+       tab === 'marriage' ? 'AI가 결혼 궁합을 분석하고 있어요' :
+                            'AI가 스킨십 궁합을 분석하고 있어요');
 
   return (
     <div className="mlc-page">
@@ -693,6 +735,9 @@ function MyLoveCompat() {
         <AnalysisMatrix theme="love" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
       )}
 
+      {/* 분석 완료 애니메이션은 finishWithCompleteAnimation의 setTimeout으로 자동 진행 — 공용 컴포넌트로 분리 */}
+      <AnalysisComplete show={completing} theme="love" onDone={() => {}} duration={1600} />
+
       {/* ═══ 결과 ═══ */}
       {result && (
         <div className="mlc-result fade-in" ref={resultRef}>
@@ -766,14 +811,6 @@ function MyLoveCompat() {
                   <button className="mlc-deep-btn" onClick={() => guardDeepSajuCompat(() => startDeepCompat('compatibility'))}>
                     🔍 심화분석 보기 <HeartCost category="DEEP_COMPATIBILITY" />
                   </button>
-                )}
-                {deepStreaming && (
-                  <StreamText
-                    text={deepStreamText || ' '}
-                    icon="✨"
-                    label="AI가 두 사람의 궁합을 더 깊이 분석하고 있어요"
-                    color="#ff3d7f"
-                  />
                 )}
                 {deepCompleting && (
                   <div className="mlc-deep-complete">
@@ -882,14 +919,6 @@ function MyLoveCompat() {
                   <button className="mlc-deep-btn" onClick={() => guardDeepMarriageCompat(() => startDeepCompat('marriage_compat'))}>
                     🔍 결혼궁합 심화분석 보기 <HeartCost category="DEEP_MARRIAGE_COMPAT" />
                   </button>
-                )}
-                {deepStreaming && (
-                  <StreamText
-                    text={deepStreamText || ' '}
-                    icon="💒"
-                    label="AI가 결혼 궁합을 더 깊이 분석하고 있어요"
-                    color="#ff3d7f"
-                  />
                 )}
                 {deepCompleting && (
                   <div className="mlc-deep-complete">

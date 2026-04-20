@@ -226,3 +226,207 @@
 [data-theme="light"] .myf-lucky-value { color: #b8860b; }
 [data-theme="light"] .myf-empty h2 { color: #111; }
 [data-theme="light"] .myf-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #b8860b; }
+
+/* ─── 행운의 코디 카드 ─── */
+.myf-outfit { padding: 18px; margin-top: 12px; }
+.myf-outfit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.myf-outfit-swatch {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.myf-outfit-title { margin: 0; font-size: 16px; font-weight: 700; }
+.myf-outfit-color {
+  font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, #FBBF24, #FF3D7F);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin-bottom: 8px;
+}
+.myf-outfit-desc { font-size: 14px; line-height: 1.6; margin: 0 0 8px; opacity: 0.85; }
+.myf-outfit-combo { font-size: 13px; line-height: 1.5; margin: 0; opacity: 0.7; padding: 8px 12px; background: rgba(255,215,0,0.06); border-radius: 8px; border-left: 3px solid #FBBF24; }
+
+/* ─── 일별 점수 트렌드 ─── */
+.myf-trend { padding: 18px; margin-top: 12px; }
+.myf-trend-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+.myf-trend-svg { width: 100%; height: auto; display: block; }
+.myf-trend-score { font-size: 9px; fill: #FBBF24; font-weight: 700; }
+.myf-trend-date { font-size: 8px; fill: rgba(255,255,255,0.5); }
+[data-theme="light"] .myf-trend-date { fill: #888; }
+
+/* ─── 띠 출생연도별 운세 ─── */
+.myf-zby { padding: 18px; margin-top: 12px; }
+.myf-zby-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+.myf-zby-list { display: flex; flex-direction: column; gap: 8px; }
+.myf-zby-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  animation: zbyFade 0.4s ease-out both;
+}
+@keyframes zbyFade { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+.myf-zby-year {
+  flex-shrink: 0; font-size: 13px; font-weight: 700;
+  color: #FBBF24; min-width: 64px;
+}
+.myf-zby-text { font-size: 13px; line-height: 1.55; opacity: 0.85; }
+[data-theme="light"] .myf-zby-row { background: #fff8e1; }
+[data-theme="light"] .myf-zby-year { color: #b8860b; }
+[data-theme="light"] .myf-zby-text { color: #2e2e45; }
+
+/* ─── 오늘 태어난 유명인 ─── */
+.myf-celebs { padding: 18px; margin-top: 12px; }
+.myf-celebs-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+.myf-celebs-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.myf-celebs-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(255, 61, 127, 0.12), rgba(251, 191, 36, 0.12));
+  border: 1px solid rgba(255, 61, 127, 0.25);
+  border-radius: 999px;
+  font-size: 13px;
+  animation: celebsFade 0.4s ease-out both;
+}
+@keyframes celebsFade { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.myf-celebs-name { font-weight: 700; }
+.myf-celebs-group { font-size: 11px; opacity: 0.65; }
+[data-theme="light"] .myf-celebs-chip {
+  background: linear-gradient(135deg, #ffe4ec, #fff8e1);
+  border-color: rgba(255, 61, 127, 0.4);
+  color: #2e2e45;
+}
+
+/* ─── 점신 스타일 카테고리 sub-tab ─── */
+.myf-cat-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  margin: 12px 0 16px;
+}
+.myf-cat-tab {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.myf-cat-tab:hover { color: rgba(255, 255, 255, 0.9); }
+.myf-cat-tab.active {
+  background: linear-gradient(135deg, #fbbf24, #ff3d7f);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 61, 127, 0.3);
+}
+.myf-cat-tab-icon { font-size: 16px; }
+[data-theme="light"] .myf-cat-tabs { background: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+[data-theme="light"] .myf-cat-tab { color: #888; }
+[data-theme="light"] .myf-cat-tab.active { color: #fff; }
+
+.myf-cat-zodiac-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fbbf24, #ff3d7f);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin: 8px 0 16px;
+}
+
+.myf-cat-loading, .myf-cat-empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+/* ─── 띠 운세 탭 (점신 스타일) ─── */
+.myf-zodiac-hero {
+  text-align: center;
+  padding: 28px 20px;
+  margin-bottom: 16px;
+}
+.myf-zodiac-hero-icon {
+  font-size: 56px;
+  margin-bottom: 8px;
+  display: inline-block;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
+}
+.myf-zodiac-hero-name {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fbbf24, #ff3d7f);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin-bottom: 12px;
+}
+.myf-zodiac-hero-line {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.85;
+  padding: 0 8px;
+}
+
+/* ─── 띠 출생연도별 풀카드 ─── */
+.myf-zby-full {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.myf-zby-card {
+  padding: 16px 18px;
+  animation: zbyCardFade 0.5s ease-out both;
+}
+@keyframes zbyCardFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.myf-zby-card--mine {
+  border: 2px solid rgba(255, 61, 127, 0.4);
+  background: linear-gradient(135deg, rgba(255, 61, 127, 0.08), rgba(251, 191, 36, 0.06));
+  box-shadow: 0 0 20px rgba(255, 61, 127, 0.2);
+}
+[data-theme="light"] .myf-zby-card--mine {
+  background: linear-gradient(135deg, #fff0f5, #fffaf0);
+  border-color: rgba(255, 61, 127, 0.5);
+}
+.myf-zby-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.myf-zby-card-year {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+[data-theme="light"] .myf-zby-card-year { color: #b8860b; }
+.myf-zby-card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #fbbf24, #ff3d7f);
+  color: #fff;
+  border-radius: 999px;
+}
+.myf-zby-card-ganji {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.55;
+}
+.myf-zby-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #ff3d7f;
+}
+[data-theme="light"] .myf-zby-card-title { color: #c2185b; }
+.myf-zby-card-text {
+  font-size: 13.5px;
+  line-height: 1.7;
+  margin: 0;
+  opacity: 0.88;
+}

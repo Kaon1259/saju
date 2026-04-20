@@ -4,6 +4,7 @@ import { getPsychTests, analyzePsychTestStream, isGuest } from '../api/fortune';
 
 import StreamText from '../components/StreamText';
 import PageTopBar from '../components/PageTopBar';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -81,6 +82,8 @@ function PsychTest() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [streamText, setStreamText] = useState('');
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
@@ -159,14 +162,11 @@ function PsychTest() {
         onDone: (fullText) => {
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           const parsed = parseAiJson(fullText);
-          if (parsed) {
-            setResult(parsed);
-          } else {
-            setResult({ type: '분석 완료', description: fullText, score: 80 });
-          }
-          setStep('result');
+          pendingResultRef.current = parsed
+            ? parsed
+            : { type: '분석 완료', description: fullText, score: 80 };
+          setCompleting(true);
           setLoading(false);
-          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
         onError: (err) => {
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -219,6 +219,19 @@ function PsychTest() {
   // ═══ 렌더링 ═══
   return (
     <div className="pt-page">
+      <AnalysisComplete
+        show={completing}
+        theme="mbti"
+        onDone={() => {
+          setCompleting(false);
+          if (pendingResultRef.current) {
+            setResult(pendingResultRef.current);
+            pendingResultRef.current = null;
+            setStep('result');
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+          }
+        }}
+      />
       <PageTopBar onReset={goToOtherTest} color={selectedTest?.color || '#9B59B6'} />
       {/* 배경 */}
       <div className="pt-bg">

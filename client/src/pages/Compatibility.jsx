@@ -5,6 +5,7 @@ import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -55,11 +56,25 @@ function Compatibility() {
   const [streamText, setStreamText] = useState('');
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const pendingResultRef = useRef(null);
   const [showStarPicker, setShowStarPicker] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const [showMoreCards, setShowMoreCards] = useState(false);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+
+  /** 스트리밍 완료 → matrix 페이드아웃(0.7s) → 완료 애니(1.6s) → 결과 */
+  const finishWithCompleteAnimation = (finalResult) => {
+    setMatrixExiting(true);
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setTimeout(() => {
+      setMatrixShown(false);
+      setStreamText('');
+      pendingResultRef.current = finalResult;
+      setCompleting(true);
+    }, 700);
+  };
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
@@ -142,8 +157,6 @@ function Compatibility() {
           onChunk: (text) => setStreamText(prev => prev + text),
           onDone: (fullText) => {
             setAiStreaming(false);
-            setStreamText('');
-            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const merged = parsed ? {
               ...data,
@@ -154,7 +167,6 @@ function Compatibility() {
               aiConflictPoint: parsed.conflictPoint || null,
               aiAdvice: parsed.advice || null,
             } : { ...data, aiAnalysis: fullText };
-            setResult(merged);
             saveCompatCache({
               birthDate1: bd1, birthDate2: bd2,
               birthTime1: bt1 || null, birthTime2: bt2 || null,
@@ -167,6 +179,7 @@ function Compatibility() {
               aiConflictPoint: merged.aiConflictPoint,
               aiAdvice: merged.aiAdvice,
             }).catch(() => {});
+            finishWithCompleteAnimation(merged);
           },
           onError: () => {
             setAiStreaming(false); setStreamText(''); setMatrixShown(false);
@@ -190,7 +203,7 @@ function Compatibility() {
 
     return (
       <div className="compat-page">
-        {matrixShown && (
+        {matrixShown && !completing && (
           <AnalysisMatrix theme="love" label="AI가 사주 궁합을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
         )}
         {/* 결과 히어로 */}
@@ -324,11 +337,25 @@ function Compatibility() {
     );
   }
 
+  const analysisCompleteEl = (
+    <AnalysisComplete
+      show={completing}
+      theme="love"
+      onDone={() => {
+        setCompleting(false);
+        const r = pendingResultRef.current;
+        pendingResultRef.current = null;
+        if (r) setResult(r);
+      }}
+    />
+  );
+
   return (
     <div className="compat-page">
-      {matrixShown && (
+      {matrixShown && !completing && (
         <AnalysisMatrix theme="love" label="AI가 사주 궁합을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
+      {analysisCompleteEl}
       <section className="compat-intro compat-intro--compact">
         <span className="compat-intro-icon">💕</span>
         <h1 className="compat-intro-title">사주 궁합</h1>

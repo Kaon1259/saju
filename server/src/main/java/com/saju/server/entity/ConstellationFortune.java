@@ -28,6 +28,18 @@ public class ConstellationFortune {
     private String money;
     @Column(columnDefinition = "TEXT")
     private String health;
+    @Column(columnDefinition = "TEXT")
+    private String work;
+    @Column(columnDefinition = "TEXT")
+    private String advice;
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+    @Column(name = "planet_influence", columnDefinition = "TEXT")
+    private String planetInfluence;
+    @Column(name = "emotional_tip", columnDefinition = "TEXT")
+    private String emotionalTip;
+    @Column(name = "time_advice", columnDefinition = "TEXT")
+    private String timeAdvice;
 
     private Integer luckyNumber;
     private String luckyColor;

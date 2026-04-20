@@ -27,6 +27,8 @@ public class FortuneResponse {
     private String luckyFood;
     private String luckyFashion;
     private String luckyItem;
+    private String academicFortune;
+    private String luckyPerson;
     private Integer score;
 
     public static FortuneResponse from(DailyFortune fortune) {
@@ -46,6 +48,8 @@ public class FortuneResponse {
                 .luckyFood(fortune.getLuckyFood())
                 .luckyFashion(fortune.getLuckyFashion())
                 .luckyItem(fortune.getLuckyItem())
+                .academicFortune(fortune.getAcademicFortune())
+                .luckyPerson(fortune.getLuckyPerson())
                 .score(fortune.getScore())
                 .build();
     }
