@@ -23,6 +23,7 @@ public class CompatibilityService {
     private final ClaudeApiService claudeApiService;
     private final SpecialFortuneRepository specialFortuneRepository;
     private final ObjectMapper objectMapper;
+    private final DeepAnalysisService deepAnalysisService;
 
     public Map<String, Object> analyzeSaju(LocalDate bd1, String bt1, LocalDate bd2, String bt2) {
         return analyzeSaju(bd1, bt1, bd2, bt2, "M", "F");
@@ -270,16 +271,30 @@ public class CompatibilityService {
 
     /**
      * 결혼궁합 basic — 캐시 히트 시 마지막 AI 결과 포함 반환, 미스 시 기본 점수 계산.
+     * 결혼 심화분석 캐시도 함께 조회하여 deepCache 필드로 첨부.
      */
     public Map<String, Object> analyzeMarriageBasic(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
         String dbCacheKey = buildCacheKey("marriage", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
         Map<String, Object> dbCached = getFromCache("marriage", dbCacheKey);
-        if (dbCached != null) {
-            log.info("결혼궁합 캐시 히트: key={}", dbCacheKey);
-            return dbCached;
-        }
-        // 미스 시 기본 점수/사주 정보만 반환
-        return analyzeSajuBasic(bd1, bt1, bd2, bt2, gender1, gender2);
+        Map<String, Object> result = (dbCached != null) ? dbCached : analyzeSajuBasic(bd1, bt1, bd2, bt2, gender1, gender2);
+        if (dbCached != null) log.info("결혼궁합 캐시 히트: key={}", dbCacheKey);
+        attachDeepCache(result, "marriage_compat", bd1, bt1, gender1, bd2, bt2, gender2);
+        return result;
+    }
+
+    /** 심화분석 캐시가 있으면 result.deepCache 로 첨부 (한번에 노출 위함) */
+    private void attachDeepCache(Map<String, Object> result, String deepType,
+                                  LocalDate bd1, String bt1, String g1,
+                                  LocalDate bd2, String bt2, String g2) {
+        try {
+            String btn1 = (bt1 == null || bt1.isBlank()) ? null : bt1;
+            String btn2 = (bt2 == null || bt2.isBlank()) ? null : bt2;
+            Map<String, Object> deep = deepAnalysisService.getCachedCompat(deepType, bd1.toString(), btn1, g1, bd2.toString(), btn2, g2);
+            if (deep != null) {
+                result.put("deepCache", deep);
+                log.info("궁합 deepCache 첨부: type={}", deepType);
+            }
+        } catch (Exception e) { /* ignore */ }
     }
 
     /**
@@ -373,6 +388,7 @@ public class CompatibilityService {
         Map<String, Object> dbCached = getFromCache("compatibility", dbCacheKey);
         if (dbCached != null) {
             log.info("Basic 캐시 히트!");
+            attachDeepCache(dbCached, "compatibility", bd1, bt1, gender1, bd2, bt2, gender2);
             return dbCached;
         }
         log.info("Basic 캐시 미스");
@@ -424,6 +440,7 @@ public class CompatibilityService {
         result.put("elementRelation", relationship);
         result.put("branchRelation", branchRelation);
         result.put("yinyangBalance", yang1 != yang2 ? "음양 조화가 잘 맞습니다" : "같은 기운이라 경쟁할 수 있습니다");
+        attachDeepCache(result, "compatibility", bd1, bt1, gender1, bd2, bt2, gender2);
         return result;
     }
 

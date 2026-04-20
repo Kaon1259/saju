@@ -5,6 +5,7 @@ import {
   getCompatibilityStream,
   saveCompatCache,
   getLoveFortuneStream,
+  getCompatibilityDeepStream,
   isGuest,
   getHistory,
   getUser,
@@ -14,6 +15,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
+import StreamText from '../components/StreamText';
 import parseAiJson from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -59,11 +61,32 @@ function MyLoveCompat() {
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [result, setResult] = useState(null);
+  // 심화분석
+  const [deepResult, setDeepResult] = useState(null);
+  const [deepStreaming, setDeepStreaming] = useState(false);
+  const [deepStreamText, setDeepStreamText] = useState('');
+  const [deepCompleting, setDeepCompleting] = useState(false);
+  // 접기/펼치기 (true=펼침)
+  const [basicExpanded, setBasicExpanded] = useState(true);
+  const [deepExpanded, setDeepExpanded] = useState(true);
+
+  // 심화분석이 생기면 일반은 자동 접힘, 심화는 펼침
+  useEffect(() => {
+    if (deepResult) {
+      setBasicExpanded(false);
+      setDeepExpanded(true);
+    } else {
+      setBasicExpanded(true);
+    }
+  }, [deepResult]);
   const cleanupRef = useRef(null);
+  const deepCleanupRef = useRef(null);
   const resultRef = useRef(null);
+  const deepRef = useRef(null);
   const stopAmbientRef = useRef(null);
 
   useEffect(() => () => cleanupRef.current?.(), []);
+  useEffect(() => () => deepCleanupRef.current?.(), []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // 홈 드로어에서 넘어온 restoreHistoryId 복원 (skinship_compat/marriage_compat/my_love_compat)
@@ -160,12 +183,18 @@ function MyLoveCompat() {
     setAiStreaming(false);
     setMatrixShown(false);
     setMatrixExiting(false);
+    setDeepResult(null);
+    setDeepStreaming(false);
+    setDeepStreamText('');
+    setDeepCompleting(false);
     cleanupRef.current?.();
+    deepCleanupRef.current?.();
     try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
   };
 
   const handleReset = () => {
     cleanupRef.current?.();
+    deepCleanupRef.current?.();
     try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     setResult(null);
     setStreamText('');
@@ -173,6 +202,10 @@ function MyLoveCompat() {
     setLoading(false);
     setMatrixShown(false);
     setMatrixExiting(false);
+    setDeepResult(null);
+    setDeepStreaming(false);
+    setDeepStreamText('');
+    setDeepCompleting(false);
     setBd1(''); setBd2(''); setBt1(''); setBt2('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -180,6 +213,68 @@ function MyLoveCompat() {
   const { guardedAction: guardSajuCompat } = useHeartGuard('COMPATIBILITY');
   const { guardedAction: guardMarriageCompat } = useHeartGuard('COMPATIBILITY');
   const { guardedAction: guardSkinshipCompat } = useHeartGuard('LOVE_COUPLE');
+  const { guardedAction: guardDeepSajuCompat } = useHeartGuard('DEEP_COMPATIBILITY');
+  const { guardedAction: guardDeepMarriageCompat } = useHeartGuard('DEEP_MARRIAGE_COMPAT');
+
+  // 심화분석 시작 (사주 or 결혼)
+  const startDeepCompat = (deepType) => {
+    if (!result || !bd1 || !bd2) return;
+    // 캐시에 이미 있으면 스트리밍 없이 즉시 노출
+    if (result.deepCache) {
+      setDeepResult(result.deepCache);
+      setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      return;
+    }
+    // 기존 분석 결과를 context로 전달
+    const ctxParts = [];
+    if (result.aiSummary) ctxParts.push('요약: ' + result.aiSummary);
+    if (result.aiAnalysis) ctxParts.push('총평: ' + result.aiAnalysis);
+    if (deepType === 'compatibility') {
+      if (result.aiLoveCompat) ctxParts.push('연애궁합: ' + result.aiLoveCompat);
+      if (result.aiWorkCompat) ctxParts.push('일궁합: ' + result.aiWorkCompat);
+      if (result.aiConflictPoint) ctxParts.push('갈등: ' + result.aiConflictPoint);
+      if (result.aiAdvice) ctxParts.push('조언: ' + result.aiAdvice);
+    } else if (deepType === 'marriage_compat') {
+      if (result.aiMarriageTiming) ctxParts.push('결혼시기: ' + result.aiMarriageTiming);
+      if (result.aiFamilyHarmony) ctxParts.push('가정화합: ' + result.aiFamilyHarmony);
+      if (result.aiChildLuck) ctxParts.push('자녀운: ' + result.aiChildLuck);
+      if (result.aiSpouseTrait) ctxParts.push('배우자성향: ' + result.aiSpouseTrait);
+      if (result.aiInLawRelation) ctxParts.push('양가관계: ' + result.aiInLawRelation);
+      if (result.aiFinanceTogether) ctxParts.push('공동재물: ' + result.aiFinanceTogether);
+      if (result.aiAdvice) ctxParts.push('조언: ' + result.aiAdvice);
+    }
+    const context = ctxParts.join('\n');
+
+    setDeepStreaming(true);
+    setDeepStreamText('');
+    setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+    deepCleanupRef.current = getCompatibilityDeepStream(
+      deepType, bd1, bt1 || '', g1, bd2, bt2 || '', g2,
+      {
+        context,
+        onCached: (cached) => {
+          setDeepStreaming(false); setDeepStreamText('');
+          setDeepResult(cached);
+        },
+        onChunk: (text) => setDeepStreamText((prev) => prev + text),
+        onDone: (fullText) => {
+          const parsed = parseAiJson(fullText);
+          const finalData = parsed || { detailAnalysis: fullText };
+          // 스트리밍 종료 → 완료 애니메이션 1.6초 → 결과 표시
+          setDeepStreaming(false);
+          setDeepCompleting(true);
+          setTimeout(() => {
+            setDeepCompleting(false);
+            setDeepStreamText('');
+            setDeepResult(finalData);
+            setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          }, 1600);
+        },
+        onError: () => { setDeepStreaming(false); setDeepStreamText(''); setDeepCompleting(false); },
+      }
+    );
+  };
 
   // ─── 사주 궁합 ───
   const analyzeSaju = async () => {
@@ -202,6 +297,7 @@ function MyLoveCompat() {
 
       if (data.aiAnalysis || data.aiSummary) {
         setResult(data);
+        if (data.deepCache) setDeepResult(data.deepCache);
         setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
@@ -294,6 +390,7 @@ function MyLoveCompat() {
           aiFinanceTogether: data.aiFinanceTogether || null,
           aiAdvice: data.aiAdvice || null,
         });
+        if (data.deepCache) setDeepResult(data.deepCache);
         setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
@@ -641,12 +738,76 @@ function MyLoveCompat() {
                 </span>
               </div>
 
-              {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
-              {result.aiAnalysis && <FortuneCard icon="🔮" title="종합 분석" description={result.aiAnalysis} delay={80} />}
-              {result.aiLoveCompat && <FortuneCard icon="💖" title="연애 궁합" description={result.aiLoveCompat} delay={160} />}
-              {result.aiWorkCompat && <FortuneCard icon="🤝" title="일 / 협력 궁합" description={result.aiWorkCompat} delay={240} />}
-              {result.aiConflictPoint && <FortuneCard icon="⚠️" title="갈등 포인트" description={result.aiConflictPoint} delay={320} />}
-              {result.aiAdvice && <FortuneCard icon="💡" title="관계 조언" description={result.aiAdvice} delay={400} />}
+              {(result.aiSummary || result.aiAnalysis) && (() => {
+                const cards = (
+                  <>
+                    {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
+                    {result.aiAnalysis && <FortuneCard icon="🔮" title="종합 분석" description={result.aiAnalysis} delay={80} />}
+                    {result.aiLoveCompat && <FortuneCard icon="💖" title="연애 궁합" description={result.aiLoveCompat} delay={160} />}
+                    {result.aiWorkCompat && <FortuneCard icon="🤝" title="일 / 협력 궁합" description={result.aiWorkCompat} delay={240} />}
+                    {result.aiConflictPoint && <FortuneCard icon="⚠️" title="갈등 포인트" description={result.aiConflictPoint} delay={320} />}
+                    {result.aiAdvice && <FortuneCard icon="💡" title="관계 조언" description={result.aiAdvice} delay={400} />}
+                  </>
+                );
+                return deepResult ? (
+                  <div className="mlc-section">
+                    <button className={`mlc-section-toggle ${basicExpanded ? 'open' : ''}`} onClick={() => setBasicExpanded((v) => !v)}>
+                      <span className="mlc-section-title">📋 일반 분석</span>
+                      <span className="mlc-section-chevron">▾</span>
+                    </button>
+                    {basicExpanded && <div className="mlc-section-body">{cards}</div>}
+                  </div>
+                ) : cards;
+              })()}
+
+              {/* ─── 정통궁합 심화분석 ─── */}
+              <div ref={deepRef} className="mlc-deep-section">
+                {!deepResult && !deepStreaming && !deepCompleting && (
+                  <button className="mlc-deep-btn" onClick={() => guardDeepSajuCompat(() => startDeepCompat('compatibility'))}>
+                    🔍 심화분석 보기 <HeartCost category="DEEP_COMPATIBILITY" />
+                  </button>
+                )}
+                {deepStreaming && (
+                  <StreamText
+                    text={deepStreamText || ' '}
+                    icon="✨"
+                    label="AI가 두 사람의 궁합을 더 깊이 분석하고 있어요"
+                    color="#ff3d7f"
+                  />
+                )}
+                {deepCompleting && (
+                  <div className="mlc-deep-complete">
+                    <div className="mlc-deep-complete-burst">
+                      <span className="mlc-deep-complete-icon">✨</span>
+                      <span className="mlc-deep-complete-ring" />
+                      <span className="mlc-deep-complete-ring mlc-deep-complete-ring-2" />
+                    </div>
+                    <p className="mlc-deep-complete-text">분석이 끝났어요!</p>
+                    <p className="mlc-deep-complete-sub">결과를 보여드릴게요</p>
+                  </div>
+                )}
+                {deepResult && !deepCompleting && (
+                  <div className="mlc-section mlc-section--deep">
+                    <button className={`mlc-section-toggle mlc-section-toggle--deep ${deepExpanded ? 'open' : ''}`} onClick={() => setDeepExpanded((v) => !v)}>
+                      <span className="mlc-section-title">✨ 심화분석</span>
+                      <span className="mlc-section-chevron">▾</span>
+                    </button>
+                    {deepExpanded && (
+                      <div className="mlc-section-body">
+                        {deepResult.deepSummary && <FortuneCard icon="🌟" title="심화 요약" description={deepResult.deepSummary} delay={0} />}
+                        {deepResult.conflictScenario && <FortuneCard icon="⚡" title="갈등 시나리오" description={deepResult.conflictScenario} delay={80} />}
+                        {deepResult.synergyPoint && <FortuneCard icon="✨" title="시너지 포인트" description={deepResult.synergyPoint} delay={160} />}
+                        {deepResult.elementChemistry && <FortuneCard icon="🌈" title="오행 케미" description={deepResult.elementChemistry} delay={240} />}
+                        {deepResult.timelineChange && <FortuneCard icon="⏳" title="시기별 변화" description={deepResult.timelineChange} delay={320} />}
+                        {deepResult.crisisHandling && <FortuneCard icon="🛡️" title="위기 극복법" description={deepResult.crisisHandling} delay={400} />}
+                        {deepResult.longTermStrategy && <FortuneCard icon="🎯" title="지속 전략" description={deepResult.longTermStrategy} delay={480} />}
+                        {deepResult.hiddenMessage && <FortuneCard icon="🔮" title="천기누설" description={deepResult.hiddenMessage} delay={560} />}
+                        {deepResult.detailAnalysis && !deepResult.deepSummary && <FortuneCard icon="🔍" title="심화 분석" description={deepResult.detailAnalysis} delay={0} />}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </>
           )}
 
@@ -690,15 +851,80 @@ function MyLoveCompat() {
                 </span>
               </div>
 
-              {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
-              {result.aiAnalysis && <FortuneCard icon="💒" title="결혼궁합 총평" description={result.aiAnalysis} delay={80} />}
-              {result.aiMarriageTiming && <FortuneCard icon="📅" title="결혼 시기" description={result.aiMarriageTiming} delay={160} />}
-              {result.aiFamilyHarmony && <FortuneCard icon="🏡" title="가정 화합" description={result.aiFamilyHarmony} delay={240} />}
-              {result.aiChildLuck && <FortuneCard icon="👶" title="자녀운" description={result.aiChildLuck} delay={320} />}
-              {result.aiSpouseTrait && <FortuneCard icon="💼" title="배우자 성향" description={result.aiSpouseTrait} delay={400} />}
-              {result.aiInLawRelation && <FortuneCard icon="🏠" title="양가 관계" description={result.aiInLawRelation} delay={480} />}
-              {result.aiFinanceTogether && <FortuneCard icon="💰" title="공동 재물" description={result.aiFinanceTogether} delay={560} />}
-              {result.aiAdvice && <FortuneCard icon="💡" title="결혼 준비 조언" description={result.aiAdvice} delay={640} />}
+              {(result.aiSummary || result.aiAnalysis) && (() => {
+                const cards = (
+                  <>
+                    {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
+                    {result.aiAnalysis && <FortuneCard icon="💒" title="결혼궁합 총평" description={result.aiAnalysis} delay={80} />}
+                    {result.aiMarriageTiming && <FortuneCard icon="📅" title="결혼 시기" description={result.aiMarriageTiming} delay={160} />}
+                    {result.aiFamilyHarmony && <FortuneCard icon="🏡" title="가정 화합" description={result.aiFamilyHarmony} delay={240} />}
+                    {result.aiChildLuck && <FortuneCard icon="👶" title="자녀운" description={result.aiChildLuck} delay={320} />}
+                    {result.aiSpouseTrait && <FortuneCard icon="💼" title="배우자 성향" description={result.aiSpouseTrait} delay={400} />}
+                    {result.aiInLawRelation && <FortuneCard icon="🏠" title="양가 관계" description={result.aiInLawRelation} delay={480} />}
+                    {result.aiFinanceTogether && <FortuneCard icon="💰" title="공동 재물" description={result.aiFinanceTogether} delay={560} />}
+                    {result.aiAdvice && <FortuneCard icon="💡" title="결혼 준비 조언" description={result.aiAdvice} delay={640} />}
+                  </>
+                );
+                return deepResult ? (
+                  <div className="mlc-section">
+                    <button className={`mlc-section-toggle ${basicExpanded ? 'open' : ''}`} onClick={() => setBasicExpanded((v) => !v)}>
+                      <span className="mlc-section-title">📋 일반 분석</span>
+                      <span className="mlc-section-chevron">▾</span>
+                    </button>
+                    {basicExpanded && <div className="mlc-section-body">{cards}</div>}
+                  </div>
+                ) : cards;
+              })()}
+
+              {/* ─── 결혼궁합 심화분석 ─── */}
+              <div ref={deepRef} className="mlc-deep-section">
+                {!deepResult && !deepStreaming && !deepCompleting && (
+                  <button className="mlc-deep-btn" onClick={() => guardDeepMarriageCompat(() => startDeepCompat('marriage_compat'))}>
+                    🔍 결혼궁합 심화분석 보기 <HeartCost category="DEEP_MARRIAGE_COMPAT" />
+                  </button>
+                )}
+                {deepStreaming && (
+                  <StreamText
+                    text={deepStreamText || ' '}
+                    icon="💒"
+                    label="AI가 결혼 궁합을 더 깊이 분석하고 있어요"
+                    color="#ff3d7f"
+                  />
+                )}
+                {deepCompleting && (
+                  <div className="mlc-deep-complete">
+                    <div className="mlc-deep-complete-burst">
+                      <span className="mlc-deep-complete-icon">✨</span>
+                      <span className="mlc-deep-complete-ring" />
+                      <span className="mlc-deep-complete-ring mlc-deep-complete-ring-2" />
+                    </div>
+                    <p className="mlc-deep-complete-text">분석이 끝났어요!</p>
+                    <p className="mlc-deep-complete-sub">결과를 보여드릴게요</p>
+                  </div>
+                )}
+                {deepResult && !deepCompleting && (
+                  <div className="mlc-section mlc-section--deep">
+                    <button className={`mlc-section-toggle mlc-section-toggle--deep ${deepExpanded ? 'open' : ''}`} onClick={() => setDeepExpanded((v) => !v)}>
+                      <span className="mlc-section-title">✨ 결혼궁합 심화분석</span>
+                      <span className="mlc-section-chevron">▾</span>
+                    </button>
+                    {deepExpanded && (
+                      <div className="mlc-section-body">
+                        {deepResult.deepSummary && <FortuneCard icon="🌟" title="심화 요약" description={deepResult.deepSummary} delay={0} />}
+                        {deepResult.marriageTimingDeep && <FortuneCard icon="📅" title="결혼 시기 심화" description={deepResult.marriageTimingDeep} delay={80} />}
+                        {deepResult.spouseRole && <FortuneCard icon="🤝" title="부부 역할 분담" description={deepResult.spouseRole} delay={160} />}
+                        {deepResult.childRaisingDeep && <FortuneCard icon="👨‍👩‍👧" title="자녀 양육 심화" description={deepResult.childRaisingDeep} delay={240} />}
+                        {deepResult.inLawDeep && <FortuneCard icon="🏠" title="양가 관계 심화" description={deepResult.inLawDeep} delay={320} />}
+                        {deepResult.financeDesign && <FortuneCard icon="💰" title="재정 설계" description={deepResult.financeDesign} delay={400} />}
+                        {deepResult.crisisManagement && <FortuneCard icon="🛡️" title="위기 관리" description={deepResult.crisisManagement} delay={480} />}
+                        {deepResult.longTermVision && <FortuneCard icon="🎯" title="장기 비전" description={deepResult.longTermVision} delay={560} />}
+                        {deepResult.hiddenMessage && <FortuneCard icon="🔮" title="천기누설" description={deepResult.hiddenMessage} delay={640} />}
+                        {deepResult.detailAnalysis && !deepResult.deepSummary && <FortuneCard icon="🔍" title="심화 분석" description={deepResult.detailAnalysis} delay={0} />}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </>
           )}
 

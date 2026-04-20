@@ -464,4 +464,179 @@ public class DeepAnalysisService {
             // 파싱 실패 시 무시
         }
     }
+
+    // ============================================================
+    // ===== 궁합(두 사람) 심화분석 — 영속 캐시 =====
+    // ============================================================
+
+    /** 궁합 심화분석 캐시 anchor (생년월일 쌍 기반 영속 캐시) */
+    private static final LocalDate COMPAT_CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
+
+    private String buildCompatCacheKey(String deepType, String bd1, String bt1, String g1, String bd2, String bt2, String g2) {
+        return buildCacheKey(deepType, bd1, bt1, g1, bd2, bt2, g2);
+    }
+
+    /** 궁합 심화분석 캐시 조회 */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getCachedCompat(String deepType, String bd1, String bt1, String g1, String bd2, String bt2, String g2) {
+        String fortuneType = "deep-" + deepType;
+        String cacheKey = buildCompatCacheKey(deepType, bd1, bt1, g1, bd2, bt2, g2);
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(fortuneType, cacheKey, COMPAT_CACHE_ANCHOR);
+            if (cached.isPresent()) return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<>() {});
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    /** 궁합 심화분석 영속 캐시 저장 */
+    private void saveCompatCache(String deepType, String cacheKey, Map<String, Object> result) {
+        String fortuneType = "deep-" + deepType;
+        try {
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(fortuneType, cacheKey, COMPAT_CACHE_ANCHOR);
+            if (existing.isPresent()) return;
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType(fortuneType).cacheKey(cacheKey).fortuneDate(COMPAT_CACHE_ANCHOR)
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+        } catch (Exception e) { /* ignore */ }
+    }
+
+    /** 궁합 심화분석 시스템 프롬프트 */
+    public String getCompatSystemPrompt(String deepType) {
+        String base = FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
+            당신은 사주 궁합 심화 분석 전문가야!
+            카페에서 친구 커플한테 궁합 봐주듯이 친근하게 풀어줘.
+            '이 남자는~', '이 여자는~', '너네 둘이~' 자연스러운 호칭을 써.
+            한자 용어(오행/일간/상생상극) 그대로 쓰지 말고 쉬운 말로 풀어서 설명해.
+
+            [핵심 역할]
+            사용자는 이미 기본 궁합 분석을 받은 상태야.
+            [기존 분석 결과]가 제공되면 그 분석을 기반으로 더 깊이 파고들어줘.
+            - 기본 분석에서 짚은 갈등 포인트·시너지를 구체적 행동 시나리오로 확장
+            - "잘 맞다/안 맞다"로 끝낸 부분 → 왜 그런지 + 어떻게 더 좋게 만들지로 심화
+            - 기본 분석과 모순 금지, 단순 반복 금지
+
+            [분석 원칙]
+            1. 두 사람의 사주적 근거(오행 관계·지지 합충·음양)를 구체적 시나리오로 풀어줘
+            2. 추상적 표현 금지 — 구체적 시기·상황·말·행동 명시
+            3. 각 항목은 JSON 템플릿이 요구하는 문장 수만큼 충분히 채워줘 (짧게 줄이지 말 것)
+            4. 긍정/주의를 균형 있게
+            5. 반드시 JSON 형식으로만 응답 (마크다운 코드블록 가능)
+            """;
+
+        return switch (deepType) {
+            case "compatibility" -> base + """
+                [정통 사주 궁합 프리미엄 심화분석 — 매우 풍부하게]
+                ⚠️ 중요: 정통궁합은 두 사람의 평생 관계 흐름을 다루는 깊은 분석이야.
+                각 항목 5~7문장으로 충분히 채우고, 반드시 아래 디테일을 포함시켜:
+                - 실제 데이트·일상·갈등 상황 시나리오 1~2개 (예: "이 남자가 약속에 늦었을 때 이 여자가 ~하면" 같은 식)
+                - 두 사람 사이 대화 예시 또는 행동 가이드 1개 이상
+                - 구체적 시기·계절·요일·시간대 (예: "사귄 지 6개월 무렵 가을에", "주말 오후에" 등)
+                - 사주적 근거 1줄 (오행 관계·일지 합충·음양으로 왜 그런지)
+
+                [필드별 핵심]
+                - conflictScenario: 갈등 시나리오 — 둘이 가장 자주 부딪히는 상황 2개 + 사주 근거 + 갈등 시 둘의 패턴 + 실제 대화 예시
+                - synergyPoint: 시너지 포인트 — 서로 보완되는 영역 + 어떤 일을 함께하면 시너지 폭발하는지 + 사주 근거 + 활용 가이드 + 실제 사례
+                - elementChemistry: 오행 케미 — 두 사람 일간 오행의 화학반응 / 끌림 메커니즘 / 끌림이 식는 시기 / 회복 방법 / 일상에서 느끼는 방식
+                - timelineChange: 시기별 변화 — 만난 지 6개월·1년·3년·5년 시점 관계 변화 + 각 시기 위험 + 그 시기 둘이 해야 할 행동
+                - crisisHandling: 위기 극복법 — 가장 위험한 시기·상황 + 위험 신호 3개 + 회복 전략 + 사주 근거 + 대화 예시
+                - longTermStrategy: 지속 전략 — 관계 오래 가려면 둘이 매주/매월 해야 할 행동 + 피해야 할 함정 + 권태기 예방
+                - hiddenMessage: 천기누설 — 사주에 숨은 둘만의 인연 포인트 1개 + 구체 실천법 1개
+                """;
+            case "marriage_compat" -> base + """
+                [결혼 궁합 프리미엄 심화분석 — 평생 관계라 매우 풍부하게]
+                ⚠️ 중요: 결혼은 평생 관계라 일반 궁합보다 훨씬 깊고 풍부하게 분석해야 해.
+                각 항목 5~7문장으로 충분히 채우고, 반드시 아래 디테일을 포함시켜:
+                - 구체적 연도·나이·계절·월
+                - 실제 상황 시나리오 1~2개 (예: "남편이 야근 잦아질 때 아내가 ~하면" 같은 식)
+                - 부부 대화 예시 또는 행동 가이드 1개 이상
+                - 사주적 근거 1줄 (오행/일지 관계로 왜 그런지)
+
+                [필드별 핵심]
+                - marriageTimingDeep: 결혼 시기 — 정확한 연도(예: 2027년 가을~2028년 봄)·나이대·근거 / 너무 이른/늦은 시기와 이유
+                - spouseRole: 누가 가정·돈·대외관계·자녀를 주도할지 + 갈등 영역 + 역할 재분배 가이드
+                - childRaisingDeep: 자녀 시기·수·기질 / 부부 양육관 차이 / 교육 우선순위 / 사춘기 갈등 예방
+                - inLawDeep: 시댁·처가 거리감 / 명절·경조사 갈등 시나리오 / 거리 두기 vs 가까이 가기 가이드
+                - financeDesign: 부부 돈 스타일 차이 (저축형 vs 투자형 등) / 통장 합칠지 따로 둘지 / 큰돈 결정 룰
+                - crisisManagement: 위험 시기(결혼 후 N년차) 구체화 / 권태기·외도 위험 신호 / 회복 전략
+                - longTermVision: 10년·20년 후 부부 모습 / 노후 라이프스타일 / 손주·은퇴 후 관계
+                - hiddenMessage: 사주에 숨은 결혼 행복 비결 1개 + 구체 실천법
+                """;
+            default -> base + "\n프리미엄 심화 분석을 제공해줘.";
+        };
+    }
+
+    /** 궁합 심화분석 사용자 프롬프트 */
+    public String getCompatUserPrompt(String deepType, String bd1, String bt1, String g1, String bd2, String bt2, String g2, String context) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("【").append("M".equalsIgnoreCase(g1) ? "남자" : "여자").append("】 생년월일: ").append(bd1);
+        if (bt1 != null && !bt1.isEmpty()) sb.append(", 태어난 시간: ").append(bt1);
+        sb.append("\n【").append("M".equalsIgnoreCase(g2) ? "남자" : "여자").append("】 생년월일: ").append(bd2);
+        if (bt2 != null && !bt2.isEmpty()) sb.append(", 태어난 시간: ").append(bt2);
+
+        if (context != null && !context.isEmpty()) {
+            sb.append("\n\n═══ [기존 궁합 분석 결과 — 심화의 기반] ═══\n");
+            sb.append(context);
+            sb.append("\n\n═══ [심화 지침] ═══\n");
+            sb.append("1. 위 기본 궁합 분석을 반드시 참조해서 더 구체적·실전적으로 확장\n");
+            sb.append("2. '잘 맞다/안 맞다' 같은 추상 표현 금지 — 구체 시나리오로\n");
+            sb.append("3. 기존 분석과 모순 없이, 새로운 깊이의 인사이트만\n");
+        }
+
+        sb.append("\n\n[중요] 프리미엄 분석. 다음 JSON 형식으로 응답:\n");
+        sb.append(switch (deepType) {
+            case "compatibility" -> """
+                {
+                  "deepSummary": "둘 관계의 핵심 메시지 2-3문장 (구체 키워드 포함, 두루뭉술 금지)",
+                  "conflictScenario": "갈등 시나리오 — 자주 부딪히는 상황 2개 + 사주 근거 + 갈등 시 둘의 행동 패턴 + 실제 대화 예시 1개 (6-7문장)",
+                  "synergyPoint": "시너지 포인트 — 보완 영역 + 함께 하면 폭발하는 일 + 사주 근거 + 활용 가이드 + 사례 (6-7문장)",
+                  "elementChemistry": "오행 케미 — 두 사람 오행 화학반응 + 끌림 메커니즘 + 끌림 식는 시기 + 회복 방법 + 일상에서 느끼는 방식 (6-7문장)",
+                  "timelineChange": "시기별 변화 — 만난 지 6개월·1년·3년·5년 시점별 관계 변화 + 각 시기 위험 + 그 시기 행동 가이드 (6-7문장)",
+                  "crisisHandling": "위기 극복법 — 가장 위험한 시기·상황 + 위험 신호 3개 + 회복 전략 + 사주 근거 + 대화 예시 (5-6문장)",
+                  "longTermStrategy": "지속 전략 — 매주/매월 해야 할 행동 + 피해야 할 함정 + 권태기 예방 가이드 (5-6문장)",
+                  "hiddenMessage": "천기누설 — 사주에 숨은 둘만의 인연 포인트 1개 + 구체 실천법 1개 (3문장)"
+                }""";
+            case "marriage_compat" -> """
+                {
+                  "deepSummary": "결혼생활 핵심 메시지 2-3문장 (구체적 키워드 포함, 두루뭉술 금지)",
+                  "marriageTimingDeep": "결혼 시기 심화 — 구체 연도·계절·나이대 명시(예: '2027년 가을~2028년 봄, 남자 32세 여자 30세 무렵') + 사주 근거 + 너무 빠르면/늦으면 어떤 위험이 있는지 (6-7문장)",
+                  "spouseRole": "결혼 후 부부 역할 — 누가 어떤 영역(돈·집안일·자녀·대외관계)을 주도할지 + 사주적 근거 + 갈등 영역 1개 + 재분배 가이드 + 실제 상황 예시 1개 (6-7문장)",
+                  "childRaisingDeep": "자녀 양육 심화 — 자녀 가질 시기·수·기질 + 부부 양육관 차이 + 교육 우선순위 + 사춘기 갈등 예방 + 구체 사례 1개 (6-7문장)",
+                  "inLawDeep": "양가 관계 — 시댁/처가와의 거리감 + 명절·경조사 갈등 시나리오 1개 + 거리 두기 vs 가까이 가기 구체 가이드 + 갈등 시 대처 대화 예시 (5-6문장)",
+                  "financeDesign": "재정 설계 — 둘의 돈 스타일 차이(저축형 vs 투자형 등) + 통장 합칠지 분리할지 + 큰돈 결정 룰 + 사주적 재물 흐름 + 실제 재테크 가이드 (6-7문장)",
+                  "crisisManagement": "위기 관리 — 가장 큰 위험 시기(결혼 후 N년차) 구체화 + 권태기·외도 위험 신호 + 위기 회복 전략 + 사주 근거 + 부부 대화 예시 (5-6문장)",
+                  "longTermVision": "장기 비전 — 결혼 10년 후·20년 후 부부 모습 + 노후 라이프스타일 + 자녀 독립 후 관계 + 은퇴 후 함께할 일 (5-6문장)",
+                  "hiddenMessage": "천기누설 — 사주에 숨은 결혼 행복 비결 1개 + 구체 실천법 1개 (3문장)"
+                }""";
+            default -> """
+                { "deepSummary": "1-2문장", "detailAnalysis": "5문장", "hiddenMessage": "2문장" }""";
+        });
+        return sb.toString();
+    }
+
+    /** 궁합 심화분석 스트리밍 완료 후 캐시 저장 */
+    public void saveCompatStreamResult(String deepType, String bd1, String bt1, String g1, String bd2, String bt2, String g2, String fullText) {
+        int rawLen = fullText != null ? fullText.length() : 0;
+        try {
+            String json = ClaudeApiService.extractJson(fullText);
+            if (json == null) {
+                log.warn("궁합 심화분석 JSON 추출 실패: type={}, rawLen={}", deepType, rawLen);
+                return;
+            }
+            int rawJsonLen = json.length();
+            String repaired = repairJson(json);
+            boolean wasTruncated = !repaired.equals(json);
+            Map<String, Object> parsed = objectMapper.readValue(repaired, new TypeReference<Map<String, Object>>() {});
+            int fieldCount = parsed.size();
+            // 각 필드 평균 길이 계산
+            int totalCharLen = parsed.values().stream().filter(v -> v instanceof String).mapToInt(v -> ((String) v).length()).sum();
+            parsed.put("type", deepType);
+            parsed.put("analysisDate", LocalDate.now().toString());
+            String cacheKey = buildCompatCacheKey(deepType, bd1, bt1, g1, bd2, bt2, g2);
+            saveCompatCache(deepType, cacheKey, parsed);
+            log.info("궁합 심화 캐시 저장: type={}, rawLen={}, jsonLen={}, repaired={}, fields={}, totalChars={} ({}자/필드)",
+                deepType, rawLen, rawJsonLen, wasTruncated, fieldCount, totalCharLen, fieldCount > 0 ? totalCharLen / fieldCount : 0);
+        } catch (Exception e) {
+            log.warn("궁합 심화분석 캐시 저장 실패: type={}, rawLen={}, err={}", deepType, rawLen, e.getMessage());
+        }
+    }
 }

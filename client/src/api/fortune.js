@@ -1034,6 +1034,90 @@ export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calend
   return () => controller.abort();
 };
 
+// ─── 궁합 심화분석 캐시 조회 ───
+export const getCompatibilityDeepCached = async (type, bd1, bt1, g1, bd2, bt2, g2) => {
+  const params = { type, bd1, g1, bd2, g2 };
+  if (bt1) params.bt1 = bt1;
+  if (bt2) params.bt2 = bt2;
+  try {
+    const res = await api.get('/deep/compatibility/cached', { params });
+    return res.data?.cached ? res.data.data : null;
+  } catch {
+    return null;
+  }
+};
+
+// ─── 궁합 심화분석 스트리밍 (POST + body=context) ───
+export const getCompatibilityDeepStream = (type, bd1, bt1, g1, bd2, bt2, g2, { onChunk, onCached, onDone, onError, context } = {}) => {
+  if (!requireLogin(onError)) return () => {};
+  const params = new URLSearchParams({ type, bd1, g1, bd2, g2 });
+  if (bt1) params.set('bt1', bt1);
+  if (bt2) params.set('bt2', bt2);
+  appendUserId(params);
+
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/deep/compatibility/stream?${params.toString()}`;
+  const controller = new AbortController();
+
+  (async () => {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: context || '',
+        signal: controller.signal,
+      });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+
+        for (const event of events) {
+          if (!event.trim()) continue;
+          const lines = event.split('\n');
+          let eventName = '';
+          let dataLines = [];
+          for (const line of lines) {
+            if (line.startsWith('event:')) eventName = line.slice(6).trim();
+            else if (line.startsWith('data:')) dataLines.push(line.slice(5));
+          }
+          const data = dataLines.join('\n');
+
+          if (eventName === 'insufficient_hearts') {
+            try { window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: JSON.parse(data) })); } catch {}
+            onError?.('insufficient_hearts');
+            return;
+          } else if (eventName === 'cached') {
+            try { onCached?.(JSON.parse(data)); } catch { onDone?.(data); }
+            return;
+          } else if (eventName === 'chunk') {
+            onChunk?.(data);
+          } else if (eventName === 'done') {
+            window.dispatchEvent(new CustomEvent('heart:refresh'));
+            window.dispatchEvent(new CustomEvent('heart:deducted'));
+            onDone?.(data);
+            return;
+          } else if (eventName === 'error') {
+            onError?.(data);
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') onError?.(e.message || 'Connection lost');
+    }
+  })();
+
+  return () => controller.abort();
+};
+
 // ─── YouTube Shorts ───
 export const getFortuneShorts = async (context) => {
   const params = {};

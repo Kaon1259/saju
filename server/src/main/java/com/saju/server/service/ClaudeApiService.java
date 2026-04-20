@@ -64,7 +64,7 @@ public class ClaudeApiService {
             Map<String, Object> body = Map.of(
                 "model", model,
                 "max_tokens", maxTokens,
-                "system", systemPrompt,
+                "system", buildCachedSystem(systemPrompt),
                 "messages", List.of(
                     Map.of("role", "user", "content", userPrompt)
                 )
@@ -79,6 +79,7 @@ public class ClaudeApiService {
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode root = objectMapper.readTree(response.getBody());
+                logUsage(root.path("usage"));
                 JsonNode content = root.path("content");
                 if (content.isArray() && content.size() > 0) {
                     return content.get(0).path("text").asText();
@@ -148,7 +149,7 @@ public class ClaudeApiService {
                     "model", model,
                     "max_tokens", maxTokens,
                     "stream", true,
-                    "system", systemPrompt,
+                    "system", buildCachedSystem(systemPrompt),
                     "messages", List.of(Map.of("role", "user", "content", userPrompt))
                 );
                 String jsonBody = objectMapper.writeValueAsString(body);
@@ -185,6 +186,8 @@ public class ClaudeApiService {
                                 fullText.append(text);
                                 emitter.send(SseEmitter.event().name("chunk").data(text));
                             }
+                        } else if ("message_start".equals(eventType)) {
+                            logUsage(event.path("message").path("usage"));
                         } else if ("message_stop".equals(eventType)) {
                             break;
                         }
@@ -221,6 +224,33 @@ public class ClaudeApiService {
         });
 
         return emitter;
+    }
+
+    /**
+     * 캐시 사용량 로깅 — input/cache_read/cache_create/output 토큰을 한 줄로 출력.
+     * cache_read_input_tokens가 0보다 크면 캐시 히트(90% 할인 적용됨).
+     */
+    private static void logUsage(JsonNode usage) {
+        if (usage == null || usage.isMissingNode() || usage.isNull()) return;
+        long input = usage.path("input_tokens").asLong(0);
+        long cacheRead = usage.path("cache_read_input_tokens").asLong(0);
+        long cacheCreate = usage.path("cache_creation_input_tokens").asLong(0);
+        long output = usage.path("output_tokens").asLong(0);
+        log.info("[Claude usage] input={} cache_read={} cache_create={} output={}",
+            input, cacheRead, cacheCreate, output);
+    }
+
+    /**
+     * Anthropic Prompt Caching 적용용 system 블록 빌더.
+     * 시스템 프롬프트에 cache_control:{type:ephemeral} 마킹 → 5분간 캐시 → 입력토큰 90% 절감.
+     * 1024토큰 미만이면 Anthropic이 자동 무시하므로 안전.
+     */
+    private static List<Map<String, Object>> buildCachedSystem(String systemPrompt) {
+        return List.of(Map.of(
+            "type", "text",
+            "text", systemPrompt == null ? "" : systemPrompt,
+            "cache_control", Map.of("type", "ephemeral")
+        ));
     }
 
     /**

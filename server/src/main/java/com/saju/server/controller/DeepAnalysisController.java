@@ -136,8 +136,82 @@ public class DeepAnalysisController {
             case "mbti" -> "DEEP_MBTI";
             case "constellation" -> "DEEP_CONSTELLATION";
             case "tojeong" -> "DEEP_TOJEONG";
+            case "compatibility" -> "DEEP_COMPATIBILITY";
+            case "marriage_compat" -> "DEEP_MARRIAGE_COMPAT";
             default -> "DEEP_TODAY";
         };
+    }
+
+    // ============================================================
+    // ===== 궁합(두 사람) 심화분석 엔드포인트 =====
+    // ============================================================
+
+    /** 궁합 심화분석 캐시 조회 (있으면 반환, 없으면 null) */
+    @GetMapping("/compatibility/cached")
+    public ResponseEntity<Map<String, Object>> getCompatCached(
+            @RequestParam String type,
+            @RequestParam String bd1,
+            @RequestParam(required = false) String bt1,
+            @RequestParam String g1,
+            @RequestParam String bd2,
+            @RequestParam(required = false) String bt2,
+            @RequestParam String g2) {
+        Map<String, Object> cached = deepAnalysisService.getCachedCompat(type, bd1, bt1, g1, bd2, bt2, g2);
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("cached", cached != null);
+        if (cached != null) resp.put("data", cached);
+        return ResponseEntity.ok(resp);
+    }
+
+    /** 궁합 심화분석 스트리밍 (POST - context를 body로) */
+    @PostMapping(value = "/compatibility/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter compatDeepStream(
+            @RequestParam String type,
+            @RequestParam String bd1,
+            @RequestParam(required = false) String bt1,
+            @RequestParam String g1,
+            @RequestParam String bd2,
+            @RequestParam(required = false) String bt2,
+            @RequestParam String g2,
+            @RequestParam(required = false) Long userId,
+            @RequestBody(required = false) String context) {
+        log.info("궁합 심화분석 요청: type={}, bd1={}, bd2={}, ctxLen={}", type, bd1, bd2, context != null ? context.length() : 0);
+
+        // 캐시 확인
+        Map<String, Object> cached = deepAnalysisService.getCachedCompat(type, bd1, bt1, g1, bd2, bt2, g2);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try {
+                    emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
+                    emitter.complete();
+                } catch (Exception ignored) {}
+            }).start();
+            return emitter;
+        }
+
+        // 하트 잔액 확인
+        final String configKey;
+        if (userId != null) {
+            try {
+                configKey = mapDeepTypeToConfigKey(type);
+                heartPointService.checkPoints(userId, configKey);
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        } else {
+            configKey = null;
+        }
+
+        String systemPrompt = deepAnalysisService.getCompatSystemPrompt(type);
+        String userPrompt = deepAnalysisService.getCompatUserPrompt(type, bd1, bt1, g1, bd2, bt2, g2, context);
+        final Long uid = userId;
+        // 정통/결혼 심화 모두 7-8개 필드 × 5-7문장으로 분량 풍부 → 토큰 여유 확보
+        int maxTokens = ("marriage_compat".equalsIgnoreCase(type) || "compatibility".equalsIgnoreCase(type)) ? 6000 : 4000;
+        return claudeApiService.generateStream(systemPrompt, userPrompt, maxTokens, (fullText) -> {
+            deepAnalysisService.saveCompatStreamResult(type, bd1, bt1, g1, bd2, bt2, g2, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, configKey, "심화분석 - " + type);
+        });
     }
 
     @DeleteMapping("/cache")

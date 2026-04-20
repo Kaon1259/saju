@@ -87,6 +87,8 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("DEEP_MBTI",           15,  "심화분석",    "심화 - MBTI");
         init("DEEP_CONSTELLATION",  15,  "심화분석",    "심화 - 별자리");
         init("DEEP_TOJEONG",        15,  "심화분석",    "심화 - 토정비결");
+        init("DEEP_COMPATIBILITY",  200, "심화분석",    "심화 - 정통궁합");
+        init("DEEP_MARRIAGE_COMPAT", 200, "심화분석",   "심화 - 결혼궁합");
 
         // ── 시스템 ──
         init("SIGNUP_BONUS",       500,  "시스템",      "회원가입 보너스");
