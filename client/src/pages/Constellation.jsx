@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllConstellations, getConstellationFortuneStream, getUser, isGuest } from '../api/fortune';
+import { getAllConstellations, getConstellationFortuneStream, getUser, isGuest, getHistory } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
+import HistoryDrawer from '../components/HistoryDrawer';
 
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -265,6 +266,23 @@ function Constellation() {
             ) : null;
           })()}
         </div>
+      )}
+
+      {!isGuest() && (
+        <HistoryDrawer
+          type="constellation"
+          label="📚 최근 본 별자리 운세"
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              const p = full?.payload;
+              if (!p) return;
+              setSelected(p.sign || null);
+              setFortune(p);
+              setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            } catch {}
+          }}
+        />
       )}
     </div>
   );
