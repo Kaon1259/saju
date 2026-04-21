@@ -203,6 +203,45 @@ function App() {
     }
   }, []);
 
+  // 타로 덱 인트로(webp/gif) 유휴 시간 프리로드 — 타로 페이지 진입 지연 제거
+  useEffect(() => {
+    const TAROT_DECK_INTROS = [
+      '/tarot-effects/deck-intro/newclassic_0.webp',
+      '/tarot-effects/deck-intro/jester_0.webp',
+      '/tarot-effects/deck-intro/masterpiece_0.webp',
+      '/tarot-effects/deck-intro/kdrama_0.webp',
+      '/tarot-effects/deck-intro/celestial_0.webp',
+      '/tarot-effects/deck-intro/lady_0.webp',
+      '/tarot-effects/deck-intro/cartoon_girl_0.gif',
+      '/tarot-effects/deck-intro/cartoon_boy_0.gif',
+    ];
+    const TAROT_DECK_COVERS = [
+      '/tarot-effects/deck-intro/newclassic_cover.jpg',
+      '/tarot-effects/deck-intro/jester_cover.jpg',
+      '/tarot-effects/deck-intro/masterpiece_cover.jpg',
+      '/tarot-effects/deck-intro/kdrama_cover.jpg',
+      '/tarot-effects/deck-intro/celestial_cover.jpg',
+      '/tarot-effects/deck-intro/lady_cover.jpg',
+      '/tarot-effects/deck-intro/cartoon_girl_cover.jpg',
+      '/tarot-effects/deck-intro/cartoon_boy_cover.jpg',
+    ];
+    const preload = (src) => {
+      const img = new Image();
+      if ('fetchPriority' in img) img.fetchPriority = 'low';
+      img.decoding = 'async';
+      img.src = src;
+    };
+    const run = () => {
+      TAROT_DECK_COVERS.forEach(preload);
+      TAROT_DECK_INTROS.forEach(preload);
+    };
+    const ric = window.requestIdleCallback || ((cb) => setTimeout(cb, 2000));
+    const handle = ric(run, { timeout: 5000 });
+    return () => {
+      if (window.cancelIdleCallback && typeof handle === 'number') window.cancelIdleCallback(handle);
+    };
+  }, []);
+
   const triggerSplash = () => {
     // 세션에 한 번이라도 스플래시를 봤다면 다시 띄우지 않음
     if (sessionStorage.getItem('splashShown') === '1') return;

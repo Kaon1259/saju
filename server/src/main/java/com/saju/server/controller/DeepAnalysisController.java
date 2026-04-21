@@ -206,8 +206,10 @@ public class DeepAnalysisController {
         String systemPrompt = deepAnalysisService.getCompatSystemPrompt(type);
         String userPrompt = deepAnalysisService.getCompatUserPrompt(type, bd1, bt1, g1, bd2, bt2, g2, context);
         final Long uid = userId;
-        // 정통/결혼 심화 모두 7-8개 필드 × 5-7문장으로 분량 풍부 → 토큰 여유 확보
-        int maxTokens = ("marriage_compat".equalsIgnoreCase(type) || "compatibility".equalsIgnoreCase(type)) ? 6000 : 4000;
+        // 정통/결혼 심화 모두 7-8개 필드 × 5-8문장으로 분량 풍부 → 토큰 여유 확보 (결혼은 더 길게)
+        int maxTokens = "marriage_compat".equalsIgnoreCase(type) ? 7500
+                : "compatibility".equalsIgnoreCase(type) ? 6000
+                : 4000;
         return claudeApiService.generateStream(systemPrompt, userPrompt, maxTokens, (fullText) -> {
             deepAnalysisService.saveCompatStreamResult(type, bd1, bt1, g1, bd2, bt2, g2, fullText);
             if (uid != null) heartPointService.deductPoints(uid, configKey, "심화분석 - " + type);

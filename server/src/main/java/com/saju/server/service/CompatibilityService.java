@@ -276,8 +276,25 @@ public class CompatibilityService {
     public Map<String, Object> analyzeMarriageBasic(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
         String dbCacheKey = buildCacheKey("marriage", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
         Map<String, Object> dbCached = getFromCache("marriage", dbCacheKey);
-        Map<String, Object> result = (dbCached != null) ? dbCached : analyzeSajuBasic(bd1, bt1, bd2, bt2, gender1, gender2);
-        if (dbCached != null) log.info("결혼궁합 캐시 히트: key={}", dbCacheKey);
+        Map<String, Object> result;
+        if (dbCached != null) {
+            log.info("결혼궁합 캐시 히트: key={}", dbCacheKey);
+            result = dbCached;
+        } else {
+            // 결혼 캐시가 없으면 기본 계산만 — 정통궁합(compatibility) 캐시의 AI 필드·deepCache는 구조가 달라 사용 금지
+            result = analyzeSajuBasic(bd1, bt1, bd2, bt2, gender1, gender2);
+            result.remove("aiSummary");
+            result.remove("aiAnalysis");
+            result.remove("aiLoveCompat");
+            result.remove("aiWorkCompat");
+            result.remove("aiConflictPoint");
+            result.remove("aiAdvice");
+            result.remove("aiScore");
+            result.remove("aiGrade");
+            result.remove("deepCache"); // analyzeSajuBasic이 붙인 deep-compatibility 제거
+        }
+        // 항상 marriage_compat 전용 deepCache만 재첨부 (없으면 null 상태 유지 → client가 새로 스트림)
+        result.remove("deepCache");
         attachDeepCache(result, "marriage_compat", bd1, bt1, gender1, bd2, bt2, gender2);
         return result;
     }
@@ -459,25 +476,27 @@ public class CompatibilityService {
 
         if ("marriage".equalsIgnoreCase(mode)) {
             String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
-                    + "카페에서 친구 커플한테 결혼궁합 봐주듯이 자연스럽게 얘기하는 사주 전문가야.\n"
+                    + "카페에서 친구 커플한테 결혼궁합 봐주듯이 자연스럽게 얘기하는 결혼 전문 사주 분석가야.\n"
                     + "20대 후반~30대가 '우리 결혼해도 될까?' 진지하게 물을 때 답하는 톤으로.\n"
                     + "'너네 둘이~', '이 남자는~', '이 여자는~' 자연스러운 호칭 사용.\n"
-                    + "한자 용어(오행/일간/상생상극) 그대로 쓰지 말고 쉬운 말로 풀어서.\n\n"
-                    + "결혼궁합 특화 분석 — JSON만 응답:\n"
-                    + "- summary: 한 줄 요약 (30자 이내, 결혼에 초점)\n"
-                    + "- overall: 결혼 궁합 전반 3-4문장\n"
-                    + "- marriageTiming: 결혼 시기 분석 3-4문장 (언제가 좋을지, 구체적 나이대/연도·계절)\n"
-                    + "- familyHarmony: 가정 분위기·부부 화합 3-4문장\n"
-                    + "- childLuck: 자녀운 3-4문장 (자녀 수·터울·양육 스타일)\n"
-                    + "- spouseTrait: 배우자 성향·직업 성향 3-4문장\n"
-                    + "- inLawRelation: 양가(시댁/처가) 관계 2-3문장\n"
-                    + "- financeTogether: 공동 재물운 3-4문장 (돈 모으는 스타일·투자·소비)\n"
-                    + "- advice: 결혼 준비 실천 조언 3-4문장\n"
+                    + "한자 용어(오행/일간/상생상극) 그대로 쓰지 말고 쉬운 말로 풀어서.\n"
+                    + "⚠️ 모든 필드는 '결혼해서 함께 사는 관계'에 특화 — 일반 연애 궁합과 절대 같은 톤으로 답하지 마.\n\n"
+                    + "결혼궁합 특화 분석 — 각 필드 충분히 길게 채우고, 구체 연도·상황 예시 1개씩 반드시 포함 — JSON만 응답:\n"
+                    + "- summary: 한 줄 요약 (30자 이내, 결혼생활에 초점)\n"
+                    + "- overall: 결혼 전반 총평 5-6문장 (결혼해서 같이 살 때 둘 관계 흐름, 결혼으로 얻는 것·잃는 것, 사주 근거 1줄)\n"
+                    + "- marriageTiming: 결혼 시기 분석 5-6문장 (구체 연도·계절·나이대, 왜 그 시기인지 사주 근거, 너무 이르거나 늦으면 어떤 위험)\n"
+                    + "- familyHarmony: 신혼~결혼 3년차 가정 분위기 5-6문장 (신혼 1년 모습·3년차 변화·부부 대화 패턴·주말 보내는 스타일)\n"
+                    + "- childLuck: 결혼 후 자녀 5-6문장 (자녀 시기·수·터울·양육관 차이·부부 육아 스타일·교육 우선순위)\n"
+                    + "- spouseTrait: 결혼 후 배우자로 보이는 모습 5-6문장 (연인 때와 달라지는 부분·직장에서의 성향·가정에서 책임감·말투 변화)\n"
+                    + "- inLawRelation: 결혼 후 시댁·처가 관계 4-5문장 (명절·경조사 갈등 포인트·거리감·배우자가 해줘야 할 중재 역할)\n"
+                    + "- financeTogether: 신혼 공동 재물 5-6문장 (통장 합칠지 분리할지·돈 쓰는 스타일 차이·집 마련·큰돈 결정·저축 vs 투자)\n"
+                    + "- advice: 결혼 준비·결혼 생활 실천 조언 5-6문장 (상견례~신혼까지 구체 팁·피해야 할 행동·반드시 해야 할 대화)\n"
                     + "- score: 1-100 (결혼궁합 점수), grade: 천생배필/좋은 짝/보통/고민 필요/어려움\n"
                     + "{\"summary\":\"\",\"overall\":\"\",\"marriageTiming\":\"\",\"familyHarmony\":\"\",\"childLuck\":\"\",\"spouseTrait\":\"\",\"inLawRelation\":\"\",\"financeTogether\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
 
             String userPrompt = buildCompatPrompt(r1, r2, score, elementRelation, branchRelation, label1, label2)
-                    + "\n\n⚠️ 이 분석은 '결혼 가능성'에 초점을 맞춘 결혼궁합이야. 단순 연애가 아닌 평생 함께할 가능성·가정 꾸리기 관점에서 답해줘.";
+                    + "\n\n⚠️ 이 분석은 '결혼해서 함께 살 때 둘 관계'에 초점. 단순 연애가 아닌 평생 가정 꾸리는 관점 필수.\n"
+                    + "각 필드는 짧게 줄이지 말고 5-6문장씩 풍부하게 채우고, 구체 연도·상황 예시 1개씩 반드시 포함해줘.";
             return new String[]{systemPrompt, userPrompt};
         }
 

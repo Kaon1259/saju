@@ -167,7 +167,8 @@ public class CompatibilityController {
         final LocalDate fbd1 = bd1, fbd2 = bd2;
         final Long uid = userId;
         final boolean isMarriage = "marriage".equalsIgnoreCase(mode);
-        return claudeApiService.generateStream(prompts[0], prompts[1], 2500, (fullText) -> {
+        int maxTokens = isMarriage ? 3500 : 2500;
+        return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens, (fullText) -> {
             // mode별 전용 캐시 저장
             if (isMarriage) {
                 compatibilityService.parseAndSaveMarriageStreamResult(fbd1, birthTime1, fbd2, birthTime2, gender1, gender2,
