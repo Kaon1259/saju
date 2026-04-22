@@ -167,7 +167,9 @@ public class CompatibilityController {
         final LocalDate fbd1 = bd1, fbd2 = bd2;
         final Long uid = userId;
         final boolean isMarriage = "marriage".equalsIgnoreCase(mode);
-        int maxTokens = isMarriage ? 3500 : 2500;
+        // 결혼은 9필드(summary/overall/marriageTiming/familyHarmony/childLuck/spouseTrait/
+        // inLawRelation/financeTogether/advice), 정통은 6필드. 3500으로는 결혼 advice 필드에서 토큰 부족으로 잘림.
+        int maxTokens = isMarriage ? 5500 : 2500;
         return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens, (fullText) -> {
             // mode별 전용 캐시 저장
             if (isMarriage) {

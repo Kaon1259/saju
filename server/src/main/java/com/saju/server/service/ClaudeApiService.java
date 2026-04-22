@@ -130,7 +130,7 @@ public class ClaudeApiService {
 
     private SseEmitter generateStreamInternal(String systemPrompt, String userPrompt, int maxTokens,
             java.util.function.Function<String, String> onComplete) {
-        SseEmitter emitter = new SseEmitter(300000L); // 5분 타임아웃
+        SseEmitter emitter = new SseEmitter(600000L); // 10분 타임아웃 (결혼/심화는 5500~7500토큰 → 최대 3~4분 소요)
 
         if (!isAvailable()) {
             streamExecutor.execute(() -> {
@@ -161,7 +161,9 @@ public class ClaudeApiService {
                 conn.setRequestProperty("x-api-key", apiKey);
                 conn.setRequestProperty("anthropic-version", "2023-06-01");
                 conn.setConnectTimeout(10000);
-                conn.setReadTimeout(180000);
+                // readTimeout은 청크 간 최대 대기 시간 — 스트림이 꾸준히 흐르면 길게 잡아도 OK.
+                // 결혼 5500토큰 / 심화 7500토큰은 Claude 속도 기준 2~4분 → 600초로 여유 있게.
+                conn.setReadTimeout(600000);
 
                 conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
                 conn.getOutputStream().flush();
