@@ -36,6 +36,45 @@ export function extractStreamingFields(partialText, fields) {
 }
 
 /**
+ * 부분 JSON에서 각 필드의 진행 상태 추출 (typewriter 효과용).
+ * 닫는 따옴표 안 와도 현재까지 흘러온 텍스트를 반환 → 카드 안에 한 글자씩 채워짐 효과.
+ *
+ * @returns {Record<string, { value: string, done: boolean }>}
+ *   value: 현재까지 누적된 텍스트 (escape 디코딩 시도)
+ *   done:  키가 완전히 닫혔으면 true
+ */
+export function extractStreamingFieldsPartial(partialText, fields) {
+  if (!partialText || !Array.isArray(fields)) return {};
+  let text = partialText;
+  const cb = text.indexOf('```');
+  if (cb >= 0) {
+    const after = text.indexOf('\n', cb);
+    if (after > 0) text = text.substring(after + 1);
+  }
+  const result = {};
+  for (const key of fields) {
+    // 1) 완성된 필드: "key": "..." (닫는 따옴표 + 콤마/}/줄바꿈)
+    const reDone = new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"\\s*(?:,|\\}|\\n|$)`, 's');
+    const mDone = text.match(reDone);
+    if (mDone && mDone[1] !== undefined) {
+      try { result[key] = { value: JSON.parse('"' + mDone[1] + '"'), done: true }; }
+      catch { result[key] = { value: mDone[1], done: true }; }
+      continue;
+    }
+    // 2) 진행 중: "key": "...current text without closing quote
+    const rePart = new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)$`, 's');
+    const mPart = text.match(rePart);
+    if (mPart && mPart[1] !== undefined) {
+      // 부분 escape는 안전하게 처리 — JSON.parse 실패 가능성 높으므로 raw 사용
+      const raw = mPart[1];
+      try { result[key] = { value: JSON.parse('"' + raw + '"'), done: false }; }
+      catch { result[key] = { value: raw, done: false }; }
+    }
+  }
+  return result;
+}
+
+/**
  * AI 스트리밍 응답에서 JSON을 안전하게 추출
  * - 마크다운 코드블록(```) 제거
  * - 잘린 JSON 복구 시도

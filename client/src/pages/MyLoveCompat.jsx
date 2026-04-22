@@ -15,9 +15,10 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
+import StreamingCard from '../components/StreamingCard';
 import StreamText from '../components/StreamText';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson, { extractStreamingFields } from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFields, extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyLoveCompat.css';
@@ -62,6 +63,9 @@ function MyLoveCompat() {
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [result, setResult] = useState(null);
+  // Progressive 카드 상태 추적 — 분석 중 placeholder → streaming(typewriter) → done
+  const [streamingActive, setStreamingActive] = useState(false);
+  const [doneFields, setDoneFields] = useState(() => new Set());
   // 심화분석
   const [deepResult, setDeepResult] = useState(null);
   const [deepStreaming, setDeepStreaming] = useState(false);
@@ -436,14 +440,39 @@ function MyLoveCompat() {
       setLoading(false);
       setAiStreaming(true);
 
+      // Progressive 카드 노출 — 완성된 필드부터 즉시 표시
+      const FIELD_MAP = {
+        summary: 'aiSummary', overall: 'aiAnalysis', loveCompat: 'aiLoveCompat',
+        workCompat: 'aiWorkCompat', conflictPoint: 'aiConflictPoint', advice: 'aiAdvice',
+      };
+      const PROG_FIELDS = Object.keys(FIELD_MAP);
+      let buffer = '';
+      let firstShown = false;
+
       cleanupRef.current = getCompatibilityStream(
         bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
           historyType: 'my_love_compat',
-          onChunk: (text) => setStreamText((prev) => prev + text),
+          onChunk: (text) => {
+            buffer += text;
+            setStreamText((prev) => prev + text);
+            const completed = extractStreamingFields(buffer, PROG_FIELDS);
+            const newFields = {};
+            for (const [src, dst] of Object.entries(FIELD_MAP)) {
+              if (completed[src] !== undefined) newFields[dst] = completed[src];
+            }
+            if (Object.keys(newFields).length > 0) {
+              setResult((prev) => ({ ...(prev || data), ...newFields }));
+              if (!firstShown) {
+                firstShown = true;
+                setMatrixExiting(true);
+                setTimeout(() => setMatrixShown(false), 600);
+                setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+              }
+            }
+          },
           onDone: (fullText) => {
-            setAiStreaming(false);
             const parsed = parseAiJson(fullText);
             const finalResult = parsed ? {
               ...data,
@@ -466,7 +495,14 @@ function MyLoveCompat() {
               aiConflictPoint: finalResult.aiConflictPoint,
               aiAdvice: finalResult.aiAdvice,
             }).catch(() => {});
-            finishWithCompleteAnimation(finalResult);
+            setAiStreaming(false);
+            if (firstShown) {
+              setResult(finalResult);
+              try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+              setStreamText('');
+            } else {
+              finishWithCompleteAnimation(finalResult);
+            }
           },
           onError: () => {
             setAiStreaming(false); setStreamText('');
@@ -526,18 +562,65 @@ function MyLoveCompat() {
       setLoading(false);
       setAiStreaming(true);
 
+      // Progressive 카드 노출 — 결혼궁합 9필드 (placeholder → typewriter → done)
+      const FIELD_MAP = {
+        summary: 'aiSummary', overall: 'aiAnalysis',
+        marriageTiming: 'aiMarriageTiming', familyHarmony: 'aiFamilyHarmony',
+        childLuck: 'aiChildLuck', spouseTrait: 'aiSpouseTrait',
+        inLawRelation: 'aiInLawRelation', financeTogether: 'aiFinanceTogether',
+        advice: 'aiAdvice',
+      };
+      const PROG_FIELDS = Object.keys(FIELD_MAP);
+      let buffer = '';
+      let firstShown = false;
+
+      // 분석 시작 즉시 placeholder 카드 9장 노출
+      setDoneFields(new Set());
+      setStreamingActive(true);
+      setResult({ ...data, _kind: 'marriage' });
+      // 매트릭스 즉시 페이드아웃 → 카드 placeholder가 바로 보이게
+      setMatrixExiting(true);
+      setTimeout(() => setMatrixShown(false), 600);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
       cleanupRef.current = getCompatibilityStream(
         bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
           historyType: 'marriage_compat',
           mode: 'marriage',
-          onChunk: (text) => setStreamText((prev) => prev + text),
+          onChunk: (text) => {
+            buffer += text;
+            setStreamText((prev) => prev + text);
+            // 부분 텍스트 추출 — 카드 안에 typewriter처럼 흘러나옴
+            const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+            const newFields = {};
+            const newDone = [];
+            for (const [src, dst] of Object.entries(FIELD_MAP)) {
+              const p = partial[src];
+              if (p !== undefined) {
+                newFields[dst] = p.value;
+                if (p.done) newDone.push(dst);
+              }
+            }
+            if (Object.keys(newFields).length > 0) {
+              setResult((prev) => ({ ...(prev || data), ...newFields }));
+              firstShown = true;
+            }
+            if (newDone.length > 0) {
+              setDoneFields((prev) => {
+                let changed = false;
+                const next = new Set(prev);
+                for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+                return changed ? next : prev;
+              });
+            }
+          },
           onDone: (fullText) => {
-            setAiStreaming(false);
             const parsed = parseAiJson(fullText);
             const finalResult = parsed ? {
               ...data,
+              _kind: 'marriage',
               score: parsed.score || data.score,
               grade: parsed.grade || data.grade,
               aiSummary: parsed.summary || null,
@@ -549,11 +632,21 @@ function MyLoveCompat() {
               aiInLawRelation: parsed.inLawRelation || null,
               aiFinanceTogether: parsed.financeTogether || null,
               aiAdvice: parsed.advice || null,
-            } : { ...data, aiAnalysis: fullText };
-            finishWithCompleteAnimation(finalResult);
+            } : { ...data, _kind: 'marriage', aiAnalysis: fullText };
+            setAiStreaming(false);
+            setStreamingActive(false);
+            setDoneFields(new Set());
+            if (firstShown) {
+              setResult(finalResult);
+              try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+              setStreamText('');
+            } else {
+              finishWithCompleteAnimation(finalResult);
+            }
           },
           onError: () => {
             setAiStreaming(false); setStreamText('');
+            setStreamingActive(false); setDoneFields(new Set());
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           },
         }
@@ -589,6 +682,16 @@ function MyLoveCompat() {
       setLoading(false);
       setAiStreaming(true);
 
+      // Progressive 카드 노출 — 스킨십 9필드
+      const FIELD_MAP = {
+        overall: 'aiAnalysis', timing: 'aiTiming', advice: 'aiAdvice',
+        caution: 'aiCaution', mindsetBoost: 'aiMindsetBoost', oneLiner: 'aiOneLiner',
+        luckyDay: 'aiLuckyDay', luckyPlace: 'aiLuckyPlace', luckyColor: 'aiLuckyColor',
+      };
+      const PROG_FIELDS = Object.keys(FIELD_MAP);
+      let buffer = '';
+      let firstShown = false;
+
       cleanupRef.current = getLoveFortuneStream('skinship', bd1, bt1 || '', g1, 'SOLAR', bd2, g2, '', '', '', {
         onCached: (cached) => {
           setAiStreaming(false); setStreamText('');
@@ -609,9 +712,25 @@ function MyLoveCompat() {
           });
           setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
         },
-        onChunk: (text) => setStreamText((prev) => prev + text),
+        onChunk: (text) => {
+          buffer += text;
+          setStreamText((prev) => prev + text);
+          const completed = extractStreamingFields(buffer, PROG_FIELDS);
+          const newFields = {};
+          for (const [src, dst] of Object.entries(FIELD_MAP)) {
+            if (completed[src] !== undefined) newFields[dst] = completed[src];
+          }
+          if (Object.keys(newFields).length > 0) {
+            setResult((prev) => ({ ...(prev || base), ...newFields }));
+            if (!firstShown) {
+              firstShown = true;
+              setMatrixExiting(true);
+              setTimeout(() => setMatrixShown(false), 600);
+              setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }
+          }
+        },
         onDone: (fullText) => {
-          setAiStreaming(false);
           const parsed = parseAiJson(fullText);
           const merged = parsed ? {
             ...base,
@@ -627,7 +746,14 @@ function MyLoveCompat() {
             aiLuckyPlace: parsed.luckyPlace || null,
             aiLuckyColor: parsed.luckyColor || null,
           } : { ...base, aiAnalysis: fullText };
-          finishWithCompleteAnimation(merged);
+          setAiStreaming(false);
+          if (firstShown) {
+            setResult(merged);
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+            setStreamText('');
+          } else {
+            finishWithCompleteAnimation(merged);
+          }
         },
         onError: () => {
           setAiStreaming(false); setStreamText('');
@@ -981,7 +1107,7 @@ function MyLoveCompat() {
                 </span>
               </div>
 
-              {!result.aiSummary && !result.aiAnalysis && !result.aiMarriageTiming && (
+              {!streamingActive && !result.aiSummary && !result.aiAnalysis && !result.aiMarriageTiming && (
                 <div className="mlc-empty-ai">
                   <p className="mlc-empty-ai-msg">⚠️ 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
                   <button className="mlc-empty-ai-btn" onClick={() => guardMarriageCompat(() => analyzeMarriage())}>
@@ -989,18 +1115,25 @@ function MyLoveCompat() {
                   </button>
                 </div>
               )}
-              {(result.aiSummary || result.aiAnalysis) && (() => {
+              {(streamingActive || result.aiSummary || result.aiAnalysis) && (() => {
+                // 필드별 카드 상태 결정
+                const fs = (field) => {
+                  if (!streamingActive) return 'done';
+                  if (doneFields.has(field)) return 'done';
+                  if (result[field]) return 'streaming';
+                  return 'pending';
+                };
                 const cards = (
                   <>
-                    {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
-                    {result.aiAnalysis && <FortuneCard icon="💒" title="결혼궁합 총평" description={result.aiAnalysis} delay={80} />}
-                    {result.aiMarriageTiming && <FortuneCard icon="📅" title="결혼 시기" description={result.aiMarriageTiming} delay={160} />}
-                    {result.aiFamilyHarmony && <FortuneCard icon="🏡" title="가정 화합" description={result.aiFamilyHarmony} delay={240} />}
-                    {result.aiChildLuck && <FortuneCard icon="👶" title="자녀운" description={result.aiChildLuck} delay={320} />}
-                    {result.aiSpouseTrait && <FortuneCard icon="💼" title="배우자 성향" description={result.aiSpouseTrait} delay={400} />}
-                    {result.aiInLawRelation && <FortuneCard icon="🏠" title="양가 관계" description={result.aiInLawRelation} delay={480} />}
-                    {result.aiFinanceTogether && <FortuneCard icon="💰" title="공동 재물" description={result.aiFinanceTogether} delay={560} />}
-                    {result.aiAdvice && <FortuneCard icon="💡" title="결혼 준비 조언" description={result.aiAdvice} delay={640} />}
+                    <StreamingCard icon="💕" title="한 줄 요약" text={result.aiSummary || ''} status={fs('aiSummary')} delay={0} />
+                    <StreamingCard icon="💒" title="결혼궁합 총평" text={result.aiAnalysis || ''} status={fs('aiAnalysis')} delay={80} />
+                    <StreamingCard icon="📅" title="결혼 시기" text={result.aiMarriageTiming || ''} status={fs('aiMarriageTiming')} delay={160} />
+                    <StreamingCard icon="🏡" title="가정 화합" text={result.aiFamilyHarmony || ''} status={fs('aiFamilyHarmony')} delay={240} />
+                    <StreamingCard icon="👶" title="자녀운" text={result.aiChildLuck || ''} status={fs('aiChildLuck')} delay={320} />
+                    <StreamingCard icon="💼" title="배우자 성향" text={result.aiSpouseTrait || ''} status={fs('aiSpouseTrait')} delay={400} />
+                    <StreamingCard icon="🏠" title="양가 관계" text={result.aiInLawRelation || ''} status={fs('aiInLawRelation')} delay={480} />
+                    <StreamingCard icon="💰" title="공동 재물" text={result.aiFinanceTogether || ''} status={fs('aiFinanceTogether')} delay={560} />
+                    <StreamingCard icon="💡" title="결혼 준비 조언" text={result.aiAdvice || ''} status={fs('aiAdvice')} delay={640} />
                   </>
                 );
                 return deepResult ? (
