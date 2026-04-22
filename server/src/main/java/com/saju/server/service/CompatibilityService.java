@@ -280,6 +280,21 @@ public class CompatibilityService {
         if (dbCached != null) {
             log.info("결혼궁합 캐시 히트: key={}", dbCacheKey);
             result = dbCached;
+            // 옛 캐시는 person1/person2가 누락됐을 수 있어 즉시 보강
+            // (클라이언트 렌더 조건이 result.person1을 요구)
+            if (!result.containsKey("person1") || !result.containsKey("person2")) {
+                try {
+                    SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
+                    SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
+                    if (!result.containsKey("person1")) result.put("person1", buildPersonInfo(r1, bd1));
+                    if (!result.containsKey("person2")) result.put("person2", buildPersonInfo(r2, bd2));
+                    if (!result.containsKey("elementRelation")) result.put("elementRelation", "");
+                    if (!result.containsKey("branchRelation")) result.put("branchRelation", "");
+                    log.info("결혼궁합 캐시 person1/2 보강 완료");
+                } catch (Exception e) {
+                    log.warn("결혼궁합 캐시 보강 실패: {}", e.getMessage());
+                }
+            }
         } else {
             // 결혼 캐시가 없으면 기본 계산만 — 정통궁합(compatibility) 캐시의 AI 필드·deepCache는 구조가 달라 사용 금지
             result = analyzeSajuBasic(bd1, bt1, bd2, bt2, gender1, gender2);
