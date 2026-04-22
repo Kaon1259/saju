@@ -1087,6 +1087,23 @@ function Tarot() {
     }
     // 프레임 오버레이 세트+변형 고정 (덱 선택 시 1회)
     setSelectedFrame({ set: Math.floor(Math.random() * 10), v: Math.floor(Math.random() * 4) });
+    // 새 덱 78장 v0 백그라운드 프리로드 — 다음 셔플 즉시 시작
+    try {
+      const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+      if (conn && conn.saveData) return;
+      const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
+      const base = bgPaths[d];
+      if (!base) return;
+      const ric = window.requestIdleCallback || ((cb) => setTimeout(cb, 500));
+      ric(() => {
+        for (let i = 0; i < 78; i++) {
+          const img = new Image();
+          if ('fetchPriority' in img) img.fetchPriority = 'low';
+          img.decoding = 'async';
+          img.src = `${base}/m${String(i).padStart(2,'0')}_v0.jpg`;
+        }
+      }, { timeout: 4000 });
+    } catch {}
   };
 
   const selectDeckWithFlip = (d) => {

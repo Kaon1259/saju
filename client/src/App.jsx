@@ -203,37 +203,48 @@ function App() {
     }
   }, []);
 
-  // 타로 덱 인트로(webp/gif) 유휴 시간 프리로드 — 타로 페이지 진입 지연 제거
+  // 타로 자산 유휴 시간 프리로드 — 페이지/셔플/카드 노출 지연 제거
   useEffect(() => {
-    const TAROT_DECK_INTROS = [
-      '/tarot-effects/deck-intro/newclassic_0.webp',
-      '/tarot-effects/deck-intro/jester_0.webp',
-      '/tarot-effects/deck-intro/masterpiece_0.webp',
-      '/tarot-effects/deck-intro/kdrama_0.webp',
-      '/tarot-effects/deck-intro/celestial_0.webp',
-      '/tarot-effects/deck-intro/lady_0.webp',
-      '/tarot-effects/deck-intro/cartoon_girl_0.gif',
-      '/tarot-effects/deck-intro/cartoon_boy_0.gif',
+    const DECK_IDS = ['newclassic','jester','masterpiece','cartoon_girl','cartoon_boy','kdrama','celestial','lady'];
+    const TAROT_DECK_INTROS = DECK_IDS.map(id => {
+      const ext = (id === 'cartoon_girl' || id === 'cartoon_boy') ? 'gif' : 'webp';
+      return `/tarot-effects/deck-intro/${id}_0.${ext}`;
+    });
+    const TAROT_DECK_COVERS = DECK_IDS.map(id => `/tarot-effects/deck-intro/${id}_cover.jpg`);
+    const TAROT_EFFECTS = [
+      '/tarot-effects/shuffle.jpg',
+      '/tarot-effects/shuffle_0.jpg', '/tarot-effects/shuffle_1.jpg',
+      '/tarot-effects/shuffle_2.jpg', '/tarot-effects/shuffle_3.jpg',
+      '/tarot-effects/spread.jpg',
+      '/tarot-effects/spread_0.jpg', '/tarot-effects/spread_1.jpg',
+      '/tarot-effects/spread_2.jpg', '/tarot-effects/spread_3.jpg',
+      '/tarot-effects/pick.jpg',
+      '/tarot-effects/table.jpg',
     ];
-    const TAROT_DECK_COVERS = [
-      '/tarot-effects/deck-intro/newclassic_cover.jpg',
-      '/tarot-effects/deck-intro/jester_cover.jpg',
-      '/tarot-effects/deck-intro/masterpiece_cover.jpg',
-      '/tarot-effects/deck-intro/kdrama_cover.jpg',
-      '/tarot-effects/deck-intro/celestial_cover.jpg',
-      '/tarot-effects/deck-intro/lady_cover.jpg',
-      '/tarot-effects/deck-intro/cartoon_girl_cover.jpg',
-      '/tarot-effects/deck-intro/cartoon_boy_cover.jpg',
-    ];
+
     const preload = (src) => {
       const img = new Image();
       if ('fetchPriority' in img) img.fetchPriority = 'low';
       img.decoding = 'async';
       img.src = src;
     };
+
+    // 데이터 절약 모드면 효과/인트로만, 카드 78장은 스킵
+    const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+    const saveData = !!(conn && conn.saveData);
+
+    const savedDeck = localStorage.getItem('tarotDeck') || 'newclassic';
+    const deck = DECK_IDS.includes(savedDeck) ? savedDeck : 'newclassic';
+    const SELECTED_DECK_CARDS = saveData ? [] : Array.from({ length: 78 }, (_, i) =>
+      `/tarot-${deck}/m${String(i).padStart(2,'0')}_v0.jpg`
+    );
+
     const run = () => {
+      // 우선순위: 커버(즉시 보임) → 효과(셔플 화면) → 인트로(덱 선택 GIF) → 카드 78장(셔플 결과)
       TAROT_DECK_COVERS.forEach(preload);
+      TAROT_EFFECTS.forEach(preload);
       TAROT_DECK_INTROS.forEach(preload);
+      SELECTED_DECK_CARDS.forEach(preload);
     };
     const ric = window.requestIdleCallback || ((cb) => setTimeout(cb, 2000));
     const handle = ric(run, { timeout: 5000 });
