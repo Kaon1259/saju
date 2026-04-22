@@ -172,12 +172,14 @@ function MyLoveCompat() {
   }, [location.state?.restoreHistoryId]);
 
   useEffect(() => {
-    if (result && matrixShown && !completing) {
+    // 일반 분석 result 등장 시 매트릭스 자동 페이드아웃.
+    // 단, 심화분석 진행 중(deepStreaming/deepCompleting)이면 매트릭스 유지 — result는 이미 존재하므로 자동 종료되면 안 됨.
+    if (result && matrixShown && !completing && !deepStreaming && !deepCompleting) {
       setMatrixExiting(true);
       const t = setTimeout(() => setMatrixShown(false), 700);
       return () => clearTimeout(t);
     }
-  }, [result, matrixShown, completing]);
+  }, [result, matrixShown, completing, deepStreaming, deepCompleting]);
 
   /** 일반 분석 onDone 공통 흐름: matrix 페이드아웃(0.7s) → 완료 애니(1.6s) → 결과 표시 */
   const finishWithCompleteAnimation = (finalResult) => {
