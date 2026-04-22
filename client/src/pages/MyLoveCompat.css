@@ -675,6 +675,36 @@
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(255, 61, 127, 0.2));
 }
 
+/* 심화분석 진행 중 인디케이터 (progressive 카드 노출 중) */
+.mlc-deep-progress {
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+  color: #fbbf24;
+  -webkit-text-fill-color: #fbbf24;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0.92;
+}
+.mlc-deep-dots { display: inline-flex; gap: 2px; margin-left: 4px; }
+.mlc-deep-dots i {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: currentColor; opacity: 0.4;
+  animation: mlcDeepDot 1.2s infinite ease-in-out;
+}
+.mlc-deep-dots i:nth-child(2) { animation-delay: 0.2s; }
+.mlc-deep-dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes mlcDeepDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.4); }
+}
+[data-theme="light"] .mlc-deep-progress {
+  color: #c2185b;
+  -webkit-text-fill-color: #c2185b;
+}
+
 /* 라이트모드 */
 [data-theme="light"] .mlc-section-toggle {
   background: #fff;

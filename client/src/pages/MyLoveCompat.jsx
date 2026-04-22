@@ -17,7 +17,7 @@ import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
 import StreamText from '../components/StreamText';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFields } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MyLoveCompat.css';
@@ -264,11 +264,19 @@ function MyLoveCompat() {
 
   // 심화분석 시작 (사주 or 결혼)
   const [deepStreamingType, setDeepStreamingType] = useState(null);
+
+  // Progressive 카드 노출용 — deepType별 추출 필드 목록 (UI 카드 순서와 일치)
+  const DEEP_FIELDS = {
+    compatibility: ['deepSummary','conflictScenario','synergyPoint','elementChemistry','timelineChange','crisisHandling','longTermStrategy','hiddenMessage'],
+    marriage_compat: ['deepSummary','marriageTimingDeep','spouseRole','childRaisingDeep','inLawDeep','financeDesign','crisisManagement','longTermVision','hiddenMessage'],
+  };
+
   const startDeepCompat = (deepType) => {
     if (!result || !bd1 || !bd2) return;
     // 캐시에 이미 있으면 스트리밍 없이 즉시 노출
     if (result.deepCache) {
       setDeepResult(result.deepCache);
+      setDeepExpanded(true);
       setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       return;
     }
@@ -292,10 +300,16 @@ function MyLoveCompat() {
     }
     const context = ctxParts.join('\n');
 
+    const fields = DEEP_FIELDS[deepType] || [];
+    let buffer = '';
+    let firstFieldShown = false;
+
     setDeepStreaming(true);
     setDeepStreamText('');
     setDeepStreamingType(deepType);
-    // 일반 분석과 동일한 AnalysisMatrix 효과 발동
+    setDeepResult(null);          // 초기화 — progressive로 점차 채워짐
+    setDeepExpanded(true);         // 자동 펼침
+    // 매트릭스로 시작 (첫 필드 완성되면 페이드아웃)
     setStreamText('');
     setMatrixShown(true);
     setMatrixExiting(false);
@@ -314,28 +328,55 @@ function MyLoveCompat() {
           setDeepResult(cached);
         },
         onChunk: (text) => {
+          buffer += text;
           setDeepStreamText((prev) => prev + text);
-          setStreamText((prev) => prev + text); // matrix 안에도 텍스트 흐름
+          setStreamText((prev) => prev + text);
+
+          // 완성된 필드 progressive 추출
+          if (fields.length > 0) {
+            const completed = extractStreamingFields(buffer, fields);
+            const completedKeys = Object.keys(completed);
+            if (completedKeys.length > 0) {
+              setDeepResult((prev) => {
+                const next = prev || {};
+                let changed = false;
+                for (const k of completedKeys) {
+                  if (next[k] !== completed[k]) { next[k] = completed[k]; changed = true; }
+                }
+                return changed ? { ...next } : prev;
+              });
+              // 첫 필드 완성 — 매트릭스 페이드아웃해 카드 영역 노출
+              if (!firstFieldShown) {
+                firstFieldShown = true;
+                setMatrixExiting(true);
+                setTimeout(() => {
+                  setMatrixShown(false);
+                  setStreamText('');
+                  setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                }, 600);
+              }
+            }
+          }
         },
         onDone: (fullText) => {
+          // 최종 정리 — 누락 필드 보강 + raw fallback
           const parsed = parseAiJson(fullText);
           const finalData = parsed || { detailAnalysis: fullText };
-          setDeepStreaming(false);
-          // matrix 페이드아웃
-          setMatrixExiting(true);
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-          setTimeout(() => {
-            setMatrixShown(false);
-            setStreamText('');
-            // 완료 애니 1.6초 → 결과
+          if (matrixShown) {
+            setMatrixExiting(true);
+            setTimeout(() => { setMatrixShown(false); setStreamText(''); }, 700);
+          }
+          setDeepResult((prev) => ({ ...(prev || {}), ...finalData }));
+          setDeepStreaming(false);
+          setDeepStreamText('');
+          // progressive로 이미 카드가 떠있으니 완료 애니는 생략 (또는 매우 짧게)
+          if (!firstFieldShown) {
+            // 필드 추출 한 번도 안 된 경우(raw fallback) 짧은 완료 애니
             setDeepCompleting(true);
-            setTimeout(() => {
-              setDeepCompleting(false);
-              setDeepStreamText('');
-              setDeepResult(finalData);
-              setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-            }, 1600);
-          }, 700);
+            setTimeout(() => setDeepCompleting(false), 800);
+          }
+          setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         },
         onError: () => {
           setDeepStreaming(false); setDeepStreamText('');
@@ -851,7 +892,10 @@ function MyLoveCompat() {
                 {deepResult && !deepCompleting && (
                   <div className="mlc-section mlc-section--deep">
                     <button className={`mlc-section-toggle mlc-section-toggle--deep ${deepExpanded ? 'open' : ''}`} onClick={() => setDeepExpanded((v) => !v)}>
-                      <span className="mlc-section-title">✨ 심화분석</span>
+                      <span className="mlc-section-title">
+                        ✨ 심화분석
+                        {deepStreaming && <span className="mlc-deep-progress"> · AI가 더 깊이 분석 중<span className="mlc-deep-dots"><i/><i/><i/></span></span>}
+                      </span>
                       <span className="mlc-section-chevron">▾</span>
                     </button>
                     {deepExpanded && (
@@ -959,7 +1003,10 @@ function MyLoveCompat() {
                 {deepResult && !deepCompleting && (
                   <div className="mlc-section mlc-section--deep">
                     <button className={`mlc-section-toggle mlc-section-toggle--deep ${deepExpanded ? 'open' : ''}`} onClick={() => setDeepExpanded((v) => !v)}>
-                      <span className="mlc-section-title">✨ 결혼궁합 심화분석</span>
+                      <span className="mlc-section-title">
+                        ✨ 결혼궁합 심화분석
+                        {deepStreaming && <span className="mlc-deep-progress"> · AI가 더 깊이 분석 중<span className="mlc-deep-dots"><i/><i/><i/></span></span>}
+                      </span>
                       <span className="mlc-section-chevron">▾</span>
                     </button>
                     {deepExpanded && (
