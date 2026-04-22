@@ -285,7 +285,7 @@ function MyLoveCompat() {
   // 심화분석 시작 (사주 or 결혼)
   const [deepStreamingType, setDeepStreamingType] = useState(null);
 
-  // Progressive 카드 노출용 — deepType별 추출 필드 목록 (UI 카드 순서와 일치)
+  // Progressive placeholder + typewriter — deepType별 필드 목록 (UI 카드 순서와 일치)
   const DEEP_FIELDS = {
     compatibility: ['deepSummary','conflictScenario','synergyPoint','elementChemistry','timelineChange','crisisHandling','longTermStrategy','hiddenMessage'],
     marriage_compat: ['deepSummary','marriageTimingDeep','spouseRole','childRaisingDeep','inLawDeep','financeDesign','crisisManagement','longTermVision','hiddenMessage'],
@@ -327,12 +327,17 @@ function MyLoveCompat() {
     setDeepStreaming(true);
     setDeepStreamText('');
     setDeepStreamingType(deepType);
-    setDeepResult(null);          // 초기화 — progressive로 점차 채워짐
-    setDeepExpanded(true);         // 자동 펼침
-    // 매트릭스로 시작 (첫 필드 완성되면 페이드아웃)
+    // Placeholder 즉시 노출 — 카드 9장 빈 상태로 그려짐
+    setDoneFields(new Set());
+    setStreamingActive(true);
+    setDeepResult({});
+    setDeepExpanded(true);
+    // 매트릭스 즉시 페이드아웃 → 카드 placeholder 바로 보이게
     setStreamText('');
     setMatrixShown(true);
-    setMatrixExiting(false);
+    setMatrixExiting(true);
+    setTimeout(() => setMatrixShown(false), 600);
+    setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
@@ -342,6 +347,7 @@ function MyLoveCompat() {
         context,
         onCached: (cached) => {
           setDeepStreaming(false); setDeepStreamText('');
+          setStreamingActive(false); setDoneFields(new Set());
           setMatrixExiting(true);
           setTimeout(() => { setMatrixShown(false); setStreamText(''); }, 700);
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -352,34 +358,34 @@ function MyLoveCompat() {
           setDeepStreamText((prev) => prev + text);
           setStreamText((prev) => prev + text);
 
-          // 완성된 필드 progressive 추출
           if (fields.length > 0) {
-            const completed = extractStreamingFields(buffer, fields);
-            const completedKeys = Object.keys(completed);
-            if (completedKeys.length > 0) {
-              setDeepResult((prev) => {
-                const next = prev || {};
-                let changed = false;
-                for (const k of completedKeys) {
-                  if (next[k] !== completed[k]) { next[k] = completed[k]; changed = true; }
-                }
-                return changed ? { ...next } : prev;
-              });
-              // 첫 필드 완성 — 매트릭스 페이드아웃해 카드 영역 노출
-              if (!firstFieldShown) {
-                firstFieldShown = true;
-                setMatrixExiting(true);
-                setTimeout(() => {
-                  setMatrixShown(false);
-                  setStreamText('');
-                  setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-                }, 600);
+            const partial = extractStreamingFieldsPartial(buffer, fields);
+            const newDone = [];
+            let hasAny = false;
+            setDeepResult((prev) => {
+              const next = { ...(prev || {}) };
+              let changed = false;
+              for (const k of fields) {
+                const p = partial[k];
+                if (p === undefined) continue;
+                hasAny = true;
+                if (next[k] !== p.value) { next[k] = p.value; changed = true; }
+                if (p.done) newDone.push(k);
               }
+              return changed ? next : prev;
+            });
+            if (hasAny) firstFieldShown = true;
+            if (newDone.length > 0) {
+              setDoneFields((prev) => {
+                let changed = false;
+                const next = new Set(prev);
+                for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+                return changed ? next : prev;
+              });
             }
           }
         },
         onDone: (fullText) => {
-          // 최종 정리 — 누락 필드 보강 + raw fallback
           const parsed = parseAiJson(fullText);
           const finalData = parsed || { detailAnalysis: fullText };
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -389,18 +395,18 @@ function MyLoveCompat() {
           }
           setDeepResult((prev) => ({ ...(prev || {}), ...finalData }));
           setDeepStreaming(false);
+          setStreamingActive(false);
+          setDoneFields(new Set());
           setDeepStreamText('');
-          // progressive로 이미 카드가 떠있으니 완료 애니는 생략 (또는 매우 짧게)
           if (!firstFieldShown) {
-            // 필드 추출 한 번도 안 된 경우(raw fallback) 짧은 완료 애니
             setDeepCompleting(true);
             setTimeout(() => setDeepCompleting(false), 800);
           }
-          setTimeout(() => deepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         },
         onError: () => {
           setDeepStreaming(false); setDeepStreamText('');
           setDeepCompleting(false);
+          setStreamingActive(false); setDoneFields(new Set());
           setMatrixExiting(true);
           setTimeout(() => { setMatrixShown(false); setStreamText(''); }, 700);
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -440,7 +446,7 @@ function MyLoveCompat() {
       setLoading(false);
       setAiStreaming(true);
 
-      // Progressive 카드 노출 — 완성된 필드부터 즉시 표시
+      // Progressive 카드 — placeholder + typewriter + 자동 스크롤
       const FIELD_MAP = {
         summary: 'aiSummary', overall: 'aiAnalysis', loveCompat: 'aiLoveCompat',
         workCompat: 'aiWorkCompat', conflictPoint: 'aiConflictPoint', advice: 'aiAdvice',
@@ -448,6 +454,14 @@ function MyLoveCompat() {
       const PROG_FIELDS = Object.keys(FIELD_MAP);
       let buffer = '';
       let firstShown = false;
+
+      // 분석 시작 즉시 placeholder 카드 노출
+      setDoneFields(new Set());
+      setStreamingActive(true);
+      setResult(data);
+      setMatrixExiting(true);
+      setTimeout(() => setMatrixShown(false), 600);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
       cleanupRef.current = getCompatibilityStream(
         bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
@@ -457,19 +471,27 @@ function MyLoveCompat() {
           onChunk: (text) => {
             buffer += text;
             setStreamText((prev) => prev + text);
-            const completed = extractStreamingFields(buffer, PROG_FIELDS);
+            const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
             const newFields = {};
+            const newDone = [];
             for (const [src, dst] of Object.entries(FIELD_MAP)) {
-              if (completed[src] !== undefined) newFields[dst] = completed[src];
+              const p = partial[src];
+              if (p !== undefined) {
+                newFields[dst] = p.value;
+                if (p.done) newDone.push(dst);
+              }
             }
             if (Object.keys(newFields).length > 0) {
               setResult((prev) => ({ ...(prev || data), ...newFields }));
-              if (!firstShown) {
-                firstShown = true;
-                setMatrixExiting(true);
-                setTimeout(() => setMatrixShown(false), 600);
-                setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-              }
+              firstShown = true;
+            }
+            if (newDone.length > 0) {
+              setDoneFields((prev) => {
+                let changed = false;
+                const next = new Set(prev);
+                for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+                return changed ? next : prev;
+              });
             }
           },
           onDone: (fullText) => {
@@ -496,6 +518,8 @@ function MyLoveCompat() {
               aiAdvice: finalResult.aiAdvice,
             }).catch(() => {});
             setAiStreaming(false);
+            setStreamingActive(false);
+            setDoneFields(new Set());
             if (firstShown) {
               setResult(finalResult);
               try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -506,6 +530,7 @@ function MyLoveCompat() {
           },
           onError: () => {
             setAiStreaming(false); setStreamText('');
+            setStreamingActive(false); setDoneFields(new Set());
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           },
         }
@@ -682,7 +707,7 @@ function MyLoveCompat() {
       setLoading(false);
       setAiStreaming(true);
 
-      // Progressive 카드 노출 — 스킨십 9필드
+      // Progressive 카드 — 스킨십 9필드 (placeholder + typewriter + 자동 스크롤)
       const FIELD_MAP = {
         overall: 'aiAnalysis', timing: 'aiTiming', advice: 'aiAdvice',
         caution: 'aiCaution', mindsetBoost: 'aiMindsetBoost', oneLiner: 'aiOneLiner',
@@ -691,6 +716,14 @@ function MyLoveCompat() {
       const PROG_FIELDS = Object.keys(FIELD_MAP);
       let buffer = '';
       let firstShown = false;
+
+      // 분석 시작 즉시 placeholder 노출
+      setDoneFields(new Set());
+      setStreamingActive(true);
+      setResult(base);
+      setMatrixExiting(true);
+      setTimeout(() => setMatrixShown(false), 600);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
       cleanupRef.current = getLoveFortuneStream('skinship', bd1, bt1 || '', g1, 'SOLAR', bd2, g2, '', '', '', {
         onCached: (cached) => {
@@ -715,19 +748,27 @@ function MyLoveCompat() {
         onChunk: (text) => {
           buffer += text;
           setStreamText((prev) => prev + text);
-          const completed = extractStreamingFields(buffer, PROG_FIELDS);
+          const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
           const newFields = {};
+          const newDone = [];
           for (const [src, dst] of Object.entries(FIELD_MAP)) {
-            if (completed[src] !== undefined) newFields[dst] = completed[src];
+            const p = partial[src];
+            if (p !== undefined) {
+              newFields[dst] = p.value;
+              if (p.done) newDone.push(dst);
+            }
           }
           if (Object.keys(newFields).length > 0) {
             setResult((prev) => ({ ...(prev || base), ...newFields }));
-            if (!firstShown) {
-              firstShown = true;
-              setMatrixExiting(true);
-              setTimeout(() => setMatrixShown(false), 600);
-              setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-            }
+            firstShown = true;
+          }
+          if (newDone.length > 0) {
+            setDoneFields((prev) => {
+              let changed = false;
+              const next = new Set(prev);
+              for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+              return changed ? next : prev;
+            });
           }
         },
         onDone: (fullText) => {
@@ -747,6 +788,8 @@ function MyLoveCompat() {
             aiLuckyColor: parsed.luckyColor || null,
           } : { ...base, aiAnalysis: fullText };
           setAiStreaming(false);
+          setStreamingActive(false);
+          setDoneFields(new Set());
           if (firstShown) {
             setResult(merged);
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -757,6 +800,7 @@ function MyLoveCompat() {
         },
         onError: () => {
           setAiStreaming(false); setStreamText('');
+          setStreamingActive(false); setDoneFields(new Set());
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         },
       });
@@ -991,7 +1035,7 @@ function MyLoveCompat() {
                 </span>
               </div>
 
-              {!result.aiSummary && !result.aiAnalysis && !result.aiLoveCompat && (
+              {!streamingActive && !result.aiSummary && !result.aiAnalysis && !result.aiLoveCompat && (
                 <div className="mlc-empty-ai">
                   <p className="mlc-empty-ai-msg">⚠️ 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
                   <button className="mlc-empty-ai-btn" onClick={() => guardSajuCompat(() => analyzeSaju())}>
@@ -999,15 +1043,21 @@ function MyLoveCompat() {
                   </button>
                 </div>
               )}
-              {(result.aiSummary || result.aiAnalysis) && (() => {
+              {(streamingActive || result.aiSummary || result.aiAnalysis) && (() => {
+                const fs = (field) => {
+                  if (!streamingActive) return 'done';
+                  if (doneFields.has(field)) return 'done';
+                  if (result[field]) return 'streaming';
+                  return 'pending';
+                };
                 const cards = (
                   <>
-                    {result.aiSummary && <FortuneCard icon="💕" title="한 줄 요약" description={result.aiSummary} delay={0} />}
-                    {result.aiAnalysis && <FortuneCard icon="🔮" title="종합 분석" description={result.aiAnalysis} delay={80} />}
-                    {result.aiLoveCompat && <FortuneCard icon="💖" title="연애 궁합" description={result.aiLoveCompat} delay={160} />}
-                    {result.aiWorkCompat && <FortuneCard icon="🤝" title="일 / 협력 궁합" description={result.aiWorkCompat} delay={240} />}
-                    {result.aiConflictPoint && <FortuneCard icon="⚠️" title="갈등 포인트" description={result.aiConflictPoint} delay={320} />}
-                    {result.aiAdvice && <FortuneCard icon="💡" title="관계 조언" description={result.aiAdvice} delay={400} />}
+                    <StreamingCard icon="💕" title="한 줄 요약" text={result.aiSummary || ''} status={fs('aiSummary')} delay={0} />
+                    <StreamingCard icon="🔮" title="종합 분석" text={result.aiAnalysis || ''} status={fs('aiAnalysis')} delay={80} />
+                    <StreamingCard icon="💖" title="연애 궁합" text={result.aiLoveCompat || ''} status={fs('aiLoveCompat')} delay={160} />
+                    <StreamingCard icon="🤝" title="일 / 협력 궁합" text={result.aiWorkCompat || ''} status={fs('aiWorkCompat')} delay={240} />
+                    <StreamingCard icon="⚠️" title="갈등 포인트" text={result.aiConflictPoint || ''} status={fs('aiConflictPoint')} delay={320} />
+                    <StreamingCard icon="💡" title="관계 조언" text={result.aiAdvice || ''} status={fs('aiAdvice')} delay={400} />
                   </>
                 );
                 return deepResult ? (
@@ -1048,19 +1098,32 @@ function MyLoveCompat() {
                       </span>
                       <span className="mlc-section-chevron">▾</span>
                     </button>
-                    {deepExpanded && (
+                    {deepExpanded && (() => {
+                      const dfs = (field) => {
+                        if (!streamingActive) return 'done';
+                        if (doneFields.has(field)) return 'done';
+                        if (deepResult[field]) return 'streaming';
+                        return 'pending';
+                      };
+                      return (
                       <div className="mlc-section-body">
-                        {deepResult.deepSummary && <FortuneCard icon="🌟" title="심화 요약" description={deepResult.deepSummary} delay={0} />}
-                        {deepResult.conflictScenario && <FortuneCard icon="⚡" title="갈등 시나리오" description={deepResult.conflictScenario} delay={80} />}
-                        {deepResult.synergyPoint && <FortuneCard icon="✨" title="시너지 포인트" description={deepResult.synergyPoint} delay={160} />}
-                        {deepResult.elementChemistry && <FortuneCard icon="🌈" title="오행 케미" description={deepResult.elementChemistry} delay={240} />}
-                        {deepResult.timelineChange && <FortuneCard icon="⏳" title="시기별 변화" description={deepResult.timelineChange} delay={320} />}
-                        {deepResult.crisisHandling && <FortuneCard icon="🛡️" title="위기 극복법" description={deepResult.crisisHandling} delay={400} />}
-                        {deepResult.longTermStrategy && <FortuneCard icon="🎯" title="지속 전략" description={deepResult.longTermStrategy} delay={480} />}
-                        {deepResult.hiddenMessage && <FortuneCard icon="🔮" title="천기누설" description={deepResult.hiddenMessage} delay={560} />}
-                        {deepResult.detailAnalysis && !deepResult.deepSummary && <FortuneCard icon="🔍" title="심화 분석" description={deepResult.detailAnalysis} delay={0} />}
+                        {deepResult.detailAnalysis && !deepResult.deepSummary ? (
+                          <FortuneCard icon="🔍" title="심화 분석" description={deepResult.detailAnalysis} delay={0} />
+                        ) : (
+                          <>
+                            <StreamingCard icon="🌟" title="심화 요약" text={deepResult.deepSummary || ''} status={dfs('deepSummary')} delay={0} />
+                            <StreamingCard icon="⚡" title="갈등 시나리오" text={deepResult.conflictScenario || ''} status={dfs('conflictScenario')} delay={80} />
+                            <StreamingCard icon="✨" title="시너지 포인트" text={deepResult.synergyPoint || ''} status={dfs('synergyPoint')} delay={160} />
+                            <StreamingCard icon="🌈" title="오행 케미" text={deepResult.elementChemistry || ''} status={dfs('elementChemistry')} delay={240} />
+                            <StreamingCard icon="⏳" title="시기별 변화" text={deepResult.timelineChange || ''} status={dfs('timelineChange')} delay={320} />
+                            <StreamingCard icon="🛡️" title="위기 극복법" text={deepResult.crisisHandling || ''} status={dfs('crisisHandling')} delay={400} />
+                            <StreamingCard icon="🎯" title="지속 전략" text={deepResult.longTermStrategy || ''} status={dfs('longTermStrategy')} delay={480} />
+                            <StreamingCard icon="🔮" title="천기누설" text={deepResult.hiddenMessage || ''} status={dfs('hiddenMessage')} delay={560} />
+                          </>
+                        )}
                       </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -1174,20 +1237,33 @@ function MyLoveCompat() {
                       </span>
                       <span className="mlc-section-chevron">▾</span>
                     </button>
-                    {deepExpanded && (
+                    {deepExpanded && (() => {
+                      const dfs = (field) => {
+                        if (!streamingActive) return 'done';
+                        if (doneFields.has(field)) return 'done';
+                        if (deepResult[field]) return 'streaming';
+                        return 'pending';
+                      };
+                      return (
                       <div className="mlc-section-body">
-                        {deepResult.deepSummary && <FortuneCard icon="🌟" title="심화 요약" description={deepResult.deepSummary} delay={0} />}
-                        {deepResult.marriageTimingDeep && <FortuneCard icon="📅" title="결혼 시기 심화" description={deepResult.marriageTimingDeep} delay={80} />}
-                        {deepResult.spouseRole && <FortuneCard icon="🤝" title="부부 역할 분담" description={deepResult.spouseRole} delay={160} />}
-                        {deepResult.childRaisingDeep && <FortuneCard icon="👨‍👩‍👧" title="자녀 양육 심화" description={deepResult.childRaisingDeep} delay={240} />}
-                        {deepResult.inLawDeep && <FortuneCard icon="🏠" title="양가 관계 심화" description={deepResult.inLawDeep} delay={320} />}
-                        {deepResult.financeDesign && <FortuneCard icon="💰" title="재정 설계" description={deepResult.financeDesign} delay={400} />}
-                        {deepResult.crisisManagement && <FortuneCard icon="🛡️" title="위기 관리" description={deepResult.crisisManagement} delay={480} />}
-                        {deepResult.longTermVision && <FortuneCard icon="🎯" title="장기 비전" description={deepResult.longTermVision} delay={560} />}
-                        {deepResult.hiddenMessage && <FortuneCard icon="🔮" title="천기누설" description={deepResult.hiddenMessage} delay={640} />}
-                        {deepResult.detailAnalysis && !deepResult.deepSummary && <FortuneCard icon="🔍" title="심화 분석" description={deepResult.detailAnalysis} delay={0} />}
+                        {deepResult.detailAnalysis && !deepResult.deepSummary ? (
+                          <FortuneCard icon="🔍" title="심화 분석" description={deepResult.detailAnalysis} delay={0} />
+                        ) : (
+                          <>
+                            <StreamingCard icon="🌟" title="심화 요약" text={deepResult.deepSummary || ''} status={dfs('deepSummary')} delay={0} />
+                            <StreamingCard icon="📅" title="결혼 시기 심화" text={deepResult.marriageTimingDeep || ''} status={dfs('marriageTimingDeep')} delay={80} />
+                            <StreamingCard icon="🤝" title="부부 역할 분담" text={deepResult.spouseRole || ''} status={dfs('spouseRole')} delay={160} />
+                            <StreamingCard icon="👨‍👩‍👧" title="자녀 양육 심화" text={deepResult.childRaisingDeep || ''} status={dfs('childRaisingDeep')} delay={240} />
+                            <StreamingCard icon="🏠" title="양가 관계 심화" text={deepResult.inLawDeep || ''} status={dfs('inLawDeep')} delay={320} />
+                            <StreamingCard icon="💰" title="재정 설계" text={deepResult.financeDesign || ''} status={dfs('financeDesign')} delay={400} />
+                            <StreamingCard icon="🛡️" title="위기 관리" text={deepResult.crisisManagement || ''} status={dfs('crisisManagement')} delay={480} />
+                            <StreamingCard icon="🎯" title="장기 비전" text={deepResult.longTermVision || ''} status={dfs('longTermVision')} delay={560} />
+                            <StreamingCard icon="🔮" title="천기누설" text={deepResult.hiddenMessage || ''} status={dfs('hiddenMessage')} delay={640} />
+                          </>
+                        )}
                       </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -1234,23 +1310,44 @@ function MyLoveCompat() {
                 </span>
               </div>
 
-              {result.aiOneLiner && (
+              {result.aiOneLiner && !streamingActive && (
                 <div className="mlc-oneliner">
                   <span className="mlc-oneliner-text">{result.aiOneLiner}</span>
                 </div>
               )}
-              {result.aiAnalysis && <FortuneCard icon="💋" title="케미 진단" description={result.aiAnalysis} delay={0} />}
-              {result.aiTiming && <FortuneCard icon="⏰" title="스킨십 타이밍" description={result.aiTiming} delay={80} />}
-              {result.aiAdvice && <FortuneCard icon="💡" title="케미 올리는 팁" description={result.aiAdvice} delay={160} />}
-              {result.aiCaution && <FortuneCard icon="⚠️" title="주의할 점" description={result.aiCaution} delay={240} />}
-              {result.aiMindsetBoost && <FortuneCard icon="💪" title="멘탈 부스터" description={result.aiMindsetBoost} delay={320} />}
-              {(result.aiLuckyDay || result.aiLuckyPlace || result.aiLuckyColor) && (
-                <div className="mlc-lucky">
-                  {result.aiLuckyDay && <div className="mlc-lucky-item"><span className="mlc-lucky-label">행운의 날</span><span className="mlc-lucky-value">{result.aiLuckyDay}</span></div>}
-                  {result.aiLuckyPlace && <div className="mlc-lucky-item"><span className="mlc-lucky-label">분위기 좋은 장소</span><span className="mlc-lucky-value">{result.aiLuckyPlace}</span></div>}
-                  {result.aiLuckyColor && <div className="mlc-lucky-item"><span className="mlc-lucky-label">매력 UP 컬러</span><span className="mlc-lucky-value">{result.aiLuckyColor}</span></div>}
-                </div>
-              )}
+              {(streamingActive || result.aiAnalysis || result.aiTiming) && (() => {
+                const fs = (field) => {
+                  if (!streamingActive) return 'done';
+                  if (doneFields.has(field)) return 'done';
+                  if (result[field]) return 'streaming';
+                  return 'pending';
+                };
+                return (
+                  <>
+                    {streamingActive && (
+                      <StreamingCard icon="💞" title="한 줄 메시지" text={result.aiOneLiner || ''} status={fs('aiOneLiner')} delay={0} />
+                    )}
+                    <StreamingCard icon="💋" title="케미 진단" text={result.aiAnalysis || ''} status={fs('aiAnalysis')} delay={80} />
+                    <StreamingCard icon="⏰" title="스킨십 타이밍" text={result.aiTiming || ''} status={fs('aiTiming')} delay={160} />
+                    <StreamingCard icon="💡" title="케미 올리는 팁" text={result.aiAdvice || ''} status={fs('aiAdvice')} delay={240} />
+                    <StreamingCard icon="⚠️" title="주의할 점" text={result.aiCaution || ''} status={fs('aiCaution')} delay={320} />
+                    <StreamingCard icon="💪" title="멘탈 부스터" text={result.aiMindsetBoost || ''} status={fs('aiMindsetBoost')} delay={400} />
+                    {streamingActive ? (
+                      <>
+                        <StreamingCard icon="📅" title="행운의 날" text={result.aiLuckyDay || ''} status={fs('aiLuckyDay')} delay={480} />
+                        <StreamingCard icon="📍" title="분위기 좋은 장소" text={result.aiLuckyPlace || ''} status={fs('aiLuckyPlace')} delay={560} />
+                        <StreamingCard icon="🎨" title="매력 UP 컬러" text={result.aiLuckyColor || ''} status={fs('aiLuckyColor')} delay={640} />
+                      </>
+                    ) : (result.aiLuckyDay || result.aiLuckyPlace || result.aiLuckyColor) && (
+                      <div className="mlc-lucky">
+                        {result.aiLuckyDay && <div className="mlc-lucky-item"><span className="mlc-lucky-label">행운의 날</span><span className="mlc-lucky-value">{result.aiLuckyDay}</span></div>}
+                        {result.aiLuckyPlace && <div className="mlc-lucky-item"><span className="mlc-lucky-label">분위기 좋은 장소</span><span className="mlc-lucky-value">{result.aiLuckyPlace}</span></div>}
+                        {result.aiLuckyColor && <div className="mlc-lucky-item"><span className="mlc-lucky-label">매력 UP 컬러</span><span className="mlc-lucky-value">{result.aiLuckyColor}</span></div>}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </>
           )}
 
