@@ -675,6 +675,44 @@
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(255, 61, 127, 0.2));
 }
 
+/* AI 텍스트 누락된 옛 히스토리 안내 + 재분석 버튼 */
+.mlc-empty-ai {
+  margin: 14px 0;
+  padding: 16px;
+  background: rgba(255, 200, 80, 0.08);
+  border: 1px solid rgba(255, 200, 80, 0.3);
+  border-radius: 12px;
+  text-align: center;
+}
+.mlc-empty-ai-msg {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #fbbf24;
+  line-height: 1.55;
+}
+.mlc-empty-ai-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fbbf24, #ff3d7f);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s, filter 0.15s;
+}
+.mlc-empty-ai-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+[data-theme="light"] .mlc-empty-ai {
+  background: rgba(194, 24, 91, 0.06);
+  border-color: rgba(194, 24, 91, 0.25);
+}
+[data-theme="light"] .mlc-empty-ai-msg { color: #c2185b; }
+
 /* 심화분석 진행 중 인디케이터 (progressive 카드 노출 중) */
 .mlc-deep-progress {
   font-size: 12px;

@@ -142,20 +142,31 @@ function MyLoveCompat() {
           p._kind = 'marriage';
           setTab('marriage');
         }
-        // person1/person2 누락된 옛 payload 보강 — 화면 렌더 조건(result.person1) 충족
-        if (!p.person1 || !p.person2) {
+        // person1/person2 + ai*/deepCache 누락된 옛 payload를 캐시에서 보강
+        const isMarriage = full?.type === 'marriage_compat';
+        const aiFields = isMarriage
+          ? ['aiSummary','aiAnalysis','aiMarriageTiming','aiFamilyHarmony','aiChildLuck','aiSpouseTrait','aiInLawRelation','aiFinanceTogether','aiAdvice']
+          : ['aiSummary','aiAnalysis','aiLoveCompat','aiWorkCompat','aiConflictPoint','aiAdvice'];
+        const needsBackfill = !p.person1 || !p.person2 || aiFields.every(k => !p[k]) || !p.deepCache;
+        if (needsBackfill) {
           try {
             const base = await getSajuCompatibilityBasic(
               p.birthDate1, p.birthDate2,
               p.birthTime1 || undefined, p.birthTime2 || undefined,
               p.calendarType1 || 'SOLAR', p.calendarType2 || 'SOLAR',
               p._g1, p._g2,
-              full?.type === 'marriage_compat' ? { mode: 'marriage' } : {}
+              isMarriage ? { mode: 'marriage' } : {}
             );
             if (base?.person1) p.person1 = base.person1;
             if (base?.person2) p.person2 = base.person2;
             if (!p.score && base?.score) p.score = base.score;
             if (!p.grade && base?.grade) p.grade = base.grade;
+            for (const k of aiFields) {
+              if (!p[k] && base?.[k]) p[k] = base[k];
+            }
+            if (!p.deepCache && base?.deepCache) p.deepCache = base.deepCache;
+            if (!p.elementRelation && base?.elementRelation) p.elementRelation = base.elementRelation;
+            if (!p.branchRelation && base?.branchRelation) p.branchRelation = base.branchRelation;
           } catch {}
         }
         setBd1(p.birthDate1 || '');
@@ -165,6 +176,11 @@ function MyLoveCompat() {
         setG1(p._g1);
         setG2(p._g2);
         setResult(p);
+        // history에 deepCache가 살아있으면 즉시 심화분석 카드도 자동 노출
+        if (p.deepCache) {
+          setDeepResult(p.deepCache);
+          setDeepExpanded(true);
+        }
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       } catch {}
     })();
@@ -849,6 +865,14 @@ function MyLoveCompat() {
                 </span>
               </div>
 
+              {!result.aiSummary && !result.aiAnalysis && !result.aiLoveCompat && (
+                <div className="mlc-empty-ai">
+                  <p className="mlc-empty-ai-msg">⚠️ 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
+                  <button className="mlc-empty-ai-btn" onClick={() => guardSajuCompat(() => analyzeSaju())}>
+                    🔮 사주 궁합 다시 분석하기 <HeartCost category="COMPATIBILITY" />
+                  </button>
+                </div>
+              )}
               {(result.aiSummary || result.aiAnalysis) && (() => {
                 const cards = (
                   <>
@@ -957,6 +981,14 @@ function MyLoveCompat() {
                 </span>
               </div>
 
+              {!result.aiSummary && !result.aiAnalysis && !result.aiMarriageTiming && (
+                <div className="mlc-empty-ai">
+                  <p className="mlc-empty-ai-msg">⚠️ 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
+                  <button className="mlc-empty-ai-btn" onClick={() => guardMarriageCompat(() => analyzeMarriage())}>
+                    💒 결혼 궁합 다시 분석하기 <HeartCost category="COMPATIBILITY" />
+                  </button>
+                </div>
+              )}
               {(result.aiSummary || result.aiAnalysis) && (() => {
                 const cards = (
                   <>
