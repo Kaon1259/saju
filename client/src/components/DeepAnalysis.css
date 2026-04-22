@@ -86,6 +86,21 @@
 }
 [data-theme="light"] .deep-inline-badge { color: #b8860b; background: rgba(251,191,36,0.06); border-color: rgba(184,134,11,0.2); }
 
+/* Progressive 진행 인디케이터 (스트림 도중 카드 점진 노출 중) */
+.deep-progress-tag { font-weight: 500; opacity: 0.92; display: inline-flex; align-items: center; gap: 2px; }
+.deep-dots { display: inline-flex; gap: 2px; margin-left: 4px; }
+.deep-dots i {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: currentColor; opacity: 0.4;
+  animation: deepDot 1.2s infinite ease-in-out;
+}
+.deep-dots i:nth-child(2) { animation-delay: 0.2s; }
+.deep-dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes deepDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.4); }
+}
+
 /* 라이트 모드 */
 [data-theme="light"] .deep-toggle-btn { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(124,58,237,0.05)); border-color: rgba(184,134,11,0.3); color: #b8860b; }
 [data-theme="light"] .deep-summary { color: #b8860b; background: rgba(251,191,36,0.06); }

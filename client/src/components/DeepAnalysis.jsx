@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDeepAnalysis, getDeepAnalysisStream } from '../api/fortune';
 import AnalysisMatrix from './AnalysisMatrix';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFields } from '../utils/parseAiJson';
 import HeartCost from './HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './DeepAnalysis.css';
@@ -149,16 +149,25 @@ export function hasDeepResult(type, birthDate, extra) {
   return !!getDeepCache(type, birthDate, extra);
 }
 
+// Progressive 추출 대상: FIELD_CONFIG 키 중 not-null인 것 + deepSummary/hiddenMessage/detailAnalysis
+const PROGRESSIVE_DEEP_FIELDS = (() => {
+  const cfgKeys = Object.entries(FIELD_CONFIG)
+    .filter(([, v]) => v !== null && v !== undefined)
+    .map(([k]) => k);
+  return ['deepSummary', ...cfgKeys, 'hiddenMessage'];
+})();
+
 function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra, autoOpen = false, previousResult }) {
   const [data, setData] = useState(() => getDeepCache(type, birthDate, extra));
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);   // progressive 노출 중 (loading은 false, 카드 영역 활성)
   const [streamText, setStreamText] = useState('');
   const [visibleCards, setVisibleCards] = useState(0);
   const calledRef = useRef(false);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
 
-  const alreadyDone = !!data;
+  const alreadyDone = !!data && !streaming;
 
   // 결과 카드 순차 노출
   useEffect(() => {
@@ -191,6 +200,7 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
     if (calledRef.current || !birthDate) return;
     calledRef.current = true;
     setLoading(true);
+    setStreaming(false);
     setStreamText('');
 
     try { playAnalyzeStart(); } catch {}
@@ -199,17 +209,31 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
     const stopAmbient = () => { try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null; };
 
     const context = summarizeResult(previousResult);
+    let buffer = '';
+    let firstShown = false;
 
     cleanupRef.current = getDeepAnalysisStream(
       type, birthDate, birthTime, gender, calendarType, extra,
       {
         context,
         onChunk: (text) => {
+          buffer += text;
           setStreamText(prev => prev + text);
+          // Progressive 추출 — 완성된 필드만 즉시 setData에 반영
+          const completed = extractStreamingFields(buffer, PROGRESSIVE_DEEP_FIELDS);
+          if (Object.keys(completed).length > 0) {
+            setData((prev) => ({ ...(prev || { type, birthDate }), ...completed }));
+            if (!firstShown) {
+              firstShown = true;
+              setLoading(false);    // 매트릭스 끄고
+              setStreaming(true);    // 카드 영역 + 인디케이터로 전환
+            }
+          }
         },
         onCached: (cachedData) => {
           saveAndSet(cachedData);
           setLoading(false);
+          setStreaming(false);
           stopAmbient();
         },
         onDone: (fullText) => {
@@ -222,11 +246,13 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
             saveAndSet({ type, birthDate, detailAnalysis: fullText });
           }
           setLoading(false);
+          setStreaming(false);
           setStreamText('');
           stopAmbient();
         },
         onError: () => {
           setStreamText('');
+          setStreaming(false);
           (async () => {
             try {
               const result = await getDeepAnalysis(type, birthDate, birthTime, gender, calendarType, extra, context);
@@ -303,7 +329,10 @@ function DeepAnalysis({ type, birthDate, birthTime, gender, calendarType, extra,
       {data && !loading && (
         <div className="deep-content fade-in">
           <div className="deep-inline-divider">
-            <span className="deep-inline-badge">✨ 심화분석</span>
+            <span className="deep-inline-badge">
+              ✨ 심화분석
+              {streaming && <span className="deep-progress-tag"> · AI가 더 깊이 분석 중<span className="deep-dots"><i/><i/><i/></span></span>}
+            </span>
           </div>
           <div className="deep-result">
             {data.deepSummary && (

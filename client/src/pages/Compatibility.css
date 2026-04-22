@@ -135,6 +135,45 @@
 
 /* ─── Analysis Cards ─── */
 .compat-cards { display: flex; flex-direction: column; gap: 10px; }
+
+/* Progressive 카드 노출 중 인디케이터 */
+.compat-progress-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(255, 61, 127, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 10px;
+  font-size: 13px;
+  color: #fbbf24;
+  animation: compatProgressFade 0.3s ease-out;
+}
+.compat-progress-icon { font-size: 16px; animation: compatProgressSpin 2s linear infinite; }
+.compat-progress-text { display: inline-flex; align-items: center; gap: 2px; font-weight: 500; }
+.compat-progress-dots { display: inline-flex; gap: 2px; margin-left: 4px; }
+.compat-progress-dots i {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: currentColor; opacity: 0.4;
+  animation: compatProgressDot 1.2s infinite ease-in-out;
+}
+.compat-progress-dots i:nth-child(2) { animation-delay: 0.2s; }
+.compat-progress-dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes compatProgressDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.4); }
+}
+@keyframes compatProgressSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes compatProgressFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+[data-theme="light"] .compat-progress-bar {
+  color: #c2185b;
+  border-color: rgba(194, 24, 91, 0.3);
+  background: linear-gradient(135deg, rgba(194, 24, 91, 0.06), rgba(251, 191, 36, 0.05));
+}
 .compat-card { padding: 16px; }
 .compat-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .compat-card-icon { font-size: 18px; }

@@ -6,7 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFields } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Compatibility.css';
@@ -145,18 +145,47 @@ function Compatibility() {
         return;
       }
 
-      // 2단계: AI 스트리밍 — 매트릭스에 실시간 텍스트 공급
+      // 2단계: AI 스트리밍 — Progressive 카드 노출 (완성된 필드부터 즉시 표시)
       setLoading(false);
       setAiStreaming(true);
+
+      // raw JSON key → UI ai* 필드 매핑
+      const FIELD_MAP = {
+        summary: 'aiSummary',
+        overall: 'aiAnalysis',
+        loveCompat: 'aiLoveCompat',
+        workCompat: 'aiWorkCompat',
+        conflictPoint: 'aiConflictPoint',
+        advice: 'aiAdvice',
+      };
+      const PROG_FIELDS = Object.keys(FIELD_MAP);
+      let buffer = '';
+      let firstShown = false;
 
       cleanupRef.current = getCompatibilityStream(
         bd1, bd2, bt1 || '', bt2 || '', calType1, calType2, g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
           historyType: 'compatibility',
-          onChunk: (text) => setStreamText(prev => prev + text),
+          onChunk: (text) => {
+            buffer += text;
+            setStreamText(prev => prev + text);
+            const completed = extractStreamingFields(buffer, PROG_FIELDS);
+            const newFields = {};
+            for (const [src, dst] of Object.entries(FIELD_MAP)) {
+              if (completed[src] !== undefined) newFields[dst] = completed[src];
+            }
+            if (Object.keys(newFields).length > 0) {
+              setResult((prev) => ({ ...(prev || data), ...newFields }));
+              if (!firstShown) {
+                firstShown = true;
+                // 매트릭스 페이드아웃 → 결과 영역 노출 (aiStreaming은 유지하여 인디케이터 표시)
+                setMatrixExiting(true);
+                setTimeout(() => setMatrixShown(false), 600);
+              }
+            }
+          },
           onDone: (fullText) => {
-            setAiStreaming(false);
             const parsed = parseAiJson(fullText);
             const merged = parsed ? {
               ...data,
@@ -179,7 +208,15 @@ function Compatibility() {
               aiConflictPoint: merged.aiConflictPoint,
               aiAdvice: merged.aiAdvice,
             }).catch(() => {});
-            finishWithCompleteAnimation(merged);
+            setAiStreaming(false);
+            // progressive로 이미 카드가 떠있으면 완료 애니 생략, 미노출이면 기존 흐름
+            if (firstShown) {
+              setResult(merged);
+              try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+              setStreamText('');
+            } else {
+              finishWithCompleteAnimation(merged);
+            }
           },
           onError: () => {
             setAiStreaming(false); setStreamText(''); setMatrixShown(false);
@@ -266,6 +303,12 @@ function Compatibility() {
 
         {/* 분석 카드 */}
         <section className="compat-cards">
+          {aiStreaming && (
+            <div className="compat-progress-bar">
+              <span className="compat-progress-icon">✨</span>
+              <span className="compat-progress-text">AI가 더 깊이 분석 중<span className="compat-progress-dots"><i/><i/><i/></span></span>
+            </div>
+          )}
           {result.aiSummary && (
             <div className="compat-card glass-card compat-card--summary">
               <p className="compat-summary-text">{cleanAiText(result.aiSummary)}</p>
