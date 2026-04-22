@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getYearFortuneStream, getYearFortune, isGuest } from '../api/fortune';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
+import StreamingCard from '../components/StreamingCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -64,6 +65,10 @@ function YearFortune() {
   const pendingResultRef = useRef(null);
   const pendingSetterRef = useRef(null);
 
+  // Progressive 카드 상태 (3탭 공용)
+  const [streamingActive, setStreamingActive] = useState(false);
+  const [doneFields, setDoneFields] = useState(() => new Set());
+
   useEffect(() => {
     return () => { mineCleanupRef.current?.(); partnerCleanupRef.current?.(); otherCleanupRef.current?.(); };
   }, []);
@@ -81,12 +86,16 @@ function YearFortune() {
   const startAnalysis = (bd, bt, g, ct, setters) => {
     const { setResult, setLoading, setStreamText, setStreaming, cleanupRef } = setters;
     setLoading(true); setStreamText(''); setStreaming(false); setResult(null);
+    setDoneFields(new Set()); setStreamingActive(false);
     cleanupRef.current?.();
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     let firstChunk = true;
     let gotResult = false;
+    let buffer = '';
+    let firstFieldShown = false;
+    const PROG_FIELDS = ['love', 'money', 'career', 'health', 'relationship', 'advice', 'yearAdvice', 'summary', 'yearTheme'];
 
     // 비스트리밍 폴백: 스트림 실패/파싱실패 시 일반 API 로 재시도
     const fallback = async (reason) => {
@@ -102,6 +111,7 @@ function YearFortune() {
         console.error('[YearFortune] fallback failed:', e);
       } finally {
         setLoading(false); setStreaming(false); setStreamText('');
+        setStreamingActive(false); setDoneFields(new Set());
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       }
     };
@@ -115,17 +125,52 @@ function YearFortune() {
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        buffer += chunk;
         setStreamText(prev => prev + chunk);
+        // Progressive partial 추출 — 카드 placeholder + typewriter
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const newFields = {};
+        const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            newFields[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(newFields).length > 0) {
+          if (!firstFieldShown) {
+            firstFieldShown = true;
+            setStreamingActive(true);
+            setResult({ overallScore: 0, summary: '', yearTheme: '분석 중...', ...newFields });
+          } else {
+            setResult(prev => ({ ...(prev || {}), ...newFields }));
+          }
+          if (newDone.length > 0) {
+            setDoneFields(prev => {
+              let changed = false;
+              const next = new Set(prev);
+              for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+              return changed ? next : prev;
+            });
+          }
+        }
       },
       onDone: (fullText) => {
         const parsed = parseAiJson(fullText);
         if (parsed) {
           gotResult = true;
           setStreaming(false); setLoading(false); setStreamText('');
+          setStreamingActive(false); setDoneFields(new Set());
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-          pendingResultRef.current = parsed;
-          pendingSetterRef.current = setResult;
-          setCompleting(true);
+          if (firstFieldShown) {
+            // 이미 카드가 떠있으면 완료 애니 생략하고 바로 최종 결과로 교체
+            setResult(parsed);
+          } else {
+            pendingResultRef.current = parsed;
+            pendingSetterRef.current = setResult;
+            setCompleting(true);
+          }
         } else {
           // 파싱 실패 → 불완전 JSON(토큰 초과 등) → 폴백
           console.warn('[YearFortune] parseAiJson failed, fallback. raw length:', fullText?.length);
@@ -197,11 +242,34 @@ function YearFortune() {
         )}
         <div className="yf-section">
           <h3 className="yf-section-title"><span>🔮</span> 영역별 운세</h3>
-          {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={0} />}
-          {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={80} />}
-          {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={160} />}
-          {result.health && <FortuneCard icon="💚" title="건강운" description={result.health} delay={240} />}
-          {result.relationship && <FortuneCard icon="🤝" title="대인관계운" description={result.relationship} delay={320} />}
+          {(() => {
+            const fs = (field) => {
+              if (!streamingActive) return 'done';
+              if (doneFields.has(field)) return 'done';
+              if (result[field]) return 'streaming';
+              return 'pending';
+            };
+            if (streamingActive) {
+              return (
+                <>
+                  <StreamingCard icon="💕" title="애정운" text={result.love || ''} status={fs('love')} delay={0} />
+                  <StreamingCard icon="💰" title="재물운" text={result.money || ''} status={fs('money')} delay={80} />
+                  <StreamingCard icon="💼" title="직장운" text={result.career || ''} status={fs('career')} delay={160} />
+                  <StreamingCard icon="💚" title="건강운" text={result.health || ''} status={fs('health')} delay={240} />
+                  <StreamingCard icon="🤝" title="대인관계운" text={result.relationship || ''} status={fs('relationship')} delay={320} />
+                </>
+              );
+            }
+            return (
+              <>
+                {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={0} />}
+                {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={80} />}
+                {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={160} />}
+                {result.health && <FortuneCard icon="💚" title="건강운" description={result.health} delay={240} />}
+                {result.relationship && <FortuneCard icon="🤝" title="대인관계운" description={result.relationship} delay={320} />}
+              </>
+            );
+          })()}
         </div>
         {(result.luckyMonths || result.cautionMonths) && (
           <div className="yf-months glass-card">
@@ -216,7 +284,11 @@ function YearFortune() {
             {result.luckyDirection && <div className="yf-lucky-item"><span className="yf-lucky-label">행운의 방위</span><span className="yf-lucky-value">{result.luckyDirection}</span></div>}
           </div>
         )}
-        {rAdvice && <FortuneCard icon="💡" title="2026년 조언" description={rAdvice} delay={400} />}
+        {streamingActive ? (
+          <StreamingCard icon="💡" title="2026년 조언" text={rAdvice || ''}
+            status={!streamingActive ? 'done' : (doneFields.has('advice') || doneFields.has('yearAdvice')) ? 'done' : (rAdvice ? 'streaming' : 'pending')}
+            delay={400} />
+        ) : rAdvice && <FortuneCard icon="💡" title="2026년 조언" description={rAdvice} delay={400} />}
         {bd && <DeepAnalysis type="yearly" birthDate={bd} birthTime={bt} gender={g} calendarType={ct} previousResult={result} />}
         <div className="yf-actions">
           <button className="yf-action-btn yf-share-btn" onClick={() => handleShare(result)}>{copied ? '✅ 복사됨' : '📤 공유하기'}</button>
@@ -227,6 +299,8 @@ function YearFortune() {
   };
 
   const renderLoading = (isLoading, isStreaming, sText, hasResult) => {
+    // streamingActive(=carousel placeholder 노출 중)면 매트릭스 숨김
+    if (streamingActive) return null;
     if ((isLoading || isStreaming) && !hasResult && !completing) {
       return <AnalysisMatrix theme="year" label="AI가 2026년 운세를 분석하고 있어요" streamText={sText} />;
     }

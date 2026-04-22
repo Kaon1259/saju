@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getWeeklyFortuneStream, isGuest } from '../api/fortune';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -59,6 +60,8 @@ function WeeklyFortune() {
   const [streamText, setStreamText] = useState('');
   const [result, setResult] = useState(null);
   const [completing, setCompleting] = useState(false);
+  const [streamingActive, setStreamingActive] = useState(false);
+  const [doneFields, setDoneFields] = useState(() => new Set());
   const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const daysScrollRef = useRef(null);
@@ -94,6 +97,12 @@ function WeeklyFortune() {
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
+    let buffer = '';
+    let firstFieldShown = false;
+    const PROG_FIELDS = ['love', 'money', 'career', 'advice', 'summary'];
+    setDoneFields(new Set());
+    setStreamingActive(false);
+
     cleanupRef.current = getWeeklyFortuneStream(birthDate, birthTime, gender, {
       onCached: (data) => {
         setResult(data);
@@ -103,15 +112,47 @@ function WeeklyFortune() {
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        buffer += chunk;
         setStreamText(prev => prev + chunk);
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const newFields = {};
+        const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            newFields[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(newFields).length > 0) {
+          if (!firstFieldShown) {
+            firstFieldShown = true;
+            setStreamingActive(true);
+            setResult({ score: 0, summary: '', ...newFields });
+          } else {
+            setResult(prev => ({ ...(prev || {}), ...newFields }));
+          }
+          if (newDone.length > 0) {
+            setDoneFields(prev => {
+              let changed = false;
+              const next = new Set(prev);
+              for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+              return changed ? next : prev;
+            });
+          }
+        }
       },
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-        {
-          const parsed = parseAiJson(fullText);
-          if (parsed) {
+        const parsed = parseAiJson(fullText);
+        setStreamingActive(false);
+        setDoneFields(new Set());
+        if (parsed) {
+          if (firstFieldShown) {
+            setResult(parsed);
+          } else {
             pendingResultRef.current = parsed;
             setCompleting(true);
           }
@@ -122,6 +163,8 @@ function WeeklyFortune() {
         console.error('주간운세 스트림 실패:', err);
         setLoading(false);
         setStreaming(false);
+        setStreamingActive(false);
+        setDoneFields(new Set());
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
@@ -237,7 +280,7 @@ function WeeklyFortune() {
 
       {/* 스트리밍 중 */}
       {streaming && (
-        <StreamText text={streamText} icon="📅" label="AI가 이번 주 운세를 분석하고 있어요..." color="#34D399" />
+        !streamingActive && <StreamText text={streamText} icon="📅" label="AI가 이번 주 운세를 분석하고 있어요..." color="#34D399" />
       )}
 
       {/* 결과 */}
@@ -315,15 +358,33 @@ function WeeklyFortune() {
             </div>
           )}
 
-          {/* 운세 카드들 */}
-          {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={0} />}
-          {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={80} />}
-          {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={160} />}
-
-          {/* 조언 */}
-          {result.advice && (
-            <FortuneCard icon="💡" title="이번 주 조언" description={result.advice} delay={240} />
-          )}
+          {/* 운세 카드들 (Progressive 모드: streamingActive일 때 placeholder + typewriter) */}
+          {(() => {
+            const fs = (field) => {
+              if (!streamingActive) return 'done';
+              if (doneFields.has(field)) return 'done';
+              if (result[field]) return 'streaming';
+              return 'pending';
+            };
+            if (streamingActive) {
+              return (
+                <>
+                  <StreamingCard icon="💕" title="애정운" text={result.love || ''} status={fs('love')} delay={0} />
+                  <StreamingCard icon="💰" title="재물운" text={result.money || ''} status={fs('money')} delay={80} />
+                  <StreamingCard icon="💼" title="직장운" text={result.career || ''} status={fs('career')} delay={160} />
+                  <StreamingCard icon="💡" title="이번 주 조언" text={result.advice || ''} status={fs('advice')} delay={240} />
+                </>
+              );
+            }
+            return (
+              <>
+                {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={0} />}
+                {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={80} />}
+                {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={160} />}
+                {result.advice && <FortuneCard icon="💡" title="이번 주 조언" description={result.advice} delay={240} />}
+              </>
+            );
+          })()}
 
           {/* 심화분석 */}
           {birthDate && (

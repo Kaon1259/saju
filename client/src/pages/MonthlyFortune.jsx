@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMonthlyFortuneStream, isGuest } from '../api/fortune';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
+import StreamingCard from '../components/StreamingCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import StreamText from '../components/StreamText';
@@ -64,6 +65,8 @@ function MonthlyFortune() {
   const [result, setResult] = useState(null);
   const [showAllMonths, setShowAllMonths] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [streamingActive, setStreamingActive] = useState(false);
+  const [doneFields, setDoneFields] = useState(() => new Set());
   const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
   const cleanupRef = useRef(null);
@@ -108,6 +111,12 @@ function MonthlyFortune() {
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
+    let buffer = '';
+    let firstFieldShown = false;
+    const PROG_FIELDS = ['overall', 'love', 'money', 'career', 'health', 'advice', 'summary'];
+    setDoneFields(new Set());
+    setStreamingActive(false);
+
     cleanupRef.current = getMonthlyFortuneStream(birthDate, m, birthTime, gender, {
       extra: isExtraMonth(m),
       onCached: (data) => {
@@ -118,16 +127,51 @@ function MonthlyFortune() {
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        buffer += chunk;
         setStreamText(prev => prev + chunk);
+        // Progressive partial 추출
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const newFields = {};
+        const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            newFields[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(newFields).length > 0) {
+          if (!firstFieldShown) {
+            firstFieldShown = true;
+            setStreamingActive(true);
+            setResult({ month: m, score: 0, ...newFields });
+          } else {
+            setResult(prev => ({ ...(prev || { month: m }), ...newFields }));
+          }
+          if (newDone.length > 0) {
+            setDoneFields(prev => {
+              let changed = false;
+              const next = new Set(prev);
+              for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+              return changed ? next : prev;
+            });
+          }
+        }
       },
       onDone: (fullText) => {
         setStreaming(false);
         setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
+        setStreamingActive(false);
+        setDoneFields(new Set());
         if (parsed) {
-          pendingResultRef.current = { ...parsed, month: m };
-          setCompleting(true);
+          if (firstFieldShown) {
+            setResult({ ...parsed, month: m });
+          } else {
+            pendingResultRef.current = { ...parsed, month: m };
+            setCompleting(true);
+          }
         }
         setLoading(false);
       },
@@ -135,6 +179,8 @@ function MonthlyFortune() {
         console.error('월별운세 스트림 실패:', err);
         setLoading(false);
         setStreaming(false);
+        setStreamingActive(false);
+        setDoneFields(new Set());
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
@@ -276,8 +322,8 @@ function MonthlyFortune() {
         </div>
       )}
 
-      {/* 스트리밍 중 */}
-      {streaming && (
+      {/* 스트리밍 중 — Progressive 카드(streamingActive)일 땐 카드 영역에서 표시 */}
+      {streaming && !streamingActive && (
         <StreamText text={streamText} icon="📅" label="AI가 이번 달 운세를 분석하고 있어요..." color="#9B59B6" />
       )}
 
@@ -322,16 +368,35 @@ function MonthlyFortune() {
             </span>
           </div>
 
-          {/* 종합 분석 */}
-          {result.overall && (
-            <FortuneCard icon={getSeasonEmoji(result.month)} title="총운" description={result.overall} delay={0} />
-          )}
-
-          {/* 운세 카드들 */}
-          {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={80} />}
-          {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={160} />}
-          {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={240} />}
-          {result.health && <FortuneCard icon="💚" title="건강운" description={result.health} delay={320} />}
+          {/* 종합 분석 + 운세 카드 (Progressive 모드: streamingActive일 때 placeholder + typewriter) */}
+          {(() => {
+            const fs = (field) => {
+              if (!streamingActive) return 'done';
+              if (doneFields.has(field)) return 'done';
+              if (result[field]) return 'streaming';
+              return 'pending';
+            };
+            if (streamingActive) {
+              return (
+                <>
+                  <StreamingCard icon={getSeasonEmoji(result.month)} title="총운" text={result.overall || ''} status={fs('overall')} delay={0} />
+                  <StreamingCard icon="💕" title="애정운" text={result.love || ''} status={fs('love')} delay={80} />
+                  <StreamingCard icon="💰" title="재물운" text={result.money || ''} status={fs('money')} delay={160} />
+                  <StreamingCard icon="💼" title="직장운" text={result.career || ''} status={fs('career')} delay={240} />
+                  <StreamingCard icon="💚" title="건강운" text={result.health || ''} status={fs('health')} delay={320} />
+                </>
+              );
+            }
+            return (
+              <>
+                {result.overall && <FortuneCard icon={getSeasonEmoji(result.month)} title="총운" description={result.overall} delay={0} />}
+                {result.love && <FortuneCard icon="💕" title="애정운" description={result.love} delay={80} />}
+                {result.money && <FortuneCard icon="💰" title="재물운" description={result.money} delay={160} />}
+                {result.career && <FortuneCard icon="💼" title="직장운" description={result.career} delay={240} />}
+                {result.health && <FortuneCard icon="💚" title="건강운" description={result.health} delay={320} />}
+              </>
+            );
+          })()}
 
           {/* 좋은 주 / 주의 주 */}
           {(result.bestWeek || result.cautionWeek) && (
@@ -367,8 +432,12 @@ function MonthlyFortune() {
           )}
 
           {/* 조언 */}
-          {result.advice && (
-            <FortuneCard icon="💡" title={`${result.month}월 조언`} description={result.advice} delay={400} />
+          {(streamingActive || result.advice) && (
+            streamingActive ? (
+              <StreamingCard icon="💡" title={`${result.month}월 조언`} text={result.advice || ''}
+                status={doneFields.has('advice') ? 'done' : (result.advice ? 'streaming' : 'pending')}
+                delay={400} />
+            ) : <FortuneCard icon="💡" title={`${result.month}월 조언`} description={result.advice} delay={400} />
           )}
 
           {/* 심화분석 */}
