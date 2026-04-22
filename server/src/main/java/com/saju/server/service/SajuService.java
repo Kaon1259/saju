@@ -29,6 +29,9 @@ public class SajuService {
     private final ConcurrentHashMap<String, SajuResult> cache = new ConcurrentHashMap<>();
     private volatile LocalDate cacheDate = null;
 
+    // 정통 사주 분석은 동일 입력에 대해 영속(평생 동일). 만세력은 만세력대로 일간.
+    private static final LocalDate SAJU_CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
+
     /**
      * 사주 분석 수행 (gender 없는 버전 - 하위 호환)
      */
@@ -42,8 +45,8 @@ public class SajuService {
     public SajuResult analyze(LocalDate birthDate, String birthTime, String gender) {
         LocalDate today = LocalDate.now();
 
-        // DB 캐시 체크
-        String dbCacheKey = buildCacheKey("saju", birthDate.toString(), birthTime, gender);
+        // DB 캐시 체크 — 사주 자체는 영속, 월운/세운 갱신 위해 cacheKey에 연도 포함
+        String dbCacheKey = buildCacheKey("saju", birthDate.toString(), birthTime, gender, String.valueOf(today.getYear()));
         Map<String, Object> dbCached = getFromCache("saju", dbCacheKey);
         if (dbCached != null) {
             try {
@@ -183,7 +186,7 @@ public class SajuService {
      * DB 캐시에서 사주 분석 결과 조회 (스트리밍 캐시 체크용)
      */
     public SajuResult getCachedResult(LocalDate birthDate, String birthTime, String gender) {
-        String dbCacheKey = buildCacheKey("saju", birthDate.toString(), birthTime, gender);
+        String dbCacheKey = buildCacheKey("saju", birthDate.toString(), birthTime, gender, String.valueOf(LocalDate.now().getYear()));
         Map<String, Object> dbCached = getFromCache("saju", dbCacheKey);
         if (dbCached != null) {
             try {
@@ -330,10 +333,15 @@ public class SajuService {
         }
     }
 
+    /** type별 anchor — saju는 영속, 그 외(만세력 등)는 일간 */
+    private LocalDate cacheAnchor(String type) {
+        return "saju".equals(type) ? SAJU_CACHE_ANCHOR : LocalDate.now();
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> getFromCache(String type, String cacheKey) {
         try {
-            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, cacheAnchor(type));
             if (cached.isPresent()) {
                 return objectMapper.readValue(cached.get().getResultJson(), new TypeReference<Map<String, Object>>() {});
             }
@@ -343,11 +351,12 @@ public class SajuService {
 
     private void saveToCache(String type, String cacheKey, Map<String, Object> result) {
         try {
+            LocalDate anchor = cacheAnchor(type);
             // 이미 존재하면 저장하지 않음
-            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, LocalDate.now());
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(type, cacheKey, anchor);
             if (existing.isPresent()) return;
             specialFortuneRepository.save(SpecialFortune.builder()
-                .fortuneType(type).cacheKey(cacheKey).fortuneDate(LocalDate.now())
+                .fortuneType(type).cacheKey(cacheKey).fortuneDate(anchor)
                 .resultJson(objectMapper.writeValueAsString(result)).build());
         } catch (Exception e) {
             log.debug("Cache save skipped (duplicate): {}", cacheKey);

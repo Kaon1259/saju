@@ -142,7 +142,30 @@ function MyLoveCompat() {
           p._kind = 'marriage';
           setTab('marriage');
         }
+        // person1/person2 누락된 옛 payload 보강 — 화면 렌더 조건(result.person1) 충족
+        if (!p.person1 || !p.person2) {
+          try {
+            const base = await getSajuCompatibilityBasic(
+              p.birthDate1, p.birthDate2,
+              p.birthTime1 || undefined, p.birthTime2 || undefined,
+              p.calendarType1 || 'SOLAR', p.calendarType2 || 'SOLAR',
+              p._g1, p._g2,
+              full?.type === 'marriage_compat' ? { mode: 'marriage' } : {}
+            );
+            if (base?.person1) p.person1 = base.person1;
+            if (base?.person2) p.person2 = base.person2;
+            if (!p.score && base?.score) p.score = base.score;
+            if (!p.grade && base?.grade) p.grade = base.grade;
+          } catch {}
+        }
+        setBd1(p.birthDate1 || '');
+        setBd2(p.birthDate2 || '');
+        setBt1(p.birthTime1 || '');
+        setBt2(p.birthTime2 || '');
+        setG1(p._g1);
+        setG2(p._g2);
         setResult(p);
+        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       } catch {}
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
