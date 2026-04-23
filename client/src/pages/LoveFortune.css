@@ -1,5 +1,30 @@
 .lf-page { max-width: 600px; margin: 0 auto; padding: 8px 16px 100px; }
 
+/* Progressive 스트리밍 — 분석 중 카드 */
+.lf-streaming-wrap { padding: 8px 0 16px; }
+.lf-streaming-header { text-align: center; margin: 8px 0 18px; }
+.lf-streaming-title {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700;
+  background: linear-gradient(90deg, #ff3d7f 0%, #fbbf24 50%, #a855f7 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lf-streaming-orb {
+  font-size: 22px; display: inline-block;
+  animation: lfStreamingOrb 1.6s ease-in-out infinite;
+  -webkit-text-fill-color: initial;
+  filter: drop-shadow(0 0 8px rgba(255, 61, 127, 0.7));
+}
+@keyframes lfStreamingOrb {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.25) rotate(-10deg); }
+}
+.lf-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
+[data-theme="light"] .lf-streaming-title {
+  background: linear-gradient(90deg, #c2185b 0%, #b8860b 50%, #7e22ce 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
 /* 상단 버튼바 */
 .lf-topbar {
   display: flex;

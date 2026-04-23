@@ -5,7 +5,8 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './Tojeong.css';
@@ -27,6 +28,8 @@ function Tojeong() {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [showInput, setShowInput] = useState(true);
@@ -90,6 +93,9 @@ function Tojeong() {
     if (!userBirthDate) { setShowInput(true); setLoading(false); setMatrixShown(false); return; }
 
     let firstChunk = true;
+    setStreamFields({}); setDoneFields(new Set());
+    let buffer = '';
+    const TJ_FIELDS = ['yearSummary', 'yearAdvice', 'bestMonth', 'cautionMonth'];
     cleanupRef.current = getTojeongStream(userBirthDate, userCalendarType, {
       onCached: (data) => {
         setResult(data);
@@ -97,12 +103,25 @@ function Tojeong() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onBase: (base) => {
-        // 기본 계산값(sangsu/jungsu/hasu/totalGwae/gwaeName/monthlyFortunes) 먼저 저장
         baseRef.current = base;
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        buffer += chunk;
         setStreamText(prev => prev + chunk);
+        const partial = extractStreamingFieldsPartial(buffer, TJ_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of TJ_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
       },
       onDone: (fullText) => {
         setStreaming(false);
@@ -168,6 +187,9 @@ function Tojeong() {
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     let firstChunk = true;
+    setStreamFields({}); setDoneFields(new Set());
+    let buffer = '';
+    const TJ_FIELDS = ['yearSummary', 'yearAdvice', 'bestMonth', 'cautionMonth'];
     cleanupRef.current = getTojeongStream(birthDate, calendarType, {
       onCached: (data) => {
         setResult(data);
@@ -175,12 +197,25 @@ function Tojeong() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
       onBase: (base) => {
-        // 기본 계산값(sangsu/jungsu/hasu/totalGwae/gwaeName/monthlyFortunes) 먼저 저장
         baseRef.current = base;
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        buffer += chunk;
         setStreamText(prev => prev + chunk);
+        const partial = extractStreamingFieldsPartial(buffer, TJ_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of TJ_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
       },
       onDone: (fullText) => {
         setStreaming(false);
@@ -233,9 +268,26 @@ function Tojeong() {
   const currentMonth = new Date().getMonth(); // 0-indexed
 
   if ((loading || streaming) && !result && !completing) {
+    const st = (key) => {
+      if (doneFields.has(key)) return 'done';
+      if (streamFields[key]) return 'streaming';
+      return 'pending';
+    };
     return (
       <div className="tj-page">
-        <AnalysisMatrix theme="saju" label="AI가 토정비결을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+        <div className="tj-streaming-wrap">
+          <div className="tj-streaming-header">
+            <span className="tj-streaming-orb">📜</span>
+            <span className="tj-streaming-title">AI가 토정비결을 분석중이에요</span>
+            <span className="streaming-dots"><i/><i/><i/></span>
+          </div>
+          <div className="tj-streaming-cards">
+            <StreamingCard icon="🎋" title="올해의 총운"    text={streamFields.yearSummary  || ''} status={st('yearSummary')}  delay={0}   />
+            <StreamingCard icon="🌟" title="최고의 달"      text={streamFields.bestMonth    || ''} status={st('bestMonth')}    delay={80}  />
+            <StreamingCard icon="⚠️" title="주의의 달"      text={streamFields.cautionMonth || ''} status={st('cautionMonth')} delay={160} />
+            <StreamingCard icon="💡" title="올해의 조언"    text={streamFields.yearAdvice   || ''} status={st('yearAdvice')}   delay={240} />
+          </div>
+        </div>
       </div>
     );
   }

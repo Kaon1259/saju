@@ -411,64 +411,21 @@ export function playAnalyzeStart() {
   note(c, 1046.5, 0.65, 0.35, 0.06, 'square'); // C6 hold
 }
 
-// ─── AI 분석 루프: CPU 작동 중 전자 앰비언트 ───
+// ─── AI 분석 루프: 타로 카드 선택 효과음(딸깍+둥+반짝) 주기 재생 ───
 export function startAnalyzeAmbient() {
   const c = ctx(); if (!c) return null;
   let stopped = false;
   let timer = null;
 
-  function playLoop() {
+  function loop() {
     if (stopped) return;
-    const now = c.currentTime;
-
-    // 1) 저음 펄스 드론 (CPU heartbeat) — sawtooth 로 전자적 느낌
-    const drone = c.createOscillator();
-    const droneG = c.createGain();
-    const droneFilt = c.createBiquadFilter();
-    drone.type = 'sawtooth';
-    drone.frequency.setValueAtTime(55, now);  // A1
-    droneFilt.type = 'lowpass';
-    droneFilt.frequency.setValueAtTime(400, now);
-    droneFilt.Q.setValueAtTime(2, now);
-    droneG.gain.setValueAtTime(0, now);
-    droneG.gain.linearRampToValueAtTime(0.035, now + 0.3);
-    droneG.gain.linearRampToValueAtTime(0.035, now + 2.7);
-    droneG.gain.exponentialRampToValueAtTime(0.001, now + 3.1);
-    drone.connect(droneFilt); droneFilt.connect(droneG); droneG.connect(c.destination);
-    drone.start(now); drone.stop(now + 3.2);
-
-    // 2) 주기적 데이터 처리 비프 (일정한 리듬)
-    // 0.35초 간격으로 짧은 square 비프 — 규칙적인 CPU 작동음
-    for (let i = 0; i < 8; i++) {
-      const t = 0.1 + i * 0.35;
-      // 살짝 다른 주파수로 "데이터 스트림" 느낌
-      const freqs = [1568, 1760, 1396.9, 1864.7, 2093, 1760, 1568, 1760];
-      note(c, freqs[i], t, 0.035, 0.042, 'square');
-    }
-
-    // 3) 랜덤 고속 글리치 틱 (데이터 패킷 전송)
-    for (let i = 0; i < 4; i++) {
-      const t = 0.5 + Math.random() * 2.2;
-      const f = 2500 + Math.random() * 1500;
-      note(c, f, t, 0.015, 0.025, 'square');
-    }
-
-    // 4) 저주파 펄스 (rhythm) — 2Hz 심장박동 같은
-    [0.5, 1.5, 2.5].forEach(t => {
-      const p = c.createOscillator();
-      const pg = c.createGain();
-      p.type = 'sine';
-      p.frequency.setValueAtTime(80, now + t);
-      pg.gain.setValueAtTime(0.06, now + t);
-      pg.gain.exponentialRampToValueAtTime(0.001, now + t + 0.08);
-      p.connect(pg); pg.connect(c.destination);
-      p.start(now + t); p.stop(now + t + 0.1);
-    });
-
-    timer = setTimeout(() => { if (!stopped) playLoop(); }, 3100);
+    // 타로 카드 선택 효과음 — 딸깍 슬랩 + E5/B5 톤 + G6 반짝
+    playCardPick();
+    // 1.8~2.4초 랜덤 간격 (일정하지 않게, 분석 리듬감)
+    const nextMs = 1800 + Math.random() * 600;
+    timer = setTimeout(loop, nextMs);
   }
-
-  playLoop();
+  loop();
 
   return () => {
     stopped = true;

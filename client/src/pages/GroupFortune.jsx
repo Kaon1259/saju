@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getSajuCompatibility, analyzeSajuStream, isGuest } from '../api/fortune';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
 import GROUPS, { GROUP_TYPES } from '../data/groups';
 import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -49,6 +50,8 @@ function GroupFortune() {
   const [fortuneResult, setFortuneResult] = useState(null);
   const [fortuneStreamText, setFortuneStreamText] = useState('');
   const [fortuneStreaming, setFortuneStreaming] = useState(false);
+  const [fortuneStreamFields, setFortuneStreamFields] = useState({});
+  const [fortuneDoneFields, setFortuneDoneFields] = useState(new Set());
   const fortuneCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
   const [completing, setCompleting] = useState(false);
@@ -119,15 +122,36 @@ function GroupFortune() {
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
+    setFortuneStreamFields({}); setFortuneDoneFields(new Set());
+    let buffer = '';
+    const PROG_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
     fortuneCleanupRef.current = analyzeSajuStream(bd, undefined, 'SOLAR', g, { context: 'idol', targetType: 'celebrity', targetName: fortuneTargetName,
       onCached: (data) => {
         setFortuneResult(data); setFortuneLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
-      onChunk: (text) => { setFortuneStreaming(true); setFortuneStreamText(prev => prev + text); },
+      onChunk: (text) => {
+        setFortuneStreaming(true);
+        buffer += text;
+        setFortuneStreamText(prev => prev + text);
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setFortuneStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setFortuneDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
+      },
       onDone: (fullText) => {
         setFortuneStreaming(false);
         setFortuneStreamText('');
+        setFortuneStreamFields({}); setFortuneDoneFields(new Set());
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
@@ -139,6 +163,7 @@ function GroupFortune() {
       },
       onError: () => {
         setFortuneStreaming(false); setFortuneStreamText(''); setFortuneLoading(false);
+        setFortuneStreamFields({}); setFortuneDoneFields(new Set());
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     });
@@ -274,7 +299,30 @@ function GroupFortune() {
           }
         }}
       />
-      {matrixShown && (
+      {matrixShown && !fortuneResult && fortuneStreaming && (() => {
+        const st = (key) => {
+          if (fortuneDoneFields.has(key)) return 'done';
+          if (fortuneStreamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="gf-streaming-wrap">
+            <div className="gf-streaming-header">
+              <span className="gf-streaming-orb">⭐</span>
+              <span className="gf-streaming-title">{matrixLabel}</span>
+              <span className="streaming-dots"><i/><i/><i/></span>
+            </div>
+            <div className="gf-streaming-cards">
+              <StreamingCard icon="🌟" title="총운"   text={fortuneStreamFields.overall || ''} status={st('overall')} delay={0}   />
+              <StreamingCard icon="💕" title="애정운" text={fortuneStreamFields.love    || ''} status={st('love')}    delay={80}  />
+              <StreamingCard icon="💰" title="재물운" text={fortuneStreamFields.money   || ''} status={st('money')}   delay={160} />
+              <StreamingCard icon="💪" title="건강운" text={fortuneStreamFields.health  || ''} status={st('health')}  delay={240} />
+              <StreamingCard icon="💼" title="직장운" text={fortuneStreamFields.work    || ''} status={st('work')}    delay={320} />
+            </div>
+          </div>
+        );
+      })()}
+      {matrixShown && !fortuneStreaming && (
         <AnalysisMatrix theme={matrixTheme} label={matrixLabel} streamText={fortuneStreamText} exiting={matrixExiting} />
       )}
       {/* 뒤로가기 */}

@@ -4,6 +4,12 @@
   gap: var(--space-lg);
   padding-bottom: var(--space-xl);
 }
+.saju-streaming-wrap { padding: 8px 16px 16px; }
+.saju-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.saju-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #fbbf24 0%, #a855f7 50%, #ec4899 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.saju-streaming-orb { font-size: 22px; display: inline-block; animation: sajuOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8)); }
+@keyframes sajuOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.saju-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 
 /* Loading */
 .saju-loading {

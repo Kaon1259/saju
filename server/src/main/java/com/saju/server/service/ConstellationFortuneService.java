@@ -278,7 +278,8 @@ public class ConstellationFortuneService {
             + promptBuilder.buildPersonContext(birthDate, gender)
             + promptBuilder.buildTargetContext(targetType, targetName);
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json == null) return;

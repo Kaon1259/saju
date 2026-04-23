@@ -10,6 +10,12 @@
   overflow: hidden;
   min-height: 100vh;
 }
+.pt-streaming-wrap { padding: 8px 0 16px; position: relative; z-index: 1; }
+.pt-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.pt-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #E91E63 0%, #9B59B6 50%, #fbbf24 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pt-streaming-orb { font-size: 22px; display: inline-block; animation: ptOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(233, 30, 99, 0.7)); }
+@keyframes ptOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.pt-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 
 /* ═══ 배경 버블 ═══ */
 .pt-bg {

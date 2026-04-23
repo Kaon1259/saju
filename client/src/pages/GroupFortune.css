@@ -1,4 +1,10 @@
 .gf-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 100px; display: flex; flex-direction: column; gap: 12px; }
+.gf-streaming-wrap { padding: 8px 0 16px; }
+.gf-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.gf-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #fbbf24 0%, #ff3d7f 50%, #a855f7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gf-streaming-orb { font-size: 22px; display: inline-block; animation: gfOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.7)); }
+@keyframes gfOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.gf-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 .gf-nav-back { align-self: flex-start; padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .gf-nav-back:hover { color: #C084FC; border-color: rgba(192,132,252,0.3); }
 [data-theme="light"] .gf-nav-back { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.65); }

@@ -7,7 +7,8 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { mapLuckyOutfit } from '../utils/luckyOutfitTemplate';
@@ -243,6 +244,12 @@ function MyFortune() {
   const [copied, setCopied] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [streamFields, setStreamFields] = useState({}); // progressive 카드 (내 운세)
+  const [doneFields, setDoneFields] = useState(new Set());
+  const [partnerStreamFields, setPartnerStreamFields] = useState({});
+  const [partnerDoneFields, setPartnerDoneFields] = useState(new Set());
+  const [otherStreamFields, setOtherStreamFields] = useState({});
+  const [otherDoneFields, setOtherDoneFields] = useState(new Set());
   const [completing, setCompleting] = useState(false);
   const pendingResultRef = useRef(null);
   const pendingSetterRef = useRef(null);
@@ -412,8 +419,10 @@ function MyFortune() {
 
   // 스트리밍 분석 공통 함수 (호출 전에 guardTodayFortune으로 감쌀 것)
   const startAnalysis = (birthDate, birthTime, calendarType, gender, setters, extraOpts = {}) => {
-    const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef } = setters;
+    const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef, setStreamFields: sSF, setDoneFields: sDF } = setters;
     sL(true); sST(''); sS(false);
+    sSF?.({}); sDF?.(new Set());
+    let buffer = '';
     cRef.current?.();
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current?.(); } catch {}
@@ -424,7 +433,27 @@ function MyFortune() {
         sD(cached); sL(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
-      onChunk: (text) => { sS(true); sST(prev => prev + text); },
+      onChunk: (text) => {
+        sS(true);
+        buffer += text;
+        sST(prev => prev + text);
+        if (sSF && sDF) {
+          const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+          const next = {};
+          const newDone = [];
+          for (const k of PROG_FIELDS) {
+            const p = partial[k];
+            if (p !== undefined) {
+              next[k] = p.value;
+              if (p.done) newDone.push(k);
+            }
+          }
+          if (Object.keys(next).length > 0) sSF(prev => ({ ...prev, ...next }));
+          if (newDone.length > 0) sDF(prev => {
+            const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+          });
+        }
+      },
       onDone: () => {
         sS(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -432,9 +461,10 @@ function MyFortune() {
           try {
             const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
             sL(false); sST('');
+            sSF?.({}); sDF?.(new Set());
             finishWithCompleteAnimation(r, sD);
           }
-          catch (e) { console.error(e); sL(false); sST(''); }
+          catch (e) { console.error(e); sL(false); sST(''); sSF?.({}); sDF?.(new Set()); }
         })();
       },
       onError: () => {
@@ -443,10 +473,46 @@ function MyFortune() {
         (async () => {
           try { const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined); sD(r); }
           catch (e) { console.error(e); }
-          finally { sL(false); sST(''); }
+          finally { sL(false); sST(''); sSF?.({}); sDF?.(new Set()); }
         })();
       },
     });
+  };
+
+  // progressive 카드 필드 (서버 JSON의 todayFortune 내부 필드와 동일)
+  const PROG_FIELDS = ['overall', 'love', 'money', 'health', 'work', 'academic', 'tip'];
+
+  // 카드 상태 계산 헬퍼 (pending/streaming/done)
+  const cardStatus = (isStreaming, fields, done, key) => {
+    if (!isStreaming) return 'done';
+    if (done.has(key)) return 'done';
+    if (fields[key]) return 'streaming';
+    return 'pending';
+  };
+
+  // 스트리밍 중에 progressive 카드 + 스트림텍스트 라이브 보여주는 블록
+  const renderStreamingCards = (fields, done, label) => {
+    const st = (key) => cardStatus(true, fields, done, key);
+    return (
+      <div className="myf-streaming-wrap">
+        <div className="myf-streaming-header">
+          <div className="myf-streaming-title">
+            <span className="myf-streaming-orb">🔮</span>
+            <span>{label}</span>
+            <span className="streaming-dots"><i/><i/><i/></span>
+          </div>
+        </div>
+        <div className="myf-cards">
+          <StreamingCard icon="🌟" title="총운"           text={fields.overall  || ''} status={st('overall')}  delay={0}   />
+          <StreamingCard icon="💕" title="애정운"         text={fields.love     || ''} status={st('love')}     delay={60}  />
+          <StreamingCard icon="💰" title="재물운"         text={fields.money    || ''} status={st('money')}    delay={120} />
+          <StreamingCard icon="💪" title="건강운"         text={fields.health   || ''} status={st('health')}   delay={180} />
+          <StreamingCard icon="💼" title="직장운"         text={fields.work     || ''} status={st('work')}     delay={240} />
+          <StreamingCard icon="📚" title="학업·자기계발운" text={fields.academic || ''} status={st('academic')} delay={300} />
+          {fields.tip && <StreamingCard icon="💡" title="꿀팁" text={fields.tip || ''} status={st('tip')} delay={360} />}
+        </div>
+      </div>
+    );
   };
 
   const handleShare = async (fortuneData, title) => {
@@ -475,6 +541,8 @@ function MyFortune() {
   const loadMyFortune = (targetDate) => {
     if (!userId) { setLoading(false); return; }
     setData(null); setLoading(true); setStreamText(''); setStreaming(false);
+    setStreamFields({}); setDoneFields(new Set());
+    let buffer = '';
     cleanupRef.current?.();
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current?.(); } catch {}
@@ -484,7 +552,25 @@ function MyFortune() {
         setData(d); setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
-      onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
+      onChunk: (t) => {
+        setStreaming(true);
+        buffer += t;
+        setStreamText(prev => prev + t);
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const next = {};
+        const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
+      },
       onDone: (fullText) => {
         setStreaming(false); setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -497,14 +583,17 @@ function MyFortune() {
             saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor, luckyDirection: parsed.luckyDirection, luckyFood: parsed.luckyFood, luckyFashion: parsed.luckyFashion, luckyItem: parsed.luckyItem, hourlyFortune: Array.isArray(parsed.hourlyFortune) ? parsed.hourlyFortune : null }
           };
           setLoading(false);
+          setStreamFields({}); setDoneFields(new Set());
           finishWithCompleteAnimation(finalData, setData);
         } else {
           setLoading(false);
+          setStreamFields({}); setDoneFields(new Set());
         }
       },
       onError: () => {
         setStreaming(false); setStreamText('');
         setLoading(false);
+        setStreamFields({}); setDoneFields(new Set());
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     }, targetDate);
@@ -539,12 +628,12 @@ function MyFortune() {
     );
   }
 
-  // 내 운세 탭에서 분석 중이면 로딩 화면 (다른 탭은 자기 렌더링으로)
+  // 내 운세 탭에서 분석 중이면 progressive 카드 표시 (다른 탭은 자기 렌더링으로)
   if (viewMode === 'mine' && (loading || streaming) && !completing) {
     const dateLabel = dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`;
     return (
       <div className="myf-page">
-        <AnalysisMatrix theme="saju" label={`AI가 ${dateLabel} 운세를 분석하고 있어요`} streamText={streamText} />
+        {renderStreamingCards(streamFields, doneFields, `AI가 ${dateLabel} 운세를 분석중이에요`)}
       </div>
     );
   }
@@ -616,10 +705,10 @@ function MyFortune() {
     </>
   );
 
-  /* ── 스트리밍/로딩 표시 공통 ── */
-  const renderLoading = (isLoading, isStreaming, sText, hasData) => {
+  /* ── 스트리밍/로딩 표시 공통 (progressive 카드) ── */
+  const renderLoading = (isLoading, isStreaming, sText, hasData, fields, done) => {
     if ((isLoading || isStreaming) && !hasData && !completing) {
-      return <AnalysisMatrix theme="saju" label="AI가 오늘의 운세를 분석하고 있어요" streamText={sText} />;
+      return renderStreamingCards(fields || {}, done || new Set(), 'AI가 오늘의 운세를 분석중이에요');
     }
     return null;
   };
@@ -684,7 +773,7 @@ function MyFortune() {
           )}
 
           {!partnerCacheChecking && (
-            renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData) || (
+            renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData, partnerStreamFields, partnerDoneFields) || (
               !partnerData ? (
                 <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
                   <h2 style={{ marginBottom: 12 }}>💕 연인 운세</h2>
@@ -702,6 +791,7 @@ function MyFortune() {
                         onClick={() => guardTodayFortune(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, 'SOLAR', partnerInfo.gender, {
                           setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
                           setData: setPartnerData, cleanupRef: partnerCleanupRef,
+                          setStreamFields: setPartnerStreamFields, setDoneFields: setPartnerDoneFields,
                         }, { targetType: 'partner' }))}>
                         💕 연인 운세 보기 <HeartCost category="TODAY_FORTUNE" />
                       </button>
@@ -750,7 +840,7 @@ function MyFortune() {
       {/* ════════ 다른 사람 운세 ════════ */}
       {viewMode === 'other' && (
         <div className="myf-other-view">
-          {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData) || (
+          {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData, otherStreamFields, otherDoneFields) || (
             !otherData ? (
               <div className="myf-other-form glass-card">
                 <h2 style={{ textAlign: 'center', marginBottom: 12 }}>다른 사람 운세 보기</h2>
@@ -818,6 +908,7 @@ function MyFortune() {
                   onClick={() => guardTodayFortune(() => startAnalysis(otherBirthDate, otherBirthTime, otherCalendarType, otherGender, {
                     setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming,
                     setData: setOtherData, cleanupRef: otherCleanupRef,
+                    setStreamFields: setOtherStreamFields, setDoneFields: setOtherDoneFields,
                   }, { targetType: 'other' }))}>
                   {otherLoading || otherStreaming ? 'AI 분석중...' : '운세 보기'} <HeartCost category="TODAY_FORTUNE" />
                 </button>

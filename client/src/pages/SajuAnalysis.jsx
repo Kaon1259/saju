@@ -7,7 +7,8 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneLoading from '../components/FortuneLoading';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './SajuAnalysis.css';
@@ -65,6 +66,9 @@ function SajuAnalysis() {
   const [dailyFortunes, setDailyFortunes] = useState(null);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
+  const bufferRef = useRef('');
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const cleanupRef = useRef(null);
@@ -138,8 +142,23 @@ function SajuAnalysis() {
         getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
       },
       onChunk: (chunk) => {
-        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); bufferRef.current = ''; }
+        bufferRef.current += chunk;
         setStreamText(prev => prev + chunk);
+        const PROG_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
+        const partial = extractStreamingFieldsPartial(bufferRef.current, PROG_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
       },
       onDone: () => {
         setStreaming(false);
@@ -205,8 +224,23 @@ function SajuAnalysis() {
         getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
       },
       onChunk: (chunk) => {
-        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); }
+        if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); bufferRef.current = ''; }
+        bufferRef.current += chunk;
         setStreamText(prev => prev + chunk);
+        const PROG_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
+        const partial = extractStreamingFieldsPartial(bufferRef.current, PROG_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
       },
       onDone: () => {
         setStreaming(false);
@@ -283,9 +317,29 @@ function SajuAnalysis() {
             }
           }}
         />
-        {matrixShown ? (
-          <AnalysisMatrix theme="saju" label="AI가 사주를 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
-        ) : (
+        {matrixShown ? (() => {
+          const st = (key) => {
+            if (doneFields.has(key)) return 'done';
+            if (streamFields[key]) return 'streaming';
+            return 'pending';
+          };
+          return (
+            <div className="saju-streaming-wrap">
+              <div className="saju-streaming-header">
+                <span className="saju-streaming-orb">☯️</span>
+                <span className="saju-streaming-title">AI가 사주를 분석중이에요</span>
+                <span className="streaming-dots"><i/><i/><i/></span>
+              </div>
+              <div className="saju-streaming-cards">
+                <StreamingCard icon="🌟" title="총운"   text={streamFields.overall || ''} status={st('overall')} delay={0}   />
+                <StreamingCard icon="💕" title="애정운" text={streamFields.love    || ''} status={st('love')}    delay={80}  />
+                <StreamingCard icon="💰" title="재물운" text={streamFields.money   || ''} status={st('money')}   delay={160} />
+                <StreamingCard icon="💪" title="건강운" text={streamFields.health  || ''} status={st('health')}  delay={240} />
+                <StreamingCard icon="💼" title="직장운" text={streamFields.work    || ''} status={st('work')}    delay={320} />
+              </div>
+            </div>
+          );
+        })() : (
           <FortuneLoading type="default" />
         )}
       </div>

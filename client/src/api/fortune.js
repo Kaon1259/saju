@@ -27,6 +27,33 @@ const requireLogin = (onError) => {
 // 페이지에서 분석 전 호출 — 비로그인이면 true 반환
 export const isGuest = () => !localStorage.getItem('userId');
 
+// SSE 청크를 requestAnimationFrame 으로 배치 — 5~10ms 간격으로 쏟아지는 청크를
+// 화면 주사율(≈16ms) 에 맞춰 합쳐 전달. React re-render 수를 줄여 모바일 WebView에서
+// 스트리밍 텍스트가 자연스럽게 출력되도록 한다.
+const rafBatchChunks = (onChunk) => {
+  const noop = () => {};
+  if (typeof onChunk !== 'function') return { push: noop, flush: noop, cancel: noop };
+  const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+  const caf = window.cancelAnimationFrame || clearTimeout;
+  let buf = '';
+  let rafId = null;
+  const emit = () => {
+    rafId = null;
+    if (!buf) return;
+    const s = buf; buf = '';
+    try { onChunk(s); } catch {}
+  };
+  return {
+    push: (s) => {
+      if (s == null) return;
+      buf += s;
+      if (rafId == null) rafId = raf(emit);
+    },
+    flush: () => { if (rafId != null) { caf(rafId); rafId = null; } emit(); },
+    cancel: () => { if (rafId != null) { caf(rafId); rafId = null; } buf = ''; },
+  };
+};
+
 const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
   eventSource.addEventListener('insufficient_hearts', (e) => {
     try {
@@ -95,17 +122,19 @@ export const getFortuneByZodiacStream = (zodiac, { onChunk, onCached, onNoCache,
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('no-cache', () => { __chunker.cancel(); onNoCache?.(); eventSource.close(); });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getFortuneByUserStream = (userId, { onChunk, onCached, onNoCache, onDone, onError, onInsufficientHearts, cacheOnly } = {}) => {
@@ -119,17 +148,19 @@ export const getFortuneByUserStream = (userId, { onChunk, onCached, onNoCache, o
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('no-cache', () => { __chunker.cancel(); onNoCache?.(); eventSource.close(); });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getAllTodayFortunes = async () => {
@@ -199,20 +230,23 @@ export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { 
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
   eventSource.addEventListener('no-cache', () => {
+    __chunker.cancel();
     onNoCache?.();
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getUserSaju = async (userId) => {
@@ -249,16 +283,18 @@ export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone,
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getConstellationByDate = async (birthDate) => {
@@ -291,17 +327,19 @@ export const getMyFortuneStream = (userId, { onChunk, onCached, onNoCache, onDon
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('no-cache', () => { __chunker.cancel(); onNoCache?.(); eventSource.close(); });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 혈액형 운세 ───
@@ -323,16 +361,18 @@ export const getBloodTypeFortuneStream = (type, { onChunk, onCached, onDone, onE
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getAllBloodTypeFortunes = async () => {
@@ -356,11 +396,12 @@ export const getBloodTypeCompatibilityStream = (type1, type2, { onChunk, onDone,
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/bloodtype/compatibility/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── MBTI 운세 ───
@@ -387,16 +428,18 @@ export const getMbtiFortuneStream = (type, { onChunk, onCached, onDone, onError,
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getMbtiCompatibility = async (type1, type2) => {
@@ -415,11 +458,12 @@ export const getMbtiCompatibilityStream = (type1, type2, { onChunk, onDone, onEr
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/mbti/compatibility/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 만세력 ───
@@ -443,17 +487,19 @@ export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, on
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('no-cache', () => { onNoCache?.(); eventSource.close(); });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('no-cache', () => { __chunker.cancel(); onNoCache?.(); eventSource.close(); });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 토정비결 ───
@@ -481,15 +527,17 @@ export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, o
   eventSource.addEventListener('base', (e) => {
     try { onBase?.(JSON.parse(e.data)); } catch {}
   });
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 사주 궁합 ───
@@ -548,12 +596,13 @@ export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birth
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 export const getCelebMatch = async (birthDate, birthTime, calendarType, celebrities) => {
@@ -592,17 +641,19 @@ export const getTarotReadingStream = (cardIds, reversals, spread, category, ques
   let finished = false;
   addHeartListener(eventSource, { onInsufficientHearts, onError: (e) => { if (!finished) onError?.(e); } });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     finished = true;
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { finished = true; onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { if (!finished) { onError?.(e.data || 'Stream error'); eventSource.close(); } });
-  eventSource.onerror = () => { if (!finished) { onError?.('Connection lost'); eventSource.close(); } };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); finished = true; onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { if (!finished) { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); } });
+  eventSource.onerror = () => { if (!finished) { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); } };
 
-  return () => { finished = true; eventSource.close(); };
+  return () => { __chunker.cancel(); finished = true; eventSource.close(); };
 };
 
 // ─── 오늘의 연애 온도 ───
@@ -666,16 +717,18 @@ export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calenda
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 아침/점심/저녁 운세 ───
@@ -730,16 +783,18 @@ export const interpretDreamStream = (dreamText, birthDate, gender, { onChunk, on
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── AI 관상 ───
@@ -769,16 +824,18 @@ export const analyzeFaceReadingStream = (faceShape, eyeShape, noseShape, mouthSh
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 심리테스트 ───
@@ -810,16 +867,18 @@ export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onC
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
 
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
 
-  return () => eventSource.close();
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 바이오리듬 ───
@@ -836,15 +895,17 @@ export const getBiorhythmStream = (birthDate, { onChunk, onCached, onDone, onErr
   const url = `${baseURL}/biorhythm/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 2026 신년운세 ───
@@ -870,15 +931,17 @@ export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType,
   const url = `${baseURL}/year-fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 월별 운세 ───
@@ -903,15 +966,17 @@ export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { o
   const url = `${baseURL}/monthly-fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 주간 운세 ───
@@ -935,15 +1000,17 @@ export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, 
   const url = `${baseURL}/weekly-fortune/stream?${params.toString()}`;
   const eventSource = new EventSource(url);
   addHeartListener(eventSource, { onInsufficientHearts, onError });
-  eventSource.addEventListener('chunk', (e) => onChunk?.(e.data));
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
   eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
     try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
     eventSource.close();
   });
-  eventSource.addEventListener('done', (e) => { onDone?.(e.data); eventSource.close(); });
-  eventSource.addEventListener('error', (e) => { onError?.(e.data || 'Stream error'); eventSource.close(); });
-  eventSource.onerror = () => { onError?.('Connection lost'); eventSource.close(); };
-  return () => eventSource.close();
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+  return () => { __chunker.cancel(); eventSource.close(); };
 };
 
 // ─── 심화분석 ───
@@ -973,6 +1040,7 @@ export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calend
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/deep/fortune/stream?${params.toString()}`;
   const controller = new AbortController();
+  const __chunker = rafBatchChunks(onChunk);
 
   (async () => {
     try {
@@ -1007,31 +1075,36 @@ export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calend
           const data = dataLines.join('\n');
 
           if (eventName === 'insufficient_hearts') {
+            __chunker.cancel();
             try { window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: JSON.parse(data) })); } catch {}
             onError?.('insufficient_hearts');
             return;
           } else if (eventName === 'cached') {
+            __chunker.cancel();
             try { onCached?.(JSON.parse(data)); } catch { onDone?.(data); }
             return;
           } else if (eventName === 'chunk') {
-            onChunk?.(data);
+            __chunker.push(data);
           } else if (eventName === 'done') {
+            __chunker.flush();
             window.dispatchEvent(new CustomEvent('heart:refresh'));
             window.dispatchEvent(new CustomEvent('heart:deducted'));
             onDone?.(data);
             return;
           } else if (eventName === 'error') {
+            __chunker.flush();
             onError?.(data);
             return;
           }
         }
       }
     } catch (e) {
+      __chunker.cancel();
       if (e.name !== 'AbortError') onError?.(e.message || 'Connection lost');
     }
   })();
 
-  return () => controller.abort();
+  return () => { __chunker.cancel(); controller.abort(); };
 };
 
 // ─── 궁합 심화분석 캐시 조회 ───
@@ -1058,6 +1131,7 @@ export const getCompatibilityDeepStream = (type, bd1, bt1, g1, bd2, bt2, g2, { o
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/deep/compatibility/stream?${params.toString()}`;
   const controller = new AbortController();
+  const __chunker = rafBatchChunks(onChunk);
 
   (async () => {
     try {
@@ -1091,31 +1165,36 @@ export const getCompatibilityDeepStream = (type, bd1, bt1, g1, bd2, bt2, g2, { o
           const data = dataLines.join('\n');
 
           if (eventName === 'insufficient_hearts') {
+            __chunker.cancel();
             try { window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: JSON.parse(data) })); } catch {}
             onError?.('insufficient_hearts');
             return;
           } else if (eventName === 'cached') {
+            __chunker.cancel();
             try { onCached?.(JSON.parse(data)); } catch { onDone?.(data); }
             return;
           } else if (eventName === 'chunk') {
-            onChunk?.(data);
+            __chunker.push(data);
           } else if (eventName === 'done') {
+            __chunker.flush();
             window.dispatchEvent(new CustomEvent('heart:refresh'));
             window.dispatchEvent(new CustomEvent('heart:deducted'));
             onDone?.(data);
             return;
           } else if (eventName === 'error') {
+            __chunker.flush();
             onError?.(data);
             return;
           }
         }
       }
     } catch (e) {
+      __chunker.cancel();
       if (e.name !== 'AbortError') onError?.(e.message || 'Connection lost');
     }
   })();
 
-  return () => controller.abort();
+  return () => { __chunker.cancel(); controller.abort(); };
 };
 
 // ─── YouTube Shorts ───

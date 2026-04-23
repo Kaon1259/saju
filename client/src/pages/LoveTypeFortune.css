@@ -5,6 +5,31 @@
   min-height: 100vh;
 }
 
+/* Progressive 스트리밍 — 분석 중 카드 */
+.ltf-streaming-wrap { padding: 8px 0 16px; }
+.ltf-streaming-header { text-align: center; margin: 8px 0 18px; }
+.ltf-streaming-title {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700;
+  background: linear-gradient(90deg, #ff3d7f 0%, #fbbf24 50%, #a855f7 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.ltf-streaming-orb {
+  font-size: 22px; display: inline-block;
+  animation: ltfStreamingOrb 1.6s ease-in-out infinite;
+  -webkit-text-fill-color: initial;
+  filter: drop-shadow(0 0 8px rgba(255, 61, 127, 0.7));
+}
+@keyframes ltfStreamingOrb {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.25) rotate(-10deg); }
+}
+.ltf-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
+[data-theme="light"] .ltf-streaming-title {
+  background: linear-gradient(90deg, #c2185b 0%, #b8860b 50%, #7e22ce 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
 /* ═══ 상단 버튼 바 ═══ */
 .ltf-topbar {
   display: flex;

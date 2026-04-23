@@ -4,7 +4,8 @@ import { getManseryeok, getManseryeokStream, isGuest } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './MyFortune.css';
@@ -30,6 +31,9 @@ function Manseryeok() {
   // AI 스트리밍 상태
   const [aiResult, setAiResult] = useState(null);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
+  const bufferRef = useRef('');
   const [aiStreaming, setAiStreaming] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [matrixShown, setMatrixShown] = useState(false);
@@ -91,7 +95,22 @@ function Manseryeok() {
       onChunk: (text) => {
         setAiLoading(false);
         setAiStreaming(true);
+        bufferRef.current += text;
         setStreamText(prev => prev + text);
+        const MS_FIELDS = AI_SECTIONS.map(s => s.key);
+        const partial = extractStreamingFieldsPartial(bufferRef.current, MS_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of MS_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
       },
       onDone: (fullText) => {
         setAiStreaming(false);
@@ -202,9 +221,28 @@ function Manseryeok() {
           }
         }}
       />
-      {matrixShown && (
-        <AnalysisMatrix theme="saju" label="AI가 만세력을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
-      )}
+      {matrixShown && (() => {
+        const st = (key) => {
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="ms-streaming-wrap">
+            <div className="ms-streaming-header">
+              <span className="ms-streaming-orb">📜</span>
+              <span className="ms-streaming-title">AI가 만세력을 분석중이에요</span>
+              <span className="streaming-dots"><i/><i/><i/></span>
+            </div>
+            <div className="ms-streaming-cards">
+              {AI_SECTIONS.map(({ key, icon, label }, i) => (
+                <StreamingCard key={key} icon={icon} title={label}
+                  text={streamFields[key] || ''} status={st(key)} delay={i * 80} />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
       <section className="ms-hero">
         <h1 className="ms-title">만세력</h1>
         <p className="ms-subtitle">날짜별 천간지지 조회</p>

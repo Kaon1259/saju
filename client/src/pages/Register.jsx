@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { kakaoLogin, kakaoRegister, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -97,9 +98,20 @@ function Register() {
   };
 
   // 카카오 로그인 버튼 클릭
-  const handleKakaoLogin = () => {
+  const handleKakaoLogin = async () => {
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
-    window.location.href = kakaoAuthUrl;
+    if (isNative) {
+      // 앱: Chrome Custom Tab으로 열어야 카카오 차단 회피 (embedded WebView 차단)
+      // 인증 후 com.love.onetoone:// 딥링크로 MainActivity 복귀 → WebView 로드
+      try {
+        await Browser.open({ url: kakaoAuthUrl });
+      } catch (e) {
+        console.error('Browser.open failed', e);
+        window.location.href = kakaoAuthUrl;
+      }
+    } else {
+      window.location.href = kakaoAuthUrl;
+    }
   };
 
   // 카카오 콜백 처리 - ref로 중복 호출 방지
@@ -108,6 +120,11 @@ function Register() {
     const code = searchParams.get('code');
     if (!code || kakaoProcessed.current) return;
     kakaoProcessed.current = true;
+
+    // 앱: 딥링크로 WebView 복귀 시 열려 있던 Chrome Custom Tab 닫기
+    if (isNative) {
+      Browser.close().catch(() => {});
+    }
 
     setStep('loading');
     (async () => {

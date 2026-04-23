@@ -5,7 +5,8 @@ import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Dream.css';
@@ -58,6 +59,8 @@ function Dream() {
   const [showPersonal, setShowPersonal] = useState(false);
   const [result, setResult] = useState(null);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -101,11 +104,14 @@ function Dream() {
     if (!dreamText.trim()) return;
     setStep('loading');
     setStreamText('');
+    setStreamFields({}); setDoneFields(new Set());
     setMatrixShown(true);
     setMatrixExiting(false);
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
+    let buffer = '';
+    const DM_FIELDS = ['interpretation', 'psychology', 'fortuneHint', 'luckyAction'];
 
     const cleanup = interpretDreamStream(
       dreamText.trim(),
@@ -115,6 +121,20 @@ function Dream() {
         onChunk: (chunk) => {
           setStreamText(prev => prev + chunk);
           setStep('streaming');
+          buffer += chunk;
+          const partial = extractStreamingFieldsPartial(buffer, DM_FIELDS);
+          const next = {}; const newDone = [];
+          for (const k of DM_FIELDS) {
+            const p = partial[k];
+            if (p !== undefined) {
+              next[k] = p.value;
+              if (p.done) newDone.push(k);
+            }
+          }
+          if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+          if (newDone.length > 0) setDoneFields(prev => {
+            const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+          });
         },
         onCached: (data) => {
           setResult(data);
@@ -316,9 +336,30 @@ function Dream() {
         </div>
       )}
 
-      {/* ═══ 매트릭스 오버레이 (로딩/스트리밍 중) ═══ */}
+      {/* ═══ Progressive 스트리밍 ═══ */}
       {matrixShown && (step === 'loading' || step === 'streaming') && (
-        <AnalysisMatrix theme="saju" label="AI가 꿈을 해석하고 있어요" streamText={streamText} exiting={matrixExiting} />
+        (() => {
+          const st = (key) => {
+            if (doneFields.has(key)) return 'done';
+            if (streamFields[key]) return 'streaming';
+            return 'pending';
+          };
+          return (
+            <div className="dream-streaming-wrap">
+              <div className="dream-streaming-header">
+                <span className="dream-streaming-orb">🌙</span>
+                <span className="dream-streaming-title">AI가 꿈을 해석중이에요</span>
+                <span className="streaming-dots"><i/><i/><i/></span>
+              </div>
+              <div className="dream-streaming-cards">
+                <StreamingCard icon="🔮" title="꿈 해석"       text={streamFields.interpretation || ''} status={st('interpretation')} delay={0}   />
+                <StreamingCard icon="🧠" title="심리 분석"     text={streamFields.psychology     || ''} status={st('psychology')}     delay={80}  />
+                <StreamingCard icon="🍀" title="길흉 힌트"     text={streamFields.fortuneHint    || ''} status={st('fortuneHint')}    delay={160} />
+                <StreamingCard icon="✨" title="행운의 행동"   text={streamFields.luckyAction    || ''} status={st('luckyAction')}    delay={240} />
+              </div>
+            </div>
+          );
+        })()
       )}
 
       {/* ═══ STEP: 결과 ═══ */}

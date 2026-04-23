@@ -1,4 +1,11 @@
 .bt-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 40px; }
+/* Progressive 스트리밍 */
+.bt-streaming-wrap { padding: 8px 0 16px; }
+.bt-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.bt-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #EF4444 0%, #F472B6 50%, #C084FC 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-streaming-orb { font-size: 22px; display: inline-block; animation: btOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.7)); }
+@keyframes btOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.bt-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 .bt-hero { text-align: center; padding: 8px 0 12px; }
 .bt-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #EF4444, #C084FC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .bt-subtitle { color: var(--color-text-muted); margin-top: 4px; font-size: 13px; }

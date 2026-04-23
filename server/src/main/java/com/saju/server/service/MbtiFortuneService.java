@@ -219,7 +219,7 @@ public class MbtiFortuneService {
         String user = promptBuilder.compatibilityPrompt("mbti", type1, type2, LocalDate.now()) +
             "\n\n위 내용을 정확히 다음 JSON 형식으로만 답해: " +
             "{\"summary\":\"...\",\"overall\":\"...\",\"loveCompat\":\"...\",\"advice\":\"...\",\"caution\":\"...\"}";
-        return claudeApiService.generateStream(system, user, 1200);
+        return claudeApiService.generateStreamModel(system, user, 1200, ClaudeApiService.HAIKU_MODEL);
     }
 
     /**
@@ -318,7 +318,8 @@ public class MbtiFortuneService {
             + promptBuilder.buildPersonContext(birthDate, gender)
             + promptBuilder.buildTargetContext(targetType, targetName);
 
-        return claudeApiService.generateStream(system, user, 2500, (fullText) -> {
+        return claudeApiService.generateStream(system, user, 2500,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json == null) return;

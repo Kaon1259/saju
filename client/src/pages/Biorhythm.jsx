@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getBiorhythm, getBiorhythmStream, isGuest } from '../api/fortune';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
+import StreamingCard from '../components/StreamingCard';
 import BirthDatePicker from '../components/BirthDatePicker';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Biorhythm.css';
@@ -132,6 +133,9 @@ function Biorhythm() {
   // AI 스트리밍 상태
   const [streamText, setStreamText] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
+  const bufferRef = useRef('');
   const [aiResult, setAiResult] = useState(null);
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
@@ -203,8 +207,27 @@ function Biorhythm() {
     });
 
     // AI 스트리밍 분석 시작
+    setStreamFields({}); setDoneFields(new Set()); bufferRef.current = '';
+    const BR_FIELDS = ['advice', 'physicalAdvice', 'emotionalAdvice', 'intellectualAdvice', 'intuitionAdvice'];
     cleanupRef.current = getBiorhythmStream(birthDate, {
-      onChunk: (t) => { setStreaming(true); setStreamText(prev => prev + t); },
+      onChunk: (t) => {
+        setStreaming(true);
+        bufferRef.current += t;
+        setStreamText(prev => prev + t);
+        const partial = extractStreamingFieldsPartial(bufferRef.current, BR_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of BR_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
+      },
       onCached: (data) => {
         setAiResult(data);
         setStreaming(false);
@@ -296,9 +319,29 @@ function Biorhythm() {
           }
         }}
       />
-      {matrixShown && (
-        <AnalysisMatrix theme="saju" label="AI가 바이오리듬을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
-      )}
+      {matrixShown && !aiResult && (() => {
+        const st = (key) => {
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="br-streaming-wrap">
+            <div className="br-streaming-header">
+              <span className="br-streaming-orb">📊</span>
+              <span className="br-streaming-title">AI가 바이오리듬을 분석중이에요</span>
+              <span className="streaming-dots"><i/><i/><i/></span>
+            </div>
+            <div className="br-streaming-cards">
+              <StreamingCard icon="💡" title="오늘의 종합 조언" text={streamFields.advice             || ''} status={st('advice')}             delay={0}   />
+              <StreamingCard icon="💪" title="신체 리듬"        text={streamFields.physicalAdvice     || ''} status={st('physicalAdvice')}     delay={80}  />
+              <StreamingCard icon="💗" title="감정 리듬"        text={streamFields.emotionalAdvice    || ''} status={st('emotionalAdvice')}    delay={160} />
+              <StreamingCard icon="🧠" title="지성 리듬"        text={streamFields.intellectualAdvice || ''} status={st('intellectualAdvice')} delay={240} />
+              <StreamingCard icon="✨" title="직관 리듬"        text={streamFields.intuitionAdvice    || ''} status={st('intuitionAdvice')}    delay={320} />
+            </div>
+          </div>
+        );
+      })()}
       {/* 배경 */}
       <div className="bio-bg">
         <div className="bio-grid-lines" />

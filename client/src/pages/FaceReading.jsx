@@ -5,7 +5,8 @@ import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './FaceReading.css';
@@ -93,6 +94,8 @@ function FaceReading() {
   const [result, setResult] = useState(null);
   const [scanPhase, setScanPhase] = useState(0);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -135,11 +138,14 @@ function FaceReading() {
     setLoading(true);
     setScanPhase(0);
     setStreamText('');
+    setStreamFields({}); setDoneFields(new Set());
     setMatrixShown(true);
     setMatrixExiting(false);
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
+    let buffer = '';
+    const FR_FIELDS = ['personality', 'moneyFortune', 'loveFortune', 'careerFortune', 'healthFortune'];
 
     // 스캔 애니메이션 단계 (로딩 중 표시)
     let phaseIdx = 0;
@@ -162,6 +168,20 @@ function FaceReading() {
           clearInterval(phaseTimer);
           setStreamText(prev => prev + chunk);
           setStep('streaming');
+          buffer += chunk;
+          const partial = extractStreamingFieldsPartial(buffer, FR_FIELDS);
+          const next = {}; const newDone = [];
+          for (const k of FR_FIELDS) {
+            const p = partial[k];
+            if (p !== undefined) {
+              next[k] = p.value;
+              if (p.done) newDone.push(k);
+            }
+          }
+          if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+          if (newDone.length > 0) setDoneFields(prev => {
+            const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+          });
         },
         onCached: (data) => {
           clearInterval(phaseTimer);
@@ -466,8 +486,31 @@ function FaceReading() {
         </div>
       )}
 
-      {/* ═══ 매트릭스 오버레이 (로딩/스트리밍 중) ═══ */}
-      {matrixShown && (step === 'loading' || step === 'streaming') && (
+      {/* ═══ Progressive 스트리밍 ═══ */}
+      {matrixShown && step === 'streaming' && (() => {
+        const st = (key) => {
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="fr-streaming-wrap">
+            <div className="fr-streaming-header">
+              <span className="fr-streaming-orb">👁️</span>
+              <span className="fr-streaming-title">AI가 관상을 분석중이에요</span>
+              <span className="streaming-dots"><i/><i/><i/></span>
+            </div>
+            <div className="fr-streaming-cards">
+              <StreamingCard icon="🌟" title="성격 분석" text={streamFields.personality    || ''} status={st('personality')}    delay={0}   />
+              <StreamingCard icon="💰" title="재물운"   text={streamFields.moneyFortune   || ''} status={st('moneyFortune')}   delay={80}  />
+              <StreamingCard icon="💕" title="애정운"   text={streamFields.loveFortune    || ''} status={st('loveFortune')}    delay={160} />
+              <StreamingCard icon="💼" title="직장운"   text={streamFields.careerFortune  || ''} status={st('careerFortune')}  delay={240} />
+              <StreamingCard icon="💪" title="건강운"   text={streamFields.healthFortune  || ''} status={st('healthFortune')}  delay={320} />
+            </div>
+          </div>
+        );
+      })()}
+      {matrixShown && step === 'loading' && (
         <AnalysisMatrix theme="saju" label="AI가 관상을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
       )}
 

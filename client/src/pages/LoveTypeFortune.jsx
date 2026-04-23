@@ -3,6 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest, getHistory } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
+import StreamingCard from '../components/StreamingCard';
+import { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -90,6 +92,8 @@ function LoveTypeFortune() {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [result, setResult] = useState(null);
@@ -201,15 +205,35 @@ function LoveTypeFortune() {
       }
 
       setStreaming(true);
+      setStreamFields({}); setDoneFields(new Set());
+      let buffer = '';
+      const PROG_FIELDS = ['overall', 'timing', 'advice', 'caution', 'mindsetBoost'];
       cleanupRef.current = getLoveFortuneStream(
         type, birth, '', gender || '', '', pDate || '', pGender || '', bDate || '', mDate || '', '',
         {
           onCached: (cachedData) => {
             setStreaming(false); setLoading(false); setStreamText('');
+            setStreamFields({}); setDoneFields(new Set());
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             setResult(cachedData);
           },
-          onChunk: (text) => setStreamText(prev => prev + text),
+          onChunk: (text) => {
+            buffer += text;
+            setStreamText(prev => prev + text);
+            const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+            const next = {}; const newDone = [];
+            for (const k of PROG_FIELDS) {
+              const p = partial[k];
+              if (p !== undefined) {
+                next[k] = p.value;
+                if (p.done) newDone.push(k);
+              }
+            }
+            if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+            if (newDone.length > 0) setDoneFields(prev => {
+              const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+            });
+          },
           onDone: (fullText) => {
             setStreaming(false); setLoading(false);
             setStreamText('');
@@ -222,11 +246,13 @@ function LoveTypeFortune() {
             } else {
               pendingResultRef.current = { ...basic, score: 65, grade: '보통', overall: fullText || '' };
             }
+            setStreamFields({}); setDoneFields(new Set());
             setMatrixShown(false);
             setCompleting(true);
           },
           onError: () => {
             setStreaming(false); setLoading(false); setStreamText('');
+            setStreamFields({}); setDoneFields(new Set());
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
           },
         }
@@ -366,10 +392,40 @@ function LoveTypeFortune() {
         </div>
       )}
 
-      {/* ═══ 매트릭스 로딩 ═══ */}
-      {matrixShown && (
-        <AnalysisMatrix theme="love" label={`AI가 ${info.label}을 분석하고 있어요`} streamText={streamText} exiting={matrixExiting} />
-      )}
+      {/* ═══ Progressive 스트리밍 ═══ */}
+      {matrixShown && !result && (() => {
+        const st = (key) => {
+          if (!streaming) return 'pending';
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="ltf-streaming-wrap">
+            <div className="ltf-streaming-header">
+              <div className="ltf-streaming-title">
+                <span className="ltf-streaming-orb">{info.icon}</span>
+                <span>AI가 {info.label}을 분석중이에요</span>
+                <span className="streaming-dots"><i/><i/><i/></span>
+              </div>
+            </div>
+            <div className="ltf-streaming-cards">
+              <StreamingCard icon={info.icon} title={type === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'}
+                text={streamFields.overall || ''} status={st('overall')} delay={0} />
+              {type !== 'ideal_type' && (
+                <>
+                  <StreamingCard icon="📅" title="최적 시기"        text={streamFields.timing       || ''} status={st('timing')}       delay={80}  />
+                  <StreamingCard icon="💡" title="행동 조언"        text={streamFields.advice       || ''} status={st('advice')}       delay={160} />
+                </>
+              )}
+              <StreamingCard icon="⚠️" title="주의사항"          text={streamFields.caution      || ''} status={st('caution')}      delay={240} />
+              {type !== 'ideal_type' && (
+                <StreamingCard icon="💪" title="오늘의 멘탈 부스터" text={streamFields.mindsetBoost || ''} status={st('mindsetBoost')} delay={320} />
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ═══ 결과 ═══ */}
       {result && (

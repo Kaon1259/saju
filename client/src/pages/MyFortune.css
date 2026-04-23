@@ -74,6 +74,36 @@
 /* 카드 */
 .myf-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 
+/* Progressive 스트리밍 — 분석 중 카드 컨테이너 */
+.myf-streaming-wrap { padding: 8px 0 32px; }
+.myf-streaming-header { text-align: center; margin: 8px 0 18px; }
+.myf-streaming-title {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700;
+  background: linear-gradient(90deg, #fbbf24 0%, #ff3d7f 50%, #a855f7 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: myfStreamingHue 3.5s ease-in-out infinite;
+}
+.myf-streaming-orb {
+  font-size: 20px;
+  display: inline-block;
+  animation: myfStreamingOrb 1.8s ease-in-out infinite;
+  -webkit-text-fill-color: initial;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.7));
+}
+@keyframes myfStreamingHue {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50%      { filter: hue-rotate(30deg); }
+}
+@keyframes myfStreamingOrb {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  50%      { transform: scale(1.18) rotate(-10deg); opacity: 1; }
+}
+[data-theme="light"] .myf-streaming-title {
+  background: linear-gradient(90deg, #b8860b 0%, #c2185b 50%, #7e22ce 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
 /* 팁 */
 .myf-tip { display: flex; align-items: flex-start; gap: 10px; padding: 14px; margin-bottom: 16px; }
 .myf-tip p { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.85); }

@@ -2,7 +2,8 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
+import StreamingCard from '../components/StreamingCard';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -71,6 +72,12 @@ function CelebCompatibility() {
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [matrixLabel, setMatrixLabel] = useState('');
   const [streamText, setStreamText] = useState('');
+  const [compatStreamFields, setCompatStreamFields] = useState({});
+  const [compatDoneFields, setCompatDoneFields] = useState(new Set());
+  const [starStreamFields, setStarStreamFields] = useState({});
+  const [starDoneFields, setStarDoneFields] = useState(new Set());
+  const compatBufferRef = useRef('');
+  const starBufferRef = useRef('');
   const compatCleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
   const [completing, setCompleting] = useState(false);
@@ -248,9 +255,27 @@ function CelebCompatibility() {
         {
           historyType: 'celeb_compatibility',
           celebName: selectedCeleb.name,
-          onChunk: (text) => setStreamText((prev) => prev + text),
+          onChunk: (text) => {
+            compatBufferRef.current += text;
+            setStreamText((prev) => prev + text);
+            const CM_FIELDS = ['summary', 'overall', 'loveCompat', 'workCompat', 'conflictPoint', 'advice'];
+            const partial = extractStreamingFieldsPartial(compatBufferRef.current, CM_FIELDS);
+            const next = {}; const newDone = [];
+            for (const k of CM_FIELDS) {
+              const p = partial[k];
+              if (p !== undefined) {
+                next[k] = p.value;
+                if (p.done) newDone.push(k);
+              }
+            }
+            if (Object.keys(next).length > 0) setCompatStreamFields(prev => ({ ...prev, ...next }));
+            if (newDone.length > 0) setCompatDoneFields(prev => {
+              const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+            });
+          },
           onDone: (fullText) => {
             setStreamText('');
+            setCompatStreamFields({}); setCompatDoneFields(new Set()); compatBufferRef.current = '';
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             const parsed = parseAiJson(fullText);
             const merged = parsed ? {
@@ -339,11 +364,27 @@ function CelebCompatibility() {
       },
       onChunk: (text) => {
         setStarStreaming(true);
+        starBufferRef.current += text;
         setStarStreamText(prev => prev + text);
+        const SF_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
+        const partial = extractStreamingFieldsPartial(starBufferRef.current, SF_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of SF_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStarStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setStarDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
       },
       onDone: (fullText) => {
         setStarStreaming(false);
         setStarStreamText('');
+        setStarStreamFields({}); setStarDoneFields(new Set()); starBufferRef.current = '';
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
@@ -636,9 +677,30 @@ function CelebCompatibility() {
             }
           }}
         />
-        {matrixShown && (
-          <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
-        )}
+        {matrixShown && (() => {
+          const st = (key) => {
+            if (compatDoneFields.has(key)) return 'done';
+            if (compatStreamFields[key]) return 'streaming';
+            return 'pending';
+          };
+          return (
+            <div className="celeb-streaming-wrap">
+              <div className="celeb-streaming-header">
+                <span className="celeb-streaming-orb">💫</span>
+                <span className="celeb-streaming-title">{matrixLabel}</span>
+                <span className="streaming-dots"><i/><i/><i/></span>
+              </div>
+              <div className="celeb-streaming-cards">
+                <StreamingCard icon="💕" title="한 줄 요약"     text={compatStreamFields.summary       || ''} status={st('summary')}       delay={0}   />
+                <StreamingCard icon="🔮" title="종합 분석"     text={compatStreamFields.overall       || ''} status={st('overall')}       delay={80}  />
+                <StreamingCard icon="💖" title="연애 궁합"     text={compatStreamFields.loveCompat    || ''} status={st('loveCompat')}    delay={160} />
+                <StreamingCard icon="🤝" title="일 / 협력 궁합" text={compatStreamFields.workCompat    || ''} status={st('workCompat')}    delay={240} />
+                <StreamingCard icon="⚠️" title="갈등 포인트"   text={compatStreamFields.conflictPoint || ''} status={st('conflictPoint')} delay={320} />
+                <StreamingCard icon="💡" title="관계 조언"     text={compatStreamFields.advice        || ''} status={st('advice')}        delay={400} />
+              </div>
+            </div>
+          );
+        })()}
       </div>
     );
   }
@@ -660,8 +722,31 @@ function CelebCompatibility() {
             }
           }}
         />
-        {matrixShown && (
-          <AnalysisMatrix theme="star" label={matrixLabel} streamText={starStreaming ? starStreamText : streamText} exiting={matrixExiting} />
+        {matrixShown && starStreaming && (() => {
+          const st = (key) => {
+            if (starDoneFields.has(key)) return 'done';
+            if (starStreamFields[key]) return 'streaming';
+            return 'pending';
+          };
+          return (
+            <div className="celeb-streaming-wrap">
+              <div className="celeb-streaming-header">
+                <span className="celeb-streaming-orb">⭐</span>
+                <span className="celeb-streaming-title">{matrixLabel}</span>
+                <span className="streaming-dots"><i/><i/><i/></span>
+              </div>
+              <div className="celeb-streaming-cards">
+                <StreamingCard icon="🌟" title="총운"   text={starStreamFields.overall || ''} status={st('overall')} delay={0}   />
+                <StreamingCard icon="💕" title="애정운" text={starStreamFields.love    || ''} status={st('love')}    delay={80}  />
+                <StreamingCard icon="💰" title="재물운" text={starStreamFields.money   || ''} status={st('money')}   delay={160} />
+                <StreamingCard icon="💪" title="건강운" text={starStreamFields.health  || ''} status={st('health')}  delay={240} />
+                <StreamingCard icon="💼" title="직장운" text={starStreamFields.work    || ''} status={st('work')}    delay={320} />
+              </div>
+            </div>
+          );
+        })()}
+        {matrixShown && !starStreaming && (
+          <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
         )}
         <button className="celeb-back-btn" onClick={handleReset}>← 스타 목록으로</button>
         <section className="celeb-result-hero">

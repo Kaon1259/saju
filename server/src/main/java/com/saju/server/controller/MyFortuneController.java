@@ -200,7 +200,9 @@ public class MyFortuneController {
         final LocalDate finalDate = targetDate;
         final Long uid = userId;
         final UserResponse finalUser = user;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
+        // 비용 절감 테스트 — 오늘의 운세는 Haiku 4.5 사용 (Sonnet 대비 1/3 비용, 2~3배 속도)
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
             if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
             // 히스토리 저장 — 사용자가 나중에 "최근 본 운세"에서 다시 볼 수 있게

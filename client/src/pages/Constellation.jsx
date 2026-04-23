@@ -7,8 +7,9 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import HistoryDrawer from '../components/HistoryDrawer';
 
 import AnalysisMatrix from '../components/AnalysisMatrix';
+import StreamingCard from '../components/StreamingCard';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Constellation.css';
@@ -54,6 +55,8 @@ function Constellation() {
   const [fortune, setFortune] = useState(null);
   const [loading, setLoading] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [mySign, setMySign] = useState(null);
@@ -102,11 +105,31 @@ function Constellation() {
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
+    setStreamFields({}); setDoneFields(new Set());
+    let buffer = '';
+    const PROG_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
     const cleanup = getConstellationFortuneStream(sign, {
-      onChunk: (chunk) => setStreamText((prev) => prev + chunk),
+      onChunk: (chunk) => {
+        buffer += chunk;
+        setStreamText((prev) => prev + chunk);
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
+      },
       onCached: (data) => {
         setFortune(data);
         setStreamText('');
+        setStreamFields({}); setDoneFields(new Set());
         setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -120,6 +143,7 @@ function Constellation() {
           setCompleting(true);
         }
         setStreamText('');
+        setStreamFields({}); setDoneFields(new Set());
         setLoading(false);
       },
       onError: (err) => {
@@ -197,9 +221,29 @@ function Constellation() {
         </div>
       )}
 
-      {matrixShown && (
-        <AnalysisMatrix theme="star" label="AI가 별자리 운세를 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
-      )}
+      {matrixShown && !fortune && (() => {
+        const st = (key) => {
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="cs-streaming-wrap">
+            <div className="cs-streaming-header">
+              <span className="cs-streaming-orb">✨</span>
+              <span className="cs-streaming-title">AI가 별자리 운세를 분석중이에요</span>
+              <span className="streaming-dots"><i/><i/><i/></span>
+            </div>
+            <div className="cs-streaming-cards">
+              <StreamingCard icon="🌟" title="총운"   text={streamFields.overall || ''} status={st('overall')} delay={0}   />
+              <StreamingCard icon="💕" title="애정운" text={streamFields.love    || ''} status={st('love')}    delay={80}  />
+              <StreamingCard icon="💰" title="재물운" text={streamFields.money   || ''} status={st('money')}   delay={160} />
+              <StreamingCard icon="💪" title="건강운" text={streamFields.health  || ''} status={st('health')}  delay={240} />
+              <StreamingCard icon="💼" title="직장운" text={streamFields.work    || ''} status={st('work')}    delay={320} />
+            </div>
+          </div>
+        );
+      })()}
 
       {fortune && !loading && (
         <div className="cs-result" ref={resultRef}>

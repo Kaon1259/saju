@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { getPsychTests, analyzePsychTestStream, isGuest } from '../api/fortune';
 
 import StreamText from '../components/StreamText';
+import StreamingCard from '../components/StreamingCard';
 import PageTopBar from '../components/PageTopBar';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './PsychTest.css';
@@ -82,6 +83,8 @@ function PsychTest() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [completing, setCompleting] = useState(false);
   const pendingResultRef = useRef(null);
   const resultRef = useRef(null);
@@ -137,11 +140,14 @@ function PsychTest() {
     setStep('loading');
     setLoading(true);
     setStreamText('');
+    setStreamFields({}); setDoneFields(new Set());
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
     const answersStr = finalAnswers.join(',');
+    let buffer = '';
+    const PT_FIELDS = ['type', 'description', 'advice', 'compatibility'];
     const cleanup = analyzePsychTestStream(
       selectedTest.id,
       answersStr,
@@ -151,6 +157,20 @@ function PsychTest() {
         onChunk: (chunk) => {
           setStreamText(prev => prev + chunk);
           setStep('streaming');
+          buffer += chunk;
+          const partial = extractStreamingFieldsPartial(buffer, PT_FIELDS);
+          const next = {}; const newDone = [];
+          for (const k of PT_FIELDS) {
+            const p = partial[k];
+            if (p !== undefined) {
+              next[k] = p.value;
+              if (p.done) newDone.push(k);
+            }
+          }
+          if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+          if (newDone.length > 0) setDoneFields(prev => {
+            const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+          });
         },
         onCached: (data) => {
           setResult(data);
@@ -341,12 +361,29 @@ function PsychTest() {
         </div>
       )}
 
-      {/* ═══ STEP 3-5: 스트리밍 중 ═══ */}
-      {step === 'streaming' && (
-        <div className="pt-streaming fade-in">
-          <StreamText text={streamText} icon="🎭" label="AI가 심리를 분석하고 있어요..." color="#E91E63" />
-        </div>
-      )}
+      {/* ═══ STEP 3-5: 스트리밍 중 - progressive 카드 ═══ */}
+      {step === 'streaming' && (() => {
+        const st = (key) => {
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="pt-streaming-wrap fade-in">
+            <div className="pt-streaming-header">
+              <span className="pt-streaming-orb">🎭</span>
+              <span className="pt-streaming-title">AI가 심리를 분석중이에요</span>
+              <span className="streaming-dots"><i/><i/><i/></span>
+            </div>
+            <div className="pt-streaming-cards">
+              <StreamingCard icon="🌟" title="당신의 유형"   text={streamFields.type          || ''} status={st('type')}          delay={0}   />
+              <StreamingCard icon="📝" title="성격 분석"     text={streamFields.description   || ''} status={st('description')}   delay={80}  />
+              <StreamingCard icon="💡" title="조언"          text={streamFields.advice        || ''} status={st('advice')}        delay={160} />
+              <StreamingCard icon="💞" title="궁합"          text={streamFields.compatibility || ''} status={st('compatibility')} delay={240} />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ═══ STEP 4: 결과 ═══ */}
       {step === 'result' && result && (

@@ -5,9 +5,10 @@ import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 
 import StreamText from '../components/StreamText';
+import StreamingCard from '../components/StreamingCard';
 import PageTopBar from '../components/PageTopBar';
 import AnalysisComplete from '../components/AnalysisComplete';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Mbti.css';
@@ -46,6 +47,8 @@ function Mbti() {
   const [fortune, setFortune] = useState(null);
   const [loading, setLoading] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [type1, setType1] = useState(null);
   const [type2, setType2] = useState(null);
   const [compat, setCompat] = useState(null);
@@ -84,11 +87,31 @@ function Mbti() {
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
+    setStreamFields({}); setDoneFields(new Set());
+    let buffer = '';
+    const PROG_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
     const cleanup = getMbtiFortuneStream(type, {
-      onChunk: (chunk) => setStreamText((prev) => prev + chunk),
+      onChunk: (chunk) => {
+        buffer += chunk;
+        setStreamText((prev) => prev + chunk);
+        const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+        const next = {}; const newDone = [];
+        for (const k of PROG_FIELDS) {
+          const p = partial[k];
+          if (p !== undefined) {
+            next[k] = p.value;
+            if (p.done) newDone.push(k);
+          }
+        }
+        if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+        if (newDone.length > 0) setDoneFields(prev => {
+          const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+        });
+      },
       onCached: (data) => {
         setFortune(data);
         setStreamText('');
+        setStreamFields({}); setDoneFields(new Set());
         setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -101,6 +124,7 @@ function Mbti() {
           setCompleting(true);
         }
         setStreamText('');
+        setStreamFields({}); setDoneFields(new Set());
         setLoading(false);
       },
       onError: (err) => {
@@ -207,11 +231,31 @@ function Mbti() {
             </div>
           )}
 
-          {loading && !streamText && (
-            <div className="mbti-loading"><div className="mbti-spinner" /><p>AI가 운세를 분석하고 있어요</p></div>
-          )}
+          {loading && !fortune && (() => {
+            const st = (key) => {
+              if (doneFields.has(key)) return 'done';
+              if (streamFields[key]) return 'streaming';
+              return 'pending';
+            };
+            return (
+              <div className="mbti-streaming-wrap">
+                <div className="mbti-streaming-header">
+                  <span className="mbti-streaming-orb">🧬</span>
+                  <span className="mbti-streaming-title">AI가 MBTI 운세를 분석중이에요</span>
+                  <span className="streaming-dots"><i/><i/><i/></span>
+                </div>
+                <div className="mbti-streaming-cards">
+                  <StreamingCard icon="🌟" title="총운"   text={streamFields.overall || ''} status={st('overall')} delay={0}   />
+                  <StreamingCard icon="💕" title="애정운" text={streamFields.love    || ''} status={st('love')}    delay={80}  />
+                  <StreamingCard icon="💰" title="재물운" text={streamFields.money   || ''} status={st('money')}   delay={160} />
+                  <StreamingCard icon="💪" title="건강운" text={streamFields.health  || ''} status={st('health')}  delay={240} />
+                  <StreamingCard icon="💼" title="직장운" text={streamFields.work    || ''} status={st('work')}    delay={320} />
+                </div>
+              </div>
+            );
+          })()}
 
-          {loading && streamText && (
+          {false && loading && streamText && (
             <StreamText text={streamText} icon="🧬" label="AI가 MBTI 운세를 분석하고 있어요..." color="#34D399" />
           )}
 

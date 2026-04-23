@@ -1,4 +1,10 @@
 .tj-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+.tj-streaming-wrap { padding: 8px 0 16px; }
+.tj-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.tj-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #fbbf24 0%, #ef4444 50%, #a855f7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tj-streaming-orb { font-size: 22px; display: inline-block; animation: tjOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8)); }
+@keyframes tjOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.tj-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 
 /* Intro */
 .tj-intro { text-align: center; padding: 20px 0; }

@@ -1,4 +1,10 @@
 .celeb-page { max-width: 600px; margin: 0 auto; padding: 4px 16px 70px; display: flex; flex-direction: column; gap: 8px; height: calc(100vh - 60px); }
+.celeb-streaming-wrap { padding: 8px 0 16px; }
+.celeb-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.celeb-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #ff3d7f 0%, #fbbf24 50%, #a855f7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.celeb-streaming-orb { font-size: 22px; display: inline-block; animation: celebOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(255, 61, 127, 0.7)); }
+@keyframes celebOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.celeb-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 .celeb-back-btn { align-self: flex-start; padding: 6px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .celeb-back-btn:hover { color: #F472B6; border-color: rgba(244,114,182,0.3); }
 [data-theme="light"] .celeb-back-btn { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.65); }

@@ -4,6 +4,8 @@ import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCel
 import HistoryDrawer from '../components/HistoryDrawer';
 import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
+import StreamingCard from '../components/StreamingCard';
+import { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -56,6 +58,8 @@ function LoveFortune() {
   const [result, setResult] = useState(null);
   const [aiStreaming, setAiStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});
+  const [doneFields, setDoneFields] = useState(new Set());
   const [matrixShown, setMatrixShown] = useState(false);
   const [matrixExiting, setMatrixExiting] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -135,8 +139,11 @@ function LoveFortune() {
         return;
       }
 
-      // 2단계: AI 스트리밍 — 매트릭스에 실시간 텍스트 공급, 완료 시 결과 일괄 렌더
+      // 2단계: AI 스트리밍 — progressive 카드 + 매트릭스 페이드
       setAiStreaming(true);
+      setStreamFields({}); setDoneFields(new Set());
+      let buffer = '';
+      const PROG_FIELDS = ['overall', 'timing', 'advice', 'caution'];
 
       cleanupRef.current = getLoveFortuneStream(
         'relationship', birthDate, '', gender || '', '',
@@ -144,11 +151,28 @@ function LoveFortune() {
         {
           onCached: (cachedData) => {
             setAiStreaming(false); setLoading(false); setStreamText('');
+            setStreamFields({}); setDoneFields(new Set());
             try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
             setResult(cachedData);
             setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
           },
-          onChunk: (text) => setStreamText(prev => prev + text),
+          onChunk: (text) => {
+            buffer += text;
+            setStreamText(prev => prev + text);
+            const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+            const next = {}; const newDone = [];
+            for (const k of PROG_FIELDS) {
+              const p = partial[k];
+              if (p !== undefined) {
+                next[k] = p.value;
+                if (p.done) newDone.push(k);
+              }
+            }
+            if (Object.keys(next).length > 0) setStreamFields(prev => ({ ...prev, ...next }));
+            if (newDone.length > 0) setDoneFields(prev => {
+              const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
+            });
+          },
           onDone: (fullText) => {
             setAiStreaming(false); setLoading(false);
             try {
@@ -176,8 +200,10 @@ function LoveFortune() {
               };
               // 캐시 저장
               saveLoveFortuneCache({ ...finalResult, type: 'relationship', birthDate, gender }).catch(() => {});
+              setStreamFields({}); setDoneFields(new Set());
               finishWithCompleteAnimation(finalResult);
             } catch {
+              setStreamFields({}); setDoneFields(new Set());
               finishWithCompleteAnimation({ ...data, score: 65, grade: '보통', overall: fullText });
             }
           },
@@ -337,10 +363,32 @@ function LoveFortune() {
         </div>
       )}
 
-      {/* 연애 매트릭스 로딩 — 완료 후 부드럽게 페이드아웃 */}
-      {matrixShown && !completing && (
-        <AnalysisMatrix theme="love" label="AI가 연애운을 분석하고 있어요" streamText={streamText} exiting={matrixExiting} />
-      )}
+      {/* Progressive 스트리밍 — 분석 중 카드 먼저 노출 + 반짝 하이라이트 */}
+      {matrixShown && !completing && !result && (() => {
+        const st = (key) => {
+          if (!aiStreaming) return 'pending';
+          if (doneFields.has(key)) return 'done';
+          if (streamFields[key]) return 'streaming';
+          return 'pending';
+        };
+        return (
+          <div className="lf-streaming-wrap">
+            <div className="lf-streaming-header">
+              <div className="lf-streaming-title">
+                <span className="lf-streaming-orb">💕</span>
+                <span>AI가 연애운을 분석중이에요</span>
+                <span className="streaming-dots"><i/><i/><i/></span>
+              </div>
+            </div>
+            <div className="lf-streaming-cards">
+              <StreamingCard icon="💕" title="종합 분석"   text={streamFields.overall || ''} status={st('overall')} delay={0}   />
+              <StreamingCard icon="📅" title="최적 시기"   text={streamFields.timing  || ''} status={st('timing')}  delay={80}  />
+              <StreamingCard icon="💡" title="행동 조언"   text={streamFields.advice  || ''} status={st('advice')}  delay={160} />
+              <StreamingCard icon="⚠️" title="주의사항"    text={streamFields.caution || ''} status={st('caution')} delay={240} />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 결과 */}
       {result && (

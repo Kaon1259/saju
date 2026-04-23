@@ -187,7 +187,9 @@ public class SajuController {
 
         final LocalDate finalBd = birthDate;
         final Long uid = userId;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
+        // 비용 절감 — 일일 사주 운세(연인/다른사람/스타/사주분석 공용)도 Haiku 4.5로
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
+                com.saju.server.service.ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "SAJU_ANALYSIS", "사주분석");
 

@@ -31,6 +31,9 @@ public class ClaudeApiService {
     @Value("${claude.model:claude-haiku-4-5-20251001}")
     private String model;
 
+    // 비용 절감 테스트용 — 가벼운 일반 분석에 사용
+    public static final String HAIKU_MODEL = "claude-haiku-4-5-20251001";
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ExecutorService streamExecutor = Executors.newCachedThreadPool();
@@ -50,10 +53,19 @@ public class ClaudeApiService {
      * @return 생성된 텍스트, 실패 시 null
      */
     public String generate(String systemPrompt, String userPrompt, int maxTokens) {
+        return generate(systemPrompt, userPrompt, maxTokens, null);
+    }
+
+    /**
+     * Model 오버라이드 버전 — Haiku 등 가벼운 모델 지정용.
+     */
+    public String generate(String systemPrompt, String userPrompt, int maxTokens, String modelOverride) {
         if (!isAvailable()) {
             log.warn("Claude API key is not configured");
             return null;
         }
+        String effectiveModel = (modelOverride != null && !modelOverride.isBlank()) ? modelOverride : model;
+        log.info("[Claude generate] model={}, maxTokens={}", effectiveModel, maxTokens);
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -62,7 +74,7 @@ public class ClaudeApiService {
             headers.set("anthropic-version", "2023-06-01");
 
             Map<String, Object> body = Map.of(
-                "model", model,
+                "model", effectiveModel,
                 "max_tokens", maxTokens,
                 "system", buildCachedSystem(systemPrompt),
                 "messages", List.of(
@@ -105,7 +117,15 @@ public class ClaudeApiService {
      * Claude API 스트리밍 호출 - SSE로 텍스트 청크 전달
      */
     public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens) {
-        return generateStream(systemPrompt, userPrompt, maxTokens, null);
+        return generateStream(systemPrompt, userPrompt, maxTokens, (java.util.function.Consumer<String>) null);
+    }
+
+    /**
+     * Model 오버라이드 (callback 없음) — 3-arg + modelOverride.
+     * 오버로드 충돌 피하려고 별도 시그니처 필요해서 래퍼 방식.
+     */
+    public SseEmitter generateStreamModel(String systemPrompt, String userPrompt, int maxTokens, String modelOverride) {
+        return generateStream(systemPrompt, userPrompt, maxTokens, modelOverride, null);
     }
 
     /**
@@ -114,7 +134,7 @@ public class ClaudeApiService {
      */
     public SseEmitter generateStreamWithDoneData(String systemPrompt, String userPrompt, int maxTokens,
             java.util.function.Function<String, String> onCompleteWithData) {
-        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, onCompleteWithData);
+        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, null, onCompleteWithData);
     }
 
     /**
@@ -125,10 +145,23 @@ public class ClaudeApiService {
             onComplete.accept(fullText);
             return null; // null → 기본값(fullText)을 done payload로 사용
         };
-        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, wrapped);
+        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, null, wrapped);
+    }
+
+    /**
+     * Model 오버라이드 스트리밍 — Haiku 등 가벼운 모델 분기용. 비용 절감 테스트.
+     */
+    public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens,
+            String modelOverride, java.util.function.Consumer<String> onComplete) {
+        java.util.function.Function<String, String> wrapped = (onComplete == null) ? null : (fullText) -> {
+            onComplete.accept(fullText);
+            return null;
+        };
+        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, modelOverride, wrapped);
     }
 
     private SseEmitter generateStreamInternal(String systemPrompt, String userPrompt, int maxTokens,
+            String modelOverride,
             java.util.function.Function<String, String> onComplete) {
         SseEmitter emitter = new SseEmitter(600000L); // 10분 타임아웃 (결혼/심화는 5500~7500토큰 → 최대 3~4분 소요)
 
@@ -142,11 +175,13 @@ public class ClaudeApiService {
             return emitter;
         }
 
+        String effectiveModel = (modelOverride != null && !modelOverride.isBlank()) ? modelOverride : model;
         streamExecutor.execute(() -> {
             HttpURLConnection conn = null;
+            log.info("[Claude stream] model={}, maxTokens={}", effectiveModel, maxTokens);
             try {
                 Map<String, Object> body = Map.of(
-                    "model", model,
+                    "model", effectiveModel,
                     "max_tokens", maxTokens,
                     "stream", true,
                     "system", buildCachedSystem(systemPrompt),

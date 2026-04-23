@@ -24,16 +24,20 @@ export default function StreamingCard({ icon, title, text, status, delay = 0, ac
     return () => clearTimeout(t);
   }, [delay]);
 
-  // streaming으로 전환되는 순간 이 카드를 화면 중앙으로 부드럽게 스크롤 (카드별 1회만)
+  // streaming으로 전환되는 순간 이 카드를 화면 중앙으로 스크롤 (카드별 1회만)
+  // 모바일 WebView 성능: smooth scroll은 paint와 경쟁해 버벅임/흰 플래시 유발 → window.scrollTo 로 한 번에 이동
   useEffect(() => {
     if (!autoScroll) return;
     if (status !== 'streaming' || scrolledRef.current) return;
     if (!cardRef.current) return;
     scrolledRef.current = true;
-    // fade-in 완료 후 스크롤 (delay 이후)
     const t = setTimeout(() => {
       try {
-        cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const el = cardRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const targetY = window.scrollY + rect.top - (window.innerHeight - rect.height) / 2;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
       } catch {}
     }, 50);
     return () => clearTimeout(t);
