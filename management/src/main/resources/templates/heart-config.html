@@ -13,17 +13,36 @@
         .sidebar .nav-link:hover, .sidebar .nav-link.active { background: #34495e; color: #fff; }
         .sidebar .brand { padding: 20px; color: #fff; font-size: 18px; font-weight: 700; border-bottom: 1px solid #34495e; }
         .main-content { margin-left: 250px; padding: 20px; }
-        .topbar { background: #fff; padding: 12px 24px; margin: -20px -20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; justify-content: space-between; align-items: center; }
-        .config-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .topbar { background: #fff; padding: 12px 24px; margin: -20px -20px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .section-card { margin-bottom: 16px; }
+        .section-card .card-header {
+            display: flex; align-items: center; gap: 10px;
+            background: linear-gradient(90deg, #ecf0f1, #fff);
+            border-bottom: 1px solid #dde1e5;
+        }
+        .section-icon { font-size: 24px; }
+        .section-title { flex: 1; font-weight: 700; font-size: 15px; color: #2c3e50; }
+        .section-path { font-family: monospace; font-size: 11.5px; color: #95a5a6; background: #f8f9fa; padding: 2px 8px; border-radius: 4px; }
+        .config-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
         .config-item:last-child { border-bottom: none; }
-        .config-name { flex: 1; font-weight: 500; }
-        .config-key { color: #95a5a6; font-size: 12px; font-family: monospace; }
-        .group-icon { font-size: 20px; margin-right: 6px; }
-        .ai-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; margin-top: 3px; }
+        .config-item.is-deep { background: rgba(155, 89, 182, 0.04); margin: 0 -16px; padding-left: 16px; padding-right: 16px; border-left: 3px solid rgba(155, 89, 182, 0.35); }
+        .config-item.is-blocked { opacity: 0.55; }
+        .config-name { font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .config-key { color: #95a5a6; font-size: 11.5px; font-family: monospace; }
+        .deep-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(155, 89, 182, 0.15); color: #7d3c98; }
+        .blocked-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #e74c3c; color: #fff; }
+        .ai-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; }
         .ai-badge-sonnet { background: linear-gradient(135deg, #9B59B6, #E91E63); color: #fff; }
         .ai-badge-haiku  { background: #16a085; color: #fff; }
         .ai-badge-none   { background: #ecf0f1; color: #7f8c8d; }
-        .ai-legend { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #7f8c8d; }
+        .ai-legend { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #7f8c8d; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -39,12 +58,14 @@
 
     <div class="main-content">
         <div class="topbar">
-            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>메뉴별 하트 비용 설정</h5>
+            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>메뉴 페이지별 하트 비용 설정</h5>
             <div class="ai-legend">
                 <span class="ai-badge ai-badge-haiku">Haiku 4.5</span>
                 <span>비용 1/3 · 일반 분석</span>
                 <span class="ai-badge ai-badge-sonnet ms-2">Sonnet 4.6</span>
-                <span>프리미엄 · 심화/타로</span>
+                <span>프리미엄 · 심화 / 타로</span>
+                <span class="blocked-tag ms-2">차단됨</span>
+                <span>DEEP_ANALYSIS_HIDDEN</span>
                 <a href="/logout" class="btn btn-outline-secondary btn-sm ms-3">로그아웃</a>
             </div>
         </div>
@@ -58,40 +79,35 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div class="row g-4">
-            <div th:each="entry : ${configGroups}" class="col-md-6">
-                <div class="card">
-                    <div class="card-header fw-semibold">
-                        <span th:switch="${entry.key}">
-                            <span th:case="'기본운세'"><i class="bi bi-sun group-icon text-warning"></i></span>
-                            <span th:case="'1:1연애운'"><i class="bi bi-heart-fill group-icon text-danger"></i></span>
-                            <span th:case="'궁합'"><i class="bi bi-heart-half group-icon text-danger"></i></span>
-                            <span th:case="'특수분석'"><i class="bi bi-stars group-icon text-info"></i></span>
-                            <span th:case="'운세종합'"><i class="bi bi-diagram-3 group-icon text-success"></i></span>
-                            <span th:case="'스타운세'"><i class="bi bi-star-fill group-icon text-warning"></i></span>
-                            <span th:case="'기간별운세'"><i class="bi bi-calendar3 group-icon text-primary"></i></span>
-                            <span th:case="'심화분석'"><i class="bi bi-lightning-charge-fill group-icon text-warning"></i></span>
-                            <span th:case="'시스템'"><i class="bi bi-gear group-icon text-secondary"></i></span>
-                            <span th:case="*"><i class="bi bi-circle group-icon"></i></span>
-                        </span>
-                        <span th:text="${entry.key}"></span>
-                        <span class="badge bg-light text-dark ms-2" th:text="|${entry.value.size()}개|" style="font-weight:500;"></span>
+        <div class="row g-3">
+            <div th:each="sec : ${pageSections}" class="col-lg-6">
+                <div class="card section-card">
+                    <div class="card-header">
+                        <span class="section-icon" th:text="${sec.icon}"></span>
+                        <span class="section-title" th:text="${sec.title}"></span>
+                        <span th:if="${sec.path != null and !sec.path.isEmpty()}" class="section-path" th:text="${sec.path}"></span>
+                        <span class="badge bg-light text-dark" th:text="|${sec.items.size()}개|"></span>
                     </div>
                     <div class="card-body">
-                        <div th:each="config : ${entry.value}" class="config-item">
-                            <div class="config-name">
-                                <div th:text="${config.description}"></div>
-                                <div class="config-key" th:text="${config.analysisCategory}"></div>
-                                <span th:with="model=${aiModelMap.get(config.analysisCategory) ?: '미매핑'}"
-                                      th:classappend="${model == 'Sonnet 4.6' ? 'ai-badge-sonnet' : (model == 'Haiku 4.5' ? 'ai-badge-haiku' : 'ai-badge-none')}"
-                                      class="ai-badge"
-                                      th:text="${model}"></span>
+                        <div th:each="item : ${sec.items}"
+                             th:classappend="${item.deep ? ' is-deep' : ''} + ${item.blocked ? ' is-blocked' : ''}"
+                             class="config-item">
+                            <div>
+                                <div class="config-name">
+                                    <span th:text="${item.config.description}"></span>
+                                    <span th:if="${item.deep}" class="deep-tag">심화</span>
+                                    <span th:if="${item.blocked}" class="blocked-tag">차단됨</span>
+                                    <span class="ai-badge"
+                                          th:classappend="${item.aiModel == 'Sonnet 4.6' ? 'ai-badge-sonnet' : (item.aiModel == 'Haiku 4.5' ? 'ai-badge-haiku' : 'ai-badge-none')}"
+                                          th:text="${item.aiModel}"></span>
+                                </div>
+                                <div class="config-key" th:text="${item.config.analysisCategory}"></div>
                             </div>
                             <form method="post" action="/hearts/config/update" class="d-flex align-items-center gap-2">
-                                <input type="hidden" name="id" th:value="${config.id}">
-                                <input type="hidden" name="description" th:value="${config.description}">
+                                <input type="hidden" name="id" th:value="${item.config.id}">
+                                <input type="hidden" name="description" th:value="${item.config.description}">
                                 <div class="input-group" style="width:130px">
-                                    <input type="number" name="cost" th:value="${config.cost}" class="form-control form-control-sm text-center" min="0">
+                                    <input type="number" name="cost" th:value="${item.config.cost}" class="form-control form-control-sm text-center" min="0">
                                     <span class="input-group-text" style="font-size:12px">하트</span>
                                 </div>
                                 <button type="submit" class="btn btn-sm btn-primary">저장</button>
