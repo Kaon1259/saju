@@ -285,6 +285,7 @@ function Tarot() {
   const [loading, setLoading] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [aiStreaming, setAiStreaming] = useState(false);
+  // 타로는 Sonnet 4.6 통일, 심화분석 UI 미노출 (서버 엔드포인트는 코드로 남아있음 — 추후 재활성 대비)
   const [shuffleAnim, setShuffleAnim] = useState(false);
   const [shuffleFlipping, setShuffleFlipping] = useState(false);
   const [shufflePhase, setShufflePhase] = useState('riffle'); // riffle(좌우 두 묶음 인터리브) → gather(한 덩어리로 모임) → fan(부채꼴 펼침)
@@ -367,6 +368,7 @@ function Tarot() {
 
   useEffect(() => { return () => { cleanupRef.current?.(); analyzeAmbientRef.current?.(); }; }, []);
   useEffect(() => () => { if (cAnimId.current) cancelAnimationFrame(cAnimId.current); }, []);
+
 
   // pick 자동 드리프트 ID (별도 관리)
   const driftId = useRef(null);
@@ -941,12 +943,11 @@ function Tarot() {
       await new Promise(r => setTimeout(r, 900));
     }
 
-    // 카드 전면이 모두 보이면 바로 AI 분석 효과 시작 (대기 없음)
+    // 카드 전면이 모두 보이면 reveal 단계에서 AI 분석 (오브 + 하단 타입라이터), done 후 result 로 전환
     setLoading(true);
     setStreamText('');
     setAiStreaming(false);
 
-    // AI 분석 시작 사운드 + 앰비언트 루프
     try { playAnalyzeStart(); } catch {}
     try {
       analyzeAmbientRef.current?.();
@@ -975,8 +976,8 @@ function Tarot() {
       luckyElement: '불(火)',
     };
 
-    // reveal 화면 최소 노출 시간 보장 (카드 감상 시간)
-    const MIN_REVEAL_MS = 6000;
+    // reveal 화면 최소 노출 시간 (카드 감상 + 타입라이터 효과 충분히 보이게)
+    const MIN_REVEAL_MS = 5000;
     let doneFired = false;
     const goToResult = () => {
       if (doneFired) return;
@@ -986,7 +987,6 @@ function Tarot() {
       const elapsed = Date.now() - revealStartTime;
       const wait = Math.max(0, MIN_REVEAL_MS - elapsed);
       setTimeout(() => {
-        // reveal → result 페이지 플립 전환
         flipToStep(() => {
           setStep('result');
           setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
@@ -994,7 +994,7 @@ function Tarot() {
       }, wait);
     };
 
-    // 안전장치: 4분 지나도 응답이 안 오면 폴백으로 결과 전환
+    // 안전장치: 4분 내 응답 없으면 폴백으로 결과 전환
     const safetyTimeoutId = setTimeout(() => {
       if (doneFired) return;
       console.warn('[Tarot] AI analysis safety timeout — forcing result');
@@ -1002,13 +1002,6 @@ function Tarot() {
       setLoading(false);
       setReading({
         ...fallbackReading,
-        cards: cards.map((c, i) => ({
-          ...c,
-          position: POSITION_LABELS[spread]?.[i] || '카드',
-          meaning: c.reversed
-            ? '내면의 성찰이 필요한 시기입니다.'
-            : '긍정적인 에너지가 당신을 감싸고 있습니다.',
-        })),
         interpretation: streamText || fallbackReading.interpretation,
       });
       setCarouselIndex(0);
@@ -1032,8 +1025,7 @@ function Tarot() {
       onDone: (donePayload) => {
         try {
           setAiStreaming(false);
-          setStreamText('');
-          // 서버가 enriched JSON 반환 시도 — 파싱 성공하면 풍부한 데이터 그대로 사용
+          // 서버 enriched JSON 우선, 실패 시 평문 그대로 interpretation 에 넣기
           let enriched = null;
           if (donePayload && typeof donePayload === 'string') {
             const trimmed = donePayload.trim();
@@ -1047,17 +1039,11 @@ function Tarot() {
           } else {
             finalReading = {
               ...fallbackReading,
-              cards: cards.map((c, i) => ({
-                ...c,
-                position: POSITION_LABELS[spread]?.[i] || '카드',
-                meaning: c.reversed
-                  ? '내면의 성찰이 필요한 시기입니다.'
-                  : '긍정적인 에너지가 당신을 감싸고 있습니다.',
-              })),
-              interpretation: (donePayload || '').trim() || fallbackReading.interpretation,
+              interpretation: (donePayload || '').trim() || streamText || fallbackReading.interpretation,
             };
           }
           setReading(finalReading);
+          setStreamText('');
           setLoading(false);
           setCarouselIndex(0);
           goToResult();
@@ -2015,8 +2001,8 @@ function Tarot() {
             </div>
           )}
 
-          {/* Phase 1: 한 장씩 크게 순차 공개 (1초씩) */}
-          <div className="reveal-center-wrap">
+          {/* Phase 1: 한 장씩 크게 순차 공개 (1초씩). ai-analyzing 클래스 — 분석 중엔 카드가 위로 올라가 하단 타입라이터 자리 확보 */}
+          <div className={`reveal-center-wrap ${(loading || aiStreaming) ? 'ai-analyzing' : ''}`}>
             {!revealCarouselMode && (
               <div className="reveal-single-wrap">
                 {revealedCards.length > 0 && revealSingleIdx >= 0 && revealSingleIdx < revealedCards.length && (() => {
@@ -2078,7 +2064,7 @@ function Tarot() {
               </div>
             )}
 
-            {/* AI 분석 — 매트릭스 + 분석중 문구 (Phase 2에서만) */}
+            {/* AI 분석 — 카드 뒤 오브 (배경 분위기) */}
             {(loading || aiStreaming) && (
               <div className="reveal-ai-behind">
                 <div className="reveal-ai-orbit">
@@ -2086,24 +2072,29 @@ function Tarot() {
                   <div className="reveal-ai-orb reveal-ai-orb-2" />
                   <div className="reveal-ai-orb reveal-ai-orb-3" />
                 </div>
-                <div className="matrix-rain">
-                  {Array.from({ length: 6 }).map((_, col) => (
-                    <div key={col} className="matrix-col" style={{
-                      left: `${8 + col * 15}%`,
-                      animationDuration: `${3 + col * 0.8}s`,
-                      animationDelay: `${-col * 0.7}s`,
-                      opacity: 0.5 + col * 0.08,
-                    }}>
-                      {(aiStreaming ? streamText : '운명의카드가당신에게전하는메시지를해석하고있습니다').split('').filter((_, i) => i % 2 === col % 2).slice(0, 15).map((ch, i) => (
-                        <span key={i}>{ch}</span>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                <div className="reveal-ai-status">AI가 타로를 분석하고 있어요</div>
               </div>
             )}
           </div>
+
+          {/* AI 분석 — 하단 타입라이터 스트리밍 텍스트 박스 */}
+          {(loading || aiStreaming) && (
+            <div className="reveal-ai-bottom-stream">
+              <div className="reveal-ai-status-top">🔮 AI가 타로를 분석하고 있어요</div>
+              <div className="reveal-ai-typewriter" ref={el => { if (el) el.scrollTop = el.scrollHeight; }}>
+                {aiStreaming && streamText ? (
+                  <p className="reveal-ai-typewriter-text">
+                    {streamText}
+                    <span className="reveal-ai-cursor">▍</span>
+                  </p>
+                ) : (
+                  <p className="reveal-ai-typewriter-text reveal-ai-typewriter-waiting">
+                    운명의 카드가 당신에게 전하는 메시지를 해석하고 있어요
+                    <span className="reveal-ai-dots">···</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         );
       })()}
@@ -2157,7 +2148,6 @@ function Tarot() {
                 <p className="tarot-overall-text">{reading.overallMessage}</p>
               </div>
 
-              {/* 카드별 해석 테이블 */}
               {reading.cards && reading.cards.length > 0 && (
                 <div className="tarot-cards-table glass-card tarot-framed-card">
                   <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
@@ -2178,7 +2168,7 @@ function Tarot() {
                 <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
                 <h3 className="tarot-interp-title"><span>📜</span> 타로 마스터의 해석</h3>
                 <div className="tarot-interp-body">
-                  {reading.interpretation.split('\n').map((line, i) => (
+                  {(reading.interpretation || '').split('\n').map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
                 </div>

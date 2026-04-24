@@ -138,8 +138,84 @@ public class DeepAnalysisController {
             case "tojeong" -> "DEEP_TOJEONG";
             case "compatibility" -> "DEEP_COMPATIBILITY";
             case "marriage_compat" -> "DEEP_MARRIAGE_COMPAT";
+            case "tarot" -> "DEEP_TAROT";
             default -> "DEEP_TODAY";
         };
+    }
+
+    // ============================================================
+    // ===== 타로 심화분석 (Sonnet 4.6, 200하트) =====
+    // ============================================================
+
+    /** 타로 심화 캐시 조회 */
+    @GetMapping("/tarot/cached")
+    public ResponseEntity<Map<String, Object>> getTarotDeepCached(
+            @RequestParam String cardIds,
+            @RequestParam String reversals,
+            @RequestParam String spread,
+            @RequestParam(required = false) String category) {
+        Map<String, Object> cached = deepAnalysisService.getCachedTarot(cardIds, reversals, spread, category);
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("cached", cached != null);
+        if (cached != null) resp.put("data", cached);
+        return ResponseEntity.ok(resp);
+    }
+
+    /** 타로 심화 스트리밍 (POST — basicInterpretation 을 body로) */
+    @PostMapping(value = "/tarot/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter tarotDeepStream(
+            @RequestParam String cardIds,
+            @RequestParam String reversals,
+            @RequestParam String spread,
+            @RequestParam(required = false, defaultValue = "general") String category,
+            @RequestParam(required = false) String categoryKr,
+            @RequestParam(required = false) String question,
+            @RequestParam(required = false) String birthDate,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long userId,
+            @RequestBody(required = false) String basicInterpretation) {
+        log.info("타로 심화분석 요청: spread={}, cardIds={}, ctxLen={}",
+            spread, cardIds, basicInterpretation != null ? basicInterpretation.length() : 0);
+
+        // 캐시 확인 — 같은 카드 조합은 영속 캐시 (한 번만 결제)
+        Map<String, Object> cached = deepAnalysisService.getCachedTarot(cardIds, reversals, spread, category);
+        if (cached != null) {
+            SseEmitter emitter = new SseEmitter(5000L);
+            new Thread(() -> {
+                try {
+                    emitter.send(SseEmitter.event().name("cached").data(
+                        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
+                    emitter.complete();
+                } catch (Exception ignored) {}
+            }).start();
+            return emitter;
+        }
+
+        // 하트 잔액 확인
+        if (userId != null) {
+            try {
+                heartPointService.checkPoints(userId, "DEEP_TAROT");
+            } catch (InsufficientHeartsException e) {
+                return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
+            }
+        }
+
+        // 카드 블록 구성 — basicInterpretation 에 이미 카드 정보 들어있어도 되고, 없으면 cardIds 목록 표시
+        String cardsBlock = (basicInterpretation != null && !basicInterpretation.isBlank())
+            ? "카드 ID: " + cardIds + " / 역방향: " + reversals
+            : "카드 ID: " + cardIds + " (역방향 플래그: " + reversals + ")";
+
+        String systemPrompt = deepAnalysisService.getTarotDeepSystemPrompt();
+        String userPrompt = deepAnalysisService.getTarotDeepUserPrompt(
+            cardsBlock, spread, categoryKr != null ? categoryKr : category,
+            question, basicInterpretation, birthDate, gender);
+
+        final Long uid = userId;
+        // 기본(modelOverride 없음) → Sonnet 4.6 자동 사용. 1400자 평문 → 3500 토큰 여유.
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 3500, (fullText) -> {
+            deepAnalysisService.saveTarotDeepStreamResult(cardIds, reversals, spread, category, fullText);
+            if (uid != null) heartPointService.deductPoints(uid, "DEEP_TAROT", "심화분석 - 타로");
+        });
     }
 
     // ============================================================

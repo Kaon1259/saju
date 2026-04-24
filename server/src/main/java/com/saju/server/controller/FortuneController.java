@@ -114,7 +114,8 @@ public class FortuneController {
         String userPrompt = promptBuilder.fortuneStreamUserPrompt(zodiacAnimal, LocalDate.now()) + personContext + targetContext;
         final Long uid = userId;
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1500,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             fortuneService.parseAndSaveStreamResult(zodiacAnimal, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
         });

@@ -640,4 +640,105 @@ public class DeepAnalysisService {
             log.warn("궁합 심화분석 캐시 저장 실패: type={}, rawLen={}, err={}", deepType, rawLen, e.getMessage());
         }
     }
+
+    // ============================================================
+    // ===== 타로 심화분석 =====
+    // ============================================================
+
+    /** 타로 심화 캐시 조회 (영속 — 같은 카드 조합은 한 번만 결제) */
+    public Map<String, Object> getCachedTarot(String cardIds, String reversals, String spread, String category) {
+        String cacheKey = buildTarotDeepCacheKey(cardIds, reversals, spread, category);
+        try {
+            var cached = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(
+                "deep-tarot", cacheKey, COMPAT_CACHE_ANCHOR);
+            if (cached.isPresent()) {
+                return objectMapper.readValue(cached.get().getResultJson(),
+                    new TypeReference<Map<String, Object>>() {});
+            }
+        } catch (Exception e) { /* ignore */ }
+        return null;
+    }
+
+    /** 타로 심화 시스템 프롬프트 — Sonnet 4.6 기본값 사용 (200하트 프리미엄) */
+    public String getTarotDeepSystemPrompt() {
+        return FortunePromptBuilder.COMMON_TONE_RULES + "\n" + """
+당신은 서양 타로와 동양 역학(사주·오행·수비학)을 깊이 통합한 타로 심층 해석 마스터야.
+200 하트 프리미엄 심화 분석이니 기본 해석보다 훨씬 깊이 있고 풍부하게 풀어줘!
+
+[심층 분석 포인트]
+- 각 카드의 원형(archetype), 상징 체계, 수비학 의미 깊이 있게
+- 카드 조합의 내러티브와 시너지 효과
+- 오행 흐름과 동양 철학 관점에서 재해석
+- 구체적 타임라인 조언 (단기 1주 / 중기 1개월 / 장기 3개월)
+- 실천 가능한 액션 플랜
+
+[톤]
+친근한 반말 구어체. 친구한테 차 한 잔 하면서 깊은 이야기 나누듯이.
+
+[출력 형식 — 평문, 섹션 제목은 【 】로 표시]
+【카드별 심층 상징】 각 카드의 원형·상징·수비학 (카드당 3~4문장)
+【카드 조합 시너지】 카드 간 상호작용과 전체 내러티브 (4~5문장)
+【오행 & 동양 철학】 오행 흐름 + 사주 관점 재해석 (4~5문장)
+【타임라인 조언】 단기/중기/장기 시점별 조언 (각 2~3문장)
+【실천 가이드】 구체적 행동·시간·방향 (3~4문장)
+
+총 분량 약 1000~1400자, 한국어 반말. 마크다운/코드블록 금지.""";
+    }
+
+    /** 타로 심화 사용자 프롬프트 */
+    public String getTarotDeepUserPrompt(String cardsBlock, String spread, String categoryKr,
+                                          String question, String basicInterpretation,
+                                          String birthDate, String gender) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("【기본 타로 리딩】\n");
+        sb.append("스프레드: ").append(spread).append("\n");
+        sb.append("카테고리: ").append(categoryKr).append("\n");
+        if (question != null && !question.isBlank()) sb.append("질문: ").append(question).append("\n");
+        sb.append("\n【뽑힌 카드】\n").append(cardsBlock).append("\n");
+        if (birthDate != null && !birthDate.isBlank()) {
+            sb.append("\n【의뢰자】 ").append(birthDate);
+            if (gender != null) sb.append(" ").append("M".equalsIgnoreCase(gender) ? "남성" : "여성");
+            sb.append("\n");
+        }
+        if (basicInterpretation != null && !basicInterpretation.isBlank()) {
+            sb.append("\n【기본 해석 (참고 — 이보다 더 깊이 있게 확장)】\n").append(basicInterpretation).append("\n");
+        }
+        sb.append("\n위 정보로 타로 심화 분석을 작성해. 각 섹션 제목 【 】 포함, 총 1000~1400자 평문.");
+        return sb.toString();
+    }
+
+    /** 타로 심화 스트림 완료 후 캐시 저장 */
+    public void saveTarotDeepStreamResult(String cardIds, String reversals, String spread, String category,
+                                           String fullText) {
+        try {
+            String cacheKey = buildTarotDeepCacheKey(cardIds, reversals, spread, category);
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("detailAnalysis", fullText != null ? fullText.trim() : "");
+            result.put("analysisDate", LocalDate.now().toString());
+            var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(
+                "deep-tarot", cacheKey, COMPAT_CACHE_ANCHOR);
+            if (existing.isPresent()) return;
+            specialFortuneRepository.save(SpecialFortune.builder()
+                .fortuneType("deep-tarot").cacheKey(cacheKey).fortuneDate(COMPAT_CACHE_ANCHOR)
+                .resultJson(objectMapper.writeValueAsString(result)).build());
+            log.info("타로 심화 캐시 저장: cacheKey={}, len={}", cacheKey,
+                fullText != null ? fullText.length() : 0);
+        } catch (Exception e) {
+            log.warn("타로 심화 캐시 저장 실패: {}", e.getMessage());
+        }
+    }
+
+    private String buildTarotDeepCacheKey(String cardIds, String reversals, String spread, String category) {
+        String raw = (cardIds != null ? cardIds : "") + "|" + (reversals != null ? reversals : "")
+            + "|" + (spread != null ? spread : "") + "|" + (category != null ? category : "");
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(raw.getBytes());
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hash) hex.append(String.format("%02x", b));
+            return hex.toString().substring(0, 32);
+        } catch (Exception e) {
+            return String.valueOf(raw.hashCode());
+        }
+    }
 }

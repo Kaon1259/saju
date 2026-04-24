@@ -293,7 +293,7 @@ public class TojeongService {
                     currentGanji
             );
 
-            String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 2500);
+            String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 2500, ClaudeApiService.HAIKU_MODEL);
 
             if (aiResponse != null && !aiResponse.isBlank()) {
                 parseAndApplyAIResponse(result, aiResponse);

@@ -124,7 +124,7 @@ public class YearFortuneService {
             try {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, birthTime, gender, yearPillar, monthPillar, dayPillar, year2026Pillar, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 2400);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 2400, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {

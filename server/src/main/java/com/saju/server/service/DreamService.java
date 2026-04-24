@@ -111,7 +111,8 @@ public class DreamService {
         String userPrompt = buildUserPrompt(dreamText, birthDate, gender);
         final String finalCacheKey = cacheKey;
 
-        return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt, 1600, (fullText) -> {
+        return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt, 1600,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json != null) {
@@ -139,7 +140,7 @@ public class DreamService {
 
         try {
             String userPrompt = buildUserPrompt(dreamText, birthDate, gender);
-            String response = claudeApiService.generate(SYSTEM_PROMPT, userPrompt, 1600);
+            String response = claudeApiService.generate(SYSTEM_PROMPT, userPrompt, 1600, ClaudeApiService.HAIKU_MODEL);
             String json = ClaudeApiService.extractJson(response);
 
             if (json != null) {

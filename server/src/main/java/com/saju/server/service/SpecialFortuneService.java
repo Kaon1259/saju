@@ -432,7 +432,7 @@ public class SpecialFortuneService {
                     "\"timing\":\"최적시기 2문장\",\"advice\":\"행동조언 3문장\"," +
                     "\"caution\":\"주의 2문장\",\"luckyDay\":\"\",\"luckyPlace\":\"\",\"luckyColor\":\"\"}";
 
-                String response = claudeApiService.generate(system, user, 1200);
+                String response = claudeApiService.generate(system, user, 1200, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
                 if (json != null) {
                     JsonNode node = objectMapper.readTree(json);
@@ -511,7 +511,7 @@ public class SpecialFortuneService {
                     "{\"name\":\"저녁\",\"timeRange\":\"17:00~05:00\",\"score\":점수,\"fortune\":\"운세(3문장)\",\"advice\":\"조언(1문장)\",\"luckyAction\":\"추천행동\"}" +
                     "],\"bestBlock\":\"가장 좋은 시간대\",\"summary\":\"하루 시간 활용 조언(2문장)\"}";
 
-                String response = claudeApiService.generate(system, user, 700);
+                String response = claudeApiService.generate(system, user, 700, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
                 if (json != null) {
                     var node = objectMapper.readTree(json);

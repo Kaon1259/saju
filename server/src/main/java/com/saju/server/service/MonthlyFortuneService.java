@@ -134,7 +134,7 @@ public class MonthlyFortuneService {
             try {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, month, birthTime, gender, yearPillar, dayPillar, targetMonthPillar, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {

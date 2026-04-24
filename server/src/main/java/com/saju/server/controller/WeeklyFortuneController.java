@@ -70,7 +70,8 @@ public class WeeklyFortuneController {
         }
 
         final Long uid = userId;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             weeklyFortuneService.saveStreamResult(birthDate, birthTime, gender, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "WEEKLY_FORTUNE", "주간운세");
         });

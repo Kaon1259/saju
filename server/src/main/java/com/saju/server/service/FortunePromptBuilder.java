@@ -261,7 +261,7 @@ public class FortunePromptBuilder {
     }
 
     /**
-     * 타로 리딩 시스템 프롬프트
+     * 타로 리딩 시스템 프롬프트 — 평문 출력 (reveal 단계에서 하단 타입라이터로 노출)
      */
     public String tarotSystemPrompt() {
         return COMMON_TONE_RULES + "\n" + """

@@ -115,7 +115,8 @@ public class TojeongController {
         final String finalGender = gender;
         final String finalTargetType = targetType;
         final String finalTargetName = targetName;
-        SseEmitter emitter = claudeApiService.generateStream(systemPrompt, userPrompt, 2500, (fullText) -> {
+        SseEmitter emitter = claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             tojeongService.saveStreamResult(finalBirthDate, finalGender, finalTargetType, finalTargetName, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "TOJEONG", "토정비결");
         });

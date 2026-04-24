@@ -77,7 +77,8 @@ public class MonthlyFortuneController {
         final int finalMonth = month;
         final Long uid = userId;
         final String finalCategory = heartCategory;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             monthlyFortuneService.saveStreamResult(birthDate, finalMonth, birthTime, gender, fullText);
             if (uid != null) heartPointService.deductPoints(uid, finalCategory, "월간운세");
         });

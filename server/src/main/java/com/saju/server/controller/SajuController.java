@@ -347,7 +347,8 @@ public class SajuController {
 
         final Long uid = userId;
         final String finalCacheKey = cacheKey;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2000, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 2000,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             sajuService.parseManseryeokStreamResult(finalCacheKey, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "MANSERYEOK", "만세력 AI해석");
         });
@@ -405,7 +406,7 @@ public class SajuController {
                     "\"luckyTime\":\"길한 시간대 2~3개와 이유 (3문장)\"," +
                     "\"advice\":\"이 날의 총평과 조언 (3문장)\"}";
 
-                String resp = claudeApiService.generate(systemPrompt, userPrompt, 800);
+                String resp = claudeApiService.generate(systemPrompt, userPrompt, 800, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(resp);
                 if (json != null) {
                     var aiResult = new com.fasterxml.jackson.databind.ObjectMapper().readValue(

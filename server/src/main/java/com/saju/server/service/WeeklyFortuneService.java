@@ -136,7 +136,7 @@ public class WeeklyFortuneService {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, birthTime, gender, yearPillar, dayPillar,
                     weekStart, weekEnd, weekDayPillars, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {

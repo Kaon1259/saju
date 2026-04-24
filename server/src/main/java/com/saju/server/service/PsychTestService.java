@@ -394,7 +394,8 @@ public class PsychTestService {
         final String finalTestId = testId;
         final Map<String, Integer> finalScores = scores;
 
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1000, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1000,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json != null) {
@@ -491,7 +492,7 @@ public class PsychTestService {
             String systemPrompt = buildSystemPrompt();
             String userPrompt = buildUserPrompt(testId, answers, scores, dominantType, birthDate, gender);
 
-            String response = claudeApiService.generate(systemPrompt, userPrompt, 1000);
+            String response = claudeApiService.generate(systemPrompt, userPrompt, 1000, ClaudeApiService.HAIKU_MODEL);
             String json = ClaudeApiService.extractJson(response);
 
             if (json != null) {

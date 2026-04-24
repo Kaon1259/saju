@@ -169,7 +169,9 @@ public class SpecialFortuneController {
         int maxTokens = "ideal_type".equals(type) ? 2500
             : "skinship".equals(type) ? 1800 : 1400;
         final Long uid = userId;
-        return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens, (fullText) -> {
+        // 비용 절감 — 1:1연애 전체 타입(스킨십/짝사랑/소개팅/고백/이상형 등) Haiku 4.5 적용.
+        return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
                 partnerDate, partnerGender, breakupDate, meetDate, fullText);
             if (uid != null) heartPointService.deductPoints(uid, configKey, "1:1연애운 - " + type);

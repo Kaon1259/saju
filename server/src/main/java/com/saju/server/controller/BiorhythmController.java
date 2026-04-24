@@ -71,7 +71,8 @@ public class BiorhythmController {
 
         final Long uid = userId;
         final String bd = birthDate;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1500, (fullText) -> {
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 1500,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             biorhythmService.saveStreamResult(bd, fullText);
             if (uid != null) heartPointService.deductPoints(uid, "BIORHYTHM", "바이오리듬");
         });

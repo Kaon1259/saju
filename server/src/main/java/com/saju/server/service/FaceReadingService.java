@@ -137,7 +137,8 @@ public class FaceReadingService {
         final String finalFaceShape = faceShape;
         final String finalEyeShape = eyeShape;
 
-        return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt.toString(), 1000, (fullText) -> {
+        return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt.toString(), 1000,
+                ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json != null) {
@@ -209,7 +210,7 @@ public class FaceReadingService {
                     .append("\"strengths\":[\"강점1\",\"강점2\",\"강점3\"],\"improvements\":[\"개선점1\",\"개선점2\"],")
                     .append("\"score\":종합점수(0-100),\"grade\":\"등급(대길/길/보통/소흉)\"}");
 
-                String response = claudeApiService.generate(SYSTEM_PROMPT, userPrompt.toString(), 1000);
+                String response = claudeApiService.generate(SYSTEM_PROMPT, userPrompt.toString(), 1000, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
                 if (json != null) {
                     JsonNode node = objectMapper.readTree(json);

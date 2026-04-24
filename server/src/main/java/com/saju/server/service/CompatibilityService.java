@@ -116,7 +116,8 @@ public class CompatibilityService {
                         + "{\"summary\":\"\",\"overall\":\"\",\"loveCompat\":\"\",\"workCompat\":\"\",\"conflictPoint\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
 
                 String userPrompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation, label1, label2);
-                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 1500);
+                // 비용 절감 — 정통궁합 비스트림 분석도 Haiku 4.5
+                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 1500, ClaudeApiService.HAIKU_MODEL);
 
                 if (aiResponse != null && !aiResponse.isBlank()) {
                     parseAndApplyCompatAI(result, aiResponse, score, grade);

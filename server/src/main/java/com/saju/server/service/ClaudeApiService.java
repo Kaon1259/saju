@@ -138,6 +138,14 @@ public class ClaudeApiService {
     }
 
     /**
+     * Model 오버라이드 버전 — 타로 등 done payload가 필요한 경우에 Haiku 사용.
+     */
+    public SseEmitter generateStreamWithDoneData(String systemPrompt, String userPrompt, int maxTokens,
+            String modelOverride, java.util.function.Function<String, String> onCompleteWithData) {
+        return generateStreamInternal(systemPrompt, userPrompt, maxTokens, modelOverride, onCompleteWithData);
+    }
+
+    /**
      * Claude API 스트리밍 호출 + 완료 콜백 (캐시 저장 등)
      */
     public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens, java.util.function.Consumer<String> onComplete) {
