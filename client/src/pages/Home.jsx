@@ -73,27 +73,11 @@ const DAILY_MESSAGES = [
   '운명의 상대가 가까이 있을지도 🔮',
 ];
 
-const HOME_MAIN_MENUS = [
-  { id: 'love', icon: '💕', label: '1:1연애운', sub: '오늘 연애 기운은?', path: '/love-fortune' },
-  { id: 'some', icon: '🎯', label: '썸진단', sub: '누가 먼저 끌리나요', path: '/love/some_check' },
-  { id: 'compat', icon: '🌌', label: '전생인연', sub: '전생에 어떤 사이였을까?', path: '/love/past_life' },
-  { id: 'crush', icon: '💘', label: '짝사랑', sub: '플러팅해도 될까요?', path: '/love/crush' },
-  { id: 'blind', icon: '🤝', label: '소개팅', sub: '새로운 인연이 올까요?', path: '/love/blind_date' },
-  { id: 'date', icon: '💑', label: '데이트운', sub: '오늘 만나도 될까요?', path: '/love/couple_fortune' },
-  { id: 'confess', icon: '💌', label: '고백타이밍', sub: '언제 마음을 전할까?', path: '/love/confession_timing' },
-  { id: 'meeting', icon: '🔮', label: '만남시기', sub: '언제 인연을 만날까?', path: '/love/meeting_timing' },
-  { id: 'reunion', icon: '💔', label: '재회운', sub: '다시 만날 수 있을까?', path: '/love/reunion' },
-];
-
-const HOME_MORE_MENUS = [
-  { id: 'skinship', icon: '💋', label: '스킨십궁합', sub: '우리 스킨십 케미는?', path: '/my-love-compat', state: { presetTab: 'skinship' } },
-  { id: 'contact', icon: '📱', label: '연락운', sub: '먼저 연락해도 될까?', path: '/love/contact_fortune' },
-  { id: 'marriage', icon: '💒', label: '결혼운', sub: '결혼 시기와 인연', path: '/love/marriage' },
-  { id: 'remarriage', icon: '💍', label: '재혼운', sub: '새로운 인연의 가능성', path: '/love/remarriage' },
-  { id: 'psych', icon: '🎭', label: '심리테스트', sub: '내 마음속 연애 유형', path: '/psych-test' },
-  { id: 'mbti', icon: '🧬', label: 'MBTI', sub: 'MBTI로 보는 연애 궁합', path: '/mbti' },
-  { id: 'blood', icon: '🩸', label: '혈액형', sub: '혈액형별 연애 스타일', path: '/bloodtype' },
-];
+// 홈의 분석 메뉴는 모두 전용 페이지로 이관됨
+// - 1:1연애운/결혼운/전생인연/재회운/재혼운 → /my-solo
+// - 썸진단/짝사랑/고백타이밍/연락운 → /my-some-crush
+// - 스킨십궁합/데이트운 → /my-love-compat
+// - 심리테스트/MBTI/혈액형 → /traditional (성격·유형 분석 섹션)
 
 function getLoveHeartColor(score) {
   const s = Math.max(0, Math.min(100, score || 50));
@@ -210,7 +194,7 @@ function Home() {
   const [guestResult, setGuestResult] = useState(null);
   const [guestLoading, setGuestLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [showMoreMenus, setShowMoreMenus] = useState(false);
+  // 더보기 토글 제거됨 — HOME_MORE_MENUS 도 전용 페이지로 이관
 
   // love modal
   const [loveModal, setLoveModal] = useState(null);
@@ -470,7 +454,7 @@ function Home() {
         </section>
       )}
 
-      {/* 2-1. 나의 연인 배너 */}
+      {/* 2-1. 나의 연인 배너 — 커플/결혼 대상 */}
       <section style={{ padding: '0 4px', marginBottom: 4 }}>
         <button className="home-lover-banner" onClick={() => navigate('/my-love-compat')}>
           <div className="home-lover-banner-sparkles">
@@ -489,47 +473,41 @@ function Home() {
         </button>
       </section>
 
-      {/* 3. 핵심 동선 9개 그리드 */}
-      <section className="home-main-actions">
-        {HOME_MAIN_MENUS.map((item, idx) => (
-          <button
-            key={item.id}
-            className="home-main-action-card"
-            onClick={() => navigate(item.path)}
-            style={{ '--mac-color': '#E91E63', '--card-idx': idx }}
-          >
-            <span className={`home-mac-icon home-mac-anim--${item.id}`}>{item.icon}</span>
-            <span className="home-mac-label">{item.label}</span>
-            <span className="home-mac-sub">{item.sub}</span>
-          </button>
-        ))}
+      {/* 3-A-0. 나의 썸·짝사랑 배너 — 연애 진행 중간 단계 (보라/마젠타) */}
+      <section style={{ padding: '0 4px', marginTop: 10, marginBottom: 4 }}>
+        <button className="home-some-banner" onClick={() => navigate('/my-some-crush')}>
+          <div className="home-some-banner-sparkles">
+            {[...Array(6)].map((_, i) => <span key={i} style={{ '--hmb-i': i }}>✦</span>)}
+          </div>
+          <div className="home-some-banner-icon">
+            <span className="home-some-banner-heart">💘</span>
+            <span className="home-some-banner-q">?</span>
+          </div>
+          <div className="home-some-banner-text">
+            <span className="home-some-banner-title">나의 썸·짝사랑</span>
+            <span className="home-some-banner-sub">썸진단 · 짝사랑 · 고백타이밍 · 연락운</span>
+          </div>
+          <span className="home-some-banner-arrow">›</span>
+        </button>
       </section>
 
-      {/* 3-1. 더보기 드롭다운 */}
-      {showMoreMenus && (
-        <section className="home-main-actions home-more-actions">
-          {HOME_MORE_MENUS.map((item, idx) => (
-            <button
-              key={item.id}
-              className="home-main-action-card"
-              onClick={() => navigate(item.path, item.state ? { state: item.state } : undefined)}
-              style={{ '--mac-color': '#E91E63', '--card-idx': idx }}
-            >
-              <span className={`home-mac-icon home-mac-anim--${item.id}`}>{item.icon}</span>
-              <span className="home-mac-label">{item.label}</span>
-              <span className="home-mac-sub">{item.sub}</span>
-            </button>
-          ))}
-        </section>
-      )}
-
-      <button
-        className="home-more-toggle"
-        onClick={() => setShowMoreMenus(v => !v)}
-      >
-        {showMoreMenus ? '접기 ▲' : '더보기 ▼'}
-      </button>
-
+      {/* 3-A. 나는 솔로 배너 — 솔로 전용 페이지로 이동 (나의 연인과 대칭 패턴) */}
+      <section style={{ padding: '0 4px', marginTop: 10, marginBottom: 4 }}>
+        <button className="home-solo-banner" onClick={() => navigate('/my-solo')}>
+          <div className="home-solo-banner-sparkles">
+            {[...Array(6)].map((_, i) => <span key={i} style={{ '--hsb-i': i }}>✦</span>)}
+          </div>
+          <div className="home-solo-banner-icon">
+            <span className="home-solo-banner-star">✨</span>
+            <span className="home-solo-banner-face">🙋</span>
+          </div>
+          <div className="home-solo-banner-text">
+            <span className="home-solo-banner-title">나는 솔로</span>
+            <span className="home-solo-banner-sub">1:1연애운 · 이상형 · 결혼운 · 재회운까지</span>
+          </div>
+          <span className="home-solo-banner-arrow">›</span>
+        </button>
+      </section>
 
       {/* 5. 스타 운세 배너 */}
       <section style={{ padding: '0 4px', marginBottom: 8 }}>

@@ -96,6 +96,17 @@ function MyLoveCompat() {
   useEffect(() => () => deepCleanupRef.current?.(), []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
+  // 마운트 시 자동 autofill — 로그인 유저면 내 정보 + 연인 정보(있으면) 자동 입력.
+  // 히스토리 복원 경로(restoreHistoryId) 에선 해당 로직이 form 을 채우므로 skip.
+  // 재방문/탭 전환 시엔 이미 bd1/bd2 가 있으므로 조건으로 막음.
+  useEffect(() => {
+    if (!userId) return;
+    if (location.state?.restoreHistoryId) return;
+    if (bd1 || bd2) return;
+    handleAutoFill();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 홈 드로어에서 넘어온 restoreHistoryId 복원 (skinship_compat/marriage_compat/my_love_compat)
   useEffect(() => {
     const hid = location.state?.restoreHistoryId;
@@ -837,6 +848,18 @@ function MyLoveCompat() {
         </div>
         <h1 className="mlc-title">나의 연인과의 궁합</h1>
         <p className="mlc-subtitle">사주·결혼·스킨십, 세 가지 궁합으로 우리를 깊이 알아봐요</p>
+      </section>
+
+      {/* 연인과 함께 보는 추가 운세 — 데이트운 */}
+      <section className="mlc-related">
+        <button className="mlc-related-card" onClick={() => navigate('/love/couple_fortune')}>
+          <span className="mlc-related-icon">💑</span>
+          <div className="mlc-related-text">
+            <span className="mlc-related-label">오늘의 데이트운</span>
+            <span className="mlc-related-sub">연인과 오늘 만나도 좋은 날일까요?</span>
+          </div>
+          <span className="mlc-related-arrow">›</span>
+        </button>
       </section>
 
       {/* 탭 */}

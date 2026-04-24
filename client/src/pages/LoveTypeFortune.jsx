@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest, getHistory } from '../api/fortune';
+import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest, getHistory, getUser } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
@@ -169,13 +169,40 @@ function LoveTypeFortune() {
     );
   }
 
-  const handleAutoFill = () => {
+  const handleAutoFill = async () => {
+    // 서버에서 최신 프로필 조회 (localStorage 캐시가 파트너 정보 미포함일 수 있음)
+    let p = null;
     try {
-      const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      if (p.birthDate) setBirth(p.birthDate);
-      if (p.gender) setGender(p.gender);
+      const uid = localStorage.getItem('userId');
+      if (uid) {
+        p = await getUser(uid);
+        if (p) localStorage.setItem('userProfile', JSON.stringify(p));
+      }
     } catch {}
+    if (!p) {
+      try { p = JSON.parse(localStorage.getItem('userProfile') || '{}'); } catch { p = {}; }
+    }
+    if (p.birthDate) setBirth(p.birthDate);
+    if (p.gender) setGender(p.gender);
+    // 연인 정보가 저장되어 있으면 자동 채움 + 커플성 타입일 때는 panel 자동 펼침
+    if (p.partnerBirthDate) {
+      setPartnerDate(p.partnerBirthDate);
+      const partnerG = p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : '';
+      if (partnerG) setPartnerGender(partnerG);
+      const coupleTypes = ['couple_fortune', 'some_check', 'confession_timing', 'contact_fortune', 'reunion'];
+      if (coupleTypes.includes(type)) setShowPartner(true);
+    }
   };
+
+  // 로그인 유저 마운트 시 자동 autofill (히스토리 복원/게스트 제외)
+  useEffect(() => {
+    const uid = localStorage.getItem('userId');
+    if (!uid) return;
+    if (location.state?.restoreHistoryId) return;
+    if (birth) return; // 이미 채워졌으면 skip
+    handleAutoFill();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
 
   const loveCategory = HEART_MAP[type] || 'LOVE_RELATIONSHIP';
   const { guardedAction: guardLoveType } = useHeartGuard(loveCategory);
@@ -190,8 +217,11 @@ function LoveTypeFortune() {
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
 
-    const pDate = showPartner && partnerDate ? partnerDate : null;
-    const pGender = showPartner && partnerGender ? partnerGender : null;
+    // 데이트운·썸진단·짝사랑 은 상대 정보 필수 (항상 전송), 나머지는 상대방 정보 토글 상태에 따름
+    const PARTNER_REQUIRED_TYPES = ['couple_fortune', 'some_check', 'crush'];
+    const isPartnerRequired = PARTNER_REQUIRED_TYPES.includes(type);
+    const pDate = isPartnerRequired ? (partnerDate || null) : (showPartner && partnerDate ? partnerDate : null);
+    const pGender = isPartnerRequired ? (partnerGender || null) : (showPartner && partnerGender ? partnerGender : null);
     const bDate = type === 'reunion' && breakupDate ? breakupDate : null;
     const mDate = type === 'blind_date' && meetDate ? meetDate : null;
 
@@ -322,75 +352,130 @@ function LoveTypeFortune() {
         />
       )}
 
+      {/* 상대방 정보가 분석에 필수(가까운)인 타입들 — 정통궁합 스타일 2-블록 폼 적용 */}
+      {/* couple_fortune: 연인 · some_check: 썸 상대 · crush: 짝사랑 상대 */}
+
       {/* ═══ 입력 폼 ═══ */}
-      {!result && !loading && !streaming && (
+      {!result && !loading && !streaming && (() => {
+        const PARTNER_REQUIRED_TYPES = ['couple_fortune', 'some_check', 'crush'];
+        const partnerBlockLabel = {
+          couple_fortune: '💕 연인 정보',
+          some_check:     '💛 썸 상대 정보',
+          crush:          '💘 짝사랑 상대 정보',
+        };
+        const autofillLabel = {
+          couple_fortune: '✨ 내 정보 / 연인 정보로 채우기',
+          some_check:     '✨ 내 정보 / 썸 상대 정보로 채우기',
+          crush:          '✨ 내 정보 / 짝사랑 상대 정보로 채우기',
+        };
+        const isPartnerRequired = PARTNER_REQUIRED_TYPES.includes(type);
+        return (
         <div className="ltf-form fade-in">
           {userId && (
-            <button className="ltf-autofill" onClick={handleAutoFill}>✨ 내 정보로 채우기</button>
-          )}
-          <div className="ltf-field">
-            <label className="ltf-label">생년월일</label>
-            <BirthDatePicker value={birth} onChange={setBirth} />
-          </div>
-          <div className="ltf-field">
-            <label className="ltf-label">성별</label>
-            <div className="ltf-toggle">
-              <button className={`ltf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                <span className="ltf-g-circle ltf-g-male">♂</span>
-                <span>남성</span>
-              </button>
-              <button className={`ltf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                <span className="ltf-g-circle ltf-g-female">♀</span>
-                <span>여성</span>
-              </button>
-            </div>
-          </div>
-
-          {type === 'reunion' && (
-            <div className="ltf-field">
-              <label className="ltf-label">헤어진 시기 <span className="ltf-opt">(선택)</span></label>
-              <BirthDatePicker value={breakupDate} onChange={setBreakupDate} />
-            </div>
-          )}
-          {type === 'blind_date' && (
-            <div className="ltf-field">
-              <label className="ltf-label">소개팅 날짜 <span className="ltf-opt">(선택)</span></label>
-              <BirthDatePicker value={meetDate} onChange={setMeetDate} />
-            </div>
-          )}
-
-          {type !== 'ideal_type' && (
-            <button className="ltf-partner-btn" onClick={() => setShowPartner(!showPartner)}>
-              {showPartner ? '상대방 정보 접기 ▲' : '상대방 정보 추가 (선택) ▼'}
+            <button className="ltf-autofill" onClick={handleAutoFill}>
+              {autofillLabel[type] || '✨ 내 정보로 채우기'}
             </button>
           )}
-          {showPartner && (
-            <div className="ltf-partner fade-in">
-              <div className="ltf-field">
-                <label className="ltf-label">상대방 생년월일</label>
-                <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />
+
+          {isPartnerRequired ? (
+            /* ═══ 상대 필수 타입 — 정통궁합처럼 내 정보 / 상대 정보 블록 2개 ═══ */
+            <>
+              <div className="ltf-person-block">
+                <h3 className="ltf-person-title">👤 내 정보</h3>
+                <BirthDatePicker value={birth} onChange={setBirth} />
+                <div className="ltf-toggle">
+                  <button className={`ltf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
+                    <span className="ltf-g-circle ltf-g-male">♂</span><span>남자</span>
+                  </button>
+                  <button className={`ltf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
+                    <span className="ltf-g-circle ltf-g-female">♀</span><span>여자</span>
+                  </button>
+                </div>
               </div>
-              <div className="ltf-field">
-                <label className="ltf-label">상대방 성별</label>
+
+              <div className="ltf-person-block">
+                <h3 className="ltf-person-title">{partnerBlockLabel[type]}</h3>
+                <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />
                 <div className="ltf-toggle">
                   <button className={`ltf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}>
+                    <span className="ltf-g-circle ltf-g-male">♂</span><span>남자</span>
+                  </button>
+                  <button className={`ltf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}>
+                    <span className="ltf-g-circle ltf-g-female">♀</span><span>여자</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* 기존 폼 — 짝사랑/고백/소개팅 등 (상대방 정보 선택 토글) */
+            <>
+              <div className="ltf-field">
+                <label className="ltf-label">생년월일</label>
+                <BirthDatePicker value={birth} onChange={setBirth} />
+              </div>
+              <div className="ltf-field">
+                <label className="ltf-label">성별</label>
+                <div className="ltf-toggle">
+                  <button className={`ltf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
                     <span className="ltf-g-circle ltf-g-male">♂</span>
                     <span>남성</span>
                   </button>
-                  <button className={`ltf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}>
+                  <button className={`ltf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
                     <span className="ltf-g-circle ltf-g-female">♀</span>
                     <span>여성</span>
                   </button>
                 </div>
               </div>
-            </div>
+
+              {type === 'reunion' && (
+                <div className="ltf-field">
+                  <label className="ltf-label">헤어진 시기 <span className="ltf-opt">(선택)</span></label>
+                  <BirthDatePicker value={breakupDate} onChange={setBreakupDate} />
+                </div>
+              )}
+              {type === 'blind_date' && (
+                <div className="ltf-field">
+                  <label className="ltf-label">소개팅 날짜 <span className="ltf-opt">(선택)</span></label>
+                  <BirthDatePicker value={meetDate} onChange={setMeetDate} />
+                </div>
+              )}
+
+              {type !== 'ideal_type' && (
+                <button className="ltf-partner-btn" onClick={() => setShowPartner(!showPartner)}>
+                  {showPartner ? '상대방 정보 접기 ▲' : '상대방 정보 추가 (선택) ▼'}
+                </button>
+              )}
+              {showPartner && (
+                <div className="ltf-partner fade-in">
+                  <div className="ltf-field">
+                    <label className="ltf-label">상대방 생년월일</label>
+                    <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />
+                  </div>
+                  <div className="ltf-field">
+                    <label className="ltf-label">상대방 성별</label>
+                    <div className="ltf-toggle">
+                      <button className={`ltf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}>
+                        <span className="ltf-g-circle ltf-g-male">♂</span>
+                        <span>남성</span>
+                      </button>
+                      <button className={`ltf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}>
+                        <span className="ltf-g-circle ltf-g-female">♀</span>
+                        <span>여성</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
-          <button className="ltf-submit" onClick={() => guardLoveType(handleAnalyze)} disabled={!birth}>
+          <button className="ltf-submit" onClick={() => guardLoveType(handleAnalyze)}
+            disabled={!birth || (isPartnerRequired && !partnerDate)}>
             {info.icon} {info.label} 보기 <HeartCost category={loveCategory} />
           </button>
         </div>
-      )}
+        );
+      })()}
 
       {/* ═══ Progressive 스트리밍 ═══ */}
       {matrixShown && !result && (() => {

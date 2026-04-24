@@ -30,6 +30,8 @@ import WeeklyFortune from './pages/WeeklyFortune';
 import LoveFortune from './pages/LoveFortune';
 import LoveTypeFortune from './pages/LoveTypeFortune';
 import MyLoveCompat from './pages/MyLoveCompat';
+import MySomeCrush from './pages/MySomeCrush';
+import MySolo from './pages/MySolo';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
 import MyMenu from './pages/MyMenu';
@@ -312,6 +314,8 @@ function App() {
               <Route path="/love-fortune" element={<LoveFortune />} />
               <Route path="/love/:type" element={<LoveTypeFortune />} />
               <Route path="/my-love-compat" element={<MyLoveCompat />} />
+              <Route path="/my-some-crush" element={<MySomeCrush />} />
+              <Route path="/my-solo" element={<MySolo />} />
               <Route path="/my-menu" element={<MyMenu />} />
               <Route path="/star-fortune" element={<StarFortune />} />
               <Route path="/my-star" element={<MyStar />} />

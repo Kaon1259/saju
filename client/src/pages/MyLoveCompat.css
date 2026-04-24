@@ -100,6 +100,73 @@
 }
 [data-theme="light"] .mlc-subtitle { color: #64748b; }
 
+/* ═══ 연인과 함께 보는 추가 운세 (데이트운 카드) ═══ */
+.mlc-related {
+  margin: 10px 0 14px;
+  padding: 0 4px;
+}
+.mlc-related-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(233, 30, 99, 0.28);
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(139, 92, 246, 0.08));
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.22s;
+}
+.mlc-related-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(233, 30, 99, 0.55);
+  box-shadow: 0 4px 14px rgba(233, 30, 99, 0.2);
+}
+.mlc-related-card:active { transform: scale(0.99); }
+[data-theme="light"] .mlc-related-card {
+  background: #fff0f5;
+  border-color: rgba(233, 30, 99, 0.2);
+  box-shadow: 0 1px 6px rgba(233, 30, 99, 0.08);
+}
+.mlc-related-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  animation: mlcRelatedBounce 2.4s ease-in-out infinite;
+}
+@keyframes mlcRelatedBounce {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-2px); }
+}
+.mlc-related-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mlc-related-label {
+  font-size: 14.5px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #E91E63, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.mlc-related-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.6);
+}
+[data-theme="light"] .mlc-related-sub { color: #64748b; }
+.mlc-related-arrow {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ff6b9d;
+  flex-shrink: 0;
+}
+[data-theme="light"] .mlc-related-arrow { color: #c2185b; }
+
 /* ═══ 탭 ═══ */
 .mlc-tabs {
   display: flex;

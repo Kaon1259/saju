@@ -1,0 +1,249 @@
+.mysolo-page {
+  padding: 16px 16px 100px;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.mysolo-back-btn {
+  background: transparent;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: #67e8f9;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: all 0.2s;
+}
+.mysolo-back-btn:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+[data-theme="light"] .mysolo-back-btn {
+  color: #0891b2;
+  border-color: rgba(8, 145, 178, 0.25);
+}
+
+/* ═══ Hero ═══ */
+.mysolo-hero {
+  position: relative;
+  text-align: center;
+  padding: 26px 18px 22px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(6, 182, 212, 0.3);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.14), rgba(167, 139, 250, 0.12));
+  box-shadow: 0 6px 24px rgba(6, 182, 212, 0.15);
+  overflow: hidden;
+  margin-bottom: 18px;
+  animation: msHeroIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes msHeroIn {
+  0%   { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+[data-theme="light"] .mysolo-hero {
+  background: linear-gradient(135deg, #fff, #ecfeff);
+  border-color: rgba(8, 145, 178, 0.25);
+  box-shadow: 0 2px 14px rgba(8, 145, 178, 0.1);
+}
+
+.mysolo-hero-sparkles {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.mysolo-hero-sparkles span {
+  position: absolute;
+  font-size: 10px;
+  color: #67e8f9;
+  opacity: 0;
+  animation: msSparkle 3s ease-in-out infinite;
+  animation-delay: calc(var(--ms-i) * 0.25s);
+}
+.mysolo-hero-sparkles span:nth-child(1)  { top:  8%; left:  8%; }
+.mysolo-hero-sparkles span:nth-child(2)  { top: 15%; left: 30%; }
+.mysolo-hero-sparkles span:nth-child(3)  { top: 10%; right: 12%; }
+.mysolo-hero-sparkles span:nth-child(4)  { top: 25%; right: 28%; }
+.mysolo-hero-sparkles span:nth-child(5)  { top: 60%; left:  6%; font-size: 13px; }
+.mysolo-hero-sparkles span:nth-child(6)  { top: 70%; left: 28%; }
+.mysolo-hero-sparkles span:nth-child(7)  { top: 55%; right:  8%; font-size: 13px; }
+.mysolo-hero-sparkles span:nth-child(8)  { top: 75%; right: 22%; }
+.mysolo-hero-sparkles span:nth-child(9)  { bottom: 12%; left: 45%; }
+.mysolo-hero-sparkles span:nth-child(10) { top: 38%; left: 48%; font-size: 12px; }
+@keyframes msSparkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50%     { opacity: 1; transform: scale(1.2); }
+}
+
+.mysolo-hero-icons {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.mysolo-hero-star {
+  font-size: 36px;
+  animation: msStar 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(103, 232, 249, 0.55));
+}
+.mysolo-hero-face {
+  font-size: 44px;
+  animation: msFace 2.8s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+@keyframes msStar {
+  0%,100% { transform: rotate(0) scale(1); }
+  50%     { transform: rotate(12deg) scale(1.15); }
+}
+@keyframes msFace {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-4px); }
+}
+
+.mysolo-hero-title {
+  position: relative;
+  z-index: 1;
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0 0 6px;
+  background: linear-gradient(135deg, #06B6D4, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.5px;
+}
+.mysolo-hero-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+[data-theme="light"] .mysolo-hero-sub { color: #64748b; }
+
+/* ═══ 로그인 CTA ═══ */
+.mysolo-login-cta { margin-bottom: 16px; }
+.mysolo-login-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+}
+.mysolo-login-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.mysolo-login-btn:active { transform: scale(0.98); }
+
+/* ═══ Menu cards ═══ */
+.mysolo-menus {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mysolo-menu-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(6, 182, 212, 0.22);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.4));
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.22s;
+  animation: msCardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--card-idx, 0) * 60ms + 80ms);
+}
+@keyframes msCardIn {
+  0%   { opacity: 0; transform: translateX(-6px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.mysolo-menu-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 6px 18px rgba(6, 182, 212, 0.2);
+}
+.mysolo-menu-card:active { transform: scale(0.99); }
+[data-theme="light"] .mysolo-menu-card {
+  background: #fff;
+  border-color: rgba(8, 145, 178, 0.18);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .mysolo-menu-card:hover {
+  border-color: rgba(8, 145, 178, 0.4);
+}
+
+.mysolo-menu-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.18));
+  border: 1px solid rgba(6, 182, 212, 0.25);
+}
+.mysolo-menu-icon { font-size: 28px; }
+
+.mysolo-menu-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.mysolo-menu-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text, #fff);
+}
+.mysolo-menu-sub {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(103, 232, 249, 0.9);
+}
+.mysolo-menu-desc {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.55);
+}
+[data-theme="light"] .mysolo-menu-label { color: #1e293b; }
+[data-theme="light"] .mysolo-menu-sub { color: #0891b2; }
+[data-theme="light"] .mysolo-menu-desc { color: #64748b; }
+
+.mysolo-menu-arrow {
+  font-size: 22px;
+  font-weight: 900;
+  color: #22d3ee;
+  flex-shrink: 0;
+}
+[data-theme="light"] .mysolo-menu-arrow { color: #0891b2; }
+
+/* ═══ Footer 메시지 ═══ */
+.mysolo-footer {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px dashed rgba(6, 182, 212, 0.3);
+  text-align: center;
+}
+.mysolo-footer-text {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.7;
+}
+[data-theme="light"] .mysolo-footer {
+  background: #f0f9ff;
+  border-color: rgba(8, 145, 178, 0.25);
+}
+[data-theme="light"] .mysolo-footer-text { color: #475569; }
