@@ -107,8 +107,8 @@ public class HeartPointManagementService {
     public Map<String, List<HeartPointConfig>> getConfigsByGroup() {
         List<HeartPointConfig> all = heartPointConfigRepository.findAll();
         Map<String, List<HeartPointConfig>> grouped = new LinkedHashMap<>();
-        // 정렬 순서 정의
-        String[] order = {"기본운세", "연애/궁합", "특수분석", "운세종합", "기간별운세", "심화분석", "시스템"};
+        // 정렬 순서 — 서버 HeartPointConfigInitializer 의 menuGroup 과 정확히 맞춤
+        String[] order = {"기본운세", "1:1연애운", "궁합", "특수분석", "운세종합", "스타운세", "기간별운세", "심화분석", "시스템"};
         for (String g : order) {
             grouped.put(g, new java.util.ArrayList<>());
         }
@@ -116,9 +116,57 @@ public class HeartPointManagementService {
             String group = c.getMenuGroup() != null ? c.getMenuGroup() : "기타";
             grouped.computeIfAbsent(group, k -> new java.util.ArrayList<>()).add(c);
         }
-        // 빈 그룹 제거
         grouped.entrySet().removeIf(e -> e.getValue().isEmpty());
         return grouped;
+    }
+
+    /**
+     * 각 analysisCategory 가 현재 어떤 AI 모델을 사용하는지 매핑.
+     * 서버 코드(HAIKU_MODEL 명시 여부)와 동기화 — 바뀌면 여기도 수정 필요.
+     */
+    public Map<String, String> getAiModelMap() {
+        Map<String, String> m = new LinkedHashMap<>();
+        // 심화분석 전체 → Sonnet 4.6
+        String[] deepKeys = {
+            "DEEP_TODAY", "DEEP_LOVE", "DEEP_REUNION", "DEEP_REMARRIAGE", "DEEP_BLIND_DATE",
+            "DEEP_YEARLY", "DEEP_MONTHLY", "DEEP_WEEKLY", "DEEP_BLOODTYPE", "DEEP_MBTI",
+            "DEEP_CONSTELLATION", "DEEP_TOJEONG", "DEEP_COMPATIBILITY", "DEEP_MARRIAGE_COMPAT",
+            "DEEP_TAROT"
+        };
+        for (String k : deepKeys) m.put(k, "Sonnet 4.6");
+
+        // 타로 전체 → Sonnet 4.6 (서사·상징 의존도 높음)
+        m.put("TAROT", "Sonnet 4.6");
+        m.put("TAROT_ONE", "Sonnet 4.6");
+        m.put("TAROT_THREE", "Sonnet 4.6");
+        m.put("TAROT_FIVE", "Sonnet 4.6");
+
+        // 시스템 → N/A
+        m.put("SIGNUP_BONUS", "-");
+
+        // 일반 분석 대부분 → Haiku 4.5
+        String[] haikuKeys = {
+            // 기본운세
+            "TODAY_FORTUNE", "SAJU_ANALYSIS", "DAILY_FORTUNE_EXTRA", "MANSERYEOK",
+            // 1:1연애운
+            "LOVE_RELATIONSHIP", "LOVE_CRUSH", "LOVE_SOME_CHECK", "LOVE_BLIND_DATE",
+            "LOVE_COUPLE", "LOVE_CONFESSION", "LOVE_IDEAL_TYPE", "LOVE_REUNION",
+            "LOVE_REMARRIAGE", "LOVE_MARRIAGE", "LOVE_PAST_LIFE", "LOVE_MEETING_TIMING",
+            "LOVE_CONTACT",
+            // 궁합
+            "COMPATIBILITY", "CELEB_COMPAT", "MBTI_COMPAT", "BLOODTYPE_COMPAT",
+            // 특수분석 (타로 제외)
+            "DREAM", "FACE_READING", "PSYCH_TEST",
+            // 운세종합
+            "BLOOD_TYPE", "MBTI", "CONSTELLATION", "BIORHYTHM",
+            // 스타운세
+            "CELEB_FORTUNE", "GROUP_FORTUNE", "GROUP_COMPAT", "CELEB_MATCH",
+            // 기간별운세
+            "YEAR_FORTUNE", "MONTHLY_FORTUNE", "MONTHLY_FORTUNE_EXTRA", "WEEKLY_FORTUNE", "TOJEONG"
+        };
+        for (String k : haikuKeys) m.put(k, "Haiku 4.5");
+
+        return m;
     }
 
     @Transactional

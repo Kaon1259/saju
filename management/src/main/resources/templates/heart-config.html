@@ -19,6 +19,11 @@
         .config-name { flex: 1; font-weight: 500; }
         .config-key { color: #95a5a6; font-size: 12px; font-family: monospace; }
         .group-icon { font-size: 20px; margin-right: 6px; }
+        .ai-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; margin-top: 3px; }
+        .ai-badge-sonnet { background: linear-gradient(135deg, #9B59B6, #E91E63); color: #fff; }
+        .ai-badge-haiku  { background: #16a085; color: #fff; }
+        .ai-badge-none   { background: #ecf0f1; color: #7f8c8d; }
+        .ai-legend { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #7f8c8d; }
     </style>
 </head>
 <body>
@@ -35,7 +40,13 @@
     <div class="main-content">
         <div class="topbar">
             <h5 class="mb-0"><i class="bi bi-gear me-2"></i>메뉴별 하트 비용 설정</h5>
-            <a href="/logout" class="btn btn-outline-secondary btn-sm">로그아웃</a>
+            <div class="ai-legend">
+                <span class="ai-badge ai-badge-haiku">Haiku 4.5</span>
+                <span>비용 1/3 · 일반 분석</span>
+                <span class="ai-badge ai-badge-sonnet ms-2">Sonnet 4.6</span>
+                <span>프리미엄 · 심화/타로</span>
+                <a href="/logout" class="btn btn-outline-secondary btn-sm ms-3">로그아웃</a>
+            </div>
         </div>
 
         <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
@@ -53,21 +64,28 @@
                     <div class="card-header fw-semibold">
                         <span th:switch="${entry.key}">
                             <span th:case="'기본운세'"><i class="bi bi-sun group-icon text-warning"></i></span>
-                            <span th:case="'연애/궁합'"><i class="bi bi-heart group-icon text-danger"></i></span>
+                            <span th:case="'1:1연애운'"><i class="bi bi-heart-fill group-icon text-danger"></i></span>
+                            <span th:case="'궁합'"><i class="bi bi-heart-half group-icon text-danger"></i></span>
                             <span th:case="'특수분석'"><i class="bi bi-stars group-icon text-info"></i></span>
                             <span th:case="'운세종합'"><i class="bi bi-diagram-3 group-icon text-success"></i></span>
+                            <span th:case="'스타운세'"><i class="bi bi-star-fill group-icon text-warning"></i></span>
                             <span th:case="'기간별운세'"><i class="bi bi-calendar3 group-icon text-primary"></i></span>
-                            <span th:case="'심화분석'"><i class="bi bi-lightning group-icon text-warning"></i></span>
+                            <span th:case="'심화분석'"><i class="bi bi-lightning-charge-fill group-icon text-warning"></i></span>
                             <span th:case="'시스템'"><i class="bi bi-gear group-icon text-secondary"></i></span>
                             <span th:case="*"><i class="bi bi-circle group-icon"></i></span>
                         </span>
                         <span th:text="${entry.key}"></span>
+                        <span class="badge bg-light text-dark ms-2" th:text="|${entry.value.size()}개|" style="font-weight:500;"></span>
                     </div>
                     <div class="card-body">
                         <div th:each="config : ${entry.value}" class="config-item">
                             <div class="config-name">
                                 <div th:text="${config.description}"></div>
                                 <div class="config-key" th:text="${config.analysisCategory}"></div>
+                                <span th:with="model=${aiModelMap.get(config.analysisCategory) ?: '미매핑'}"
+                                      th:classappend="${model == 'Sonnet 4.6' ? 'ai-badge-sonnet' : (model == 'Haiku 4.5' ? 'ai-badge-haiku' : 'ai-badge-none')}"
+                                      class="ai-badge"
+                                      th:text="${model}"></span>
                             </div>
                             <form method="post" action="/hearts/config/update" class="d-flex align-items-center gap-2">
                                 <input type="hidden" name="id" th:value="${config.id}">

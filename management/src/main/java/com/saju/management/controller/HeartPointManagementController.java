@@ -55,6 +55,7 @@ public class HeartPointManagementController {
     @GetMapping("/hearts/config")
     public String configPage(Model model) {
         model.addAttribute("configGroups", heartPointService.getConfigsByGroup());
+        model.addAttribute("aiModelMap", heartPointService.getAiModelMap());
         return "heart-config";
     }
 
