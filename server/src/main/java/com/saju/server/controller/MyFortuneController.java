@@ -239,6 +239,12 @@ public class MyFortuneController {
         userMap.put("birthTime", user.getBirthTime() != null ? user.getBirthTime() : "");
         userMap.put("gender", user.getGender() != null ? user.getGender() : "");
         userMap.put("calendarType", user.getCalendarType() != null ? user.getCalendarType() : "SOLAR");
+        // 연인 정보 — 운세 페이지에서 자동 채움/심화분석 등에 사용
+        if (user.getPartnerBirthDate() != null) {
+            userMap.put("partnerBirthDate", user.getPartnerBirthDate().toString());
+            userMap.put("partnerBirthTime", user.getPartnerBirthTime() != null ? user.getPartnerBirthTime() : "");
+            userMap.put("partnerCalendarType", user.getPartnerCalendarType() != null ? user.getPartnerCalendarType() : "SOLAR");
+        }
         result.put("user", userMap);
 
         Map<String, Object> saju = new LinkedHashMap<>();
@@ -247,6 +253,7 @@ public class MyFortuneController {
         saju.put("money", fortune.getMoney());
         saju.put("health", fortune.getHealth());
         saju.put("work", fortune.getWork());
+        saju.put("academic", fortune.getAcademicFortune()); // 학업·자기계발운
         saju.put("score", fortune.getScore());
         saju.put("luckyNumber", fortune.getLuckyNumber());
         saju.put("luckyColor", fortune.getLuckyColor());
@@ -254,6 +261,7 @@ public class MyFortuneController {
         saju.put("luckyFood", fortune.getLuckyFood());
         saju.put("luckyFashion", fortune.getLuckyFashion());
         saju.put("luckyItem", fortune.getLuckyItem());
+        saju.put("luckyPerson", fortune.getLuckyPerson()); // 오늘 만나면 좋은 사람
         saju.put("hourlyFortune", parseHourly(fortune.getHourlyFortuneJson()));
         saju.put("zodiacAnimal", user.getZodiacAnimal());
         result.put("saju", saju);

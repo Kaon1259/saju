@@ -810,6 +810,26 @@ function Home() {
                   <span className="home-weather-meta-item">💧 {w.humidity}%</span>
                 </div>
                 <p className="home-hero-new__msg">{w.message}</p>
+                {/* 로그인 시 운세 요약/CTA — 연애 카드와 동일하게 표시해 두 면 높이 균형 */}
+                {userId && fortuneLoading && !myData?.saju && (
+                  <div className="home-hero-fortune-summary home-hero-fortune-summary--on-weather skeleton-pulse">
+                    <span className="hero-fortune-badge">🔮 --</span>
+                    <span className="hero-fortune-text">운세를 불러오는 중...</span>
+                  </div>
+                )}
+                {userId && myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall && (
+                  <div className="home-hero-fortune-summary home-hero-fortune-summary--on-weather" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
+                    <span className={`hero-fortune-badge ${myData.saju.score >= 80 ? 'badge-great' : myData.saju.score >= 60 ? 'badge-good' : myData.saju.score >= 40 ? 'badge-normal' : 'badge-low'}`}>
+                      {myData.saju.score >= 80 ? '🌟' : myData.saju.score >= 60 ? '☀️' : myData.saju.score >= 40 ? '🌤️' : '🌙'} {myData.saju.score}
+                    </span>
+                    <span className="hero-fortune-text">{myData.saju.overall.split('.')[0] + '.'}</span>
+                  </div>
+                )}
+                {userId && !fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed && (
+                  <button className="home-hero-fortune-cta home-hero-fortune-cta--on-weather" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
+                    ✨ 오늘의 운세 분석받기 <span>›</span>
+                  </button>
+                )}
                 <span className="home-hero-flip-hint">↕ 탭하면 연애운</span>
               </section>
             </div>

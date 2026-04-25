@@ -38,6 +38,18 @@ function YearFortune() {
   });
   const [copied, setCopied] = useState(false);
 
+  // MyFortune 에서 navigate 시 전달한 다른 사람 정보 자동 채움 (state 1회 사용 후 cleanup)
+  useEffect(() => {
+    const s = location.state || {};
+    if (s.presetMode === 'other' && s.otherBirthDate) {
+      setBirthDate(s.otherBirthDate);
+      if (s.otherBirthTime) setBirthTime(s.otherBirthTime);
+      if (s.otherGender) setGender(s.otherGender);
+      if (s.otherCalendarType) setCalendarType(s.otherCalendarType.toLowerCase()); // SOLAR→solar
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 내 운세
   const [mineResult, setMineResult] = useState(null);
   const [mineLoading, setMineLoading] = useState(false);
@@ -84,7 +96,12 @@ function YearFortune() {
   const getPartnerInfo = () => {
     const p = getProfile();
     if (!p.partnerBirthDate) return null;
-    return { birthDate: p.partnerBirthDate, birthTime: p.partnerBirthTime || '', gender: p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : '' };
+    return {
+      birthDate: p.partnerBirthDate,
+      birthTime: p.partnerBirthTime || '',
+      calendarType: p.partnerCalendarType || 'SOLAR',
+      gender: p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : '',
+    };
   };
 
   const { guardedAction: guardYear } = useHeartGuard('YEAR_FORTUNE');
@@ -380,11 +397,13 @@ function YearFortune() {
                   <h2 style={{ marginBottom: 12 }}>💕 연인 2026 신년운세</h2>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 16 }}>프로필에 등록된 연인 정보로 분석합니다</p>
                   <div className="myf-badges" style={{ justifyContent: 'center', marginBottom: 20, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <span className="myf-badge">{partnerInfo.birthDate}</span>
+                    <span className="myf-badge">
+                      {partnerInfo.calendarType === 'LUNAR' ? '🌙 음력' : '☀️ 양력'} {partnerInfo.birthDate}
+                    </span>
                     {partnerInfo.birthTime && <span className="myf-badge">{partnerInfo.birthTime}</span>}
                     {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
                   </div>
-                  <button className="yf-submit" onClick={() => guardYear(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, partnerInfo.gender, 'solar', {
+                  <button className="yf-submit" onClick={() => guardYear(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, partnerInfo.gender, (partnerInfo.calendarType || 'solar').toLowerCase(), {
                     setResult: setPartnerResult, setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming, cleanupRef: partnerCleanupRef
                   }))}>💕 연인 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
@@ -396,7 +415,7 @@ function YearFortune() {
                 </>
               )}
             </div>
-          ) : renderResult(partnerResult, partnerInfo?.birthDate, partnerInfo?.birthTime, partnerInfo?.gender, 'solar', () => { partnerCleanupRef.current?.(); setPartnerResult(null); setPartnerStreamText(''); setPartnerStreaming(false); window.scrollTo({ top: 0, behavior: 'smooth' }); })
+          ) : renderResult(partnerResult, partnerInfo?.birthDate, partnerInfo?.birthTime, partnerInfo?.gender, (partnerInfo?.calendarType || 'solar').toLowerCase(), () => { partnerCleanupRef.current?.(); setPartnerResult(null); setPartnerStreamText(''); setPartnerStreaming(false); window.scrollTo({ top: 0, behavior: 'smooth' }); })
         )
       )}
 

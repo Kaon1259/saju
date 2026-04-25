@@ -971,8 +971,42 @@ function MyFortune() {
           );
         }
         return (
-          <section className="profile-daily glass-card" style={{ marginTop: 8 }}>
-            <h3 className="profile-section-title">
+          <section className="profile-daily glass-card" style={{ marginTop: 8, position: 'relative' }}>
+            {/* 다른 사람: 우측 상단 다시하기 버튼 — 입력 폼으로 돌아감 */}
+            {viewMode === 'other' && otherBirthDate && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOtherBirthDate('');
+                  setOtherBirthTime('');
+                  setOtherGender('');
+                  setOtherCalendarType('SOLAR');
+                  setMonthlyDaily(null);
+                  setMonthlyForBirthDate(null);
+                  setMonthlyForCalendar(null);
+                }}
+                aria-label="다시하기"
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  padding: '6px 12px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(251, 191, 36, 0.4)',
+                  background: 'rgba(251, 191, 36, 0.08)',
+                  color: '#fbbf24',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  zIndex: 1,
+                  fontFamily: 'inherit',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                ↻ 다시하기
+              </button>
+            )}
+            <h3 className="profile-section-title" style={viewMode === 'other' ? { paddingRight: 90 } : undefined}>
               📆 {new Date().getMonth() + 1}월 {personLabel} 일운
               {monthlyForBirthDate && (
                 <span style={{ display: 'block', fontSize: 11, fontWeight: 500, color: 'var(--color-text-muted)', marginTop: 4 }}>
