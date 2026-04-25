@@ -169,6 +169,209 @@ function ScoreCircle({ score, size = 120, label }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════════
+// 연애상태별 카드 캐러셀 — 데이팅앱 스타일 (가로 스와이프 + Peek)
+// ════════════════════════════════════════════════════════════════
+const REL_CARDS = {
+  lover: {
+    id: 'lover',
+    path: '/my-love-compat',
+    title: '나의 연인',
+    sub: '정통 · 결혼 · 스킨십 궁합 한 번에',
+    icon: '💑',
+    accentFrom: '#ec4899',
+    accentTo: '#f472b6',
+    shortcuts: [
+      { icon: '💞', label: '정통궁합',   path: '/my-love-compat',         state: { presetTab: 'saju' } },
+      { icon: '💒', label: '결혼궁합',   path: '/my-love-compat',         state: { presetTab: 'marriage' } },
+      { icon: '🤝', label: '스킨십',     path: '/my-love-compat',         state: { presetTab: 'skinship' } },
+      { icon: '💑', label: '데이트운',   path: '/love/couple_fortune' },
+    ],
+  },
+  some: {
+    id: 'some',
+    path: '/my-some-crush',
+    title: '나의 썸·짝사랑',
+    sub: '썸 · 짝사랑 · 고백 · 연락 4가지',
+    icon: '💘',
+    accentFrom: '#a855f7',
+    accentTo: '#ec4899',
+    shortcuts: [
+      { icon: '🎯', label: '썸진단',     path: '/love/some_check' },
+      { icon: '💘', label: '짝사랑',     path: '/love/crush' },
+      { icon: '💌', label: '고백타이밍', path: '/love/confession_timing' },
+      { icon: '📱', label: '연락운',     path: '/love/contact_fortune' },
+    ],
+  },
+  solo: {
+    id: 'solo',
+    path: '/my-solo',
+    title: '나는 솔로',
+    sub: '연애운 · 이상형 · 결혼 · 만남시기',
+    icon: '🙋',
+    accentFrom: '#06b6d4',
+    accentTo: '#a78bfa',
+    shortcuts: [
+      { icon: '💕',         label: '1:1연애운', path: '/love-fortune' },
+      { icon: '👩‍❤️‍👨', label: '이상형',    path: '/love/ideal_type' },
+      { icon: '🔮',         label: '만남시기',  path: '/love/meeting_timing' },
+      { icon: '💒',         label: '결혼운',    path: '/love/marriage' },
+    ],
+  },
+  again: {
+    id: 'again',
+    path: '/again-meet',
+    title: '다시 만날까?',
+    sub: '재회 · 재혼 · 회복 · 연락 타이밍',
+    icon: '🌙',
+    accentFrom: '#7c3aed',
+    accentTo: '#c084fc',
+    shortcuts: [
+      { icon: '💔', label: '재회운',     path: '/love/reunion' },
+      { icon: '💍', label: '재혼운',     path: '/love/remarriage' },
+      { icon: '🕯️', label: '이별회복',   path: '/love/recovery' },
+      { icon: '📞', label: '연락타이밍', path: '/love/contact_fortune' },
+    ],
+  },
+};
+
+// 사용자의 relationshipStatus → 카드 정렬 우선순위
+function getOrderedRelCards(profile) {
+  const status = profile?.relationshipStatus;
+  let order;
+  switch (status) {
+    case 'IN_RELATIONSHIP':
+    case 'MARRIED':
+      order = ['lover', 'some', 'solo', 'again'];
+      break;
+    case 'SOME':
+      order = ['some', 'solo', 'lover', 'again'];
+      break;
+    case 'SINGLE':
+      order = ['solo', 'some', 'again', 'lover'];
+      break;
+    case 'COMPLICATED':
+      order = ['again', 'solo', 'some', 'lover'];
+      break;
+    default: // 비로그인 / 미설정
+      order = ['solo', 'some', 'lover', 'again'];
+  }
+  return order.map(k => REL_CARDS[k]);
+}
+
+function RelationshipCarousel({ navigate, myData }) {
+  const profile = myData?.user;
+  const cards = useMemo(() => getOrderedRelCards(profile), [profile?.relationshipStatus]);
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const resumeTimerRef = useRef(null);
+
+  // 자동 회전 (물레방아) — 3.5초 간격, 일시정지 시 멈춤
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setActive((a) => (a + 1) % cards.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, [paused, cards.length]);
+
+  // 사용자 인터랙션 후 8초 일시정지 → 다시 자동 회전
+  const advanceTo = (idx) => {
+    setActive(idx);
+    setPaused(true);
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => setPaused(false), 8000);
+  };
+
+  useEffect(() => () => {
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+  }, []);
+
+  // pos: 0=center, 1=front-bottom, len-1=front-top, 그 외=back hidden
+  const getPosClass = (i) => {
+    const len = cards.length;
+    const offset = (i - active + len) % len;
+    if (offset === 0) return 'pos-center';
+    if (offset === 1) return 'pos-bottom';
+    if (offset === len - 1) return 'pos-top';
+    return 'pos-back';
+  };
+
+  return (
+    <section className="home-rel-section">
+      <div className="home-rel-wheel">
+        {cards.map((card, i) => {
+          const posClass = getPosClass(i);
+          const isCenter = posClass === 'pos-center';
+          return (
+            <div
+              key={card.id}
+              className={`home-rel-wheel-card ${posClass}`}
+              style={{ '--c-from': card.accentFrom, '--c-to': card.accentTo }}
+              onClick={() => {
+                if (isCenter) navigate(card.path);
+                else if (posClass !== 'pos-back') advanceTo(i);
+              }}
+              role="button"
+              aria-label={card.title}
+            >
+              <div className="home-rel-card-bg" />
+              <div className="home-rel-card-sparkles">
+                {Array.from({ length: 8 }).map((_, k) => (
+                  <span key={k} style={{ '--rs-i': k }}>✦</span>
+                ))}
+              </div>
+
+              <div className="home-rel-card-icon">
+                <span className="home-rel-card-icon-main">{card.icon}</span>
+              </div>
+
+              <h3 className="home-rel-card-title">{card.title}</h3>
+              <p className="home-rel-card-sub">{card.sub}</p>
+
+              {/* 숏컷 2x2 그리드 — 클릭 가능 + 미니 애니메이션 */}
+              <div className="home-rel-card-shortcuts">
+                {card.shortcuts.map((sc, sIdx) => (
+                  <button
+                    key={sc.label}
+                    className="home-rel-shortcut"
+                    style={{ '--sc-i': sIdx }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isCenter) { advanceTo(i); return; }
+                      navigate(sc.path, sc.state ? { state: sc.state } : undefined);
+                    }}
+                    tabIndex={isCenter ? 0 : -1}
+                  >
+                    <span className="home-rel-shortcut-icon">{sc.icon}</span>
+                    <span className="home-rel-shortcut-label">{sc.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="home-rel-card-cta">
+                전체 보기 <span className="home-rel-card-arrow">→</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 도트 인디케이터 */}
+      <div className="home-rel-dots">
+        {cards.map((_, i) => (
+          <button
+            key={i}
+            className={`home-rel-dot ${i === active ? 'active' : ''}`}
+            onClick={() => advanceTo(i)}
+            aria-label={`카드 ${i + 1}`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Home() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -454,60 +657,9 @@ function Home() {
         </section>
       )}
 
-      {/* 2-1. 나의 연인 배너 — 커플/결혼 대상 */}
-      <section style={{ padding: '0 4px', marginBottom: 4 }}>
-        <button className="home-lover-banner" onClick={() => navigate('/my-love-compat')}>
-          <div className="home-lover-banner-sparkles">
-            {[...Array(6)].map((_, i) => <span key={i} style={{ '--hlb-i': i }}>✦</span>)}
-          </div>
-          <div className="home-lover-banner-icon">
-            <span className="home-lover-banner-m">♂</span>
-            <span className="home-lover-banner-heart">♥</span>
-            <span className="home-lover-banner-f">♀</span>
-          </div>
-          <div className="home-lover-banner-text">
-            <span className="home-lover-banner-title">나의 연인</span>
-            <span className="home-lover-banner-sub">정통 · 결혼 · 스킨십 궁합 한 번에</span>
-          </div>
-          <span className="home-lover-banner-arrow">›</span>
-        </button>
-      </section>
+      {/* 2~3. 연애상태별 카드 캐러셀 (가로 스와이프 + Peek + 도트) */}
+      <RelationshipCarousel navigate={navigate} myData={myData} />
 
-      {/* 3-A-0. 나의 썸·짝사랑 배너 — 연애 진행 중간 단계 (보라/마젠타) */}
-      <section style={{ padding: '0 4px', marginTop: 10, marginBottom: 4 }}>
-        <button className="home-some-banner" onClick={() => navigate('/my-some-crush')}>
-          <div className="home-some-banner-sparkles">
-            {[...Array(6)].map((_, i) => <span key={i} style={{ '--hmb-i': i }}>✦</span>)}
-          </div>
-          <div className="home-some-banner-icon">
-            <span className="home-some-banner-heart">💘</span>
-            <span className="home-some-banner-q">?</span>
-          </div>
-          <div className="home-some-banner-text">
-            <span className="home-some-banner-title">나의 썸·짝사랑</span>
-            <span className="home-some-banner-sub">썸진단 · 짝사랑 · 고백타이밍 · 연락운</span>
-          </div>
-          <span className="home-some-banner-arrow">›</span>
-        </button>
-      </section>
-
-      {/* 3-A. 나는 솔로 배너 — 솔로 전용 페이지로 이동 (나의 연인과 대칭 패턴) */}
-      <section style={{ padding: '0 4px', marginTop: 10, marginBottom: 4 }}>
-        <button className="home-solo-banner" onClick={() => navigate('/my-solo')}>
-          <div className="home-solo-banner-sparkles">
-            {[...Array(6)].map((_, i) => <span key={i} style={{ '--hsb-i': i }}>✦</span>)}
-          </div>
-          <div className="home-solo-banner-icon">
-            <span className="home-solo-banner-star">✨</span>
-            <span className="home-solo-banner-face">🙋</span>
-          </div>
-          <div className="home-solo-banner-text">
-            <span className="home-solo-banner-title">나는 솔로</span>
-            <span className="home-solo-banner-sub">1:1연애운 · 이상형 · 결혼운 · 재회운까지</span>
-          </div>
-          <span className="home-solo-banner-arrow">›</span>
-        </button>
-      </section>
 
       {/* 5. 스타 운세 배너 */}
       <section style={{ padding: '0 4px', marginBottom: 8 }}>

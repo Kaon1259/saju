@@ -2137,6 +2137,118 @@
 }
 [data-theme="light"] .home-solo-banner-arrow { color: #0891b2; }
 
+/* ═══ "다시 만날까?" 배너 — 보랏빛/세피아 톤 (재회·회복 묶음) ═══ */
+.home-again-banner {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(167, 139, 250, 0.35);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(244, 114, 182, 0.12));
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.25s;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.18);
+}
+.home-again-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(124, 58, 237, 0.3);
+  border-color: rgba(167, 139, 250, 0.6);
+}
+.home-again-banner:active { transform: scale(0.98); }
+[data-theme="light"] .home-again-banner {
+  background: linear-gradient(135deg, #fff, #faf5ff);
+  border-color: rgba(124, 58, 237, 0.25);
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.1);
+}
+
+.home-again-banner-sparkles {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.home-again-banner-sparkles span {
+  position: absolute;
+  font-size: 9px;
+  color: #c4b5fd;
+  opacity: 0;
+  animation: habSparkle 3s ease-in-out infinite;
+  animation-delay: calc(var(--hab-i) * 0.4s);
+}
+.home-again-banner-sparkles span:nth-child(1) { top: 20%; left: 12%; }
+.home-again-banner-sparkles span:nth-child(2) { top: 15%; right: 22%; }
+.home-again-banner-sparkles span:nth-child(3) { bottom: 22%; left: 18%; }
+.home-again-banner-sparkles span:nth-child(4) { bottom: 18%; right: 15%; }
+.home-again-banner-sparkles span:nth-child(5) { top: 50%; left: 8%; }
+.home-again-banner-sparkles span:nth-child(6) { top: 50%; right: 10%; }
+@keyframes habSparkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50%     { opacity: 1; transform: scale(1.2); }
+}
+
+.home-again-banner-icon {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.home-again-banner-moon {
+  font-size: 22px;
+  animation: habMoon 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.55));
+}
+.home-again-banner-heart {
+  font-size: 26px;
+  animation: habHeart 2.4s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+@keyframes habMoon {
+  0%,100% { transform: rotate(-8deg) scale(1); }
+  50%     { transform: rotate(6deg) scale(1.1); }
+}
+@keyframes habHeart {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-3px); }
+}
+
+.home-again-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+.home-again-banner-title {
+  font-size: 17px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #c084fc, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.home-again-banner-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+[data-theme="light"] .home-again-banner-sub { color: #64748b; }
+.home-again-banner-arrow {
+  font-size: 24px;
+  font-weight: 900;
+  color: #c084fc;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+[data-theme="light"] .home-again-banner-arrow { color: #7c3aed; }
+
 /* 솔로 섹션 그리드 — 메인과 대비되게 살짝 시안 틴트 */
 .home-solo-actions .home-main-action-card {
   border-color: rgba(6, 182, 212, 0.2);
@@ -2716,4 +2828,380 @@
   25% { transform: scale(1.15) rotate(-8deg); filter: brightness(1.3) drop-shadow(0 0 6px rgba(251,191,36,0.6)); }
   50% { transform: scale(1) rotate(0deg); filter: brightness(1); }
   75% { transform: scale(1.1) rotate(6deg); filter: brightness(1.2) drop-shadow(0 0 4px rgba(147,51,234,0.5)); }
+}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* 연애상태별 카드 — 3D 물레방아 (수직 무한 회전)                      */
+/* ════════════════════════════════════════════════════════════════ */
+.home-rel-section {
+  position: relative;
+  margin: 8px 0 14px;
+  padding: 0;
+}
+
+/* 3D 휠 컨테이너 — 위/아래 카드가 보이도록 perspective 적용 */
+.home-rel-wheel {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  perspective: 1100px;
+  transform-style: preserve-3d;
+  user-select: none;
+}
+
+.home-rel-wheel-card {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 82%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px 16px 14px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(155deg,
+              color-mix(in oklab, var(--c-from) 22%, rgba(15,23,42,0.55)),
+              color-mix(in oklab, var(--c-to) 18%, rgba(15,23,42,0.45)));
+  cursor: pointer;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+  transform-origin: center center;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.5s ease,
+              box-shadow 0.4s ease,
+              border-color 0.4s ease;
+  will-change: transform, opacity;
+}
+
+[data-theme="light"] .home-rel-wheel-card {
+  background: linear-gradient(155deg,
+              color-mix(in oklab, var(--c-from) 16%, #fff),
+              color-mix(in oklab, var(--c-to) 12%, #fff));
+  border-color: color-mix(in oklab, var(--c-from) 35%, #fff);
+  color: #1e293b;
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--c-from) 25%, transparent);
+}
+
+/* 위치별 transform — 물레방아처럼 3D 회전 */
+.home-rel-wheel-card.pos-center {
+  transform: translate(-50%, -50%) translateZ(0) rotateX(0) scale(1);
+  opacity: 1;
+  z-index: 3;
+  pointer-events: auto;
+  box-shadow: 0 14px 40px var(--c-from), 0 0 0 1.5px var(--c-from) inset;
+  border-color: var(--c-from);
+}
+.home-rel-wheel-card.pos-top {
+  transform: translate(-50%, -50%) translateY(-130px) translateZ(-140px) rotateX(38deg) scale(0.78);
+  opacity: 0.45;
+  z-index: 2;
+  pointer-events: auto;
+  filter: blur(0.4px) brightness(0.85);
+}
+.home-rel-wheel-card.pos-bottom {
+  transform: translate(-50%, -50%) translateY(130px) translateZ(-140px) rotateX(-38deg) scale(0.78);
+  opacity: 0.45;
+  z-index: 2;
+  pointer-events: auto;
+  filter: blur(0.4px) brightness(0.85);
+}
+.home-rel-wheel-card.pos-back {
+  transform: translate(-50%, -50%) translateZ(-280px) scale(0.5);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.home-rel-wheel-card.pos-top:hover,
+.home-rel-wheel-card.pos-bottom:hover {
+  opacity: 0.7;
+  filter: brightness(1);
+}
+
+/* center 카드만 호버 시 살짝 들어올림 */
+.home-rel-wheel-card.pos-center:hover {
+  box-shadow: 0 18px 48px var(--c-from), 0 0 0 1.5px var(--c-from) inset;
+}
+
+/* 그라데이션 글로우 배경 */
+.home-rel-card-bg {
+  position: absolute;
+  top: -40%; left: -20%;
+  width: 140%; height: 90%;
+  background: radial-gradient(circle at 50% 50%, var(--c-from), transparent 60%);
+  opacity: 0.32;
+  filter: blur(40px);
+  pointer-events: none;
+  animation: relCardOrb 6s ease-in-out infinite;
+}
+@keyframes relCardOrb {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  50%     { transform: translate(20px, 18px) scale(1.1); }
+}
+[data-theme="light"] .home-rel-card-bg { opacity: 0.18; }
+
+/* 카드 내부 sparkles */
+.home-rel-card-sparkles {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.home-rel-card-sparkles span {
+  position: absolute;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.65);
+  opacity: 0;
+  animation: relCardSparkle 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--rs-i) * 0.32s);
+}
+.home-rel-card-sparkles span:nth-child(1) { top:  8%; left: 10%; }
+.home-rel-card-sparkles span:nth-child(2) { top: 14%; right: 14%; }
+.home-rel-card-sparkles span:nth-child(3) { top: 28%; left:  8%; }
+.home-rel-card-sparkles span:nth-child(4) { top: 30%; right: 12%; }
+.home-rel-card-sparkles span:nth-child(5) { bottom: 18%; left: 12%; }
+.home-rel-card-sparkles span:nth-child(6) { bottom: 22%; right: 18%; }
+.home-rel-card-sparkles span:nth-child(7) { top: 50%; left: 18%; font-size: 11px; }
+.home-rel-card-sparkles span:nth-child(8) { top: 54%; right: 22%; font-size: 11px; }
+@keyframes relCardSparkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50%     { opacity: 1; transform: scale(1.2); }
+}
+[data-theme="light"] .home-rel-card-sparkles span { color: var(--c-from); opacity: 0.55; }
+
+/* 상태 라벨 (상단) */
+.home-rel-card-status {
+  position: relative;
+  z-index: 1;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  margin-bottom: 14px;
+  color: rgba(255,255,255,0.92);
+}
+[data-theme="light"] .home-rel-card-status {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: color-mix(in oklab, var(--c-from) 30%, #fff);
+  color: var(--c-from);
+}
+
+/* 메인 아이콘 (단일, 큼지막) */
+.home-rel-card-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  height: 50px;
+}
+.home-rel-card-icon-main {
+  font-size: 44px;
+  filter: drop-shadow(0 0 14px var(--c-from));
+  animation: relCardIcon 2.4s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes relCardIcon {
+  0%,100% { transform: scale(1) rotate(0deg); }
+  30%     { transform: scale(1.08) rotate(-4deg); }
+  60%     { transform: scale(0.96) rotate(3deg); }
+}
+
+/* 타이틀/서브 */
+.home-rel-card-title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 2px;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #fff, color-mix(in oklab, var(--c-from) 60%, #fff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .home-rel-card-title {
+  background: linear-gradient(135deg, var(--c-from), var(--c-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.home-rel-card-sub {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+}
+[data-theme="light"] .home-rel-card-sub { color: #475569; }
+
+/* ── 숏컷 2x2 그리드 — 클릭 가능 + 미니 애니메이션 버튼 ── */
+.home-rel-card-shortcuts {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.home-rel-shortcut {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: transform 0.18s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  color: #fff;
+  font-family: inherit;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-rel-shortcut::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+              color-mix(in oklab, var(--c-from) 22%, transparent),
+              color-mix(in oklab, var(--c-to) 12%, transparent));
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.home-rel-shortcut:hover {
+  transform: translateY(-2px);
+  border-color: var(--c-from);
+  box-shadow: 0 6px 16px color-mix(in oklab, var(--c-from) 35%, transparent);
+}
+.home-rel-shortcut:hover::before { opacity: 1; }
+.home-rel-shortcut:active { transform: scale(0.96); }
+
+[data-theme="light"] .home-rel-shortcut {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: color-mix(in oklab, var(--c-from) 25%, #e5e7eb);
+  color: #1e293b;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .home-rel-shortcut:hover {
+  background: #fff;
+  border-color: var(--c-from);
+}
+
+/* 숏컷 아이콘 — 카드별 시차 bob + hover 시 회전 */
+.home-rel-shortcut-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 17px;
+  filter: drop-shadow(0 0 5px color-mix(in oklab, var(--c-from) 60%, transparent));
+  animation: scIconBob 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--sc-i) * 0.32s);
+  display: inline-block;
+  transition: transform 0.3s;
+  line-height: 1;
+}
+.home-rel-shortcut:hover .home-rel-shortcut-icon {
+  animation: scIconDance 0.65s ease-in-out;
+}
+@keyframes scIconBob {
+  0%,100% { transform: translateY(0) rotate(0); }
+  50%     { transform: translateY(-3px) rotate(0); }
+}
+@keyframes scIconDance {
+  0%   { transform: scale(1) rotate(0); }
+  25%  { transform: scale(1.18) rotate(-15deg); }
+  55%  { transform: scale(1.18) rotate(15deg); }
+  80%  { transform: scale(1.1) rotate(-6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* 숏컷 아이콘 sparkle — hover 시 반짝 */
+.home-rel-shortcut::after {
+  content: '✦';
+  position: absolute;
+  top: 4px; right: 6px;
+  font-size: 8px;
+  color: var(--c-from);
+  opacity: 0;
+  transform: scale(0.4) rotate(0);
+  transition: opacity 0.25s, transform 0.4s;
+  pointer-events: none;
+}
+.home-rel-shortcut:hover::after {
+  opacity: 1;
+  transform: scale(1) rotate(180deg);
+}
+
+.home-rel-shortcut-label {
+  position: relative;
+  z-index: 1;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+[data-theme="light"] .home-rel-shortcut-label { color: #334155; }
+
+/* CTA */
+.home-rel-card-cta {
+  position: relative;
+  z-index: 1;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.3px;
+  padding: 4px 0 0;
+}
+.home-rel-card-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  transition: transform 0.2s;
+}
+.home-rel-wheel-card.pos-center:hover .home-rel-card-arrow { transform: translateX(4px); }
+[data-theme="light"] .home-rel-card-cta { color: var(--c-from); }
+
+/* 도트 인디케이터 */
+.home-rel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: -8px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 4;
+}
+.home-rel-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s;
+}
+.home-rel-dot.active {
+  width: 22px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ec4899, #c084fc);
+}
+[data-theme="light"] .home-rel-dot { background: rgba(0, 0, 0, 0.18); }
+[data-theme="light"] .home-rel-dot.active {
+  background: linear-gradient(90deg, #ec4899, #c084fc);
 }

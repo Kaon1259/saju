@@ -32,6 +32,8 @@ import LoveTypeFortune from './pages/LoveTypeFortune';
 import MyLoveCompat from './pages/MyLoveCompat';
 import MySomeCrush from './pages/MySomeCrush';
 import MySolo from './pages/MySolo';
+import MyAgainMeet from './pages/MyAgainMeet';
+import Landing from './pages/Landing';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
 import MyMenu from './pages/MyMenu';
@@ -160,6 +162,21 @@ function useFontSize() {
   }, []);
 }
 
+// 비로그인 첫 방문 사용자를 /welcome 랜딩으로 리다이렉트 (한 번 보면 landingSeen=1)
+function useLandingRedirect() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== '/') return;
+    const userId = localStorage.getItem('userId');
+    const seen = localStorage.getItem('landingSeen');
+    if (!userId && !seen) {
+      navigate('/welcome', { replace: true });
+    }
+  }, [location.pathname]);
+}
+
 // 프로필 미완성 사용자 리다이렉트 (Guest는 건너뜀)
 function useProfileGuard() {
   const navigate = useNavigate();
@@ -194,6 +211,7 @@ function App() {
   const [tabIntro, setTabIntro] = useState(null); // { key, tabKey }
   useTimeTheme();
   useFontSize();
+  useLandingRedirect();
   useProfileGuard();
 
   // 자동 로그인 off면 앱 시작 시 로그인 정보 제거
@@ -316,6 +334,8 @@ function App() {
               <Route path="/my-love-compat" element={<MyLoveCompat />} />
               <Route path="/my-some-crush" element={<MySomeCrush />} />
               <Route path="/my-solo" element={<MySolo />} />
+              <Route path="/again-meet" element={<MyAgainMeet />} />
+              <Route path="/welcome" element={<Landing />} />
               <Route path="/my-menu" element={<MyMenu />} />
               <Route path="/star-fortune" element={<StarFortune />} />
               <Route path="/my-star" element={<MyStar />} />

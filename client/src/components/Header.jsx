@@ -99,6 +99,9 @@ function Header({ onHomeSplash, onTabIntro }) {
     localStorage.setItem('theme', 'dark');
   }, []);
 
+  // 풀스크린 랜딩(/welcome)에서는 헤더 자체를 숨김
+  if (location.pathname === '/welcome') return null;
+
   const handleTabClick = (item) => {
     const isActive = item.path === '/'
       ? location.pathname === '/'

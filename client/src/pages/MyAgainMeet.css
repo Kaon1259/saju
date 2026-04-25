@@ -1,0 +1,250 @@
+/* ═══ "다시 만날까?" — 보랏빛/세피아 톤 (추억·마음정리 무드) ═══ */
+.myagain-page {
+  padding: 16px 16px 100px;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.myagain-back-btn {
+  background: transparent;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: #c4b5fd;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: all 0.2s;
+}
+.myagain-back-btn:hover {
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.5);
+}
+[data-theme="light"] .myagain-back-btn {
+  color: #7c3aed;
+  border-color: rgba(124, 58, 237, 0.25);
+}
+
+/* ═══ Hero ═══ */
+.myagain-hero {
+  position: relative;
+  text-align: center;
+  padding: 26px 18px 22px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(167, 139, 250, 0.32);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(192, 132, 252, 0.12));
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.18);
+  overflow: hidden;
+  margin-bottom: 18px;
+  animation: maHeroIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes maHeroIn {
+  0%   { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+[data-theme="light"] .myagain-hero {
+  background: linear-gradient(135deg, #fff, #faf5ff);
+  border-color: rgba(124, 58, 237, 0.25);
+  box-shadow: 0 2px 14px rgba(124, 58, 237, 0.1);
+}
+
+.myagain-hero-sparkles {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.myagain-hero-sparkles span {
+  position: absolute;
+  font-size: 10px;
+  color: #c4b5fd;
+  opacity: 0;
+  animation: maSparkle 3s ease-in-out infinite;
+  animation-delay: calc(var(--ma-i) * 0.25s);
+}
+.myagain-hero-sparkles span:nth-child(1)  { top:  8%; left:  8%; }
+.myagain-hero-sparkles span:nth-child(2)  { top: 15%; left: 30%; }
+.myagain-hero-sparkles span:nth-child(3)  { top: 10%; right: 12%; }
+.myagain-hero-sparkles span:nth-child(4)  { top: 25%; right: 28%; }
+.myagain-hero-sparkles span:nth-child(5)  { top: 60%; left:  6%; font-size: 13px; }
+.myagain-hero-sparkles span:nth-child(6)  { top: 70%; left: 28%; }
+.myagain-hero-sparkles span:nth-child(7)  { top: 55%; right:  8%; font-size: 13px; }
+.myagain-hero-sparkles span:nth-child(8)  { top: 75%; right: 22%; }
+.myagain-hero-sparkles span:nth-child(9)  { bottom: 12%; left: 45%; }
+.myagain-hero-sparkles span:nth-child(10) { top: 38%; left: 48%; font-size: 12px; }
+@keyframes maSparkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50%     { opacity: 1; transform: scale(1.2); }
+}
+
+.myagain-hero-icons {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.myagain-hero-moon {
+  font-size: 36px;
+  animation: maMoon 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.6));
+}
+.myagain-hero-heart {
+  font-size: 40px;
+  animation: maHeart 2.6s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+@keyframes maMoon {
+  0%,100% { transform: rotate(-8deg) scale(1); }
+  50%     { transform: rotate(6deg) scale(1.08); }
+}
+@keyframes maHeart {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-4px); }
+}
+
+.myagain-hero-title {
+  position: relative;
+  z-index: 1;
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0 0 6px;
+  background: linear-gradient(135deg, #c084fc, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.5px;
+}
+.myagain-hero-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+[data-theme="light"] .myagain-hero-sub { color: #64748b; }
+
+/* ═══ 로그인 CTA ═══ */
+.myagain-login-cta { margin-bottom: 16px; }
+.myagain-login-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+}
+.myagain-login-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.myagain-login-btn:active { transform: scale(0.98); }
+
+/* ═══ Menu cards ═══ */
+.myagain-menus {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.myagain-menu-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.4));
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.22s;
+  animation: maCardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--card-idx, 0) * 60ms + 80ms);
+}
+@keyframes maCardIn {
+  0%   { opacity: 0; transform: translateX(-6px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.myagain-menu-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.22);
+}
+.myagain-menu-card:active { transform: scale(0.99); }
+[data-theme="light"] .myagain-menu-card {
+  background: #fff;
+  border-color: rgba(124, 58, 237, 0.18);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .myagain-menu-card:hover {
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.myagain-menu-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.22), rgba(244, 114, 182, 0.18));
+  border: 1px solid rgba(167, 139, 250, 0.28);
+}
+.myagain-menu-icon { font-size: 28px; }
+
+.myagain-menu-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.myagain-menu-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text, #fff);
+}
+.myagain-menu-sub {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(196, 181, 253, 0.95);
+}
+.myagain-menu-desc {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.55);
+}
+[data-theme="light"] .myagain-menu-label { color: #1e293b; }
+[data-theme="light"] .myagain-menu-sub { color: #7c3aed; }
+[data-theme="light"] .myagain-menu-desc { color: #64748b; }
+
+.myagain-menu-arrow {
+  font-size: 22px;
+  font-weight: 900;
+  color: #c4b5fd;
+  flex-shrink: 0;
+}
+[data-theme="light"] .myagain-menu-arrow { color: #7c3aed; }
+
+/* ═══ Footer 메시지 ═══ */
+.myagain-footer {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px dashed rgba(167, 139, 250, 0.3);
+  text-align: center;
+}
+.myagain-footer-text {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.7;
+}
+[data-theme="light"] .myagain-footer {
+  background: #faf5ff;
+  border-color: rgba(124, 58, 237, 0.25);
+}
+[data-theme="light"] .myagain-footer-text { color: #475569; }

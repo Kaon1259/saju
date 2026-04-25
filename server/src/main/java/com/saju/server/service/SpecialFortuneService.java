@@ -31,7 +31,7 @@ public class SpecialFortuneService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String[] LOVE_TYPES = {
-        "relationship", "reunion", "remarriage", "blind_date",
+        "relationship", "reunion", "remarriage", "recovery", "blind_date",
         "crush", "marriage", "confession_timing", "ideal_type",
         "past_life", "couple_fortune", "meeting_timing",
         "some_check", "contact_fortune"
@@ -40,6 +40,7 @@ public class SpecialFortuneService {
         put("relationship", "연애운");
         put("reunion", "재회운");
         put("remarriage", "재혼운");
+        put("recovery", "이별 회복운");
         put("blind_date", "소개팅운");
         put("crush", "짝사랑운");
         put("marriage", "결혼운");
@@ -676,6 +677,19 @@ public class SpecialFortuneService {
 - 헤어진 시기가 있으면: 그 날의 천기와 현재 천기 비교 → 에너지 변화 흐름 분석
 - 상대방 사주가 있으면: 상대의 일간 기질로 재회 접근법 맞춤 제시
 - 재회하면 안 되는 경우도 솔직히 조언""";
+
+            case "recovery" -> """
+【이별 회복운 전문 분석 프레임워크】
+- 너 일간의 오행으로 이별 후 회복 패턴 분석 (목=자기성찰형, 화=감정폭발 후 빠른정리, 토=느린 안정화, 금=감정차단, 수=깊이 잠긴 우울)
+- 오늘 일진이 마음 회복에 미치는 에너지 분석 (정체/회복/재상승)
+- 마음 정리·회복 예상 시기를 사주 흐름으로 구체적으로 제시 (1주·1개월·3개월·6개월 단계)
+- 회복을 늦추는 행동 vs 회복을 돕는 행동 명확히 구분
+- 추천 활동: 너 오행에 맞는 회복 루틴 (운동/명상/취미/사람만남/혼자시간 등)
+- 재회 미련을 끊을 결정적 신호 3가지 (사주 기반)
+- 새로운 인연을 받아들일 준비가 되는 시기 예측
+- 자존감 회복을 위한 일간별 셀프케어 팁
+- 절대 재회/재혼 권유 금지 — 이건 '놓아주고 회복하는' 운세
+- overall은 따뜻한 위로 톤으로 5-6문장, 구체적 회복 타임라인 포함""";
 
             case "remarriage" -> """
 【재혼운 전문 분석 프레임워크】

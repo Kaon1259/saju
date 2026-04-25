@@ -31,6 +31,7 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("LOVE_IDEAL_TYPE",      5,  "1:1연애운",   "이상형분석");
         init("LOVE_REUNION",         5,  "1:1연애운",   "재회운");
         init("LOVE_REMARRIAGE",      5,  "1:1연애운",   "재혼운");
+        init("LOVE_RECOVERY",        5,  "1:1연애운",   "이별회복운");
         init("LOVE_MARRIAGE",        5,  "1:1연애운",   "결혼운");
         init("LOVE_PAST_LIFE",       5,  "1:1연애운",   "전생인연");
         init("LOVE_MEETING_TIMING",  5,  "1:1연애운",   "만남시기");

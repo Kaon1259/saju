@@ -77,6 +77,8 @@ function Register() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  // 회원가입 직후 자동로그인 여부 묻기
+  const [autoLoginAsk, setAutoLoginAsk] = useState(null); // null | { user }
 
   const birthYear = form.birthDate ? parseInt(form.birthDate.split('-')[0], 10) : null;
   const zodiac = useMemo(() => getZodiacFromYear(birthYear), [birthYear]);
@@ -181,7 +183,8 @@ function Register() {
         mbtiType: form.mbtiType || null,
       });
 
-      completeLogin(result.user);
+      // 자동로그인 여부를 한 번 묻고, 응답 후 completeLogin 호출
+      setAutoLoginAsk({ user: result.user });
     } catch (err) {
       const msg = err.response?.data?.error || '';
       setError(msg || '등록에 실패했습니다. 다시 시도해주세요.');
@@ -316,6 +319,45 @@ function Register() {
             {submitting ? '확인 중...' : '🔮 프로필 저장'}
           </button>
         </form>
+      )}
+
+      {/* ═══ 회원가입 직후 자동로그인 묻기 ═══ */}
+      {autoLoginAsk && (
+        <div className="autologin-ask-overlay" role="dialog" aria-modal="true">
+          <div className="autologin-ask-modal">
+            <div className="autologin-ask-icon">🔐</div>
+            <h3 className="autologin-ask-title">자동 로그인할까요?</h3>
+            <p className="autologin-ask-desc">
+              켜두시면 다음에 앱을 열 때<br />
+              <strong>로그인 없이 바로 시작</strong>할 수 있어요.<br />
+              <span className="autologin-ask-hint">언제든 마이메뉴에서 변경 가능합니다.</span>
+            </p>
+            <div className="autologin-ask-actions">
+              <button
+                className="autologin-ask-btn autologin-ask-btn-off"
+                onClick={() => {
+                  localStorage.setItem('autoLogin', 'off');
+                  const u = autoLoginAsk.user;
+                  setAutoLoginAsk(null);
+                  completeLogin(u);
+                }}
+              >
+                지금은 끄기
+              </button>
+              <button
+                className="autologin-ask-btn autologin-ask-btn-on"
+                onClick={() => {
+                  localStorage.setItem('autoLogin', 'on');
+                  const u = autoLoginAsk.user;
+                  setAutoLoginAsk(null);
+                  completeLogin(u);
+                }}
+              >
+                자동 로그인 켜기
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
