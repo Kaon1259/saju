@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.HeartPointService;
+import com.saju.server.service.LunarCalendarService;
 import com.saju.server.service.MonthlyFortuneService;
 import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -22,16 +24,29 @@ public class MonthlyFortuneController {
     private final MonthlyFortuneService monthlyFortuneService;
     private final ClaudeApiService claudeApiService;
     private final HeartPointService heartPointService;
+    private final LunarCalendarService lunarCalendarService;
     private final ObjectMapper objectMapper;
+
+    private String resolveBirthDate(String birthDate, String calendarType) {
+        if ("LUNAR".equalsIgnoreCase(calendarType)) {
+            try {
+                LocalDate solar = lunarCalendarService.lunarToSolar(LocalDate.parse(birthDate));
+                return solar.toString();
+            } catch (Exception ignored) {}
+        }
+        return birthDate;
+    }
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getMonthlyFortune(
             @RequestParam String birthDate,
             @RequestParam int month,
             @RequestParam(required = false) String birthTime,
-            @RequestParam(required = false) String gender) {
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String calendarType) {
+        String bd = resolveBirthDate(birthDate, calendarType);
         return ResponseEntity.ok(
-            monthlyFortuneService.getMonthlyFortune(birthDate, month, birthTime, gender)
+            monthlyFortuneService.getMonthlyFortune(bd, month, birthTime, gender)
         );
     }
 
@@ -41,12 +56,16 @@ public class MonthlyFortuneController {
             @RequestParam int month,
             @RequestParam(required = false) String birthTime,
             @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String calendarType,
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String targetType,
             @RequestParam(required = false) String targetName,
             @RequestParam(required = false, defaultValue = "false") boolean extra) {
 
-        Object[] ctx = monthlyFortuneService.buildStreamContext(birthDate, month, birthTime, gender, targetType, targetName);
+        // 음력 → 양력 변환 (사주 계산은 양력 기준)
+        final String resolvedBd = resolveBirthDate(birthDate, calendarType);
+
+        Object[] ctx = monthlyFortuneService.buildStreamContext(resolvedBd, month, birthTime, gender, targetType, targetName);
         String systemPrompt = (String) ctx[0];
         String userPrompt = (String) ctx[1];
         @SuppressWarnings("unchecked")
@@ -79,7 +98,7 @@ public class MonthlyFortuneController {
         final String finalCategory = heartCategory;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1600,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            monthlyFortuneService.saveStreamResult(birthDate, finalMonth, birthTime, gender, fullText);
+            monthlyFortuneService.saveStreamResult(resolvedBd, finalMonth, birthTime, gender, fullText);
             if (uid != null) heartPointService.deductPoints(uid, finalCategory, "월간운세");
         });
     }

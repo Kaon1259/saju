@@ -85,8 +85,10 @@ function LoveTypeFortune() {
 
   const [birth, setBirth] = useState('');
   const [gender, setGender] = useState('');
+  const [calendarType, setCalendarType] = useState('SOLAR');
   const [partnerDate, setPartnerDate] = useState('');
   const [partnerGender, setPartnerGender] = useState('');
+  const [partnerCalendarType, setPartnerCalendarType] = useState('SOLAR');
   const [meetDate, setMeetDate] = useState('');
   const [breakupDate, setBreakupDate] = useState('');
   const [showPartner, setShowPartner] = useState(false);
@@ -137,8 +139,10 @@ function LoveTypeFortune() {
     setResult(null);
     setBirth('');
     setGender('');
+    setCalendarType('SOLAR');
     setPartnerDate('');
     setPartnerGender('');
+    setPartnerCalendarType('SOLAR');
     setShowPartner(false);
     setStreamText('');
     setMatrixShown(false);
@@ -149,8 +153,10 @@ function LoveTypeFortune() {
     setResult(null);
     setBirth('');
     setGender('');
+    setCalendarType('SOLAR');
     setPartnerDate('');
     setPartnerGender('');
+    setPartnerCalendarType('SOLAR');
     setShowPartner(false);
     setStreamText('');
     setMatrixShown(false);
@@ -187,9 +193,11 @@ function LoveTypeFortune() {
     }
     if (p.birthDate) setBirth(p.birthDate);
     if (p.gender) setGender(p.gender);
+    if (p.calendarType) setCalendarType(p.calendarType);
     // 연인 정보가 저장되어 있으면 자동 채움 + 커플성 타입일 때는 panel 자동 펼침
     if (p.partnerBirthDate) {
       setPartnerDate(p.partnerBirthDate);
+      if (p.partnerCalendarType) setPartnerCalendarType(p.partnerCalendarType);
       const partnerG = p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : '';
       if (partnerG) setPartnerGender(partnerG);
       const coupleTypes = ['couple_fortune', 'some_check', 'confession_timing', 'contact_fortune', 'reunion'];
@@ -229,7 +237,7 @@ function LoveTypeFortune() {
     const mDate = type === 'blind_date' && meetDate ? meetDate : null;
 
     try {
-      const basic = await getLoveFortuneBasic(type, birth, null, gender || null, null, pDate, pGender, bDate, mDate, null);
+      const basic = await getLoveFortuneBasic(type, birth, null, gender || null, calendarType || 'SOLAR', pDate, pGender, bDate, mDate, null);
       if (basic.score && basic.overall) {
         setResult(basic);
         setLoading(false);
@@ -242,7 +250,7 @@ function LoveTypeFortune() {
       let buffer = '';
       const PROG_FIELDS = ['overall', 'timing', 'advice', 'caution', 'mindsetBoost'];
       cleanupRef.current = getLoveFortuneStream(
-        type, birth, '', gender || '', '', pDate || '', pGender || '', bDate || '', mDate || '', '',
+        type, birth, '', gender || '', calendarType || 'SOLAR', pDate || '', pGender || '', bDate || '', mDate || '', '',
         {
           onCached: (cachedData) => {
             setStreaming(false); setLoading(false); setStreamText('');
@@ -275,7 +283,7 @@ function LoveTypeFortune() {
             if (parsed) {
               const finalResult = { ...basic, ...parsed, score: parsed.score || basic.score || 65, grade: parsed.grade || basic.grade || '보통', overall: parsed.overall || '' };
               pendingResultRef.current = finalResult;
-              saveLoveFortuneCache({ ...finalResult, type, birthDate: birth, gender }).catch(() => {});
+              saveLoveFortuneCache({ ...finalResult, type, birthDate: birth, gender, calendarType: calendarType || 'SOLAR' }).catch(() => {});
             } else {
               pendingResultRef.current = { ...basic, score: 65, grade: '보통', overall: fullText || '' };
             }
@@ -376,7 +384,11 @@ function LoveTypeFortune() {
             <>
               <div className="ltf-person-block">
                 <h3 className="ltf-person-title">👤 내 정보</h3>
-                <BirthDatePicker value={birth} onChange={setBirth} />
+                <div className="ltf-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} />
                 <div className="ltf-toggle">
                   <button className={`ltf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
                     <span className="ltf-g-circle ltf-g-male">♂</span><span>남자</span>
@@ -389,7 +401,11 @@ function LoveTypeFortune() {
 
               <div className="ltf-person-block">
                 <h3 className="ltf-person-title">{partnerBlockLabel[type]}</h3>
-                <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />
+                <div className="ltf-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} />
                 <div className="ltf-toggle">
                   <button className={`ltf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}>
                     <span className="ltf-g-circle ltf-g-male">♂</span><span>남자</span>
@@ -404,8 +420,12 @@ function LoveTypeFortune() {
             /* 기존 폼 — 짝사랑/고백/소개팅 등 (상대방 정보 선택 토글) */
             <>
               <div className="ltf-field">
-                <label className="ltf-label">생년월일</label>
-                <BirthDatePicker value={birth} onChange={setBirth} />
+                <label className="ltf-label">달력 / 생년월일</label>
+                <div className="ltf-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} />
               </div>
               <div className="ltf-field">
                 <label className="ltf-label">성별</label>
@@ -442,8 +462,12 @@ function LoveTypeFortune() {
               {showPartner && (
                 <div className="ltf-partner fade-in">
                   <div className="ltf-field">
-                    <label className="ltf-label">상대방 생년월일</label>
-                    <BirthDatePicker value={partnerDate} onChange={setPartnerDate} />
+                    <label className="ltf-label">상대방 달력 / 생년월일</label>
+                    <div className="ltf-toggle" style={{ marginBottom: 8 }}>
+                      <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('SOLAR')}>☀️ 양력</button>
+                      <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('LUNAR')}>🌙 음력</button>
+                    </div>
+                    <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} />
                   </div>
                   <div className="ltf-field">
                     <label className="ltf-label">상대방 성별</label>

@@ -1221,6 +1221,55 @@
   animation: catCardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
   animation-delay: calc(var(--card-i, 0) * 60ms);
 }
+
+/* 덱 배경 카드: 아이콘은 상단, 라벨은 하단 — 카드 본체(가운데)가 잘 보이게 */
+.setup-cat-tarot-card.has-deck-bg {
+  justify-content: space-between;
+  padding: 10px 8px;
+  gap: 0;
+}
+.setup-cat-tarot-card.has-deck-bg .cat-tarot-icon {
+  font-size: 30px;
+}
+.setup-cat-tarot-card.has-deck-bg .cat-tarot-label {
+  font-size: 13px;
+}
+
+/* 덱 카드 배경 — 카테고리별 랜덤 타로 카드 이미지 (선명하게 노출) */
+.cat-tarot-deck-bg {
+  position: absolute;
+  inset: 0;
+  background-image: var(--deck-bg);
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  z-index: 0;
+  pointer-events: none;
+  transition: filter 0.3s ease;
+}
+.setup-cat-tarot-card.has-deck-bg::after {
+  /* 가독성용 그라디언트 — 카드 본체는 그대로 두고 상하단만 살짝 어둡게 (텍스트 영역 vignette) */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.55) 0%,       /* 상단(아이콘 부분) 살짝 어둡게 */
+    rgba(0, 0, 0, 0.05) 30%,      /* 가운데 카드 본체 그대로 */
+    rgba(0, 0, 0, 0.05) 65%,
+    rgba(0, 0, 0, 0.75) 100%);    /* 하단(라벨 부분) 어둡게 */
+  z-index: 1;
+  pointer-events: none;
+}
+.setup-cat-tarot-card.has-deck-bg.active .cat-tarot-deck-bg {
+  filter: saturate(1.15);
+}
+[data-theme="light"] .setup-cat-tarot-card.has-deck-bg::after {
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.05) 30%,
+    rgba(0, 0, 0, 0.05) 65%,
+    rgba(0, 0, 0, 0.7) 100%);
+}
 @keyframes catCardEnter {
   from { opacity: 0; transform: translateY(14px) scale(0.92); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -1250,18 +1299,23 @@
 .cat-tarot-corner-bl { bottom: 6px; left: 7px; }
 .cat-tarot-corner-br { bottom: 6px; right: 7px; }
 .cat-tarot-icon {
+  position: relative;
   font-size: 38px;
   line-height: 1;
-  filter: drop-shadow(0 4px 10px rgba(218, 165, 32, 0.5));
-  z-index: 1;
+  filter: drop-shadow(0 4px 10px rgba(218, 165, 32, 0.5)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+  z-index: 3;
 }
 .cat-tarot-label {
+  position: relative;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.3px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  z-index: 1;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.9);
+  z-index: 3;
 }
+/* 모서리 별 / shine 도 카드 배경 위로 */
+.cat-tarot-corner { z-index: 3; }
+.cat-tarot-shine { z-index: 3; }
 /* 호버/활성 시 빛 흐름 */
 .cat-tarot-shine {
   position: absolute;
@@ -1451,7 +1505,134 @@
   color: #ec4899;
 }
 
-/* ── 요약 박스 (Step C) ── */
+/* ── 준비 완료 (Step C) — 분야 + 카드 수 시각화 ── */
+.setup-confirm-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* 선택한 분야 / 카드 수 — Step B 카드와 같은 보라/다크 그라데이션 + column 레이아웃 */
+.setup-confirm-card {
+  cursor: default !important;
+  animation: none !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  padding: 12px 14px !important;
+}
+.setup-confirm-tag-inline {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(245, 222, 179, 0.7);
+  text-transform: none;
+}
+[data-theme="light"] .setup-confirm-tag-inline { color: rgba(124, 58, 237, 0.7); }
+.setup-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.setup-confirm-cat-icon {
+  flex-shrink: 0;
+  font-size: 32px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(218, 165, 32, 0.4));
+}
+.setup-confirm-cat-label {
+  font-size: 17px;
+  font-weight: 800;
+  color: #F5DEB3;
+  letter-spacing: 0.2px;
+}
+[data-theme="light"] .setup-confirm-cat-label { color: #6c3483; }
+
+/* ── 직접 질문 추가 / 카드 셔플 시작 / 펼치기 미니 — 모두 카드 배경과 동일 그라데이션 ── */
+.tarot-setup-screen .setup-question-toggle {
+  background: linear-gradient(135deg, rgba(67, 33, 100, 0.45), rgba(20, 10, 40, 0.65)) !important;
+  border-color: rgba(218, 165, 32, 0.35) !important;
+  border-style: solid !important;
+  color: #F5DEB3 !important;
+  backdrop-filter: blur(6px);
+}
+.tarot-setup-screen .setup-question-toggle:hover {
+  border-color: rgba(218, 165, 32, 0.6) !important;
+  box-shadow: 0 0 14px rgba(218, 165, 32, 0.18);
+}
+.tarot-setup-screen .setup-question-input {
+  background: linear-gradient(135deg, rgba(67, 33, 100, 0.45), rgba(20, 10, 40, 0.65)) !important;
+  border-color: rgba(218, 165, 32, 0.35) !important;
+}
+[data-theme="light"] .tarot-setup-screen .setup-question-toggle {
+  background: linear-gradient(135deg, #fff, #f5f0ff) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+  color: #6c3483 !important;
+}
+[data-theme="light"] .tarot-setup-screen .setup-question-input {
+  background: linear-gradient(135deg, #fff, #f5f0ff) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+}
+
+/* 카드 셔플 시작 버튼 */
+.tarot-setup-screen .tarot-start-btn {
+  background: linear-gradient(135deg, rgba(67, 33, 100, 0.6), rgba(20, 10, 40, 0.85)) !important;
+  border: 1.5px solid rgba(218, 165, 32, 0.55) !important;
+  color: #F5DEB3 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 24px rgba(218, 165, 32, 0.18) !important;
+}
+.tarot-setup-screen .tarot-start-btn:hover {
+  border-color: #DAA520 !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 32px rgba(218, 165, 32, 0.35) !important;
+}
+[data-theme="light"] .tarot-setup-screen .tarot-start-btn {
+  background: linear-gradient(135deg, #fff, #ede4ff) !important;
+  border-color: rgba(124, 58, 237, 0.55) !important;
+  color: #6c3483 !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2) !important;
+}
+
+/* 펼치기 미니 — 컨테이너 배경 카드화 */
+.tarot-setup-screen .setup-pickmode-mini {
+  background: linear-gradient(135deg, rgba(67, 33, 100, 0.45), rgba(20, 10, 40, 0.65));
+  border: 1px solid rgba(218, 165, 32, 0.25);
+  border-radius: 14px;
+  padding: 8px 12px;
+  margin-top: 12px;
+}
+[data-theme="light"] .tarot-setup-screen .setup-pickmode-mini {
+  background: linear-gradient(135deg, #fff, #f5f0ff);
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+/* 작은 라벨 칩 (왼쪽 위) */
+.setup-confirm-tag {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(245, 222, 179, 0.9);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2px 8px;
+  border-radius: 999px;
+  z-index: 4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(218, 165, 32, 0.45);
+}
+[data-theme="light"] .setup-confirm-tag {
+  background: rgba(255, 255, 255, 0.7);
+  color: #6c3483;
+  border-color: rgba(124, 58, 237, 0.4);
+  text-shadow: none;
+}
+
+/* ── (구) 요약 박스 — 사용 안하지만 호환 유지 ── */
 .setup-summary {
   width: 100%;
   display: flex;

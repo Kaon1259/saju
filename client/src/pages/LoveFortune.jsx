@@ -56,6 +56,7 @@ function LoveFortune() {
   const [relationStatus, setRelationStatus] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('');
+  const [calendarType, setCalendarType] = useState('SOLAR');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [aiStreaming, setAiStreaming] = useState(false);
@@ -109,6 +110,7 @@ function LoveFortune() {
       const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
       if (p.birthDate) setBirthDate(p.birthDate);
       if (p.gender) setGender(p.gender);
+      if (p.calendarType) setCalendarType(p.calendarType);
       if (p.relationshipStatus) setRelationStatus(p.relationshipStatus);
     } catch {}
   };
@@ -128,7 +130,7 @@ function LoveFortune() {
     try {
       // 1단계: 캐시 체크 + 사주 기본 (즉시)
       const data = await getLoveFortuneBasic(
-        'relationship', birthDate, null, gender || null, null,
+        'relationship', birthDate, null, gender || null, calendarType || 'SOLAR',
         null, null, null, null, relationStatus
       );
 
@@ -148,7 +150,7 @@ function LoveFortune() {
       const PROG_FIELDS = ['overall', 'timing', 'advice', 'caution'];
 
       cleanupRef.current = getLoveFortuneStream(
-        'relationship', birthDate, '', gender || '', '',
+        'relationship', birthDate, '', gender || '', calendarType || 'SOLAR',
         '', '', '', '', relationStatus,
         {
           onCached: (cachedData) => {
@@ -201,7 +203,7 @@ function LoveFortune() {
                 luckyColor: parsed.luckyColor || '',
               };
               // 캐시 저장
-              saveLoveFortuneCache({ ...finalResult, type: 'relationship', birthDate, gender }).catch(() => {});
+              saveLoveFortuneCache({ ...finalResult, type: 'relationship', birthDate, gender, calendarType: calendarType || 'SOLAR' }).catch(() => {});
               setStreamFields({}); setDoneFields(new Set());
               finishWithCompleteAnimation(finalResult);
             } catch {
@@ -331,10 +333,14 @@ function LoveFortune() {
             </div>
           </div>
 
-          {/* 생년월일 */}
+          {/* 달력 / 생년월일 */}
           <div className="lf-form-group">
-            <label className="lf-label">생년월일</label>
-            <BirthDatePicker value={birthDate} onChange={setBirthDate} />
+            <label className="lf-label">달력 / 생년월일</label>
+            <div className="lf-toggle" style={{ marginBottom: 8 }}>
+              <button type="button" className={`lf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
+              <button type="button" className={`lf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
+            </div>
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
           </div>
 
           {/* 성별 */}

@@ -118,6 +118,7 @@ function MonthlyFortune() {
     setStreamingActive(false);
 
     cleanupRef.current = getMonthlyFortuneStream(birthDate, m, birthTime, gender, {
+      calendarType: calendarType || 'SOLAR',
       extra: isExtraMonth(m),
       onCached: (data) => {
         setResult({ ...data, month: m });

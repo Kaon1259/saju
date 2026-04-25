@@ -292,6 +292,28 @@ function Tarot() {
   useEffect(() => {
     if (step === 'setup') setSetupStep('category');
   }, [step]);
+
+  // 카테고리 카드 배경용 — 현재 덱에서 카테고리별 랜덤 카드 인덱스 (덱/variant 바뀌면 재추첨)
+  // 카테고리 ID → "/tarot-{deckid}/m{NN}_v{X}.jpg" 매핑
+  const categoryBgImages = useMemo(() => {
+    const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
+    const base = bgPaths[deck];
+    if (!base) return {};
+    const dl = DECK_LIST.find(d => d.id === deck);
+    const suffix = dl?.hasVariants ? `_v${deckVariant}` : '';
+    const allCats = [...TAROT_MAIN_CATS, ...TAROT_MORE_CATS];
+    const used = new Set();
+    const map = {};
+    allCats.forEach((cat) => {
+      // 78장 중 사용되지 않은 인덱스 추첨 (카테고리끼리 안 겹치게)
+      let idx;
+      let tries = 0;
+      do { idx = Math.floor(Math.random() * 78); tries++; } while (used.has(idx) && tries < 20);
+      used.add(idx);
+      map[cat.id] = `${base}/m${String(idx).padStart(2, '0')}${suffix}.jpg`;
+    });
+    return map;
+  }, [deck, deckVariant]);
   const [shuffledCards, setShuffledCards] = useState([]);
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [revealedCards, setRevealedCards] = useState([]);
@@ -1617,22 +1639,26 @@ function Tarot() {
                     </h2>
                     <p className="setup-substep-desc">카드에게 던질 질문의 분야를 골라주세요</p>
                     <div className="setup-cat-grid">
-                      {allCats.map((item, i) => (
-                        <button
-                          key={item.id}
-                          className={`setup-cat-tarot-card ${category === item.id ? 'active' : ''}`}
-                          style={{ '--card-i': i }}
-                          onClick={() => { setCategory(item.id); setSetupStep('spread'); }}
-                        >
-                          <span className="cat-tarot-corner cat-tarot-corner-tl">✦</span>
-                          <span className="cat-tarot-corner cat-tarot-corner-tr">✦</span>
-                          <span className="cat-tarot-corner cat-tarot-corner-bl">✦</span>
-                          <span className="cat-tarot-corner cat-tarot-corner-br">✦</span>
-                          <span className="cat-tarot-icon">{item.icon}</span>
-                          <span className="cat-tarot-label">{item.label}</span>
-                          <span className="cat-tarot-shine" />
-                        </button>
-                      ))}
+                      {allCats.map((item, i) => {
+                        const bgImg = categoryBgImages[item.id];
+                        return (
+                          <button
+                            key={item.id}
+                            className={`setup-cat-tarot-card ${category === item.id ? 'active' : ''} ${bgImg ? 'has-deck-bg' : ''}`}
+                            style={{ '--card-i': i, ...(bgImg ? { '--deck-bg': `url(${bgImg})` } : {}) }}
+                            onClick={() => { setCategory(item.id); setSetupStep('spread'); }}
+                          >
+                            {bgImg && <span className="cat-tarot-deck-bg" aria-hidden="true" />}
+                            <span className="cat-tarot-corner cat-tarot-corner-tl">✦</span>
+                            <span className="cat-tarot-corner cat-tarot-corner-tr">✦</span>
+                            <span className="cat-tarot-corner cat-tarot-corner-bl">✦</span>
+                            <span className="cat-tarot-corner cat-tarot-corner-br">✦</span>
+                            <span className="cat-tarot-icon">{item.icon}</span>
+                            <span className="cat-tarot-label">{item.label}</span>
+                            <span className="cat-tarot-shine" />
+                          </button>
+                        );
+                      })}
                     </div>
                     {!sheetExpanded && (
                       <button
@@ -1694,17 +1720,43 @@ function Tarot() {
               {setupStep === 'confirm' && (() => {
                 const c = [...TAROT_MAIN_CATS, ...TAROT_MORE_CATS].find(x => x.id === category);
                 const sp = SPREADS.find(x => x.id === spread);
+                const num = parseInt(spread, 10) || 1;
+                const spreadDesc = spread === '1' ? '한 장의 명확한 답'
+                                : spread === '3' ? '과거 · 현재 · 미래'
+                                : '깊이 있는 켈틱 크로스';
+                const catBgImg = categoryBgImages[category];
                 return (
                   <div className="setup-substep fade-in">
-                    <h2 className="setup-substep-title">준비 완료</h2>
-                    <div className="setup-summary">
-                      <div className="setup-summary-row">
-                        <span className="setup-summary-label">분야</span>
-                        <span className="setup-summary-val">{c?.icon} {c?.label}</span>
+                    <h2 className="setup-substep-title">
+                      <span className="setup-title-quote">「</span>
+                      준비 완료
+                      <span className="setup-title-quote">」</span>
+                    </h2>
+
+                    {/* 선택한 분야 + 카드 수 — Step B 카드와 동일한 보라/다크 그라데이션 배경 */}
+                    <div className="setup-confirm-grid">
+                      <div className="setup-spread-card setup-confirm-card" style={{ pointerEvents: 'none' }}>
+                        <span className="setup-confirm-tag-inline">선택한 분야</span>
+                        <div className="setup-confirm-row">
+                          <span className="setup-confirm-cat-icon">{c?.icon}</span>
+                          <span className="setup-confirm-cat-label">{c?.label}</span>
+                        </div>
                       </div>
-                      <div className="setup-summary-row">
-                        <span className="setup-summary-label">카드</span>
-                        <span className="setup-summary-val">{sp?.label} <span style={{ opacity: 0.5 }}>· 💗 {sp?.cost}</span></span>
+
+                      <div className="setup-spread-card setup-confirm-card" style={{ pointerEvents: 'none' }}>
+                        <span className="setup-confirm-tag-inline">카드 수</span>
+                        <div className="setup-confirm-row">
+                          <div className="setup-spread-visual">
+                            {Array.from({ length: num }).map((_, k) => (
+                              <span key={k} className="spread-mini-card" style={{ '--mc-i': k, '--mc-total': num }} />
+                            ))}
+                          </div>
+                          <div className="setup-spread-card-main" style={{ flex: 1 }}>
+                            <span className="setup-spread-card-num">{sp?.label}</span>
+                            <span className="setup-spread-card-desc">{spreadDesc}</span>
+                          </div>
+                          <span className="setup-spread-card-cost">💗 {sp?.cost}</span>
+                        </div>
                       </div>
                     </div>
 

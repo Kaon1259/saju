@@ -111,7 +111,7 @@ function SajuAnalysis() {
       getUserSaju(userId)
         .then((data) => {
           setResult(data);
-          getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+          getDailyFortunes(userBd, userCalendar || 'SOLAR').then(setDailyFortunes).catch(() => {});
         })
         .catch((err) => {
           console.error('Failed to load user saju:', err);
@@ -139,7 +139,7 @@ function SajuAnalysis() {
         setResult(cached);
         setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-        getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+        getDailyFortunes(userBd, userCalendar || 'SOLAR').then(setDailyFortunes).catch(() => {});
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); bufferRef.current = ''; }
@@ -170,7 +170,7 @@ function SajuAnalysis() {
             pendingResultRef.current = r;
             setMatrixShown(false);
             setCompleting(true);
-            getDailyFortunes(userBd).then((d) => { pendingDailyRef.current = d; }).catch(() => {});
+            getDailyFortunes(userBd, userCalendar || 'SOLAR').then((d) => { pendingDailyRef.current = d; }).catch(() => {});
           } catch (e) { console.error('사주 결과 로드 실패:', e); }
           finally { setLoading(false); setStreamText(''); }
         })();
@@ -185,7 +185,7 @@ function SajuAnalysis() {
           try {
             const r = await analyzeSaju(userBd, userBt || undefined, userCalendar, userGender || undefined);
             setResult(r);
-            getDailyFortunes(userBd).then(setDailyFortunes).catch(() => {});
+            getDailyFortunes(userBd, userCalendar || 'SOLAR').then(setDailyFortunes).catch(() => {});
           } catch (e) { console.error(e); setShowInput(true); }
           finally { setLoading(false); setStreamText(''); }
         })();
@@ -221,7 +221,7 @@ function SajuAnalysis() {
         setResult(cached);
         setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-        getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
+        getDailyFortunes(birthDate, calendarType || 'SOLAR').then(setDailyFortunes).catch(() => {});
       },
       onChunk: (chunk) => {
         if (firstChunk) { firstChunk = false; setLoading(false); setStreaming(true); bufferRef.current = ''; }
@@ -252,7 +252,7 @@ function SajuAnalysis() {
             pendingResultRef.current = r;
             setMatrixShown(false);
             setCompleting(true);
-            getDailyFortunes(birthDate).then((d) => { pendingDailyRef.current = d; }).catch(() => {});
+            getDailyFortunes(birthDate, calendarType || 'SOLAR').then((d) => { pendingDailyRef.current = d; }).catch(() => {});
           } catch (e) { console.error('사주 결과 로드 실패:', e); }
           finally { setLoading(false); setStreamText(''); }
         })();
@@ -267,7 +267,7 @@ function SajuAnalysis() {
           try {
             const r = await analyzeSaju(birthDate, birthTime || undefined, calendarType, gender || undefined);
             setResult(r);
-            getDailyFortunes(birthDate).then(setDailyFortunes).catch(() => {});
+            getDailyFortunes(birthDate, calendarType || 'SOLAR').then(setDailyFortunes).catch(() => {});
           } catch (e) { console.error(e); setShowInput(true); }
           finally { setLoading(false); setStreamText(''); }
         })();

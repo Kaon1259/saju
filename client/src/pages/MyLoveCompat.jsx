@@ -54,9 +54,11 @@ function MyLoveCompat() {
   const [bd1, setBd1] = useState('');
   const [g1, setG1] = useState('M');
   const [bt1, setBt1] = useState('');
+  const [ct1, setCt1] = useState('SOLAR');
   const [bd2, setBd2] = useState('');
   const [g2, setG2] = useState('F');
   const [bt2, setBt2] = useState('');
+  const [ct2, setCt2] = useState('SOLAR');
   const [showTime, setShowTime] = useState(false);
 
   // 공통 상태
@@ -248,8 +250,10 @@ function MyLoveCompat() {
     if (p.birthDate) setBd1(p.birthDate);
     if (p.birthTime) setBt1(p.birthTime);
     if (p.gender) setG1(p.gender);
+    if (p.calendarType) setCt1(p.calendarType);
     if (p.partnerBirthDate) setBd2(p.partnerBirthDate);
     if (p.partnerBirthTime) setBt2(p.partnerBirthTime);
+    if (p.partnerCalendarType) setCt2(p.partnerCalendarType);
     const partnerG = p.gender === 'M' ? 'F' : p.gender === 'F' ? 'M' : 'F';
     setG2(partnerG);
   };
@@ -288,6 +292,7 @@ function MyLoveCompat() {
     setDeepCompleting(false);
     setCompleting(false);
     setBd1(''); setBd2(''); setBt1(''); setBt2('');
+    setCt1('SOLAR'); setCt2('SOLAR');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -444,7 +449,7 @@ function MyLoveCompat() {
 
     try {
       const data = await getSajuCompatibilityBasic(
-        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        bd1, bd2, bt1 || undefined, bt2 || undefined, ct1, ct2, g1, g2,
         { historyType: 'my_love_compat' }
       );
       data._g1 = g1;
@@ -480,7 +485,7 @@ function MyLoveCompat() {
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
       cleanupRef.current = getCompatibilityStream(
-        bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
+        bd1, bd2, bt1 || '', bt2 || '', ct1, ct2, g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
           historyType: 'my_love_compat',
@@ -572,7 +577,7 @@ function MyLoveCompat() {
 
     try {
       const data = await getSajuCompatibilityBasic(
-        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        bd1, bd2, bt1 || undefined, bt2 || undefined, ct1, ct2, g1, g2,
         { historyType: 'marriage_compat', mode: 'marriage' }
       );
       data._g1 = g1;
@@ -625,7 +630,7 @@ function MyLoveCompat() {
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
       cleanupRef.current = getCompatibilityStream(
-        bd1, bd2, bt1 || '', bt2 || '', 'SOLAR', 'SOLAR', g1, g2,
+        bd1, bd2, bt1 || '', bt2 || '', ct1, ct2, g1, g2,
         data.score, data.elementRelation || '', data.branchRelation || '',
         {
           historyType: 'marriage_compat',
@@ -713,7 +718,7 @@ function MyLoveCompat() {
 
     try {
       const base = await getSajuCompatibilityBasic(
-        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        bd1, bd2, bt1 || undefined, bt2 || undefined, ct1, ct2, g1, g2,
         { historyType: 'skinship_compat' }
       );
       base._g1 = g1;
@@ -741,7 +746,7 @@ function MyLoveCompat() {
       setTimeout(() => setMatrixShown(false), 600);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
-      cleanupRef.current = getLoveFortuneStream('skinship', bd1, bt1 || '', g1, 'SOLAR', bd2, g2, '', '', '', {
+      cleanupRef.current = getLoveFortuneStream('skinship', bd1, bt1 || '', g1, ct1, bd2, g2, '', '', '', {
         onCached: (cached) => {
           setAiStreaming(false); setStreamText('');
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -841,7 +846,7 @@ function MyLoveCompat() {
 
     try {
       const base = await getSajuCompatibilityBasic(
-        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        bd1, bd2, bt1 || undefined, bt2 || undefined, ct1, ct2, g1, g2,
         { historyType: 'date_compat' }
       );
       base._g1 = g1;
@@ -867,7 +872,7 @@ function MyLoveCompat() {
       setTimeout(() => setMatrixShown(false), 600);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
-      cleanupRef.current = getLoveFortuneStream('couple_fortune', bd1, bt1 || '', g1, 'SOLAR', bd2, g2, '', '', '', {
+      cleanupRef.current = getLoveFortuneStream('couple_fortune', bd1, bt1 || '', g1, ct1, bd2, g2, '', '', '', {
         onCached: (cached) => {
           setAiStreaming(false); setStreamText('');
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
@@ -1017,7 +1022,11 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <BirthDatePicker value={bd1} onChange={setBd1} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span>
@@ -1032,7 +1041,11 @@ function MyLoveCompat() {
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <BirthDatePicker value={bd2} onChange={setBd2} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span>
@@ -1056,7 +1069,11 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <BirthDatePicker value={bd1} onChange={setBd1} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
@@ -1069,7 +1086,11 @@ function MyLoveCompat() {
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <BirthDatePicker value={bd2} onChange={setBd2} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
@@ -1093,7 +1114,11 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <BirthDatePicker value={bd1} onChange={setBd1} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
@@ -1106,7 +1131,11 @@ function MyLoveCompat() {
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <BirthDatePicker value={bd2} onChange={setBd2} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
@@ -1130,7 +1159,11 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <BirthDatePicker value={bd1} onChange={setBd1} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
@@ -1143,7 +1176,11 @@ function MyLoveCompat() {
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <BirthDatePicker value={bd2} onChange={setBd2} />
+                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
+                </div>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
                 <div className="mlc-toggle">
                   <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
                     <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>

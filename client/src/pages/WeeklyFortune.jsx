@@ -104,6 +104,7 @@ function WeeklyFortune() {
     setStreamingActive(false);
 
     cleanupRef.current = getWeeklyFortuneStream(birthDate, birthTime, gender, {
+      calendarType: calendarType || 'SOLAR',
       onCached: (data) => {
         setResult(data);
         setLoading(false);

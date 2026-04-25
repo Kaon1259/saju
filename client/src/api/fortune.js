@@ -954,11 +954,12 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
   return response.data;
 };
 
-export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, extra } = {}) => {
+export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, extra, calendarType } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate, month });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
+  if (calendarType) params.set('calendarType', calendarType);
   if (targetType) params.set('targetType', targetType);
   if (targetName) params.set('targetName', targetName);
   if (extra) params.set('extra', 'true');
@@ -989,11 +990,12 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
   return response.data;
 };
 
-export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, calendarType } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
+  if (calendarType) params.set('calendarType', calendarType);
   if (targetType) params.set('targetType', targetType);
   if (targetName) params.set('targetName', targetName);
   appendUserId(params);
