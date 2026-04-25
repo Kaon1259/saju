@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getYearFortuneStream, getYearFortune, isGuest } from '../api/fortune';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
@@ -11,6 +11,7 @@ import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './YearFortune.css';
 
 const BIRTH_TIMES = [
@@ -30,7 +31,11 @@ function getGradeLabel(s) { return s >= 90 ? '대길' : s >= 75 ? '길' : s >= 5
 
 function YearFortune() {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState('mine');
+  const location = useLocation();
+  const [viewMode, setViewMode] = useState(() => {
+    const preset = location.state?.presetMode;
+    return (preset === 'partner' || preset === 'other') ? preset : 'mine';
+  });
   const [copied, setCopied] = useState(false);
 
   // 내 운세
@@ -320,7 +325,8 @@ function YearFortune() {
         {Array.from({ length: 8 }).map((_, i) => <span key={`fw-${i}`} className="yf-firework" style={{ left: `${10 + Math.random() * 80}%`, top: `${10 + Math.random() * 40}%`, animationDelay: `${i * 0.7}s` }} />)}
       </div>
 
-      <div className="yf-hero">
+      <div className="yf-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#fbbf24" />
         <div className="yf-hero-glow" />
         <div className="yf-hero-icon">🎊</div>
         <h1 className="yf-title">2026 신년운세</h1>

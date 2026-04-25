@@ -984,6 +984,17 @@
   font-size: var(--ts-size);
   opacity: 0;
   animation: tarotStarRise var(--ts-dur) ease-out infinite;
+}
+/* soft 변형: setup 화면에서 차분하게 (밝기/속도 절반) */
+.tarot-setup-star--soft {
+  opacity: 0;
+  animation: tarotStarRiseSoft var(--ts-dur) ease-out infinite;
+}
+@keyframes tarotStarRiseSoft {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  20% { opacity: 0.35; }
+  80% { opacity: 0.25; }
+  100% { transform: translateY(-110vh) translateX(var(--ts-drift)); opacity: 0; }
   animation-delay: var(--ts-delay);
 }
 .tarot-setup-star:nth-child(4n+1) { color: #fbbf24; text-shadow: 0 0 8px rgba(251,191,36,0.5); }
@@ -1058,6 +1069,475 @@
   margin-bottom: 8px; letter-spacing: 0.5px;
 }
 [data-theme="light"] .setup-section-label { color: #7c3aed; }
+
+/* clean 변형 — ☽☾ 아이콘 없는 차분한 라벨 */
+.setup-section-label--clean {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(218,165,32,0.65);
+  letter-spacing: 0.3px;
+  text-transform: none;
+  margin-bottom: 6px;
+}
+[data-theme="light"] .setup-section-label--clean { color: rgba(124, 58, 237, 0.7); }
+
+/* ── 질문 아코디언 토글 ── */
+.setup-question-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(218,165,32,0.3);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.setup-question-toggle:hover {
+  background: rgba(218,165,32,0.08);
+  border-color: rgba(218,165,32,0.5);
+  color: #F5DEB3;
+}
+.setup-question-toggle-arrow {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-left: 8px;
+}
+[data-theme="light"] .setup-question-toggle {
+  background: rgba(255,255,255,0.5);
+  border-color: rgba(147,51,234,0.25);
+  color: #6c3483;
+}
+[data-theme="light"] .setup-question-toggle:hover {
+  background: rgba(147,51,234,0.08);
+}
+
+/* ── 진행 단계 점 (상단 우측) ── */
+.setup-step-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+.setup-step-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  transition: all 0.25s ease;
+}
+.setup-step-dot.active {
+  background: #DAA520;
+  width: 18px; border-radius: 3px;
+  box-shadow: 0 0 8px rgba(218, 165, 32, 0.5);
+}
+.setup-step-dot.done { background: rgba(218, 165, 32, 0.55); }
+[data-theme="light"] .setup-step-dot { background: rgba(0, 0, 0, 0.15); }
+[data-theme="light"] .setup-step-dot.active { background: #7c3aed; box-shadow: 0 0 8px rgba(124, 58, 237, 0.4); }
+[data-theme="light"] .setup-step-dot.done { background: rgba(124, 58, 237, 0.5); }
+
+/* ── 서브 스텝 공통 ── */
+.setup-substep {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0 auto;
+}
+.setup-substep-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #F5DEB3;
+  text-align: center;
+  margin: 12px 0 4px;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.setup-substep-desc {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin: 0 0 18px;
+}
+[data-theme="light"] .setup-substep-title { color: #6c3483; text-shadow: none; }
+[data-theme="light"] .setup-substep-desc { color: rgba(0, 0, 0, 0.55); }
+
+/* ── 타이틀 따옴표 액센트 ── */
+.setup-title-quote {
+  color: rgba(218, 165, 32, 0.55);
+  font-weight: 400;
+  margin: 0 4px;
+  font-size: 0.85em;
+}
+.setup-desc-cat {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(218, 165, 32, 0.12);
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  color: #F5DEB3;
+  font-weight: 700;
+  font-size: 13px;
+}
+[data-theme="light"] .setup-desc-cat {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #6c3483;
+}
+
+/* ── 카테고리 카드 그리드 (Step A) — 타로 카드 모양 ── */
+.setup-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+.setup-cat-tarot-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  aspect-ratio: 5 / 7;            /* 타로 카드 비율 */
+  padding: 16px 10px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(218, 165, 32, 0.45);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(218, 165, 32, 0.18), transparent 60%),
+    linear-gradient(160deg, rgba(67, 33, 100, 0.6), rgba(20, 10, 40, 0.85));
+  color: #F5DEB3;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 0 30px rgba(218, 165, 32, 0.05);
+  animation: catCardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  animation-delay: calc(var(--card-i, 0) * 60ms);
+}
+@keyframes catCardEnter {
+  from { opacity: 0; transform: translateY(14px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.setup-cat-tarot-card:hover {
+  transform: translateY(-6px) rotate(-1deg);
+  border-color: rgba(218, 165, 32, 0.85);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 32px rgba(218, 165, 32, 0.35), inset 0 0 36px rgba(218, 165, 32, 0.12);
+}
+.setup-cat-tarot-card:active { transform: scale(0.97); }
+.setup-cat-tarot-card.active {
+  border-color: #DAA520;
+  box-shadow: 0 0 0 2.5px rgba(218, 165, 32, 0.5), 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 40px rgba(218, 165, 32, 0.45);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(218, 165, 32, 0.32), transparent 60%),
+    linear-gradient(160deg, rgba(90, 50, 130, 0.7), rgba(30, 15, 55, 0.9));
+}
+/* 모서리 별 장식 */
+.cat-tarot-corner {
+  position: absolute;
+  font-size: 10px;
+  color: rgba(218, 165, 32, 0.6);
+  pointer-events: none;
+}
+.cat-tarot-corner-tl { top: 6px; left: 7px; }
+.cat-tarot-corner-tr { top: 6px; right: 7px; }
+.cat-tarot-corner-bl { bottom: 6px; left: 7px; }
+.cat-tarot-corner-br { bottom: 6px; right: 7px; }
+.cat-tarot-icon {
+  font-size: 38px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(218, 165, 32, 0.5));
+  z-index: 1;
+}
+.cat-tarot-label {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+/* 호버/활성 시 빛 흐름 */
+.cat-tarot-shine {
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 70%);
+  pointer-events: none;
+  transition: left 0.7s ease;
+}
+.setup-cat-tarot-card:hover .cat-tarot-shine,
+.setup-cat-tarot-card.active .cat-tarot-shine {
+  left: 100%;
+}
+[data-theme="light"] .setup-cat-tarot-card {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(124, 58, 237, 0.14), transparent 60%),
+    linear-gradient(160deg, #fff, #f5f0ff);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #2d1b69;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.12);
+}
+[data-theme="light"] .setup-cat-tarot-card:hover {
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.25), 0 0 28px rgba(124, 58, 237, 0.18);
+}
+[data-theme="light"] .setup-cat-tarot-card.active {
+  border-color: #7c3aed;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(124, 58, 237, 0.2), transparent 60%),
+    linear-gradient(160deg, #fff, #ede4ff);
+}
+[data-theme="light"] .cat-tarot-corner { color: rgba(124, 58, 237, 0.5); }
+[data-theme="light"] .cat-tarot-icon { filter: drop-shadow(0 3px 8px rgba(124, 58, 237, 0.3)); }
+[data-theme="light"] .cat-tarot-label { text-shadow: none; color: #6c3483; }
+
+.setup-more-link {
+  margin: 16px auto 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px dashed rgba(218, 165, 32, 0.35);
+  background: transparent;
+  color: rgba(218, 165, 32, 0.7);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.setup-more-link:hover {
+  background: rgba(218, 165, 32, 0.08);
+  border-color: rgba(218, 165, 32, 0.55);
+  color: #F5DEB3;
+}
+[data-theme="light"] .setup-more-link { border-color: rgba(124, 58, 237, 0.35); color: rgba(124, 58, 237, 0.8); }
+[data-theme="light"] .setup-more-link:hover { background: rgba(124, 58, 237, 0.08); }
+
+/* ── 카드 수 큰 카드 스택 (Step B) ── */
+.setup-spread-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.setup-spread-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(218, 165, 32, 0.25);
+  background:
+    linear-gradient(135deg, rgba(67, 33, 100, 0.45), rgba(20, 10, 40, 0.65));
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  text-align: left;
+  backdrop-filter: blur(8px);
+  animation: spreadCardEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  animation-delay: calc(var(--spread-i, 0) * 90ms);
+}
+@keyframes spreadCardEnter {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.setup-spread-card:hover {
+  border-color: rgba(218, 165, 32, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 24px rgba(218, 165, 32, 0.18);
+}
+.setup-spread-card:active { transform: scale(0.98); }
+.setup-spread-card.active {
+  border-color: #DAA520;
+  box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.45), 0 8px 22px rgba(218, 165, 32, 0.25);
+}
+
+/* 스프레드 미니 카드 시각화 */
+.setup-spread-visual {
+  position: relative;
+  flex-shrink: 0;
+  width: 60px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spread-mini-card {
+  position: absolute;
+  width: 18px;
+  height: 28px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #DAA520, #8B4513);
+  border: 0.5px solid rgba(245, 222, 179, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 0 4px rgba(245, 222, 179, 0.2);
+  /* mc-i: 0..total-1 / mc-total: 카드 수 */
+  /* 부채꼴 효과: 중앙 기준 회전 + x 오프셋 */
+  --mc-mid: calc((var(--mc-total) - 1) / 2);
+  --mc-offset: calc(var(--mc-i) - var(--mc-mid));
+  transform:
+    translateX(calc(var(--mc-offset) * 8px))
+    rotate(calc(var(--mc-offset) * 8deg));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.setup-spread-card:hover .spread-mini-card {
+  transform:
+    translateX(calc(var(--mc-offset) * 11px))
+    rotate(calc(var(--mc-offset) * 12deg));
+}
+.setup-spread-card.active .spread-mini-card {
+  background: linear-gradient(135deg, #F5DEB3, #DAA520);
+  box-shadow: 0 2px 8px rgba(218, 165, 32, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.setup-spread-card-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.setup-spread-card-num {
+  font-size: 18px;
+  font-weight: 900;
+  color: #F5DEB3;
+  letter-spacing: 0.2px;
+}
+.setup-spread-card-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 500;
+}
+.setup-spread-card-cost {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(244, 114, 182, 0.15);
+  border: 1px solid rgba(244, 114, 182, 0.35);
+  font-size: 12px;
+  font-weight: 800;
+  color: #F472B6;
+  white-space: nowrap;
+}
+[data-theme="light"] .setup-spread-card {
+  background: linear-gradient(135deg, #fff, #f5f0ff);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #2d1b69;
+}
+[data-theme="light"] .setup-spread-card.active {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35);
+}
+[data-theme="light"] .setup-spread-card-num { color: #6c3483; }
+[data-theme="light"] .setup-spread-card-desc { color: rgba(0, 0, 0, 0.55); }
+[data-theme="light"] .spread-mini-card {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+[data-theme="light"] .setup-spread-card.active .spread-mini-card {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+}
+[data-theme="light"] .setup-spread-card-cost {
+  background: rgba(244, 114, 182, 0.08);
+  border-color: rgba(244, 114, 182, 0.3);
+  color: #ec4899;
+}
+
+/* ── 요약 박스 (Step C) ── */
+.setup-summary {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(218, 165, 32, 0.2);
+  margin-bottom: 16px;
+  backdrop-filter: blur(8px);
+}
+.setup-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.setup-summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+.setup-summary-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F5DEB3;
+}
+[data-theme="light"] .setup-summary {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(124, 58, 237, 0.2);
+}
+[data-theme="light"] .setup-summary-label { color: rgba(0, 0, 0, 0.55); }
+[data-theme="light"] .setup-summary-val { color: #6c3483; }
+
+/* ── 펼치기 방식 미니 토글 (시작 버튼 아래 작게) ── */
+.setup-pickmode-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.setup-pickmode-mini-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  margin-right: 4px;
+}
+[data-theme="light"] .setup-pickmode-mini-label { color: rgba(0,0,0,0.45); }
+.setup-pickmode-mini-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.85);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  padding: 0;
+  line-height: 1;
+}
+.setup-pickmode-mini-btn:hover {
+  background: rgba(218,165,32,0.12);
+  border-color: rgba(218,165,32,0.35);
+}
+.setup-pickmode-mini-btn.active {
+  background: rgba(218,165,32,0.22);
+  border-color: rgba(218,165,32,0.6);
+  box-shadow: 0 0 0 2px rgba(218,165,32,0.18);
+  transform: scale(1.06);
+}
+[data-theme="light"] .setup-pickmode-mini-btn {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(147,51,234,0.18);
+}
+[data-theme="light"] .setup-pickmode-mini-btn.active {
+  background: rgba(147,51,234,0.14);
+  border-color: rgba(147,51,234,0.4);
+  box-shadow: 0 0 0 2px rgba(147,51,234,0.15);
+}
 
 /* ── 칩 (질문 분야) ── */
 .setup-chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; }

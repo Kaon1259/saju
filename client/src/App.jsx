@@ -17,6 +17,7 @@ import CelebCompatibility from './pages/CelebCompatibility';
 import GroupFortune from './pages/GroupFortune';
 import Manseryeok from './pages/Manseryeok';
 import Tarot from './pages/Tarot';
+import TarotLanding from './pages/TarotLanding';
 import SpecialFortune from './pages/SpecialFortune';
 import ProfileEdit from './pages/ProfileEdit';
 import Dream from './pages/Dream';
@@ -319,6 +320,7 @@ function App() {
               <Route path="/celeb-match" element={<CelebMatch />} />
               <Route path="/manseryeok" element={<Manseryeok />} />
               <Route path="/tarot" element={<Tarot />} />
+              <Route path="/tarot/welcome" element={<TarotLanding />} />
               <Route path="/special" element={<SpecialFortune />} />
               <Route path="/profile/edit" element={<ProfileEdit />} />
               <Route path="/dream" element={<Dream />} />

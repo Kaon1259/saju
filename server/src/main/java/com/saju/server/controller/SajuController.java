@@ -69,12 +69,17 @@ public class SajuController {
             @RequestParam(value = "context", required = false) String context,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
             @RequestParam(value = "targetName", required = false) String targetName,
-            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly,
+            @RequestParam(value = "date", required = false) String dateStr) {
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
             birthDate = lunarCalendarService.lunarToSolar(birthDate);
         }
+        // 분석 대상 날짜 (없으면 오늘)
+        final LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
+                ? LocalDate.parse(dateStr) : LocalDate.now();
+        final boolean isToday = targetDate.equals(LocalDate.now());
 
         // 히스토리 저장 대상 여부 (연인/다른사람 운세 전용)
         final boolean savePartnerHistory = "partner".equals(targetType) && userId != null;
@@ -84,8 +89,8 @@ public class SajuController {
         final String partnerInputGender = gender;
         final String partnerInputCalendarType = calendarType;
 
-        // 1. DB 캐시 체크
-        SajuResult cached = sajuService.getCachedResult(birthDate, birthTime, gender);
+        // 1. DB 캐시 체크 — 오늘만 (내일/지정일은 별도 캐시 없이 매번 AI 호출)
+        SajuResult cached = isToday ? sajuService.getCachedResult(birthDate, birthTime, gender) : null;
         if (cached != null && cached.getTodayFortune() != null
                 && cached.getTodayFortune().getOverall() != null
                 && !cached.getTodayFortune().getOverall().isBlank()) {
@@ -149,9 +154,9 @@ public class SajuController {
             }
         }
 
-        // 3. 통합 AI 프롬프트 (성격분석 + 오늘의 운세 한 번에)
-        String sajuSummary = sajuService.getSajuSummary(basicResult, birthDate, birthTime, LocalDate.now());
-        String todayContext = promptBuilder.buildTodayContext(LocalDate.now());
+        // 3. 통합 AI 프롬프트 (성격분석 + 분석 대상 날짜의 운세)
+        String sajuSummary = sajuService.getSajuSummary(basicResult, birthDate, birthTime, targetDate);
+        String todayContext = promptBuilder.buildTodayContext(targetDate);
 
         String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n" +
             FortunePromptBuilder.TARGET_AWARE_RULES + "\n" + """
@@ -181,6 +186,7 @@ public class SajuController {
             "\"money\":\"재물운 (3-4문장)\"," +
             "\"health\":\"건강운 (3-4문장)\"," +
             "\"work\":\"" + workLabel + "\"," +
+            "\"academic\":\"학업·자기계발운 (집중력·성취·새로운 도전 조언, 3-4문장)\"," +
             "\"score\":점수(45-98)," +
             "\"luckyNumber\":행운숫자(1-99)," +
             "\"luckyColor\":\"행운색상\"}";
@@ -188,9 +194,13 @@ public class SajuController {
         final LocalDate finalBd = birthDate;
         final Long uid = userId;
         // 비용 절감 — 일일 사주 운세(연인/다른사람/스타/사주분석 공용)도 Haiku 4.5로
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
+        // academic 필드 추가로 토큰 살짝 늘려 잘림 방지 (2500 → 3000)
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 3000,
                 com.saju.server.service.ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
+            // 오늘의 운세만 DB 캐시에 저장 (내일/지정일은 휘발성 — 오늘의 결과 덮어쓰기 방지)
+            if (isToday) {
+                sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
+            }
             if (uid != null) heartPointService.deductPoints(uid, "SAJU_ANALYSIS", "사주분석");
 
             // 연인/다른사람 운세 히스토리 저장 (AI 완료 경로)

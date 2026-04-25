@@ -1,0 +1,60 @@
+/* ─── 대기 중 회전 메시지 ─── */
+.wait-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.wait-messages-text {
+  display: inline-block;
+  background: linear-gradient(135deg, #DAA520 0%, #F5DEB3 50%, #E879F9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.2px;
+  animation: waitMsgFade 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes waitMsgFade {
+  0%   { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+  35%  { opacity: 0.5; }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* large — 분석 매트릭스용 (중앙 큰 글씨) */
+.wait-messages--large {
+  margin-top: 10px;
+  padding: 0 16px;
+}
+.wait-messages--large .wait-messages-text {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* inline — 스트리밍 카드 헤더 옆 작은 칩 */
+.wait-messages--inline {
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(218, 165, 32, 0.2);
+  backdrop-filter: blur(8px);
+}
+.wait-messages--inline .wait-messages-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+[data-theme="light"] .wait-messages-text {
+  background: linear-gradient(135deg, #d97706 0%, #ec4899 50%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+[data-theme="light"] .wait-messages--inline {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(124, 58, 237, 0.18);
+}

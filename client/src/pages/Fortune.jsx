@@ -6,6 +6,7 @@ import { getFortuneByZodiacStream, getFortuneByUserStream } from '../api/fortune
 import DeepAnalysis from '../components/DeepAnalysis';
 import StreamText from '../components/StreamText';
 import HeartCost from '../components/HeartCost';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './MyFortune.css';
 import './Fortune.css';
 
@@ -221,10 +222,8 @@ function Fortune() {
   if (!fortune && !cacheChecking) {
     return (
       <div className="fortune-page">
-        <button className="fortune-back" onClick={() => navigate(-1)}>
-          <span>&#x2190;</span> 뒤로
-        </button>
-        <div className="glass-card" style={{ padding: '28px 20px', textAlign: 'center', marginTop: 16 }}>
+        <div className="glass-card" style={{ padding: '28px 20px', textAlign: 'center', marginTop: 16, position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+          <HeroIconButtons color="#7c3aed" />
           <div style={{ fontSize: 36, marginBottom: 10 }}>🔮</div>
           <h2 style={{ marginBottom: 12 }}>오늘의 {zodiacParam ? `${zodiacParam}띠 ` : ''}운세</h2>
           <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
@@ -246,13 +245,9 @@ function Fortune() {
 
   return (
     <div className="fortune-page">
-      {/* Back Button */}
-      <button className="fortune-back" onClick={() => navigate(-1)}>
-        <span>&#x2190;</span> 뒤로
-      </button>
-
-      {/* Score Section */}
-      <section className="fortune-score animate-scale-in">
+      {/* Score Section — 좌상단에 뒤로가기 통합 */}
+      <section className="fortune-score animate-scale-in" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#7c3aed" />
         <div className="fortune-score__circle">
           <svg viewBox="0 0 120 120" className="fortune-score__svg">
             <circle

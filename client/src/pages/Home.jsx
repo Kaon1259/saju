@@ -235,28 +235,43 @@ const REL_CARDS = {
       { icon: '📞', label: '연락타이밍', path: '/love/contact_fortune' },
     ],
   },
+  star: {
+    id: 'star',
+    path: '/star-fortune',
+    title: '스타 운세',
+    sub: '최애 스타와 사주로 통하는 운명',
+    icon: '⭐',
+    accentFrom: '#f59e0b',
+    accentTo: '#fbbf24',
+    shortcuts: [
+      { icon: '🌟', label: '나의 스타', path: '/my-star' },
+      { icon: '💫', label: '스타 궁합', path: '/celeb-compatibility' },
+      { icon: '✨', label: '스타 운세', path: '/celeb-fortune' },
+      { icon: '🎤', label: '그룹 운세', path: '/celeb-fortune' },
+    ],
+  },
 };
 
-// 사용자의 relationshipStatus → 카드 정렬 우선순위
+// 사용자의 relationshipStatus → 카드 정렬 우선순위 (star 는 항상 맨 뒤)
 function getOrderedRelCards(profile) {
   const status = profile?.relationshipStatus;
   let order;
   switch (status) {
     case 'IN_RELATIONSHIP':
     case 'MARRIED':
-      order = ['lover', 'some', 'solo', 'again'];
+      order = ['lover', 'some', 'solo', 'again', 'star'];
       break;
     case 'SOME':
-      order = ['some', 'solo', 'lover', 'again'];
+      order = ['some', 'solo', 'lover', 'again', 'star'];
       break;
     case 'SINGLE':
-      order = ['solo', 'some', 'again', 'lover'];
+      order = ['solo', 'some', 'again', 'lover', 'star'];
       break;
     case 'COMPLICATED':
-      order = ['again', 'solo', 'some', 'lover'];
+      order = ['again', 'solo', 'some', 'lover', 'star'];
       break;
     default: // 비로그인 / 미설정
-      order = ['solo', 'some', 'lover', 'again'];
+      order = ['solo', 'some', 'lover', 'again', 'star'];
   }
   return order.map(k => REL_CARDS[k]);
 }
@@ -813,30 +828,7 @@ function Home() {
       <RelationshipCarousel navigate={navigate} myData={myData} />
 
 
-      {/* 5. 스타 운세 배너 */}
-      <section style={{ padding: '0 4px', marginBottom: 8 }}>
-        <button className="home-year-banner home-star-banner" onClick={() => navigate('/star-fortune')}>
-          <span className="home-year-banner-bg" />
-          <div className="star-banner-particles">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <span key={i} className="star-banner-particle" style={{
-                '--sp-x': `${5 + (i * 8.3) % 90}%`,
-                '--sp-delay': `${i * 0.4}s`,
-                '--sp-dur': `${2 + (i % 4) * 0.6}s`,
-                '--sp-size': `${8 + (i % 3) * 4}px`,
-              }}>✦</span>
-            ))}
-          </div>
-          <div className="home-year-banner-content">
-            <span className="home-year-banner-icon star-banner-icon-anim">⭐</span>
-            <div className="home-year-banner-text">
-              <span className="home-year-banner-title">스타 운세</span>
-              <span className="home-year-banner-desc">최애 스타와 사주로 통하는 운명을 확인하세요</span>
-            </div>
-            <span className="home-year-banner-arrow">›</span>
-          </div>
-        </button>
-      </section>
+      {/* 스타 운세 배너 제거 — 휠 카드(star)로 통합됨 */}
 
       {/* 5.4 오늘의 운세 배너 */}
       <section style={{ padding: '0 4px', marginBottom: 8 }}>

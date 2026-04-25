@@ -10,6 +10,7 @@ import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
+import HeroIconButtons from '../components/HeroIconButtons';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -240,13 +241,13 @@ function GroupFortune() {
   if (mode === 'list') {
     return (
       <div className="gf-page">
-        <button className="gf-nav-back" onClick={() => navigate('/')}>← 홈으로</button>
         <StarHero
           icon="🌟"
           title="보이그룹·걸그룹 궁합"
           desc="좋아하는 그룹과 사주 궁합을 확인해보세요"
           color="#9B59B6"
           particles={['🌟','💫','✨','💜','⭐']}
+          topButtons={<HeroIconButtons color="#9B59B6" onBack={() => navigate('/star-fortune')} />}
         />
 
         <input className="gf-search" type="text" placeholder="그룹 이름 검색..."

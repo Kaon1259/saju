@@ -214,7 +214,7 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
   return response.data;
 };
 
-export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, onNoCache, context, targetType, targetName, freeMode, cacheOnly } = {}) => {
+export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, onNoCache, context, targetType, targetName, freeMode, cacheOnly, date } = {}) => {
   if (!freeMode && !requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
@@ -224,6 +224,7 @@ export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { 
   if (targetType) params.set('targetType', targetType);
   if (targetName) params.set('targetName', targetName);
   if (cacheOnly) params.set('cacheOnly', 'true');
+  if (date) params.set('date', date);
   if (!freeMode) appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/saju/analyze/stream?${params.toString()}`;

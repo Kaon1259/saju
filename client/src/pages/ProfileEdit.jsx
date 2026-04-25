@@ -64,7 +64,7 @@ function ProfileEdit() {
     name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
     birthTime: '', bloodType: '', mbtiType: '',
     relationshipStatus: 'SINGLE',
-    partnerBirthDate: '', partnerBirthTime: '', partnerBloodType: '', partnerMbtiType: '',
+    partnerBirthDate: '', partnerBirthTime: '', partnerCalendarType: 'SOLAR', partnerBloodType: '', partnerMbtiType: '',
   });
 
   useEffect(() => {
@@ -83,6 +83,7 @@ function ProfileEdit() {
           relationshipStatus: user.relationshipStatus || 'SINGLE',
           partnerBirthDate: user.partnerBirthDate || '',
           partnerBirthTime: user.partnerBirthTime || '',
+          partnerCalendarType: user.partnerCalendarType || 'SOLAR',
           partnerBloodType: user.partnerBloodType || '',
           partnerMbtiType: user.partnerMbtiType || '',
         });
@@ -117,6 +118,7 @@ function ProfileEdit() {
         relationshipStatus: form.relationshipStatus,
         partnerBirthDate: isPartnerEnabled && form.partnerBirthDate ? form.partnerBirthDate : null,
         partnerBirthTime: isPartnerEnabled && form.partnerBirthTime ? form.partnerBirthTime : null,
+        partnerCalendarType: isPartnerEnabled && form.partnerBirthDate ? (form.partnerCalendarType || 'SOLAR') : null,
         partnerBloodType: isPartnerEnabled && form.partnerBloodType ? form.partnerBloodType : null,
         partnerMbtiType: isPartnerEnabled && form.partnerMbtiType ? form.partnerMbtiType : null,
       };
@@ -226,8 +228,18 @@ function ProfileEdit() {
           </label>
 
           <div className="form-group">
-            <label className="form-label" style={{ fontSize: '12px' }}>상대방 생년월일</label>
-            <BirthDatePicker value={form.partnerBirthDate} onChange={(v) => handleChange('partnerBirthDate', v)} />
+            <label className="form-label" style={{ fontSize: '12px' }}>상대방 달력 구분</label>
+            <div className="form-toggle">
+              <button type="button" className={`form-toggle__btn ${form.partnerCalendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`}
+                onClick={() => handleChange('partnerCalendarType', 'SOLAR')} disabled={!isPartnerEnabled}>☀️ 양력</button>
+              <button type="button" className={`form-toggle__btn ${form.partnerCalendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`}
+                onClick={() => handleChange('partnerCalendarType', 'LUNAR')} disabled={!isPartnerEnabled}>🌙 음력</button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '12px' }}>상대방 생년월일 ({form.partnerCalendarType === 'LUNAR' ? '음력' : '양력'})</label>
+            <BirthDatePicker value={form.partnerBirthDate} onChange={(v) => handleChange('partnerBirthDate', v)} calendarType={form.partnerCalendarType} />
           </div>
 
           {/* 상대방 띠 + 별자리 자동 표시 */}

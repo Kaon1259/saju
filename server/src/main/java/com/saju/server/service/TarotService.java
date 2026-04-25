@@ -636,6 +636,12 @@ public class TarotService {
         final String finalQuestion = question;
         final String finalDeck = deck;
         final Integer finalDeckVariant = deckVariant;
+
+        // ★ 하트 즉시 차감 — AI 호출 시작 직전 (캐시 히트 시엔 위에서 이미 return 했으므로 무료 유지)
+        if (onSuccess != null) {
+            try { onSuccess.run(); } catch (Exception e) { log.warn("Tarot heart deduction failed: {}", e.getMessage()); }
+        }
+
         // 타로는 해석이 서사/상징 의존도가 커서 Sonnet 4.6 으로 통일 (심화 별도 X).
         return claudeApiService.generateStreamWithDoneData(systemPrompt, userPrompt, 2500, (fullText) -> {
             // 스트리밍 완료 → 결과 구성 후 서버에서 직접 캐시 저장 + done 이벤트에 enriched JSON 반환
@@ -671,7 +677,7 @@ public class TarotService {
             } catch (Exception e) {
                 log.warn("Failed to save tarot stream cache: {}", e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            // 하트 차감은 AI 시작 직전에 이미 처리됨 (캐시 미스 시) — 여기선 호출 안 함
             return donePayload;
         });
     }

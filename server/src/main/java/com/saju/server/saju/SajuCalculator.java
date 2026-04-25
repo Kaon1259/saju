@@ -956,19 +956,94 @@ public class SajuCalculator {
         SajuPillar dayPillar = calculateDayPillar(targetDate);
         int sipsung = calculateSipsung(dayStemIndex, dayPillar.getStemIndex());
         int twelveStage = calculateTwelveStage(dayStemIndex, dayPillar.getBranchIndex());
+        String sipsungKr = SajuConstants.SIPSUNG[sipsung];
+        String twelveStageKr = SajuConstants.TWELVE_STAGES[twelveStage];
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("date", targetDate.toString());
         result.put("dayPillar", dayPillar.getFullHanja() + "(" + dayPillar.getFullName() + ")");
-        result.put("sipsung", SajuConstants.SIPSUNG[sipsung]);
-        result.put("twelveStage", SajuConstants.TWELVE_STAGES[twelveStage]);
+        result.put("sipsung", sipsungKr);
+        result.put("twelveStage", twelveStageKr);
         result.put("stemElement", SajuConstants.OHENG[SajuConstants.CHEONGAN_OHENG[dayPillar.getStemIndex()]]);
         result.put("branchElement", SajuConstants.OHENG[SajuConstants.JIJI_OHENG[dayPillar.getBranchIndex()]]);
 
-        // Rating
-        result.put("rating", determineMonthRating(SajuConstants.SIPSUNG[sipsung], SajuConstants.TWELVE_STAGES[twelveStage]));
-        result.put("summary", generateMonthSummary(SajuConstants.SIPSUNG[sipsung], SajuConstants.TWELVE_STAGES[twelveStage], targetDate.getDayOfMonth()));
+        // 정밀 점수 (50±35) — 십성+12운성 조합으로 미세 차이까지 반영
+        int score = computeDailyScore(sipsungKr, twelveStageKr, dayStemIndex, dayPillar.getStemIndex(), dayPillar.getBranchIndex());
+        result.put("score", score);
+        // 점수 → 등급 매핑 (UI 색상/뱃지용)
+        result.put("rating", scoreToRating(score));
+        result.put("summary", generateMonthSummary(sipsungKr, twelveStageKr, targetDate.getDayOfMonth()));
 
         return result;
+    }
+
+    /**
+     * 일운 점수 계산 — 정밀 (십성+12운성+오행 충극 미세 보정)
+     */
+    private static int computeDailyScore(String sipsung, String twelveStage,
+                                          int dayStemIdx, int targetStemIdx, int targetBranchIdx) {
+        int score = 50;
+        // 십성 기반 점수 (가중치 더 세분화)
+        switch (sipsung) {
+            case "정관": score += 22; break;
+            case "정인": score += 20; break;
+            case "정재": score += 18; break;
+            case "식신": score += 14; break;
+            case "편재": score += 12; break;
+            case "편인": score += 8; break;
+            case "비견": score += 2; break;
+            case "겁재": score -= 4; break;
+            case "상관": score -= 8; break;
+            case "편관": score -= 12; break;
+        }
+        // 12운성 기반 점수
+        switch (twelveStage) {
+            case "제왕": score += 22; break;
+            case "건록": score += 20; break;
+            case "관대": score += 16; break;
+            case "장생": score += 14; break;
+            case "목욕": score += 8; break;
+            case "양":   score += 4; break;
+            case "쇠":   score += 0; break;
+            case "태":   score -= 2; break;
+            case "병":   score -= 8; break;
+            case "절":   score -= 10; break;
+            case "사":   score -= 14; break;
+            case "묘":   score -= 16; break;
+        }
+        // 일간 vs 일지 충극 미세 보정 — 같은 오행끼리는 +1, 상극이면 -1
+        int dayStemElem = SajuConstants.CHEONGAN_OHENG[dayStemIdx];
+        int targetStemElem = SajuConstants.CHEONGAN_OHENG[targetStemIdx];
+        int targetBranchElem = SajuConstants.JIJI_OHENG[targetBranchIdx];
+        if (dayStemElem == targetStemElem) score += 1;
+        if (isProductive(dayStemElem, targetStemElem)) score += 2;
+        if (isProductive(targetStemElem, dayStemElem)) score += 1;
+        if (isOpposing(dayStemElem, targetStemElem))   score -= 2;
+        if (dayStemElem == targetBranchElem) score += 1;
+        if (isProductive(targetBranchElem, dayStemElem)) score += 1;
+        // 날짜 자체에서 오는 미세 변동 — 일진 강약 (지지 인덱스 기반 ±2)
+        score += (targetBranchIdx % 5) - 2;
+
+        // 클램프 15~98
+        if (score < 15) score = 15;
+        if (score > 98) score = 98;
+        return score;
+    }
+
+    private static boolean isProductive(int from, int to) {
+        // 오행 상생: 木(0)→火(1)→土(2)→金(3)→水(4)→木(0)
+        return ((from + 1) % 5) == to;
+    }
+    private static boolean isOpposing(int a, int b) {
+        // 오행 상극: 木→土, 土→水, 水→火, 火→金, 金→木 (간격 2)
+        return Math.abs(a - b) == 2 || Math.abs(a - b) == 3;
+    }
+
+    private static String scoreToRating(int score) {
+        if (score >= 80) return "대길";
+        if (score >= 65) return "길";
+        if (score >= 45) return "보통";
+        if (score >= 30) return "흉";
+        return "대흉";
     }
 }

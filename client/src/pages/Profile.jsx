@@ -161,7 +161,9 @@ function Profile() {
           <div className="pf-partner-info">
             <div className="pf-partner-row">
               <span className="pf-partner-label">생년월일</span>
-              <span className="pf-partner-value">{formatDate(user.partnerBirthDate)}</span>
+              <span className="pf-partner-value">
+                {user.partnerCalendarType === 'LUNAR' ? '🌙 음력' : '☀️ 양력'} {formatDate(user.partnerBirthDate)}
+              </span>
             </div>
             {(() => {
               const pYear = parseInt(user.partnerBirthDate.split('-')[0]);

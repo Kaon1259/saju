@@ -64,7 +64,7 @@ function MyStar() {
           desc="나만의 최애 스타를 등록하고 관리하세요"
           color="#FF9800"
           particles={['⭐','✨','💫','🌟','✦']}
-          topButtons={<HeroIconButtons color="#FF9800" />}
+          topButtons={<HeroIconButtons color="#FF9800" onBack={() => navigate('/star-fortune')} />}
         />
 
         <section className="mystar-login-card glass-card">

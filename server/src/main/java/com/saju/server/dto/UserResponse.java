@@ -27,6 +27,7 @@ public class UserResponse {
     private String relationshipStatus;
     private LocalDate partnerBirthDate;
     private String partnerBirthTime;
+    private String partnerCalendarType;
     private String partnerBloodType;
     private String partnerMbtiType;
     private Integer heartPoints;
@@ -48,6 +49,7 @@ public class UserResponse {
                 .relationshipStatus(user.getRelationshipStatus())
                 .partnerBirthDate(user.getPartnerBirthDate())
                 .partnerBirthTime(user.getPartnerBirthTime())
+                .partnerCalendarType(user.getPartnerCalendarType())
                 .partnerBloodType(user.getPartnerBloodType())
                 .partnerMbtiType(user.getPartnerMbtiType())
                 .heartPoints(user.getHeartPoints())

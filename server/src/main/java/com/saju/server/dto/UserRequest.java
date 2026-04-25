@@ -38,6 +38,7 @@ public class UserRequest {
     private String relationshipStatus; // IN_RELATIONSHIP, SOME, SINGLE
     private LocalDate partnerBirthDate;
     private String partnerBirthTime;
+    private String partnerCalendarType;
     private String partnerBloodType;
     private String partnerMbtiType;
 }

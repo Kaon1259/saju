@@ -13,6 +13,8 @@ import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeroIconButtons from '../components/HeroIconButtons';
+import WaitMessages from '../components/WaitMessages';
+import { WAIT_MESSAGES } from '../data/waitMessages';
 import './LoveTypeFortune.css';
 
 const LOVE_TYPES = {
@@ -485,6 +487,7 @@ function LoveTypeFortune() {
                 <span>AI가 {info.label}을 분석중이에요</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
+              <WaitMessages messages={WAIT_MESSAGES.love} interval={6000} variant="large" />
             </div>
             <div className="ltf-streaming-cards">
               <StreamingCard icon={info.icon} title={type === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'}

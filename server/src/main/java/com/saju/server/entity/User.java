@@ -57,6 +57,8 @@ public class User {
     // 상대방 정보
     private LocalDate partnerBirthDate;
     private String partnerBirthTime;
+    @Column(length = 8)
+    private String partnerCalendarType; // SOLAR or LUNAR
     @Column(length = 4)
     private String partnerBloodType;
     @Column(length = 4)

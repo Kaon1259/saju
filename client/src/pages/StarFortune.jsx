@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './StarFortune.css';
 
 const STAR_MENUS = [
@@ -28,7 +29,8 @@ function StarFortune() {
         ))}
       </div>
 
-      <div className="star-fortune-hero">
+      <div className="star-fortune-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#FF9800" onBack={() => navigate('/')} />
         <div className="star-fortune-hero-glow" />
         <span className="star-fortune-badge">✨ SPECIAL</span>
         <h1 className="star-fortune-title">나의 스타 운세</h1>

@@ -1,0 +1,309 @@
+/* ═══ 타로 전용 랜딩 페이지 (비로그인 시) ═══ */
+.tarot-landing {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at top, #1a0a3a 0%, #0a051f 60%, #050217 100%);
+  color: #f3e8ff;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 9000;
+  padding: 32px 24px 132px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 배경 ── */
+.tlanding-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.tlanding-bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+.tlanding-bg-orb-1 {
+  top: -10%; left: -10%;
+  width: 360px; height: 360px;
+  background: #7c3aed;
+  animation: tlanding-orb 14s ease-in-out infinite;
+}
+.tlanding-bg-orb-2 {
+  bottom: -15%; right: -15%;
+  width: 420px; height: 420px;
+  background: #db2777;
+  animation: tlanding-orb 16s ease-in-out infinite reverse;
+}
+@keyframes tlanding-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.08); }
+}
+
+.tlanding-star {
+  position: absolute;
+  left: var(--ts-x);
+  top: var(--ts-y);
+  font-size: var(--ts-size);
+  color: rgba(245, 222, 179, 0.7);
+  opacity: 0;
+  animation: tlanding-twinkle var(--ts-dur) ease-in-out infinite;
+  animation-delay: var(--ts-delay);
+  pointer-events: none;
+}
+@keyframes tlanding-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.6); }
+  50% { opacity: 0.9; transform: scale(1.2); }
+}
+
+/* ── Hero ── */
+.tlanding-hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-top: 24px;
+  margin-bottom: 28px;
+}
+.tlanding-hero-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 16px;
+}
+.tlanding-hero-aura {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(218, 165, 32, 0.5), transparent 70%);
+  animation: tlanding-aura 3.5s ease-in-out infinite;
+}
+@keyframes tlanding-aura {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+.tlanding-hero-emoji {
+  position: relative;
+  z-index: 1;
+  font-size: 64px;
+  filter: drop-shadow(0 4px 12px rgba(218, 165, 32, 0.6));
+  animation: tlanding-emoji-bob 4s ease-in-out infinite;
+}
+@keyframes tlanding-emoji-bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-6px) rotate(3deg); }
+}
+
+.tlanding-title {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.3;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  letter-spacing: -0.5px;
+}
+.tlanding-title-line { color: #f3e8ff; }
+.tlanding-title-accent {
+  background: linear-gradient(135deg, #DAA520 0%, #F5DEB3 50%, #DAA520 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tlanding-sub {
+  font-size: 14px;
+  color: rgba(243, 232, 255, 0.75);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── 덱 미리보기 띠 (가로 스크롤) ── */
+.tlanding-decks {
+  position: relative;
+  z-index: 1;
+  margin: 0 -24px 24px;
+  overflow: hidden;
+}
+.tlanding-decks-track {
+  display: flex;
+  gap: 12px;
+  padding: 8px 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.tlanding-decks-track::-webkit-scrollbar { display: none; }
+.tlanding-deck-thumb {
+  position: relative;
+  flex: 0 0 auto;
+  width: 84px;
+  scroll-snap-align: center;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  animation: tlanding-deck-float 4s ease-in-out infinite;
+  animation-delay: calc(var(--td-i) * 0.4s);
+}
+@keyframes tlanding-deck-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.tlanding-deck-thumb img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 261 / 500;
+  object-fit: cover;
+}
+.tlanding-deck-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  padding: 12px 4px 4px;
+  letter-spacing: 0.2px;
+}
+
+/* ── 하이라이트 슬라이드 ── */
+.tlanding-highlights {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 24px;
+}
+.tlanding-highlights-track {
+  position: relative;
+  height: 130px;
+  overflow: hidden;
+}
+.tlanding-highlight {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(218, 165, 32, 0.18);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+.tlanding-highlight.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.tlanding-highlight-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 2px 6px rgba(218, 165, 32, 0.4));
+}
+.tlanding-highlight-title {
+  font-size: 15px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  color: #F5DEB3;
+}
+.tlanding-highlight-desc {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+  color: rgba(243, 232, 255, 0.75);
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+.tlanding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.tlanding-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.25s;
+  padding: 0;
+}
+.tlanding-dot.active {
+  background: #DAA520;
+  width: 18px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(218, 165, 32, 0.5);
+}
+
+/* ── 하단 CTA ── */
+.tlanding-cta-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 16px 24px 24px;
+  background: linear-gradient(to top, #050217 70%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tlanding-cta-kakao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: #FEE500;
+  color: #181600;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow:
+    0 6px 20px rgba(254, 229, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.3px;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+.tlanding-cta-kakao:hover {
+  background: #FFEB3B;
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 26px rgba(254, 229, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.tlanding-cta-kakao:active { transform: scale(0.97); }
+.tlanding-cta-kakao-logo { flex-shrink: 0; }
+
+.tlanding-cta-skip {
+  background: transparent;
+  border: none;
+  color: rgba(243, 232, 255, 0.55);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px;
+  font-family: inherit;
+}
+.tlanding-cta-skip:hover { color: rgba(243, 232, 255, 0.85); }

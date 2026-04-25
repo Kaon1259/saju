@@ -195,7 +195,7 @@ function CelebMatch() {
     return (
       <div className="cm-page">
         <section className="cm-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
-          <HeroIconButtons color="#FF6B6B" />
+          <HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />
           <span className="cm-hero-icon">🔮</span>
           <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
           <p className="cm-hero-desc">사주로 찾는 운명의 스타</p>
@@ -221,7 +221,7 @@ function CelebMatch() {
     return (
       <div className="cm-page">
         <section className="cm-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
-          <HeroIconButtons color="#FF6B6B" />
+          <HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />
           <span className="cm-hero-icon">🔮</span>
           <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
           <p className="cm-hero-desc">사주로 찾는 운명의 스타</p>
@@ -244,7 +244,7 @@ function CelebMatch() {
         desc="사주 오행 + AI 분석으로 찾는 운명의 스타"
         color="#FF6B6B"
         particles={['🔮','✨','💫','⭐','💖']}
-        topButtons={<HeroIconButtons color="#FF6B6B" onBack={() => navigate('/')} />}
+        topButtons={<HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />}
       />
 
       {/* AI 분석 진행 표시 */}

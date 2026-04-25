@@ -44,6 +44,7 @@ public class UserService {
                 .relationshipStatus(request.getRelationshipStatus())
                 .partnerBirthDate(request.getPartnerBirthDate())
                 .partnerBirthTime(request.getPartnerBirthTime())
+                .partnerCalendarType(request.getPartnerCalendarType())
                 .partnerBloodType(request.getPartnerBloodType())
                 .partnerMbtiType(request.getPartnerMbtiType())
                 .build();
@@ -78,6 +79,7 @@ public class UserService {
         user.setRelationshipStatus(request.getRelationshipStatus());
         user.setPartnerBirthDate(request.getPartnerBirthDate());
         user.setPartnerBirthTime(request.getPartnerBirthTime());
+        user.setPartnerCalendarType(request.getPartnerCalendarType());
         user.setPartnerBloodType(request.getPartnerBloodType());
         user.setPartnerMbtiType(request.getPartnerMbtiType());
 

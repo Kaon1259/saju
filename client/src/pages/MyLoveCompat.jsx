@@ -21,6 +21,8 @@ import parseAiJson, { extractStreamingFields, extractStreamingFieldsPartial } fr
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import WaitMessages from '../components/WaitMessages';
+import { WAIT_MESSAGES } from '../data/waitMessages';
 import './MyLoveCompat.css';
 
 const TABS = [
@@ -1162,9 +1164,21 @@ function MyLoveCompat() {
         </div>
       )}
 
-      {/* 매트릭스 로딩 */}
+      {/* 매트릭스 로딩 + 대기 멘트 회전 */}
       {matrixShown && (
-        <AnalysisMatrix theme="love" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
+        <>
+          <AnalysisMatrix theme="love" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
+          <WaitMessages
+            messages={
+              deepStreaming ? WAIT_MESSAGES.deep
+              : tab === 'marriage' ? WAIT_MESSAGES.marriage
+              : tab === 'date' ? WAIT_MESSAGES.love
+              : WAIT_MESSAGES.saju
+            }
+            interval={6000}
+            variant="large"
+          />
+        </>
       )}
 
       {/* 분석 완료 애니메이션은 finishWithCompleteAnimation의 setTimeout으로 자동 진행 — 공용 컴포넌트로 분리 */}

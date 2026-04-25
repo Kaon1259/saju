@@ -10,6 +10,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
+import HeroIconButtons from '../components/HeroIconButtons';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -434,6 +435,7 @@ function CelebCompatibility() {
           desc="최애와 사주 궁합을 확인해보세요"
           color="#E91E63"
           particles={['💖','💫','✨','💘','🌟']}
+          topButtons={<HeroIconButtons color="#E91E63" onBack={() => navigate('/star-fortune')} />}
         />
 
         <div className="celeb-search-wrap">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory, getScoreTrend, getFortuneByZodiac, getConstellationFortune, getConstellationByDate } from '../api/fortune';
+import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory, getScoreTrend, getFortuneByZodiac, getConstellationFortune, getConstellationByDate, getDailyFortunes } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -291,8 +291,11 @@ function MyFortune() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state?.restoreHistoryId]);
-  const [dateMode, setDateMode] = useState('today'); // 'today' | 'tomorrow' | 'pick'
+  const [dateMode, setDateMode] = useState('today'); // 'today' | 'tomorrow' | 'pick' | 'monthly' | 'yearly'
   const [pickDate, setPickDate] = useState('');
+  // 월간 일운 (rule-based, 무료)
+  const [monthlyDaily, setMonthlyDaily] = useState(null);
+  const [monthlyLoading, setMonthlyLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempPickDate, setTempPickDate] = useState('');
 
@@ -616,6 +619,79 @@ function MyFortune() {
     return () => cleanupRef.current?.();
   }, [userId, dateMode, pickDate]);
 
+  // 날짜 모드 변경 시 연인/다른사람 결과 리셋 — 새 날짜 폼이 다시 보이도록
+  useEffect(() => {
+    setPartnerData(null);
+    setPartnerStreamText('');
+    setPartnerStreaming(false);
+    setPartnerLoading(false);
+    partnerCleanupRef.current?.();
+    setOtherData(null);
+    setOtherStreamText('');
+    setOtherStreaming(false);
+    setOtherLoading(false);
+    otherCleanupRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateMode, pickDate]);
+
+  // 월간 일운: 현재 viewMode 의 birthDate + calendarType 로 fetch (rule-based, 무료)
+  // 어떤 birthDate 로 fetch 했는지 추적하여 UI 에 표시
+  const [monthlyForBirthDate, setMonthlyForBirthDate] = useState(null);
+  const [monthlyForCalendar, setMonthlyForCalendar] = useState(null);
+  useEffect(() => {
+    if (dateMode !== 'monthly') {
+      // 모드 전환 시 이전 결과 정리
+      return;
+    }
+    // 연인 정보 (생년월일 + 달력 구분) — partnerOverride 우선, 없으면 localStorage
+    const partnerInfo = (() => {
+      if (partnerOverride?.birthDate) {
+        return {
+          birthDate: partnerOverride.birthDate,
+          calendarType: partnerOverride.calendarType || 'SOLAR',
+        };
+      }
+      try {
+        const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        if (!p.partnerBirthDate) return null;
+        return {
+          birthDate: p.partnerBirthDate,
+          calendarType: p.partnerCalendarType || 'SOLAR',
+        };
+      } catch { return null; }
+    })();
+
+    let bd, ct;
+    if (viewMode === 'mine') {
+      bd = data?.user?.birthDate;
+      ct = data?.user?.calendarType || 'SOLAR';
+    } else if (viewMode === 'partner') {
+      bd = partnerInfo?.birthDate;
+      ct = partnerInfo?.calendarType || 'SOLAR';
+    } else {
+      bd = otherBirthDate;
+      ct = otherCalendarType || 'SOLAR';
+    }
+
+    if (!bd) {
+      setMonthlyDaily(null);
+      setMonthlyForBirthDate(null);
+      setMonthlyForCalendar(null);
+      return;
+    }
+    // viewMode 가 바뀌면 즉시 이전 결과 제거 (새 데이터 도착 전 stale 표시 방지)
+    setMonthlyDaily(null);
+    setMonthlyForBirthDate(bd);
+    setMonthlyForCalendar(ct);
+    setMonthlyLoading(true);
+    let cancelled = false;
+    getDailyFortunes(bd, ct)
+      .then((list) => { if (!cancelled) setMonthlyDaily(list || []); })
+      .catch(() => { if (!cancelled) setMonthlyDaily([]); })
+      .finally(() => { if (!cancelled) setMonthlyLoading(false); });
+    return () => { cancelled = true; };
+  }, [dateMode, viewMode, data?.user?.birthDate, data?.user?.calendarType, partnerOverride, otherBirthDate, otherCalendarType]);
+
   if (!userId) {
     return (
       <div className="myf-page">
@@ -723,47 +799,210 @@ function MyFortune() {
         <button className={`myf-mode-tab ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>다른 사람</button>
       </div>
 
-      {/* 날짜 선택 (내 운세 탭) */}
-      {viewMode === 'mine' && (
-        <>
-          {dateMode === 'today' ? (
-            <div className="myf-date-actions">
-              <button className="myf-date-action-btn" onClick={() => { setDateMode('tomorrow'); setPickDate(''); }}>
-                🌙 내일의 운세
-              </button>
-              <button className="myf-date-action-btn myf-date-action-btn--pick" onClick={() => {
-                setTempPickDate('');
-                setShowDatePicker(true);
-              }}>
-                📅 날짜 지정 운세
-              </button>
-            </div>
-          ) : (
-            <div className="myf-date-actions">
-              <button className="myf-date-action-btn" onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}>
-                ☀️ 오늘의 운세로 돌아가기
-              </button>
-            </div>
-          )}
-          {showDatePicker && (
-            <div className="myf-date-picker-inline glass-card">
-              <h3 className="myf-date-picker-title">📅 날짜 선택</h3>
-              <BirthDatePicker value={tempPickDate} onChange={setTempPickDate} />
-              <div className="myf-date-picker-buttons">
-                <button className="myf-date-picker-cancel" onClick={() => setShowDatePicker(false)}>취소</button>
-                <button className="myf-date-picker-confirm" disabled={!tempPickDate} onClick={() => {
-                  setPickDate(tempPickDate);
-                  setDateMode('pick');
-                  setShowDatePicker(false);
-                }}>이 날짜로 보기</button>
-              </div>
-            </div>
-          )}
-        </>
+      {/* 날짜/모드 선택 — 5개 모드 가로 스크롤 (모든 탭 공용) */}
+      <div className="myf-mode-scroll" role="tablist" aria-label="운세 모드">
+        <button
+          className={`myf-mode-pill ${dateMode === 'today' ? 'active' : ''}`}
+          onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}
+        >☀️ 오늘</button>
+        <button
+          className={`myf-mode-pill ${dateMode === 'tomorrow' ? 'active' : ''}`}
+          onClick={() => { setDateMode('tomorrow'); setPickDate(''); setShowDatePicker(false); }}
+        >🌙 내일</button>
+        <button
+          className={`myf-mode-pill ${dateMode === 'pick' ? 'active' : ''}`}
+          onClick={() => {
+            if (dateMode === 'pick') return;
+            setTempPickDate('');
+            setShowDatePicker(true);
+          }}
+        >📅 날짜 지정{dateMode === 'pick' && pickDate ? ` (${getDateLabel()})` : ''}</button>
+        <button
+          className={`myf-mode-pill ${dateMode === 'monthly' ? 'active' : ''}`}
+          onClick={() => { setDateMode('monthly'); setShowDatePicker(false); }}
+        >📆 월간 일운</button>
+        <button
+          className={`myf-mode-pill ${dateMode === 'yearly' ? 'active' : ''}`}
+          onClick={() => { setDateMode('yearly'); setShowDatePicker(false); }}
+        >🎊 연간 운세</button>
+      </div>
+      {showDatePicker && (
+        <div className="myf-date-picker-inline glass-card">
+          <h3 className="myf-date-picker-title">📅 날짜 선택</h3>
+          <BirthDatePicker value={tempPickDate} onChange={setTempPickDate} />
+          <div className="myf-date-picker-buttons">
+            <button className="myf-date-picker-cancel" onClick={() => setShowDatePicker(false)}>취소</button>
+            <button className="myf-date-picker-confirm" disabled={!tempPickDate} onClick={() => {
+              setPickDate(tempPickDate);
+              setDateMode('pick');
+              setShowDatePicker(false);
+            }}>이 날짜로 보기</button>
+          </div>
+        </div>
       )}
 
-      {/* ════════ 연인 운세 ════════ */}
-      {viewMode === 'partner' && (
+      {/* ════════ 월간 일운 (모든 viewMode 공용 — rule-based, 무료) ════════ */}
+      {dateMode === 'monthly' && (() => {
+        const personLabel = viewMode === 'mine' ? '내'
+                          : viewMode === 'partner' ? '연인'
+                          : '다른 사람';
+        const partnerBd = (() => {
+          if (partnerOverride?.birthDate) return partnerOverride.birthDate;
+          try {
+            const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            return p.partnerBirthDate || null;
+          } catch { return null; }
+        })();
+        const bd = viewMode === 'mine' ? data?.user?.birthDate
+                 : viewMode === 'partner' ? partnerBd
+                 : otherBirthDate;
+
+        // 연인 미등록 안내
+        if (viewMode === 'partner' && !partnerBd) {
+          return (
+            <div className="glass-card" style={{ padding: '24px 20px', textAlign: 'center' }}>
+              <div style={{ fontSize: 42, marginBottom: 10 }}>💔</div>
+              <h3 style={{ marginBottom: 10 }}>연인 정보가 필요해요</h3>
+              <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 18, lineHeight: 1.6 }}>
+                프로필에서 연인 생년월일·태어난 시간을 등록하면<br />연인의 월간 일운을 볼 수 있어요
+              </p>
+              <button className="btn-gold" style={{ width: '100%' }} onClick={() => navigate('/profile/edit')}>
+                프로필에서 연인 등록하기
+              </button>
+            </div>
+          );
+        }
+
+        // 다른 사람: 입력 폼 노출 (생년월일·시간·성별)
+        if (viewMode === 'other' && !otherBirthDate) {
+          return (
+            <div className="myf-other-form glass-card">
+              <h2 style={{ textAlign: 'center', marginBottom: 16 }}>📆 다른 사람 월간 일운</h2>
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', textAlign: 'center', marginBottom: 16 }}>
+                생년월일과 태어난 시간을 입력하면 한 달치 일운을 보여드려요
+              </p>
+              <div className="form-group">
+                <label className="form-label">달력 구분</label>
+                <div className="form-toggle">
+                  <button type="button" className={`form-toggle__btn ${otherCalendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('SOLAR')}>☀️ 양력</button>
+                  <button type="button" className={`form-toggle__btn ${otherCalendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('LUNAR')}>🌙 음력</button>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">생년월일</label>
+                <BirthDatePicker value={otherBirthDate} onChange={setOtherBirthDate} calendarType={otherCalendarType} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">태어난 시간 <span style={{ fontWeight: 400, opacity: 0.5 }}>(선택)</span></label>
+                <select className="form-input form-select" value={otherBirthTime} onChange={(e) => setOtherBirthTime(e.target.value)}>
+                  <option value="">모름 / 선택안함</option>
+                  <option value="자시">자시 (23:00~01:00)</option>
+                  <option value="축시">축시 (01:00~03:00)</option>
+                  <option value="인시">인시 (03:00~05:00)</option>
+                  <option value="묘시">묘시 (05:00~07:00)</option>
+                  <option value="진시">진시 (07:00~09:00)</option>
+                  <option value="사시">사시 (09:00~11:00)</option>
+                  <option value="오시">오시 (11:00~13:00)</option>
+                  <option value="미시">미시 (13:00~15:00)</option>
+                  <option value="신시">신시 (15:00~17:00)</option>
+                  <option value="유시">유시 (17:00~19:00)</option>
+                  <option value="술시">술시 (19:00~21:00)</option>
+                  <option value="해시">해시 (21:00~23:00)</option>
+                </select>
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--color-text-muted)', textAlign: 'center', marginTop: 8 }}>
+                생년월일을 입력하면 자동으로 일운이 표시됩니다
+              </p>
+            </div>
+          );
+        }
+        return (
+          <section className="profile-daily glass-card" style={{ marginTop: 8 }}>
+            <h3 className="profile-section-title">
+              📆 {new Date().getMonth() + 1}월 {personLabel} 일운
+              {monthlyForBirthDate && (
+                <span style={{ display: 'block', fontSize: 11, fontWeight: 500, color: 'var(--color-text-muted)', marginTop: 4 }}>
+                  {monthlyForCalendar === 'LUNAR' ? '음력' : '양력'} {monthlyForBirthDate} 기준
+                </span>
+              )}
+            </h3>
+            {monthlyLoading ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-muted)' }}>일운을 불러오는 중...</div>
+            ) : !monthlyDaily?.length ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: 'var(--color-text-muted)' }}>표시할 일운이 없습니다</div>
+            ) : (
+              <div className="profile-daily-list">
+                {monthlyDaily.map((day) => {
+                  // 서버가 정밀 점수를 직접 반환 (없으면 등급 기반 폴백)
+                  const score = typeof day.score === 'number' ? day.score
+                              : day.rating === '대길' ? 95 : day.rating === '길' ? 78 : day.rating === '보통' ? 55 : day.rating === '흉' ? 38 : 25;
+                  const scoreColor = score >= 80 ? '#ff3d7f' : score >= 65 ? '#fbbf24' : score >= 45 ? '#94a3b8' : '#64748b';
+                  return (
+                    <div key={day.date} className={`profile-daily-item ${day.isToday ? 'profile-daily--today' : ''}`}>
+                      <span className="profile-daily-date">{new Date(day.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short' })}</span>
+                      <span className="profile-daily-pillar">{day.dayPillar}</span>
+                      <span className="profile-daily-sipsung">{day.sipsung}</span>
+                      <span className="profile-daily-score" style={{ color: scoreColor }}>{score}점</span>
+                      <span className={`profile-daily-rating ${day.rating === '대길' ? 'rate-best' : day.rating === '길' ? 'rate-good' : day.rating === '보통' ? 'rate-normal' : 'rate-bad'}`}>{day.rating}</span>
+                      {day.isToday && <span className="profile-daily-now">오늘</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })()}
+
+      {/* ════════ 연간 운세 (CTA → /year-fortune, viewMode 전달) ════════ */}
+      {dateMode === 'yearly' && (() => {
+        const partnerBd = (() => {
+          if (partnerOverride?.birthDate) return partnerOverride.birthDate;
+          try {
+            const p = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            return p.partnerBirthDate || null;
+          } catch { return null; }
+        })();
+        // 연인 미등록
+        if (viewMode === 'partner' && !partnerBd) {
+          return (
+            <div className="glass-card" style={{ padding: '24px 20px', textAlign: 'center' }}>
+              <div style={{ fontSize: 42, marginBottom: 10 }}>💔</div>
+              <h3 style={{ marginBottom: 10 }}>연인 정보가 필요해요</h3>
+              <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 18, lineHeight: 1.6 }}>
+                프로필에서 연인 생년월일·태어난 시간을 등록하면<br />연인의 연간 운세를 볼 수 있어요
+              </p>
+              <button className="btn-gold" style={{ width: '100%' }} onClick={() => navigate('/profile/edit')}>
+                프로필에서 연인 등록하기
+              </button>
+            </div>
+          );
+        }
+        return (
+          <div className="glass-card" style={{ padding: '24px 20px', textAlign: 'center' }}>
+            <div style={{ fontSize: 42, marginBottom: 10 }}>🎊</div>
+            <h2 style={{ marginBottom: 10 }}>2026 연간 운세</h2>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 18, lineHeight: 1.6 }}>
+              {viewMode === 'mine' ? '내 사주로 보는 한 해의 흐름'
+              : viewMode === 'partner' ? '연인의 한 해 운세 흐름'
+              : '다른 사람의 한 해 운세 흐름'}
+            </p>
+            <button className="btn-gold" style={{ width: '100%' }} onClick={() => navigate('/year-fortune', {
+              state: {
+                presetMode: viewMode,
+                ...(viewMode === 'other' && otherBirthDate ? {
+                  otherBirthDate, otherBirthTime, otherGender, otherCalendarType,
+                } : {})
+              }
+            })}>
+              🎊 신년 운세 보기 <HeartCost category="YEAR_FORTUNE" />
+            </button>
+          </div>
+        );
+      })()}
+
+      {/* ════════ 연인 운세 ════════ (월간/연간이 아닐 때만 노출) */}
+      {dateMode !== 'monthly' && dateMode !== 'yearly' && viewMode === 'partner' && (
         <div className="myf-other-view">
           {/* 저장된 운세 확인중 */}
           {partnerCacheChecking && !partnerData && !partnerLoading && !partnerStreaming && (
@@ -793,8 +1032,8 @@ function MyFortune() {
                           setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
                           setData: setPartnerData, cleanupRef: partnerCleanupRef,
                           setStreamFields: setPartnerStreamFields, setDoneFields: setPartnerDoneFields,
-                        }, { targetType: 'partner' }))}>
-                        💕 연인 운세 보기 <HeartCost category="TODAY_FORTUNE" />
+                        }, { targetType: 'partner', date: getTargetDate() }))}>
+                        💕 연인의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
                       </button>
                     </>
                   ) : (
@@ -838,8 +1077,8 @@ function MyFortune() {
         </div>
       )}
 
-      {/* ════════ 다른 사람 운세 ════════ */}
-      {viewMode === 'other' && (
+      {/* ════════ 다른 사람 운세 ════════ (월간/연간이 아닐 때만 노출) */}
+      {dateMode !== 'monthly' && dateMode !== 'yearly' && viewMode === 'other' && (
         <div className="myf-other-view">
           {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData, otherStreamFields, otherDoneFields) || (
             !otherData ? (
@@ -910,8 +1149,11 @@ function MyFortune() {
                     setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming,
                     setData: setOtherData, cleanupRef: otherCleanupRef,
                     setStreamFields: setOtherStreamFields, setDoneFields: setOtherDoneFields,
-                  }, { targetType: 'other' }))}>
-                  {otherLoading || otherStreaming ? 'AI 분석중...' : '운세 보기'} <HeartCost category="TODAY_FORTUNE" />
+                  }, { targetType: 'other', date: getTargetDate() }))}>
+                  {otherLoading || otherStreaming
+                    ? 'AI 분석중...'
+                    : `${dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세 보기`}
+                  <HeartCost category="TODAY_FORTUNE" />
                 </button>
               </div>
             ) : (
@@ -941,15 +1183,15 @@ function MyFortune() {
         </div>
       )}
 
-      {/* ════════ 내 운세 ════════ */}
-      {viewMode === 'mine' && !data && cacheChecking && (
+      {/* ════════ 내 운세 ════════ (월간/연간이 아닐 때만) */}
+      {dateMode !== 'monthly' && dateMode !== 'yearly' && viewMode === 'mine' && !data && cacheChecking && (
         <div className="myf-other-form glass-card myf-cache-check">
           <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
           <p className="myf-cache-check-text">저장된 운세 확인중</p>
         </div>
       )}
 
-      {viewMode === 'mine' && !cacheChecking && (
+      {dateMode !== 'monthly' && dateMode !== 'yearly' && viewMode === 'mine' && !cacheChecking && (
         <HistoryDrawer
           type="today_fortune"
           label="📚 최근 본 내 운세"
@@ -961,7 +1203,7 @@ function MyFortune() {
           }} />
       )}
 
-      {viewMode === 'mine' && !data && !cacheChecking && (
+      {dateMode !== 'monthly' && dateMode !== 'yearly' && viewMode === 'mine' && !data && !cacheChecking && (
         <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
           <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
           <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
@@ -974,7 +1216,7 @@ function MyFortune() {
         </div>
       )}
 
-      {viewMode === 'mine' && data && (
+      {dateMode !== 'monthly' && dateMode !== 'yearly' && viewMode === 'mine' && data && (
       <>
       <div className="myf-header">
         <h1 className="myf-title">{userName || user.name}님의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h1>
