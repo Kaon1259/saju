@@ -32,28 +32,126 @@
   word-break: keep-all;
 }
 
-/* placeholder (분석 대기) — box-shadow 키프레임 제거, opacity 기반 pulse */
+/* placeholder (분석 대기) — 명확한 분석중 인디케이터: 회전 링 + 스켈레톤 + 호흡하는 보더 */
 .streaming-card--pending {
-  border-color: var(--streaming-accent, rgba(251, 191, 36, 0.35));
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(255, 61, 127, 0.04));
+  border-color: var(--streaming-accent, rgba(251, 191, 36, 0.55));
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.06), rgba(255, 61, 127, 0.04));
   box-shadow: 0 0 14px rgba(251, 191, 36, 0.14);
+  animation: scPendingBreath 1.8s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
 }
+@keyframes scPendingBreath {
+  0%, 100% {
+    border-color: var(--streaming-accent, rgba(251, 191, 36, 0.45));
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.12);
+  }
+  50% {
+    border-color: var(--streaming-accent, rgba(251, 191, 36, 0.85));
+    box-shadow: 0 0 24px rgba(251, 191, 36, 0.32), 0 0 0 1px rgba(251, 191, 36, 0.4) inset;
+  }
+}
+/* 진행중을 명확히 보이는 가로 바 (top edge) */
+.streaming-card--pending::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--streaming-accent, #fbbf24) 50%,
+    transparent 100%);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: scPendingBar 1.4s linear infinite;
+  z-index: 1;
+}
+@keyframes scPendingBar {
+  0%   { background-position: -50% 0; }
+  100% { background-position: 150% 0; }
+}
+
+/* 회전 링 + 가운데 ✨ */
+.streaming-card-pending-ring {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  margin: 4px 0 8px;
+  display: inline-block;
+}
+.sc-spin-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2.5px solid rgba(251, 191, 36, 0.18);
+  border-top-color: var(--streaming-accent, #fbbf24);
+  border-right-color: var(--streaming-accent, #fbbf24);
+  animation: scSpin 1.1s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5));
+}
+@keyframes scSpin {
+  to { transform: rotate(360deg); }
+}
+.sc-spin-orb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  animation: scOrbPulse 1.6s ease-in-out infinite;
+}
+@keyframes scOrbPulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.7; }
+  50%      { transform: scale(1.15); opacity: 1; }
+}
+
 .streaming-card-pending {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--streaming-accent, #fbbf24);
-  margin: 0;
-  opacity: 0.85;
+  margin: 0 0 10px;
+  letter-spacing: 0.3px;
 }
-.streaming-pulse {
-  display: inline-block;
-  animation: streamingPulse 1.6s ease-in-out infinite;
+.streaming-card-pending-label {
+  background: linear-gradient(90deg, var(--streaming-accent, #fbbf24), #fce7a8, var(--streaming-accent, #fbbf24));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: scLabelShimmer 2.4s linear infinite;
 }
-@keyframes streamingPulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.15); }
+@keyframes scLabelShimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* 스켈레톤 라인 — 텍스트 자리 표시 (pending 카드의 본문) */
+.streaming-card-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 4px;
+}
+.sc-skel-line {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg,
+    rgba(251, 191, 36, 0.10) 0%,
+    rgba(251, 191, 36, 0.22) 50%,
+    rgba(251, 191, 36, 0.10) 100%);
+  background-size: 200% 100%;
+  animation: scSkeletonShimmer 1.6s linear infinite;
+}
+.sc-skel-line--1 { width: 92%; }
+.sc-skel-line--2 { width: 78%; }
+.sc-skel-line--3 { width: 64%; }
+@keyframes scSkeletonShimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 .streaming-dots { display: inline-flex; gap: 2px; margin-left: 2px; }
 .streaming-dots i {
@@ -155,6 +253,25 @@
   border-color: rgba(184, 134, 11, 0.3);
 }
 [data-theme="light"] .streaming-card-pending { color: #c2185b; }
+[data-theme="light"] .sc-spin-ring {
+  border-color: rgba(184, 134, 11, 0.18);
+  border-top-color: #b8860b;
+  border-right-color: #b8860b;
+}
+[data-theme="light"] .sc-skel-line {
+  background: linear-gradient(90deg,
+    rgba(184, 134, 11, 0.08) 0%,
+    rgba(184, 134, 11, 0.18) 50%,
+    rgba(184, 134, 11, 0.08) 100%);
+  background-size: 200% 100%;
+}
+[data-theme="light"] .streaming-card-pending-label {
+  background: linear-gradient(90deg, #c2185b, #fbbf24, #c2185b);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 [data-theme="light"] .streaming-card--streaming {
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(194, 24, 91, 0.06));
   border-color: rgba(184, 134, 11, 0.55);

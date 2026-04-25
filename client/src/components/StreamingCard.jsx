@@ -54,11 +54,14 @@ export default function StreamingCard({ icon, title, text, status, delay = 0, ac
         <h3 className="streaming-card-title">{title}</h3>
       </div>
       {status === 'pending' ? (
-        <p className="streaming-card-pending">
-          <span className="streaming-pulse">✨</span>
-          <span>분석 중</span>
-          <span className="streaming-dots"><i/><i/><i/></span>
-        </p>
+        <>
+          {/* 회전 링과 스켈레톤만으로 "분석 중" 시각화 — 텍스트 라벨 제거 (헤더와 중복 방지) */}
+          <div className="streaming-card-skeleton" aria-hidden="true">
+            <span className="sc-skel-line sc-skel-line--1" />
+            <span className="sc-skel-line sc-skel-line--2" />
+            <span className="sc-skel-line sc-skel-line--3" />
+          </div>
+        </>
       ) : (
         <p className="streaming-card-text">
           {text}

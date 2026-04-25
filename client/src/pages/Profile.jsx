@@ -63,7 +63,8 @@ function Profile() {
     getUser(userId).then((u) => {
       setUser(u);
       if (u.birthDate) {
-        getDailyFortunes(u.birthDate).then(setDailyFortunes).catch(() => {});
+        // 음력 사용자는 반드시 calendarType 전달 — 안 그러면 서버가 양력으로 잘못 해석
+        getDailyFortunes(u.birthDate, u.calendarType || 'SOLAR').then(setDailyFortunes).catch(() => {});
       }
     }).catch(() => {
       localStorage.removeItem('userId');
@@ -186,18 +187,31 @@ function Profile() {
       {/* 이번 달 일운 */}
       {dailyFortunes && (
         <section className="profile-daily glass-card">
-          <h3 className="profile-section-title">📆 {new Date().getMonth() + 1}월 일운</h3>
+          <h3 className="profile-section-title">
+            📆 {new Date().getMonth() + 1}월 일운
+            {user?.birthDate && (
+              <span style={{ display: 'block', fontSize: 11, fontWeight: 500, color: 'var(--color-text-muted)', marginTop: 4 }}>
+                {user.calendarType === 'LUNAR' ? '음력' : '양력'} {user.birthDate} 기준
+              </span>
+            )}
+          </h3>
           <div className="profile-daily-list">
             {(showAllDaily ? dailyFortunes : dailyFortunes.slice(0, 3)).map((day) => {
-              const score = day.rating === '대길' ? 95 : day.rating === '길' ? 78 : day.rating === '보통' ? 55 : day.rating === '소길' ? 42 : 30;
-              const scoreColor = score >= 80 ? '#ff3d7f' : score >= 60 ? '#fbbf24' : score >= 45 ? '#94a3b8' : '#64748b';
+              // 서버가 정밀 점수를 직접 반환 (없으면 등급 기반 폴백 — 서버 등급은 대길/길/보통/흉/대흉)
+              const score = typeof day.score === 'number' ? day.score
+                          : day.rating === '대길' ? 95 : day.rating === '길' ? 78 : day.rating === '보통' ? 55 : day.rating === '흉' ? 38 : 25;
+              const scoreColor = score >= 80 ? '#ff3d7f' : score >= 65 ? '#fbbf24' : score >= 45 ? '#94a3b8' : '#64748b';
+              const ratingCls = day.rating === '대길' ? 'rate-best'
+                              : day.rating === '길' ? 'rate-good'
+                              : day.rating === '보통' ? 'rate-normal'
+                              : 'rate-bad';
               return (
               <div key={day.date} className={`profile-daily-item ${day.isToday ? 'profile-daily--today' : ''}`}>
                 <span className="profile-daily-date">{new Date(day.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short' })}</span>
                 <span className="profile-daily-pillar">{day.dayPillar}</span>
                 <span className="profile-daily-sipsung">{day.sipsung}</span>
                 <span className="profile-daily-score" style={{ color: scoreColor }}>{score}점</span>
-                <span className={`profile-daily-rating ${day.rating === '대길' ? 'rate-best' : day.rating === '길' ? 'rate-good' : day.rating === '보통' ? 'rate-normal' : 'rate-bad'}`}>{day.rating}</span>
+                <span className={`profile-daily-rating ${ratingCls}`}>{day.rating}</span>
                 {day.isToday && <span className="profile-daily-now">오늘</span>}
               </div>
               );
