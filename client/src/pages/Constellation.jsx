@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllConstellations, getConstellationFortuneStream, getUser, isGuest, getHistory } from '../api/fortune';
+import { getAllConstellations, getConstellationFortuneStream, getConstellationByDate, getUser, isGuest, getHistory } from '../api/fortune';
 import ConstellationMap from '../components/ConstellationMap';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -82,9 +82,19 @@ function Constellation() {
     if (userId) {
       getUser(userId).then((u) => {
         if (u.birthDate) {
-          const sign = getSignFromDate(u.birthDate);
-          setMySign(sign);
-          if (sign) setSelected(sign);
+          // 음력 사용자면 서버에 양력 변환 요청 후 sign 결정
+          if (u.calendarType === 'LUNAR') {
+            getConstellationByDate(u.birthDate, 'LUNAR').then((r) => {
+              if (r?.sign) {
+                setMySign(r.sign);
+                setSelected(r.sign);
+              }
+            }).catch(() => {});
+          } else {
+            const sign = getSignFromDate(u.birthDate);
+            setMySign(sign);
+            if (sign) setSelected(sign);
+          }
         }
       }).catch(() => {});
     }

@@ -298,8 +298,10 @@ export const getConstellationFortuneStream = (sign, { onChunk, onCached, onDone,
   return () => { __chunker.cancel(); eventSource.close(); };
 };
 
-export const getConstellationByDate = async (birthDate) => {
-  const response = await api.get('/constellation/fortune/by-date', { params: { birthDate } });
+export const getConstellationByDate = async (birthDate, calendarType) => {
+  const params = { birthDate };
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/constellation/fortune/by-date', { params });
   return response.data;
 };
 
@@ -883,14 +885,17 @@ export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onC
 };
 
 // ─── 바이오리듬 ───
-export const getBiorhythm = async (birthDate) => {
-  const response = await api.get('/biorhythm', { params: { birthDate } });
+export const getBiorhythm = async (birthDate, calendarType) => {
+  const params = { birthDate };
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/biorhythm', { params });
   return response.data;
 };
 
-export const getBiorhythmStream = (birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+export const getBiorhythmStream = (birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts, calendarType } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
+  if (calendarType) params.set('calendarType', calendarType);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/biorhythm/stream?${params.toString()}`;

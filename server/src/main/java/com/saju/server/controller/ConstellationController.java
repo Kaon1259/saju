@@ -5,6 +5,7 @@ import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.service.ConstellationFortuneService;
 import com.saju.server.service.FortuneHistoryService;
 import com.saju.server.service.HeartPointService;
+import com.saju.server.service.LunarCalendarService;
 import com.saju.server.util.SseEmitterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ public class ConstellationController {
     private final HeartPointService heartPointService;
     private final ObjectMapper objectMapper;
     private final FortuneHistoryService fortuneHistoryService;
+    private final LunarCalendarService lunarCalendarService;
 
     /** 별자리 운세 히스토리 저장 헬퍼 */
     private void saveConstellationHistory(Long userId, String sign, Map<String, Object> result) {
@@ -48,8 +50,14 @@ public class ConstellationController {
     }
 
     @GetMapping("/fortune/by-date")
-    public ResponseEntity<Map<String, Object>> getFortuneByDate(@RequestParam String birthDate) {
+    public ResponseEntity<Map<String, Object>> getFortuneByDate(
+            @RequestParam String birthDate,
+            @RequestParam(required = false) String calendarType) {
         LocalDate date = LocalDate.parse(birthDate);
+        // 별자리는 양력 월/일 기준 — 음력 입력 시 양력 변환
+        if ("LUNAR".equalsIgnoreCase(calendarType)) {
+            try { date = lunarCalendarService.lunarToSolar(date); } catch (Exception ignored) {}
+        }
         String sign = service.getSignFromDate(date);
         return ResponseEntity.ok(service.getTodayFortune(sign));
     }

@@ -126,6 +126,7 @@ function Biorhythm() {
   const navigate = useNavigate();
   // ─── 상태 ───
   const [birthDate, setBirthDate] = useState('');
+  const [calendarType, setCalendarType] = useState('SOLAR');
   const [result, setResult] = useState(null);
   const [serverData, setServerData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -159,6 +160,7 @@ function Biorhythm() {
     try {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       if (profile.birthDate) setBirthDate(profile.birthDate);
+      if (profile.calendarType) setCalendarType(profile.calendarType);
     } catch { /* 무시 */ }
   }, []);
 
@@ -170,6 +172,7 @@ function Biorhythm() {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       if (profile.birthDate) {
         setBirthDate(profile.birthDate);
+        if (profile.calendarType) setCalendarType(profile.calendarType);
       } else {
         alert('프로필에 생년월일을 등록해주세요.');
       }
@@ -210,6 +213,7 @@ function Biorhythm() {
     setStreamFields({}); setDoneFields(new Set()); bufferRef.current = '';
     const BR_FIELDS = ['advice', 'physicalAdvice', 'emotionalAdvice', 'intellectualAdvice', 'intuitionAdvice'];
     cleanupRef.current = getBiorhythmStream(birthDate, {
+      calendarType: calendarType || 'SOLAR',
       onChunk: (t) => {
         setStreaming(true);
         bufferRef.current += t;
@@ -263,7 +267,7 @@ function Biorhythm() {
 
     // 서버 기본 데이터도 시도
     try {
-      const data = await getBiorhythm(birthDate);
+      const data = await getBiorhythm(birthDate, calendarType || 'SOLAR');
       if (data) setServerData(data);
     } catch {
       /* 클라이언트 계산으로 충분 */
@@ -365,8 +369,22 @@ function Biorhythm() {
                 ✨ 내 정보로 채우기
               </button>
             )}
+            <div className="bio-input-row" style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <button type="button"
+                style={{ flex: 1, padding: '10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)',
+                  background: calendarType === 'SOLAR' ? 'rgba(33,150,243,0.18)' : 'rgba(255,255,255,0.04)',
+                  color: calendarType === 'SOLAR' ? '#2196F3' : 'rgba(255,255,255,0.7)',
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
+              <button type="button"
+                style={{ flex: 1, padding: '10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)',
+                  background: calendarType === 'LUNAR' ? 'rgba(33,150,243,0.18)' : 'rgba(255,255,255,0.04)',
+                  color: calendarType === 'LUNAR' ? '#2196F3' : 'rgba(255,255,255,0.7)',
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
+            </div>
             <div className="bio-input-row">
-              <BirthDatePicker value={birthDate} onChange={setBirthDate} />
+              <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
             </div>
             <button
               className="bio-analyze-btn"

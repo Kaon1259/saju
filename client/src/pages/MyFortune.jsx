@@ -338,8 +338,8 @@ function MyFortune() {
       const bd = data.user.birthDate;
       if (!bd) return;
       setConstellationLoading(true);
-      // birthDate → 별자리 자동 매핑
-      getConstellationByDate(bd)
+      // birthDate → 별자리 자동 매핑 (음력이면 서버에서 양력 변환)
+      getConstellationByDate(bd, data.user.calendarType || 'SOLAR')
         .then((res) => {
           if (res?.sign) {
             return getConstellationFortune(res.sign).then((cf) => setConstellationFortune({ ...cf, sign: res.sign, signName: res.signName }));
@@ -1333,7 +1333,7 @@ function MyFortune() {
           const bd = data?.user?.birthDate;
           if (bd) {
             try {
-              const r = await getConstellationByDate(bd);
+              const r = await getConstellationByDate(bd, data?.user?.calendarType || 'SOLAR');
               if (r?.sign) {
                 navigate('/constellation', { state: { autoStart: r.sign } });
                 return;
