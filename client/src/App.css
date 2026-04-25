@@ -5,6 +5,89 @@
   width: 100%;
 }
 
+/* ─── 카카오 로그인 CTA (전역) ─── */
+.kakao-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: none;
+  background: #FEE500;
+  color: #181600;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow:
+    0 4px 14px rgba(254, 229, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.3px;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+.kakao-cta-btn:hover {
+  background: #FFEB3B;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 20px rgba(254, 229, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.kakao-cta-btn:active {
+  transform: scale(0.97);
+}
+.kakao-cta-btn-logo {
+  flex-shrink: 0;
+}
+[data-theme="light"] .kakao-cta-btn {
+  box-shadow:
+    0 4px 14px rgba(254, 229, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── 히어로 카드 모서리 아이콘 버튼 (뒤로 / 다시하기) ─── */
+.hero-iconbtn {
+  position: absolute;
+  top: 12px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--hib-color, #ec4899) 35%, transparent);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--hib-color, #ec4899);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 5;
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  padding: 0;
+}
+.hero-iconbtn:hover {
+  background: color-mix(in oklab, var(--hib-color, #ec4899) 18%, transparent);
+  border-color: color-mix(in oklab, var(--hib-color, #ec4899) 60%, transparent);
+}
+.hero-iconbtn:active { transform: scale(0.92); }
+.hero-iconbtn--back  { left: 12px; }
+.hero-iconbtn--reset { right: 12px; }
+.hero-iconbtn span { display: block; line-height: 1; }
+[data-theme="light"] .hero-iconbtn {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: color-mix(in oklab, var(--hib-color, #ec4899) 30%, transparent);
+}
+[data-theme="light"] .hero-iconbtn:hover {
+  background: #fff;
+  border-color: color-mix(in oklab, var(--hib-color, #ec4899) 50%, transparent);
+}
+
 .app-main {
   flex: 1;
   padding: var(--space-md);

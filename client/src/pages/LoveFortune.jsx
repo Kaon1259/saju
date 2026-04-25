@@ -11,6 +11,8 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
@@ -282,18 +284,9 @@ function LoveFortune() {
 
   return (
     <div className="lf-page">
-      {/* 상단 버튼바 */}
-      <div className="lf-topbar">
-        <button className="lf-topbtn lf-topbtn--back" onClick={() => navigate(-1)} aria-label="뒤로">
-          <span>‹</span> 뒤로
-        </button>
-        <button className="lf-topbtn lf-topbtn--reset" onClick={handleReset} aria-label="다시하기">
-          다시하기 <span>↻</span>
-        </button>
-      </div>
-
-      {/* 히어로 */}
-      <section className="lf-hero">
+      {/* 히어로 — 좌우 상단에 뒤로/다시하기 통합 */}
+      <section className="lf-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#E91E63" onReset={handleReset} />
         <div className="lf-hero-bg" />
         <div className="lf-hero-couple">
           <span className="lf-sym lf-sym--m">♂</span>
@@ -309,9 +302,9 @@ function LoveFortune() {
 
       {/* 비로그인 CTA */}
       {!userId && !result && !loading && !aiStreaming && (
-        <button className="home-cta-btn" style={{ margin: '0 0 10px' }} onClick={() => navigate('/register', { state: { from: '/love-fortune' } })}>
+        <KakaoLoginCTA returnTo="/love-fortune" style={{ margin: '0 0 10px' }}>
           카카오 로그인하고 맞춤 연애운 받기
-        </button>
+        </KakaoLoginCTA>
       )}
 
       {/* 입력 폼 */}

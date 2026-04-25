@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import StarHero from '../components/StarHero';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './MyStar.css';
 
 const STORAGE_KEY = 'myStarList';
@@ -56,13 +58,13 @@ function MyStar() {
   if (!isLoggedIn) {
     return (
       <div className="mystar-page">
-        <button className="mystar-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
         <StarHero
           icon="⭐"
           title="나의 스타"
           desc="나만의 최애 스타를 등록하고 관리하세요"
           color="#FF9800"
           particles={['⭐','✨','💫','🌟','✦']}
+          topButtons={<HeroIconButtons color="#FF9800" />}
         />
 
         <section className="mystar-login-card glass-card">
@@ -70,9 +72,7 @@ function MyStar() {
           <h2 className="mystar-login-title">로그인이 필요해요</h2>
           <p className="mystar-login-desc">나의 스타를 등록하고 관리하려면<br/>로그인 또는 회원가입을 해주세요</p>
           <div className="mystar-login-btns">
-            <button className="mystar-login-btn mystar-login-btn--primary" onClick={() => navigate('/register')}>
-              회원가입 / 로그인
-            </button>
+            <KakaoLoginCTA returnTo="/my-star">카카오 로그인하고 나의 스타 등록하기</KakaoLoginCTA>
           </div>
         </section>
 
@@ -91,13 +91,13 @@ function MyStar() {
   // ─── 로그인 상태: 나의 스타 목록 ───
   return (
     <div className="mystar-page">
-      <button className="mystar-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
       <StarHero
         icon="⭐"
         title="나의 스타"
         desc="나만의 최애 스타를 등록하고 관리하세요"
         color="#FF9800"
         particles={['⭐','✨','💫','🌟','✦']}
+        topButtons={<HeroIconButtons color="#FF9800" />}
       />
 
       {/* 나의 스타 목록 */}

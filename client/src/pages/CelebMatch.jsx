@@ -5,6 +5,8 @@ import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import { shareResult } from '../utils/share';
 import StarHero from '../components/StarHero';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './CelebMatch.css';
 
 // ─── 사주 오행 기반 간이 궁합 계산 ───
@@ -192,7 +194,8 @@ function CelebMatch() {
   if (!isLoggedIn) {
     return (
       <div className="cm-page">
-        <section className="cm-hero">
+        <section className="cm-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+          <HeroIconButtons color="#FF6B6B" />
           <span className="cm-hero-icon">🔮</span>
           <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
           <p className="cm-hero-desc">사주로 찾는 운명의 스타</p>
@@ -202,7 +205,7 @@ function CelebMatch() {
           <h2 className="mystar-login-title">로그인이 필요해요</h2>
           <p className="mystar-login-desc">나와 궁합이 맞는 스타를 찾으려면<br/>로그인 또는 회원가입을 해주세요</p>
           <div className="mystar-login-btns">
-            <button className="mystar-login-btn mystar-login-btn--primary" onClick={() => navigate('/register')}>회원가입 / 로그인</button>
+            <KakaoLoginCTA returnTo="/celeb-match">카카오 로그인하고 스타와 궁합보기</KakaoLoginCTA>
           </div>
         </section>
         <section className="cm-quick">
@@ -217,7 +220,8 @@ function CelebMatch() {
   if (!myBirth) {
     return (
       <div className="cm-page">
-        <section className="cm-hero">
+        <section className="cm-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+          <HeroIconButtons color="#FF6B6B" />
           <span className="cm-hero-icon">🔮</span>
           <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
           <p className="cm-hero-desc">사주로 찾는 운명의 스타</p>
@@ -234,13 +238,13 @@ function CelebMatch() {
 
   return (
     <div className="cm-page">
-      <button className="cm-back-btn" onClick={() => navigate('/')}>← 홈으로</button>
       <StarHero
         icon="🔮"
         title="나와 궁합이 맞는 스타"
         desc="사주 오행 + AI 분석으로 찾는 운명의 스타"
         color="#FF6B6B"
         particles={['🔮','✨','💫','⭐','💖']}
+        topButtons={<HeroIconButtons color="#FF6B6B" onBack={() => navigate('/')} />}
       />
 
       {/* AI 분석 진행 표시 */}

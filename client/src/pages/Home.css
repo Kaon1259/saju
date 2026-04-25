@@ -224,8 +224,10 @@
   gap: 12px;
   max-width: 480px;
   margin: 0 auto;
+  padding: 0 5%;       /* 모든 카드/배너/버튼을 좌우 10% 좁게 */
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* ─── Weather Background Effects ─── */
@@ -432,6 +434,325 @@
   border: 1.5px solid rgba(233,30,99,0.2);
   text-align: center;
   overflow: hidden;
+}
+
+/* ─── Hero X축 flip 컨테이너 (연애 ↔ 날씨) ─── */
+/* 두 면을 동일 크기로 잡아 카드 가운데(1/2 지점)를 축으로 제자리 회전. */
+/* 하단 휠이 메인이므로 상단은 컴팩트하게 (이전보다 ~30% 축소). */
+.home-hero-flip {
+  position: relative;
+  perspective: 1400px;
+  margin-bottom: 8px;
+  min-height: 175px;
+}
+.home-hero-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 175px;        /* 두 면이 공유하는 높이. 회전축 = 87.5px */
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* 로그인 사용자: 운세 요약/CTA 가 추가되면 카드 높이 자동 확장 (양면 동일) */
+.home-hero-flip.has-extras { min-height: 220px; }
+.home-hero-flip.has-extras .home-hero-flip-inner { height: 220px; }
+.home-hero-flip-inner.flipped {
+  transform: rotateX(180deg);
+}
+.home-hero-flip-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  /* 상단/중앙/하단 균등 배치 → 메시지가 하단 외곽선에 가까이 */
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.home-hero-flip-back {
+  transform: rotateX(180deg);
+}
+
+/* flip 안에서만 적용되는 컴팩트 사이즈 — 다른 곳의 동일 클래스에는 영향 없음 */
+.home-hero-flip-face.home-hero-new {
+  padding: 8px 14px 7px;
+}
+.home-hero-flip-face .home-hero__title {
+  font-size: 16px !important;
+}
+.home-hero-flip-face .home-hero__date-inline {
+  font-size: 11px !important;
+}
+.home-hero-flip-face .home-love-temp-center {
+  margin: 4px 0 4px;
+  gap: 10px;
+}
+/* 하트/온도 = 날씨 카드 아이콘/온도와 동일 크기 */
+.home-hero-flip-face .home-love-temp-heart {
+  font-size: 36px;
+}
+.home-hero-flip-face .home-love-temp-num {
+  font-size: 34px;
+}
+.home-hero-flip-face .home-love-temp-label {
+  margin: 0 0 2px;
+  font-size: 10px !important;
+}
+/* 메시지: 최대 2줄로 자르고 ellipsis (max-height 강제 X — 잘림 방지) */
+.home-hero-flip-face .home-hero-new__msg {
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-hero-flip-face .home-hero-fortune-summary {
+  margin-top: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.home-hero-flip-face .home-hero-fortune-cta {
+  margin-top: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+/* 날씨 카드 컴팩트 */
+.home-hero-flip-face.home-weather-card {
+  padding: 8px 14px 7px;
+}
+.home-hero-flip-face .home-weather-center {
+  margin: 2px 0 2px;
+  gap: 10px;
+}
+.home-hero-flip-face .home-weather-icon {
+  font-size: 36px;
+}
+.home-hero-flip-face .home-weather-temp {
+  font-size: 34px;
+}
+.home-hero-flip-face .home-weather-condition {
+  font-size: 13px;
+  margin: 2px 0 4px;
+}
+.home-hero-flip-face .home-weather-condition--inline {
+  margin: 0;
+  font-size: 14px;
+}
+.home-hero-flip-face .home-weather-meta {
+  font-size: 10.5px;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.home-hero-flip-face.home-weather-card .home-hero-new__msg {
+  /* 날씨 카드 메시지도 2줄 클램프 (max-height 강제 X) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+.home-hero-flip-face .home-weather-orb--1 {
+  width: 110px; height: 110px; top: -20px; left: -16px;
+}
+.home-hero-flip-face .home-weather-orb--2 {
+  width: 140px; height: 140px; bottom: -30px; right: -22px;
+}
+.home-hero-flip-face .home-hero-flip-hint {
+  font-size: 9px;
+  top: 6px;
+  right: 8px;
+  bottom: auto;
+  padding: 2px 6px;
+}
+.home-hero-flip-face .home-love-hearts-bg {
+  /* 기존 하트 비 효과는 작은 카드에서 과해지므로 살짝 옅게 */
+  opacity: 0.6;
+}
+.home-hero-flip-hint {
+  position: absolute;
+  top: 8px; right: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.55);
+  background: rgba(0,0,0,0.18);
+  padding: 3px 8px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 2;
+}
+[data-theme="light"] .home-hero-flip-hint {
+  color: rgba(30,41,59,0.55);
+  background: rgba(255,255,255,0.55);
+}
+
+/* ─── 오늘의 날씨 카드 ─── */
+/* 시간대별 오버레이(--w-overlay)로 새벽~심야 사이 밝기 자동 조절 */
+.home-weather-card {
+  position: relative;
+  padding: 18px 16px 16px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, var(--w-overlay, rgba(0,0,0,0.20)), var(--w-overlay, rgba(0,0,0,0.32))),
+    linear-gradient(160deg, var(--w-from, #38bdf8), var(--w-to, #f59e0b));
+  border: 1.5px solid rgba(255,255,255,0.25);
+  text-align: center;
+  overflow: hidden;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.35);
+  transition: background 0.6s ease;
+}
+/* 시간대별 미세한 추가 효과 */
+.home-weather-card--dawn     { box-shadow: 0 10px 28px rgba(251, 146, 60, 0.35); }
+.home-weather-card--morning  { box-shadow: 0 10px 28px rgba(125, 211, 252, 0.35); }
+.home-weather-card--noon     { box-shadow: 0 10px 28px rgba(251, 191, 36, 0.30); }
+.home-weather-card--evening  { box-shadow: 0 10px 28px rgba(124, 58, 237, 0.35); }
+.home-weather-card--night    { box-shadow: 0 10px 28px rgba(30, 58, 138, 0.45); }
+.home-weather-card--midnight { box-shadow: 0 10px 28px rgba(15, 23, 42, 0.55); }
+/* 시간 칩 — 도시명 옆에 표시 */
+.home-weather-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  margin-left: 6px;
+}
+[data-theme="light"] .home-weather-card {
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+}
+.home-weather-card .home-hero__title {
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  font-weight: 800;
+}
+.home-weather-card .home-hero__date-inline {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  font-weight: 600;
+}
+.home-weather-city {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
+}
+.home-love-top-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--love-temp-color, #F472B6);
+  letter-spacing: 0.3px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+}
+[data-theme="light"] .home-love-top-label {
+  color: #d4380d;
+  filter: none;
+}
+.home-weather-card .home-hero-new__msg {
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 600;
+}
+
+.home-weather-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.4;
+  pointer-events: none;
+  animation: weatherOrbFloat 8s ease-in-out infinite;
+}
+.home-weather-orb--1 {
+  top: -30px; left: -20px;
+  width: 160px; height: 160px;
+  background: var(--w-from, #7dd3fc);
+}
+.home-weather-orb--2 {
+  bottom: -40px; right: -30px;
+  width: 200px; height: 200px;
+  background: var(--w-to, #fbbf24);
+  animation-delay: -3s;
+}
+@keyframes weatherOrbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8px, -10px) scale(1.05); }
+}
+
+.home-weather-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 12px 0 4px;
+  position: relative;
+  z-index: 1;
+}
+.home-weather-icon {
+  font-size: 60px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+  animation: weatherIconBob 3s ease-in-out infinite;
+}
+@keyframes weatherIconBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.home-weather-temp {
+  font-size: 58px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: #fff;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
+  line-height: 1;
+}
+.home-weather-condition {
+  font-size: 17px;
+  font-weight: 800;
+  margin: 6px 0 8px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
+  position: relative; z-index: 1;
+}
+/* 아이콘 왼쪽에 인라인 배치되는 변형 */
+.home-weather-condition--inline {
+  margin: 0;
+  white-space: nowrap;
+}
+.home-weather-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 8px;
+  position: relative; z-index: 1;
+}
+.home-weather-meta-sep {
+  opacity: 0.6;
+}
+.home-weather-card + .home-hero-flip-hint,
+.home-weather-card .home-hero-flip-hint {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .home-hero-new__top {
@@ -2289,6 +2610,47 @@
   transform: scale(0.97);
 }
 
+/* 카카오 노란색 CTA — 즉시 OAuth */
+.home-kakao-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #FEE500;
+  color: #181600;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow:
+    0 4px 14px rgba(254, 229, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.3px;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-kakao-cta:hover {
+  background: #FFEB3B;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 20px rgba(254, 229, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.home-kakao-cta:active {
+  transform: scale(0.97);
+}
+.home-kakao-cta-logo {
+  flex-shrink: 0;
+}
+[data-theme="light"] .home-kakao-cta {
+  box-shadow:
+    0 4px 14px rgba(254, 229, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
 .home-cta-icon {
   width: 22px;
   height: 22px;
@@ -2836,7 +3198,7 @@
 .home-rel-section {
   position: relative;
   margin: 8px 0 14px;
-  padding: 0;
+  padding: 0 4px;   /* 다른 배너 섹션과 동일한 좌우 여백 */
 }
 
 /* 3D 휠 컨테이너 — 위/아래 카드가 보이도록 perspective 적용 */
@@ -2847,13 +3209,17 @@
   perspective: 1100px;
   transform-style: preserve-3d;
   user-select: none;
+  touch-action: pan-x;
+  cursor: grab;
+}
+.home-rel-wheel:active {
+  cursor: grabbing;
 }
 
 .home-rel-wheel-card {
   position: absolute;
   top: 50%; left: 50%;
-  width: 82%;
-  max-width: 320px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;

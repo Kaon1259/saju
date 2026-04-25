@@ -10,11 +10,51 @@
 .mlc-hero {
   position: relative;
   text-align: center;
-  padding: 22px 12px 18px;
+  padding: 22px 48px 18px;   /* 좌우 패딩을 늘려 아이콘 버튼 자리 확보 */
   margin-bottom: 14px;
   border-radius: 22px;
   overflow: hidden;
   background: radial-gradient(ellipse at top, rgba(236,72,153,0.14), rgba(139,92,246,0.06) 60%, transparent 100%);
+}
+
+/* 히어로 안에 들어간 작은 원형 아이콘 버튼 (뒤로/다시하기) */
+.mlc-hero-iconbtn {
+  position: absolute;
+  top: 12px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f472b6;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+}
+.mlc-hero-iconbtn:hover {
+  background: rgba(236, 72, 153, 0.18);
+  border-color: rgba(236, 72, 153, 0.6);
+}
+.mlc-hero-iconbtn:active { transform: scale(0.92); }
+.mlc-hero-iconbtn--back  { left: 12px; }
+.mlc-hero-iconbtn--reset { right: 12px; }
+.mlc-hero-iconbtn span { display: block; line-height: 1; }
+[data-theme="light"] .mlc-hero-iconbtn {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(236, 72, 153, 0.3);
+  color: #d4380d;
+}
+[data-theme="light"] .mlc-hero-iconbtn:hover {
+  background: #fff;
+  border-color: rgba(236, 72, 153, 0.5);
 }
 [data-theme="light"] .mlc-hero {
   background: linear-gradient(135deg, #fff, #fff0f5 80%);

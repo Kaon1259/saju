@@ -9,6 +9,7 @@ import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFields } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import './Compatibility.css';
 
 // JSON 잔여물 제거
@@ -406,9 +407,9 @@ function Compatibility() {
 
       {/* 비로그인 CTA */}
       {!userId && (
-        <button className="home-cta-btn" style={{ margin: '0 0 8px' }} onClick={() => navigate('/register', { state: { from: '/compatibility' } })}>
+        <KakaoLoginCTA returnTo="/compatibility" style={{ margin: '0 0 8px' }}>
           카카오 로그인하고 맞춤 궁합 받기
-        </button>
+        </KakaoLoginCTA>
       )}
 
       {/* 하단 pull-up drawer — 최근 본 사주 궁합 */}

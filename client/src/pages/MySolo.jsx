@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './MySolo.css';
 
 // 완전 솔로 대상 — 아직 관심 대상 없거나 인연을 찾는 중.
@@ -18,10 +20,9 @@ function MySolo() {
 
   return (
     <div className="mysolo-page">
-      <button className="mysolo-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
-
-      {/* 히어로 */}
-      <section className="mysolo-hero">
+      {/* 히어로 — 좌상단에 뒤로 아이콘 통합 */}
+      <section className="mysolo-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#06b6d4" />
         <div className="mysolo-hero-sparkles">
           {[...Array(10)].map((_, i) => <span key={i} style={{ '--ms-i': i }}>✦</span>)}
         </div>
@@ -35,9 +36,9 @@ function MySolo() {
 
       {!isLoggedIn && (
         <section className="mysolo-login-cta">
-          <button className="mysolo-login-btn" onClick={() => navigate('/register', { state: { from: '/my-solo' } })}>
-            💕 로그인하고 맞춤 솔로 운세 받기
-          </button>
+          <KakaoLoginCTA returnTo="/my-solo">
+            카카오 로그인하고 맞춤 솔로 운세 받기
+          </KakaoLoginCTA>
         </section>
       )}
 

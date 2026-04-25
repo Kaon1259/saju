@@ -9,6 +9,8 @@ import parseAiJson from '../utils/parseAiJson';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import HeartCost from '../components/HeartCost';
 import HistoryDrawer from '../components/HistoryDrawer';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import { getCurrentWeather, getTimeBand } from '../utils/weather';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -185,7 +187,7 @@ const REL_CARDS = {
       { icon: '💞', label: '정통궁합',   path: '/my-love-compat',         state: { presetTab: 'saju' } },
       { icon: '💒', label: '결혼궁합',   path: '/my-love-compat',         state: { presetTab: 'marriage' } },
       { icon: '🤝', label: '스킨십',     path: '/my-love-compat',         state: { presetTab: 'skinship' } },
-      { icon: '💑', label: '데이트운',   path: '/love/couple_fortune' },
+      { icon: '💑', label: '데이트운',   path: '/my-love-compat',         state: { presetTab: 'date' } },
     ],
   },
   some: {
@@ -264,42 +266,105 @@ function RelationshipCarousel({ navigate, myData }) {
   const cards = useMemo(() => getOrderedRelCards(profile), [profile?.relationshipStatus]);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [direction, setDirection] = useState('down'); // 'down' = 위에서 아래로, 'up' = 아래에서 위로
   const resumeTimerRef = useRef(null);
 
-  // 자동 회전 (물레방아) — 3.5초 간격, 일시정지 시 멈춤
+  // 자동 회전 (물레방아) — 3.5초 간격, direction 에 따라 방향 결정
   useEffect(() => {
     if (paused) return;
     const id = setInterval(() => {
-      setActive((a) => (a + 1) % cards.length);
+      setActive((a) => {
+        const len = cards.length;
+        return direction === 'down' ? (a + 1) % len : (a - 1 + len) % len;
+      });
     }, 3500);
     return () => clearInterval(id);
-  }, [paused, cards.length]);
+  }, [paused, cards.length, direction]);
 
   // 사용자 인터랙션 후 8초 일시정지 → 다시 자동 회전
   const advanceTo = (idx) => {
-    setActive(idx);
+    const len = cards.length;
+    const next = ((idx % len) + len) % len;
+    setActive(next);
     setPaused(true);
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => setPaused(false), 8000);
+    resumeTimerRef.current = setTimeout(() => setPaused(false), 4000);
   };
 
   useEffect(() => () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
   }, []);
 
-  // pos: 0=center, 1=front-bottom, len-1=front-top, 그 외=back hidden
+  // pos: offset=1 은 항상 위(top), offset=len-1 은 항상 아래(bottom).
+  // direction 에 따라 어느 위치가 "들어오는 다음 카드"가 되는지만 달라짐.
   const getPosClass = (i) => {
     const len = cards.length;
     const offset = (i - active + len) % len;
     if (offset === 0) return 'pos-center';
-    if (offset === 1) return 'pos-bottom';
-    if (offset === len - 1) return 'pos-top';
+    if (offset === 1) return 'pos-top';
+    if (offset === len - 1) return 'pos-bottom';
     return 'pos-back';
+  };
+
+  // 스와이프 제스처 (수직) — 스와이프 방향이 자동 회전 방향이 됨
+  const dragRef = useRef({ startY: 0, startX: 0, dy: 0, dx: 0, dragging: false, moved: false });
+  const SWIPE_THRESHOLD = 40;
+  const TAP_TOLERANCE = 10;
+
+  const onPointerDown = (e) => {
+    const p = e.touches ? e.touches[0] : e;
+    dragRef.current = { startY: p.clientY, startX: p.clientX, dy: 0, dx: 0, dragging: true, moved: false };
+  };
+  const onPointerMove = (e) => {
+    if (!dragRef.current.dragging) return;
+    const p = e.touches ? e.touches[0] : e;
+    const dy = p.clientY - dragRef.current.startY;
+    const dx = p.clientX - dragRef.current.startX;
+    dragRef.current.dy = dy;
+    dragRef.current.dx = dx;
+    if (Math.abs(dy) > TAP_TOLERANCE || Math.abs(dx) > TAP_TOLERANCE) {
+      dragRef.current.moved = true;
+    }
+  };
+  const onPointerEnd = () => {
+    const { dy, dx, dragging } = dragRef.current;
+    if (!dragging) return;
+    dragRef.current.dragging = false;
+    // 수직 스와이프만 처리 (수평이 더 크면 스크롤로 간주)
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > SWIPE_THRESHOLD) {
+      if (dy > 0) {
+        // 아래로 스와이프 → 자동 회전을 '아래로(down)' 방향으로 잠그고 다음 카드
+        setDirection('down');
+        advanceTo(active + 1);
+      } else {
+        // 위로 스와이프 → 자동 회전을 '위로(up)' 방향으로 잠그고 이전 카드
+        setDirection('up');
+        advanceTo(active - 1);
+      }
+    }
+  };
+
+  const swallowClickAfterSwipe = (e) => {
+    if (dragRef.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      return true;
+    }
+    return false;
   };
 
   return (
     <section className="home-rel-section">
-      <div className="home-rel-wheel">
+      <div
+        className="home-rel-wheel"
+        onTouchStart={onPointerDown}
+        onTouchMove={onPointerMove}
+        onTouchEnd={onPointerEnd}
+        onMouseDown={onPointerDown}
+        onMouseMove={onPointerMove}
+        onMouseUp={onPointerEnd}
+        onMouseLeave={onPointerEnd}
+      >
         {cards.map((card, i) => {
           const posClass = getPosClass(i);
           const isCenter = posClass === 'pos-center';
@@ -308,7 +373,8 @@ function RelationshipCarousel({ navigate, myData }) {
               key={card.id}
               className={`home-rel-wheel-card ${posClass}`}
               style={{ '--c-from': card.accentFrom, '--c-to': card.accentTo }}
-              onClick={() => {
+              onClick={(e) => {
+                if (swallowClickAfterSwipe(e)) return;
                 if (isCenter) navigate(card.path);
                 else if (posClass !== 'pos-back') advanceTo(i);
               }}
@@ -338,6 +404,7 @@ function RelationshipCarousel({ navigate, myData }) {
                     style={{ '--sc-i': sIdx }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (swallowClickAfterSwipe(e)) return;
                       if (!isCenter) { advanceTo(i); return; }
                       navigate(sc.path, sc.state ? { state: sc.state } : undefined);
                     }}
@@ -372,6 +439,28 @@ function RelationshipCarousel({ navigate, myData }) {
   );
 }
 
+// 시간대별 폴백 그라데이션 — weatherData 없을 때 사용 (실제 날씨 받기 전)
+const TIMEBAND_FALLBACK_GRAD = {
+  dawn:     { bgFrom: '#fb923c', bgTo: '#fcd34d' },
+  morning:  { bgFrom: '#7dd3fc', bgTo: '#fde68a' },
+  noon:     { bgFrom: '#7dd3fc', bgTo: '#fbbf24' },
+  evening:  { bgFrom: '#f97316', bgTo: '#7c3aed' },
+  night:    { bgFrom: '#1e3a8a', bgTo: '#312e81' },
+  midnight: { bgFrom: '#0f172a', bgTo: '#1e1b4b' },
+};
+
+const FALLBACK_WEATHER_BASE = {
+  city: '서울',
+  temp: 18,
+  high: 22,
+  low: 12,
+  condition: 'Clear',
+  conditionLabel: '맑음',
+  icon: '☀️',
+  humidity: 45,
+  message: '날씨 정보를 불러오는 중...',
+};
+
 function Home() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -388,6 +477,30 @@ function Home() {
   const [myData, setMyData] = useState(null);
   const [fortuneLoading, setFortuneLoading] = useState(false);
   const [loveTemp, setLoveTemp] = useState(null);
+
+  // 상단 히어로 X축 flip — 0: 연애 카드, 1: 날씨 카드
+  const [heroFace, setHeroFace] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setHeroFace((f) => (f + 1) % 2), 6000);
+    return () => clearInterval(id);
+  }, []);
+
+  // 오늘의 날씨 (서버 프록시 → OpenWeather)
+  const [weatherData, setWeatherData] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    getCurrentWeather()
+      .then((w) => { if (!cancelled) setWeatherData(w); })
+      .catch((e) => { console.warn('[home] weather fetch failed', e?.message); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // 시간대별 (새벽/아침/점심/저녁/밤/심야) — 1분마다 갱신
+  const [timeBand, setTimeBandState] = useState(() => getTimeBand());
+  useEffect(() => {
+    const id = setInterval(() => setTimeBandState(getTimeBand()), 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // guest form
   const [birthDate, setBirthDate] = useState('');
@@ -590,7 +703,7 @@ function Home() {
     <div className="home">
       {weather && <WeatherBg type={weather.type} />}
 
-      {/* 1. Hero + 연애온도 통합 */}
+      {/* 1. Hero — 연애 + 날씨 X축 flip 2카드 */}
       {(() => {
         const temp = loveTemp?.temperature || 55;
         const msg = loveTemp?.message || dailyMsg;
@@ -598,62 +711,101 @@ function Home() {
         const heartLight = 80 - temp * 0.35;
         const heartColor = `hsl(340, ${heartSat}%, ${heartLight}%)`;
         const heartCount = Math.max(5, Math.floor(temp / 6));
+        const fallbackGrad = TIMEBAND_FALLBACK_GRAD[timeBand.id] || TIMEBAND_FALLBACK_GRAD.noon;
+        const w = weatherData || { ...FALLBACK_WEATHER_BASE, ...fallbackGrad };
+        // 로그인 시 연애 카드에 운세 요약/CTA 가 추가로 들어가므로 카드 높이를 자동으로 키운다
+        const hasFortuneExtras = !!userId && (
+          (fortuneLoading && !myData?.saju) ||
+          (myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall) ||
+          (!fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed)
+        );
         return (
-          <section className="home-hero-new" style={{ '--love-temp-color': heartColor }}>
-            <div className="home-love-hearts-bg">
-              {Array.from({ length: heartCount }).map((_, i) => (
-                <span key={i} className="home-love-float-heart" style={{
-                  '--hf-x': `${5 + (i * 97 / heartCount) % 90}%`,
-                  '--hf-delay': `${i * 0.35}s`,
-                  '--hf-dur': `${2.5 + (i % 3) * 0.8}s`,
-                  '--hf-size': `${12 + (i % 5) * 3}px`,
-                  color: heartColor,
-                }}>&#x2764;</span>
-              ))}
+          <div className={`home-hero-flip ${hasFortuneExtras ? 'has-extras' : ''}`}>
+            <div
+              className={`home-hero-flip-inner ${heroFace === 1 ? 'flipped' : ''}`}
+              onClick={() => setHeroFace((f) => (f + 1) % 2)}
+              role="button"
+              aria-label="히어로 카드 뒤집기"
+            >
+              {/* ── Front: 연애 카드 ── */}
+              <section className="home-hero-flip-face home-hero-new" style={{ '--love-temp-color': heartColor }}>
+                <div className="home-hero-new__top">
+                  <span className="home-love-top-label">
+                    {loveTemp?.weatherBased && !userId ? '💕 오늘의 연애 날씨' : '💕 나의 연애 온도'}
+                  </span>
+                </div>
+                <div className="home-love-hearts-bg">
+                  {Array.from({ length: heartCount }).map((_, i) => (
+                    <span key={i} className="home-love-float-heart" style={{
+                      '--hf-x': `${5 + (i * 97 / heartCount) % 90}%`,
+                      '--hf-delay': `${i * 0.35}s`,
+                      '--hf-dur': `${2.5 + (i % 3) * 0.8}s`,
+                      '--hf-size': `${12 + (i % 5) * 3}px`,
+                      color: heartColor,
+                    }}>&#x2764;</span>
+                  ))}
+                </div>
+                <div className="home-love-temp-center">
+                  <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
+                  <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
+                </div>
+                <p className="home-hero-new__msg">{msg}</p>
+                {userId && fortuneLoading && !myData?.saju && (
+                  <div className="home-hero-fortune-summary skeleton-pulse">
+                    <span className="hero-fortune-badge">🔮 --</span>
+                    <span className="hero-fortune-text">운세를 불러오는 중...</span>
+                  </div>
+                )}
+                {userId && myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall && (
+                  <div className="home-hero-fortune-summary" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
+                    <span className={`hero-fortune-badge ${myData.saju.score >= 80 ? 'badge-great' : myData.saju.score >= 60 ? 'badge-good' : myData.saju.score >= 40 ? 'badge-normal' : 'badge-low'}`}>
+                      {myData.saju.score >= 80 ? '🌟' : myData.saju.score >= 60 ? '☀️' : myData.saju.score >= 40 ? '🌤️' : '🌙'} {myData.saju.score}
+                    </span>
+                    <span className="hero-fortune-text">{myData.saju.overall.split('.')[0] + '.'}</span>
+                  </div>
+                )}
+                {userId && !fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed && (
+                  <button className="home-hero-fortune-cta" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
+                    ✨ 오늘의 운세 분석받기 <span>›</span>
+                  </button>
+                )}
+                <span className="home-hero-flip-hint">↕ 탭하면 날씨</span>
+              </section>
+
+              {/* ── Back: 날씨 카드 ── */}
+              <section
+                className={`home-hero-flip-face home-hero-flip-back home-weather-card home-weather-card--${timeBand.id}`}
+                style={{ '--w-from': w.bgFrom, '--w-to': w.bgTo, '--w-overlay': timeBand.overlay }}
+              >
+                <div className="home-weather-orb home-weather-orb--1" />
+                <div className="home-weather-orb home-weather-orb--2" />
+                <div className="home-hero-new__top">
+                  <span className="home-weather-city">📍 {w.city}</span>
+                </div>
+                <div className="home-weather-center">
+                  <span className="home-weather-condition home-weather-condition--inline">{w.conditionLabel || w.condition}</span>
+                  <span className="home-weather-icon">{w.icon}</span>
+                  <span className="home-weather-temp">{w.temp}°</span>
+                </div>
+                <div className="home-weather-meta">
+                  <span className="home-weather-meta-item">↑ {w.high}°</span>
+                  <span className="home-weather-meta-sep">·</span>
+                  <span className="home-weather-meta-item">↓ {w.low}°</span>
+                  <span className="home-weather-meta-sep">·</span>
+                  <span className="home-weather-meta-item">💧 {w.humidity}%</span>
+                </div>
+                <p className="home-hero-new__msg">{w.message}</p>
+                <span className="home-hero-flip-hint">↕ 탭하면 연애운</span>
+              </section>
             </div>
-            <div className="home-hero-new__top">
-              <h1 className="home-hero__title">1:1연애운</h1>
-              <span className="home-hero__date-inline">{dayStr} {dateStr}</span>
-            </div>
-            <div className="home-love-temp-center">
-              <span className="home-love-temp-heart" style={{ color: heartColor }}>&#x2764;</span>
-              <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
-            </div>
-            <p className="home-love-temp-label">
-              {loveTemp?.weatherBased && !userId ? '오늘의 연애 날씨' : '나의 연애 온도'}
-            </p>
-            <p className="home-hero-new__msg">{msg}</p>
-            {/* 로그인 사용자: 오늘 운세 한줄 요약 (AI 분석 캐시가 있을 때만) */}
-            {userId && fortuneLoading && !myData?.saju && (
-              <div className="home-hero-fortune-summary skeleton-pulse">
-                <span className="hero-fortune-badge">🔮 --</span>
-                <span className="hero-fortune-text">운세를 불러오는 중...</span>
-              </div>
-            )}
-            {userId && myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall && (
-              <div className="home-hero-fortune-summary" onClick={() => navigate('/my')}>
-                <span className={`hero-fortune-badge ${myData.saju.score >= 80 ? 'badge-great' : myData.saju.score >= 60 ? 'badge-good' : myData.saju.score >= 40 ? 'badge-normal' : 'badge-low'}`}>
-                  {myData.saju.score >= 80 ? '🌟' : myData.saju.score >= 60 ? '☀️' : myData.saju.score >= 40 ? '🌤️' : '🌙'} {myData.saju.score}
-                </span>
-                <span className="hero-fortune-text">{myData.saju.overall.split('.')[0] + '.'}</span>
-              </div>
-            )}
-            {/* AI 분석 캐시가 없으면 CTA */}
-            {userId && !fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed && (
-              <button className="home-hero-fortune-cta" onClick={() => navigate('/my')}>
-                ✨ 오늘의 운세 분석받기 <span>›</span>
-              </button>
-            )}
-          </section>
+          </div>
         );
       })()}
 
-      {/* 2. 비로그인 CTA */}
+      {/* 2. 비로그인 CTA — 상단 카드 바로 아래 */}
       {!userId && !showForm && (
-        <section style={{ padding: '0 4px' }}>
-          <button className="home-cta-btn" onClick={() => navigate('/register', { state: { from: '/' } })}>
-            카카오 로그인하고 맞춤 운세 받기
-          </button>
+        <section style={{ padding: '0 4px', marginTop: 0, marginBottom: 12 }}>
+          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
         </section>
       )}
 
@@ -743,9 +895,7 @@ function Home() {
       {/* 비로그인: 카카오 로그인 유도 */}
       {!userId && !showForm && (
         <section style={{ padding: '0 4px' }}>
-          <button className="home-cta-btn" onClick={() => navigate('/register', { state: { from: '/' } })}>
-            카카오 로그인하고 맞춤 운세 받기
-          </button>
+          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
         </section>
       )}
 

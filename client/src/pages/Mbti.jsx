@@ -6,7 +6,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 
 import StreamText from '../components/StreamText';
 import StreamingCard from '../components/StreamingCard';
-import PageTopBar from '../components/PageTopBar';
+import HeroIconButtons from '../components/HeroIconButtons';
 import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -186,8 +186,8 @@ function Mbti() {
           }
         }}
       />
-      <PageTopBar onReset={handleReset} color="#8B5CF6" />
-      <div className="mbti-hero">
+      <div className="mbti-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#8B5CF6" onReset={handleReset} />
         <h1 className="mbti-title">MBTI 운세</h1>
         <p className="mbti-subtitle">16가지 성격 유형으로 보는 오늘의 운세</p>
       </div>

@@ -6,7 +6,7 @@ import DeepAnalysis from '../components/DeepAnalysis';
 
 import StreamText from '../components/StreamText';
 import StreamingCard from '../components/StreamingCard';
-import PageTopBar from '../components/PageTopBar';
+import HeroIconButtons from '../components/HeroIconButtons';
 import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -167,8 +167,8 @@ function BloodType() {
           }
         }}
       />
-      <PageTopBar onReset={handleReset} color="#EF4444" />
-      <div className="bt-hero">
+      <div className="bt-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#EF4444" onReset={handleReset} />
         <h1 className="bt-title">혈액형 운세</h1>
         <p className="bt-subtitle">혈액형으로 보는 오늘의 운세와 궁합</p>
       </div>

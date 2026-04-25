@@ -66,6 +66,37 @@
   align-items: center;
   gap: 8px;
 }
+
+/* 오늘 날짜 칩 — 요일 + 월.일 */
+.top-bar-date {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(244,114,182,0.18), rgba(124,58,237,0.14));
+  border: 1px solid rgba(244,114,182,0.25);
+  white-space: nowrap;
+  font-feature-settings: "tnum";
+}
+.top-bar-date-day {
+  font-size: 12px;
+  font-weight: 800;
+  color: #F472B6;
+  letter-spacing: 0.5px;
+}
+.top-bar-date-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.3px;
+}
+[data-theme="light"] .top-bar-date {
+  background: linear-gradient(135deg, rgba(244,114,182,0.1), rgba(124,58,237,0.06));
+  border-color: rgba(244,114,182,0.2);
+}
+[data-theme="light"] .top-bar-date-day { color: #d4380d; }
+[data-theme="light"] .top-bar-date-num { color: rgba(0,0,0,0.55); }
 .top-bar-user {
   font-size: 12px; font-weight: 700;
   color: rgba(255,255,255,0.7);
@@ -81,14 +112,29 @@
   color: rgba(0,0,0,0.6); background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08);
 }
 
-/* 하트 잔액 */
+/* 하트 잔액 — 클릭 시 서버에서 새로 조회 */
 .top-bar-hearts {
   display: flex; align-items: center; gap: 4px;
   padding: 4px 10px; border-radius: 16px;
   background: rgba(244,114,182,0.12);
   border: 1px solid rgba(244,114,182,0.2);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-.top-bar-hearts-icon { font-size: 14px; }
+.top-bar-hearts:hover { background: rgba(244,114,182,0.2); }
+.top-bar-hearts:active { transform: scale(0.95); }
+.top-bar-hearts.refreshing .top-bar-hearts-icon {
+  animation: heartChipSpin 0.6s linear;
+}
+@keyframes heartChipSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.top-bar-hearts-icon {
+  font-size: 14px;
+  display: inline-block;
+}
 .top-bar-hearts-count {
   font-size: 13px; font-weight: 800; color: #F472B6;
   min-width: 20px; text-align: center;

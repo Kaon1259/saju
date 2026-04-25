@@ -85,14 +85,34 @@ const TAB_INTRO_MAP = {
   '/profile': 'my',
 };
 
+const DAY_NAMES_KR = ['일', '월', '화', '수', '목', '금', '토'];
+
 function Header({ onHomeSplash, onTabIntro }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { triggerTransition } = useTransition();
   const { isLoggedIn, appUser } = useApp();
   const userId = isLoggedIn ? localStorage.getItem('userId') : null;
-  const { heartPoints } = useHearts();
+  const { heartPoints, refreshHearts } = useHearts();
   const [showMore, setShowMore] = useState(false);
+  const [heartRefreshing, setHeartRefreshing] = useState(false);
+
+  // 하트 칩 클릭 — 서버에서 잔량 새로 조회 (네비게이션 없이 현재 자리에서 갱신)
+  const handleHeartsClick = async () => {
+    if (heartRefreshing) return;
+    setHeartRefreshing(true);
+    try { await refreshHearts(); } catch {}
+    setTimeout(() => setHeartRefreshing(false), 600);
+  };
+
+  // 오늘 날짜 / 요일 — 자정 지나면 갱신되도록 분 단위 폴링
+  const [today, setToday] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setToday(new Date()), 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+  const dayLabel = DAY_NAMES_KR[today.getDay()];
+  const dateLabel = `${today.getMonth() + 1}.${today.getDate()}`;
   // 다크모드 고정
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -162,12 +182,22 @@ function Header({ onHomeSplash, onTabIntro }) {
         </button>
 
         <div className="top-bar-right">
+          <span className="top-bar-date" aria-label="오늘 날짜">
+            <span className="top-bar-date-day">{dayLabel}</span>
+            <span className="top-bar-date-num">{dateLabel}</span>
+          </span>
           <span className="top-bar-user" onClick={() => navigate(isLoggedIn ? '/profile' : '/register')}>
             {isLoggedIn ? (appUser?.name || localStorage.getItem('userName') || '사용자') : 'Guest'}
           </span>
           {heartPoints != null && (
-            <div className="top-bar-hearts" onClick={() => navigate('/my-menu')}>
-              <span className="top-bar-hearts-icon">💗</span>
+            <div
+              className={`top-bar-hearts ${heartRefreshing ? 'refreshing' : ''}`}
+              onClick={handleHeartsClick}
+              role="button"
+              aria-label="하트 잔량 새로고침"
+              title="탭하면 잔량 새로고침"
+            >
+              <span className="top-bar-hearts-icon">{heartRefreshing ? '🔄' : '💗'}</span>
               <span className="top-bar-hearts-count">{heartPoints}</span>
             </div>
           )}

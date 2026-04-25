@@ -12,6 +12,7 @@ import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './LoveTypeFortune.css';
 
 const LOVE_TYPES = {
@@ -159,10 +160,8 @@ function LoveTypeFortune() {
   if (!info) {
     return (
       <div className="ltf-page">
-        <div className="ltf-topbar">
-          <button className="ltf-topbtn ltf-topbtn--back" onClick={() => navigate(-1)}>‹ 뒤로</button>
-        </div>
-        <div className="ltf-notfound">
+        <div className="ltf-notfound" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+          <HeroIconButtons color="#94A3B8" />
           <span style={{ fontSize: 48 }}>❓</span>
           <h2>존재하지 않는 운세입니다</h2>
           <button className="ltf-submit" onClick={() => navigate('/')}>홈으로</button>
@@ -312,18 +311,9 @@ function LoveTypeFortune() {
           }
         }}
       />
-      {/* 상단 버튼 */}
-      <div className="ltf-topbar">
-        <button className="ltf-topbtn ltf-topbtn--back" onClick={() => navigate(-1)} aria-label="뒤로">
-          <span>‹</span> 뒤로
-        </button>
-        <button className="ltf-topbtn ltf-topbtn--reset" onClick={handleReset} aria-label="다시하기">
-          다시하기 <span>↻</span>
-        </button>
-      </div>
-
-      {/* ═══ 히어로 ═══ */}
-      <div className="ltf-hero">
+      {/* ═══ 히어로 — 좌우 상단에 뒤로/다시하기 통합 ═══ */}
+      <div className="ltf-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color={info.color} onReset={handleReset} />
         <div className="ltf-hero-bg" />
         <div className="ltf-hero-particles">
           {info.particles.map((p, i) => (

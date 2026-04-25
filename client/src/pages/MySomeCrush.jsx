@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './MySomeCrush.css';
 
 const SOME_CRUSH_MENUS = [
@@ -14,10 +16,9 @@ function MySomeCrush() {
 
   return (
     <div className="mysome-page">
-      <button className="mysome-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
-
-      {/* 히어로 */}
-      <section className="mysome-hero">
+      {/* 히어로 — 좌상단에 뒤로 아이콘 통합 */}
+      <section className="mysome-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#a855f7" />
         <div className="mysome-hero-sparkles">
           {[...Array(10)].map((_, i) => <span key={i} style={{ '--msc-i': i }}>✦</span>)}
         </div>
@@ -31,9 +32,9 @@ function MySomeCrush() {
 
       {!isLoggedIn && (
         <section className="mysome-login-cta">
-          <button className="mysome-login-btn" onClick={() => navigate('/register', { state: { from: '/my-some-crush' } })}>
-            💕 로그인하고 맞춤 썸 분석 받기
-          </button>
+          <KakaoLoginCTA returnTo="/my-some-crush">
+            카카오 로그인하고 맞춤 썸 분석 받기
+          </KakaoLoginCTA>
         </section>
       )}
 

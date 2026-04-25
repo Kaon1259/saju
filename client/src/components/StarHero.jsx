@@ -1,9 +1,10 @@
 import './StarHero.css';
 
-function StarHero({ icon = '⭐', title, desc, color = '#FF9800', particles = ['⭐','✨','💫','🌟','✦'] }) {
-  const style = { '--sh-color': color };
+function StarHero({ icon = '⭐', title, desc, color = '#FF9800', particles = ['⭐','✨','💫','🌟','✦'], topButtons = null }) {
+  const style = { '--sh-color': color, position: 'relative' };
   return (
     <div className="star-hero" style={style}>
+      {topButtons}
       <div className="star-hero-bg" />
       <div className="star-hero-particles">
         {particles.map((p, i) => (

@@ -10,6 +10,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import './YearFortune.css';
 
 const BIRTH_TIMES = [
@@ -355,7 +356,7 @@ function YearFortune() {
                 <>
                   <div style={{ fontSize: 48, margin: '20px 0' }}>🔮</div>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>프로필 정보가 없습니다.<br />회원가입 후 이용해주세요.</p>
-                  <button className="yf-submit" onClick={() => navigate('/register')}>회원가입하기</button>
+                  <KakaoLoginCTA returnTo="/year-fortune" className="yf-submit">카카오 로그인하고 신년운세 받기</KakaoLoginCTA>
                 </>
               )}
             </div>

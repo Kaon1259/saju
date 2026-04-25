@@ -4,7 +4,7 @@ import { getPsychTests, analyzePsychTestStream, isGuest } from '../api/fortune';
 
 import StreamText from '../components/StreamText';
 import StreamingCard from '../components/StreamingCard';
-import PageTopBar from '../components/PageTopBar';
+import HeroIconButtons from '../components/HeroIconButtons';
 import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -252,7 +252,6 @@ function PsychTest() {
           }
         }}
       />
-      <PageTopBar onReset={goToOtherTest} color={selectedTest?.color || '#9B59B6'} />
       {/* 배경 */}
       <div className="pt-bg">
         {Array.from({ length: 25 }).map((_, i) => (
@@ -269,7 +268,8 @@ function PsychTest() {
 
       {/* ═══ 히어로 ═══ */}
       {step === 'select' && (
-        <div className="pt-hero fade-in">
+        <div className="pt-hero fade-in" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+          <HeroIconButtons color={selectedTest?.color || '#9B59B6'} onReset={goToOtherTest} />
           <div className="pt-hero-glow" />
           <div className="pt-hero-icon">{'\uD83E\uDDE0'}</div>
           <h1 className="pt-title">심리테스트</h1>

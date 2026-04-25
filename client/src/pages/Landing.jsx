@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { startKakaoLogin } from '../utils/kakaoAuth';
 import './Landing.css';
 
 const FEATURES = [
@@ -45,7 +46,7 @@ function Landing() {
 
   const goLogin = () => {
     markSeen();
-    navigate('/register');
+    startKakaoLogin('/');
   };
 
   const goHome = () => {

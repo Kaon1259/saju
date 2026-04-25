@@ -13,7 +13,6 @@ import {
 import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
-import PageTopBar from '../components/PageTopBar';
 import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
 import StreamText from '../components/StreamText';
@@ -21,12 +20,14 @@ import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFields, extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import './MyLoveCompat.css';
 
 const TABS = [
   { id: 'saju',     icon: '🔮', label: '정통궁합' },
   { id: 'marriage', icon: '💒', label: '결혼궁합' },
   { id: 'skinship', icon: '💋', label: '스킨십궁합' },
+  { id: 'date',     icon: '💑', label: '데이트운' },
 ];
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -44,7 +45,7 @@ function MyLoveCompat() {
   const userId = localStorage.getItem('userId');
   const [tab, setTab] = useState(() => {
     const preset = location.state?.presetTab;
-    return (preset === 'marriage' || preset === 'skinship') ? preset : 'saju';
+    return (preset === 'marriage' || preset === 'skinship' || preset === 'date') ? preset : 'saju';
   });
 
   // 사주 입력
@@ -116,8 +117,9 @@ function MyLoveCompat() {
         const full = await getHistory(hid);
         const p = full?.payload;
         if (!p) return;
-        if (full?.type === 'skinship_compat') {
-          setTab('skinship');
+        if (full?.type === 'skinship_compat' || full?.type === 'date_compat') {
+          const isDate = full?.type === 'date_compat';
+          setTab(isDate ? 'date' : 'skinship');
           setBd1(p.birthDate || '');
           setBd2(p.partnerDate || '');
           setG1(p.gender || 'M');
@@ -132,7 +134,7 @@ function MyLoveCompat() {
               ...base,
               _g1: p.gender || 'M',
               _g2: p.partnerGender || 'F',
-              _kind: 'skinship',
+              _kind: isDate ? 'date' : 'skinship',
               score: p.score || base.score,
               grade: p.grade || base.grade,
               aiAnalysis: p.overall,
@@ -290,6 +292,7 @@ function MyLoveCompat() {
   const { guardedAction: guardSajuCompat } = useHeartGuard('COMPATIBILITY');
   const { guardedAction: guardMarriageCompat } = useHeartGuard('COMPATIBILITY');
   const { guardedAction: guardSkinshipCompat } = useHeartGuard('LOVE_COUPLE');
+  const { guardedAction: guardDateCompat } = useHeartGuard('LOVE_COUPLE');
   const { guardedAction: guardDeepSajuCompat } = useHeartGuard('DEEP_COMPATIBILITY');
   const { guardedAction: guardDeepMarriageCompat } = useHeartGuard('DEEP_MARRIAGE_COMPAT');
 
@@ -823,21 +826,153 @@ function MyLoveCompat() {
     }
   };
 
+  // ══ 데이트운 (오늘의 커플 운세) — type='couple_fortune' ══
+  const analyzeDate = async () => {
+    if (!bd1 || !bd2) return;
+    setLoading(true);
+    setResult(null);
+    setStreamText('');
+    setMatrixShown(true);
+    setMatrixExiting(false);
+    try { playAnalyzeStart(); } catch {}
+    try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
+
+    try {
+      const base = await getSajuCompatibilityBasic(
+        bd1, bd2, bt1 || undefined, bt2 || undefined, 'SOLAR', 'SOLAR', g1, g2,
+        { historyType: 'date_compat' }
+      );
+      base._g1 = g1;
+      base._g2 = g2;
+      base._kind = 'date';
+
+      setLoading(false);
+      setAiStreaming(true);
+
+      const FIELD_MAP = {
+        overall: 'aiAnalysis', timing: 'aiTiming', advice: 'aiAdvice',
+        caution: 'aiCaution', mindsetBoost: 'aiMindsetBoost', oneLiner: 'aiOneLiner',
+        luckyDay: 'aiLuckyDay', luckyPlace: 'aiLuckyPlace', luckyColor: 'aiLuckyColor',
+      };
+      const PROG_FIELDS = Object.keys(FIELD_MAP);
+      let buffer = '';
+      let firstShown = false;
+
+      setDoneFields(new Set());
+      setStreamingActive(true);
+      setResult(base);
+      setMatrixExiting(true);
+      setTimeout(() => setMatrixShown(false), 600);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+      cleanupRef.current = getLoveFortuneStream('couple_fortune', bd1, bt1 || '', g1, 'SOLAR', bd2, g2, '', '', '', {
+        onCached: (cached) => {
+          setAiStreaming(false); setStreamText('');
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          setResult({
+            ...base,
+            score: cached.score || base.score,
+            grade: cached.grade || base.grade,
+            aiAnalysis: cached.overall || null,
+            aiTiming: cached.timing || null,
+            aiAdvice: cached.advice || null,
+            aiCaution: cached.caution || null,
+            aiMindsetBoost: cached.mindsetBoost || null,
+            aiOneLiner: cached.oneLiner || null,
+            aiLuckyDay: cached.luckyDay || null,
+            aiLuckyPlace: cached.luckyPlace || null,
+            aiLuckyColor: cached.luckyColor || null,
+          });
+          setStreamingActive(false);
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+        },
+        onChunk: (text) => {
+          buffer += text;
+          setStreamText((prev) => prev + text);
+          const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+          const newFields = {};
+          const newDone = [];
+          for (const [src, dst] of Object.entries(FIELD_MAP)) {
+            const p = partial[src];
+            if (p !== undefined) {
+              newFields[dst] = p.value;
+              if (p.done) newDone.push(dst);
+            }
+          }
+          if (Object.keys(newFields).length > 0) {
+            setResult((prev) => ({ ...(prev || base), ...newFields }));
+            firstShown = true;
+          }
+          if (newDone.length > 0) {
+            setDoneFields((prev) => {
+              let changed = false;
+              const next = new Set(prev);
+              for (const f of newDone) { if (!next.has(f)) { next.add(f); changed = true; } }
+              return changed ? next : prev;
+            });
+          }
+        },
+        onDone: (fullText) => {
+          const parsed = parseAiJson(fullText);
+          const merged = parsed ? {
+            ...base,
+            score: parsed.score || base.score,
+            grade: parsed.grade || base.grade,
+            aiAnalysis: parsed.overall || null,
+            aiTiming: parsed.timing || null,
+            aiAdvice: parsed.advice || null,
+            aiCaution: parsed.caution || null,
+            aiMindsetBoost: parsed.mindsetBoost || null,
+            aiOneLiner: parsed.oneLiner || null,
+            aiLuckyDay: parsed.luckyDay || null,
+            aiLuckyPlace: parsed.luckyPlace || null,
+            aiLuckyColor: parsed.luckyColor || null,
+          } : { ...base, aiAnalysis: fullText };
+          setAiStreaming(false);
+          setStreamingActive(false);
+          setDoneFields(new Set());
+          if (firstShown) {
+            setResult(merged);
+            try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+            setStreamText('');
+          } else {
+            finishWithCompleteAnimation(merged);
+          }
+        },
+        onError: () => {
+          setAiStreaming(false); setStreamText('');
+          setStreamingActive(false); setDoneFields(new Set());
+          try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      setMatrixShown(false);
+      try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    }
+  };
+
   const matrixLabel = deepStreaming
     ? (deepStreamingType === 'marriage_compat'
         ? 'AI가 결혼 궁합을 더 깊이 분석하고 있어요'
         : 'AI가 사주 궁합을 더 깊이 분석하고 있어요')
     : (tab === 'saju'     ? 'AI가 사주 궁합을 분석하고 있어요' :
        tab === 'marriage' ? 'AI가 결혼 궁합을 분석하고 있어요' :
+       tab === 'date'     ? 'AI가 데이트운을 분석하고 있어요' :
                             'AI가 스킨십 궁합을 분석하고 있어요');
 
   return (
     <div className="mlc-page">
-      <PageTopBar onReset={handleReset} color="#E91E63" />
-
-      {/* 히어로 */}
+      {/* 히어로 — 좌우 상단에 뒤로/다시하기 아이콘 버튼 통합 */}
       <section className="mlc-hero">
         <div className="mlc-hero-bg" />
+        <button className="mlc-hero-iconbtn mlc-hero-iconbtn--back" onClick={() => navigate(-1)} aria-label="뒤로">
+          <span>‹</span>
+        </button>
+        <button className="mlc-hero-iconbtn mlc-hero-iconbtn--reset" onClick={handleReset} aria-label="다시하기">
+          <span>↻</span>
+        </button>
         <div className="mlc-hero-couple">
           <span className="mlc-sym mlc-sym--m">♂</span>
           <div className="mlc-hero-bond">
@@ -848,18 +983,6 @@ function MyLoveCompat() {
         </div>
         <h1 className="mlc-title">나의 연인과의 궁합</h1>
         <p className="mlc-subtitle">사주·결혼·스킨십, 세 가지 궁합으로 우리를 깊이 알아봐요</p>
-      </section>
-
-      {/* 연인과 함께 보는 추가 운세 — 데이트운 */}
-      <section className="mlc-related">
-        <button className="mlc-related-card" onClick={() => navigate('/love/couple_fortune')}>
-          <span className="mlc-related-icon">💑</span>
-          <div className="mlc-related-text">
-            <span className="mlc-related-label">오늘의 데이트운</span>
-            <span className="mlc-related-sub">연인과 오늘 만나도 좋은 날일까요?</span>
-          </div>
-          <span className="mlc-related-arrow">›</span>
-        </button>
       </section>
 
       {/* 탭 */}
@@ -882,12 +1005,9 @@ function MyLoveCompat() {
           {userId ? (
             <button className="mlc-autofill-btn" onClick={handleAutoFill}>✨ 내 정보 / 연인 정보로 채우기</button>
           ) : (
-            <button
-              className="mlc-login-cta"
-              onClick={() => navigate('/register', { state: { from: '/my-love-compat' } })}
-            >
-              💕 로그인하고 연인과 궁합보기
-            </button>
+            <KakaoLoginCTA returnTo="/my-love-compat" className="mlc-login-cta">
+              카카오 로그인하고 연인과 궁합보기
+            </KakaoLoginCTA>
           )}
 
           {/* ═══ 사주 ═══ */}
@@ -999,6 +1119,43 @@ function MyLoveCompat() {
 
               <button className="mlc-submit" onClick={() => guardSkinshipCompat(analyzeSkinship)} disabled={!bd1 || !bd2}>
                 💋 스킨십 궁합 보기 <HeartCost category="LOVE_COUPLE" />
+              </button>
+            </>
+          )}
+
+          {/* ═══ 데이트운 ═══ */}
+          {tab === 'date' && (
+            <>
+              <div className="mlc-person-block">
+                <h3 className="mlc-person-title">👤 내 정보</h3>
+                <BirthDatePicker value={bd1} onChange={setBd1} />
+                <div className="mlc-toggle">
+                  <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
+                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
+                  </button>
+                  <button className={`mlc-toggle-btn ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>
+                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="mlc-person-block">
+                <h3 className="mlc-person-title">💕 연인 정보</h3>
+                <BirthDatePicker value={bd2} onChange={setBd2} />
+                <div className="mlc-toggle">
+                  <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
+                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
+                  </button>
+                  <button className={`mlc-toggle-btn ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>
+                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
+                  </button>
+                </div>
+              </div>
+
+              <p className="mlc-marriage-hint">💑 오늘 둘이 만나도 좋은 날일까요? 행운의 시간대·장소·컬러까지</p>
+
+              <button className="mlc-submit" onClick={() => guardDateCompat(analyzeDate)} disabled={!bd1 || !bd2}>
+                💑 오늘의 데이트운 보기 <HeartCost category="LOVE_COUPLE" />
               </button>
             </>
           )}
@@ -1374,6 +1531,87 @@ function MyLoveCompat() {
             </>
           )}
 
+          {/* 데이트운 결과 */}
+          {tab === 'date' && result._kind === 'date' && result.person1 && (
+            <>
+              <div className="mlc-score-hero">
+                <div className="mlc-vs-row">
+                  <div className="mlc-person-card">
+                    <span className="mlc-person-icon" style={{ color: result._g1 === 'F' ? '#F472B6' : '#60A5FA' }}>
+                      {result._g1 === 'F' ? '♀' : '♂'}
+                    </span>
+                    <span className="mlc-person-pillar" style={{ color: ELEMENT_COLORS[result.person1.dayMasterElement] || '#fbbf24' }}>
+                      {result.person1.dayMaster}
+                    </span>
+                    <span className="mlc-person-date">{result.person1.birthDate}</span>
+                  </div>
+                  <div className="mlc-score-ring-wrap">
+                    <svg viewBox="0 0 100 100" className="mlc-score-ring">
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+                      <circle cx="50" cy="50" r="42" fill="none" stroke={getScoreColor(result.score)} strokeWidth="6" strokeLinecap="round"
+                        strokeDasharray={`${(result.score / 100) * 264} 264`} transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div className="mlc-score-inner">
+                      <span className="mlc-score-num">{result.score}</span>
+                      <span className="mlc-score-unit">점</span>
+                    </div>
+                  </div>
+                  <div className="mlc-person-card">
+                    <span className="mlc-person-icon" style={{ color: result._g2 === 'F' ? '#F472B6' : '#60A5FA' }}>
+                      {result._g2 === 'F' ? '♀' : '♂'}
+                    </span>
+                    <span className="mlc-person-pillar" style={{ color: ELEMENT_COLORS[result.person2.dayMasterElement] || '#a78bfa' }}>
+                      {result.person2.dayMaster}
+                    </span>
+                    <span className="mlc-person-date">{result.person2.birthDate}</span>
+                  </div>
+                </div>
+                <span className="mlc-grade-badge" style={{ color: GRADE_COLORS[result.grade] || getScoreColor(result.score) }}>
+                  💑 {result.grade}
+                </span>
+              </div>
+
+              {result.aiOneLiner && !streamingActive && (
+                <div className="mlc-oneliner">
+                  <span className="mlc-oneliner-text">{result.aiOneLiner}</span>
+                </div>
+              )}
+              {(streamingActive || result.aiAnalysis || result.aiTiming) && (() => {
+                const fs = (field) => {
+                  if (!streamingActive) return 'done';
+                  if (doneFields.has(field)) return 'done';
+                  if (result[field]) return 'streaming';
+                  return 'pending';
+                };
+                return (
+                  <>
+                    {streamingActive && (
+                      <StreamingCard icon="💞" title="한 줄 메시지" text={result.aiOneLiner || ''} status={fs('aiOneLiner')} delay={0} />
+                    )}
+                    <StreamingCard icon="💑" title="오늘 데이트 진단" text={result.aiAnalysis || ''} status={fs('aiAnalysis')} delay={80} />
+                    <StreamingCard icon="⏰" title="만남 좋은 시간대" text={result.aiTiming || ''} status={fs('aiTiming')} delay={160} />
+                    <StreamingCard icon="💡" title="오늘의 행동 조언" text={result.aiAdvice || ''} status={fs('aiAdvice')} delay={240} />
+                    <StreamingCard icon="⚠️" title="오늘 주의할 점" text={result.aiCaution || ''} status={fs('aiCaution')} delay={320} />
+                    <StreamingCard icon="💪" title="멘탈 부스터" text={result.aiMindsetBoost || ''} status={fs('aiMindsetBoost')} delay={400} />
+                    {streamingActive ? (
+                      <>
+                        <StreamingCard icon="📅" title="데이트하기 좋은 날" text={result.aiLuckyDay || ''} status={fs('aiLuckyDay')} delay={480} />
+                        <StreamingCard icon="📍" title="추천 데이트 장소" text={result.aiLuckyPlace || ''} status={fs('aiLuckyPlace')} delay={560} />
+                        <StreamingCard icon="🎨" title="오늘의 럭키 컬러" text={result.aiLuckyColor || ''} status={fs('aiLuckyColor')} delay={640} />
+                      </>
+                    ) : (result.aiLuckyDay || result.aiLuckyPlace || result.aiLuckyColor) && (
+                      <div className="mlc-lucky">
+                        {result.aiLuckyDay && <div className="mlc-lucky-item"><span className="mlc-lucky-label">데이트하기 좋은 날</span><span className="mlc-lucky-value">{result.aiLuckyDay}</span></div>}
+                        {result.aiLuckyPlace && <div className="mlc-lucky-item"><span className="mlc-lucky-label">추천 장소</span><span className="mlc-lucky-value">{result.aiLuckyPlace}</span></div>}
+                        {result.aiLuckyColor && <div className="mlc-lucky-item"><span className="mlc-lucky-label">럭키 컬러</span><span className="mlc-lucky-value">{result.aiLuckyColor}</span></div>}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </>
+          )}
+
           <button className="mlc-reset-btn" onClick={handleReset}>🔄 다시 보기</button>
         </div>
       )}
@@ -1381,21 +1619,20 @@ function MyLoveCompat() {
       {/* 하단 pull-up drawer — 탭별 히스토리 타입 분기 */}
       {!isGuest() && (
         <HistoryDrawer
-          type={tab === 'marriage' ? 'marriage_compat' : tab === 'skinship' ? 'skinship_compat' : 'my_love_compat'}
-          label={tab === 'marriage' ? '📚 최근 본 결혼 궁합' : tab === 'skinship' ? '📚 최근 본 스킨십 궁합' : '📚 최근 본 연인 궁합'}
+          type={tab === 'marriage' ? 'marriage_compat' : tab === 'skinship' ? 'skinship_compat' : tab === 'date' ? 'date_compat' : 'my_love_compat'}
+          label={tab === 'marriage' ? '📚 최근 본 결혼 궁합' : tab === 'skinship' ? '📚 최근 본 스킨십 궁합' : tab === 'date' ? '📚 최근 본 데이트운' : '📚 최근 본 연인 궁합'}
           onOpen={async (item) => {
             try {
               const full = await getHistory(item.id);
               const p = full?.payload;
               if (!p) return;
-              if (full?.type === 'skinship_compat') {
-                // payload는 SpecialFortune 스키마 (birthDate/partnerDate/overall/...)
-                setTab('skinship');
+              if (full?.type === 'skinship_compat' || full?.type === 'date_compat') {
+                const isDate = full?.type === 'date_compat';
+                setTab(isDate ? 'date' : 'skinship');
                 setBd1(p.birthDate || '');
                 setBd2(p.partnerDate || '');
                 setG1(p.gender || 'M');
                 setG2(p.partnerGender || 'F');
-                // skinship 결과 재현에는 person1/person2 사주 정보가 필요 → basic 재호출
                 try {
                   const base = await getSajuCompatibilityBasic(
                     p.birthDate, p.partnerDate,
@@ -1406,7 +1643,7 @@ function MyLoveCompat() {
                     ...base,
                     _g1: p.gender || 'M',
                     _g2: p.partnerGender || 'F',
-                    _kind: 'skinship',
+                    _kind: isDate ? 'date' : 'skinship',
                     score: p.score || base.score,
                     grade: p.grade || base.grade,
                     aiAnalysis: p.overall,

@@ -5,14 +5,11 @@ import { Browser } from '@capacitor/browser';
 import { kakaoLogin, kakaoRegister, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
+import { startKakaoLogin, peekKakaoReturnTo, clearKakaoReturnTo, getKakaoRedirectUri } from '../utils/kakaoAuth';
 import './Register.css';
 
-const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY || '';
 const isNative = Capacitor.isNativePlatform();
-const API_URL = import.meta.env.VITE_API_URL || '/api';
-const KAKAO_REDIRECT_URI = isNative
-  ? `${API_URL}/auth/kakao/app-callback`
-  : `${window.location.origin}/auth/kakao/callback`;
+const KAKAO_REDIRECT_URI = getKakaoRedirectUri();
 
 const BIRTH_TIMES = [
   { value: '', label: '모름 / 선택안함' },
@@ -66,7 +63,10 @@ function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const redirectTo = location.state?.from || '/';
+  // OAuth 콜백으로 복귀할 때는 location.state 가 비어있으므로 sessionStorage 에 저장된 returnTo 도 확인.
+  // peek 만 하고, 실제 navigate 성공 후에 clear — Strict Mode 더블 마운트로 값이 사라지는 것을 방지.
+  const redirectToRef = useRef(location.state?.from || peekKakaoReturnTo() || '/');
+  const redirectTo = redirectToRef.current;
 
   const needProfile = searchParams.get('needProfile') === 'true';
   const [step, setStep] = useState(needProfile ? 'profile' : 'kakao'); // 'kakao' | 'profile' | 'loading'
@@ -96,24 +96,13 @@ function Register() {
     localStorage.setItem('userProfile', JSON.stringify(user));
     window.dispatchEvent(new Event('heart:refresh'));
     window.dispatchEvent(new Event('auth:changed')); // AppContext 재초기화
+    clearKakaoReturnTo(); // 사용 완료 후 sessionStorage 정리
     navigate(redirectTo, { replace: true });
   };
 
   // 카카오 로그인 버튼 클릭
   const handleKakaoLogin = async () => {
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(KAKAO_REDIRECT_URI)}&response_type=code`;
-    if (isNative) {
-      // 앱: Chrome Custom Tab으로 열어야 카카오 차단 회피 (embedded WebView 차단)
-      // 인증 후 com.love.onetoone:// 딥링크로 MainActivity 복귀 → WebView 로드
-      try {
-        await Browser.open({ url: kakaoAuthUrl });
-      } catch (e) {
-        console.error('Browser.open failed', e);
-        window.location.href = kakaoAuthUrl;
-      }
-    } else {
-      window.location.href = kakaoAuthUrl;
-    }
+    await startKakaoLogin(redirectTo);
   };
 
   // 카카오 콜백 처리 - ref로 중복 호출 방지
@@ -143,6 +132,7 @@ function Register() {
 
         if (result.profileComplete) {
           // 프로필 완성됨 → 바로 이동
+          clearKakaoReturnTo();
           navigate(redirectTo, { replace: true });
         } else {
           // 프로필 미완성 → 프로필 입력 폼

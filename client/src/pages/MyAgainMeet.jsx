@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import HeroIconButtons from '../components/HeroIconButtons';
 import './MyAgainMeet.css';
 
 // "다시 만날까?" — 옛 인연 / 이별 후 마음 정리에 관한 4개 묶음 메뉴
@@ -15,10 +17,9 @@ function MyAgainMeet() {
 
   return (
     <div className="myagain-page">
-      <button className="myagain-back-btn" onClick={() => navigate(-1)}>← 뒤로</button>
-
-      {/* 히어로 */}
-      <section className="myagain-hero">
+      {/* 히어로 — 좌상단에 뒤로 아이콘 통합 */}
+      <section className="myagain-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
+        <HeroIconButtons color="#7c3aed" />
         <div className="myagain-hero-sparkles">
           {[...Array(10)].map((_, i) => <span key={i} style={{ '--ma-i': i }}>✦</span>)}
         </div>
@@ -32,9 +33,9 @@ function MyAgainMeet() {
 
       {!isLoggedIn && (
         <section className="myagain-login-cta">
-          <button className="myagain-login-btn" onClick={() => navigate('/register', { state: { from: '/again-meet' } })}>
-            🕯️ 로그인하고 맞춤 분석 받기
-          </button>
+          <KakaoLoginCTA returnTo="/again-meet">
+            카카오 로그인하고 맞춤 분석 받기
+          </KakaoLoginCTA>
         </section>
       )}
 
