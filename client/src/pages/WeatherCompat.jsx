@@ -68,6 +68,9 @@ export default function WeatherCompat() {
     setStreamText('');
     setResult(null);
 
+    // 누적 buffer — onDone 의 fullText 가 비어 있을 때 fallback 으로 사용
+    let buffer = '';
+
     cleanupRef.current = getWeatherCompatStream(
       {
         condition: weather.condition,
@@ -82,20 +85,31 @@ export default function WeatherCompat() {
           setStreamText('');
           setResult(cachedData);
         },
-        onChunk: (text) => setStreamText(prev => prev + text),
+        onChunk: (text) => {
+          buffer += text;
+          setStreamText(prev => prev + text);
+        },
         onDone: (fullText) => {
           setStreaming(false);
           setLoading(false);
-          const text = fullText || '';
+          const text = (fullText && fullText.trim()) ? fullText : buffer;
           setStreamText('');
           const parsed = parseAiJson(text);
-          if (parsed) {
+          const baseMeta = {
+            condition: weather.condition,
+            conditionKo: weather.conditionLabel || weather.condition,
+            dayMaster,
+            date: new Date().toISOString().slice(0, 10),
+          };
+          if (parsed && (parsed.overall || parsed.summary)) {
+            setResult({ ...parsed, ...baseMeta });
+          } else {
+            // 파싱 실패 시에도 raw text 를 종합 분석으로 노출 (빈 화면 방지)
             setResult({
-              ...parsed,
-              condition: weather.condition,
-              conditionKo: weather.conditionLabel || weather.condition,
-              dayMaster,
-              date: new Date().toISOString().slice(0, 10),
+              score: 70,
+              grade: '보통',
+              overall: text || '오늘의 날씨와 사주 궁합 분석을 다시 시도해주세요.',
+              ...baseMeta,
             });
           }
         },
@@ -157,10 +171,21 @@ export default function WeatherCompat() {
               오늘은 <b>{weather.conditionLabel || weather.condition}</b>이에요.<br/>
               날씨가 가진 오행과 내 일간의 상생/상극으로 오늘의 운세를 봐드릴게요.
             </p>
-            <button className="wc-analyze-btn" onClick={handleAnalyze} disabled={!weather?.condition}>
-              ✨ 날씨 궁합 분석받기
-              <HeartCost category="WEATHER_COMPAT" />
-            </button>
+            {!dayMaster ? (
+              <>
+                <p className="wc-cta-desc" style={{ color: '#ec4899', fontWeight: 700 }}>
+                  먼저 사주 정보(생년월일)를 등록해주세요.
+                </p>
+                <button className="wc-analyze-btn" onClick={() => navigate('/profile/edit')}>
+                  ✨ 내 정보 등록하기
+                </button>
+              </>
+            ) : (
+              <button className="wc-analyze-btn" onClick={handleAnalyze} disabled={!weather?.condition}>
+                ✨ 날씨 궁합 분석받기
+                <HeartCost category="WEATHER_COMPAT" />
+              </button>
+            )}
           </div>
         )}
 

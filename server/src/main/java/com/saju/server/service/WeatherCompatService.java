@@ -80,9 +80,19 @@ public class WeatherCompatService {
 
         String system = "카페에서 친한 친구한테 수다 떨듯이 자연스러운 대화체 반말로 '오늘 날씨와 내 사주의 궁합'을 분석하는 운세 전문가야. " +
             "오늘 날씨가 가진 오행과 사용자 일간(日干)의 오행을 비교해, 상생(서로 살림)/상극(부딪힘)/비화(같은 기운) 관계를 자연스럽게 풀어줘. " +
-            "딱딱한 보고서 톤이나 한자 나열 금지. 친근한 20대 친구 말투. " +
-            "반드시 아래 형식의 JSON만 출력 (마크다운 코드블록 금지, 추가 설명 금지): " +
-            "{\"score\":80,\"grade\":\"길\",\"summary\":\"한 줄 요약(35자 이내)\",\"overall\":\"종합 분석 (4~5문장)\",\"advice\":\"오늘 행동 조언 (2~3문장)\",\"caution\":\"오늘 주의할 점 (1~2문장)\",\"luckyActivity\":\"행운의 활동\",\"luckyPlace\":\"행운의 장소\",\"luckyColor\":\"행운의 색\"} " +
+            "딱딱한 보고서 톤이나 한자 나열 금지. 친근한 20대 친구 말투. 각 필드를 충분히 풍부하게 채워서 답변해. " +
+            "반드시 아래 형식의 JSON만 출력 (마크다운 코드블록 금지, 추가 설명 금지). 모든 필드를 빠짐없이 채워: \n" +
+            "{\n" +
+            "  \"score\": 80,\n" +
+            "  \"grade\": \"길\",\n" +
+            "  \"summary\": \"한 줄 요약 (30~40자)\",\n" +
+            "  \"overall\": \"종합 분석 (5~6문장 250~350자, 일간 오행과 날씨 오행 관계를 구체적으로 풀어줘)\",\n" +
+            "  \"advice\": \"오늘 행동 조언 (3~4문장 150~200자, 구체적이고 실용적으로)\",\n" +
+            "  \"caution\": \"오늘 주의할 점 (2~3문장 100~150자)\",\n" +
+            "  \"luckyActivity\": \"행운의 활동 한 줄 (예: 카페에서 책 읽기)\",\n" +
+            "  \"luckyPlace\": \"행운의 장소 한 줄 (예: 강가 산책로)\",\n" +
+            "  \"luckyColor\": \"행운의 색 한 단어 (예: 하늘색)\"\n" +
+            "}\n" +
             "score는 50~95 정수, grade는 대길/길/보통/흉 중 하나.";
 
         String user = "오늘 날짜: " + LocalDate.now() + "\n" +
@@ -91,13 +101,15 @@ public class WeatherCompatService {
             "사용자 사주 일간(日干): " + dm + "\n\n" +
             "위 정보로 오늘 하루 '날씨 × 내 사주'의 궁합 운세를 알려줘. " +
             "특히 일간 오행과 날씨 오행의 상생/상극 관계가 핵심 포인트야. " +
-            "행운의 활동·장소·색상은 오늘 날씨와 어울리는 현실적인 추천으로.";
+            "오늘 같은 날씨가 너의 일간에 어떤 영향을 주는지, 컨디션·기분·주의점은 어떨지 구체적으로 설명해. " +
+            "행운의 활동·장소·색상은 오늘 날씨와 어울리는 현실적인 추천으로. " +
+            "각 필드를 빠짐없이, 풍부하게 채워줘. JSON 외 다른 텍스트는 절대 쓰지 마.";
 
         final Long uid = userId;
         final String condFinal = condition;
         final String dmFinal = dm;
         final String condKoFinal = conditionKo;
-        return claudeApiService.generateStream(system, user, 1400, ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+        return claudeApiService.generateStream(system, user, 2400, ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 String json = ClaudeApiService.extractJson(fullText);
                 if (json == null) return;
