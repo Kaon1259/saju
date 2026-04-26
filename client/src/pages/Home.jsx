@@ -279,119 +279,144 @@ function getOrderedRelCards(profile) {
 function RelationshipCarousel({ navigate, myData }) {
   const profile = myData?.user;
   const cards = useMemo(() => getOrderedRelCards(profile), [profile?.relationshipStatus]);
+  const len = cards.length;
+
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [direction, setDirection] = useState('down'); // 'down' = 위에서 아래로, 'up' = 아래에서 위로
+  const [flyDir, setFlyDir] = useState(0);  // -1=이전, 1=다음, 0=정지
+  const [sliding, setSliding] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const dragRef = useRef({ startX: 0, dragging: false, moved: false });
+  const velocityRef = useRef({ lastX: 0, lastT: 0, v: 0 });
   const resumeTimerRef = useRef(null);
 
-  // 자동 회전 (물레방아) — 3.5초 간격, direction 에 따라 방향 결정
+  const trackRef = useRef(null);
+  const [trackWidth, setTrackWidth] = useState(360);
   useEffect(() => {
-    if (paused) return;
-    const id = setInterval(() => {
-      setActive((a) => {
-        const len = cards.length;
-        return direction === 'down' ? (a + 1) % len : (a - 1 + len) % len;
-      });
-    }, 3500);
-    return () => clearInterval(id);
-  }, [paused, cards.length, direction]);
+    const update = () => {
+      if (trackRef.current) setTrackWidth(trackRef.current.clientWidth);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
-  // 사용자 인터랙션 후 8초 일시정지 → 다시 자동 회전
-  const advanceTo = (idx) => {
-    const len = cards.length;
-    const next = ((idx % len) + len) % len;
-    setActive(next);
-    setPaused(true);
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => setPaused(false), 4000);
+  // 슬라이드 간격 — 카드 폭(82%) 만큼 → 인접 카드는 살짝 옆에서 peek
+  const slideW = Math.max(220, Math.round(trackWidth * 0.82));
+
+  // 순환 인덱스 — 항상 valid
+  const cardAt = (offset) => cards[((active + offset) % len + len) % len];
+
+  // 한 칸 이동 (방향 +1 or -1) — 타로덱과 동일하게 1.1초 트랜지션
+  const slide = (dir) => {
+    if (sliding) return;
+    setFlyDir(dir);
+    setSliding(true);
+    setTimeout(() => {
+      setActive((a) => ((a + dir) % len + len) % len);
+      setFlyDir(0);
+      setDragX(0);
+      setSliding(false);
+    }, 1100);
+    pauseAuto();
   };
 
+  // 자동 회전 (4.5초)
+  useEffect(() => {
+    if (paused || sliding) return;
+    const id = setInterval(() => slide(1), 4500);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paused, sliding, len]);
+
+  const pauseAuto = () => {
+    setPaused(true);
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => setPaused(false), 6000);
+  };
   useEffect(() => () => {
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
   }, []);
 
-  // pos: offset=1 은 항상 위(top), offset=len-1 은 항상 아래(bottom).
-  // direction 에 따라 어느 위치가 "들어오는 다음 카드"가 되는지만 달라짐.
-  const getPosClass = (i) => {
-    const len = cards.length;
-    const offset = (i - active + len) % len;
-    if (offset === 0) return 'pos-center';
-    if (offset === 1) return 'pos-top';
-    if (offset === len - 1) return 'pos-bottom';
-    return 'pos-back';
+  // 드래그 핸들러 — 물리(관성) 기반 momentum
+  const onDragStart = (clientX) => {
+    if (sliding) return;
+    dragRef.current = { startX: clientX, dragging: true, moved: false };
+    velocityRef.current = { lastX: clientX, lastT: performance.now(), v: 0 };
   };
-
-  // 스와이프 제스처 (수직) — 스와이프 방향이 자동 회전 방향이 됨
-  const dragRef = useRef({ startY: 0, startX: 0, dy: 0, dx: 0, dragging: false, moved: false });
-  const SWIPE_THRESHOLD = 40;
-  const TAP_TOLERANCE = 10;
-
-  const onPointerDown = (e) => {
-    const p = e.touches ? e.touches[0] : e;
-    dragRef.current = { startY: p.clientY, startX: p.clientX, dy: 0, dx: 0, dragging: true, moved: false };
-  };
-  const onPointerMove = (e) => {
+  const onDragMove = (clientX) => {
     if (!dragRef.current.dragging) return;
-    const p = e.touches ? e.touches[0] : e;
-    const dy = p.clientY - dragRef.current.startY;
-    const dx = p.clientX - dragRef.current.startX;
-    dragRef.current.dy = dy;
-    dragRef.current.dx = dx;
-    if (Math.abs(dy) > TAP_TOLERANCE || Math.abs(dx) > TAP_TOLERANCE) {
-      dragRef.current.moved = true;
+    const now = performance.now();
+    const dt = now - velocityRef.current.lastT;
+    if (dt > 0) {
+      // EMA(0.6/0.4) — instant velocity 와 누적 velocity 를 부드럽게 섞음
+      const instant = (clientX - velocityRef.current.lastX) / dt; // px/ms
+      velocityRef.current.v = velocityRef.current.v * 0.6 + instant * 0.4;
+      velocityRef.current.lastT = now;
+      velocityRef.current.lastX = clientX;
     }
+    const dx = clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 8) dragRef.current.moved = true;
+    setDragX(dx);
   };
-  const onPointerEnd = () => {
-    const { dy, dx, dragging } = dragRef.current;
-    if (!dragging) return;
+  const onDragEnd = () => {
+    if (!dragRef.current.dragging) return;
     dragRef.current.dragging = false;
-    // 수직 스와이프만 처리 (수평이 더 크면 스크롤로 간주)
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > SWIPE_THRESHOLD) {
-      if (dy > 0) {
-        // 아래로 스와이프 → 자동 회전을 '아래로(down)' 방향으로 잠그고 다음 카드
-        setDirection('down');
-        advanceTo(active + 1);
-      } else {
-        // 위로 스와이프 → 자동 회전을 '위로(up)' 방향으로 잠그고 이전 카드
-        setDirection('up');
-        advanceTo(active - 1);
-      }
-    }
+    const v = velocityRef.current.v;        // px/ms
+    // 관성 거리 — 250ms 후 정지한다고 가정
+    const projected = dragX + v * 250;
+    const threshold = slideW * 0.30;        // 카드 폭의 30% 만 넘어도 다음 카드로
+    if (projected < -threshold) slide(1);
+    else if (projected > threshold) slide(-1);
+    else setDragX(0);
   };
 
-  const swallowClickAfterSwipe = (e) => {
-    if (dragRef.current.moved) {
-      e.preventDefault();
-      e.stopPropagation();
-      return true;
-    }
-    return false;
-  };
+  // 보여줄 윈도우 — 5장 (-2, -1, 0, 1, 2). 자연스러운 무한 순환.
+  const visible = [-2, -1, 0, 1, 2].map((off) => ({ off, card: cardAt(off) }));
+  const animOffset = flyDir ? -flyDir * slideW : dragX;
+  const transStyle = dragRef.current.dragging
+    ? 'none'
+    : 'transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.9s ease';
 
   return (
     <section className="home-rel-section">
       <div
-        className="home-rel-wheel"
-        onTouchStart={onPointerDown}
-        onTouchMove={onPointerMove}
-        onTouchEnd={onPointerEnd}
-        onMouseDown={onPointerDown}
-        onMouseMove={onPointerMove}
-        onMouseUp={onPointerEnd}
-        onMouseLeave={onPointerEnd}
+        className="home-rel-stage"
+        ref={trackRef}
+        onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
+        onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
+        onTouchEnd={onDragEnd}
+        onMouseDown={(e) => { e.preventDefault(); onDragStart(e.clientX); }}
+        onMouseMove={(e) => onDragMove(e.clientX)}
+        onMouseUp={onDragEnd}
+        onMouseLeave={() => { if (dragRef.current.dragging) onDragEnd(); }}
       >
-        {cards.map((card, i) => {
-          const posClass = getPosClass(i);
-          const isCenter = posClass === 'pos-center';
+        {visible.map(({ off, card }) => {
+          const x = off * slideW + animOffset;
+          const dist = Math.abs(x) / slideW;
+          // 타로덱과 동일한 곡선 — 옆 카드는 작고 옅게
+          const scale = Math.max(0.65, 1 - dist * 0.15);
+          const opacity = Math.max(0.3, 1 - dist * 0.35);
+          const z = 10 - Math.abs(off);
+          const isCenter = off === 0 && !flyDir;
+          // 무한 순환을 위해 key 에 off 포함 (같은 카드가 다른 위치에 있을 수 있음)
           return (
             <div
-              key={card.id}
-              className={`home-rel-wheel-card ${posClass}`}
-              style={{ '--c-from': card.accentFrom, '--c-to': card.accentTo }}
+              key={`${card.id}-${off}`}
+              className={`home-rel-h-card ${isCenter ? 'is-active' : ''}`}
+              style={{
+                '--c-from': card.accentFrom,
+                '--c-to': card.accentTo,
+                transform: `translate(-50%, -50%) translateX(${x}px) scale(${scale})`,
+                opacity,
+                zIndex: z,
+                transition: transStyle,
+              }}
               onClick={(e) => {
-                if (swallowClickAfterSwipe(e)) return;
+                if (dragRef.current.moved) { e.preventDefault(); return; }
                 if (isCenter) navigate(card.path);
-                else if (posClass !== 'pos-back') advanceTo(i);
+                else if (off < 0) slide(-1);
+                else if (off > 0) slide(1);
               }}
               role="button"
               aria-label={card.title}
@@ -410,7 +435,6 @@ function RelationshipCarousel({ navigate, myData }) {
               <h3 className="home-rel-card-title">{card.title}</h3>
               <p className="home-rel-card-sub">{card.sub}</p>
 
-              {/* 숏컷 2x2 그리드 — 클릭 가능 + 미니 애니메이션 */}
               <div className="home-rel-card-shortcuts">
                 {card.shortcuts.map((sc, sIdx) => (
                   <button
@@ -419,8 +443,12 @@ function RelationshipCarousel({ navigate, myData }) {
                     style={{ '--sc-i': sIdx }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (swallowClickAfterSwipe(e)) return;
-                      if (!isCenter) { advanceTo(i); return; }
+                      if (dragRef.current.moved) { e.preventDefault(); return; }
+                      if (!isCenter) {
+                        if (off < 0) slide(-1);
+                        else if (off > 0) slide(1);
+                        return;
+                      }
                       navigate(sc.path, sc.state ? { state: sc.state } : undefined);
                     }}
                     tabIndex={isCenter ? 0 : -1}
@@ -437,6 +465,14 @@ function RelationshipCarousel({ navigate, myData }) {
             </div>
           );
         })}
+
+        {/* 좌우 화살표 */}
+        <button className="home-rel-arrow home-rel-arrow-left" onClick={() => slide(-1)} aria-label="이전">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3 L5 12 L16 21 Z" fill="currentColor" /></svg>
+        </button>
+        <button className="home-rel-arrow home-rel-arrow-right" onClick={() => slide(1)} aria-label="다음">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 L19 12 L8 21 Z" fill="currentColor" /></svg>
+        </button>
       </div>
 
       {/* 도트 인디케이터 */}
@@ -445,7 +481,11 @@ function RelationshipCarousel({ navigate, myData }) {
           <button
             key={i}
             className={`home-rel-dot ${i === active ? 'active' : ''}`}
-            onClick={() => advanceTo(i)}
+            onClick={() => {
+              if (i === active) return;
+              const diff = ((i - active) % len + len) % len;
+              slide(diff <= len / 2 ? 1 : -1);
+            }}
             aria-label={`카드 ${i + 1}`}
           />
         ))}
@@ -496,7 +536,7 @@ function Home() {
   // 상단 히어로 X축 flip — 0: 연애 카드, 1: 날씨 카드
   const [heroFace, setHeroFace] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setHeroFace((f) => (f + 1) % 2), 6000);
+    const id = setInterval(() => setHeroFace((f) => (f + 1) % 2), 5000);
     return () => clearInterval(id);
   }, []);
 
@@ -728,14 +768,8 @@ function Home() {
         const heartCount = Math.max(5, Math.floor(temp / 6));
         const fallbackGrad = TIMEBAND_FALLBACK_GRAD[timeBand.id] || TIMEBAND_FALLBACK_GRAD.noon;
         const w = weatherData || { ...FALLBACK_WEATHER_BASE, ...fallbackGrad };
-        // 로그인 시 연애 카드에 운세 요약/CTA 가 추가로 들어가므로 카드 높이를 자동으로 키운다
-        const hasFortuneExtras = !!userId && (
-          (fortuneLoading && !myData?.saju) ||
-          (myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall) ||
-          (!fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed)
-        );
         return (
-          <div className={`home-hero-flip ${hasFortuneExtras ? 'has-extras' : ''}`}>
+          <div className="home-hero-flip">
             <div
               className={`home-hero-flip-inner ${heroFace === 1 ? 'flipped' : ''}`}
               onClick={() => setHeroFace((f) => (f + 1) % 2)}
@@ -765,26 +799,6 @@ function Home() {
                   <span className="home-love-temp-num" style={{ color: heartColor }}>{temp}°</span>
                 </div>
                 <p className="home-hero-new__msg">{msg}</p>
-                {userId && fortuneLoading && !myData?.saju && (
-                  <div className="home-hero-fortune-summary skeleton-pulse">
-                    <span className="hero-fortune-badge">🔮 --</span>
-                    <span className="hero-fortune-text">운세를 불러오는 중...</span>
-                  </div>
-                )}
-                {userId && myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall && (
-                  <div className="home-hero-fortune-summary" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
-                    <span className={`hero-fortune-badge ${myData.saju.score >= 80 ? 'badge-great' : myData.saju.score >= 60 ? 'badge-good' : myData.saju.score >= 40 ? 'badge-normal' : 'badge-low'}`}>
-                      {myData.saju.score >= 80 ? '🌟' : myData.saju.score >= 60 ? '☀️' : myData.saju.score >= 40 ? '🌤️' : '🌙'} {myData.saju.score}
-                    </span>
-                    <span className="hero-fortune-text">{myData.saju.overall.split('.')[0] + '.'}</span>
-                  </div>
-                )}
-                {userId && !fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed && (
-                  <button className="home-hero-fortune-cta" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
-                    ✨ 오늘의 운세 분석받기 <span>›</span>
-                  </button>
-                )}
-                <span className="home-hero-flip-hint">↕ 탭하면 날씨</span>
               </section>
 
               {/* ── Back: 날씨 카드 ── */}
@@ -810,45 +824,24 @@ function Home() {
                   <span className="home-weather-meta-item">💧 {w.humidity}%</span>
                 </div>
                 <p className="home-hero-new__msg">{w.message}</p>
-                {/* 로그인 시 운세 요약/CTA — 연애 카드와 동일하게 표시해 두 면 높이 균형 */}
-                {userId && fortuneLoading && !myData?.saju && (
-                  <div className="home-hero-fortune-summary home-hero-fortune-summary--on-weather skeleton-pulse">
-                    <span className="hero-fortune-badge">🔮 --</span>
-                    <span className="hero-fortune-text">운세를 불러오는 중...</span>
-                  </div>
-                )}
-                {userId && myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall && (
-                  <div className="home-hero-fortune-summary home-hero-fortune-summary--on-weather" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
-                    <span className={`hero-fortune-badge ${myData.saju.score >= 80 ? 'badge-great' : myData.saju.score >= 60 ? 'badge-good' : myData.saju.score >= 40 ? 'badge-normal' : 'badge-low'}`}>
-                      {myData.saju.score >= 80 ? '🌟' : myData.saju.score >= 60 ? '☀️' : myData.saju.score >= 40 ? '🌤️' : '🌙'} {myData.saju.score}
-                    </span>
-                    <span className="hero-fortune-text">{myData.saju.overall.split('.')[0] + '.'}</span>
-                  </div>
-                )}
-                {userId && !fortuneLoading && myData?.saju && !myData?.saju?.aiAnalyzed && (
-                  <button className="home-hero-fortune-cta home-hero-fortune-cta--on-weather" onClick={(e) => { e.stopPropagation(); navigate('/my'); }}>
-                    ✨ 오늘의 운세 분석받기 <span>›</span>
-                  </button>
-                )}
-                <span className="home-hero-flip-hint">↕ 탭하면 연애운</span>
               </section>
             </div>
           </div>
         );
       })()}
 
-      {/* 2. 비로그인 CTA — 상단 카드 바로 아래 */}
-      {!userId && !showForm && (
-        <section style={{ padding: '0 4px', marginTop: 0, marginBottom: 12 }}>
-          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
-        </section>
-      )}
-
       {/* 2~3. 연애상태별 카드 캐러셀 (가로 스와이프 + Peek + 도트) */}
       <RelationshipCarousel navigate={navigate} myData={myData} />
 
 
       {/* 스타 운세 배너 제거 — 휠 카드(star)로 통합됨 */}
+
+      {/* 비로그인 CTA — 오늘의 운세 바로 위 */}
+      {!userId && !showForm && (
+        <section style={{ padding: '0 4px', marginBottom: 8 }}>
+          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
+        </section>
+      )}
 
       {/* 5.4 오늘의 운세 배너 */}
       <section style={{ padding: '0 4px', marginBottom: 8 }}>
@@ -901,13 +894,6 @@ function Home() {
               <button className="home-guest__link" onClick={() => setShowForm(false)}>돌아가기</button>
             </div>
           )}
-        </section>
-      )}
-
-      {/* 비로그인: 카카오 로그인 유도 */}
-      {!userId && !showForm && (
-        <section style={{ padding: '0 4px' }}>
-          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
         </section>
       )}
 
