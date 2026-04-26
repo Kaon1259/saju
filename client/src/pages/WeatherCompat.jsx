@@ -48,11 +48,12 @@ export default function WeatherCompat() {
       .catch(() => {});
   }, [userId]);
 
-  // 날씨가 준비되면 자동으로 캐시 확인 → 히트면 결과, 미스면 버튼 노출
+  // condition 결정되면 캐시 확인 (실패해도 무시 — CTA 는 항상 노출)
   useEffect(() => {
-    if (!weather?.condition) return;
+    const cond = weather?.condition;
+    if (!cond) return;
     let cancelled = false;
-    getWeatherCompatBasic(weather.condition)
+    getWeatherCompatBasic(cond)
       .then(data => {
         if (cancelled) return;
         if (data && data.score) setResult(data);
@@ -62,7 +63,7 @@ export default function WeatherCompat() {
   }, [weather?.condition]);
 
   const handleAnalyze = () => {
-    if (!weather?.condition) return;
+    if (!effectiveWeather?.condition) return;
     setLoading(true);
     setStreaming(true);
     setStreamText('');
@@ -73,10 +74,10 @@ export default function WeatherCompat() {
 
     cleanupRef.current = getWeatherCompatStream(
       {
-        condition: weather.condition,
+        condition: effectiveWeather.condition,
         dayMaster,
         timeBand: timeBand.id,
-        temp: weather.temp,
+        temp: effectiveWeather.temp,
       },
       {
         onCached: (cachedData) => {
@@ -101,15 +102,20 @@ export default function WeatherCompat() {
             dayMaster,
             date: new Date().toISOString().slice(0, 10),
           };
+          const baseMetaResolved = {
+            ...baseMeta,
+            condition: effectiveWeather.condition,
+            conditionKo: effectiveWeather.conditionLabel || effectiveWeather.condition,
+          };
           if (parsed && (parsed.overall || parsed.summary)) {
-            setResult({ ...parsed, ...baseMeta });
+            setResult({ ...parsed, ...baseMetaResolved });
           } else {
             // 파싱 실패 시에도 raw text 를 종합 분석으로 노출 (빈 화면 방지)
             setResult({
               score: 70,
               grade: '보통',
               overall: text || '오늘의 날씨와 사주 궁합 분석을 다시 시도해주세요.',
-              ...baseMeta,
+              ...baseMetaResolved,
             });
           }
         },
@@ -121,10 +127,24 @@ export default function WeatherCompat() {
 
   useEffect(() => () => { cleanupRef.current?.(); }, []);
 
-  const heroBg = useMemo(() => {
-    if (!weather) return { from: '#7dd3fc', to: '#fbbf24' };
-    return { from: weather.bgFrom || '#7dd3fc', to: weather.bgTo || '#fbbf24' };
+  // 위치 권한 거부 / 네트워크 실패 시에도 분석 진행 가능하도록 fallback
+  const effectiveWeather = useMemo(() => {
+    if (weather) return weather;
+    return {
+      condition: 'Clear',
+      conditionLabel: '맑음',
+      icon: '☀️',
+      city: '서울',
+      temp: null,
+      bgFrom: '#7dd3fc',
+      bgTo: '#fbbf24',
+    };
   }, [weather]);
+
+  const heroBg = useMemo(() => ({
+    from: effectiveWeather.bgFrom || '#7dd3fc',
+    to: effectiveWeather.bgTo || '#fbbf24',
+  }), [effectiveWeather]);
 
   if (!userId) return null;
 
@@ -139,7 +159,7 @@ export default function WeatherCompat() {
         <div className="wc-hero-orb wc-hero-orb--1" />
         <div className="wc-hero-orb wc-hero-orb--2" />
         <div className="wc-hero-top">
-          <span className="wc-hero-city">📍 {weather?.city || '서울'}</span>
+          <span className="wc-hero-city">📍 {effectiveWeather.city || '서울'}</span>
           <span className="wc-hero-time">{timeBand.icon} {timeBand.label}</span>
         </div>
         <div className="wc-hero-title-wrap">
@@ -147,10 +167,10 @@ export default function WeatherCompat() {
           <p className="wc-hero-sub">오늘 날씨의 오행과 내 사주 일간의 만남</p>
         </div>
         <div className="wc-hero-center">
-          <span className="wc-hero-icon">{weather?.icon || '☀️'}</span>
+          <span className="wc-hero-icon">{effectiveWeather.icon || '☀️'}</span>
           <div className="wc-hero-info">
-            <span className="wc-hero-cond">{weather?.conditionLabel || weather?.condition || '맑음'}</span>
-            {weather?.temp != null && <span className="wc-hero-temp">{Math.round(weather.temp)}°</span>}
+            <span className="wc-hero-cond">{effectiveWeather.conditionLabel || effectiveWeather.condition || '맑음'}</span>
+            {effectiveWeather.temp != null && <span className="wc-hero-temp">{Math.round(effectiveWeather.temp)}°</span>}
           </div>
         </div>
         {dayMaster && (
@@ -163,14 +183,19 @@ export default function WeatherCompat() {
 
       {/* 분석 영역 */}
       <section className="wc-body">
-        {!result && !loading && weather && (
+        {!result && !loading && (
           <div className="wc-cta-card glass-card fade-in">
             <span className="wc-cta-icon">🔮</span>
             <h2 className="wc-cta-title">오늘 날씨와 내 사주, 얼마나 잘 맞을까?</h2>
             <p className="wc-cta-desc">
-              오늘은 <b>{weather.conditionLabel || weather.condition}</b>이에요.<br/>
+              오늘은 <b>{effectiveWeather.conditionLabel || effectiveWeather.condition}</b>이에요.<br/>
               날씨가 가진 오행과 내 일간의 상생/상극으로 오늘의 운세를 봐드릴게요.
             </p>
+            {!weather && (
+              <p className="wc-cta-desc" style={{ color: '#94a3b8', fontSize: '12px', marginTop: '-8px' }}>
+                ⚠️ 위치 권한이 없어 기본값(맑음)으로 분석합니다.
+              </p>
+            )}
             {!dayMaster ? (
               <>
                 <p className="wc-cta-desc" style={{ color: '#ec4899', fontWeight: 700 }}>
@@ -181,7 +206,7 @@ export default function WeatherCompat() {
                 </button>
               </>
             ) : (
-              <button className="wc-analyze-btn" onClick={handleAnalyze} disabled={!weather?.condition}>
+              <button className="wc-analyze-btn" onClick={handleAnalyze}>
                 ✨ 날씨 궁합 분석받기
                 <HeartCost category="WEATHER_COMPAT" />
               </button>
