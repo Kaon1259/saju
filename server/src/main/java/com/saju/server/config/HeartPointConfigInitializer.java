@@ -59,6 +59,7 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
 
         // ── 운세종합 (추가) ──
         init("BIORHYTHM",              3,  "운세종합",    "바이오리듬");
+        init("WEATHER_COMPAT",         3,  "운세종합",    "날씨 궁합");
         init("MBTI_COMPAT",            3,  "궁합",       "MBTI 궁합");
         init("BLOODTYPE_COMPAT",       3,  "궁합",       "혈액형 궁합");
 

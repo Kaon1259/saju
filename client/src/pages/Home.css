@@ -442,13 +442,13 @@
 .home-hero-flip {
   position: relative;
   perspective: 1400px;
-  margin-bottom: 8px;
-  min-height: 88px;
+  margin-bottom: 4px;
+  min-height: 76px;
 }
 .home-hero-flip-inner {
   position: relative;
   width: 100%;
-  height: 88px;         /* 기존 175px 의 약 50% — 좌우는 그대로, 상하만 축소 */
+  height: 76px;          /* 라벨 + 콘텐츠 안전하게 분리 */
   transform-style: preserve-3d;
   transform-origin: center center;
   transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
@@ -493,7 +493,7 @@
 
 /* flip 안에서만 적용되는 컴팩트 사이즈 — 카드 높이 88px 에 맞춰 가로 배치 최적화 */
 .home-hero-flip-face.home-hero-new {
-  padding: 8px 14px;
+  padding: 16px 14px 2px;     /* 상단 라벨(top:3) 영역 확보 */
   flex-direction: row;
   justify-content: center;
   align-items: center;
@@ -507,8 +507,9 @@
 }
 .home-hero-flip-face .home-hero-new__top {
   position: absolute;
-  top: 6px;
-  left: 12px;
+  top: 3px;
+  left: 10px;
+  z-index: 2;
 }
 .home-hero-flip-face .home-love-temp-center {
   margin: 0;
@@ -518,10 +519,10 @@
 }
 /* 하트/온도 = 날씨 카드 아이콘/온도와 동일 크기 (컴팩트) */
 .home-hero-flip-face .home-love-temp-heart {
-  font-size: 28px;
+  font-size: 22px;
 }
 .home-hero-flip-face .home-love-temp-num {
-  font-size: 26px;
+  font-size: 20px;
   line-height: 1;
 }
 .home-hero-flip-face .home-love-temp-label {
@@ -544,12 +545,13 @@
 }
 .home-hero-flip-face .home-love-top-label,
 .home-hero-flip-face .home-weather-city {
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: -0.2px;
+  line-height: 1.1;
 }
 /* 날씨 카드 컴팩트 */
 .home-hero-flip-face.home-weather-card {
-  padding: 8px 14px;
+  padding: 16px 14px 2px;     /* 상단 도시명(📍서울) 영역 확보 */
   flex-direction: row;
   justify-content: center;
   align-items: center;
@@ -562,10 +564,10 @@
   align-items: center;
 }
 .home-hero-flip-face .home-weather-icon {
-  font-size: 28px;
+  font-size: 22px;
 }
 .home-hero-flip-face .home-weather-temp {
-  font-size: 26px;
+  font-size: 20px;
   line-height: 1;
 }
 .home-hero-flip-face .home-weather-condition {
@@ -3251,9 +3253,88 @@
 /* ════════════════════════════════════════════════════════════════ */
 /* 연애상태별 카드 — 3D 물레방아 (수직 무한 회전)                      */
 /* ════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════ */
+/* 오늘의 운세 마퀴 — 히어로와 캐러셀 사이, 우→좌 흐르는 텍스트       */
+/* ════════════════════════════════════════════════════════════════ */
+.home-fortune-marquee {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 0;             /* 카드 간격 안에 흡수 — 추가 공간 차지 X */
+  padding: 3px 6px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  color: #fff;
+  text-align: left;
+  overflow: hidden;
+  box-shadow: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.home-fortune-marquee:hover {
+  opacity: 0.92;
+}
+.home-fortune-marquee:active {
+  transform: scale(0.99);
+}
+[data-theme="light"] .home-fortune-marquee {
+  color: #1e293b;
+}
+.home-fortune-marquee-icon {
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.5));
+}
+.home-fortune-marquee-viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  /* 양옆 fade — 텍스트가 자연스럽게 등장/소실 */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+.home-fortune-marquee-track {
+  display: inline-flex;
+  gap: 48px;
+  white-space: nowrap;
+  animation: homeFortuneMarquee 22s linear infinite;
+  will-change: transform;
+}
+.home-fortune-marquee-text {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+}
+@keyframes homeFortuneMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }   /* 텍스트 2개 복제 → 50% 이동하면 첫 텍스트가 두 번째 위치로 = 끊김 없음 */
+}
+.home-fortune-marquee:hover .home-fortune-marquee-track {
+  animation-play-state: paused;
+}
+.home-fortune-marquee-arrow {
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  color: rgba(236, 72, 153, 0.85);
+  transition: transform 0.2s;
+}
+.home-fortune-marquee:hover .home-fortune-marquee-arrow {
+  transform: translateX(3px);
+}
+
 .home-rel-section {
   position: relative;
-  margin: 8px 0 14px;
+  margin: -6px 0 8px;     /* 위쪽 마진 음수로 끌어올려 마퀴와의 간격 압축 */
   padding: 0 4px;
 }
 
@@ -3261,7 +3342,7 @@
 .home-rel-stage {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 360px;          /* 380 → 360 (위로 올라온 만큼 컴팩트) */
   overflow: hidden;
   user-select: none;
   cursor: grab;

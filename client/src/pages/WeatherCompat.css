@@ -1,0 +1,345 @@
+/* ════════════════════════════════════════════════════════════════ */
+/* 날씨 궁합 페이지 — 오늘 날씨 × 내 사주 일간                          */
+/* ════════════════════════════════════════════════════════════════ */
+.wc-page {
+  padding-bottom: 40px;
+}
+
+/* 상단 히어로 — 시간대별 그라데이션 + 도시/날씨/일간 */
+.wc-hero {
+  position: relative;
+  padding: 16px 16px 18px;
+  border-radius: 0 0 24px 24px;
+  background:
+    linear-gradient(180deg, var(--w-overlay, rgba(0,0,0,0.18)), var(--w-overlay, rgba(0,0,0,0.30))),
+    linear-gradient(160deg, var(--w-from, #7dd3fc), var(--w-to, #fbbf24));
+  color: #fff;
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.30);
+}
+.wc-back-btn {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(15, 23, 42, 0.45);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, transform 0.15s;
+}
+.wc-back-btn:hover { background: rgba(15, 23, 42, 0.65); }
+.wc-back-btn:active { transform: scale(0.92); }
+
+.wc-hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  filter: blur(32px);
+  pointer-events: none;
+}
+.wc-hero-orb--1 { width: 160px; height: 160px; top: -40px; left: -30px; }
+.wc-hero-orb--2 { width: 200px; height: 200px; bottom: -60px; right: -40px; }
+
+.wc-hero-top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 44px 12px 44px;     /* 뒤로가기 버튼 자리 확보 */
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.wc-hero-time {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.wc-hero-title-wrap {
+  position: relative;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.wc-hero-title {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+.wc-hero-sub {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.92;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+
+.wc-hero-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 4px 0 12px;
+}
+.wc-hero-icon {
+  font-size: 56px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+.wc-hero-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.wc-hero-cond {
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  margin-bottom: 2px;
+}
+.wc-hero-temp {
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.wc-hero-daymaster {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 14px;
+  margin: 0 auto;
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.wc-hero-dm-label {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+  letter-spacing: 0.3px;
+}
+.wc-hero-dm-value {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
+/* 본문 */
+.wc-body {
+  padding: 0 14px;
+}
+
+/* CTA 카드 — 분석 시작 전 */
+.wc-cta-card {
+  text-align: center;
+  padding: 22px 18px 18px;
+  border-radius: 16px;
+}
+.wc-cta-icon {
+  display: inline-block;
+  font-size: 44px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.5));
+  animation: wcCtaPulse 2.4s ease-in-out infinite;
+}
+@keyframes wcCtaPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+.wc-cta-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--color-text);
+}
+.wc-cta-desc {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+.wc-cta-desc b {
+  color: #ec4899;
+  font-weight: 800;
+}
+.wc-analyze-btn {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 22px rgba(236, 72, 153, 0.4);
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wc-analyze-btn:hover { box-shadow: 0 10px 28px rgba(236, 72, 153, 0.5); }
+.wc-analyze-btn:active { transform: scale(0.98); }
+.wc-analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 결과 카드 */
+.wc-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wc-score-card {
+  position: relative;
+  text-align: center;
+  padding: 22px 14px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(236, 72, 153, 0.25);
+  overflow: hidden;
+}
+[data-theme="light"] .wc-score-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(236, 72, 153, 0.30);
+  box-shadow: 0 6px 18px rgba(236, 72, 153, 0.12);
+}
+.wc-score-orb {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  filter: blur(20px);
+  pointer-events: none;
+}
+.wc-score-center {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  z-index: 1;
+}
+.wc-score-num {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+}
+.wc-score-unit {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+.wc-score-grade {
+  position: relative;
+  display: block;
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 800;
+  z-index: 1;
+}
+.wc-score-summary {
+  position: relative;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  z-index: 1;
+}
+
+/* 행운 박스 */
+.wc-lucky {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  text-align: center;
+}
+.wc-lucky-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wc-lucky-label {
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+.wc-lucky-value {
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+/* 액션 */
+.wc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.wc-share-btn,
+.wc-reset-btn {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  border-radius: 10px;
+  background: rgba(236, 72, 153, 0.08);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, transform 0.15s;
+}
+.wc-share-btn:hover,
+.wc-reset-btn:hover { background: rgba(236, 72, 153, 0.15); }
+.wc-share-btn:active,
+.wc-reset-btn:active { transform: scale(0.98); }
+[data-theme="light"] .wc-share-btn,
+[data-theme="light"] .wc-reset-btn {
+  background: #fff;
+  border-color: rgba(236, 72, 153, 0.35);
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.10);
+}
+
+/* 스트림 미리보기 (analysis matrix 외부에 작은 미리보기 추가용) */
+.wc-stream-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.06);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+[data-theme="light"] .wc-stream-preview {
+  background: rgba(0,0,0,0.04);
+}

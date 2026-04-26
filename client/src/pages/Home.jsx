@@ -772,9 +772,13 @@ function Home() {
           <div className="home-hero-flip">
             <div
               className={`home-hero-flip-inner ${heroFace === 1 ? 'flipped' : ''}`}
-              onClick={() => setHeroFace((f) => (f + 1) % 2)}
+              onClick={() => {
+                // 연애 면(0): 나의 연인 페이지, 날씨 면(1): 로그인 시만 날씨 궁합
+                if (heroFace === 0) navigate('/my-love-compat');
+                else if (heroFace === 1 && userId) navigate('/weather-compat');
+              }}
               role="button"
-              aria-label="히어로 카드 뒤집기"
+              aria-label="나의 연애운 카드"
             >
               {/* ── Front: 연애 카드 ── */}
               <section className="home-hero-flip-face home-hero-new" style={{ '--love-temp-color': heartColor }}>
@@ -827,6 +831,36 @@ function Home() {
               </section>
             </div>
           </div>
+        );
+      })()}
+
+      {/* 1.5 오늘의 운세 마퀴 — 우→좌 흐르는 텍스트, 클릭 시 /my 이동 */}
+      {(() => {
+        let icon = '🔮';
+        let text = '로그인하고 오늘의 사주 운세를 받아보세요';
+        if (userId) {
+          if (myData?.saju?.aiAnalyzed && myData?.saju?.score != null && myData?.saju?.overall) {
+            const s = myData.saju.score;
+            icon = s >= 80 ? '🌟' : s >= 60 ? '☀️' : s >= 40 ? '🌤️' : '🌙';
+            const summary = (myData.saju.overall || '').replace(/\s+/g, ' ').trim();
+            text = `오늘의 운세 ${s}점 — ${summary}`;
+          } else if (fortuneLoading) {
+            text = '오늘의 운세를 불러오는 중...';
+          } else {
+            text = '오늘의 운세를 분석받아보세요 — 총운·애정·재물·건강';
+          }
+        }
+        return (
+          <button className="home-fortune-marquee" onClick={() => navigate('/my')} aria-label="오늘의 운세 보기">
+            <span className="home-fortune-marquee-icon">{icon}</span>
+            <div className="home-fortune-marquee-viewport">
+              <div className="home-fortune-marquee-track">
+                <span className="home-fortune-marquee-text">{text}</span>
+                <span className="home-fortune-marquee-text" aria-hidden="true">{text}</span>
+              </div>
+            </div>
+            <span className="home-fortune-marquee-arrow">›</span>
+          </button>
         );
       })()}
 

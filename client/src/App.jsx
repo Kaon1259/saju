@@ -40,6 +40,7 @@ import CelebMatch from './pages/CelebMatch';
 import MyMenu from './pages/MyMenu';
 import StarFortune from './pages/StarFortune';
 import Settings from './pages/Settings';
+import WeatherCompat from './pages/WeatherCompat';
 import { HeartProvider } from './context/HeartContext';
 import { AppProvider } from './context/AppContext';
 import './context/HeartContext.css';
@@ -341,6 +342,7 @@ function App() {
               <Route path="/my-menu" element={<MyMenu />} />
               <Route path="/star-fortune" element={<StarFortune />} />
               <Route path="/my-star" element={<MyStar />} />
+              <Route path="/weather-compat" element={<WeatherCompat />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

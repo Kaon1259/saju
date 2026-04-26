@@ -345,6 +345,40 @@ export const getMyFortuneStream = (userId, { onChunk, onCached, onNoCache, onDon
   return () => { __chunker.cancel(); eventSource.close(); };
 };
 
+// ─── 날씨 궁합 (오늘 날씨 × 내 사주 일간) ───
+export const getWeatherCompatBasic = async (condition) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) return null;
+  const response = await api.get('/weather-compat/basic', { params: { userId, condition } });
+  return response.data;
+};
+
+export const getWeatherCompatStream = ({ condition, dayMaster, timeBand, temp } = {}, { onChunk, onCached, onDone, onError, onInsufficientHearts } = {}) => {
+  if (!requireLogin(onError)) return () => {};
+  const params = new URLSearchParams({ condition: condition || 'Clear' });
+  if (dayMaster) params.set('dayMaster', dayMaster);
+  if (timeBand) params.set('timeBand', timeBand);
+  if (temp != null) params.set('temp', String(temp));
+  appendUserId(params);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/weather-compat/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
+
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+
+  return () => { __chunker.cancel(); eventSource.close(); };
+};
+
 // ─── 혈액형 운세 ───
 export const getBloodTypeFortune = async (type) => {
   const response = await api.get('/bloodtype/fortune', { params: { type } });
