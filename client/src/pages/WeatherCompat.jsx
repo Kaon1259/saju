@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
-import StreamText from '../components/StreamText';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import HeartCost from '../components/HeartCost';
-import parseAiJson from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
 import { getWeatherCompatBasic, getWeatherCompatStream, getMyFortune } from '../api/fortune';
 import { getCurrentWeather, getTimeBand } from '../utils/weather';
@@ -29,8 +28,13 @@ export default function WeatherCompat() {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamText, setStreamText] = useState('');
+  const [streamFields, setStreamFields] = useState({});  // 카드별 점진적 텍스트
+  const [streamScore, setStreamScore] = useState(null);  // 점수 (스트리밍 중 일찍 등장)
+  const [streamGrade, setStreamGrade] = useState('');
   const [result, setResult] = useState(null);
   const cleanupRef = useRef(null);
+
+  const PROG_FIELDS = ['summary', 'overall', 'advice', 'caution', 'luckyActivity', 'luckyPlace', 'luckyColor'];
 
   // 비로그인 차단
   useEffect(() => {
@@ -74,6 +78,9 @@ export default function WeatherCompat() {
     setLoading(true);
     setStreaming(true);
     setStreamText('');
+    setStreamFields({});
+    setStreamScore(null);
+    setStreamGrade('');
     setResult(null);
 
     // 누적 buffer — onDone 의 fullText 가 비어 있을 때 fallback 으로 사용
@@ -94,42 +101,83 @@ export default function WeatherCompat() {
           setStreaming(false);
           setLoading(false);
           setStreamText('');
+          setStreamFields({});
           setResult(cachedData);
         },
         onChunk: (text) => {
           buffer += text;
           setStreamText(prev => prev + text);
+
+          // 첫 chunk 가 들어오면 매트릭스 닫고 카드 골격 노출
+          setLoading(false);
+
+          // 부분 JSON → 카드별 텍스트 추출
+          const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+          const next = {};
+          for (const k of PROG_FIELDS) {
+            if (partial[k]?.value !== undefined) next[k] = partial[k].value;
+          }
+          if (Object.keys(next).length > 0) {
+            setStreamFields(prev => ({ ...prev, ...next }));
+          }
+
+          // score / grade 부분 매칭
+          const scoreMatch = buffer.match(/"score"\s*:\s*(\d{1,3})/);
+          if (scoreMatch) {
+            const s = parseInt(scoreMatch[1], 10);
+            if (!isNaN(s) && s >= 0 && s <= 100) setStreamScore(s);
+          }
+          const gradeMatch = buffer.match(/"grade"\s*:\s*"(대길|길|보통|흉)"/);
+          if (gradeMatch) setStreamGrade(gradeMatch[1]);
         },
         onDone: (fullText) => {
           setStreaming(false);
           setLoading(false);
           const text = (fullText && fullText.trim()) ? fullText : buffer;
-          setStreamText('');
           const parsed = parseAiJson(text);
           const baseMeta = {
-            condition: weather.condition,
-            conditionKo: weather.conditionLabel || weather.condition,
+            condition: effectiveWeather.condition,
+            conditionKo: effectiveWeather.conditionLabel || effectiveWeather.condition,
             dayMaster,
             date: new Date().toISOString().slice(0, 10),
           };
-          const baseMetaResolved = {
-            ...baseMeta,
-            condition: effectiveWeather.condition,
-            conditionKo: effectiveWeather.conditionLabel || effectiveWeather.condition,
-          };
           if (parsed && (parsed.overall || parsed.summary)) {
-            setResult({ ...parsed, ...baseMetaResolved });
+            setResult({ ...parsed, ...baseMeta });
+          } else if (buffer) {
+            // parseAiJson 실패해도 buffer 로 partial 추출 시도 (stale state 의존 X)
+            const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
+            const sMatch = buffer.match(/"score"\s*:\s*(\d{1,3})/);
+            const gMatch = buffer.match(/"grade"\s*:\s*"(대길|길|보통|흉)"/);
+            setResult({
+              score: sMatch ? parseInt(sMatch[1], 10) : 70,
+              grade: gMatch ? gMatch[1] : '보통',
+              summary: partial.summary?.value || '',
+              overall: partial.overall?.value || text || '',
+              advice: partial.advice?.value || '',
+              caution: partial.caution?.value || '',
+              luckyActivity: partial.luckyActivity?.value || '',
+              luckyPlace: partial.luckyPlace?.value || '',
+              luckyColor: partial.luckyColor?.value || '',
+              ...baseMeta,
+            });
           } else {
-            // 파싱 실패 시에도 raw text 를 종합 분석으로 노출 (빈 화면 방지)
+            // 마지막 fallback — raw text 를 종합 분석으로 노출 (빈 화면 방지)
             setResult({
               score: 70,
               grade: '보통',
               overall: text || '오늘의 날씨와 사주 궁합 분석을 다시 시도해주세요.',
-              ...baseMetaResolved,
+              ...baseMeta,
             });
           }
+          setStreamText('');
+          setStreamFields({});
+          setStreamScore(null);
+          setStreamGrade('');
         },
-        onError: () => { setStreaming(false); setLoading(false); setStreamText(''); },
+        onError: () => {
+          setStreaming(false); setLoading(false); setStreamText('');
+          setStreamFields({}); setStreamScore(null); setStreamGrade('');
+        },
         onInsufficientHearts: () => { setStreaming(false); setLoading(false); navigate('/my-menu'); },
       }
     );
@@ -224,6 +272,7 @@ export default function WeatherCompat() {
           </div>
         )}
 
+        {/* 매트릭스 — 첫 chunk 가 들어오기 전에만 표시 */}
         {loading && (
           <AnalysisMatrix
             theme="love"
@@ -232,6 +281,36 @@ export default function WeatherCompat() {
           />
         )}
 
+        {/* 스트리밍 중 progressive 카드 — 결과 카드 골격 + 채워지는 텍스트 */}
+        {!result && !loading && streaming && (
+          <div className="wc-result wc-result--streaming fade-in">
+            <div className="wc-score-card">
+              <div className="wc-score-orb" style={{ background: `radial-gradient(circle, ${GRADE_COLORS[streamGrade] || '#ff6b9d'}, transparent 70%)` }} />
+              <div className="wc-score-center">
+                <span className="wc-score-num">{streamScore != null ? streamScore : '··'}</span>
+                <span className="wc-score-unit">점</span>
+              </div>
+              <span className="wc-score-grade" style={{ color: GRADE_COLORS[streamGrade] || '#ff6b9d' }}>
+                {streamGrade || '분석 중...'}
+              </span>
+              {streamFields.summary && <p className="wc-score-summary">{streamFields.summary}</p>}
+            </div>
+
+            <FortuneCard icon="🔮" title="종합 분석" description={streamFields.overall || '...'} delay={0} />
+            {streamFields.advice && <FortuneCard icon="💡" title="오늘의 행동 조언" description={streamFields.advice} delay={80} />}
+            {streamFields.caution && <FortuneCard icon="⚠️" title="주의할 점" description={streamFields.caution} delay={160} />}
+
+            {(streamFields.luckyActivity || streamFields.luckyPlace || streamFields.luckyColor) && (
+              <div className="wc-lucky glass-card">
+                {streamFields.luckyActivity && <div className="wc-lucky-item"><span className="wc-lucky-label">행운의 활동</span><span className="wc-lucky-value">{streamFields.luckyActivity}</span></div>}
+                {streamFields.luckyPlace && <div className="wc-lucky-item"><span className="wc-lucky-label">행운의 장소</span><span className="wc-lucky-value">{streamFields.luckyPlace}</span></div>}
+                {streamFields.luckyColor && <div className="wc-lucky-item"><span className="wc-lucky-label">행운의 색</span><span className="wc-lucky-value">{streamFields.luckyColor}</span></div>}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 최종 결과 */}
         {result && (
           <div className="wc-result fade-in">
             <div className="wc-score-card">
@@ -250,24 +329,9 @@ export default function WeatherCompat() {
 
             {(result.luckyActivity || result.luckyPlace || result.luckyColor) && (
               <div className="wc-lucky glass-card">
-                {result.luckyActivity && (
-                  <div className="wc-lucky-item">
-                    <span className="wc-lucky-label">행운의 활동</span>
-                    <span className="wc-lucky-value">{result.luckyActivity}</span>
-                  </div>
-                )}
-                {result.luckyPlace && (
-                  <div className="wc-lucky-item">
-                    <span className="wc-lucky-label">행운의 장소</span>
-                    <span className="wc-lucky-value">{result.luckyPlace}</span>
-                  </div>
-                )}
-                {result.luckyColor && (
-                  <div className="wc-lucky-item">
-                    <span className="wc-lucky-label">행운의 색</span>
-                    <span className="wc-lucky-value">{result.luckyColor}</span>
-                  </div>
-                )}
+                {result.luckyActivity && <div className="wc-lucky-item"><span className="wc-lucky-label">행운의 활동</span><span className="wc-lucky-value">{result.luckyActivity}</span></div>}
+                {result.luckyPlace && <div className="wc-lucky-item"><span className="wc-lucky-label">행운의 장소</span><span className="wc-lucky-value">{result.luckyPlace}</span></div>}
+                {result.luckyColor && <div className="wc-lucky-item"><span className="wc-lucky-label">행운의 색</span><span className="wc-lucky-value">{result.luckyColor}</span></div>}
               </div>
             )}
 
@@ -279,12 +343,6 @@ export default function WeatherCompat() {
               }}>📤 공유하기</button>
               <button className="wc-reset-btn" onClick={() => { setResult(null); }}>다시 보기</button>
             </div>
-          </div>
-        )}
-
-        {streaming && !loading && streamText && (
-          <div className="wc-stream-preview">
-            <StreamText text={streamText} />
           </div>
         )}
       </section>
