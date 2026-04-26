@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
 import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream } from '../api/fortune';
@@ -11,6 +12,8 @@ import HeartCost from '../components/HeartCost';
 import HistoryDrawer from '../components/HistoryDrawer';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import { getCurrentWeather, getTimeBand } from '../utils/weather';
+import { DAILY_TAROT_MINOR } from '../data/dailyTarotMinor';
+import { startKakaoLogin } from '../utils/kakaoAuth';
 import './Home.css';
 
 const BIRTH_TIMES = [
@@ -245,7 +248,7 @@ function getOrderedRelCards(profile) {
 // ════════════════════════════════════════════════════════════════
 const RECOMMEND_POOL = {
   guest: [
-    { icon: '🌟', title: '나의 사주 보기', sub: '생년월일로 오늘의 운세 확인', isAction: true },
+    { icon: '🌟', title: '나의 사주 보기', sub: '정통 사주로 오늘의 운세 확인', path: '/traditional' },
   ],
   couple: [
     { icon: '💑', title: '오늘 연인과의 데이트운', sub: '두 사람의 오늘 케미스트리', path: '/my-love-compat', state: { presetTab: 'date' } },
@@ -461,13 +464,27 @@ const DAILY_TAROT_DECKS = [
 function DailyTarot() {
   const [flipped, setFlipped] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [autoStartAi, setAutoStartAi] = useState(false);
+  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
-  // 날짜 시드로 매일 다른 덱 + 카드 (같은 날엔 일관)
+  // 카카오 로그인 후 복귀 → pendingDailyTarotAnalysis 있으면 모달 자동 오픈 + AI 분석 자동 시작
+  useEffect(() => {
+    if (!userId) return;
+    if (localStorage.getItem('pendingDailyTarotAnalysis')) {
+      localStorage.removeItem('pendingDailyTarotAnalysis');
+      setFlipped(true);
+      setModalOpen(true);
+      setAutoStartAi(true);
+    }
+  }, [userId]);
+
+  // 날짜 시드로 매일 다른 덱 + 카드 (78장 풀덱: 메이저 22 + 마이너 56)
   const { deck, card, frontSrc, backSrc } = useMemo(() => {
+    const allCards = [...DAILY_TAROT_CARDS, ...DAILY_TAROT_MINOR];   // 78장
     const d = new Date();
     const baseSeed = d.getFullYear() * 1000 + (d.getMonth() + 1) * 50 + d.getDate();
     const deckId = DAILY_TAROT_DECKS[baseSeed % DAILY_TAROT_DECKS.length];
-    const card = DAILY_TAROT_CARDS[(baseSeed * 7 + 3) % DAILY_TAROT_CARDS.length];
+    const card = allCards[(baseSeed * 7 + 3) % allCards.length];
     const cardNum = String(card.id).padStart(2, '0');
     return {
       deck: deckId,
@@ -509,13 +526,19 @@ function DailyTarot() {
         </div>
       </div>
       {modalOpen && (
-        <DailyTarotModal card={card} frontSrc={frontSrc} backSrc={backSrc} onClose={() => setModalOpen(false)} />
+        <DailyTarotModal
+          card={card}
+          frontSrc={frontSrc}
+          backSrc={backSrc}
+          autoStart={autoStartAi}
+          onClose={() => { setModalOpen(false); setAutoStartAi(false); }}
+        />
       )}
     </>
   );
 }
 
-function DailyTarotModal({ card, frontSrc, onClose }) {
+function DailyTarotModal({ card, frontSrc, onClose, autoStart = false }) {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const profile = useMemo(() => {
@@ -528,6 +551,7 @@ function DailyTarotModal({ card, frontSrc, onClose }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
   const cleanupRef = useRef(null);
+  const autoStartedRef = useRef(false);
 
   // 진입 시 캐시 선조회 — 오늘 이미 분석한 적 있으면 즉시 노출
   useEffect(() => {
@@ -543,6 +567,18 @@ function DailyTarotModal({ card, frontSrc, onClose }) {
   }, [userId, card.id]);
 
   useEffect(() => () => { cleanupRef.current?.(); }, []);
+
+  // 카카오 로그인 후 자동 모달 오픈 + AI 분석 자동 시작
+  useEffect(() => {
+    if (!autoStart || !userId) return;
+    if (autoStartedRef.current) return;
+    if (aiResult || aiLoading) return;
+    autoStartedRef.current = true;
+    // 캐시 선조회와 충돌 방지 위해 살짝 지연
+    const t = setTimeout(() => { startAiAnalysis(); }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, userId]);
 
   const startAiAnalysis = (e) => {
     e?.stopPropagation();
@@ -586,9 +622,12 @@ function DailyTarotModal({ card, frontSrc, onClose }) {
   };
   const isAi = !!aiResult;
 
-  return (
+  // body 에 직접 렌더링 — Hero stacking context 영향 없이 완전한 풀스크린
+  return createPortal((
     <div className="dt-detail-overlay fade-in" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="dt-detail" onClick={(e) => e.stopPropagation()}>
+      {/* dt-detail 자체는 stopPropagation 안 함 — 빈 공간 어디든 탭하면 닫힘
+          단, CTA 버튼·dismiss는 각자 onClick 에서 stopPropagation 처리 */}
+      <div className="dt-detail">
         <div className="dt-detail-img">
           <img src={frontSrc} alt={card.nameKr} draggable={false} />
         </div>
@@ -637,8 +676,13 @@ function DailyTarotModal({ card, frontSrc, onClose }) {
         ) : aiError ? (
           <div className="dt-detail-error">{aiError}</div>
         ) : !userId ? (
-          <button className="dt-detail-cta" onClick={(e) => { e.stopPropagation(); navigate('/register'); }}>
-            🔑 로그인하고 AI 맞춤 분석 받기
+          <button className="dt-detail-cta" onClick={(e) => {
+            e.stopPropagation();
+            // 카카오 즉시 로그인 → 복귀 후 자동 모달 오픈 + AI 분석
+            localStorage.setItem('pendingDailyTarotAnalysis', '1');
+            startKakaoLogin('/');
+          }}>
+            🔑 카카오 로그인하고 AI 맞춤 분석 받기
           </button>
         ) : !aiResult ? (
           <button className="dt-detail-cta dt-detail-cta--ai" onClick={startAiAnalysis}>
@@ -649,7 +693,7 @@ function DailyTarotModal({ card, frontSrc, onClose }) {
         <p className="dt-detail-dismiss" onClick={onClose}>탭하여 돌아가기</p>
       </div>
     </div>
-  );
+  ), document.body);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -734,19 +778,20 @@ function ScoreGauge({ score, color = '#ec4899' }) {
 // 메뉴 페이저 — 4×2 정사각 타일 × N페이지, 가로 스크롤(snap) + 도트
 // ════════════════════════════════════════════════════════════════
 const MENU_PAGES = [
-  // 페이지 1 — 연애 핵심 (타로는 하단 네비에 있어 제외, 별자리 추가)
+  // 페이지 1 — 오늘의 운세 + 연애 핵심
   [
+    { icon: '🔮', label: '오늘의 운세', path: '/my' },
     { icon: '💑', label: '나의 연인',   path: '/my-love-compat' },
     { icon: '💘', label: '썸·짝사랑',   path: '/my-some-crush' },
     { icon: '🙋', label: '솔로 운세',   path: '/my-solo' },
     { icon: '🌙', label: '다시 만날까', path: '/again-meet' },
     { icon: '💞', label: '사주궁합',   path: '/compatibility' },
     { icon: '✨', label: '별자리',     path: '/constellation' },
-    { icon: '⭐', label: '스타 운세',   path: '/star-fortune' },
     { icon: '🎊', label: '신년운세',   path: '/year-fortune' },
   ],
   // 페이지 2 — 종합 / 특수 분석
   [
+    { icon: '⭐', label: '스타 운세',   path: '/star-fortune' },
     { icon: '🩸', label: '혈액형',     path: '/bloodtype' },
     { icon: '🧬', label: 'MBTI',       path: '/mbti' },
     { icon: '💭', label: '꿈해몽',     path: '/dream' },
@@ -754,7 +799,6 @@ const MENU_PAGES = [
     { icon: '👤', label: '관상분석',   path: '/face-reading' },
     { icon: '📅', label: '월간운세',   path: '/monthly-fortune' },
     { icon: '📜', label: '토정비결',   path: '/tojeong' },
-    { icon: '📖', label: '만세력',     path: '/manseryeok' },
   ],
 ];
 
@@ -1313,7 +1357,7 @@ function Home() {
           }
         })();
         const oneLiner = (() => {
-          if (!userId) return '로그인하고 오늘의 연애·사주 운세를 받아보세요';
+          if (!userId) return '';
           if (fortuneLoading && !myData?.saju) return '오늘의 운세를 불러오는 중...';
           if (myData?.saju?.aiAnalyzed && myData?.saju?.overall) {
             return myData.saju.overall.split('.')[0] + '.';
@@ -1385,7 +1429,7 @@ function Home() {
               <DailyTarot />
             </div>
 
-            <p className="home-hero-v2-oneliner">{oneLiner}</p>
+            {oneLiner && <p className="home-hero-v2-oneliner">{oneLiner}</p>}
           </section>
         );
       })()}
@@ -1429,6 +1473,32 @@ function Home() {
       {/* 3. 메뉴 페이저 — 4×2 정사각 타일 × N페이지 (가로 스와이프)    */}
       {/* ════════════════════════════════════════════════════════════ */}
       <MenuPager navigate={navigate} />
+
+      {/* 인기 운세 섹션 제거 — 메뉴 페이저로 충분 */}
+
+      {/* ════════════════════════════════════════════════════════════ */}
+      {/* 5. 오늘의 행운 — 우→좌 흐르는 마퀴                            */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      {(() => {
+        const COLORS  = ['빨강','주황','노랑','초록','하늘','파랑','보라','분홍','금색','은색','청록','자주'];
+        const TIMES   = ['새벽', '아침', '낮', '저녁', '밤', '오전 9시', '오후 3시', '오후 7시'];
+        const PLACES  = ['카페', '서점', '공원', '강변', '산책로', '미술관', '한강', '바다', '꽃집', '도서관'];
+        const d = new Date();
+        const seed = d.getFullYear() * 1000 + (d.getMonth() + 1) * 50 + d.getDate();
+        const color  = COLORS[seed % COLORS.length];
+        const number = ((seed * 7) % 99) + 1;
+        const time   = TIMES[(seed * 11) % TIMES.length];
+        const place  = PLACES[(seed * 13) % PLACES.length];
+        const text = `🍀 오늘의 행운  ·  🎨 색: ${color}  ·  🔢 숫자: ${number}  ·  ⏰ 시간: ${time}  ·  📍 장소: ${place}  ·  💫 ${d.getMonth()+1}월 ${d.getDate()}일`;
+        return (
+          <section className="home-lucky-marquee">
+            <div className="home-lucky-marquee-track">
+              <span className="home-lucky-marquee-text">{text}</span>
+              <span className="home-lucky-marquee-text" aria-hidden="true">{text}</span>
+            </div>
+          </section>
+        );
+      })()}
 
 
       {/* 7. 비로그인: 게스트 운세 입력폼 */}

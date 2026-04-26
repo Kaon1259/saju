@@ -1,6 +1,6 @@
 /* Iljin Tabs */
 .home-iljin-tabs { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; padding: 0 4px; }
-.home-iljin-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--color-text-muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.home-iljin-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--color-text-muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
 .home-iljin-tab.active { background: linear-gradient(135deg, var(--color-accent-gold), #f59e0b); color: #1a0533; border-color: transparent; }
 .home-iljin-pin { margin-left: auto; padding: 5px 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); font-size: 14px; cursor: pointer; transition: all 0.2s; }
 .home-iljin-pin.pinned { background: rgba(255,183,77,0.15); border-color: var(--color-accent-gold); }
@@ -34,9 +34,9 @@
   0%, 100% { transform: scale(1); opacity: 0.4; }
   50% { transform: scale(1.4); opacity: 0.8; }
 }
-.home-med-title { font-size: 17px; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.home-med-title { font-size: 17px; font-weight: 600; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .home-med-sound-tag {
-  font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px;
+  font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 10px;
   background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.25);
   cursor: pointer; transition: all 0.2s;
 }
@@ -77,7 +77,7 @@
 .home-med-step-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
 .home-med-step-body { flex: 1; }
 .home-med-step-time {
-  font-size: 11px; font-weight: 800; color: var(--med-color, #fbbf24);
+  font-size: 11px; font-weight: 600; color: var(--med-color, #fbbf24);
   text-transform: uppercase; letter-spacing: 0.5px;
 }
 .home-med-step-action { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.5; margin: 3px 0 0; }
@@ -85,11 +85,11 @@
   margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
   display: flex; justify-content: space-between; align-items: center;
 }
-.home-med-tag { font-size: 11px; font-weight: 700; }
+.home-med-tag { font-size: 11px; font-weight: 500; }
 .home-med-sound-btn {
   padding: 5px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
   background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);
-  font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+  font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.3s;
 }
 .home-med-sound-btn.on {
   border-color: var(--med-color, #fbbf24);
@@ -131,7 +131,7 @@
   background: rgba(22,163,74,0.12); color: #15803d; border-color: rgba(22,163,74,0.25);
 }
 [data-theme="light"] .home-med-step-icon { opacity: 1; }
-[data-theme="light"] .home-med-step-time { color: #15803d; font-weight: 800; }
+[data-theme="light"] .home-med-step-time { color: #15803d; font-weight: 600; }
 [data-theme="light"] .home-med-step-action { color: #222; }
 [data-theme="light"] .home-med-footer { border-top-color: rgba(22,163,74,0.15); }
 [data-theme="light"] .home-med-tag { color: #15803d !important; }
@@ -148,7 +148,7 @@
 }
 .home-color-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 .home-color-main-swatch { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-.home-color-title { font-size: 16px; font-weight: 800; color: #fff; margin: 0; }
+.home-color-title { font-size: 16px; font-weight: 600; color: #fff; margin: 0; }
 .home-color-main-name { font-size: 12px; font-weight: 600; margin: 3px 0 0; }
 
 .home-color-palette { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
@@ -162,17 +162,17 @@
 @keyframes chipIn { to { opacity: 1; transform: translateY(0); } }
 .home-color-chip-swatch { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 .home-color-chip-info { display: flex; flex-direction: column; gap: 2px; }
-.home-color-chip-name { font-size: 13px; font-weight: 800; color: #fff; }
+.home-color-chip-name { font-size: 13px; font-weight: 600; color: #fff; }
 .home-color-chip-effect { font-size: 11px; color: rgba(255,255,255,0.7); }
 
 .home-color-avoid {
   padding: 12px; border-radius: 12px; margin-bottom: 12px;
   background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15);
 }
-.home-color-avoid-label { font-size: 11px; font-weight: 800; color: #f87171; display: block; margin-bottom: 8px; }
+.home-color-avoid-label { font-size: 11px; font-weight: 600; color: #f87171; display: block; margin-bottom: 8px; }
 .home-color-avoid-row { display: flex; align-items: center; gap: 10px; }
 .home-color-avoid-swatch { width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; }
-.home-color-avoid-name { font-size: 13px; font-weight: 700; color: #fff; display: block; }
+.home-color-avoid-name { font-size: 13px; font-weight: 500; color: #fff; display: block; }
 .home-color-avoid-reason { font-size: 11px; color: rgba(255,255,255,0.65); }
 
 .home-color-tip {
@@ -267,7 +267,7 @@
 @keyframes stormFlash { 0%,100% { opacity: 0; } 4% { opacity: 0.8; } 6% { opacity: 0; } 8% { opacity: 0.4; } 10% { opacity: 0; } }
 
 /* Weather Badge */
-.home-weather-badge { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 10px; padding: 8px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8); width: fit-content; margin-left: auto; margin-right: auto; }
+.home-weather-badge { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 10px; padding: 8px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.8); width: fit-content; margin-left: auto; margin-right: auto; }
 .home-weather-desc { color: var(--color-text-muted); font-weight: 500; font-size: 12px; }
 
 /* ─── Landing (Guest Fun) ─── */
@@ -296,8 +296,8 @@
 .home-weather-scene:has(.home-weather-anim--snow) { background: linear-gradient(180deg, rgba(140,170,210,0.15) 0%, rgba(30,40,70,0.3) 100%); }
 .home-weather-anim { position: absolute; inset: 0; overflow: hidden; }
 .home-weather-info-big { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.home-weather-temp-big { font-size: 48px; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
-.home-weather-desc-big { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 4px; }
+.home-weather-temp-big { font-size: 48px; font-weight: 500; color: #fff; line-height: 1; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+.home-weather-desc-big { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 500; margin-top: 4px; }
 
 /* 눈 */
 .home-snowflake { position: absolute; top: -20px; color: #fff; animation: snowFall linear infinite; }
@@ -330,9 +330,9 @@
 .home-landing-card:active { transform: scale(0.96); }
 
 /* 한자 장식 */
-.home-card-deco { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 2px; transition: all 0.3s; }
+.home-card-deco { font-size: 28px; font-weight: 500; line-height: 1; margin-bottom: 2px; transition: all 0.3s; }
 
-.home-landing-card-title { font-size: 14px; font-weight: 800; color: #fff; position: relative; z-index: 1; }
+.home-landing-card-title { font-size: 14px; font-weight: 600; color: #fff; position: relative; z-index: 1; }
 .home-landing-card-desc { font-size: 11px; color: var(--color-text-muted); line-height: 1.4; position: relative; z-index: 1; }
 
 /* 오늘의 운세 */
@@ -362,7 +362,7 @@
 .home-real-weather { display: flex; align-items: center; gap: 12px; padding: 14px 18px; width: 100%; }
 .home-real-weather-icon { font-size: 36px; }
 .home-real-weather-info { display: flex; flex-direction: column; }
-.home-real-weather-temp { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
+.home-real-weather-temp { font-size: 24px; font-weight: 500; color: #fff; line-height: 1; }
 .home-real-weather-desc { font-size: 14px; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
 .home-real-weather-label { margin-left: auto; font-size: 11px; color: var(--color-text-muted); font-weight: 600; padding: 4px 10px; background: rgba(255,255,255,0.06); border-radius: 8px; }
 
@@ -385,7 +385,7 @@
 
 .home-hero__title {
   font-size: 1.3rem;
-  font-weight: 900;
+  font-weight: 500;
   background: linear-gradient(135deg, var(--color-accent-gold) 0%, #fff 50%, var(--color-accent-gold) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -418,7 +418,7 @@
 
 .home-hero__date-inline {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-accent-gold, #fbbf24);
   white-space: nowrap;
   flex-shrink: 0;
@@ -457,7 +457,7 @@
   background: rgba(15, 23, 42, 0.35);
   color: #fff;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -685,7 +685,7 @@
 /* 시간 칩 — 도시명 옆에 표시 */
 .home-weather-time {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   padding: 2px 8px;
@@ -700,7 +700,7 @@
 .home-weather-card .home-hero__title {
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-  font-weight: 800;
+  font-weight: 600;
 }
 .home-weather-card .home-hero__date-inline {
   color: rgba(255, 255, 255, 0.92);
@@ -709,14 +709,14 @@
 }
 .home-weather-city {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.3px;
 }
 .home-love-top-label {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--love-temp-color, #F472B6);
   letter-spacing: 0.3px;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
@@ -776,7 +776,7 @@
 }
 .home-weather-temp {
   font-size: 58px;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: -2px;
   color: #fff;
   text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -784,7 +784,7 @@
 }
 .home-weather-condition {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 600;
   margin: 6px 0 8px;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -802,7 +802,7 @@
   justify-content: center;
   gap: 10px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   margin-bottom: 8px;
@@ -856,7 +856,7 @@
 }
 .hero-fortune-badge {
   flex-shrink: 0; display: flex; align-items: center; gap: 4px;
-  font-size: 15px; font-weight: 800; padding: 6px 10px;
+  font-size: 15px; font-weight: 600; padding: 6px 10px;
   border-radius: 10px; min-width: 56px; justify-content: center;
   background: rgba(251,191,36,0.15); color: #FBBF24;
 }
@@ -908,7 +908,7 @@
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(255, 107, 157, 0.18));
   color: #fbbf24;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 14px rgba(251, 191, 36, 0.18);
@@ -943,12 +943,12 @@
   border: 1px solid rgba(251,191,36,0.25); border-bottom: none;
   background: rgba(251,191,36,0.08);
 }
-.home-hero-fortune-score { font-size: 38px; font-weight: 900; color: #FBBF24; }
+.home-hero-fortune-score { font-size: 38px; font-weight: 500; color: #FBBF24; }
 .home-hero-fortune-text { font-size: 13px; color: rgba(255,255,255,0.8); text-align: center; line-height: 1.5; }
 .home-hero-fortune-btn {
   width: 100%; padding: 11px; border: 1px solid rgba(251,191,36,0.35);
   border-radius: 0 0 14px 14px; background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.1));
-  color: #FBBF24; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.25s;
+  color: #FBBF24; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.25s;
 }
 .home-hero-fortune-btn:hover { background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(251,191,36,0.18)); }
 .home-hero-fortune-btn:active { transform: scale(0.98); }
@@ -1117,7 +1117,7 @@
 }
 .home-mac-label {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--color-text, #fff);
 }
 .home-mac-sub {
@@ -1167,7 +1167,7 @@
   background: linear-gradient(160deg, rgba(233,30,99,0.08), rgba(233,30,99,0.02));
   color: var(--color-text, #fff);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1208,7 +1208,7 @@
   background: rgba(233,30,99,0.05);
   color: #F472B6;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -1260,7 +1260,7 @@
 .home-menu-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
 .home-menu-icon { font-size: 28px; flex-shrink: 0; }
 .home-menu-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.home-menu-label { font-size: 15px; font-weight: 800; color: var(--color-text); }
+.home-menu-label { font-size: 15px; font-weight: 600; color: var(--color-text); }
 .home-menu-summary {
   font-size: 14px; color: var(--color-text-secondary); line-height: 1.4;
   margin: 0; overflow: hidden; text-overflow: ellipsis;
@@ -1268,7 +1268,7 @@
 }
 
 .home-menu-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.home-menu-score { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+.home-menu-score { font-size: 26px; font-weight: 500; letter-spacing: -1px; }
 .home-menu-score small { font-size: 12px; font-weight: 600; opacity: 0.7; margin-left: 1px; }
 .home-menu-arrow {
   font-size: 22px; color: var(--menu-accent, var(--color-text-muted)); font-weight: 300;
@@ -1303,7 +1303,7 @@
 .home-floating-btn:nth-child(3) { animation-delay: 1.0s; }
 .home-floating-btn:nth-child(4) { animation-delay: 1.5s; }
 .home-floating-icon { font-size: 18px; line-height: 1; }
-.home-floating-label { font-size: 11px; font-weight: 800; line-height: 1.2; white-space: nowrap; }
+.home-floating-label { font-size: 11px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .home-floating-btn:active { transform: scale(0.92); }
 
 /* 각 버튼 색상 */
@@ -1375,7 +1375,7 @@
 
 .swipe-card-title {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--card-accent, var(--color-accent-gold));
 }
 
@@ -1412,7 +1412,7 @@
 
 .home-score-num {
   font-size: 30px;
-  font-weight: 900;
+  font-weight: 500;
   color: #fff;
   display: block;
   line-height: 1;
@@ -1453,7 +1453,7 @@
 
 .swipe-cat-title {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--color-accent-gold);
   display: block;
   margin-bottom: 3px;
@@ -1529,7 +1529,7 @@
 
 .swipe-lucky-value {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--color-accent-gold);
 }
 
@@ -1629,7 +1629,7 @@
 
 .home-guest__title {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--color-text);
   text-align: center;
 }
@@ -1642,7 +1642,7 @@
 
 .home-guest__label {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text-muted);
 }
 
@@ -1659,7 +1659,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -1721,7 +1721,7 @@
   background: linear-gradient(135deg, var(--color-accent-gold, #fbbf24), #f59e0b);
   color: #1a0533;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   margin-top: 4px;
   transition: all 0.2s;
@@ -1766,7 +1766,7 @@
 
 .home-guest-result-header h3 {
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 500;
   background: linear-gradient(135deg, var(--color-accent-gold) 0%, #fff 50%, var(--color-accent-gold) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -1778,7 +1778,7 @@
 .home-guest-badge {
   display: inline-block;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 12px;
   border-radius: 20px;
   background: rgba(251, 191, 36, 0.1);
@@ -1803,7 +1803,7 @@
   background: rgba(255, 255, 255, 0.06);
   color: var(--color-text-secondary);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   margin-top: 8px;
   transition: all 0.2s;
@@ -1817,7 +1817,7 @@
 
 /* ─── 특수 운세 배너 ─── */
 .home-special-section { padding: 0 16px; margin-bottom: 20px; }
-.home-special-title { font-size: 17px; font-weight: 800; color: var(--color-text); margin: 0 0 12px; }
+.home-special-title { font-size: 17px; font-weight: 600; color: var(--color-text); margin: 0 0 12px; }
 /* ═══ 오늘의 연애 온도 ═══ */
 .home-love-section {
   margin: -8px 0 16px;
@@ -1865,18 +1865,18 @@
   display: flex; align-items: center; justify-content: center; gap: 12px;
   position: relative; z-index: 1; margin-bottom: 4px;
 }
-.home-love-fortune-btn { padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 10px !important; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+.home-love-fortune-btn { padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.1); color: #F472B6; font-size: 10px !important; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
 .home-love-fortune-btn:hover { background: rgba(244,114,182,0.2); }
 
 /* 커플 운세 */
 .home-couple-section { margin-top: 16px; position: relative; z-index: 1; }
-.home-couple-title { font-size: 16px; font-weight: 900; color: var(--color-text); margin: 0 0 10px; text-align: center; }
+.home-couple-title { font-size: 16px; font-weight: 500; color: var(--color-text); margin: 0 0 10px; text-align: center; }
 .home-couple-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .home-couple-card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.2s; text-align: center; }
 .home-couple-card:hover { background: rgba(244,114,182,0.08); border-color: rgba(244,114,182,0.25); transform: translateY(-2px); }
 .home-couple-icon { font-size: 24px; }
 .home-couple-info { display: flex; flex-direction: column; gap: 2px; }
-.home-couple-label { font-size: 13px; font-weight: 800; color: var(--color-text); }
+.home-couple-label { font-size: 13px; font-weight: 600; color: var(--color-text); }
 .home-couple-desc { font-size: 10px; color: rgba(255,255,255,0.4); }
 [data-theme="light"] .home-couple-card { border-color: rgba(0,0,0,0.06); background: rgba(0,0,0,0.02); }
 [data-theme="light"] .home-couple-desc { color: rgba(0,0,0,0.6); }
@@ -1909,7 +1909,7 @@
 
 .home-love-temp-num {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -1941,11 +1941,11 @@
 .home-love-group { position: relative; z-index: 1; margin-bottom: 4px; padding: 6px 8px; border-radius: 12px; }
 .home-love-group--active { background: rgba(244,114,182,0.06); border: 1px solid rgba(244,114,182,0.2); }
 .home-love-group-title {
-  font-size: 11px !important; font-weight: 700; color: var(--color-text-secondary, rgba(255,255,255,0.6));
+  font-size: 11px !important; font-weight: 500; color: var(--color-text-secondary, rgba(255,255,255,0.6));
   margin: 0 0 4px 2px; display: flex; align-items: center; gap: 4px;
 }
-.home-love-group--active .home-love-group-title { color: #F472B6; font-weight: 900; }
-.home-love-group-my { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 6px; background: rgba(244,114,182,0.2); color: #F472B6; letter-spacing: 0.5px; margin-left: 4px; }
+.home-love-group--active .home-love-group-title { color: #F472B6; font-weight: 500; }
+.home-love-group-my { font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 6px; background: rgba(244,114,182,0.2); color: #F472B6; letter-spacing: 0.5px; margin-left: 4px; }
 [data-theme="light"] .home-love-group--active { background: rgba(233,30,99,0.04); border-color: rgba(233,30,99,0.15); }
 [data-theme="light"] .home-love-group--active .home-love-group-title { color: #E91E63; }
 .home-love-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; position: relative; z-index: 1; }
@@ -1960,7 +1960,7 @@
 .home-love-icon { font-size: 18px; }
 
 /* 커플 운세 커스텀 아이콘: ♂♡♀ */
-.couple-icon { display: inline-flex; align-items: center; gap: 2px; font-weight: 900; }
+.couple-icon { display: inline-flex; align-items: center; gap: 2px; font-weight: 500; }
 .couple-m { color: #64B5F6; }
 .couple-f { color: #F48FB1; }
 .couple-heart { color: #F472B6; animation: coupleHeartBeat 1.5s ease-in-out infinite; }
@@ -1979,10 +1979,10 @@
 }
 
 /* 결혼운 아이콘: 🎩/♂ 🎀/♀ 세로 배치 */
-.wedding-icon { display: inline-flex; align-items: flex-end; gap: 6px; font-weight: 900; line-height: 1; }
+.wedding-icon { display: inline-flex; align-items: flex-end; gap: 6px; font-weight: 500; line-height: 1; }
 .wedding-person { display: flex; flex-direction: column; align-items: center; gap: 0; }
 .wedding-hat { font-size: 10px; line-height: 1; margin-bottom: -2px; }
-.wedding-sym { font-size: 18px; font-weight: 900; }
+.wedding-sym { font-size: 18px; font-weight: 500; }
 .wedding-sym--m { color: #60A5FA; }
 .wedding-sym--f { color: #F472B6; }
 .home-love-icon .wedding-hat { font-size: 9px; }
@@ -1992,7 +1992,7 @@
 .wedding-icon--lg .wedding-sym { font-size: 32px; }
 .wedding-icon--lg { gap: 12px; }
 
-.home-love-label { font-size: 11px !important; font-weight: 800; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.home-love-label { font-size: 11px !important; font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 /* ═══ 스타 운세 섹션 (컴팩트) ═══ */
 .home-star-section {
@@ -2035,13 +2035,13 @@
 }
 .home-star-header { text-align: center; margin-bottom: 10px; position: relative; }
 .home-star-badge {
-  display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 2px;
   padding: 3px 12px; border-radius: 10px;
   background: linear-gradient(135deg, #9B59B6, #E91E63);
   color: #fff; margin-bottom: 8px;
 }
 .home-star-title {
-  font-size: 20px; font-weight: 900; margin: 0;
+  font-size: 20px; font-weight: 500; margin: 0;
   background: linear-gradient(135deg, #C084FC, #F472B6);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
@@ -2071,7 +2071,7 @@
   font-size: 15px; line-height: 1; color: #F472B6;
 }
 .home-star-card-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.home-star-card-label { font-size: 15px; font-weight: 800; color: var(--color-text); }
+.home-star-card-label { font-size: 15px; font-weight: 600; color: var(--color-text); }
 .home-star-card-desc { font-size: 12px; color: rgba(255,255,255,0.6); }
 .home-star-card-arrow { font-size: 20px; color: var(--color-text-muted); font-weight: 300; }
 
@@ -2132,7 +2132,7 @@
 }
 .home-special-card--time:hover { box-shadow: 0 6px 20px rgba(33,150,243,0.2); }
 .home-special-icon { font-size: 24px; }
-.home-special-label { font-size: 14px; font-weight: 800; color: var(--color-text); }
+.home-special-label { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .home-special-desc { font-size: 11px; color: var(--color-text-muted); }
 .home-special-arrow {
   position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
@@ -2151,7 +2151,7 @@
 }
 .home-new-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px color-mix(in srgb, var(--new-color) 25%, transparent); }
 .home-new-icon { font-size: 28px; }
-.home-new-label { font-size: 14px; font-weight: 800; color: var(--color-text); }
+.home-new-label { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .home-new-desc { font-size: 11px; color: var(--color-text-muted); }
 
 [data-theme="light"] .home-new-card {
@@ -2176,7 +2176,7 @@
 
 .home-grid-title {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--color-text, #fff);
 }
 
@@ -2259,7 +2259,7 @@
 .home-lover-banner-m,
 .home-lover-banner-f {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 500;
   width: 34px; height: 34px;
   display: inline-flex;
   align-items: center;
@@ -2293,7 +2293,7 @@
 }
 .home-lover-banner-title {
   font-size: 17px;
-  font-weight: 900;
+  font-weight: 500;
   background: linear-gradient(135deg, #ff3d7f, #8B5CF6);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2310,7 +2310,7 @@
 
 .home-lover-banner-arrow {
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 500;
   color: #ff6b9d;
   flex-shrink: 0;
   position: relative;
@@ -2383,7 +2383,7 @@
 }
 .home-some-banner-q {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 500;
   color: #c4b5fd;
   animation: hmbQ 2.4s ease-in-out infinite;
   animation-delay: 0.3s;
@@ -2409,7 +2409,7 @@
 }
 .home-some-banner-title {
   font-size: 17px;
-  font-weight: 900;
+  font-weight: 500;
   background: linear-gradient(135deg, #ec4899, #8b5cf6);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2425,7 +2425,7 @@
 [data-theme="light"] .home-some-banner-sub { color: #64748b; }
 .home-some-banner-arrow {
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 500;
   color: #c084fc;
   flex-shrink: 0;
   position: relative;
@@ -2521,7 +2521,7 @@
 }
 .home-solo-banner-title {
   font-size: 17px;
-  font-weight: 900;
+  font-weight: 500;
   background: linear-gradient(135deg, #06B6D4, #8B5CF6);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2538,7 +2538,7 @@
 
 .home-solo-banner-arrow {
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 500;
   color: #22d3ee;
   flex-shrink: 0;
   position: relative;
@@ -2634,7 +2634,7 @@
 }
 .home-again-banner-title {
   font-size: 17px;
-  font-weight: 900;
+  font-weight: 500;
   background: linear-gradient(135deg, #c084fc, #f472b6);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2650,7 +2650,7 @@
 [data-theme="light"] .home-again-banner-sub { color: #64748b; }
 .home-again-banner-arrow {
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 500;
   color: #c084fc;
   flex-shrink: 0;
   position: relative;
@@ -2678,7 +2678,7 @@
   background: linear-gradient(135deg, var(--color-primary, #7c3aed), #a855f7);
   color: #fff;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
   box-shadow:
@@ -2711,7 +2711,7 @@
   background: #FEE500;
   color: #181600;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow:
@@ -2768,7 +2768,7 @@
 }
 
 .home-iljin-badge {
-  font-size: 12px; font-weight: 700; color: var(--color-text-muted);
+  font-size: 12px; font-weight: 500; color: var(--color-text-muted);
   letter-spacing: 0.5px; text-transform: uppercase; display: block; margin-bottom: 14px;
 }
 
@@ -2783,13 +2783,13 @@
 @keyframes iljinPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
 .home-iljin-info { display: flex; flex-direction: column; gap: 3px; }
-.home-iljin-name { font-size: 22px; font-weight: 900; color: var(--color-text); letter-spacing: -0.3px; }
+.home-iljin-name { font-size: 22px; font-weight: 500; color: var(--color-text); letter-spacing: -0.3px; }
 .home-iljin-el-tag { font-size: 13.5px; font-weight: 600; }
 
 /* 오행 에너지 바 */
 .home-iljin-bars { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
 .home-iljin-bar-row { display: flex; align-items: center; gap: 8px; }
-.home-iljin-bar-row.home-iljin-bar--dominant .home-iljin-bar-label { font-weight: 800; color: var(--color-text); }
+.home-iljin-bar-row.home-iljin-bar--dominant .home-iljin-bar-label { font-weight: 600; color: var(--color-text); }
 .home-iljin-bar-icon { font-size: 15px; width: 22px; text-align: center; }
 .home-iljin-bar-label { font-size: 12.5px; font-weight: 600; color: var(--color-text-muted); width: 18px; }
 .home-iljin-bar-track {
@@ -2815,7 +2815,7 @@
   background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 20px;
 }
 .home-hero-iljin-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.home-hero-iljin-el { font-weight: 800; }
+.home-hero-iljin-el { font-weight: 600; }
 
 /* 라이트 모드 */
 [data-theme="light"] .home-iljin-bar-track { background: rgba(0,0,0,0.06); }
@@ -2858,7 +2858,7 @@
   text-align: center; padding: 16px 20px 12px; position: relative;
 }
 .love-modal-icon { font-size: 40px; display: block; margin-bottom: 6px; }
-.love-modal-title { font-size: 24px; font-weight: 900; color: #fff; margin: 0 0 4px; letter-spacing: -0.3px; }
+.love-modal-title { font-size: 24px; font-weight: 500; color: #fff; margin: 0 0 4px; letter-spacing: -0.3px; }
 .love-modal-desc { font-size: 14.5px; color: rgba(255,255,255,0.7); line-height: 1.4; }
 .love-modal-close {
   position: absolute; top: 14px; right: 16px;
@@ -2875,7 +2875,7 @@
 .love-modal-autofill {
   width: 100%; padding: 11px; border-radius: 12px;
   border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
-  color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer;
+  color: #C49BF0; font-size: 14px; font-weight: 500; cursor: pointer;
   transition: all 0.2s;
 }
 .love-modal-autofill:hover { background: rgba(155,89,182,0.15); border-color: rgba(155,89,182,0.6); }
@@ -2895,7 +2895,7 @@
   100% { opacity: 0; transform: translateY(-40px); }
 }
 .love-modal-field { display: flex; flex-direction: column; gap: 9px; }
-.love-modal-label { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.2px; }
+.love-modal-label { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: -0.2px; }
 .love-modal-opt { font-size: 12.5px; color: rgba(255,255,255,0.5); font-weight: 500; }
 .love-modal-input {
   padding: 15px 16px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.22);
@@ -2908,7 +2908,7 @@
 .love-modal-toggle-btn {
   flex: 1; padding: 14px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6);
-  font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s;
 }
 .love-modal-toggle-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
 .love-modal-toggle-btn.active {
@@ -2930,7 +2930,7 @@
 .love-modal-submit {
   width: 100%; padding: 16px; border-radius: 14px; border: none;
   background: linear-gradient(135deg, #E91E63, #FF6B6B);
-  color: #fff; font-size: 17px; font-weight: 800; cursor: pointer;
+  color: #fff; font-size: 17px; font-weight: 600; cursor: pointer;
   transition: all 0.3s; margin-top: 8px; letter-spacing: -0.2px;
   box-shadow: 0 4px 16px rgba(233,30,99,0.25);
 }
@@ -2966,13 +2966,13 @@
 @keyframes heartBeat { 0%,100% { transform: scale(1); } 15% { transform: scale(1.12); } 30% { transform: scale(1); } 45% { transform: scale(1.08); } }
 .love-modal-heart-num {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -55%);
-  font-size: 32px !important; font-weight: 900; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  font-size: 32px !important; font-weight: 500; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.35);
 }
 .love-modal-heart-unit {
   position: absolute; top: 50%; left: 50%; transform: translate(34px, -18%);
-  font-size: 13px !important; font-weight: 700; color: rgba(255,255,255,0.8); text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  font-size: 13px !important; font-weight: 500; color: rgba(255,255,255,0.8); text-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
-.love-modal-heart-grade { position: relative; z-index: 1; font-size: 20px !important; font-weight: 900; letter-spacing: 1px; }
+.love-modal-heart-grade { position: relative; z-index: 1; font-size: 20px !important; font-weight: 500; letter-spacing: 1px; }
 
 /* 라이트모드 점수 가독성 */
 [data-theme="light"] .love-modal-heart-num { color: #c2185b; text-shadow: 0 2px 8px rgba(194,24,91,0.2); }
@@ -2983,18 +2983,18 @@
 .love-modal-lucky { display: flex; justify-content: space-around; padding: 18px 16px; flex-wrap: wrap; gap: 10px; }
 .love-modal-lucky-item { text-align: center; }
 .love-modal-lucky-label { display: block; font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 5px; font-weight: 600; }
-.love-modal-lucky-value { font-size: 16px; font-weight: 800; color: #fbbf24; }
+.love-modal-lucky-value { font-size: 16px; font-weight: 600; color: #fbbf24; }
 
 .love-modal-share {
   width: 100%; padding: 13px; border-radius: 14px; border: 1.5px solid rgba(244,114,182,0.3);
   background: rgba(244,114,182,0.08); color: #F472B6;
-  font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
 }
 .love-modal-share:hover { background: rgba(244,114,182,0.15); }
 .love-modal-reset {
   width: 100%; padding: 15px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.06); color: #e0e0e0;
-  font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s;
 }
 .love-modal-reset:hover { background: rgba(255,255,255,0.1); }
 
@@ -3004,7 +3004,7 @@
 [data-theme="light"] .love-modal-handle { background: rgba(0,0,0,0.18); }
 [data-theme="light"] .love-modal-close { background: rgba(0,0,0,0.08); color: #2e2e45; }
 [data-theme="light"] .love-modal-title { color: #111; }
-[data-theme="light"] .love-modal-label { color: #111; font-weight: 800; }
+[data-theme="light"] .love-modal-label { color: #111; font-weight: 600; }
 [data-theme="light"] .love-modal-desc { color: #2e2e45; }
 [data-theme="light"] .love-modal-opt { color: #888; }
 [data-theme="light"] .love-modal-input {
@@ -3026,7 +3026,7 @@
 
 /* 스트리밍 */
 .love-modal-stream { padding: 16px; }
-.love-modal-stream-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #F472B6; }
+.love-modal-stream-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 14px; font-weight: 500; color: #F472B6; }
 .love-modal-stream-icon { font-size: 18px; animation: heartBeat 1.5s ease-in-out infinite; }
 .love-modal-stream-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); white-space: pre-wrap; word-break: break-word; margin: 0; }
 .love-modal-stream-cursor { animation: loveStreamBlink 0.8s step-end infinite; color: #F472B6; }
@@ -3086,7 +3086,7 @@
 
 .home-lq-label {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text-primary, #fff);
 }
 
@@ -3104,7 +3104,7 @@
 /* ─── 섹션 타이틀 ─── */
 .home-section-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text-primary, #fff);
   margin: 0 0 12px 4px;
 }
@@ -3203,7 +3203,7 @@
 .home-year-banner-content { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; }
 .home-year-banner-icon { font-size: 32px; flex-shrink: 0; }
 .home-year-banner-text { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-.home-year-banner-title { font-size: 16px; font-weight: 900; color: #FBBF24; }
+.home-year-banner-title { font-size: 16px; font-weight: 500; color: #FBBF24; }
 .home-year-banner-desc { font-size: 12px; color: var(--color-text-muted); }
 .home-year-banner-arrow { font-size: 24px; font-weight: 300; color: rgba(251,191,36,0.6); flex-shrink: 0; }
 [data-theme="light"] .home-year-banner { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(220,38,38,0.04), rgba(124,58,237,0.03)); border-color: rgba(184,134,11,0.25); }
@@ -3378,7 +3378,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s;
@@ -3392,7 +3392,7 @@
   cursor: default;
   padding: 0;
 }
-.home-hero-v2-meta-arrow { font-weight: 800; opacity: 0.8; margin-left: 2px; }
+.home-hero-v2-meta-arrow { font-weight: 600; opacity: 0.8; margin-left: 2px; }
 
 .home-hero-v2-center {
   position: relative;
@@ -3429,7 +3429,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -3507,30 +3507,28 @@
 /* ════════════════════════════════════════════════════════════════ */
 .dt-detail-overlay {
   position: fixed;
-  /* 하단 네비(76px) 위는 가리지 않도록 — sample 처럼 네비가 보임 */
-  top: 0; left: 0; right: 0;
-  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-  z-index: 990;
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  inset: 0;                     /* 풀스크린 — 홈 콘텐츠가 비치지 않게 */
+  z-index: 99999;               /* 모든 콘텐츠 위 (포털 + 매우 높은 z-index) */
+  background: #000;             /* 완전 불투명 — 비치지 않게 */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   cursor: pointer;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: calc(env(safe-area-inset-top, 0px) + 24px) 0 24px;
+  padding: calc(env(safe-area-inset-top, 0px) + 36px) 0 calc(env(safe-area-inset-bottom, 0px) + 24px);
   animation: dtDetailIn 0.3s ease-out;
 }
 @keyframes dtDetailIn { from { opacity: 0; } to { opacity: 1; } }
 .dt-detail {
   display: flex; flex-direction: column; align-items: center;
-  padding: 8px 10px 0;
+  padding: 24px 10px 0;                /* 상단 여백 늘려 메뉴와 분리 */
   max-width: 420px; width: 100%;
 }
 .dt-detail-img {
-  width: min(92vw, 360px);             /* 카드를 거의 풀폭 — sample 패턴 */
+  width: min(78vw, 300px);             /* 살짝 축소 (92vw/360px → 78vw/300px) */
   aspect-ratio: 261 / 500;
   border-radius: 14px;
   overflow: hidden;
@@ -3550,13 +3548,13 @@
 }
 .dt-detail-pos {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: rgba(222, 169, 87, 0.95);
   letter-spacing: 1px;
 }
 .dt-detail-name {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 500;
   color: #fff;
   margin: 4px 0 2px;
 }
@@ -3606,7 +3604,7 @@
 .dt-detail-section-label {
   display: block;
   font-size: 11.5px;
-  font-weight: 800;
+  font-weight: 600;
   color: rgba(222, 169, 87, 0.95);
   margin-bottom: 4px;
   letter-spacing: 0.2px;
@@ -3633,7 +3631,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   display: inline-flex;
@@ -3651,7 +3649,7 @@
 }
 .dt-detail-cta-cost {
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.35);
@@ -3666,7 +3664,7 @@
   border: 1px solid rgba(168, 85, 247, 0.30);
   color: rgba(255, 255, 255, 0.92);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   text-align: center;
   max-width: 320px;
 }
@@ -3761,7 +3759,7 @@
 .dt-focus-pos {
   display: inline-block;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: #BB8FCE;
   padding: 4px 14px;
   background: rgba(147, 51, 234, 0.18);
@@ -3771,7 +3769,7 @@
 }
 .dt-focus-name {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 500;
   color: #fff;
   margin: 4px 0 2px;
 }
@@ -3799,7 +3797,7 @@
   color: rgba(255, 255, 255, 0.92);
   font-family: inherit;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s, transform 0.15s;
@@ -3841,7 +3839,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -3863,7 +3861,7 @@
 .daily-tarot-modal-date {
   display: inline-block;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.4px;
   color: rgba(251, 191, 36, 0.95);
   background: rgba(251, 191, 36, 0.10);
@@ -3920,7 +3918,7 @@
   z-index: 1;
   margin: 14px 0 8px;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: -0.5px;
   text-align: center;
   background: linear-gradient(135deg, #fbbf24, #f472b6);
@@ -3939,7 +3937,7 @@
 }
 .daily-tarot-modal-keyword {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   color: rgba(251, 191, 36, 0.95);
   background: rgba(251, 191, 36, 0.10);
   border: 1px solid rgba(251, 191, 36, 0.30);
@@ -3966,7 +3964,7 @@
 .daily-tarot-modal-section-label {
   display: block;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.2px;
   color: rgba(251, 191, 36, 0.95);
   margin-bottom: 5px;
@@ -3990,7 +3988,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s, transform 0.15s;
@@ -4093,7 +4091,7 @@
 .home-hero-v2-score-gauge .home-hero-v2-score-num {
   position: absolute;
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: -0.5px;
   text-shadow: 0 1px 3px rgba(0,0,0,0.45);
   line-height: 1;
@@ -4114,7 +4112,7 @@
 }
 .home-hero-v2-score-grade {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   margin-top: 2px;
   letter-spacing: -0.3px;
   text-shadow: 0 1px 3px rgba(0,0,0,0.45);
@@ -4157,7 +4155,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 12.5px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s, transform 0.15s;
@@ -4201,7 +4199,7 @@
 .home-recommend-badge {
   display: inline-block;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.4px;
   color: #db2777;
   background: rgba(236, 72, 153, 0.08);
@@ -4230,7 +4228,7 @@
 }
 .home-recommend-title {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.3px;
   color: var(--color-text);
 }
@@ -4238,10 +4236,13 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .home-recommend-arrow {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 600;
   color: rgba(236, 72, 153, 0.75);
   flex: 0 0 auto;
   transition: transform 0.2s;
@@ -4329,7 +4330,7 @@
 }
 .home-menu-tile-label {
   font-size: 10.5px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.3px;
   text-align: center;
   line-height: 1.15;
@@ -4347,6 +4348,218 @@
 }
 
 /* ════════════════════════════════════════════════════════════════ */
+/* 4. 인기 운세 BEST — 가로 스크롤 카드들                            */
+/* ════════════════════════════════════════════════════════════════ */
+.home-popular-section {
+  margin: 2px 0 6px;
+  padding: 0 4px;
+}
+.home-popular-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 0 4px;
+}
+.home-popular-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--color-text);
+}
+.home-popular-track {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 4px 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.home-popular-track::-webkit-scrollbar { display: none; }
+.home-popular-card {
+  flex: 0 0 auto;
+  width: 64px;                 /* 96 → 64, 컴팩트 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 7px 4px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--popular-accent, #ec4899) 25%, rgba(255,255,255,0.10));
+  background: color-mix(in oklab, var(--popular-accent, #ec4899) 8%, rgba(255,255,255,0.04));
+  color: var(--color-text);
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  scroll-snap-align: start;
+  text-align: center;
+}
+.home-popular-card:hover {
+  background: color-mix(in oklab, var(--popular-accent, #ec4899) 14%, rgba(255,255,255,0.06));
+  border-color: color-mix(in oklab, var(--popular-accent, #ec4899) 50%, transparent);
+  box-shadow: 0 3px 10px color-mix(in oklab, var(--popular-accent, #ec4899) 25%, transparent);
+}
+.home-popular-card:active { transform: scale(0.96); }
+.home-popular-card-icon {
+  font-size: 18px;
+  line-height: 1;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--popular-accent, #ec4899) 35%, transparent));
+}
+.home-popular-card-label {
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+.home-popular-card-sub {
+  display: none;            /* 컴팩트 — sub 숨김 */
+}
+[data-theme="light"] .home-popular-card {
+  background: #fff;
+  border-color: color-mix(in oklab, var(--popular-accent, #ec4899) 25%, #e5e7eb);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .home-popular-card:hover {
+  border-color: var(--popular-accent, #ec4899);
+}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* 5. 오늘의 행운 — 색·숫자·시간·장소 미니 위젯                        */
+/* ════════════════════════════════════════════════════════════════ */
+/* 오늘의 행운 — 우→좌 흐르는 마퀴 (한 줄, 컴팩트) */
+.home-lucky-marquee {
+  margin: -12px 4px 8px;     /* 위로 약 0.3cm 끌어올림 */
+  padding: 6px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 165, 116, 0.25);
+  background: linear-gradient(90deg,
+              rgba(212, 165, 116, 0.10),
+              rgba(168, 85, 247, 0.06),
+              rgba(212, 165, 116, 0.08));
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+.home-lucky-marquee-track {
+  display: inline-flex;
+  gap: 36px;
+  white-space: nowrap;
+  animation: homeLuckyMarquee 24s linear infinite;
+  will-change: transform;
+}
+.home-lucky-marquee-text {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  color: var(--color-text);
+  padding: 0 8px;
+}
+@keyframes homeLuckyMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.home-lucky-marquee:hover .home-lucky-marquee-track {
+  animation-play-state: paused;
+}
+
+.home-lucky-section {
+  margin: 0 0 8px;
+  padding: 0 4px;
+}
+.home-lucky-card {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 165, 116, 0.30);
+  background: linear-gradient(135deg,
+              rgba(212, 165, 116, 0.10),
+              rgba(168, 85, 247, 0.06));
+  color: var(--color-text);
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.home-lucky-card::-webkit-scrollbar { display: none; }
+.home-lucky-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.home-lucky-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+.home-lucky-date {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(212, 165, 116, 0.10);
+  border: 1px solid rgba(212, 165, 116, 0.20);
+}
+.home-lucky-grid {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  flex-wrap: nowrap;
+}
+.home-lucky-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  white-space: nowrap;
+}
+.home-lucky-item-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.home-lucky-item-value {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.home-lucky-item-num {
+  font-size: 13px;
+  background: linear-gradient(135deg, #d4a574, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.home-lucky-color-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  box-shadow: 0 0 5px currentColor;
+}
+[data-theme="light"] .home-lucky-card {
+  background: #fff;
+  border-color: rgba(212, 165, 116, 0.30);
+  box-shadow: 0 3px 10px rgba(212, 165, 116, 0.10);
+}
+[data-theme="light"] .home-lucky-item {
+  background: rgba(0,0,0,0.025);
+  border-color: rgba(0,0,0,0.06);
+}
+
+/* ════════════════════════════════════════════════════════════════ */
 /* 미니 칩 — 비시즌 신년운세 등 보조 진입점                          */
 /* ════════════════════════════════════════════════════════════════ */
 .home-mini-chip {
@@ -4360,7 +4573,7 @@
   color: var(--color-text);
   font-family: inherit;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s, transform 0.15s;
@@ -4370,7 +4583,7 @@
 }
 .home-mini-chip:active { transform: scale(0.96); }
 .home-mini-chip-label { letter-spacing: -0.2px; }
-.home-mini-chip-arrow { font-weight: 800; opacity: 0.7; }
+.home-mini-chip-arrow { font-weight: 600; opacity: 0.7; }
 [data-theme="light"] .home-mini-chip {
   background: #fff;
   border-color: rgba(212, 165, 116, 0.4);
@@ -4447,7 +4660,7 @@
 .home-fortune-marquee-arrow {
   flex: 0 0 auto;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
   color: rgba(236, 72, 153, 0.85);
   transition: transform 0.2s;
@@ -4493,7 +4706,7 @@
   color: var(--color-text);
   font-family: inherit;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -4651,7 +4864,7 @@
   position: relative;
   z-index: 1;
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.6px;
   padding: 4px 12px;
   border-radius: 999px;
@@ -4696,7 +4909,7 @@
   z-index: 1;
   margin: 0 0 2px;
   font-size: 19px;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: -0.3px;
   background: linear-gradient(135deg, #fff, color-mix(in oklab, var(--c-from) 60%, #fff));
   -webkit-background-clip: text;
@@ -4826,7 +5039,7 @@
   position: relative;
   z-index: 1;
   font-size: 10.5px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.3px;
   white-space: nowrap;
   line-height: 1.2;
@@ -4839,7 +5052,7 @@
   z-index: 1;
   margin-top: 2px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   color: rgba(255,255,255,0.85);
   letter-spacing: 0.3px;
   padding: 4px 0 0;
