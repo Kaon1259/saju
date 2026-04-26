@@ -353,10 +353,13 @@ export const getWeatherCompatBasic = async (condition) => {
   return response.data;
 };
 
-export const getWeatherCompatStream = ({ condition, dayMaster, timeBand, temp } = {}, { onChunk, onCached, onDone, onError, onInsufficientHearts } = {}) => {
+export const getWeatherCompatStream = ({ condition, dayMaster, birthDate, calendarType, birthTime, timeBand, temp } = {}, { onChunk, onCached, onDone, onError, onInsufficientHearts } = {}) => {
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ condition: condition || 'Clear' });
   if (dayMaster) params.set('dayMaster', dayMaster);
+  if (birthDate) params.set('birthDate', birthDate);
+  if (calendarType) params.set('calendarType', calendarType);
+  if (birthTime) params.set('birthTime', birthTime);
   if (timeBand) params.set('timeBand', timeBand);
   if (temp != null) params.set('temp', String(temp));
   appendUserId(params);

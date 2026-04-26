@@ -37,6 +37,9 @@ public class WeatherCompatController {
     public SseEmitter stream(
             @RequestParam Long userId,
             @RequestParam(required = false) String dayMaster,
+            @RequestParam(required = false) String birthDate,
+            @RequestParam(required = false, defaultValue = "SOLAR") String calendarType,
+            @RequestParam(required = false) String birthTime,
             @RequestParam String condition,
             @RequestParam(required = false, defaultValue = "noon") String timeBand,
             @RequestParam(required = false) Double temp) {
@@ -55,6 +58,11 @@ public class WeatherCompatController {
             return emitter;
         }
 
+        // dayMaster 비어있으면 birthDate 로 직접 계산
+        String resolvedDayMaster = (dayMaster != null && !dayMaster.isBlank())
+                ? dayMaster
+                : weatherCompatService.resolveDayMaster(birthDate, calendarType, birthTime);
+
         // 하트 잔액 확인
         try {
             heartPointService.checkPoints(userId, "WEATHER_COMPAT");
@@ -62,7 +70,7 @@ public class WeatherCompatController {
             return SseEmitterUtils.insufficientHearts(e.getRequired(), e.getAvailable());
         }
 
-        return weatherCompatService.streamFortune(userId, dayMaster, condition, timeBand, temp,
+        return weatherCompatService.streamFortune(userId, resolvedDayMaster, condition, timeBand, temp,
                 () -> heartPointService.deductPoints(userId, "WEATHER_COMPAT", "날씨 궁합"));
     }
 }

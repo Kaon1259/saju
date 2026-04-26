@@ -1,6 +1,8 @@
 package com.saju.server.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saju.server.saju.SajuCalculator;
+import com.saju.server.saju.SajuResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WeatherCompatService {
 
     private final ClaudeApiService claudeApiService;
+    private final LunarCalendarService lunarCalendarService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<String, Map<String, Object>> cache = new ConcurrentHashMap<>();
@@ -67,6 +70,25 @@ public class WeatherCompatService {
     public Map<String, Object> getCached(Long userId, String condition) {
         rolloverIfNewDay();
         return cache.get(key(userId, condition));
+    }
+
+    /** birthDate(yyyy-MM-dd) + calendarType(SOLAR/LUNAR) + birthTime → 한글 일간(예: "갑") */
+    public String resolveDayMaster(String birthDate, String calendarType, String birthTime) {
+        if (birthDate == null || birthDate.isBlank()) return "";
+        try {
+            LocalDate date = LocalDate.parse(birthDate);
+            if ("LUNAR".equalsIgnoreCase(calendarType)) {
+                date = lunarCalendarService.lunarToSolar(date);
+            }
+            SajuResult result = SajuCalculator.calculate(date, birthTime);
+            String dm = result.getDayMaster();   // 예: "갑"
+            String hanja = result.getDayMasterHanja(); // 예: "甲"
+            if (hanja != null && !hanja.isBlank()) return hanja + " " + dm;
+            return dm == null ? "" : dm;
+        } catch (Exception e) {
+            log.warn("dayMaster 계산 실패: {} {} ({})", birthDate, calendarType, e.getMessage());
+            return "";
+        }
     }
 
     public SseEmitter streamFortune(Long userId, String dayMaster, String condition,

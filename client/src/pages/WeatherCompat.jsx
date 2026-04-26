@@ -16,6 +16,13 @@ export default function WeatherCompat() {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
 
+  // localStorage 의 userProfile 에서 사주 정보 직접 로드 (서버 호출 실패해도 동작)
+  const profile = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('userProfile') || '{}'); }
+    catch { return {}; }
+  }, []);
+  const hasBirth = !!(profile?.birthDate);
+
   const [weather, setWeather] = useState(null);
   const [timeBand, setTimeBandState] = useState(() => getTimeBand());
   const [dayMaster, setDayMaster] = useState('');
@@ -40,7 +47,7 @@ export default function WeatherCompat() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
-  // 사주 일간(dayMaster) 로드 — myData.saju 활용
+  // 사주 일간(dayMaster) 캐시 로드 — 서버 호출 실패해도 birthDate 만 있으면 분석 가능
   useEffect(() => {
     if (!userId) return;
     getMyFortune(userId)
@@ -76,6 +83,9 @@ export default function WeatherCompat() {
       {
         condition: effectiveWeather.condition,
         dayMaster,
+        birthDate: profile.birthDate,
+        calendarType: profile.calendarType || 'SOLAR',
+        birthTime: profile.birthTime,
         timeBand: timeBand.id,
         temp: effectiveWeather.temp,
       },
@@ -196,7 +206,7 @@ export default function WeatherCompat() {
                 ⚠️ 위치 권한이 없어 기본값(맑음)으로 분석합니다.
               </p>
             )}
-            {!dayMaster ? (
+            {!hasBirth ? (
               <>
                 <p className="wc-cta-desc" style={{ color: '#ec4899', fontWeight: 700 }}>
                   먼저 사주 정보(생년월일)를 등록해주세요.
