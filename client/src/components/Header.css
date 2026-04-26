@@ -408,6 +408,18 @@
   text-shadow: 0 0 12px color-mix(in srgb, var(--tab-color) 50%, transparent);
 }
 
+/* 비활성 상태에서도 강조되는 탭 (예: 타로카드) — 항상 컬러 라벨 */
+.tab-item.highlight:not(.active) .tab-label {
+  color: var(--tab-color);
+  font-weight: 800;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--tab-color) 35%, transparent);
+}
+.tab-item.highlight:not(.active) .tab-svg {
+  stroke: var(--tab-color);
+  opacity: 0.85;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--tab-color) 35%, transparent));
+}
+
 /* ─── 탭 아래 도트 인디케이터 ─── */
 .tab-item.active::after {
   content: '';

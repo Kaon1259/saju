@@ -345,6 +345,42 @@ export const getMyFortuneStream = (userId, { onChunk, onCached, onNoCache, onDon
   return () => { __chunker.cancel(); eventSource.close(); };
 };
 
+// ─── 오늘의 타로 한 장 (AI 풍부 해석, 하트 차감) ───
+export const getDailyTarotBasic = async (cardId) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) return null;
+  const response = await api.get('/daily-tarot/basic', { params: { userId, cardId } });
+  return response.data;
+};
+
+export const getDailyTarotStream = ({ cardId, cardNameKr, cardNameEn, dayMaster, birthDate, calendarType, birthTime } = {}, { onChunk, onCached, onDone, onError, onInsufficientHearts } = {}) => {
+  if (!requireLogin(onError)) return () => {};
+  const params = new URLSearchParams({ cardId: String(cardId), cardNameKr: cardNameKr || '' });
+  if (cardNameEn) params.set('cardNameEn', cardNameEn);
+  if (dayMaster) params.set('dayMaster', dayMaster);
+  if (birthDate) params.set('birthDate', birthDate);
+  if (calendarType) params.set('calendarType', calendarType);
+  if (birthTime) params.set('birthTime', birthTime);
+  appendUserId(params);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/daily-tarot/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
+
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+
+  return () => { __chunker.cancel(); eventSource.close(); };
+};
+
 // ─── 날씨 궁합 (오늘 날씨 × 내 사주 일간) ───
 export const getWeatherCompatBasic = async (condition) => {
   const userId = localStorage.getItem('userId');

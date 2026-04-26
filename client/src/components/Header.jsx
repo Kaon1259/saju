@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   ), color: '#FF6B6B' },
   { path: '/tarot', label: '타로카드', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><rect x="4" y="2" width="16" height="20" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M12 7l1 2h-2l1-2M9 15h6" /><path d="M8 4h8M8 20h8" strokeWidth="1" opacity="0.5" /></svg>
-  ), color: '#9B59B6' },
+  ), color: '#9B59B6', highlight: true },
   { path: '/traditional', label: '정통운세', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="12" r="10" /><path d="M12 2c0 5.5-5 10-5 10s5 4.5 5 10" /><circle cx="10" cy="7" r="1.5" fill="var(--color-bg, #1a0533)" stroke="none" /><circle cx="14" cy="17" r="1.5" /></svg>
   ), color: '#E879F9' },
@@ -219,7 +219,7 @@ function Header({ onHomeSplash, onTabIntro }) {
           return (
             <button
               key={item.path}
-              className={`tab-item ${isActive ? 'active' : ''}`}
+              className={`tab-item ${isActive ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`}
               style={{ '--tab-color': item.color }}
               onClick={() => handleTabClick(item)}
             >
