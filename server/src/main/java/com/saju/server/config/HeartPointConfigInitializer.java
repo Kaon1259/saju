@@ -56,6 +56,7 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("BLOOD_TYPE",           3,  "운세종합",    "혈액형 운세");
         init("MBTI",                 3,  "운세종합",    "MBTI 운세");
         init("CONSTELLATION",        1,  "운세종합",    "별자리 운세");
+        init("ZODIAC",               1,  "운세종합",    "띠 운세");
 
         // ── 운세종합 (추가) ──
         init("BIORHYTHM",              3,  "운세종합",    "바이오리듬");

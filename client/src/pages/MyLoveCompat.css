@@ -298,22 +298,28 @@
   color: #c2185b;
 }
 
-/* ═══ 폼 ═══ */
+/* ═══ 폼 (재디자인 2026-04-27) ═══ */
 .mlc-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 .mlc-autofill-btn {
-  padding: 12px;
+  padding: 11px 14px;
   border-radius: 12px;
-  border: 1.5px dashed rgba(255,61,127,0.35);
-  background: rgba(255,61,127,0.06);
+  border: 1px dashed rgba(255,61,127,0.35);
+  background: linear-gradient(135deg, rgba(255,61,127,0.06), rgba(168,85,247,0.06));
   color: #ff6b9d;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  letter-spacing: 0.2px;
+}
+.mlc-autofill-btn:hover {
+  background: linear-gradient(135deg, rgba(255,61,127,0.12), rgba(168,85,247,0.12));
+  border-style: solid;
+  transform: translateY(-1px);
 }
 .mlc-login-cta {
   padding: 14px;
@@ -332,77 +338,135 @@
   box-shadow: 0 6px 20px rgba(253, 216, 53, 0.4);
 }
 .mlc-login-cta:active { transform: scale(0.98); }
-.mlc-autofill-btn:hover {
-  background: rgba(255,61,127,0.12);
-  transform: translateY(-1px);
-}
 [data-theme="light"] .mlc-autofill-btn {
-  background: #fff0f5;
+  background: linear-gradient(135deg, #fff0f5, #faf5ff);
   color: #c2185b;
-  border-color: rgba(233,30,99,0.3);
+  border-color: rgba(233,30,99,0.28);
 }
 
+/* ── Person 블록 — 액센트 그라데이션, 컴팩트 카드 ── */
 .mlc-person-block {
-  padding: 14px;
+  position: relative;
+  padding: 14px 14px 14px 18px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+    rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.mlc-person-block::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #ec4899, #f472b6);
+  z-index: 0;
+}
+/* 두 번째 person-block (연인) — 보라 액센트 */
+.mlc-person-block + .mlc-person-block::before {
+  background: linear-gradient(180deg, #a855f7, #c084fc);
+}
+.mlc-person-block::after {
+  content: '';
+  position: absolute;
+  top: -30%; right: -20%;
+  width: 140px; height: 140px;
+  background: radial-gradient(circle, rgba(236,72,153,0.10), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+.mlc-person-block + .mlc-person-block::after {
+  background: radial-gradient(circle, rgba(168,85,247,0.10), transparent 70%);
 }
 [data-theme="light"] .mlc-person-block {
   background: #fff;
-  border-color: rgba(0,0,0,0.08);
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
-.mlc-person-title {
-  font-size: 15px;
-  font-weight: 800;
-  margin: 0 0 4px;
-  color: #ff6b9d;
-}
-[data-theme="light"] .mlc-person-title { color: #c2185b; }
 
-/* 성별 토글 */
-.mlc-toggle {
+/* 헤더 — 라벨 + (우측) 양력/음력 인라인 세그먼트 */
+.mlc-person-title {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.mlc-person-block + .mlc-person-block .mlc-person-title { color: #fff; }
+[data-theme="light"] .mlc-person-title { color: #2e2e45; }
+
+/* 토글 컨테이너 — 세그먼트 컨트롤 룩 */
+.mlc-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+/* 성별 토글은 폭 100%로 (Birthdate 아래에 단독 노출) */
+.mlc-person-block > .mlc-toggle:not(:first-of-type) {
+  display: flex;
+  width: 100%;
 }
 .mlc-toggle-btn {
   flex: 1;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1.5px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.03);
-  color: rgba(255,255,255,0.7);
-  font-size: 13px;
-  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
+  transition: all 0.18s;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
+  white-space: nowrap;
 }
+.mlc-toggle-btn:hover { color: rgba(255,255,255,0.85); }
 .mlc-toggle-btn.active {
-  border-color: #ff3d7f;
-  background: rgba(255,61,127,0.1);
+  background: linear-gradient(135deg, #ec4899, #f472b6);
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(236,72,153,0.32);
 }
-[data-theme="light"] .mlc-toggle-btn {
-  background: #fff;
-  border-color: rgba(0,0,0,0.1);
-  color: #475569;
+.mlc-person-block + .mlc-person-block .mlc-toggle-btn.active {
+  background: linear-gradient(135deg, #a855f7, #c084fc);
+  box-shadow: 0 2px 6px rgba(168,85,247,0.32);
 }
-[data-theme="light"] .mlc-toggle-btn.active { background: rgba(255,61,127,0.08); color: #c2185b; }
+[data-theme="light"] .mlc-toggle {
+  background: #f5f3f7;
+  border-color: rgba(0,0,0,0.06);
+}
+[data-theme="light"] .mlc-toggle-btn { color: #888; }
+[data-theme="light"] .mlc-toggle-btn:hover { color: #333; }
+[data-theme="light"] .mlc-toggle-btn.active { color: #fff; }
+
+/* 성별 원형 (♂/♀) */
 .mlc-g-circle {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; border-radius: 50%;
-  font-size: 16px; font-weight: 900;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 13px; font-weight: 800;
+  transition: all 0.18s;
 }
-.mlc-g-male   { background: rgba(96,165,250,0.15); color: #60A5FA; }
-.mlc-g-female { background: rgba(244,114,182,0.15); color: #F472B6; }
+.mlc-g-male   { background: rgba(96,165,250,0.18); color: #60A5FA; }
+.mlc-g-female { background: rgba(244,114,182,0.20); color: #F472B6; }
+.mlc-toggle-btn.active .mlc-g-circle {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+}
 
 /* MBTI 그리드 */
 .mlc-mbti-grid {

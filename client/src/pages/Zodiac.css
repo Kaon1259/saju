@@ -1,0 +1,212 @@
+.zd-page { max-width: 600px; margin: 0 auto; padding: 12px 16px 40px; }
+.zd-streaming-wrap { padding: 8px 0 16px; }
+.zd-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.zd-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #f59e0b 0%, #ec4899 50%, #fbbf24 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.zd-streaming-orb { font-size: 22px; display: inline-block; animation: zdOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7)); }
+@keyframes zdOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
+.zd-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
+.zd-hero { text-align: center; padding: 8px 0 16px; }
+.zd-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #ec4899, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.zd-subtitle { color: var(--color-text-muted); margin-top: 4px; font-size: 13px; }
+
+/* ─── 띠 그리드 ─── */
+.zd-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.zd-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px 12px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  overflow: hidden;
+  animation: zdIn 0.4s ease both;
+}
+
+@keyframes zdIn { from { opacity:0; transform: scale(0.85) translateY(10px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+.zd-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent 0%, color-mix(in srgb, var(--zd-color) 8%, transparent) 25%, transparent 50%);
+  animation: zdShimmer 6s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.zd-card:hover::before,
+.zd-card.active::before { opacity: 1; }
+
+@keyframes zdShimmer { to { transform: rotate(360deg); } }
+
+.zd-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--zd-color) 50%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--zd-color) 22%, transparent);
+}
+
+.zd-card.active {
+  border-color: var(--zd-color);
+  background: color-mix(in srgb, var(--zd-color) 15%, transparent);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--zd-color) 30%, transparent),
+    0 0 20px color-mix(in srgb, var(--zd-color) 15%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* 동물 이모지 */
+.zd-card-emoji {
+  font-size: 32px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--zd-color) 35%, transparent));
+  animation: zdEmojiBob 3.5s ease-in-out infinite;
+  line-height: 1;
+}
+@keyframes zdEmojiBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.zd-card.active .zd-card-emoji {
+  font-size: 36px;
+  filter: drop-shadow(0 0 14px var(--zd-color));
+}
+
+/* 띠 이름 */
+.zd-card-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.7);
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+.zd-card.active .zd-card-name {
+  color: #fff;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--zd-color) 50%, transparent);
+}
+
+/* 한자·오행 */
+.zd-card-meta {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--zd-color);
+  opacity: 0.65;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.3px;
+}
+.zd-card.active .zd-card-meta { opacity: 1; }
+
+/* 점수 */
+.zd-card-score {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-accent-gold);
+  position: relative;
+  z-index: 1;
+  margin-top: 2px;
+}
+.zd-card-score small { font-size: 9px; opacity: 0.7; }
+
+/* MY 뱃지 */
+.zd-card-mine {
+  position: absolute;
+  top: 6px; left: 6px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #fff;
+  background: var(--zd-color);
+  padding: 2px 6px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--zd-color) 40%, transparent);
+}
+
+/* ─── 결과 히어로 ─── */
+.zd-result-hero {
+  position: relative;
+  text-align: center;
+  padding: 28px 20px 22px;
+  margin-bottom: 16px;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--zd-color) 18%, transparent), transparent 70%);
+  overflow: hidden;
+}
+.zd-result-stars { position: absolute; inset: 0; pointer-events: none; }
+.zd-tiny-star {
+  position: absolute;
+  color: rgba(255,255,255,0.3);
+  font-size: 8px;
+  animation: zdTwinkle 3s ease-in-out infinite;
+}
+@keyframes zdTwinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+.zd-result-emoji {
+  font-size: 64px;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--zd-color) 45%, transparent));
+  animation: zdEmojiBob 3.5s ease-in-out infinite;
+}
+.zd-result-name { font-size: 24px; font-weight: 900; color: var(--zd-color); margin-top: 10px; letter-spacing: 1.5px; position: relative; z-index: 1; }
+.zd-result-meta { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; position: relative; z-index: 1; letter-spacing: 0.4px; }
+
+/* 성격 */
+.zd-personality { padding: 16px; margin-bottom: 16px; }
+.zd-personality p { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); }
+
+/* 점수 도넛 */
+.zd-score-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 20px; }
+.zd-score-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.zd-score-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+.zd-score-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
+.zd-score-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+.zd-score-num { font-size: 34px; font-weight: 900; color: #fff; display: block; }
+.zd-score-unit { font-size: 14px; color: var(--color-text-muted); }
+
+.zd-fortunes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+/* 추가 카드 (오행/시간대/감정/조언) */
+.zd-extra { padding: 14px 16px; margin-bottom: 10px; }
+.zd-extra h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 0.3px; }
+.zd-extra p { margin: 0; font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.78); }
+
+/* 럭키 */
+.zd-lucky { display: flex; align-items: center; padding: 16px; margin-bottom: 16px; }
+.zd-lucky-item { flex: 1; text-align: center; }
+.zd-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
+.zd-lucky-value { font-size: 18px; font-weight: 800; color: var(--color-accent-gold); }
+.zd-lucky-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.08); }
+
+/* ── 라이트 모드 ── */
+[data-theme="light"] .zd-card { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
+[data-theme="light"] .zd-card.active { background: color-mix(in srgb, var(--zd-color) 8%, transparent); }
+[data-theme="light"] .zd-card-name { color: #2e2e45; }
+[data-theme="light"] .zd-card.active .zd-card-name { color: #111; }
+[data-theme="light"] .zd-tiny-star { color: rgba(0,0,0,0.15); }
+[data-theme="light"] .zd-result-meta { color: #4a4a5a; }
+[data-theme="light"] .zd-result-hero { background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--zd-color) 8%, transparent), transparent 70%); }
+[data-theme="light"] .zd-personality p { color: #333; }
+[data-theme="light"] .zd-extra h4 { color: #222; }
+[data-theme="light"] .zd-extra p { color: #444; }
+[data-theme="light"] .zd-score-bg { stroke: rgba(0,0,0,0.06); }
+[data-theme="light"] .zd-score-num { color: #111; }
+[data-theme="light"] .zd-lucky-divider { background: rgba(0,0,0,0.08); }
+[data-theme="light"] .zd-lucky-value { color: #b8860b; }
+[data-theme="light"] .zd-card-score { color: #96700a; }
+[data-theme="light"] .zd-card-mine { color: #fff; }

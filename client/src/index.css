@@ -889,3 +889,82 @@ button {
 [data-theme="light"] .star-picker-item:hover { background: rgba(244,114,182,0.04); }
 [data-theme="light"] .star-picker-group { color: rgba(0,0,0,0.4); }
 [data-theme="light"] .star-picker-birth { color: rgba(0,0,0,0.35); }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* 양력/음력·성별 토글 — 세그먼트 컨트롤 일괄 적용 (2026-04-27)        */
+/* 페이지마다 prefix만 다른 토글 클래스를 한 번에 통일                */
+/* ════════════════════════════════════════════════════════════════ */
+.dream-toggle, .fr-toggle, .ltf-toggle, .mf-toggle, .sf-toggle,
+.wf-toggle, .yf-toggle {
+  display: flex !important;
+  gap: 2px !important;
+  padding: 3px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.dream-toggle-btn, .fr-toggle-btn, .ltf-toggle-btn, .mf-toggle-btn,
+.sf-toggle-btn, .wf-toggle-btn, .yf-toggle-btn {
+  flex: 1 !important;
+  padding: 9px 12px !important;
+  border-radius: 9px !important;
+  border: none !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+  transition: all 0.18s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+.dream-toggle-btn:hover, .fr-toggle-btn:hover, .ltf-toggle-btn:hover,
+.mf-toggle-btn:hover, .sf-toggle-btn:hover, .wf-toggle-btn:hover,
+.yf-toggle-btn:hover {
+  color: rgba(255, 255, 255, 0.9) !important;
+  background: transparent !important;
+}
+.dream-toggle-btn.active, .fr-toggle-btn.active, .ltf-toggle-btn.active,
+.mf-toggle-btn.active, .sf-toggle-btn.active, .wf-toggle-btn.active,
+.yf-toggle-btn.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.32) !important;
+  border: none !important;
+}
+
+[data-theme="light"] .dream-toggle, [data-theme="light"] .fr-toggle,
+[data-theme="light"] .ltf-toggle, [data-theme="light"] .mf-toggle,
+[data-theme="light"] .sf-toggle, [data-theme="light"] .wf-toggle,
+[data-theme="light"] .yf-toggle {
+  background: #f5f3f7 !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-theme="light"] .dream-toggle-btn, [data-theme="light"] .fr-toggle-btn,
+[data-theme="light"] .ltf-toggle-btn, [data-theme="light"] .mf-toggle-btn,
+[data-theme="light"] .sf-toggle-btn, [data-theme="light"] .wf-toggle-btn,
+[data-theme="light"] .yf-toggle-btn {
+  background: transparent !important;
+  color: #888 !important;
+  border: none !important;
+}
+[data-theme="light"] .dream-toggle-btn:hover, [data-theme="light"] .fr-toggle-btn:hover,
+[data-theme="light"] .ltf-toggle-btn:hover, [data-theme="light"] .mf-toggle-btn:hover,
+[data-theme="light"] .sf-toggle-btn:hover, [data-theme="light"] .wf-toggle-btn:hover,
+[data-theme="light"] .yf-toggle-btn:hover {
+  color: #333 !important;
+}
+[data-theme="light"] .dream-toggle-btn.active, [data-theme="light"] .fr-toggle-btn.active,
+[data-theme="light"] .ltf-toggle-btn.active, [data-theme="light"] .mf-toggle-btn.active,
+[data-theme="light"] .sf-toggle-btn.active, [data-theme="light"] .wf-toggle-btn.active,
+[data-theme="light"] .yf-toggle-btn.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}

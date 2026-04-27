@@ -130,15 +130,46 @@
 [data-theme="light"] .lf-status-label { color: #555; }
 [data-theme="light"] .lf-status-chip.active .lf-status-label { color: #c2185b; }
 
-/* 토글 */
-.lf-toggle { display: flex; gap: 8px; }
-.lf-toggle-btn {
-  flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.04); color: var(--color-text-secondary); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+/* 토글 — 세그먼트 컨트롤 (2026-04-27 폴리싱) */
+.lf-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.06);
 }
-.lf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.15); color: var(--color-text); }
-[data-theme="light"] .lf-toggle-btn { background: #fff; border-color: rgba(0,0,0,0.12); color: #3a3a50; }
-[data-theme="light"] .lf-toggle-btn.active { border-color: #9B59B6; background: rgba(147,51,234,0.08); color: #111; }
+.lf-toggle-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.lf-toggle-btn:hover { color: rgba(255,255,255,0.9); }
+.lf-toggle-btn.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(236,72,153,0.32);
+}
+[data-theme="light"] .lf-toggle {
+  background: #f5f3f7;
+  border-color: rgba(0,0,0,0.06);
+}
+[data-theme="light"] .lf-toggle-btn { background: transparent; color: #888; }
+[data-theme="light"] .lf-toggle-btn:hover { color: #333; }
+[data-theme="light"] .lf-toggle-btn.active { background: linear-gradient(135deg, #ec4899, #a855f7); color: #fff; font-weight: 600; }
 
 .lf-autofill-btn {
   width: 100%; padding: 11px; border-radius: 12px;

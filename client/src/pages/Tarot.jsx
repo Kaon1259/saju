@@ -1404,31 +1404,24 @@ function Tarot() {
         return (
           <div className="tarot-deck-screen">
             <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
-            {/* ─── 벚꽃 흩날림 ─── */}
-            <div className="deck-sakura" aria-hidden="true">
-              {Array.from({ length: 18 }).map((_, i) => (
-                <span key={i} className="deck-sakura-petal" style={{
-                  '--sk-x': `${-5 + (i * 110 / 17)}%`,
-                  '--sk-delay': `${i * 0.6}s`,
-                  '--sk-dur': `${4 + (i % 5) * 1.2}s`,
-                  '--sk-size': `${14 + (i % 4) * 5}px`,
-                  '--sk-drift': `${30 + (i % 6) * 15}px`,
-                  '--sk-rot': `${(i % 3) * 120}deg`,
-                }}>🌸</span>
-              ))}
+            {/* ─── 라디얼 스포트라이트 + 별빛 (정적) ─── */}
+            <div className="deck-bg-spotlight" aria-hidden="true">
+              {Array.from({ length: 50 }).map((_, i) => {
+                // 의사 랜덤 분포 (시드 기반, 매번 같은 위치)
+                const seed = i * 9301 + 49297;
+                const rx = ((seed * 233) % 10000) / 100;
+                const ry = ((seed * 421) % 10000) / 100;
+                return (
+                  <span key={i} className="deck-bg-star" style={{
+                    '--st-x': `${rx}%`,
+                    '--st-y': `${ry}%`,
+                    '--st-delay': `${(i * 0.3) % 6}s`,
+                    '--st-size': `${1.5 + ((i * 17) % 30) / 10}px`,
+                    '--st-base': `${0.35 + ((i * 7) % 30) / 100}`,
+                  }} />
+                );
+              })}
             </div>
-            {/* 배경 — 인트로에서 선택된 카드 이미지 (없으면 영상 폴백) */}
-            {introBg ? (
-              <div className="deck-bg-intro">
-                <img src={introBg} alt="" className="deck-bg-intro-img" draggable={false} />
-                <div className="deck-bg-intro-overlay" />
-              </div>
-            ) : (
-              <div className="deck-bg-video">
-                <video src="/tarot-effects/intro.mp4" autoPlay muted loop playsInline
-                  onError={(e) => { e.target.style.display = 'none'; }} />
-              </div>
-            )}
             {/* 상단 덱 이름 */}
             <div className="deck-top-header">
               <h1

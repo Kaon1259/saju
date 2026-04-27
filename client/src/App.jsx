@@ -11,6 +11,7 @@ import BloodType from './pages/BloodType';
 import Mbti from './pages/Mbti';
 import MyFortune from './pages/MyFortune';
 import Constellation from './pages/Constellation';
+import Zodiac from './pages/Zodiac';
 import Tojeong from './pages/Tojeong';
 import Compatibility from './pages/Compatibility';
 import CelebCompatibility from './pages/CelebCompatibility';
@@ -314,6 +315,7 @@ function App() {
               <Route path="/mbti" element={<Mbti />} />
               <Route path="/my" element={<MyFortune />} />
               <Route path="/constellation" element={<Constellation />} />
+              <Route path="/zodiac" element={<Zodiac />} />
               <Route path="/tojeong" element={<Tojeong />} />
               <Route path="/compatibility" element={<Compatibility />} />
               <Route path="/celeb-compatibility" element={<CelebCompatibility />} />

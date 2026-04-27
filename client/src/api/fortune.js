@@ -310,6 +310,51 @@ export const getAllConstellations = async () => {
   return response.data;
 };
 
+// ─── 띠 운세 (12지신) ───
+export const getZodiacFortune = async (animal) => {
+  const response = await api.get('/zodiac/fortune', { params: { animal } });
+  return response.data;
+};
+
+export const getZodiacFortuneStream = (animal, { onChunk, onCached, onDone, onError, onInsufficientHearts, birthDate, gender, targetType, targetName } = {}) => {
+  if (!requireLogin(onError)) return () => {};
+  const params = new URLSearchParams({ animal });
+  if (birthDate) params.set('birthDate', birthDate);
+  if (gender) params.set('gender', gender);
+  if (targetType) params.set('targetType', targetType);
+  if (targetName) params.set('targetName', targetName);
+  appendUserId(params);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/zodiac/fortune/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
+
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('cached', (e) => {
+    __chunker.cancel();
+    try { onCached?.(JSON.parse(e.data)); } catch { onDone?.(e.data); }
+    eventSource.close();
+  });
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+
+  return () => { __chunker.cancel(); eventSource.close(); };
+};
+
+export const getZodiacByDate = async (birthDate, calendarType) => {
+  const params = { birthDate };
+  if (calendarType) params.calendarType = calendarType;
+  const response = await api.get('/zodiac/fortune/by-date', { params });
+  return response.data;
+};
+
+export const getAllZodiacs = async () => {
+  const response = await api.get('/zodiac/animals');
+  return response.data;
+};
+
 // ─── 나의 통합 운세 ───
 export const getMyFortune = async (userId) => {
   const response = await api.get(`/my/fortune/${userId}`);

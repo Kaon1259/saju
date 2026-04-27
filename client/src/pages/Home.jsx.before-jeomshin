@@ -461,7 +461,7 @@ const DAILY_TAROT_DECKS = [
   'celestial', 'kdrama', 'lady', 'cartoon_girl', 'cartoon_boy',
 ];
 
-function DailyTarot({ variant = 'hero' }) {
+function DailyTarot() {
   const [flipped, setFlipped] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [autoStartAi, setAutoStartAi] = useState(false);
@@ -507,39 +507,6 @@ function DailyTarot({ variant = 'hero' }) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [modalOpen]);
-
-  if (variant === 'row') {
-    // 가로 카드 — 작은 카드 + 우측 라벨/버튼
-    return (
-      <>
-        <button className="home-tarot-row" onClick={handleClick} aria-label="오늘의 타로 한 장 뽑기">
-          <div className={`home-tarot-row-card ${flipped ? 'flipped' : ''} ${!flipped ? 'glow' : ''}`}>
-            <div className="home-tarot-row-face home-tarot-row-back">
-              <img src={backSrc} alt="" draggable={false} onError={(e) => { e.target.style.display = 'none'; }} />
-            </div>
-            <div className="home-tarot-row-face home-tarot-row-front">
-              <img src={frontSrc} alt={card.nameKr} draggable={false} onError={(e) => { e.target.style.display = 'none'; }} />
-            </div>
-          </div>
-          <div className="home-tarot-row-info">
-            <span className="home-tarot-row-tag">🔮 오늘의 타로 한 장</span>
-            {flipped && <h3 className="home-tarot-row-title">{card.nameKr}</h3>}
-            <p className="home-tarot-row-sub">{flipped ? card.msg : '카드를 탭하면 오늘의 메시지를 받을 수 있어요'}</p>
-          </div>
-          <span className="home-tarot-row-arrow">›</span>
-        </button>
-        {modalOpen && (
-          <DailyTarotModal
-            card={card}
-            frontSrc={frontSrc}
-            backSrc={backSrc}
-            autoStart={autoStartAi}
-            onClose={() => { setModalOpen(false); setAutoStartAi(false); }}
-          />
-        )}
-      </>
-    );
-  }
 
   return (
     <>
@@ -658,15 +625,6 @@ function DailyTarotModal({ card, frontSrc, onClose, autoStart = false }) {
   // body 에 직접 렌더링 — Hero stacking context 영향 없이 완전한 풀스크린
   return createPortal((
     <div className="dt-detail-overlay fade-in" onClick={onClose} role="dialog" aria-modal="true">
-      {/* 상단 고정 닫기 버튼 — 어디서든 한 번에 닫기 */}
-      <button
-        className="dt-detail-close"
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        aria-label="닫기"
-      >
-        <span className="dt-detail-close-x">✕</span>
-        <span className="dt-detail-close-label">닫기</span>
-      </button>
       {/* dt-detail 자체는 stopPropagation 안 함 — 빈 공간 어디든 탭하면 닫힘
           단, CTA 버튼·dismiss는 각자 onClick 에서 stopPropagation 처리 */}
       <div className="dt-detail">
@@ -732,10 +690,7 @@ function DailyTarotModal({ card, frontSrc, onClose, autoStart = false }) {
           </button>
         ) : null}
 
-        <button className="dt-detail-back" onClick={(e) => { e.stopPropagation(); onClose(); }}>
-          ← 홈으로 돌아가기
-        </button>
-        <p className="dt-detail-dismiss" onClick={onClose}>또는 빈 공간을 탭하세요</p>
+        <p className="dt-detail-dismiss" onClick={onClose}>탭하여 돌아가기</p>
       </div>
     </div>
   ), document.body);
@@ -1137,102 +1092,6 @@ const FALLBACK_WEATHER_BASE = {
   message: '날씨 정보를 불러오는 중...',
 };
 
-// ════════════════════════════════════════════════════════════════
-// Co-Star 스타일 한 줄 시그니처 — 매일 시드로 회전
-// ════════════════════════════════════════════════════════════════
-const LOVE_HEADLINES = [
-  '오늘 누군가가 당신을 떠올립니다.',
-  '마음을 들켜도 괜찮은 날.',
-  '연락이 늦어도 진심은 가까이 있어요.',
-  '용기 한 번이 일주일을 바꿉니다.',
-  '다정함이 가장 강한 무기인 하루.',
-  '진심을 숨기지 마세요. 오늘은 그게 답.',
-  '망설였던 한마디, 오늘이 적기예요.',
-  '먼저 다가갈수록 운이 따라옵니다.',
-  '작은 시그널을 놓치지 마세요.',
-  '오늘 만난 사람이 길게 갈 수도.',
-  '예전 인연이 다시 떠오를 수 있어요.',
-  '익숙한 관계에 새 호흡을 불어넣어 보세요.',
-  '솔직한 표현이 가장 큰 매력.',
-  '거리를 두는 것도 사랑의 기술.',
-];
-
-function pickDailyHeadline() {
-  const d = new Date();
-  const seed = d.getFullYear() * 1000 + (d.getMonth() + 1) * 50 + d.getDate();
-  return LOVE_HEADLINES[seed % LOVE_HEADLINES.length];
-}
-
-// ════════════════════════════════════════════════════════════════
-// 연애 배너 세로 스택 (점신 스타일)
-// ════════════════════════════════════════════════════════════════
-const LOVE_BANNERS = [
-  { id: 'mylove',  icon: '💑', title: '나의 연인',        sub: '정통·결혼·스킨십·데이트 통합 궁합',  gradFrom: '#fb7185', gradTo: '#ec4899', path: '/my-love-compat', badge: 'MY' },
-  { id: 'rel',     icon: '💕', title: '1:1 연애운',      sub: '오늘 나의 연애 흐름을 한눈에',     gradFrom: '#ff6b9d', gradTo: '#ec4899', path: '/love-fortune', badge: 'HOT' },
-  { id: 'compat',  icon: '💞', title: '사주 궁합',        sub: '두 사람의 운명적 케미 진단',        gradFrom: '#a855f7', gradTo: '#ec4899', path: '/compatibility' },
-  { id: 'some',    icon: '🎯', title: '썸 진단',          sub: '이 썸, 연애로 발전할까?',          gradFrom: '#f97316', gradTo: '#ec4899', path: '/love/some_check' },
-  { id: 'crush',   icon: '💘', title: '짝사랑',          sub: '내 마음, 이뤄질 수 있을까?',        gradFrom: '#ec4899', gradTo: '#a855f7', path: '/love/crush' },
-  { id: 'confess', icon: '💌', title: '고백 타이밍',      sub: '언제 말해야 답이 나올까?',          gradFrom: '#fb923c', gradTo: '#ef4444', path: '/love/confession_timing' },
-  { id: 'meet',    icon: '🔮', title: '만남 시기',        sub: '인연이 다가오는 그날',              gradFrom: '#06b6d4', gradTo: '#a78bfa', path: '/love/meeting_timing' },
-  { id: 'star',    icon: '⭐', title: '최애 스타 궁합',    sub: '내 최애와의 운명 케미',             gradFrom: '#facc15', gradTo: '#fb923c', path: '/celeb-compatibility' },
-];
-
-function reorderLoveBanners(status) {
-  const order = (() => {
-    switch (status) {
-      case 'IN_RELATIONSHIP':
-      case 'MARRIED':
-        return ['mylove', 'rel', 'compat', 'confess', 'star', 'meet', 'some', 'crush'];
-      case 'SOME':
-        return ['some', 'confess', 'rel', 'mylove', 'compat', 'crush', 'star', 'meet'];
-      case 'SINGLE':
-        return ['rel', 'crush', 'meet', 'some', 'star', 'compat', 'mylove', 'confess'];
-      case 'COMPLICATED':
-        return ['rel', 'meet', 'mylove', 'compat', 'crush', 'star', 'some', 'confess'];
-      default:
-        return ['mylove', 'rel', 'compat', 'some', 'crush', 'confess', 'meet', 'star'];
-    }
-  })();
-  return order.map(k => LOVE_BANNERS.find(b => b.id === k)).filter(Boolean);
-}
-
-// ════════════════════════════════════════════════════════════════
-// 시즌 운세 그리드 (2x2)
-// ════════════════════════════════════════════════════════════════
-const SEASON_MENUS = [
-  { icon: '🎊', title: '신년운세',  sub: '한 해의 큰 흐름', path: '/year-fortune',    color: '#fbbf24' },
-  { icon: '📜', title: '토정비결',  sub: '12달 정통 운세',  path: '/tojeong',         color: '#a855f7' },
-  { icon: '📅', title: '월간운세',  sub: '이번 달 흐름',    path: '/monthly-fortune', color: '#06b6d4' },
-  { icon: '🗓️', title: '주간운세',  sub: '이번 주 변화',    path: '/weekly-fortune',  color: '#10b981' },
-];
-
-// ════════════════════════════════════════════════════════════════
-// 종합/특수 가로 스크롤
-// ════════════════════════════════════════════════════════════════
-const OTHER_MENUS = [
-  { icon: '✨', label: '별자리',   path: '/constellation' },
-  { icon: '🩸', label: '혈액형',   path: '/bloodtype' },
-  { icon: '🧬', label: 'MBTI',     path: '/mbti' },
-  { icon: '🐯', label: '띠 운세',  path: '/zodiac' },
-  { icon: '💭', label: '꿈해몽',   path: '/dream' },
-  { icon: '🧠', label: '심리테스트', path: '/psych-test' },
-  { icon: '👤', label: '관상',     path: '/face-reading' },
-  { icon: '☯️', label: '사주 정통', path: '/traditional' },
-  { icon: '🌊', label: '바이오리듬', path: '/biorhythm' },
-  { icon: '🃏', label: '타로',     path: '/tarot' },
-];
-
-// ════════════════════════════════════════════════════════════════
-// 운세 요약 띠 — 가로 스크롤 (로그인 시)
-// ════════════════════════════════════════════════════════════════
-const SUMMARY_DEFS = [
-  { key: 'overall', icon: '🌟', label: '총운',   color: '#fbbf24' },
-  { key: 'love',    icon: '💕', label: '애정운', color: '#ec4899' },
-  { key: 'money',   icon: '💰', label: '재물운', color: '#10b981' },
-  { key: 'work',    icon: '💼', label: '직장운', color: '#6366f1' },
-  { key: 'health',  icon: '💪', label: '건강운', color: '#06b6d4' },
-];
-
 function Home() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1466,99 +1325,159 @@ function Home() {
   };
 
 
-  // 점신 + Co-Star 스타일 통합 변수
-  const fallbackGrad = TIMEBAND_FALLBACK_GRAD[timeBand.id] || TIMEBAND_FALLBACK_GRAD.noon;
-  const heroWeather = weatherData || { ...FALLBACK_WEATHER_BASE, ...fallbackGrad };
-  const loveScore = loveTemp?.temperature ?? null;
-  const loveGrade = loveScore == null ? '--' : loveScore >= 80 ? '뜨거움' : loveScore >= 60 ? '따뜻' : loveScore >= 40 ? '미지근' : '차가움';
-  const headline = useMemo(() => pickDailyHeadline(), []);
-  const loveBtn = useMemo(() => {
-    if (!userId) return { icon: '💕', label: '오늘의 연애운 보기', path: '/love-fortune' };
-    switch (myData?.user?.relationshipStatus) {
-      case 'IN_RELATIONSHIP':
-      case 'MARRIED':
-        return { icon: '💑', label: '나의 연인 보기', path: '/my-love-compat' };
-      case 'SOME':
-        return { icon: '💘', label: '썸·짝사랑 보기', path: '/my-some-crush' };
-      case 'COMPLICATED':
-        return { icon: '🌙', label: '다시 만날까 보기', path: '/again-meet' };
-      case 'SINGLE':
-        return { icon: '🙋', label: '솔로 운세 보기', path: '/my-solo' };
-      default:
-        return { icon: '💕', label: '오늘의 연애운 보기', path: '/love-fortune' };
-    }
-  }, [userId, myData?.user?.relationshipStatus]);
-  const loveBanners = useMemo(() => reorderLoveBanners(myData?.user?.relationshipStatus), [myData?.user?.relationshipStatus]);
-
   return (
-    <div className="home home-jeomshin">
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* 1. Hero — 오늘의 연애 (Co-Star 스타일 시그니처 카드)           */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      <section
-        className={`home-hero-cs home-hero-cs--${timeBand.id}`}
-        style={{ '--w-from': heroWeather.bgFrom, '--w-to': heroWeather.bgTo }}
-      >
-        <div className="home-hero-cs-orb home-hero-cs-orb--1" />
-        <div className="home-hero-cs-orb home-hero-cs-orb--2" />
-        <div className="home-hero-cs-hearts" aria-hidden="true">
-          {Array.from({ length: Math.max(10, Math.floor((loveScore || 50) / 5)) }).map((_, i) => {
-            const total = Math.max(10, Math.floor((loveScore || 50) / 5));
-            return (
-              <span key={i} className="home-hero-cs-heart" style={{
-                '--hf-x': `${5 + (i * 95 / total) % 92}%`,
-                '--hf-delay': `${(i * 0.45) % 6}s`,
-                '--hf-dur': `${3.5 + (i % 4) * 0.8}s`,
-                '--hf-size': `${10 + (i % 5) * 4}px`,
-              }}>&#x2764;</span>
-            );
-          })}
-        </div>
+    <div className="home">
+      {weather && <WeatherBg type={weather.type} />}
 
-        {/* 상단 메타 — 도시·날씨·시간대 (작게) */}
-        <div className="home-hero-cs-meta">
-          <span>📍 {heroWeather.city}</span>
-          <span className="home-hero-cs-meta-sep">·</span>
-          <button
-            className="home-hero-cs-meta-weather"
-            onClick={(e) => { e.stopPropagation(); if (userId) navigate('/weather-compat'); }}
-            disabled={!userId}
+      {/* ════════════════════════════════════════════════════════════ */}
+      {/* 1. Hero — 점수 + 날씨 + 한줄 통합 카드 (자동 움직임 X)         */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      {(() => {
+        const fallbackGrad = TIMEBAND_FALLBACK_GRAD[timeBand.id] || TIMEBAND_FALLBACK_GRAD.noon;
+        const w = weatherData || { ...FALLBACK_WEATHER_BASE, ...fallbackGrad };
+        const sajuScore = (myData?.saju?.aiAnalyzed && myData?.saju?.score != null) ? myData.saju.score : null;
+        const sajuGrade = sajuScore == null ? '미계산' : sajuScore >= 80 ? '대길' : sajuScore >= 60 ? '길' : sajuScore >= 40 ? '보통' : '주의';
+        const loveScore = loveTemp?.temperature ?? null;
+        const loveGrade = loveScore == null ? '--' : loveScore >= 80 ? '뜨거움' : loveScore >= 60 ? '따뜻' : loveScore >= 40 ? '미지근' : '차가움';
+        // 좌측 연애운 버튼 — 사용자 상태별로 가장 어울리는 메뉴로 동적 변경
+        const loveBtn = (() => {
+          if (!userId) return { icon: '💑', label: '나의 연인', path: '/my-love-compat' };
+          switch (myData?.user?.relationshipStatus) {
+            case 'IN_RELATIONSHIP':
+            case 'MARRIED':
+              return { icon: '💑', label: '나의 연인', path: '/my-love-compat' };
+            case 'SOME':
+              return { icon: '💘', label: '썸·짝사랑', path: '/my-some-crush' };
+            case 'COMPLICATED':
+              return { icon: '🌙', label: '다시 만날까', path: '/again-meet' };
+            case 'SINGLE':
+              return { icon: '🙋', label: '솔로 운세', path: '/my-solo' };
+            default:
+              return { icon: '💑', label: '나의 연인', path: '/my-love-compat' };
+          }
+        })();
+        const oneLiner = (() => {
+          if (!userId) return '';
+          if (fortuneLoading && !myData?.saju) return '오늘의 운세를 불러오는 중...';
+          if (myData?.saju?.aiAnalyzed && myData?.saju?.overall) {
+            return myData.saju.overall.split('.')[0] + '.';
+          }
+          return '오늘의 운세를 분석받아보세요';
+        })();
+        return (
+          <section
+            className={`home-hero-v2 home-hero-v2--${timeBand.id}`}
+            style={{ '--w-from': w.bgFrom, '--w-to': w.bgTo, '--w-overlay': timeBand.overlay }}
           >
-            {heroWeather.icon} {heroWeather.temp}° {heroWeather.conditionLabel || heroWeather.condition}
-            {userId && <span className="home-hero-cs-meta-arrow">›</span>}
-          </button>
-          <span className="home-hero-cs-meta-sep">·</span>
-          <span>{timeBand.icon} {timeBand.label}</span>
-        </div>
+            <div className="home-hero-v2-orb home-hero-v2-orb--1" />
+            <div className="home-hero-v2-orb home-hero-v2-orb--2" />
 
-        {/* Co-Star 시그니처 — 큰 한 줄 */}
-        <div className="home-hero-cs-signature">
-          <span className="home-hero-cs-greeting">
-            {userId ? `${userName || '오늘'}님의 연애` : '오늘의 연애'}
-          </span>
-          <h1 className="home-hero-cs-headline">{headline}</h1>
-        </div>
+            {/* 떠오르는 하트 버블 — loveScore 가 높을수록 더 많이/뜨겁게 */}
+            <div className="home-hero-v2-hearts">
+              {Array.from({ length: Math.max(8, Math.floor((loveScore || 50) / 5)) }).map((_, i) => {
+                const total = Math.max(8, Math.floor((loveScore || 50) / 5));
+                return (
+                  <span key={i} className="home-hero-v2-heart" style={{
+                    '--hf-x': `${5 + (i * 95 / total) % 92}%`,
+                    '--hf-delay': `${(i * 0.4) % 5}s`,
+                    '--hf-dur': `${3 + (i % 4) * 0.7}s`,
+                    '--hf-size': `${10 + (i % 4) * 4}px`,
+                  }}>&#x2764;</span>
+                );
+              })}
+            </div>
 
-        {/* 큰 하트 + 점수 */}
-        <div className="home-hero-cs-meter">
-          <HeartScore score={loveScore} color="#ec4899" />
-          <div className="home-hero-cs-meter-text">
-            <span className="home-hero-cs-meter-label">오늘의 연애 온도</span>
-            <span className="home-hero-cs-meter-grade">{loveGrade}</span>
-          </div>
-        </div>
+            {/* 상단 메타 — 도시/시간대/날씨, 날씨 부분은 클릭 가능(로그인 시 날씨 궁합) */}
+            <div className="home-hero-v2-top">
+              <span className="home-hero-v2-meta">📍 {w.city}</span>
+              <span className="home-hero-v2-meta-sep">·</span>
+              <button
+                className="home-hero-v2-meta home-hero-v2-meta--btn"
+                onClick={(e) => { e.stopPropagation(); if (userId) navigate('/weather-compat'); }}
+                title={userId ? '날씨 궁합 보기' : ''}
+                disabled={!userId}
+              >
+                {w.icon} {w.temp}° {w.conditionLabel || w.condition}
+                {userId && <span className="home-hero-v2-meta-arrow">›</span>}
+              </button>
+              <span className="home-hero-v2-meta-sep">·</span>
+              <span className="home-hero-v2-meta">{timeBand.icon} {timeBand.label}</span>
+            </div>
 
-        {/* CTA */}
-        <button
-          className="home-hero-cs-cta"
-          onClick={(e) => { e.stopPropagation(); navigate(loveBtn.path); }}
-        >
-          {loveBtn.icon} {loveBtn.label} <span className="home-hero-cs-cta-arrow">›</span>
-        </button>
-      </section>
+            {/* 중앙: 좌(연애운+버튼) | 우(오늘의 운세+버튼) */}
+            <div className="home-hero-v2-center">
+              {/* 좌측 — 연애운 + [나의 연인] 버튼 */}
+              <div className="home-hero-v2-col home-hero-v2-col--love">
+                <div className="home-hero-v2-score home-hero-v2-score--love">
+                  <HeartScore score={loveScore} color="#ec4899" />
+                  <div className="home-hero-v2-score-text">
+                    <span className="home-hero-v2-score-label">오늘의 연애운</span>
+                    <span className="home-hero-v2-score-grade" style={{ color: '#ec4899' }}>{loveGrade}</span>
+                  </div>
+                </div>
+                <button
+                  className="home-hero-v2-col-btn home-hero-v2-col-btn--love"
+                  onClick={(e) => { e.stopPropagation(); navigate(loveBtn.path); }}
+                >
+                  {loveBtn.icon} {loveBtn.label} ›
+                </button>
+              </div>
+
+              <div className="home-hero-v2-divider" />
+
+              {/* 우측 — 오늘의 타로 한 장 (날짜 시드 + 플립 + 모달) */}
+              <DailyTarot />
+            </div>
+
+            {oneLiner && <p className="home-hero-v2-oneliner">{oneLiner}</p>}
+          </section>
+        );
+      })()}
+
+      {/* 비로그인 CTA — Hero 바로 아래 */}
+      {!userId && !showForm && (
+        <section style={{ padding: '0 4px', marginBottom: 10 }}>
+          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
+        </section>
+      )}
 
       {/* ════════════════════════════════════════════════════════════ */}
-      {/* 1.5 오늘의 행운 마퀴 — Hero 바로 아래로 이동                   */}
+      {/* 2. 오늘의 추천 — 사용자 상태별 후보 풀 + 일별 로테이션         */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      {(() => {
+        const rec = pickDailyRecommend(userId, myData?.user?.relationshipStatus);
+        const today = new Date();
+        const dateLabel = `${today.getMonth() + 1}/${today.getDate()}`;
+        const handleClick = () => {
+          if (rec.isAction) { setShowForm(true); return; }
+          navigate(rec.path, rec.state ? { state: rec.state } : undefined);
+        };
+        return (
+          <section style={{ padding: '0 4px', marginBottom: 12 }}>
+            <button className="home-recommend-card" onClick={handleClick}>
+              <span className="home-recommend-badge">오늘의 추천 · {dateLabel}</span>
+              <div className="home-recommend-body">
+                <span className="home-recommend-icon">{rec.icon}</span>
+                <div className="home-recommend-text">
+                  <span className="home-recommend-title">{rec.title}</span>
+                  <span className="home-recommend-sub">{rec.sub}</span>
+                </div>
+                <span className="home-recommend-arrow">›</span>
+              </div>
+            </button>
+          </section>
+        );
+      })()}
+
+      {/* ════════════════════════════════════════════════════════════ */}
+      {/* 3. 메뉴 페이저 — 4×2 정사각 타일 × N페이지 (가로 스와이프)    */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      <MenuPager navigate={navigate} />
+
+      {/* 인기 운세 섹션 제거 — 메뉴 페이저로 충분 */}
+
+      {/* ════════════════════════════════════════════════════════════ */}
+      {/* 5. 오늘의 행운 — 우→좌 흐르는 마퀴                            */}
       {/* ════════════════════════════════════════════════════════════ */}
       {(() => {
         const COLORS  = ['빨강','주황','노랑','초록','하늘','파랑','보라','분홍','금색','은색','청록','자주'];
@@ -1581,156 +1500,8 @@ function Home() {
         );
       })()}
 
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* 2. (로그인) 가로 스크롤 운세 요약 띠                          */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      {userId && (
-        <section className="home-summary-strip">
-          <div className="home-summary-strip-header">
-            <span className="home-summary-strip-title">📊 오늘의 운세 요약</span>
-            <button className="home-summary-strip-more" onClick={() => navigate('/my')}>전체보기 ›</button>
-          </div>
-          <div className="home-summary-track">
-            {SUMMARY_DEFS.map((def) => {
-              const text = myData?.saju?.[def.key] || '';
-              const firstSentence = text ? (text.split(/[.!?]/)[0] + (text.includes('.') ? '.' : '')) : '';
-              const score = def.key === 'love'
-                ? (loveTemp?.temperature ?? null)
-                : (def.key === 'overall' && myData?.saju?.aiAnalyzed && myData?.saju?.score != null ? myData.saju.score : null);
-              return (
-                <button
-                  key={def.key}
-                  className="home-summary-card"
-                  style={{ '--sm-color': def.color }}
-                  onClick={() => navigate('/my')}
-                >
-                  <div className="home-summary-card-head">
-                    <span className="home-summary-card-icon">{def.icon}</span>
-                    <span className="home-summary-card-label">{def.label}</span>
-                  </div>
-                  {score != null ? (
-                    <span className="home-summary-card-score">{score}<small>점</small></span>
-                  ) : (
-                    <span className="home-summary-card-score home-summary-card-score--empty">--</span>
-                  )}
-                  <p className="home-summary-card-line">{firstSentence || '분석 받기 ›'}</p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
-      {/* 비로그인 CTA — Hero 바로 아래 */}
-      {!userId && !showForm && (
-        <section style={{ padding: '0 4px', marginBottom: 10 }}>
-          <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
-        </section>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* 3. 오늘의 추천 — 큰 배너 1개                                  */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      {(() => {
-        const rec = pickDailyRecommend(userId, myData?.user?.relationshipStatus);
-        const today = new Date();
-        const dateLabel = `${today.getMonth() + 1}/${today.getDate()}`;
-        const handleClick = () => {
-          if (rec.isAction) { setShowForm(true); return; }
-          navigate(rec.path, rec.state ? { state: rec.state } : undefined);
-        };
-        return (
-          <section className="home-section">
-            <button className="home-recommend-card" onClick={handleClick}>
-              <span className="home-recommend-badge">오늘의 추천 · {dateLabel}</span>
-              <div className="home-recommend-body">
-                <span className="home-recommend-icon">{rec.icon}</span>
-                <div className="home-recommend-text">
-                  <span className="home-recommend-title">{rec.title}</span>
-                  <span className="home-recommend-sub">{rec.sub}</span>
-                </div>
-                <span className="home-recommend-arrow">›</span>
-              </div>
-            </button>
-          </section>
-        );
-      })()}
-
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* 5. 연애 배너 세로 스택 (점신 스타일)                           */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      <section className="home-section">
-        <div className="home-section-header">
-          <h2 className="home-section-title">💕 연애 운세</h2>
-          <span className="home-section-sub">당신의 연애를 위한 모든 운세</span>
-        </div>
-        <div className="home-banner-stack">
-          {loveBanners.map((b) => (
-            <button
-              key={b.id}
-              className="home-love-banner"
-              style={{ '--b-from': b.gradFrom, '--b-to': b.gradTo }}
-              onClick={() => navigate(b.path, b.state ? { state: b.state } : undefined)}
-            >
-              <div className="home-love-banner-icon">
-                <span>{b.icon}</span>
-              </div>
-              <div className="home-love-banner-text">
-                <div className="home-love-banner-title-row">
-                  <span className="home-love-banner-title">{b.title}</span>
-                  {b.badge && <span className="home-love-banner-badge">{b.badge}</span>}
-                </div>
-                <span className="home-love-banner-sub">{b.sub}</span>
-              </div>
-              <span className="home-love-banner-arrow">›</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* 6. 시즌 운세 — 신년/토정/월간/주간 (2x2 그리드)               */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      <section className="home-section">
-        <div className="home-section-header">
-          <h2 className="home-section-title">🎊 시즌 운세</h2>
-          <span className="home-section-sub">한 해 · 한 달 · 한 주의 흐름</span>
-        </div>
-        <div className="home-season-grid">
-          {SEASON_MENUS.map((s) => (
-            <button
-              key={s.title}
-              className="home-season-card"
-              style={{ '--s-color': s.color }}
-              onClick={() => navigate(s.path)}
-            >
-              <span className="home-season-icon">{s.icon}</span>
-              <span className="home-season-title">{s.title}</span>
-              <span className="home-season-sub">{s.sub}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════ */}
-      {/* 7. 종합·특수 운세 가로 스크롤                                  */}
-      {/* ════════════════════════════════════════════════════════════ */}
-      <section className="home-section">
-        <div className="home-section-header">
-          <h2 className="home-section-title">✨ 종합 · 특수</h2>
-          <span className="home-section-sub">별자리 · 혈액형 · MBTI · 그 외</span>
-        </div>
-        <div className="home-other-strip">
-          {OTHER_MENUS.map((m) => (
-            <button key={m.label} className="home-other-chip" onClick={() => navigate(m.path)}>
-              <span className="home-other-chip-icon">{m.icon}</span>
-              <span className="home-other-chip-label">{m.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* 9. 비로그인: 게스트 운세 입력폼 */}
+      {/* 7. 비로그인: 게스트 운세 입력폼 */}
       {!userId && showForm && (
         <section className="home-guest-section">
           {guestLoading ? (

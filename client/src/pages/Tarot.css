@@ -395,7 +395,10 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  background: #050510;
+  /* 라디얼 스포트라이트 — 중앙은 살짝 밝은 보랏빛, 외곽은 거의 검정 */
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 38%, rgba(124, 58, 237, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, #1a0a3a 0%, #0d0420 55%, #050208 100%);
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-start;
   padding: 12px 0 140px;
@@ -403,7 +406,44 @@
   touch-action: pan-y;
   overscroll-behavior: contain;
 }
-[data-theme="light"] .tarot-deck-screen { background: #f0eef5; }
+[data-theme="light"] .tarot-deck-screen {
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 38%, rgba(196, 132, 252, 0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, #faf5ff 0%, #f0eaff 55%, #e8e0f5 100%);
+}
+
+/* ─── 정적 스포트라이트 + 별빛 (2026-04-27 정리) ─── */
+.deck-bg-spotlight {
+  position: absolute; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.deck-bg-star {
+  position: absolute;
+  left: var(--st-x, 50%);
+  top: var(--st-y, 50%);
+  width: var(--st-size, 2px);
+  height: var(--st-size, 2px);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 10px rgba(196, 132, 252, 0.5);
+  opacity: var(--st-base, 0.5);
+  animation: deckStarTwinkle 5s ease-in-out infinite;
+  animation-delay: var(--st-delay, 0s);
+}
+@keyframes deckStarTwinkle {
+  0%, 100% { opacity: var(--st-base, 0.5); transform: scale(0.85); }
+  50%      { opacity: 1; transform: scale(1.2); }
+}
+[data-theme="light"] .deck-bg-star {
+  background: rgba(124, 58, 237, 0.7);
+  box-shadow:
+    0 0 4px rgba(124, 58, 237, 0.5),
+    0 0 10px rgba(168, 85, 247, 0.35);
+}
 
 /* ─── 덱 선택 화면: 벚꽃 흩날림 ─── */
 .deck-sakura {
@@ -504,7 +544,7 @@
 /* 상단 덱 이름 헤더 */
 .deck-top-header {
   position: relative; z-index: 3;
-  padding: 8px 24px 8px;
+  padding: calc(env(safe-area-inset-top, 0px) + 44px) 24px 12px;
   text-align: center;
   flex-shrink: 0;
 }

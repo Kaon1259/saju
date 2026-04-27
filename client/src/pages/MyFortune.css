@@ -515,3 +515,158 @@
   margin: 0;
   opacity: 0.88;
 }
+
+/* ════════════════════════════════════════════════════════════════ */
+/* MyFortune 정리 (2026-04-27) — 컴팩트 컨트롤 바 + 더보기 + 빠른 이동 */
+/* ════════════════════════════════════════════════════════════════ */
+
+/* 통합 컨트롤 바 (모드 + 날짜) */
+.myf-control-bar {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 14px;
+}
+.myf-seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.myf-seg-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.myf-seg-btn:hover { color: var(--color-text); }
+.myf-seg-btn.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+}
+.myf-seg--date .myf-seg-btn.active {
+  background: linear-gradient(135deg, #f59e0b, #ec4899);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="light"] .myf-seg {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .myf-seg-btn { color: #888; }
+[data-theme="light"] .myf-seg-btn:hover { color: #333; }
+[data-theme="light"] .myf-seg-btn.active { color: #fff; }
+
+/* 컴팩트 결과 헤더 */
+.myf-header--compact {
+  margin-bottom: 12px;
+  padding: 10px 0 8px;
+}
+.myf-header--compact .myf-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.myf-header--compact .myf-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+
+
+.myf-extras-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  margin: 14px 0 6px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.myf-extras-toggle:hover {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: rgba(236, 72, 153, 0.35);
+}
+.myf-extras-toggle.is-open {
+  border-style: solid;
+  background: rgba(236, 72, 153, 0.06);
+  border-color: rgba(236, 72, 153, 0.25);
+}
+.myf-extras-toggle-arrow { font-size: 10px; opacity: 0.6; }
+
+.myf-extras {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 8px;
+}
+
+[data-theme="light"] .myf-extras-toggle {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .myf-extras-toggle:hover {
+  background: #fdf2f8;
+  border-color: rgba(236, 72, 153, 0.4);
+}
+
+/* 빠른 이동 링크 카드 (띠/별자리/월간/연간) */
+.myf-quicklinks {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 18px 0 14px;
+}
+.myf-quicklink {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+.myf-quicklink:hover {
+  transform: translateY(-2px);
+  border-color: rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.06);
+}
+.myf-quicklink-icon {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(168, 85, 247, 0.14);
+  font-size: 22px;
+}
+.myf-quicklink-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.myf-quicklink-title { font-size: 14px; font-weight: 700; color: var(--color-text); }
+.myf-quicklink-sub { font-size: 11px; color: var(--color-text-muted); }
+.myf-quicklink-arrow { font-size: 22px; color: var(--color-text-muted); flex-shrink: 0; }
+
+[data-theme="light"] .myf-quicklink {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .myf-quicklink-icon {
+  background: linear-gradient(135deg, #fdf2f8, #faf5ff);
+}
+[data-theme="light"] .myf-quicklink-title { color: #2e2e45; }
+[data-theme="light"] .myf-quicklink-sub { color: #666; }
+[data-theme="light"] .myf-quicklink-arrow { color: #999; }
