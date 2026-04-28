@@ -172,14 +172,14 @@ const POSITION_LABELS = {
 };
 
 const DECK_LIST = [
-  { id: 'newclassic', name: '뉴클래식', sub: 'New Classic · Mystical Neoclassical', img: '/tarot-effects/deck-intro/newclassic_cover.jpg', gif: '/tarot-effects/deck-intro/newclassic_0.webp', backs: Array.from({length: 8}, (_, i) => `/tarot-backs/newclassic_${i}.jpg`), hasVariants: true },
-  { id: 'jester', name: '광대 타로', sub: 'Renaissance Jester', img: '/tarot-effects/deck-intro/jester_cover.jpg', gif: '/tarot-effects/deck-intro/jester_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/jester_${i}.jpg`), hasVariants: true },
-  { id: 'masterpiece', name: '명화 타로', sub: 'Old Masters Masterpiece', img: '/tarot-effects/deck-intro/masterpiece_cover.jpg', gif: '/tarot-effects/deck-intro/masterpiece_0.webp', backs: Array.from({length: 12}, (_, i) => `/tarot-backs/masterpiece_${i}.jpg`), hasVariants: true },
-  { id: 'cartoon_girl', name: '카툰 걸', sub: 'Cartoon Girl', img: '/tarot-effects/deck-intro/cartoon_girl_cover.jpg', gif: '/tarot-effects/deck-intro/cartoon_girl_0.webp', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_girl_${i}.jpg`), hasVariants: true },
-  { id: 'cartoon_boy', name: '카툰 보이', sub: 'Cartoon Boy', img: '/tarot-effects/deck-intro/cartoon_boy_cover.jpg', gif: '/tarot-effects/deck-intro/cartoon_boy_0.webp', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_boy_${i}.jpg`), hasVariants: true },
-  { id: 'kdrama', name: 'K-드라마 타로', sub: 'Korean Romance Drama', img: '/tarot-effects/deck-intro/kdrama_cover.jpg', gif: '/tarot-effects/deck-intro/kdrama_0.webp', backs: Array.from({length: 12}, (_, i) => `/tarot-backs/kdrama_${i}.jpg`), hasVariants: true },
-  { id: 'celestial', name: '셀레스티얼 타로', sub: 'Celestial · Zodiac Cosmos', img: '/tarot-effects/deck-intro/celestial_cover.jpg', gif: '/tarot-effects/deck-intro/celestial_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/celestial_${i}.jpg`), hasVariants: true },
-  { id: 'lady', name: '레이디 타로', sub: 'Realistic Lady · Golden Petals', img: '/tarot-effects/deck-intro/lady_cover.jpg', gif: '/tarot-effects/deck-intro/lady_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/lady_${i}.jpg`), hasVariants: true },
+  { id: 'newclassic', name: '뉴클래식', sub: 'New Classic · Mystical Neoclassical', img: '/tarot-effects/deck-intro/newclassic_cover.webp', gif: '/tarot-effects/deck-intro/newclassic_0.webp', backs: Array.from({length: 8}, (_, i) => `/tarot-backs/newclassic_${i}.webp`), hasVariants: true },
+  { id: 'jester', name: '광대 타로', sub: 'Renaissance Jester', img: '/tarot-effects/deck-intro/jester_cover.webp', gif: '/tarot-effects/deck-intro/jester_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/jester_${i}.webp`), hasVariants: true },
+  { id: 'masterpiece', name: '명화 타로', sub: 'Old Masters Masterpiece', img: '/tarot-effects/deck-intro/masterpiece_cover.webp', gif: '/tarot-effects/deck-intro/masterpiece_0.webp', backs: Array.from({length: 12}, (_, i) => `/tarot-backs/masterpiece_${i}.webp`), hasVariants: true },
+  { id: 'cartoon_girl', name: '카툰 걸', sub: 'Cartoon Girl', img: '/tarot-effects/deck-intro/cartoon_girl_cover.webp', gif: '/tarot-effects/deck-intro/cartoon_girl_0.webp', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_girl_${i}.webp`), hasVariants: true },
+  { id: 'cartoon_boy', name: '카툰 보이', sub: 'Cartoon Boy', img: '/tarot-effects/deck-intro/cartoon_boy_cover.webp', gif: '/tarot-effects/deck-intro/cartoon_boy_0.webp', backs: [0,1,2,3].map(i => `/tarot-backs/cartoon_boy_${i}.webp`), hasVariants: true },
+  { id: 'kdrama', name: 'K-드라마 타로', sub: 'Korean Romance Drama', img: '/tarot-effects/deck-intro/kdrama_cover.webp', gif: '/tarot-effects/deck-intro/kdrama_0.webp', backs: Array.from({length: 12}, (_, i) => `/tarot-backs/kdrama_${i}.webp`), hasVariants: true },
+  { id: 'celestial', name: '셀레스티얼 타로', sub: 'Celestial · Zodiac Cosmos', img: '/tarot-effects/deck-intro/celestial_cover.webp', gif: '/tarot-effects/deck-intro/celestial_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/celestial_${i}.webp`), hasVariants: true },
+  { id: 'lady', name: '레이디 타로', sub: 'Realistic Lady · Golden Petals', img: '/tarot-effects/deck-intro/lady_cover.webp', gif: '/tarot-effects/deck-intro/lady_0.webp', backs: Array.from({length: 16}, (_, i) => `/tarot-backs/lady_${i}.webp`), hasVariants: true },
 ];
 
 // 멀티변형 덱의 톤 이름
@@ -353,7 +353,7 @@ function Tarot() {
   const [shuffleBgSrc, setShuffleBgSrc] = useState(null);
   // 프레임 오버레이: 덱 선택 시 사용 가능한 풀에서 랜덤 고정
   const [selectedFrame, setSelectedFrame] = useState(() => pickRandomFrame());
-  const frameSrc = `/tarot-frames/frame_${selectedFrame.set}_${selectedFrame.v}.png`;
+  const frameSrc = `/tarot-frames/frame_${selectedFrame.set}_${selectedFrame.v}.webp`;
   const [selectedBack, setSelectedBack] = useState(() => {
     const saved = localStorage.getItem('tarotDeck') || 'newclassic';
     const deckData = DECK_LIST.find(d => d.id === saved);
@@ -1481,7 +1481,7 @@ function Tarot() {
                     <div className={`deck-cover-wrap${off === 0 ? ' deck-cover-active' : ''}`}>
                       <img src={d.img} alt={d.name} draggable={false} className="deck-cover-static" style={{ opacity: 1 }} />
                       {d.gif && off === 0 && <img src={d.gif} alt="" draggable={false} className="deck-cover-gif" style={{ opacity: 1 }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
-                      <img src={`/tarot-frames/frame_${DECK_LIST.indexOf(d) % 10}_${Math.floor(DECK_LIST.indexOf(d) / 2) % 4}.png`} alt="" className="deck-cover-frame" draggable={false} style={{ opacity: borderIntensity }} />
+                      <img src={`/tarot-frames/frame_${DECK_LIST.indexOf(d) % 10}_${Math.floor(DECK_LIST.indexOf(d) / 2) % 4}.webp`} alt="" className="deck-cover-frame" draggable={false} style={{ opacity: borderIntensity }} />
                     </div>
                   </div>
                 );

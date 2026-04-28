@@ -243,7 +243,7 @@ function App() {
       const ext = (id === 'cartoon_girl' || id === 'cartoon_boy') ? 'gif' : 'webp';
       return `/tarot-effects/deck-intro/${id}_0.${ext}`;
     });
-    const TAROT_DECK_COVERS = DECK_IDS.map(id => `/tarot-effects/deck-intro/${id}_cover.jpg`);
+    const TAROT_DECK_COVERS = DECK_IDS.map(id => `/tarot-effects/deck-intro/${id}_cover.webp`);
     const TAROT_EFFECTS = [
       '/tarot-effects/shuffle.jpg',
       '/tarot-effects/shuffle_0.jpg', '/tarot-effects/shuffle_1.jpg',

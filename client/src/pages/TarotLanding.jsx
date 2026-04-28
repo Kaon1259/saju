@@ -5,11 +5,11 @@ import './TarotLanding.css';
 
 // 미리보기용 덱 커버 (12개 중 대표 5개)
 const PREVIEW_COVERS = [
-  { src: '/tarot-effects/deck-intro/lady_cover.jpg',         name: '레이디' },
-  { src: '/tarot-effects/deck-intro/celestial_cover.jpg',    name: '셀레스티얼' },
-  { src: '/tarot-effects/deck-intro/kdrama_cover.jpg',       name: 'K-드라마' },
-  { src: '/tarot-effects/deck-intro/cartoon_girl_cover.jpg', name: '카툰 걸' },
-  { src: '/tarot-effects/deck-intro/masterpiece_cover.jpg',  name: '명화' },
+  { src: '/tarot-effects/deck-intro/lady_cover.webp',         name: '레이디' },
+  { src: '/tarot-effects/deck-intro/celestial_cover.webp',    name: '셀레스티얼' },
+  { src: '/tarot-effects/deck-intro/kdrama_cover.webp',       name: 'K-드라마' },
+  { src: '/tarot-effects/deck-intro/cartoon_girl_cover.webp', name: '카툰 걸' },
+  { src: '/tarot-effects/deck-intro/masterpiece_cover.webp',  name: '명화' },
 ];
 
 const TAROT_HIGHLIGHTS = [

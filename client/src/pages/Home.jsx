@@ -489,8 +489,8 @@ function DailyTarot({ variant = 'hero' }) {
     return {
       deck: deckId,
       card,
-      frontSrc: `/tarot-${deckId}/m${cardNum}_v0.jpg`,
-      backSrc:  `/tarot-backs/${deckId}_0.jpg`,
+      frontSrc: `/tarot-${deckId}/m${cardNum}_v0.webp`,
+      backSrc:  `/tarot-backs/${deckId}_0.webp`,
     };
   }, []);
 

@@ -17,7 +17,7 @@ function preloadFrame(src) {
 import { FRAME_POOL } from '../utils/tarotFrames';
 // 앱 시작 시 사용 가능한 프레임만 프리로드
 (function preloadAllFrames() {
-  FRAME_POOL.forEach(({ set, v }) => preloadFrame(`/tarot-frames/frame_${set}_${v}.png`));
+  FRAME_POOL.forEach(({ set, v }) => preloadFrame(`/tarot-frames/frame_${set}_${v}.webp`));
 })();
 
 const DECK_PATHS = {
@@ -101,7 +101,7 @@ function TarotCardArt({ cardId, deck = 'newclassic', variant: propVariant, frame
     const v = propFrameV ?? Math.floor(Math.random() * FRAME_VARIANTS);
     return { set, v };
   }, [propFrameSet, propFrameV]);
-  const frameSrc = `/tarot-frames/frame_${frameIdx.set}_${frameIdx.v}.png`;
+  const frameSrc = `/tarot-frames/frame_${frameIdx.set}_${frameIdx.v}.webp`;
 
   // love 덱은 SVG 렌더링 (메이저만)
   if (isMajor && deck === 'love') {
@@ -126,8 +126,8 @@ function TarotCardArt({ cardId, deck = 'newclassic', variant: propVariant, frame
   const isMulti = MULTI_VARIANT_DECKS.has(deck);
 
   const imgSrc = isMulti
-    ? `${basePath}/m${num}_v${variant}.jpg`
-    : `${basePath}/m${num}.jpg`;
+    ? `${basePath}/m${num}_v${variant}.webp`
+    : `${basePath}/m${num}.webp`;
 
   return (
     <div className="tarot-card-art">
