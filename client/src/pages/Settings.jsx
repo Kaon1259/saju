@@ -108,9 +108,19 @@ function Settings() {
           <span className="settings-value">1.0.0</span>
         </div>
         <div className="settings-divider" />
+        <div className="settings-row" onClick={() => navigate('/privacy')} style={{ cursor: 'pointer' }}>
+          <span className="settings-label">개인정보 처리방침</span>
+          <span className="settings-value">›</span>
+        </div>
+        <div className="settings-divider" />
+        <div className="settings-row" onClick={() => navigate('/terms')} style={{ cursor: 'pointer' }}>
+          <span className="settings-label">이용약관</span>
+          <span className="settings-value">›</span>
+        </div>
+        <div className="settings-divider" />
         <div className="settings-row">
           <span className="settings-label">문의</span>
-          <span className="settings-value">1:1연애 운영팀</span>
+          <span className="settings-value">kaon1259@naver.com</span>
         </div>
       </section>
     </div>

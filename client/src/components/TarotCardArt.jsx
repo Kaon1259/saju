@@ -1,7 +1,6 @@
 /**
- * 타로 78장 — 덱 선택 지원
- * - skt, custom: 단일 이미지
- * - dark, romantic, oriental, western: 4벌 변형 (m00_v0~v3.jpg)
+ * 타로 78장 — 덱 선택 지원 (DECK_LIST 8개 + love SVG)
+ * - 모든 덱이 4벌 변형 (m00_v0~v3.jpg)
  */
 
 import { useMemo, useEffect } from 'react';
@@ -15,39 +14,25 @@ function preloadFrame(src) {
   img.src = src;
   frameCache.set(src, img);
 }
-// 앱 시작 시 전체 프레임 프리로드
+import { FRAME_POOL } from '../utils/tarotFrames';
+// 앱 시작 시 사용 가능한 프레임만 프리로드
 (function preloadAllFrames() {
-  for (let s = 0; s < 10; s++) {
-    for (let v = 0; v < 4; v++) {
-      preloadFrame(`/tarot-frames/frame_${s}_${v}.png`);
-    }
-  }
+  FRAME_POOL.forEach(({ set, v }) => preloadFrame(`/tarot-frames/frame_${set}_${v}.png`));
 })();
 
 const DECK_PATHS = {
   newclassic: '/tarot-newclassic',
   jester: '/tarot-jester',
   masterpiece: '/tarot-masterpiece',
-  skt: '/tarot-skt',
-  custom: '/tarot-custom',
-  dark: '/tarot-dark',
-  romantic: '/tarot-romantic',
-  oriental: '/tarot-oriental',
-  western: '/tarot-western',
-  classic_rws: '/tarot-classic-rws',
-  girl: '/tarot-girl',
-  boy: '/tarot-boy',
   cartoon_girl: '/tarot-cartoon-girl',
   cartoon_boy: '/tarot-cartoon-boy',
-  cats: '/tarot-cats',
-  dogs: '/tarot-dogs',
   kdrama: '/tarot-kdrama',
   celestial: '/tarot-celestial',
   lady: '/tarot-lady',
 };
 
 // 4벌 변형 덱 (각 카드마다 _v0~v3)
-const MULTI_VARIANT_DECKS = new Set(['newclassic', 'jester', 'masterpiece', 'oriental', 'western', 'dark', 'romantic', 'classic_rws', 'girl', 'boy', 'cartoon_girl', 'cartoon_boy', 'cats', 'dogs', 'kdrama', 'celestial', 'lady']);
+const MULTI_VARIANT_DECKS = new Set(['newclassic', 'jester', 'masterpiece', 'cartoon_girl', 'cartoon_boy', 'kdrama', 'celestial', 'lady']);
 
 // 메이저 아르카나 이름
 const MAJOR_NAMES = [
@@ -118,14 +103,6 @@ function TarotCardArt({ cardId, deck = 'newclassic', variant: propVariant, frame
   }, [propFrameSet, propFrameV]);
   const frameSrc = `/tarot-frames/frame_${frameIdx.set}_${frameIdx.v}.png`;
 
-  // 덱별 이미지 없는 카드 — 심볼 폴백
-  const MISSING_CUSTOM = new Set([28,29, 42,43, 56,57, 70,71]);
-  const missingSet = deck === 'custom' ? MISSING_CUSTOM : new Set();
-
-  if (!isMajor && missingSet.has(id)) {
-    return <MinorArcanaCard info={getMinorInfo(id)} />;
-  }
-
   // love 덱은 SVG 렌더링 (메이저만)
   if (isMajor && deck === 'love') {
     return (
@@ -145,11 +122,8 @@ function TarotCardArt({ cardId, deck = 'newclassic', variant: propVariant, frame
 
   // 4벌 변형 덱: prop으로 받으면 고정, 없으면 랜덤
   const randomVariant = useMemo(() => Math.floor(Math.random() * 4), [id, deck]);
-  let variant = propVariant ?? randomVariant;
+  const variant = propVariant ?? randomVariant;
   const isMulti = MULTI_VARIANT_DECKS.has(deck);
-
-  // classic_rws m77: v2 누락 → v0으로 폴백
-  if (deck === 'classic_rws' && id === 77 && variant === 2) variant = 0;
 
   const imgSrc = isMulti
     ? `${basePath}/m${num}_v${variant}.jpg`

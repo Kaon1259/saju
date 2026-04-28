@@ -8,6 +8,7 @@ import com.saju.server.repository.HeartPointLogRepository;
 import com.saju.server.repository.UserRepository;
 import com.saju.server.service.HeartPointService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,15 @@ public class HeartPointController {
     private final HeartPointLogRepository heartPointLogRepository;
     private final HeartPointConfigRepository heartPointConfigRepository;
     private final UserRepository userRepository;
+
+    @Value("${admin.secret:}")
+    private String adminSecret;
+
+    // 관리자 엔드포인트 인증 — 빈 시크릿(미설정)은 차단, 일치하지 않으면 403
+    private boolean isAdmin(String header) {
+        if (adminSecret == null || adminSecret.isBlank()) return false;
+        return adminSecret.equals(header);
+    }
 
     @GetMapping("/balance")
     public ResponseEntity<Map<String, Object>> getBalance(@RequestParam Long userId) {
@@ -74,7 +84,9 @@ public class HeartPointController {
     @PutMapping("/config")
     public ResponseEntity<Map<String, Object>> updateConfig(
             @RequestParam String category,
-            @RequestParam int cost) {
+            @RequestParam int cost,
+            @RequestHeader(value = "X-Admin-Secret", required = false) String adminHeader) {
+        if (!isAdmin(adminHeader)) return ResponseEntity.status(403).body(Map.of("error", "admin only"));
         var config = heartPointConfigRepository.findByAnalysisCategory(category);
         if (config.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "카테고리를 찾을 수 없습니다: " + category));
@@ -100,7 +112,9 @@ public class HeartPointController {
             @RequestParam String category,
             @RequestParam int cost,
             @RequestParam(defaultValue = "기타") String group,
-            @RequestParam(defaultValue = "") String description) {
+            @RequestParam(defaultValue = "") String description,
+            @RequestHeader(value = "X-Admin-Secret", required = false) String adminHeader) {
+        if (!isAdmin(adminHeader)) return ResponseEntity.status(403).body(Map.of("error", "admin only"));
         var existing = heartPointConfigRepository.findByAnalysisCategory(category);
         if (existing.isPresent()) {
             return ResponseEntity.status(409).body(Map.of("error", "이미 존재하는 카테고리: " + category));
@@ -155,7 +169,9 @@ public class HeartPointController {
     @Transactional
     public ResponseEntity<Map<String, Object>> bulkGrant(
             @RequestParam int amount,
-            @RequestParam(defaultValue = "관리자 일괄 지급") String description) {
+            @RequestParam(defaultValue = "관리자 일괄 지급") String description,
+            @RequestHeader(value = "X-Admin-Secret", required = false) String adminHeader) {
+        if (!isAdmin(adminHeader)) return ResponseEntity.status(403).body(Map.of("error", "admin only"));
         List<User> allUsers = userRepository.findAll();
         int count = 0;
         for (User user : allUsers) {

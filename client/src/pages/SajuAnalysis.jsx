@@ -11,6 +11,7 @@ import StreamingCard from '../components/StreamingCard';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { useAiAbort } from '../hooks/useAiAbort';
 import './SajuAnalysis.css';
 
 const BIRTH_TIMES = [
@@ -77,6 +78,14 @@ function SajuAnalysis() {
   const pendingResultRef = useRef(null);
   const pendingDailyRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 글로벌 ai:abort (하트 부족 등) 시 안전 정리
+  useAiAbort(() => {
+    try { cleanupRef.current?.(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setLoading(false); setStreaming(false); setStreamText('');
+    setStreamFields({}); setDoneFields(new Set());
+  });
 
   // 결과 등장 시 매트릭스 페이드아웃
   useEffect(() => {

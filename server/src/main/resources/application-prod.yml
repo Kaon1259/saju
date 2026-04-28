@@ -37,8 +37,8 @@ claude:
   api-key: ${CLAUDE_API_KEY}
   model: ${CLAUDE_MODEL:claude-sonnet-4-6}
 
-youtube:
-  api-key: ${YOUTUBE_API_KEY:}
+admin:
+  secret: ${ADMIN_SECRET:}
 
 clova:
   tts:

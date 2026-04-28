@@ -23,6 +23,7 @@ import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import WaitMessages from '../components/WaitMessages';
 import { WAIT_MESSAGES } from '../data/waitMessages';
+import { useAiAbort } from '../hooks/useAiAbort';
 import './MyLoveCompat.css';
 
 const TABS = [
@@ -99,6 +100,14 @@ function MyLoveCompat() {
 
   useEffect(() => () => cleanupRef.current?.(), []);
   useEffect(() => () => deepCleanupRef.current?.(), []);
+
+  // 글로벌 ai:abort (하트 부족 등) 시 안전 정리
+  useAiAbort(() => {
+    try { cleanupRef.current?.(); } catch {}
+    try { deepCleanupRef.current?.(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setLoading(false); setAiStreaming(false); setStreamText(''); setStreamingActive(false);
+  });
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
 
   // 마운트 시 자동 autofill — 로그인 유저면 내 정보 + 연인 정보(있으면) 자동 입력.

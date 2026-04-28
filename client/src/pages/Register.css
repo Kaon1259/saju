@@ -539,3 +539,41 @@
   box-shadow: 0 8px 22px rgba(124, 58, 237, 0.55);
 }
 .autologin-ask-btn:active { transform: scale(0.98); }
+
+/* 약관 동의 */
+.register-agree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.register-agree-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+  line-height: 1.5;
+}
+.register-agree-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #FFD954;
+  cursor: pointer;
+}
+.register-agree-row a {
+  color: #FFD954;
+  text-decoration: underline;
+}
+[data-theme="light"] .register-agree {
+  background: #fff;
+  border-color: rgba(0,0,0,0.10);
+}
+[data-theme="light"] .register-agree-row { color: #222; }
+[data-theme="light"] .register-agree-row a { color: #c2185b; }

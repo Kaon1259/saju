@@ -42,6 +42,8 @@ import MyMenu from './pages/MyMenu';
 import StarFortune from './pages/StarFortune';
 import Settings from './pages/Settings';
 import WeatherCompat from './pages/WeatherCompat';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 import { HeartProvider } from './context/HeartContext';
 import { AppProvider } from './context/AppContext';
 import './context/HeartContext.css';
@@ -180,25 +182,33 @@ function useLandingRedirect() {
   }, [location.pathname]);
 }
 
-// 프로필 미완성 사용자 리다이렉트 (Guest는 건너뜀)
+// 프로필 미완성 사용자 리다이렉트
+// - 로그인 유저 + birthDate 없음 → /register?needProfile=true
+// - Guest 유저 + AI 라우트 진입 → /register?needProfile=true (AI 호출이 사주 정보를 요구하므로)
 function useProfileGuard() {
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const allowedPaths = ['/register', '/auth/kakao/callback', '/settings'];
-    if (allowedPaths.some(p => location.pathname.startsWith(p))) return;
+    // 사주 정보가 필요 없는 라우트 (Guest도 자유롭게 진입 가능)
+    const safePaths = [
+      '/register', '/auth/kakao/callback', '/settings', '/welcome',
+      '/profile', '/profile/edit', '/my-menu', '/landing',
+      '/privacy', '/terms',
+    ];
+    if (safePaths.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))) return;
+    // 홈은 Guest도 진입 (홈 안에서 개별 카드가 분기 처리)
+    if (location.pathname === '/') return;
 
     const userId = localStorage.getItem('userId');
     if (!userId) return;
 
-    // Guest는 프로필 가드 건너뜀
     const userName = localStorage.getItem('userName');
-    if (userName === 'Guest') return;
+    const isGuest = userName === 'Guest';
 
     try {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      if (!profile.birthDate) {
+      if (isGuest || !profile.birthDate) {
         navigate('/register?needProfile=true', { replace: true });
       }
     } catch {}
@@ -346,6 +356,8 @@ function App() {
               <Route path="/my-star" element={<MyStar />} />
               <Route path="/weather-compat" element={<WeatherCompat />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
             </Routes>
           </main>
           {/* <FloatingMenu /> */}

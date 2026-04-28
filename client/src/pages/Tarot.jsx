@@ -12,6 +12,8 @@ import AnalysisComplete from '../components/AnalysisComplete';
 import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { useAiAbort } from '../hooks/useAiAbort';
+import { pickRandomFrame } from '../utils/tarotFrames';
 import './Tarot.css';
 
 // ═══════════════════════════════════════════════════
@@ -296,7 +298,7 @@ function Tarot() {
   // 카테고리 카드 배경용 — 현재 덱에서 카테고리별 랜덤 카드 인덱스 (덱/variant 바뀌면 재추첨)
   // 카테고리 ID → "/tarot-{deckid}/m{NN}_v{X}.jpg" 매핑
   const categoryBgImages = useMemo(() => {
-    const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
+    const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
     const base = bgPaths[deck];
     if (!base) return {};
     const dl = DECK_LIST.find(d => d.id === deck);
@@ -349,12 +351,8 @@ function Tarot() {
   const [resultDetailIdx, setResultDetailIdx] = useState(null); // 결과 카드 상세보기 인덱스
   const [setupBgIdx, setSetupBgIdx] = useState(0);
   const [shuffleBgSrc, setShuffleBgSrc] = useState(null);
-  // 프레임 오버레이: 덱 선택 시 세트+변형 고정
-  const [selectedFrame, setSelectedFrame] = useState(() => {
-    const set = Math.floor(Math.random() * 10);
-    const v = Math.floor(Math.random() * 4);
-    return { set, v };
-  });
+  // 프레임 오버레이: 덱 선택 시 사용 가능한 풀에서 랜덤 고정
+  const [selectedFrame, setSelectedFrame] = useState(() => pickRandomFrame());
   const frameSrc = `/tarot-frames/frame_${selectedFrame.set}_${selectedFrame.v}.png`;
   const [selectedBack, setSelectedBack] = useState(() => {
     const saved = localStorage.getItem('tarotDeck') || 'newclassic';
@@ -365,6 +363,12 @@ function Tarot() {
   const resultRef = useRef(null);
   const startBtnRef = useRef(null);
   const cleanupRef = useRef(null);
+
+  // 글로벌 ai:abort (하트 부족 등) 시 안전 정리
+  useAiAbort(() => {
+    try { cleanupRef.current?.(); } catch {}
+    setLoading(false); setAiStreaming(false); setStreamText('');
+  });
 
   // 홈 드로어에서 넘어온 restoreHistoryId 복원 — 인트로 건너뛰고 result로 점프
   useEffect(() => {
@@ -713,7 +717,7 @@ function Tarot() {
   const startShuffle = useCallback(() => {
     // 셋업 화면에서 현재 보여지던 배경을 셔플 화면에도 그대로 유지
     try {
-      const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
+      const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
       const curDeckData = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
       const bgBase = bgPaths[deck] || '';
       const bgSuffix = curDeckData.hasVariants ? `_v${deckVariant}` : '';
@@ -1209,7 +1213,7 @@ function Tarot() {
       {/* ═══ 덱 갤러리 — 필름릴 방식 ═══ */}
       {galleryDeck && (() => {
         const isMulti = ['newclassic','jester','masterpiece','oriental','western','dark','romantic','classic_rws','girl','boy','cartoon_girl','cartoon_boy','cats','dogs','kdrama','celestial','lady'].includes(galleryDeck.id);
-        const deckPaths = { newclassic:'/tarot-newclassic', jester:'/tarot-jester', masterpiece:'/tarot-masterpiece', classic_rws:'/tarot-classic-rws', dark:'/tarot-dark', romantic:'/tarot-romantic', oriental:'/tarot-oriental', western:'/tarot-western', girl:'/tarot-girl', boy:'/tarot-boy', cartoon_girl:'/tarot-cartoon-girl', cartoon_boy:'/tarot-cartoon-boy', cats:'/tarot-cats', dogs:'/tarot-dogs', kdrama:'/tarot-kdrama', celestial:'/tarot-celestial', lady:'/tarot-lady' };
+        const deckPaths = { newclassic:'/tarot-newclassic', jester:'/tarot-jester', masterpiece:'/tarot-masterpiece', cartoon_girl:'/tarot-cartoon-girl', cartoon_boy:'/tarot-cartoon-boy', kdrama:'/tarot-kdrama', celestial:'/tarot-celestial', lady:'/tarot-lady' };
         const basePath = deckPaths[galleryDeck.id] || '/tarot';
         const variant = deckVariant;
         const cardSrcFixed = (i) => {
@@ -1572,7 +1576,7 @@ function Tarot() {
       {/* ═══ STEP 1: 메뉴 화면 (타로 스타일) ═══ */}
       {step === 'setup' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', classic_rws: '/tarot-classic-rws', dark: '/tarot-dark', romantic: '/tarot-romantic', oriental: '/tarot-oriental', western: '/tarot-western', girl: '/tarot-girl', boy: '/tarot-boy', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', cats: '/tarot-cats', dogs: '/tarot-dogs', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
+        const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
         const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];

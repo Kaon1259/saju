@@ -15,6 +15,7 @@ import { mapLuckyOutfit } from '../utils/luckyOutfitTemplate';
 import { getZodiacByYearList } from '../utils/zodiacByYearTemplate';
 import CELEBRITIES from '../data/celebrities';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import { useAiAbort } from '../hooks/useAiAbort';
 import './MyFortune.css';
 
 const TIME_ICON = { '아침': '🌅', '점심': '☀️', '오후': '🌤️', '저녁': '🌆', '밤': '🌙' };
@@ -254,6 +255,16 @@ function MyFortune() {
   const stopAmbientRef = useRef(null);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
   const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'partner' | 'other'
+
+  // 글로벌 ai:abort (하트 부족, 프로필 미완성 등) 시 안전 정리
+  useAiAbort(() => {
+    try { cleanupRef.current?.(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setLoading(false); setStreaming(false); setStreamText('');
+    setStreamFields({}); setDoneFields(new Set());
+    setPartnerLoading(false); setPartnerStreaming(false); setPartnerStreamText('');
+    setOtherLoading(false); setOtherStreaming(false); setOtherStreamText('');
+  });
 
   // 홈 드로어에서 넘어온 restoreHistoryId 복원
   useEffect(() => {

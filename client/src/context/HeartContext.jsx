@@ -36,12 +36,26 @@ export function HeartProvider({ children }) {
     refreshHearts();
   }, [refreshHearts]);
 
-  // 전역 insufficient_hearts 이벤트 수신
+  // 전역 insufficient_hearts 이벤트 수신 → 모달 표시 + 진행 중 AI 호출 모두 종료
   useEffect(() => {
-    const handler = (e) => showInsufficientPopup(e.detail);
+    const handler = (e) => {
+      showInsufficientPopup(e.detail);
+      try { window.dispatchEvent(new CustomEvent('ai:abort', { detail: { reason: 'insufficient_hearts' } })); } catch {}
+    };
     window.addEventListener('heart:insufficient', handler);
     return () => window.removeEventListener('heart:insufficient', handler);
   }, [showInsufficientPopup]);
+
+  // 프로필 미완성 이벤트 수신 → ProfileEdit로 이동
+  useEffect(() => {
+    const handler = () => {
+      const here = window.location.pathname;
+      if (here.startsWith('/profile/edit') || here.startsWith('/register')) return;
+      navigate('/profile/edit', { state: { from: here } });
+    };
+    window.addEventListener('profile:required', handler);
+    return () => window.removeEventListener('profile:required', handler);
+  }, [navigate]);
 
   // 로그인 필요 이벤트 수신 → 로그인 페이지로 이동
   useEffect(() => {

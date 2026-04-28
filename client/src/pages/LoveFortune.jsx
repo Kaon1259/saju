@@ -13,6 +13,7 @@ import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import { useAiAbort } from '../hooks/useAiAbort';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
@@ -73,6 +74,13 @@ function LoveFortune() {
 
   useEffect(() => { return () => cleanupRef.current?.(); }, []);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
+
+  // 글로벌 ai:abort (하트 부족 등) 시 안전 정리
+  useAiAbort(() => {
+    try { cleanupRef.current?.(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setLoading(false); setAiStreaming(false); setStreamText('');
+  });
 
   // 결과 등장 시 매트릭스 부드럽게 페이드아웃
   useEffect(() => {

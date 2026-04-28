@@ -77,6 +77,9 @@ function Register() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [agreedPrivacy, setAgreedPrivacy] = useState(false);
+  const allAgreed = agreedTerms && agreedPrivacy;
   // 회원가입 직후 자동로그인 여부 묻기
   const [autoLoginAsk, setAutoLoginAsk] = useState(null); // null | { user }
 
@@ -211,7 +214,35 @@ function Register() {
       {/* ═══ 카카오 로그인 ═══ */}
       {step === 'kakao' && (
         <div className="register-form glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <button className="kakao-login-btn" onClick={handleKakaoLogin}>
+          <div className="register-agree">
+            <label className="register-agree-row">
+              <input
+                type="checkbox"
+                checked={allAgreed}
+                onChange={(e) => { setAgreedTerms(e.target.checked); setAgreedPrivacy(e.target.checked); }}
+              />
+              <span><strong>전체 동의</strong></span>
+            </label>
+            <label className="register-agree-row">
+              <input type="checkbox" checked={agreedTerms} onChange={(e) => setAgreedTerms(e.target.checked)} />
+              <span>
+                (필수) <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }}>이용약관</a>에 동의합니다
+              </span>
+            </label>
+            <label className="register-agree-row">
+              <input type="checkbox" checked={agreedPrivacy} onChange={(e) => setAgreedPrivacy(e.target.checked)} />
+              <span>
+                (필수) <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>개인정보 처리방침</a>에 동의합니다
+              </span>
+            </label>
+          </div>
+
+          <button
+            className="kakao-login-btn"
+            onClick={handleKakaoLogin}
+            disabled={!allAgreed}
+            style={!allAgreed ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+          >
             <svg className="kakao-logo" viewBox="0 0 24 24" width="22" height="22">
               <path fill="#000" d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.16c-.1.36.32.65.64.44l4.94-3.26c.38.04.76.06 1.16.06 5.52 0 10-3.36 10-7.64C22 6.36 17.52 3 12 3z"/>
             </svg>
@@ -224,7 +255,9 @@ function Register() {
             </div>
           )}
 
-          <p className="register-kakao-notice">카카오 계정으로 간편하게 로그인하세요</p>
+          <p className="register-kakao-notice">
+            {allAgreed ? '카카오 계정으로 간편하게 로그인하세요' : '약관에 동의해야 가입을 진행할 수 있어요'}
+          </p>
         </div>
       )}
 

@@ -27,6 +27,19 @@ const requireLogin = (onError) => {
 // 페이지에서 분석 전 호출 — 비로그인이면 true 반환
 export const isGuest = () => !localStorage.getItem('userId');
 
+// birthDate 가드: 없으면 ai:abort + profile:required 디스패치 후 false 반환
+// 중요: stream 함수는 바로 EventSource를 만드는데 이 가드는 호출 직후 onError를
+// 호출해야 하므로 setTimeout 0으로 호출 큐에 올린다 (호출자에 cleanup 함수 반환 직후 실행).
+const requireBirthDate = (birthDate, onError) => {
+  if (birthDate) return true;
+  setTimeout(() => {
+    try { onError?.('profile_required'); } catch {}
+    try { window.dispatchEvent(new CustomEvent('profile:required')); } catch {}
+    try { window.dispatchEvent(new CustomEvent('ai:abort', { detail: { reason: 'profile_required' } })); } catch {}
+  }, 0);
+  return false;
+};
+
 // SSE 청크를 requestAnimationFrame 으로 배치 — 5~10ms 간격으로 쏟아지는 청크를
 // 화면 주사율(≈16ms) 에 맞춰 합쳐 전달. React re-render 수를 줄여 모바일 WebView에서
 // 스트리밍 텍스트가 자연스럽게 출력되도록 한다.
@@ -66,6 +79,11 @@ const addHeartListener = (eventSource, { onInsufficientHearts, onError }) => {
     onError?.('하트가 부족합니다.');
     eventSource.close();
   });
+  // 글로벌 ai:abort 발생 시 EventSource 강제 종료 — 페이지가 cleanup 누락해도 스트림 누수 방지
+  const onAbort = () => { try { eventSource.close(); } catch {} };
+  window.addEventListener('ai:abort', onAbort, { once: true });
+  eventSource.addEventListener('done', () => window.removeEventListener('ai:abort', onAbort));
+  eventSource.addEventListener('cached', () => window.removeEventListener('ai:abort', onAbort));
   // 스트리밍 완료 시 하트 차감 완료 → 잔액 갱신 + 버블 애니메이션
   let hadChunks = false;
   eventSource.addEventListener('chunk', () => { hadChunks = true; });
@@ -216,6 +234,7 @@ export const analyzeSaju = async (birthDate, birthTime, calendarType, gender) =>
 
 export const analyzeSajuStream = (birthDate, birthTime, calendarType, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, onNoCache, context, targetType, targetName, freeMode, cacheOnly, date } = {}) => {
   if (!freeMode && !requireLogin(onError)) return () => {};
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
   if (calendarType) params.set('calendarType', calendarType);
@@ -597,6 +616,7 @@ export const getManseryeok = async (date, calendarType) => {
 
 // ─── 만세력 AI 해석 스트리밍 ───
 export const getManseryeokStream = (date, calendarType, birthDate, { onChunk, onCached, onNoCache, onDone, onError, onInsufficientHearts, cacheOnly } = {}) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ date });
   if (calendarType) params.set('calendarType', calendarType);
@@ -637,6 +657,7 @@ export const getUserTojeong = async (userId) => {
 };
 
 export const getTojeongStream = (birthDate, calendarType, { onChunk, onCached, onBase, onDone, onError, onInsufficientHearts }) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (calendarType) params.set('calendarType', calendarType);
@@ -696,6 +717,7 @@ export const saveCompatCache = async (data) => {
 };
 
 export const getCompatibilityStream = (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, score, elementRelation, branchRelation, { onChunk, onDone, onError, onInsufficientHearts, historyType, celebName, mode }) => {
+  if (!requireBirthDate(birthDate1, onError) || !requireBirthDate(birthDate2, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate1, birthDate2 });
   if (birthTime1) params.set('birthTime1', birthTime1);
@@ -819,6 +841,7 @@ export const saveLoveFortuneCache = async (data) => {
 };
 
 export const getLoveFortuneStream = (type, birthDate, birthTime, gender, calendarType, partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams();
   params.set('type', type);
@@ -893,6 +916,7 @@ export const interpretDream = async (dreamText, birthDate, gender) => {
 };
 
 export const interpretDreamStream = (dreamText, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams();
@@ -935,6 +959,7 @@ export const analyzeFaceReading = async (faceShape, eyeShape, noseShape, mouthSh
 };
 
 export const analyzeFaceReadingStream = (faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams({ faceShape, eyeShape, noseShape, mouthShape, foreheadShape });
@@ -978,6 +1003,7 @@ export const analyzePsychTest = async (testId, answers, birthDate, gender) => {
 };
 
 export const analyzePsychTestStream = (testId, answers, birthDate, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts }) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const params = new URLSearchParams({ testId, answers });
@@ -1011,6 +1037,7 @@ export const getBiorhythm = async (birthDate, calendarType) => {
 };
 
 export const getBiorhythmStream = (birthDate, { onChunk, onCached, onDone, onError, onInsufficientHearts, calendarType } = {}) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (calendarType) params.set('calendarType', calendarType);
@@ -1043,6 +1070,7 @@ export const getYearFortune = async (birthDate, birthTime, gender, calendarType)
 };
 
 export const getYearFortuneStream = (birthDate, birthTime, gender, calendarType, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName } = {}) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
@@ -1078,6 +1106,7 @@ export const getMonthlyFortune = async (birthDate, month, birthTime, gender) => 
 };
 
 export const getMonthlyFortuneStream = (birthDate, month, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, extra, calendarType } = {}) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate, month });
   if (birthTime) params.set('birthTime', birthTime);
@@ -1114,6 +1143,7 @@ export const getWeeklyFortune = async (birthDate, birthTime, gender) => {
 };
 
 export const getWeeklyFortuneStream = (birthDate, birthTime, gender, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, calendarType } = {}) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ birthDate });
   if (birthTime) params.set('birthTime', birthTime);
@@ -1153,6 +1183,7 @@ export const getDeepAnalysis = async (type, birthDate, birthTime, gender, calend
 
 // ─── 심화분석 스트리밍 (POST fetch + ReadableStream) ───
 export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calendarType, extra, { onChunk, onCached, onDone, onError, onInsufficientHearts, targetType, targetName, context } = {}) => {
+  if (!requireBirthDate(birthDate, onError)) return () => {};
   if (!requireLogin(onError)) return () => {};
   const params = new URLSearchParams({ type, birthDate });
   if (birthTime) params.set('birthTime', birthTime);
@@ -1167,6 +1198,8 @@ export const getDeepAnalysisStream = (type, birthDate, birthTime, gender, calend
   const url = `${baseURL}/deep/fortune/stream?${params.toString()}`;
   const controller = new AbortController();
   const __chunker = rafBatchChunks(onChunk);
+  const onAbort = () => { try { controller.abort(); } catch {} };
+  window.addEventListener('ai:abort', onAbort, { once: true });
 
   (async () => {
     try {
@@ -1249,6 +1282,7 @@ export const getCompatibilityDeepCached = async (type, bd1, bt1, g1, bd2, bt2, g
 // ─── 궁합 심화분석 스트리밍 (POST + body=context) ───
 export const getCompatibilityDeepStream = (type, bd1, bt1, g1, bd2, bt2, g2, { onChunk, onCached, onDone, onError, context } = {}) => {
   if (!requireLogin(onError)) return () => {};
+  if (!requireBirthDate(bd1, onError) || !requireBirthDate(bd2, onError)) return () => {};
   const params = new URLSearchParams({ type, bd1, g1, bd2, g2 });
   if (bt1) params.set('bt1', bt1);
   if (bt2) params.set('bt2', bt2);
@@ -1258,6 +1292,8 @@ export const getCompatibilityDeepStream = (type, bd1, bt1, g1, bd2, bt2, g2, { o
   const url = `${baseURL}/deep/compatibility/stream?${params.toString()}`;
   const controller = new AbortController();
   const __chunker = rafBatchChunks(onChunk);
+  const onAbort = () => { try { controller.abort(); } catch {} };
+  window.addEventListener('ai:abort', onAbort, { once: true });
 
   (async () => {
     try {
@@ -1341,6 +1377,8 @@ export const getTarotDeepStream = (cardIds, reversals, spread, category, {
   const url = `${baseURL}/deep/tarot/stream?${params.toString()}`;
   const controller = new AbortController();
   const __chunker = rafBatchChunks(onChunk);
+  const onAbort = () => { try { controller.abort(); } catch {} };
+  window.addEventListener('ai:abort', onAbort, { once: true });
 
   (async () => {
     try {
@@ -1406,14 +1444,6 @@ export const getTarotDeepStream = (cardIds, reversals, spread, category, {
   })();
 
   return () => { __chunker.cancel(); controller.abort(); };
-};
-
-// ─── YouTube Shorts ───
-export const getFortuneShorts = async (context) => {
-  const params = {};
-  if (context) params.context = context;
-  const response = await api.get('/shorts', { params });
-  return response.data;
 };
 
 export const searchCeleb = async (name) => {

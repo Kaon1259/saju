@@ -10,6 +10,7 @@ import parseAiJson, { extractStreamingFields } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import { useAiAbort } from '../hooks/useAiAbort';
 import './Compatibility.css';
 
 // JSON 잔여물 제거
@@ -64,6 +65,13 @@ function Compatibility() {
   const [showMoreCards, setShowMoreCards] = useState(false);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+
+  // 글로벌 ai:abort (하트 부족 등) 시 안전 정리
+  useAiAbort(() => {
+    try { cleanupRef.current?.(); } catch {}
+    try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+    setLoading(false); setAiStreaming(false); setStreamText('');
+  });
 
   /** 스트리밍 완료 → matrix 페이드아웃(0.7s) → 완료 애니(1.6s) → 결과 */
   const finishWithCompleteAnimation = (finalResult) => {
