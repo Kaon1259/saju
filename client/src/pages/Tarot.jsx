@@ -1363,17 +1363,6 @@ function Tarot() {
       {!showIntro && <>
       {/* ── 신비로운 배경 ── */}
       <div className="tarot-mystical-bg">
-        {/* 떠다니는 카드 실루엣 */}
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={`fc-${i}`} className="tarot-float-card" style={{
-            left: `${10 + i * 20}%`,
-            animationDelay: `${i * 1.5}s`,
-            animationDuration: `${8 + i * 2}s`,
-            opacity: 0.04 + i * 0.01,
-          }}>
-            <TarotCardArt cardId={i * 4} deck={deck} variant={deckVariant} frameSet={selectedFrame.set} frameV={selectedFrame.v} />
-          </div>
-        ))}
         {/* 별 파티클 */}
         {Array.from({ length: 40 }).map((_, i) => (
           <span key={i} className="tarot-particle" style={{
@@ -1481,7 +1470,6 @@ function Tarot() {
                     <div className={`deck-cover-wrap${off === 0 ? ' deck-cover-active' : ''}`}>
                       <img src={d.img} alt={d.name} draggable={false} className="deck-cover-static" style={{ opacity: 1 }} />
                       {d.gif && off === 0 && <img src={d.gif} alt="" draggable={false} className="deck-cover-gif" style={{ opacity: 1 }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
-                      <img src={`/tarot-frames/frame_${DECK_LIST.indexOf(d) % 10}_${Math.floor(DECK_LIST.indexOf(d) / 2) % 4}.webp`} alt="" className="deck-cover-frame" draggable={false} style={{ opacity: borderIntensity }} />
                     </div>
                   </div>
                 );
