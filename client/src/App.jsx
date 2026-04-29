@@ -269,7 +269,7 @@ function App() {
     const savedDeck = localStorage.getItem('tarotDeck') || 'newclassic';
     const deck = DECK_IDS.includes(savedDeck) ? savedDeck : 'newclassic';
     const SELECTED_DECK_CARDS = saveData ? [] : Array.from({ length: 78 }, (_, i) =>
-      `/tarot-${deck}/m${String(i).padStart(2,'0')}_v0.jpg`
+      `/tarot-${deck}/m${String(i).padStart(2,'0')}_v0.webp`
     );
 
     const run = () => {

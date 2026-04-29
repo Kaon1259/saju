@@ -312,7 +312,7 @@ function Tarot() {
       let tries = 0;
       do { idx = Math.floor(Math.random() * 78); tries++; } while (used.has(idx) && tries < 20);
       used.add(idx);
-      map[cat.id] = `${base}/m${String(idx).padStart(2, '0')}${suffix}.jpg`;
+      map[cat.id] = `${base}/m${String(idx).padStart(2, '0')}${suffix}.webp`;
     });
     return map;
   }, [deck, deckVariant]);
@@ -723,7 +723,7 @@ function Tarot() {
       const bgSuffix = curDeckData.hasVariants ? `_v${deckVariant}` : '';
       const curBgCard = setupBgIdx % 22;
       if (bgBase) {
-        setShuffleBgSrc(`${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.jpg`);
+        setShuffleBgSrc(`${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.webp`);
       }
     } catch {}
 
@@ -1132,7 +1132,7 @@ function Tarot() {
           const img = new Image();
           if ('fetchPriority' in img) img.fetchPriority = 'low';
           img.decoding = 'async';
-          img.src = `${base}/m${String(i).padStart(2,'0')}_v0.jpg`;
+          img.src = `${base}/m${String(i).padStart(2,'0')}_v0.webp`;
         }
       }, { timeout: 4000 });
     } catch {}
@@ -1219,7 +1219,7 @@ function Tarot() {
         const cardSrcFixed = (i) => {
           const num = String(i).padStart(2, '0');
           const v = (galleryDeck.id === 'classic_rws' && i === 77 && variant === 2) ? 0 : variant;
-          return isMulti ? `${basePath}/m${num}_v${v}.jpg` : `${basePath}/m${num}.jpg`;
+          return isMulti ? `${basePath}/m${num}_v${v}.webp` : `${basePath}/m${num}.webp`;
         };
         const center = galleryProgress; // 실수 인덱스
         // 중심 주변 ±4장 렌더 (총 9장)
@@ -1580,7 +1580,7 @@ function Tarot() {
         const bgBase = bgPaths[deck] || '';
         const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
         const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];
-        const bgSrc = `${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.jpg`;
+        const bgSrc = `${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.webp`;
         return (
           <div className="tarot-setup-screen">
             <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
