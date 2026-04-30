@@ -557,7 +557,8 @@
   cursor: grab;
   touch-action: pan-y;
   user-select: none; -webkit-user-select: none;
-  overflow: visible;
+  /* 화면 가장자리 너머로 넘치는 인접 카드(off=±1,±2) 가 좁고 긴 "막대" 처럼 보이는 버그 차단 */
+  overflow: hidden;
   flex-shrink: 0;
 }
 .deck-carousel:active { cursor: grabbing; }
