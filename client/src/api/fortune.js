@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken, clearAuth } from '../utils/auth';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -8,10 +9,79 @@ const api = axios.create({
   },
 });
 
-// 하트 포인트 시스템 헬퍼
+// JWT Bearer 자동 첨부
+api.interceptors.request.use((config) => {
+  const t = getToken();
+  if (t) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${t}`;
+  }
+  return config;
+});
+
+// 401 응답 — Phase 4 컷오버 후에만 강제 로그아웃. 듀얼모드 동안은 그대로 통과 (서버가 userId fallback)
+api.interceptors.response.use(
+  (r) => r,
+  (e) => {
+    if (e?.response?.status === 401) {
+      // 컷오버 시점에 활성화: clearAuth(); window.location.href = '/register';
+      // 현재 듀얼모드에선 그대로 reject
+    }
+    return Promise.reject(e);
+  }
+);
+
+// SSE EventSource 는 Authorization 헤더 못 붙임 → 단명(60초) 토큰을 미리 받아 ?sseToken= 으로 전달.
+// 메모리 캐시 + 50초마다 백그라운드 갱신. 만료 직전 미스 가능성은 듀얼모드(서버 ?userId= fallback)로 안전.
+let cachedSseToken = null;
+let cachedSseExpiry = 0;
+let ssePrefetchPromise = null;
+
+export const prefetchSseToken = async (force = false) => {
+  const now = Date.now();
+  if (!force && cachedSseToken && cachedSseExpiry > now + 5000) return cachedSseToken;
+  if (ssePrefetchPromise) return ssePrefetchPromise;
+  const t = getToken();
+  if (!t) return null;
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  ssePrefetchPromise = fetch(`${baseURL}/auth/sse-token`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${t}` },
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => {
+      if (j?.sseToken) {
+        cachedSseToken = j.sseToken;
+        cachedSseExpiry = Date.now() + 55_000; // 60초 TTL → 55초 안전 윈도우
+        return cachedSseToken;
+      }
+      return null;
+    })
+    .catch(() => null)
+    .finally(() => { ssePrefetchPromise = null; });
+  return ssePrefetchPromise;
+};
+
+const getSseTokenSync = () => {
+  if (cachedSseToken && cachedSseExpiry > Date.now()) return cachedSseToken;
+  return null;
+};
+
+// 백그라운드 갱신 — 50초마다 (TTL 60초보다 짧게).
+// 토큰 없으면 noop (로그인 후 setToken 시 즉시 prefetch 트리거됨).
+if (typeof window !== 'undefined') {
+  setInterval(() => {
+    if (getToken()) prefetchSseToken().catch(() => {});
+  }, 50_000);
+}
+
+// 하트 포인트 시스템 헬퍼 — JWT 시대에도 듀얼모드 동안 ?userId= fallback 유지.
+// + 캐시된 SSE 토큰이 있으면 ?sseToken= 도 같이 추가.
 const appendUserId = (params) => {
   const userId = localStorage.getItem('userId');
   if (userId) params.set('userId', userId);
+  const sseToken = getSseTokenSync();
+  if (sseToken) params.set('sseToken', sseToken);
 };
 
 // 유료 API 호출 전 로그인 체크 — false 반환 시 호출 중단
@@ -220,6 +290,12 @@ export const updateUser = async (userId, userData) => {
 
 export const getUser = async (userId) => {
   const response = await api.get(`/users/${userId}`);
+  return response.data;
+};
+
+// 회원 탈퇴 — 본인 데이터(프로필/하트로그/운세히스토리) 영구 삭제
+export const deleteUser = async (userId) => {
+  const response = await api.delete(`/users/${userId}`);
   return response.data;
 };
 

@@ -2,9 +2,11 @@ package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.DailyTarotService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +27,9 @@ public class DailyTarotController {
     /** 캐시 단순 조회 — 오늘 이미 분석한 적 있으면 반환, 없으면 빈 객체 */
     @GetMapping("/basic")
     public ResponseEntity<Map<String, Object>> basic(
-            @RequestParam Long userId,
-            @RequestParam int cardId) {
+            @RequestParam int cardId,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
         Map<String, Object> cached = dailyTarotService.getCached(userId, cardId);
         if (cached == null) return ResponseEntity.ok(Map.of());
         return ResponseEntity.ok(cached);
@@ -35,14 +38,15 @@ public class DailyTarotController {
     /** SSE 스트리밍 — 캐시 히트면 cached 이벤트, 미스면 AI 호출 (하트 차감) */
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(
-            @RequestParam Long userId,
             @RequestParam int cardId,
             @RequestParam String cardNameKr,
             @RequestParam(required = false, defaultValue = "") String cardNameEn,
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false, defaultValue = "SOLAR") String calendarType,
             @RequestParam(required = false) String birthTime,
-            @RequestParam(required = false) String dayMaster) {
+            @RequestParam(required = false) String dayMaster,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
 
         // 캐시 확인
         Map<String, Object> cached = dailyTarotService.getCached(userId, cardId);

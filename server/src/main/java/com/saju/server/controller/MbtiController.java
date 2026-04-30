@@ -2,9 +2,11 @@ package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.MbtiFortuneService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -69,11 +71,12 @@ public class MbtiController {
     public SseEmitter streamFortune(
             @RequestParam String type,
             @RequestParam(required = false) String zodiac,
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false, defaultValue = "me") String targetType,
-            @RequestParam(required = false) String targetName) {
+            @RequestParam(required = false) String targetName,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         String mbtiType = type.toUpperCase();
         String zodiacAnimal = (zodiac != null && !zodiac.isBlank()) ? zodiac : "용";
         SseEmitter emitter = new SseEmitter(180000L);

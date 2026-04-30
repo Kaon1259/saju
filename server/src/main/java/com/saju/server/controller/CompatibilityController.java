@@ -1,12 +1,14 @@
 package com.saju.server.controller;
 
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.CompatibilityService;
 import com.saju.server.service.FortuneHistoryService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.LunarCalendarService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +38,11 @@ public class CompatibilityController {
             @RequestParam(value = "calendarType2", defaultValue = "SOLAR") String calendarType2,
             @RequestParam(value = "gender1", defaultValue = "M") String gender1,
             @RequestParam(value = "gender2", defaultValue = "F") String gender2,
-            @RequestParam(required = false) Long userId,
             @RequestParam(value = "historyType", required = false) String historyType,
             @RequestParam(value = "celebName", required = false) String celebName,
-            @RequestParam(value = "mode", defaultValue = "general") String mode) {
+            @RequestParam(value = "mode", defaultValue = "general") String mode,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);
@@ -145,10 +148,11 @@ public class CompatibilityController {
             @RequestParam(value = "score", defaultValue = "60") int score,
             @RequestParam(value = "elementRelation", defaultValue = "") String elementRelation,
             @RequestParam(value = "branchRelation", defaultValue = "") String branchRelation,
-            @RequestParam(required = false) Long userId,
             @RequestParam(value = "historyType", required = false) String historyType,
             @RequestParam(value = "celebName", required = false) String celebName,
-            @RequestParam(value = "mode", defaultValue = "general") String mode) {
+            @RequestParam(value = "mode", defaultValue = "general") String mode,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) bd1 = lunarCalendarService.lunarToSolar(bd1);

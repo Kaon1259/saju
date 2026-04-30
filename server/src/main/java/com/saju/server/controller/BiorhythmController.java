@@ -2,11 +2,13 @@ package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.BiorhythmService;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.LunarCalendarService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +58,8 @@ public class BiorhythmController {
     public SseEmitter streamBiorhythm(
             @RequestParam("birthDate") String birthDate,
             @RequestParam(required = false) String calendarType,
-            @RequestParam(required = false) Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
 
         final String resolvedBd = resolveBirthDate(birthDate, calendarType);
         Object[] ctx = biorhythmService.buildStreamContext(resolvedBd);

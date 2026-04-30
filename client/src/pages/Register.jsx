@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { kakaoLogin, kakaoRegister, updateUser } from '../api/fortune';
+import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken } from '../api/fortune';
+import { setToken } from '../utils/auth';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
 import { startKakaoLogin, peekKakaoReturnTo, clearKakaoReturnTo, getKakaoRedirectUri } from '../utils/kakaoAuth';
@@ -126,6 +127,11 @@ function Register() {
         const result = await kakaoLogin(code, KAKAO_REDIRECT_URI);
         const user = result.user;
 
+        // JWT 저장 (서버에서 발급) → 후속 API 호출에 자동 첨부
+        if (result.token) {
+          setToken(result.token);
+          prefetchSseToken(true).catch(() => {});
+        }
         // localStorage에 기본 정보 저장
         localStorage.setItem('userId', user.id);
         localStorage.setItem('userName', user.name);
@@ -176,6 +182,11 @@ function Register() {
         mbtiType: form.mbtiType || null,
       });
 
+      // JWT 갱신 — 서버가 register 시점에 새 토큰 발급
+      if (result.token) {
+        setToken(result.token);
+        prefetchSseToken(true).catch(() => {});
+      }
       // 자동로그인 여부를 한 번 묻고, 응답 후 completeLogin 호출
       setAutoLoginAsk({ user: result.user });
     } catch (err) {

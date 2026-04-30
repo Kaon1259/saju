@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { clearAuth } from '../utils/auth';
 import './Settings.css';
 
 function Settings() {
@@ -87,9 +88,7 @@ function Settings() {
 
         {/* 로그아웃 */}
         <button className="settings-logout-btn" onClick={() => {
-          localStorage.removeItem('userId');
-          localStorage.removeItem('userName');
-          localStorage.removeItem('userProfile');
+          clearAuth();
           localStorage.setItem('autoLogin', 'off');
           navigate('/register');
         }}>

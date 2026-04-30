@@ -1,11 +1,13 @@
 package com.saju.server.controller;
 
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.FortuneHistoryService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.SpecialFortuneService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,8 @@ public class SpecialFortuneController {
      */
     @GetMapping("/love-temperature")
     public ResponseEntity<Map<String, Object>> getLoveTemperature(
-            @RequestParam(required = false) Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         if (userId != null) {
             return ResponseEntity.ok(specialFortuneService.getUserLoveTemperature(userId));
         }
@@ -109,7 +112,8 @@ public class SpecialFortuneController {
             @RequestParam(required = false) String breakupDate,
             @RequestParam(required = false) String meetDate,
             @RequestParam(required = false) String relationshipStatus,
-            @RequestParam(required = false) Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         // 캐시 체크 먼저
         Map<String, Object> cached = specialFortuneService.getLoveFortuneBasic(
             type, birthDate, birthTime, gender, calendarType,

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.dto.UserResponse;
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.saju.TojeongResult;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,10 +75,11 @@ public class TojeongController {
     public SseEmitter streamTojeong(
             @RequestParam("birthDate") String birthDateStr,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String targetType,
-            @RequestParam(required = false) String targetName) {
+            @RequestParam(required = false) String targetName,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {

@@ -3,9 +3,11 @@ package com.saju.server.controller;
 import com.saju.server.entity.User;
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.repository.UserRepository;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.TarotService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +72,8 @@ public class TarotController {
             @RequestParam(required = false) String question,
             @RequestParam(required = false) String deck,
             @RequestParam(required = false) Integer deckVariant,
-            @RequestParam(required = false) Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         // spread 파라미터에 따라 하트 카테고리 결정
         String heartCategory = switch (spread) {
             case "one"   -> "TAROT_ONE";

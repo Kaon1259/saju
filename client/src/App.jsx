@@ -230,6 +230,10 @@ function App() {
   // 자동 로그인 off면 앱 시작 시 로그인 정보 제거
   useEffect(() => {
     if (localStorage.getItem('autoLogin') === 'off') {
+      // JWT 토큰까지 함께 정리 (clearAuth)
+      try {
+        localStorage.removeItem('authToken');
+      } catch {}
       localStorage.removeItem('userId');
       localStorage.removeItem('userName');
       localStorage.removeItem('userProfile');

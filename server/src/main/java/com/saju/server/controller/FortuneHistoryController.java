@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.entity.FortuneHistory;
 import com.saju.server.repository.FortuneHistoryRepository;
+import com.saju.server.security.AuthUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +35,11 @@ public class FortuneHistoryController {
      */
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> list(
-            @RequestParam("userId") Long userId,
+            HttpServletRequest req,
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "subType", required = false) String subType,
             @RequestParam(value = "limit", defaultValue = "20") int limit) {
+        Long userId = AuthUtil.requireUserId(req);
         if (limit < 1) limit = 1;
         if (limit > 100) limit = 100;
 
@@ -69,7 +72,8 @@ public class FortuneHistoryController {
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> get(
             @PathVariable Long id,
-            @RequestParam("userId") Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
         return repository.findByIdAndUserId(id, userId)
             .map(r -> {
                 Map<String, Object> m = new LinkedHashMap<>();
@@ -96,7 +100,8 @@ public class FortuneHistoryController {
     @Transactional
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
-            @RequestParam("userId") Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
         repository.deleteByIdAndUserId(id, userId);
         return ResponseEntity.noContent().build();
     }

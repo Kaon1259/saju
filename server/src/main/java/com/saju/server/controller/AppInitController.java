@@ -16,6 +16,7 @@ public class AppInitController {
 
     private final HeartPointService heartPointService;
     private final UserRepository userRepository;
+    private final com.saju.server.security.JwtService jwtService;
 
     /**
      * 앱 초기화 — 하트 잔액, 비용 맵, 사용자 프로필 한번에 반환
@@ -44,6 +45,9 @@ public class AppInitController {
         }
 
         if (user != null) {
+            // 토큰 재발급 — 기존 ?userId= 만 가진 클라이언트도 자동으로 JWT 획득
+            boolean isGuest = user.getKakaoId() != null && user.getKakaoId().startsWith("guest_");
+            result.put("token", jwtService.issue(user.getId(), isGuest));
             Map<String, Object> profile = new LinkedHashMap<>();
             profile.put("id", user.getId());
             profile.put("name", user.getName());

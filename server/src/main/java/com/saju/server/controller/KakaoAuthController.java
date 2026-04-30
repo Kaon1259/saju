@@ -30,6 +30,7 @@ public class KakaoAuthController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final com.saju.server.service.HeartPointService heartPointService;
+    private final com.saju.server.security.JwtService jwtService;
 
     /**
      * 카카오 로그인/회원가입
@@ -103,6 +104,7 @@ public class KakaoAuthController {
         result.put("status", profileComplete ? "login" : "needProfile");
         result.put("user", UserResponse.from(user));
         result.put("profileComplete", profileComplete);
+        result.put("token", jwtService.issue(user.getId(), false));
 
         return ResponseEntity.ok(result);
     }
@@ -145,6 +147,7 @@ public class KakaoAuthController {
         Map<String, Object> result = new HashMap<>();
         result.put("status", "registered");
         result.put("user", UserResponse.from(saved));
+        result.put("token", jwtService.issue(saved.getId(), false));
 
         return ResponseEntity.ok(result);
     }

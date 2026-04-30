@@ -6,7 +6,9 @@ import com.saju.server.entity.User;
 import com.saju.server.repository.HeartPointConfigRepository;
 import com.saju.server.repository.HeartPointLogRepository;
 import com.saju.server.repository.UserRepository;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.HeartPointService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -36,15 +38,17 @@ public class HeartPointController {
     }
 
     @GetMapping("/balance")
-    public ResponseEntity<Map<String, Object>> getBalance(@RequestParam Long userId) {
+    public ResponseEntity<Map<String, Object>> getBalance(HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
         int balance = heartPointService.getBalance(userId);
         return ResponseEntity.ok(Map.of("userId", userId, "heartPoints", balance));
     }
 
     @GetMapping("/check")
     public ResponseEntity<Map<String, Object>> checkSufficient(
-            @RequestParam Long userId,
+            HttpServletRequest req,
             @RequestParam(defaultValue = "BASIC_ANALYSIS") String category) {
+        Long userId = AuthUtil.requireUserId(req);
         int balance = heartPointService.getBalance(userId);
         int cost = heartPointService.getCost(category);
         return ResponseEntity.ok(Map.of(
@@ -139,8 +143,9 @@ public class HeartPointController {
      */
     @PostMapping("/deduct")
     public ResponseEntity<Map<String, Object>> deductHearts(
-            @RequestParam Long userId,
+            HttpServletRequest req,
             @RequestParam String category) {
+        Long userId = AuthUtil.requireUserId(req);
         try {
             heartPointService.deductPoints(userId, category, category);
             int balance = heartPointService.getBalance(userId);

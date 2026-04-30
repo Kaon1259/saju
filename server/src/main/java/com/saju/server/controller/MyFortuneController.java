@@ -3,12 +3,16 @@ package com.saju.server.controller;
 import com.saju.server.dto.UserResponse;
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.saju.SajuResult;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
@@ -31,11 +35,20 @@ public class MyFortuneController {
     private final HeartPointService heartPointService;
     private final FortuneHistoryService fortuneHistoryService;
 
+    /** path userId 가 본인이 아니면 403. */
+    private static void requireSelf(HttpServletRequest req, Long pathId) {
+        Long uid = AuthUtil.requireUserId(req);
+        if (!uid.equals(pathId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 운세만 조회할 수 있습니다.");
+        }
+    }
+
     /**
      * 나의 통합 운세 (사주 AI + 혈액형 + MBTI)
      */
     @GetMapping("/fortune/{userId}")
-    public ResponseEntity<Map<String, Object>> getMyFortune(@PathVariable Long userId) {
+    public ResponseEntity<Map<String, Object>> getMyFortune(@PathVariable Long userId, HttpServletRequest req) {
+        requireSelf(req, userId);
         UserResponse user = userService.getUser(userId);
 
         if (user.getBirthDate() == null) {
@@ -120,7 +133,9 @@ public class MyFortuneController {
     @GetMapping(value = "/fortune/{userId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamMyFortune(@PathVariable Long userId,
             @RequestParam(value = "date", required = false) String dateStr,
-            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly,
+            HttpServletRequest req) {
+        requireSelf(req, userId);
         UserResponse user = userService.getUser(userId);
         if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
             SseEmitter emitter = new SseEmitter(5000L);

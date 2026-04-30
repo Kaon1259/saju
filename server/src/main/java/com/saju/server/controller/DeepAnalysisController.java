@@ -2,11 +2,13 @@ package com.saju.server.controller;
 
 import com.saju.server.exception.InsufficientHeartsException;
 import com.saju.server.repository.*;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.DeepAnalysisService;
 import com.saju.server.service.FortunePromptBuilder;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,10 +57,11 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String calendarType,
             @RequestParam(required = false) String extra,
-            @RequestParam(required = false) Long userId,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
             @RequestParam(value = "targetName", required = false) String targetName,
-            @RequestParam(required = false) String context) {
+            @RequestParam(required = false) String context,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         return deepFortuneStream(type, birthDate, birthTime, gender, calendarType, extra, userId, targetType, targetName, context);
     }
 
@@ -73,10 +76,11 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String calendarType,
             @RequestParam(required = false) String extra,
-            @RequestParam(required = false) Long userId,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
             @RequestParam(value = "targetName", required = false) String targetName,
-            @RequestBody(required = false) String context) {
+            @RequestBody(required = false) String context,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         return deepFortuneStream(type, birthDate, birthTime, gender, calendarType, extra, userId, targetType, targetName, context);
     }
 
@@ -172,8 +176,9 @@ public class DeepAnalysisController {
             @RequestParam(required = false) String question,
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender,
-            @RequestParam(required = false) Long userId,
-            @RequestBody(required = false) String basicInterpretation) {
+            @RequestBody(required = false) String basicInterpretation,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         log.info("타로 심화분석 요청: spread={}, cardIds={}, ctxLen={}",
             spread, cardIds, basicInterpretation != null ? basicInterpretation.length() : 0);
 
@@ -249,8 +254,9 @@ public class DeepAnalysisController {
             @RequestParam String bd2,
             @RequestParam(required = false) String bt2,
             @RequestParam String g2,
-            @RequestParam(required = false) Long userId,
-            @RequestBody(required = false) String context) {
+            @RequestBody(required = false) String context,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         log.info("궁합 심화분석 요청: type={}, bd1={}, bd2={}, ctxLen={}", type, bd1, bd2, context != null ? context.length() : 0);
 
         // 캐시 확인

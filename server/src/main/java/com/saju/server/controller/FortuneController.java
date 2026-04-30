@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.dto.FortuneResponse;
 import com.saju.server.dto.UserResponse;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,12 +66,19 @@ public class FortuneController {
     @GetMapping(value = "/today/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamTodayFortune(
             @RequestParam("zodiac") String zodiacAnimal,
-            @RequestParam(required = false) Long userId,
             @RequestParam(value = "birthDate", required = false) String birthDate,
             @RequestParam(value = "gender", required = false) String gender,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
             @RequestParam(value = "targetName", required = false) String targetName,
-            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
+        return streamTodayFortuneInternal(zodiacAnimal, userId, birthDate, gender, targetType, targetName, cacheOnly);
+    }
+
+    private SseEmitter streamTodayFortuneInternal(
+            String zodiacAnimal, Long userId, String birthDate, String gender,
+            String targetType, String targetName, boolean cacheOnly) {
         SseEmitter emitter = new SseEmitter(180000L);
 
         // 캐시 체크 (읽기 전용, INSERT 없음)
@@ -128,6 +137,6 @@ public class FortuneController {
     public SseEmitter streamUserFortune(@PathVariable Long userId,
             @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
         UserResponse user = userService.getUser(userId);
-        return streamTodayFortune(user.getZodiacAnimal(), userId, null, null, "me", null, cacheOnly);
+        return streamTodayFortuneInternal(user.getZodiacAnimal(), userId, null, null, "me", null, cacheOnly);
     }
 }

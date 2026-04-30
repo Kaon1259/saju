@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
  * 임시 구현: in-memory ConcurrentHashMap. 멀티 인스턴스로 확장 시 Redis 기반(bucket4j-redis)으로 교체.
  */
 @Component
+@org.springframework.core.annotation.Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE + 20)
 @Slf4j
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -87,7 +88,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         Bucket bucket;
         String key;
         if (isAiEndpoint(path)) {
-            String userId = request.getParameter("userId");
+            // JwtAuthFilter 가 먼저 실행되어 attribute 에 userId 를 넣음. 듀얼모드에서는 ?userId= fallback.
+            Object attr = request.getAttribute("authUserId");
+            String userId = attr != null ? attr.toString() : request.getParameter("userId");
             // userId 없으면 IP 기반 (게스트·헬스체크 케이스)
             key = "ai:" + (userId != null && !userId.isBlank() ? "u" + userId : "ip" + clientIp(request));
             bucket = aiBuckets.computeIfAbsent(key, k -> newAiBucket());

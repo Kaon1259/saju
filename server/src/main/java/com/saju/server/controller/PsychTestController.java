@@ -1,9 +1,11 @@
 package com.saju.server.controller;
 
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.PsychTestService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +53,8 @@ public class PsychTestController {
             @RequestParam String answers,
             @RequestParam(required = false) String birthDate,
             @RequestParam(required = false) String gender,
-            @RequestParam(required = false) Long userId) {
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         // 하트 잔액 확인 (차감은 AI 완료 후)
         if (userId != null) {
             try {

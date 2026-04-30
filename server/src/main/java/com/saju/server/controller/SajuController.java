@@ -3,9 +3,11 @@ package com.saju.server.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.saju.*;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
 import com.saju.server.dto.UserResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -65,12 +67,13 @@ public class SajuController {
             @RequestParam(value = "birthTime", required = false) String birthTime,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
             @RequestParam(value = "gender", required = false) String gender,
-            @RequestParam(required = false) Long userId,
             @RequestParam(value = "context", required = false) String context,
             @RequestParam(value = "targetType", defaultValue = "me") String targetType,
             @RequestParam(value = "targetName", required = false) String targetName,
             @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly,
-            @RequestParam(value = "date", required = false) String dateStr) {
+            @RequestParam(value = "date", required = false) String dateStr,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
 
         LocalDate birthDate = LocalDate.parse(birthDateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {
@@ -258,8 +261,9 @@ public class SajuController {
             @RequestParam("date") String dateStr,
             @RequestParam(value = "calendarType", defaultValue = "SOLAR") String calendarType,
             @RequestParam(value = "birthDate", required = false) String birthDateStr,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly) {
+            @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
 
         LocalDate date = LocalDate.parse(dateStr);
         if ("LUNAR".equalsIgnoreCase(calendarType)) {

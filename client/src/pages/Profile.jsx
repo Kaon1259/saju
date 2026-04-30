@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUser, getDailyFortunes, deductHearts } from '../api/fortune';
+import { getUser, getDailyFortunes, deductHearts, deleteUser } from '../api/fortune';
+import { clearAuth } from '../utils/auth';
 import HeartCost from '../components/HeartCost';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import ConstellationMap from '../components/ConstellationMap';
@@ -67,8 +68,7 @@ function Profile() {
         getDailyFortunes(u.birthDate, u.calendarType || 'SOLAR').then(setDailyFortunes).catch(() => {});
       }
     }).catch(() => {
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userName');
+      clearAuth();
       navigate('/register', { state: { from: '/profile' } });
     }).finally(() => setLoading(false));
   }, [navigate]);
@@ -253,13 +253,37 @@ function Profile() {
           ✏️ 프로필 수정
         </button>
         <button className="pf-btn pf-btn--logout" onClick={() => {
-          localStorage.removeItem('userId');
-          localStorage.removeItem('userName');
-          localStorage.removeItem('userProfile');
+          clearAuth();
           localStorage.setItem('autoLogin', 'off');
           navigate('/register');
         }}>
           🚪 로그아웃
+        </button>
+        <button
+          className="pf-btn pf-btn--logout"
+          style={{ marginTop: 8, color: '#999', fontSize: '0.85rem' }}
+          onClick={async () => {
+            const ok = window.confirm(
+              '정말 회원 탈퇴하시겠습니까?\n\n' +
+              '- 모든 운세 히스토리, 하트, 프로필 정보가 영구 삭제됩니다.\n' +
+              '- 잔여 하트는 복구되지 않습니다.\n' +
+              '- 같은 카카오 계정으로 재가입은 가능하지만 기존 데이터는 복구되지 않습니다.'
+            );
+            if (!ok) return;
+            const ok2 = window.confirm('탈퇴 후 복구가 불가능합니다. 정말 진행하시겠습니까?');
+            if (!ok2) return;
+            try {
+              const uid = localStorage.getItem('userId');
+              await deleteUser(uid);
+              alert('탈퇴가 완료되었습니다.');
+              clearAuth();
+              localStorage.setItem('autoLogin', 'off');
+              navigate('/register', { replace: true });
+            } catch (e) {
+              alert('탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
+          }}>
+          회원 탈퇴
         </button>
       </section>
     </div>

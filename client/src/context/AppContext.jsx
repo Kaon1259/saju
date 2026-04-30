@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { appInit } from '../api/fortune';
+import { appInit, prefetchSseToken } from '../api/fortune';
+import { setToken, clearAuth } from '../utils/auth';
 
 const AppContext = createContext(null);
 
@@ -30,6 +31,11 @@ export function AppProvider({ children }) {
       const data = await appInit(userId, null);
 
       if (data.heartCosts) setHeartCosts(data.heartCosts);
+      // 서버가 토큰 발급 — 기존 ?userId= 만 있던 클라이언트도 즉시 JWT 획득 (마이그레이션 키)
+      if (data.token) {
+        setToken(data.token);
+        prefetchSseToken(true).catch(() => {});
+      }
       if (data.user && !data.user.isGuest) {
         // 로그인 사용자: 서버 프로필로 localStorage 갱신
         setAppUser(data.user);
@@ -39,10 +45,7 @@ export function AppProvider({ children }) {
       } else {
         // Guest 또는 서버에 사용자 없음 또는 Guest 유저 → userId 정리
         if (userId) {
-          localStorage.removeItem('userId');
-          localStorage.removeItem('userName');
-          localStorage.removeItem('userProfile');
-          localStorage.removeItem('guestId');
+          clearAuth();
         }
         setAppUser(null);
       }

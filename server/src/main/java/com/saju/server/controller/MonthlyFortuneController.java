@@ -2,11 +2,13 @@ package com.saju.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saju.server.exception.InsufficientHeartsException;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.ClaudeApiService;
 import com.saju.server.service.HeartPointService;
 import com.saju.server.service.LunarCalendarService;
 import com.saju.server.service.MonthlyFortuneService;
 import com.saju.server.util.SseEmitterUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,10 +59,11 @@ public class MonthlyFortuneController {
             @RequestParam(required = false) String birthTime,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String calendarType,
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String targetType,
             @RequestParam(required = false) String targetName,
-            @RequestParam(required = false, defaultValue = "false") boolean extra) {
+            @RequestParam(required = false, defaultValue = "false") boolean extra,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
 
         // 음력 → 양력 변환 (사주 계산은 양력 기준)
         final String resolvedBd = resolveBirthDate(birthDate, calendarType);
