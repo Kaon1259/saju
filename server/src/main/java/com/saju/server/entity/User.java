@@ -67,6 +67,10 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /** 하트 차감 동시성 보호용 낙관적 잠금. 충돌 시 OptimisticLockingFailureException. */
+    @Version
+    private Long version;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

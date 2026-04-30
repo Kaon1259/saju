@@ -171,7 +171,7 @@ public class ClaudeApiService {
     private SseEmitter generateStreamInternal(String systemPrompt, String userPrompt, int maxTokens,
             String modelOverride,
             java.util.function.Function<String, String> onComplete) {
-        SseEmitter emitter = new SseEmitter(600000L); // 10분 타임아웃 (결혼/심화는 5500~7500토큰 → 최대 3~4분 소요)
+        SseEmitter emitter = new SseEmitter(300_000L); // 5분 타임아웃 (결혼/심화 최대 3~4분 + 1~2분 버퍼). 클라 끊김 시 메모리 누수 윈도우 단축.
 
         if (!isAvailable()) {
             streamExecutor.execute(() -> {
