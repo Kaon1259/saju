@@ -40,6 +40,13 @@ claude:
 admin:
   secret: ${ADMIN_SECRET:}
 
+# JWT 인증 — JWT_SECRET 환경변수 필수 (32자 이상)
+jwt:
+  secret: ${JWT_SECRET:dev-jwt-secret-change-me-min-32-chars-long-please}
+  ttl-minutes: ${JWT_TTL_MINUTES:43200}
+  sse-ttl-seconds: ${JWT_SSE_TTL_SECONDS:60}
+  legacy-fallback: ${JWT_LEGACY_FALLBACK:true}
+
 clova:
   tts:
     client-id: ${CLOVA_CLIENT_ID:none}
