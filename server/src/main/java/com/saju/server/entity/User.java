@@ -67,9 +67,15 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    /** 하트 차감 동시성 보호용 낙관적 잠금. 충돌 시 OptimisticLockingFailureException. */
+    /**
+     * 하트 차감 동시성 보호용 낙관적 잠금. 충돌 시 OptimisticLockingFailureException.
+     * @Builder.Default — c42604d 에서 추가됐으나 default 미지정 + ddl-auto:update 로
+     * 기존 row 의 version 이 NULL 인 채로 남아 카카오 재로그인(save) 시 0 rows updated →
+     * OptimisticLockingFailureException 발생. NULL → 0 백필은 VersionBackfillRunner 가 처리.
+     */
     @Version
-    private Long version;
+    @Builder.Default
+    private Long version = 0L;
 
     @PrePersist
     protected void onCreate() {
