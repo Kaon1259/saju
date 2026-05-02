@@ -156,7 +156,8 @@ function Register() {
         }
       } catch (e) {
         console.error(e);
-        setError('카카오 로그인에 실패했습니다. 다시 시도해주세요.');
+        const serverMsg = e?.response?.data?.error || '';
+        setError(serverMsg ? `로그인 실패: ${serverMsg}` : '카카오 로그인에 실패했습니다. 다시 시도해주세요.');
         setStep('kakao');
       }
     })();
