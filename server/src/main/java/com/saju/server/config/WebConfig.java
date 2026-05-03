@@ -21,6 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
             "http://localhost:*",        // 로컬 개발
             "https://localhost",          // Capacitor 모바일 WebView (androidScheme: https)
             "https://*.vercel.app",       // Vercel 웹 프론트 (preview 포함)
+            "https://*.up.railway.app",   // Railway 호스팅 프론트 (운영툴/프리뷰 포함)
             "https://www.recipepig.kr",   // 운영툴
             "https://recipepig.kr"        // 운영툴
         ));
