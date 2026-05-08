@@ -277,7 +277,9 @@ function Register() {
       {step === 'profile' && (
         <form className="register-form glass-card animate-fade-in-up" onSubmit={handleSubmit} style={{ animationDelay: '100ms' }}>
           <div className="register-kakao-welcome">
-            카카오 인증 완료! 프로필을 설정해주세요
+            {needProfile
+              ? '맞춤 운세를 보려면 사주 정보가 필요해요'
+              : '카카오 인증 완료! 프로필을 설정해주세요'}
           </div>
 
           <div className="form-group">

@@ -75,6 +75,92 @@ export function extractStreamingFieldsPartial(partialText, fields) {
 }
 
 /**
+ * 스트리밍 중인 부분 JSON에서 number 필드 추출 (예: "score": 80).
+ * Progressive 점수 표시용 — string 필드와 분리.
+ *
+ * @param {string} partialText  현재까지 누적된 스트림 텍스트
+ * @param {string[]} fields     추출 시도할 number 키 목록 (예: ['score'])
+ * @returns {Record<string, number>}
+ */
+export function extractStreamingNumberFields(partialText, fields) {
+  if (!partialText || !Array.isArray(fields)) return {};
+  let text = partialText;
+  const cb = text.indexOf('```');
+  if (cb >= 0) {
+    const after = text.indexOf('\n', cb);
+    if (after > 0) text = text.substring(after + 1);
+  }
+  const result = {};
+  for (const key of fields) {
+    // "key": 80 — 숫자 다음에 콤마/}/공백/줄바꿈 와야 완성으로 인정 (스트림 끊김 방지)
+    const re = new RegExp(`"${key}"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)\\s*(?:,|\\}|\\n|$)`);
+    const m = text.match(re);
+    if (m && m[1] !== undefined) {
+      const n = Number(m[1]);
+      if (!Number.isNaN(n)) result[key] = n;
+    }
+  }
+  return result;
+}
+
+/**
+ * 스트리밍 중인 부분 JSON에서 객체 배열의 "이미 닫힌" 항목만 추출.
+ * 예: "hourlyFortune": [ {...완료}, {...완료}, {...진행중 ]
+ *
+ * 진행 중인 마지막 객체는 무시. 닫힌 { ... } 만 JSON.parse 시도.
+ *
+ * @param {string} partialText  현재까지 누적된 스트림 텍스트
+ * @param {string} key          배열 필드명 (예: 'hourlyFortune')
+ * @returns {Array<object>}     완성된 항목 배열 (없으면 빈 배열)
+ */
+export function extractStreamingArrayItems(partialText, key) {
+  if (!partialText || !key) return [];
+  let text = partialText;
+  const cb = text.indexOf('```');
+  if (cb >= 0) {
+    const after = text.indexOf('\n', cb);
+    if (after > 0) text = text.substring(after + 1);
+  }
+  // "key": [ 위치 찾기
+  const keyRe = new RegExp(`"${key}"\\s*:\\s*\\[`);
+  const m = text.match(keyRe);
+  if (!m) return [];
+  const start = m.index + m[0].length;
+  // 배열 안을 순회하며 닫힌 { ... } 객체만 모음
+  const items = [];
+  let i = start;
+  let depth = 0;
+  let objStart = -1;
+  let inStr = false;
+  let escape = false;
+  while (i < text.length) {
+    const ch = text[i];
+    if (escape) { escape = false; i++; continue; }
+    if (inStr) {
+      if (ch === '\\') escape = true;
+      else if (ch === '"') inStr = false;
+      i++; continue;
+    }
+    if (ch === '"') { inStr = true; i++; continue; }
+    if (ch === '{') {
+      if (depth === 0) objStart = i;
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0 && objStart >= 0) {
+        const objText = text.substring(objStart, i + 1);
+        try { items.push(JSON.parse(objText)); } catch { /* 파싱 실패 시 스킵 */ }
+        objStart = -1;
+      }
+    } else if (ch === ']' && depth === 0) {
+      break; // 배열 종료
+    }
+    i++;
+  }
+  return items;
+}
+
+/**
  * AI 스트리밍 응답에서 JSON을 안전하게 추출
  * - 마크다운 코드블록(```) 제거
  * - 잘린 JSON 복구 시도

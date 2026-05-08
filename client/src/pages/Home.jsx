@@ -1592,6 +1592,7 @@ function Home() {
           </div>
           <div className="home-summary-track">
             {SUMMARY_DEFS.map((def) => {
+              const isLoading = fortuneLoading && !myData;
               const text = myData?.saju?.[def.key] || '';
               const firstSentence = text ? (text.split(/[.!?]/)[0] + (text.includes('.') ? '.' : '')) : '';
               const score = def.key === 'love'
@@ -1600,20 +1601,27 @@ function Home() {
               return (
                 <button
                   key={def.key}
-                  className="home-summary-card"
+                  className={`home-summary-card ${isLoading ? 'home-summary-card--skeleton' : ''}`}
                   style={{ '--sm-color': def.color }}
-                  onClick={() => navigate('/my')}
+                  onClick={() => !isLoading && navigate('/my')}
+                  disabled={isLoading}
                 >
                   <div className="home-summary-card-head">
                     <span className="home-summary-card-icon">{def.icon}</span>
                     <span className="home-summary-card-label">{def.label}</span>
                   </div>
-                  {score != null ? (
+                  {isLoading ? (
+                    <span className="home-summary-card-score-skel" />
+                  ) : score != null ? (
                     <span className="home-summary-card-score">{score}<small>점</small></span>
                   ) : (
                     <span className="home-summary-card-score home-summary-card-score--empty">--</span>
                   )}
-                  <p className="home-summary-card-line">{firstSentence || '분석 받기 ›'}</p>
+                  {isLoading ? (
+                    <span className="home-summary-card-line-skel" />
+                  ) : (
+                    <p className="home-summary-card-line">{firstSentence || '분석 받기 ›'}</p>
+                  )}
                 </button>
               );
             })}
@@ -1623,8 +1631,32 @@ function Home() {
 
       {/* 비로그인 CTA — Hero 바로 아래 */}
       {!userId && !showForm && (
-        <section style={{ padding: '0 4px', marginBottom: 10 }}>
+        <section className="home-guest-cta" style={{ padding: '0 4px', marginBottom: 10 }}>
           <KakaoLoginCTA returnTo="/">카카오 로그인하고 맞춤 운세 받기</KakaoLoginCTA>
+          <button className="home-guest-cta__quick" onClick={() => setShowForm(true)}>
+            또는 <strong>생년월일만 입력</strong>하고 무료로 보기 ›
+          </button>
+        </section>
+      )}
+
+      {/* 비로그인: 게스트 운세 입력폼 — Hero 직하 (showForm일 때 CTA 자리 대체) */}
+      {!userId && showForm && (
+        <section className="home-guest-section">
+          {guestLoading ? (
+            <AnalysisMatrix theme="saju" label="오늘의 운세를 분석하고 있어요" />
+          ) : guestResult ? (
+            renderGuestResult()
+          ) : (
+            <div className="home-guest glass-card fade-in">
+              <h3 className="home-guest__title">생년월일로 오늘의 운세 보기</h3>
+              <div className="home-guest__form-group"><label className="home-guest__label">달력</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button><button type="button" className={`home-guest__toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button></div></div>
+              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} /></div>
+              <div className="home-guest__form-group"><label className="home-guest__label">태어난 시간 (선택)</label><select className="home-guest__input home-guest__select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>{BIRTH_TIMES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}</select></div>
+              <div className="home-guest__form-group"><label className="home-guest__label">성별</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button><button type="button" className={`home-guest__toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button></div></div>
+              <button className="home-guest__submit-full" onClick={handleGuestSubmit} disabled={!birthDate}>오늘의 운세 보기</button>
+              <button className="home-guest__link" onClick={() => setShowForm(false)}>돌아가기</button>
+            </div>
+          )}
         </section>
       )}
 
@@ -1730,26 +1762,6 @@ function Home() {
         </div>
       </section>
 
-      {/* 9. 비로그인: 게스트 운세 입력폼 */}
-      {!userId && showForm && (
-        <section className="home-guest-section">
-          {guestLoading ? (
-            <AnalysisMatrix theme="saju" label="오늘의 운세를 분석하고 있어요" />
-          ) : guestResult ? (
-            renderGuestResult()
-          ) : (
-            <div className="home-guest glass-card fade-in">
-              <h3 className="home-guest__title">생년월일로 오늘의 운세 보기</h3>
-              <div className="home-guest__form-group"><label className="home-guest__label">달력</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button><button type="button" className={`home-guest__toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button></div></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} /></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">태어난 시간 (선택)</label><select className="home-guest__input home-guest__select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>{BIRTH_TIMES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}</select></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">성별</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button><button type="button" className={`home-guest__toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button></div></div>
-              <button className="home-guest__submit-full" onClick={handleGuestSubmit} disabled={!birthDate}>오늘의 운세 보기</button>
-              <button className="home-guest__link" onClick={() => setShowForm(false)}>돌아가기</button>
-            </div>
-          )}
-        </section>
-      )}
 
       {/* 연애 운세 바텀시트 모달 */}
       {loveModal && (

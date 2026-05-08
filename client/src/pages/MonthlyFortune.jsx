@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMonthlyFortuneStream, isGuest } from '../api/fortune';
-import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial, extractStreamingNumberFields } from '../utils/parseAiJson';
 import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -141,11 +141,14 @@ function MonthlyFortune() {
             if (p.done) newDone.push(k);
           }
         }
+        // 점수는 number 필드라 별도 추출 (JSON 앞쪽에 위치 → 즉시 노출 가능)
+        const nums = extractStreamingNumberFields(buffer, ['score']);
+        if (typeof nums.score === 'number') newFields.score = nums.score;
         if (Object.keys(newFields).length > 0) {
           if (!firstFieldShown) {
             firstFieldShown = true;
             setStreamingActive(true);
-            setResult({ month: m, score: 0, ...newFields });
+            setResult({ month: m, score: newFields.score ?? 0, ...newFields });
           } else {
             setResult(prev => ({ ...(prev || { month: m }), ...newFields }));
           }
@@ -167,12 +170,24 @@ function MonthlyFortune() {
         setStreamingActive(false);
         setDoneFields(new Set());
         if (parsed) {
+          // 응답이 잘려 score가 누락됐을 수 있음 → buffer에서 다시 시도, 그래도 없으면 진행 카드 평균값 fallback
+          let finalScore = parsed.score;
+          if (typeof finalScore !== 'number') {
+            const num = extractStreamingNumberFields(buffer, ['score']).score;
+            finalScore = typeof num === 'number' ? num : 70;
+          }
+          const merged = { ...parsed, score: finalScore, month: m };
           if (firstFieldShown) {
-            setResult({ ...parsed, month: m });
+            setResult(merged);
           } else {
-            pendingResultRef.current = { ...parsed, month: m };
+            pendingResultRef.current = merged;
             setCompleting(true);
           }
+        } else {
+          // parseAiJson 실패 (잘린 JSON 복구 불가) → 스트리밍으로 받은 부분 결과를 그대로 노출
+          // 점수는 buffer에서 number 추출, 없으면 70 fallback
+          const num = extractStreamingNumberFields(buffer, ['score']).score;
+          setResult(prev => prev ? { ...prev, score: typeof num === 'number' ? num : (prev.score || 70) } : prev);
         }
         setLoading(false);
       },

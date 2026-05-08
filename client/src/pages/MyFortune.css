@@ -187,6 +187,100 @@
 .light-mode .myf-hourly-desc { color: #3a2a48; }
 .light-mode .myf-hourly-bar { background: rgba(0,0,0,0.06); }
 
+/* ───────── 시간대 흐름 스트리밍 (분석 중) ───────── */
+.myf-hourly--streaming { margin-top: 18px; }
+.myf-hourly--streaming .myf-hourly-title {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+.myf-hourly-streaming-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.2px;
+}
+.myf-hourly-streaming-badge .streaming-dots i {
+  width: 3px; height: 3px;
+}
+
+/* 채워진 행은 fade-in + 살짝 위로 슬라이드 */
+.myf-hourly-row--filled { opacity: 0; animation: myfHourlyIn 0.5s ease forwards; }
+
+/* pending 슬롯 — 회색 + shimmer */
+.myf-hourly-row--pending { opacity: 0.55; transition: opacity 0.3s; }
+.myf-hourly-row--pending.is-active { opacity: 1; }
+.myf-hourly-icon--pending {
+  filter: grayscale(0.6);
+  animation: myfHourlyIconPulse 1.6s ease-in-out infinite;
+}
+.myf-hourly-row--pending.is-active .myf-hourly-icon--pending {
+  filter: none;
+  animation: myfHourlyIconActive 1.2s ease-in-out infinite;
+}
+@keyframes myfHourlyIconPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+@keyframes myfHourlyIconActive {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 4px rgba(255, 200, 120, 0.5)); }
+  50%      { transform: scale(1.12) rotate(-3deg); filter: drop-shadow(0 0 8px rgba(255, 200, 120, 0.9)); }
+}
+
+.myf-hourly-range--skel,
+.myf-hourly-score--skel,
+.myf-hourly-desc--skel {
+  display: inline-block;
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 0%,
+    rgba(255,255,255,0.18) 50%,
+    rgba(255,255,255,0.06) 100%);
+  background-size: 200% 100%;
+  animation: myfHourlyShimmer 1.4s ease-in-out infinite;
+}
+.myf-hourly-range--skel { width: 60px; height: 10px; }
+.myf-hourly-score--skel { width: 36px; height: 12px; margin-left: auto; }
+.myf-hourly-desc--skel  { width: 86%; height: 11px; margin-top: 4px; display: block; }
+.myf-hourly-bar-fill--skel {
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.28) 50%,
+    rgba(255,255,255,0.10) 100%);
+  background-size: 200% 100%;
+  animation: myfHourlyShimmer 1.4s ease-in-out infinite;
+  border-radius: 3px;
+}
+.myf-hourly-row--pending.is-active .myf-hourly-bar-fill--skel {
+  background: linear-gradient(90deg, #ff8fb3, #f5c46e);
+  width: 35%;
+  animation: myfHourlyBarSweep 1.6s ease-in-out infinite;
+}
+@keyframes myfHourlyShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes myfHourlyBarSweep {
+  0%, 100% { width: 20%; }
+  50%      { width: 70%; }
+}
+
+.light-mode .myf-hourly-range--skel,
+.light-mode .myf-hourly-score--skel,
+.light-mode .myf-hourly-desc--skel {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.04) 0%,
+    rgba(0,0,0,0.12) 50%,
+    rgba(0,0,0,0.04) 100%);
+  background-size: 200% 100%;
+}
+.light-mode .myf-hourly-bar-fill--skel {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.06) 0%,
+    rgba(0,0,0,0.20) 50%,
+    rgba(0,0,0,0.06) 100%);
+  background-size: 200% 100%;
+}
+
 /* 럭키 (기존 2칸 버전 — 하위 호환용) */
 .myf-lucky { display: flex; align-items: center; padding: 16px; }
 .myf-lucky-item { flex: 1; text-align: center; }

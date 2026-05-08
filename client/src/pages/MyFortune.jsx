@@ -8,7 +8,7 @@ import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
-import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
+import parseAiJson, { extractStreamingFieldsPartial, extractStreamingArrayItems } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { mapLuckyOutfit } from '../utils/luckyOutfitTemplate';
@@ -244,10 +244,13 @@ function MyFortune() {
   const [streaming, setStreaming] = useState(false);
   const [streamFields, setStreamFields] = useState({}); // progressive 카드 (내 운세)
   const [doneFields, setDoneFields] = useState(new Set());
+  const [streamHourly, setStreamHourly] = useState([]); // 스트리밍 중 시간대 흐름 부분 항목
   const [partnerStreamFields, setPartnerStreamFields] = useState({});
   const [partnerDoneFields, setPartnerDoneFields] = useState(new Set());
+  const [partnerStreamHourly, setPartnerStreamHourly] = useState([]);
   const [otherStreamFields, setOtherStreamFields] = useState({});
   const [otherDoneFields, setOtherDoneFields] = useState(new Set());
+  const [otherStreamHourly, setOtherStreamHourly] = useState([]);
   const [completing, setCompleting] = useState(false);
   const pendingResultRef = useRef(null);
   const pendingSetterRef = useRef(null);
@@ -261,9 +264,9 @@ function MyFortune() {
     try { cleanupRef.current?.(); } catch {}
     try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     setLoading(false); setStreaming(false); setStreamText('');
-    setStreamFields({}); setDoneFields(new Set());
-    setPartnerLoading(false); setPartnerStreaming(false); setPartnerStreamText('');
-    setOtherLoading(false); setOtherStreaming(false); setOtherStreamText('');
+    setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);
+    setPartnerLoading(false); setPartnerStreaming(false); setPartnerStreamText(''); setPartnerStreamHourly([]);
+    setOtherLoading(false); setOtherStreaming(false); setOtherStreamText(''); setOtherStreamHourly([]);
   });
 
   // 홈 드로어에서 넘어온 restoreHistoryId 복원
@@ -406,9 +409,9 @@ function MyFortune() {
 
   // 스트리밍 분석 공통 함수 (호출 전에 guardTodayFortune으로 감쌀 것)
   const startAnalysis = (birthDate, birthTime, calendarType, gender, setters, extraOpts = {}) => {
-    const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef, setStreamFields: sSF, setDoneFields: sDF } = setters;
+    const { setLoading: sL, setStreamText: sST, setStreaming: sS, setData: sD, cleanupRef: cRef, setStreamFields: sSF, setDoneFields: sDF, setStreamHourly: sSH } = setters;
     sL(true); sST(''); sS(false);
-    sSF?.({}); sDF?.(new Set());
+    sSF?.({}); sDF?.(new Set()); sSH?.([]);
     let buffer = '';
     cRef.current?.();
     try { playAnalyzeStart(); } catch {}
@@ -440,6 +443,11 @@ function MyFortune() {
             const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
           });
         }
+        // 시간대 흐름 부분 항목 추출
+        if (sSH) {
+          const items = extractStreamingArrayItems(buffer, 'hourlyFortune');
+          if (items.length > 0) sSH(prev => (prev.length === items.length ? prev : items));
+        }
       },
       onDone: () => {
         sS(false);
@@ -461,10 +469,10 @@ function MyFortune() {
               personalityReading: parsed.personalityReading || r?.personalityReading,
             } : r;
             sL(false); sST('');
-            sSF?.({}); sDF?.(new Set());
+            sSF?.({}); sDF?.(new Set()); sSH?.([]);
             finishWithCompleteAnimation(finalResult, sD);
           }
-          catch (e) { console.error(e); sL(false); sST(''); sSF?.({}); sDF?.(new Set()); }
+          catch (e) { console.error(e); sL(false); sST(''); sSF?.({}); sDF?.(new Set()); sSH?.([]); }
         })();
       },
       onError: () => {
@@ -482,7 +490,7 @@ function MyFortune() {
             sD(finalResult);
           }
           catch (e) { console.error(e); }
-          finally { sL(false); sST(''); sSF?.({}); sDF?.(new Set()); }
+          finally { sL(false); sST(''); sSF?.({}); sDF?.(new Set()); sSH?.([]); }
         })();
       },
     });
@@ -500,8 +508,13 @@ function MyFortune() {
   };
 
   // 스트리밍 중에 progressive 카드 + 스트림텍스트 라이브 보여주는 블록
-  const renderStreamingCards = (fields, done, label) => {
+  const renderStreamingCards = (fields, done, label, hourlyStream = []) => {
     const st = (key) => cardStatus(true, fields, done, key);
+    // hourlyFortune 배열이 시작되면(=AI가 카드 분석 끝내고 시간대 흐름 들어감) 스켈레톤 노출
+    // 실제 항목이 들어오는 만큼 채워지고, 아직 안 온 슬롯은 pending 상태로 흘러가는 wave 애니
+    const cardsAllDone = ['overall','love','money','health','work','academic'].every(k => done.has(k));
+    const showHourly = cardsAllDone || hourlyStream.length > 0;
+    const HOURLY_SLOTS = ['아침', '점심', '오후', '저녁', '밤'];
     return (
       <div className="myf-streaming-wrap">
         <div className="myf-streaming-header">
@@ -520,6 +533,54 @@ function MyFortune() {
           <StreamingCard icon="📚" title="학업·자기계발운" text={fields.academic || ''} status={st('academic')} delay={300} />
           {fields.tip && <StreamingCard icon="💡" title="꿀팁" text={fields.tip || ''} status={st('tip')} delay={360} />}
         </div>
+
+        {/* 시간대 흐름 progressive — 카드 끝나고 침묵하는 구간 제거 */}
+        {showHourly && (
+          <div className="myf-hourly myf-hourly--streaming glass-card fade-in">
+            <h4 className="myf-hourly-title">
+              ⏰ 오늘의 시간대 흐름
+              <span className="myf-hourly-streaming-badge">분석 중<span className="streaming-dots"><i/><i/><i/></span></span>
+            </h4>
+            <div className="myf-hourly-list">
+              {HOURLY_SLOTS.map((slotName, i) => {
+                const filled = hourlyStream[i];
+                if (filled) {
+                  const score = Number(filled.score) || 70;
+                  return (
+                    <div className="myf-hourly-row myf-hourly-row--filled" key={slotName} style={{ animationDelay: `${i * 80}ms` }}>
+                      <div className="myf-hourly-icon">{TIME_ICON[filled.time] || TIME_ICON[slotName] || '⏰'}</div>
+                      <div className="myf-hourly-main">
+                        <div className="myf-hourly-head">
+                          <span className="myf-hourly-time">{filled.time || slotName}</span>
+                          <span className="myf-hourly-range">{filled.range || ''}</span>
+                          <span className="myf-hourly-score">{score}점</span>
+                        </div>
+                        <div className="myf-hourly-bar"><div className="myf-hourly-bar-fill" style={{ width: `${score}%` }} /></div>
+                        <p className="myf-hourly-desc">{filled.desc || ''}</p>
+                      </div>
+                    </div>
+                  );
+                }
+                // pending: shimmer 슬롯 (현재 분석 위치는 active 효과)
+                const isActive = i === hourlyStream.length;
+                return (
+                  <div className={`myf-hourly-row myf-hourly-row--pending ${isActive ? 'is-active' : ''}`} key={slotName}>
+                    <div className="myf-hourly-icon myf-hourly-icon--pending">{TIME_ICON[slotName] || '⏰'}</div>
+                    <div className="myf-hourly-main">
+                      <div className="myf-hourly-head">
+                        <span className="myf-hourly-time">{slotName}</span>
+                        <span className="myf-hourly-range myf-hourly-range--skel" />
+                        <span className="myf-hourly-score myf-hourly-score--skel" />
+                      </div>
+                      <div className="myf-hourly-bar"><div className="myf-hourly-bar-fill myf-hourly-bar-fill--skel" /></div>
+                      <p className="myf-hourly-desc myf-hourly-desc--skel" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -550,7 +611,7 @@ function MyFortune() {
   const loadMyFortune = (targetDate) => {
     if (!userId) { setLoading(false); return; }
     setData(null); setLoading(true); setStreamText(''); setStreaming(false);
-    setStreamFields({}); setDoneFields(new Set());
+    setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);
     let buffer = '';
     cleanupRef.current?.();
     try { playAnalyzeStart(); } catch {}
@@ -579,6 +640,11 @@ function MyFortune() {
         if (newDone.length > 0) setDoneFields(prev => {
           const n = new Set(prev); newDone.forEach(f => n.add(f)); return n;
         });
+        // 시간대 흐름 부분 항목 추출 — 카드 끝난 뒤 멍한 침묵 구간을 채워줌
+        const hourlyItems = extractStreamingArrayItems(buffer, 'hourlyFortune');
+        if (hourlyItems.length > 0) {
+          setStreamHourly(prev => (prev.length === hourlyItems.length ? prev : hourlyItems));
+        }
       },
       onDone: (fullText) => {
         setStreaming(false); setStreamText('');
@@ -592,17 +658,17 @@ function MyFortune() {
             saju: { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, academic: parsed.academic, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor, luckyDirection: parsed.luckyDirection, luckyFood: parsed.luckyFood, luckyFashion: parsed.luckyFashion, luckyItem: parsed.luckyItem, luckyPerson: parsed.luckyPerson, hourlyFortune: Array.isArray(parsed.hourlyFortune) ? parsed.hourlyFortune : null }
           };
           setLoading(false);
-          setStreamFields({}); setDoneFields(new Set());
+          setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);
           finishWithCompleteAnimation(finalData, setData);
         } else {
           setLoading(false);
-          setStreamFields({}); setDoneFields(new Set());
+          setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);
         }
       },
       onError: () => {
         setStreaming(false); setStreamText('');
         setLoading(false);
-        setStreamFields({}); setDoneFields(new Set());
+        setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
     }, targetDate);
@@ -657,7 +723,7 @@ function MyFortune() {
     const dateLabel = dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`;
     return (
       <div className="myf-page">
-        {renderStreamingCards(streamFields, doneFields, `AI가 ${dateLabel} 운세를 분석중이에요`)}
+        {renderStreamingCards(streamFields, doneFields, `AI가 ${dateLabel} 운세를 분석중이에요`, streamHourly)}
       </div>
     );
   }
@@ -744,13 +810,13 @@ function MyFortune() {
   );
 
   /* ── 스트리밍/로딩 표시 공통 (progressive 카드) ── */
-  const renderLoading = (isLoading, isStreaming, sText, hasData, fields, done) => {
+  const renderLoading = (isLoading, isStreaming, sText, hasData, fields, done, hourlyStream = []) => {
     if ((isLoading || isStreaming) && !hasData && !completing) {
       const dateLabel = dateMode === 'today' ? '오늘의'
                       : dateMode === 'tomorrow' ? '내일의'
                       : dateMode === 'pick' ? `${getDateLabel()}의`
                       : '오늘의';
-      return renderStreamingCards(fields || {}, done || new Set(), `AI가 ${dateLabel} 운세를 분석중이에요`);
+      return renderStreamingCards(fields || {}, done || new Set(), `AI가 ${dateLabel} 운세를 분석중이에요`, hourlyStream);
     }
     return null;
   };
@@ -816,7 +882,7 @@ function MyFortune() {
           )}
 
           {!partnerCacheChecking && (
-            renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData, partnerStreamFields, partnerDoneFields) || (
+            renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData, partnerStreamFields, partnerDoneFields, partnerStreamHourly) || (
               !partnerData ? (
                 <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
                   <h2 style={{ marginBottom: 12 }}>💕 연인 운세</h2>
@@ -837,6 +903,7 @@ function MyFortune() {
                           setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming,
                           setData: setPartnerData, cleanupRef: partnerCleanupRef,
                           setStreamFields: setPartnerStreamFields, setDoneFields: setPartnerDoneFields,
+                          setStreamHourly: setPartnerStreamHourly,
                         }, { targetType: 'partner', date: getTargetDate() }))}>
                         💕 연인의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
                       </button>
@@ -885,7 +952,7 @@ function MyFortune() {
       {/* ════════ 다른 사람 운세 ════════ (월간/연간이 아닐 때만 노출) */}
       {viewMode === 'other' && (
         <div className="myf-other-view">
-          {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData, otherStreamFields, otherDoneFields) || (
+          {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData, otherStreamFields, otherDoneFields, otherStreamHourly) || (
             !otherData ? (
               <div className="myf-other-form glass-card">
                 <h2 style={{ textAlign: 'center', marginBottom: 6 }}>🔮 다른 사람 생년월일 입력하기</h2>
@@ -959,6 +1026,7 @@ function MyFortune() {
                     setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming,
                     setData: setOtherData, cleanupRef: otherCleanupRef,
                     setStreamFields: setOtherStreamFields, setDoneFields: setOtherDoneFields,
+                    setStreamHourly: setOtherStreamHourly,
                   }, { targetType: 'other', date: getTargetDate() }))}>
                   {otherLoading || otherStreaming
                     ? 'AI 분석중...'

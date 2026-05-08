@@ -99,7 +99,10 @@ public class MonthlyFortuneController {
         final int finalMonth = month;
         final Long uid = userId;
         final String finalCategory = heartCategory;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600,
+        // 22개 필드 JSON 스키마(weeklyAdvice 배열 4주차 + overall 5-6문장 + 5개 카테고리 3-4문장 + advice/caution 등).
+        // 1600 토큰은 advice(끝 필드)가 잘리고 점수까지 못 살리는 사례가 발생. YearFortune(3500)·DeepAnalysis 수준은 아니지만
+        // MyFortune(2500)보다는 더 필요해 3000으로 상향.
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 3000,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             monthlyFortuneService.saveStreamResult(resolvedBd, finalMonth, birthTime, gender, fullText);
             if (uid != null) heartPointService.deductPoints(uid, finalCategory, "월간운세");

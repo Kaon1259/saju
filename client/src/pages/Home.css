@@ -1734,6 +1734,33 @@
   color: var(--color-primary-light);
 }
 
+/* ─── Hero 직하 게스트 진입 CTA ─── */
+.home-guest-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.home-guest-cta__quick {
+  background: none;
+  border: 1px dashed rgba(236, 72, 153, 0.4);
+  color: #ec4899;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+.home-guest-cta__quick:hover {
+  background: rgba(236, 72, 153, 0.06);
+  border-color: rgba(236, 72, 153, 0.7);
+}
+.home-guest-cta__quick strong {
+  color: #db2777;
+  font-weight: 700;
+}
+
 /* ─── Guest Result (Inline) ─── */
 .home-guest-result {
   display: flex;
@@ -5386,6 +5413,45 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .home-summary-card-line { color: #555; }
+
+/* 운세 요약 띠 스켈레톤 (fortuneLoading 상태) */
+.home-summary-card--skeleton { cursor: default; pointer-events: none; }
+.home-summary-card--skeleton:hover { transform: none; }
+.home-summary-card-score-skel {
+  display: block;
+  width: 56px; height: 26px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.06) 0%,
+    rgba(0,0,0,0.12) 50%,
+    rgba(0,0,0,0.06) 100%);
+  background-size: 200% 100%;
+  animation: home-summary-shimmer 1.4s ease-in-out infinite;
+}
+.home-summary-card-line-skel {
+  display: block;
+  width: 100%; height: 26px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.04) 0%,
+    rgba(0,0,0,0.10) 50%,
+    rgba(0,0,0,0.04) 100%);
+  background-size: 200% 100%;
+  animation: home-summary-shimmer 1.4s ease-in-out infinite;
+  animation-delay: 0.15s;
+}
+[data-theme="dark"] .home-summary-card-score-skel,
+[data-theme="dark"] .home-summary-card-line-skel {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 0%,
+    rgba(255,255,255,0.14) 50%,
+    rgba(255,255,255,0.06) 100%);
+  background-size: 200% 100%;
+}
+@keyframes home-summary-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 /* ──────────────────────────────────────────────────────────────── */
 /* 4. 오늘의 타로 — 가로 카드                                        */
