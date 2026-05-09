@@ -113,11 +113,8 @@ function Header({ onHomeSplash, onTabIntro }) {
   }, []);
   const dayLabel = DAY_NAMES_KR[today.getDay()];
   const dateLabel = `${today.getMonth() + 1}.${today.getDate()}`;
-  // 다크모드 고정
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-  }, []);
+  // (이전 "다크모드 고정" 코드 제거됨 — Settings 에서 사용자가 선택한 theme 을
+  //  main.jsx 가 localStorage 에서 복구하도록 위임. Header 마운트 때마다 dark 로 덮어쓰는 사고 차단.)
 
   // 풀스크린 랜딩(/welcome)에서는 헤더 자체를 숨김
   if (location.pathname === '/welcome') return null;

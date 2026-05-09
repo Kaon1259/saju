@@ -5,6 +5,7 @@ import FortuneCard from '../components/FortuneCard';
 import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
+import MenuIcon from '../components/MenuIcon';
 // sounds (kept for potential future use)
 import { shareResult } from '../utils/share';
 import parseAiJson from '../utils/parseAiJson';
@@ -1202,37 +1203,37 @@ function reorderLoveBanners(status) {
 // 시즌 운세 — 풀 가로 배너 (한 해 → 한 달 → 한 주 흐름)
 // ════════════════════════════════════════════════════════════════
 const SEASON_MENUS = [
-  { icon: '🎊', title: '신년운세',  sub: '2026년 한 해의 큰 흐름',  badge: 'NEW',  path: '/year-fortune',    from: '#f59e0b', to: '#dc2626' },
-  { icon: '📜', title: '토정비결',  sub: '12달 정통 사주 운세',                   path: '/tojeong',         from: '#9333ea', to: '#6d28d9' },
-  { icon: '📅', title: '월간운세',  sub: '이번 달의 운세와 행운',                 path: '/monthly-fortune', from: '#0891b2', to: '#0e7490' },
-  { icon: '🗓️', title: '주간운세',  sub: '이번 주 7일간 변화',                    path: '/weekly-fortune',  from: '#10b981', to: '#047857' },
+  { iconKey: 'newyear', title: '신년운세',  sub: '2026년 한 해의 큰 흐름',  badge: 'NEW',  path: '/year-fortune',    from: '#f59e0b', to: '#dc2626' },
+  { iconKey: 'tojeong', title: '토정비결',  sub: '12달 정통 사주 운세',                   path: '/tojeong',         from: '#9333ea', to: '#6d28d9' },
+  { iconKey: 'monthly', title: '월간운세',  sub: '이번 달의 운세와 행운',                 path: '/monthly-fortune', from: '#0891b2', to: '#0e7490' },
+  { iconKey: 'weekly',  title: '주간운세',  sub: '이번 주 7일간 변화',                    path: '/weekly-fortune',  from: '#10b981', to: '#047857' },
 ];
 
 // ════════════════════════════════════════════════════════════════
 // 종합·특수 — 컬러풀 가로 배너 (각자 정체성 컬러)
 // ════════════════════════════════════════════════════════════════
 const OTHER_MENUS = [
-  { icon: '✨', label: '별자리 운세',     sub: '12별자리 오늘의 운세',            path: '/constellation', from: '#6366f1', to: '#4338ca' },
-  { icon: '🐯', label: '띠 운세',         sub: '12간지로 보는 한 해',             path: '/zodiac',        from: '#f59e0b', to: '#b45309' },
-  { icon: '🃏', label: '타로 카드',       sub: '오늘의 메시지 78장 풀덱',         path: '/tarot',         from: '#d946ef', to: '#a21caf' },
-  { icon: '☯️', label: '사주 정통',       sub: '천간지지·격국·신살',              path: '/traditional',   from: '#475569', to: '#1e293b' },
-  { icon: '🩸', label: '혈액형 운세',     sub: 'A·B·O·AB 별 성향',                path: '/bloodtype',     from: '#ef4444', to: '#b91c1c' },
-  { icon: '🧬', label: 'MBTI 운세',       sub: '16유형 깊은 분석',                path: '/mbti',          from: '#10b981', to: '#047857' },
-  { icon: '👤', label: '관상 분석',       sub: 'AI가 보는 얼굴 운세',             path: '/face-reading',  from: '#3b82f6', to: '#1d4ed8' },
-  { icon: '🧠', label: '심리테스트',      sub: '나도 몰랐던 내 모습',             path: '/psych-test',    from: '#ec4899', to: '#be185d' },
-  { icon: '💭', label: '꿈 해몽',         sub: '간밤 꿈의 의미',                  path: '/dream',         from: '#a855f7', to: '#7c3aed' },
-  { icon: '🌊', label: '바이오리듬',      sub: '신체·감정·지성 사이클',           path: '/biorhythm',     from: '#06b6d4', to: '#0e7490' },
+  { iconKey: 'constellation', label: '별자리 운세', sub: '12별자리 오늘의 운세',     path: '/constellation', from: '#6366f1', to: '#4338ca' },
+  { iconKey: 'zodiac',        label: '띠 운세',     sub: '12간지로 보는 한 해',      path: '/zodiac',        from: '#f59e0b', to: '#b45309' },
+  { iconKey: 'tarot',         label: '타로 카드',   sub: '오늘의 메시지 78장 풀덱',  path: '/tarot',         from: '#d946ef', to: '#a21caf' },
+  { iconKey: 'traditional',   label: '사주 정통',   sub: '천간지지·격국·신살',       path: '/traditional',   from: '#475569', to: '#1e293b' },
+  { iconKey: 'bloodtype',     label: '혈액형 운세', sub: 'A·B·O·AB 별 성향',         path: '/bloodtype',     from: '#ef4444', to: '#b91c1c' },
+  { iconKey: 'mbti',          label: 'MBTI 운세',   sub: '16유형 깊은 분석',         path: '/mbti',          from: '#10b981', to: '#047857' },
+  { iconKey: 'face',          label: '관상 분석',   sub: 'AI가 보는 얼굴 운세',      path: '/face-reading',  from: '#3b82f6', to: '#1d4ed8' },
+  { iconKey: 'psych',         label: '심리테스트',  sub: '나도 몰랐던 내 모습',      path: '/psych-test',    from: '#ec4899', to: '#be185d' },
+  { iconKey: 'dream',         label: '꿈 해몽',     sub: '간밤 꿈의 의미',           path: '/dream',         from: '#a855f7', to: '#7c3aed' },
+  { iconKey: 'biorhythm',     label: '바이오리듬',  sub: '신체·감정·지성 사이클',    path: '/biorhythm',     from: '#06b6d4', to: '#0e7490' },
 ];
 
 // ════════════════════════════════════════════════════════════════
 // 운세 요약 띠 — 가로 스크롤 (로그인 시)
 // ════════════════════════════════════════════════════════════════
 const SUMMARY_DEFS = [
-  { key: 'overall', icon: '🌟', label: '총운',   color: '#fbbf24' },
-  { key: 'love',    icon: '💕', label: '애정운', color: '#ec4899' },
-  { key: 'money',   icon: '💰', label: '재물운', color: '#10b981' },
-  { key: 'work',    icon: '💼', label: '직장운', color: '#6366f1' },
-  { key: 'health',  icon: '💪', label: '건강운', color: '#06b6d4' },
+  { key: 'overall', iconKey: 'overall', label: '총운',   color: '#fbbf24' },
+  { key: 'love',    iconKey: 'love',    label: '애정운', color: '#ec4899' },
+  { key: 'money',   iconKey: 'money',   label: '재물운', color: '#10b981' },
+  { key: 'work',    iconKey: 'work',    label: '직장운', color: '#6366f1' },
+  { key: 'health',  iconKey: 'health',  label: '건강운', color: '#06b6d4' },
 ];
 
 function Home() {
@@ -1615,7 +1616,9 @@ function Home() {
                   disabled={isLoading}
                 >
                   <div className="home-summary-card-head">
-                    <span className="home-summary-card-icon">{def.icon}</span>
+                    <span className="home-summary-card-icon">
+                      <MenuIcon name={def.iconKey} size={26} />
+                    </span>
                     <span className="home-summary-card-label">{def.label}</span>
                   </div>
                   {isLoading ? (
@@ -1738,7 +1741,9 @@ function Home() {
               style={{ '--b-from': s.from, '--b-to': s.to }}
               onClick={() => navigate(s.path)}
             >
-              <span className="home-love-banner-icon">{s.icon}</span>
+              <span className="home-love-banner-icon">
+                <MenuIcon name={s.iconKey} size={28} />
+              </span>
               <div className="home-love-banner-text">
                 <div className="home-love-banner-title-row">
                   <span className="home-love-banner-title">{s.title}</span>
@@ -1768,7 +1773,9 @@ function Home() {
               style={{ '--b-from': m.from, '--b-to': m.to }}
               onClick={() => navigate(m.path)}
             >
-              <span className="home-love-banner-icon">{m.icon}</span>
+              <span className="home-love-banner-icon">
+                <MenuIcon name={m.iconKey} size={24} />
+              </span>
               <div className="home-love-banner-text">
                 <div className="home-love-banner-title-row">
                   <span className="home-love-banner-title">{m.label}</span>
