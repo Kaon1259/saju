@@ -350,15 +350,13 @@ function Tojeong() {
             }}>✨ 내 정보로 채우기</button>
           )}
           <div className="form-group">
-            <label className="form-label">달력 구분</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${calendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
-              <button type="button" className={`form-toggle__btn ${calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
-            </div>
-          </div>
-          <div className="form-group">
             <label className="form-label">생년월일</label>
-            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+            <BirthDatePicker
+              value={birthDate}
+              onChange={setBirthDate}
+              calendarType={calendarType}
+              onCalendarTypeChange={setCalendarType}
+            />
           </div>
           <button className="btn-gold" onClick={() => guardTojeong(handleAnalyze)} disabled={!birthDate} style={{ opacity: birthDate ? 1 : 0.5 }}>
             토정비결 보기 <HeartCost category="TOJEONG" />

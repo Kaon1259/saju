@@ -250,15 +250,13 @@ function Manseryeok() {
 
       <div className="ms-search glass-card">
         <div className="form-group">
-          <label className="form-label">달력 구분</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${calendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
-            <button type="button" className={`form-toggle__btn ${calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
-          </div>
-        </div>
-        <div className="form-group">
           <label className="form-label">조회할 날짜</label>
-          <BirthDatePicker value={date} onChange={setDate} calendarType={calendarType} />
+          <BirthDatePicker
+            value={date}
+            onChange={setDate}
+            calendarType={calendarType}
+            onCalendarTypeChange={setCalendarType}
+          />
         </div>
         <button className="ms-search-btn" onClick={() => guardMan(handleSearch)} disabled={loading}>
           {loading ? '조회 중...' : '만세력 조회'} <HeartCost category="MANSERYEOK" />

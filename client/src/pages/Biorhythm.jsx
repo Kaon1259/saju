@@ -371,22 +371,13 @@ function Biorhythm() {
                 ✨ 내 정보로 채우기
               </button>
             )}
-            <div className="bio-input-row" style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <button type="button"
-                style={{ flex: 1, padding: '10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)',
-                  background: calendarType === 'SOLAR' ? 'rgba(33,150,243,0.18)' : 'rgba(255,255,255,0.04)',
-                  color: calendarType === 'SOLAR' ? '#2196F3' : 'rgba(255,255,255,0.7)',
-                  fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-                onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
-              <button type="button"
-                style={{ flex: 1, padding: '10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)',
-                  background: calendarType === 'LUNAR' ? 'rgba(33,150,243,0.18)' : 'rgba(255,255,255,0.04)',
-                  color: calendarType === 'LUNAR' ? '#2196F3' : 'rgba(255,255,255,0.7)',
-                  fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-                onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
-            </div>
             <div className="bio-input-row">
-              <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+              <BirthDatePicker
+                value={birthDate}
+                onChange={setBirthDate}
+                calendarType={calendarType}
+                onCalendarTypeChange={setCalendarType}
+              />
             </div>
             <button
               className="bio-analyze-btn"
