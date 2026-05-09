@@ -89,6 +89,10 @@ public class MyFortuneController {
             sajuFortune.put("health", cachedFortune.getHealth());
             sajuFortune.put("work", cachedFortune.getWork());
             sajuFortune.put("score", cachedFortune.getScore());
+            sajuFortune.put("loveScore", cachedFortune.getLoveScore());
+            sajuFortune.put("moneyScore", cachedFortune.getMoneyScore());
+            sajuFortune.put("healthScore", cachedFortune.getHealthScore());
+            sajuFortune.put("workScore", cachedFortune.getWorkScore());
             sajuFortune.put("luckyNumber", cachedFortune.getLuckyNumber());
             sajuFortune.put("luckyColor", cachedFortune.getLuckyColor());
             sajuFortune.put("luckyDirection", cachedFortune.getLuckyDirection());

@@ -67,6 +67,12 @@ public class DailyFortune {
 
     private Integer score;
 
+    // 카테고리별 점수 (홈 운세 요약 카드 / 점수 그래프용)
+    @Column(name = "love_score")    private Integer loveScore;
+    @Column(name = "money_score")   private Integer moneyScore;
+    @Column(name = "health_score")  private Integer healthScore;
+    @Column(name = "work_score")    private Integer workScore;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

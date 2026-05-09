@@ -30,6 +30,11 @@ public class FortuneResponse {
     private String academicFortune;
     private String luckyPerson;
     private Integer score;
+    // 카테고리별 점수 (홈 운세 요약 카드용)
+    private Integer loveScore;
+    private Integer moneyScore;
+    private Integer healthScore;
+    private Integer workScore;
 
     public static FortuneResponse from(DailyFortune fortune) {
         return FortuneResponse.builder()
@@ -51,6 +56,10 @@ public class FortuneResponse {
                 .academicFortune(fortune.getAcademicFortune())
                 .luckyPerson(fortune.getLuckyPerson())
                 .score(fortune.getScore())
+                .loveScore(fortune.getLoveScore())
+                .moneyScore(fortune.getMoneyScore())
+                .healthScore(fortune.getHealthScore())
+                .workScore(fortune.getWorkScore())
                 .build();
     }
 }

@@ -227,6 +227,10 @@ public class FortuneService {
                 if (node.has("health")) fortune.setHealth(node.get("health").asText());
                 if (node.has("work")) fortune.setWork(node.get("work").asText());
                 if (node.has("score")) fortune.setScore(node.get("score").asInt(fortune.getScore()));
+                if (node.has("loveScore")) fortune.setLoveScore(node.get("loveScore").asInt());
+                if (node.has("moneyScore")) fortune.setMoneyScore(node.get("moneyScore").asInt());
+                if (node.has("healthScore")) fortune.setHealthScore(node.get("healthScore").asInt());
+                if (node.has("workScore")) fortune.setWorkScore(node.get("workScore").asInt());
                 if (node.has("luckyNumber")) fortune.setLuckyNumber(node.get("luckyNumber").asInt(fortune.getLuckyNumber()));
                 if (node.has("luckyColor")) fortune.setLuckyColor(node.get("luckyColor").asText());
                 if (node.has("luckyDirection")) fortune.setLuckyDirection(node.get("luckyDirection").asText());
@@ -252,6 +256,10 @@ public class FortuneService {
                     .work(node.has("work") ? node.get("work").asText() : "")
                     .hourlyFortuneJson(hourlyJson)
                     .score(node.has("score") ? node.get("score").asInt() : random.nextInt(61) + 40)
+                    .loveScore(node.has("loveScore") ? node.get("loveScore").asInt() : null)
+                    .moneyScore(node.has("moneyScore") ? node.get("moneyScore").asInt() : null)
+                    .healthScore(node.has("healthScore") ? node.get("healthScore").asInt() : null)
+                    .workScore(node.has("workScore") ? node.get("workScore").asInt() : null)
                     .luckyNumber(node.has("luckyNumber") ? node.get("luckyNumber").asInt() : random.nextInt(99) + 1)
                     .luckyColor(node.has("luckyColor") ? node.get("luckyColor").asText() : LUCKY_COLORS[random.nextInt(LUCKY_COLORS.length)])
                     .luckyDirection(node.has("luckyDirection") ? node.get("luckyDirection").asText() : null)

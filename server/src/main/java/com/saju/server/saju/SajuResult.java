@@ -95,6 +95,11 @@ public class SajuResult {
         private String health;
         private String work;
         private int score;
+        // 카테고리별 점수 (홈 요약 카드 / 그래프용)
+        private Integer loveScore;
+        private Integer moneyScore;
+        private Integer healthScore;
+        private Integer workScore;
         private int luckyNumber;
         private String luckyColor;
         // 신규 필드

@@ -1596,11 +1596,16 @@ function Home() {
           <div className="home-summary-track">
             {SUMMARY_DEFS.map((def) => {
               const isLoading = fortuneLoading && !myData;
-              const text = myData?.saju?.[def.key] || '';
-              const firstSentence = text ? (text.split(/[.!?]/)[0] + (text.includes('.') ? '.' : '')) : '';
-              const score = def.key === 'love'
-                ? (loveTemp?.temperature ?? null)
-                : (def.key === 'overall' && myData?.saju?.aiAnalyzed && myData?.saju?.score != null ? myData.saju.score : null);
+              const saju = myData?.saju;
+              // 카테고리별 점수 매핑 (서버가 카테고리 점수 반환 — 없으면 overall fallback)
+              let score = null;
+              if (def.key === 'love') {
+                score = saju?.loveScore ?? loveTemp?.temperature ?? null;
+              } else if (def.key === 'overall') {
+                score = saju?.aiAnalyzed && saju?.score != null ? saju.score : null;
+              } else {
+                score = saju?.[`${def.key}Score`] ?? null;
+              }
               return (
                 <button
                   key={def.key}
@@ -1619,11 +1624,6 @@ function Home() {
                     <span className="home-summary-card-score">{score}<small>점</small></span>
                   ) : (
                     <span className="home-summary-card-score home-summary-card-score--empty">--</span>
-                  )}
-                  {isLoading ? (
-                    <span className="home-summary-card-line-skel" />
-                  ) : (
-                    <p className="home-summary-card-line">{firstSentence || '분석 받기 ›'}</p>
                   )}
                 </button>
               );
