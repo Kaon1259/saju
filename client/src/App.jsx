@@ -46,6 +46,7 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import { HeartProvider } from './context/HeartContext';
 import { AppProvider } from './context/AppContext';
+import { useGlobalAiAbort } from './hooks/useAiAbort';
 import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
@@ -226,6 +227,7 @@ function App() {
   useFontSize();
   useLandingRedirect();
   useProfileGuard();
+  useGlobalAiAbort(); // 라우트 변경 시 모든 진행 중 SSE 자동 종료 (비용 누수 차단)
 
   // 자동 로그인 off면 앱 시작 시 로그인 정보 제거
   useEffect(() => {

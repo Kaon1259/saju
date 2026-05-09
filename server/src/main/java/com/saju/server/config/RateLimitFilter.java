@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * IP·사용자별 rate limiting.
- * - AI 스트리밍 엔드포인트: 사용자당 분당 20회 (Sonnet 비용 폭탄 차단)
+ * - AI 스트리밍 엔드포인트: 사용자당 분당 5회 + 시간당 30회 (Sonnet/Haiku 비용 폭탄 차단, 봇 자동화 방어)
  * - 일반 엔드포인트: IP당 분당 120회 (기본 보호)
  *
  * 임시 구현: in-memory ConcurrentHashMap. 멀티 인스턴스로 확장 시 Redis 기반(bucket4j-redis)으로 교체.
@@ -32,8 +32,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final ConcurrentMap<String, Bucket> generalBuckets = new ConcurrentHashMap<>();
 
     private Bucket newAiBucket() {
+        // 분당 5회 + 시간당 30회 이중 제한
+        // - 분당 5회: 단기 봇 자동화 차단 (사람이 자연스럽게 1분에 5회 분석은 충분)
+        // - 시간당 30회: 분당 한도 우회한 장기 자동화 차단
         return Bucket.builder()
-                .addLimit(Bandwidth.builder().capacity(20).refillGreedy(20, Duration.ofMinutes(1)).build())
+                .addLimit(Bandwidth.builder().capacity(5).refillGreedy(5, Duration.ofMinutes(1)).build())
+                .addLimit(Bandwidth.builder().capacity(30).refillGreedy(30, Duration.ofHours(1)).build())
                 .build();
     }
 
