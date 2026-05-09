@@ -101,11 +101,17 @@
 
 /* ═══ 입력 폼 ═══ */
 .lf-form { padding: 16px; display: flex; flex-direction: column; gap: 14px; background: #1e1e2e; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; }
-[data-theme="light"] .lf-form { background: #fff; border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .lf-form {
+  background: linear-gradient(180deg, rgba(255, 252, 254, 0.96) 0%, rgba(253, 245, 250, 0.92) 100%);
+  border-color: rgba(255, 107, 157, 0.18);
+  box-shadow:
+    0 4px 18px rgba(255, 107, 157, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
 
 .lf-form-group { display: flex; flex-direction: column; gap: 6px; }
 .lf-label { font-size: 14px; font-weight: 700; color: var(--color-text); }
-[data-theme="light"] .lf-label { color: #222; }
+[data-theme="light"] .lf-label { color: #2a1a3a; font-weight: 700; }
 
 /* 연애 상태 칩 */
 .lf-status-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -124,11 +130,27 @@
 .lf-status-chip.active .lf-status-label { color: #fff; font-weight: 800; }
 .lf-status-desc { display: none; }
 
-[data-theme="light"] .lf-status-chip { border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); }
-[data-theme="light"] .lf-status-chip:hover { background: rgba(233,30,99,0.04); }
-[data-theme="light"] .lf-status-chip.active { border-color: #E91E63; background: linear-gradient(135deg, rgba(233,30,99,0.08), rgba(255,107,107,0.05)); }
-[data-theme="light"] .lf-status-label { color: #555; }
-[data-theme="light"] .lf-status-chip.active .lf-status-label { color: #c2185b; }
+[data-theme="light"] .lf-status-chip {
+  border-color: rgba(255, 107, 157, 0.20);
+  background: rgba(255, 248, 252, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+[data-theme="light"] .lf-status-chip:hover {
+  background: rgba(255, 240, 247, 0.85);
+  border-color: rgba(233, 30, 99, 0.35);
+  box-shadow:
+    0 2px 8px rgba(233, 30, 99, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+[data-theme="light"] .lf-status-chip.active {
+  border-color: #E91E63;
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.14), rgba(255, 107, 107, 0.08));
+  box-shadow:
+    0 4px 14px rgba(233, 30, 99, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+[data-theme="light"] .lf-status-label { color: #5a3e5e; font-weight: 600; }
+[data-theme="light"] .lf-status-chip.active .lf-status-label { color: #c2185b; font-weight: 800; }
 
 /* 토글 — 세그먼트 컨트롤 (2026-04-27 폴리싱) */
 .lf-toggle {
@@ -203,7 +225,16 @@
   border-radius: 20px; overflow: hidden;
   background: var(--color-glass); border: 1px solid var(--color-glass-border);
 }
-[data-theme="light"] .lf-heart-score-card { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .lf-heart-score-card {
+  background:
+    radial-gradient(ellipse at top right, rgba(255, 200, 220, 0.4) 0%, transparent 65%),
+    linear-gradient(180deg, rgba(255, 252, 254, 0.96) 0%, rgba(253, 245, 250, 0.90) 100%);
+  border-color: rgba(255, 107, 157, 0.22);
+  box-shadow:
+    0 6px 22px rgba(255, 107, 157, 0.14),
+    0 2px 6px rgba(168, 85, 247, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
 
 .lf-heart-aura {
   position: absolute; inset: -20px; opacity: 0.2;
@@ -256,7 +287,13 @@
   display: flex; justify-content: space-around; padding: 16px; flex-wrap: wrap; gap: 8px;
   border-radius: 16px; background: var(--color-glass); border: 1px solid var(--color-glass-border);
 }
-[data-theme="light"] .lf-lucky { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .lf-lucky {
+  background: linear-gradient(180deg, rgba(255, 252, 254, 0.96) 0%, rgba(255, 248, 240, 0.90) 100%);
+  border-color: rgba(184, 134, 11, 0.22);
+  box-shadow:
+    0 4px 16px rgba(184, 134, 11, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
 .lf-lucky-item { text-align: center; }
 .lf-lucky-label { display: block; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
 .lf-lucky-value { font-size: 15px; font-weight: 800; color: var(--color-accent-gold); }
@@ -280,7 +317,17 @@
 [data-theme="light"] .lf-stream-text { color: #2e2e45; }
 .lf-stream-cursor { animation: lfStreamBlink 0.8s step-end infinite; color: #E91E63; }
 @keyframes lfStreamBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
-[data-theme="light"] .lf-reset { background: #fff; border-color: rgba(0,0,0,0.12); color: #333; }
+[data-theme="light"] .lf-reset {
+  background: rgba(255, 248, 252, 0.7);
+  border-color: rgba(255, 107, 157, 0.22);
+  color: #5a3e5e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+[data-theme="light"] .lf-reset:hover {
+  border-color: rgba(255, 107, 157, 0.45);
+  color: #c2185b;
+  background: rgba(255, 240, 247, 0.85);
+}
 
 /* ═══ 연예인 궁합 매칭 ═══ */
 .lf-celeb-match-btn {

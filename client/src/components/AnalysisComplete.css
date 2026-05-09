@@ -11,7 +11,27 @@
   animation: anaCompleteFadeIn 0.4s ease-out;
 }
 [data-theme="light"] .ana-complete {
-  background: radial-gradient(ellipse at center, rgba(255, 248, 252, 0.97) 0%, rgba(248, 240, 250, 0.98) 100%);
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 200, 220, 0.55) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 80%, rgba(255, 230, 200, 0.45) 0%, transparent 60%),
+    radial-gradient(ellipse at center, rgba(255, 248, 252, 0.97) 0%, rgba(248, 240, 250, 0.98) 100%);
+}
+[data-theme="light"] .ana-complete-icon {
+  filter: drop-shadow(0 0 28px rgba(255, 107, 157, 0.55))
+          drop-shadow(0 0 12px rgba(184, 134, 11, 0.4));
+}
+[data-theme="light"] .ana-complete-ring {
+  border-color: rgba(236, 72, 153, 0.7);
+}
+[data-theme="light"] .ana-complete-ring-2 {
+  border-color: rgba(184, 134, 11, 0.65);
+}
+[data-theme="light"] .ana-complete-text {
+  background: linear-gradient(135deg, #d4145a, #d4380d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(255, 107, 157, 0.18));
 }
 @keyframes anaCompleteFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -74,4 +94,4 @@
   animation: anaCompleteTextPop 0.5s ease-out 0.35s both;
   text-align: center;
 }
-[data-theme="light"] .ana-complete-sub { color: #777; }
+[data-theme="light"] .ana-complete-sub { color: #5a3e5e; }

@@ -6,9 +6,20 @@
 .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(124,58,237,0.15)); color: #FBBF24; }
 .myf-mode-tab { border-right: 1px solid rgba(255,255,255,0.08); }
 .myf-mode-tab:last-child { border-right: none; }
-[data-theme="light"] .myf-mode-tabs { border-color: rgba(0,0,0,0.1); }
-[data-theme="light"] .myf-mode-tab { background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.6); }
-[data-theme="light"] .myf-mode-tab.active { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(124,58,237,0.08)); color: #b8860b; }
+[data-theme="light"] .myf-mode-tabs { border-color: rgba(255, 107, 157, 0.18); }
+[data-theme="light"] .myf-mode-tab {
+  background: rgba(255, 248, 252, 0.6);
+  color: #886b80;
+  border-right-color: rgba(255, 107, 157, 0.12);
+}
+[data-theme="light"] .myf-mode-tab.active {
+  background: linear-gradient(135deg, rgba(184, 134, 11, 0.16), rgba(124, 58, 237, 0.10));
+  color: #b8860b;
+  font-weight: 800;
+  box-shadow:
+    0 2px 8px rgba(184, 134, 11, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
 
 /* ─── 모드 가로 스크롤 (오늘/내일/지정/월간/연간) ─── */
 .myf-mode-scroll {
@@ -387,24 +398,44 @@
 .fade-in { animation: fadeInUp 0.4s ease; }
 
 /* ── 라이트 모드 ── */
-[data-theme="light"] .myf-title { background: linear-gradient(135deg, #b8860b, #333, #b8860b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-[data-theme="light"] .myf-badge { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #3a3a50; }
+[data-theme="light"] .myf-title {
+  background: linear-gradient(135deg, #c2185b 0%, #b8860b 50%, #c2185b 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(255, 107, 157, 0.22));
+}
+[data-theme="light"] .myf-badge {
+  background: rgba(255, 248, 252, 0.7);
+  border-color: rgba(255, 107, 157, 0.22);
+  color: #5a3e5e;
+}
 [data-theme="light"] .myf-badge--saju { border-color: rgba(184,134,11,0.3); color: #96700a; background: rgba(251,191,36,0.06); }
 [data-theme="light"] .myf-badge--bt { border-color: rgba(194,24,91,0.3); color: #c2185b; background: rgba(194,24,91,0.06); }
 [data-theme="light"] .myf-badge--mbti { border-color: rgba(13,121,82,0.3); color: #0d7952; background: rgba(13,121,82,0.06); }
-[data-theme="light"] .myf-tab { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
-[data-theme="light"] .myf-tab.active { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(251,191,36,0.06)); border-color: rgba(124,58,237,0.35); }
-[data-theme="light"] .myf-tab-label { color: #4a4a5a; }
-[data-theme="light"] .myf-tab.active .myf-tab-label { color: #111; }
-[data-theme="light"] .myf-score-bg { stroke: rgba(0,0,0,0.06); }
-[data-theme="light"] .myf-score-num { color: #111; }
-[data-theme="light"] .myf-analysis-title { color: #96700a; }
-[data-theme="light"] .myf-analysis p { color: #333; }
-[data-theme="light"] .myf-tip p { color: #333; }
-[data-theme="light"] .myf-lucky-divider { background: rgba(0,0,0,0.08); }
-[data-theme="light"] .myf-lucky-value { color: #b8860b; }
-[data-theme="light"] .myf-empty h2 { color: #111; }
-[data-theme="light"] .myf-spinner { border-color: rgba(0,0,0,0.1); border-top-color: #b8860b; }
+[data-theme="light"] .myf-tab { border-color: rgba(255, 107, 157, 0.18); background: rgba(255, 248, 252, 0.6); }
+[data-theme="light"] .myf-tab.active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(251, 191, 36, 0.08));
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.14);
+}
+[data-theme="light"] .myf-tab-label { color: #5a3e5e; }
+[data-theme="light"] .myf-tab.active .myf-tab-label { color: #2a1a3a; font-weight: 700; }
+[data-theme="light"] .myf-score-bg { stroke: rgba(255, 107, 157, 0.14); }
+[data-theme="light"] .myf-score-num {
+  background: linear-gradient(135deg, #d4145a, #d4380d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(212, 56, 13, 0.20));
+}
+[data-theme="light"] .myf-analysis-title { color: #b8860b; font-weight: 700; }
+[data-theme="light"] .myf-analysis p { color: #2a1a3a; }
+[data-theme="light"] .myf-tip p { color: #2a1a3a; }
+[data-theme="light"] .myf-lucky-divider { background: rgba(255, 107, 157, 0.16); }
+[data-theme="light"] .myf-lucky-value { color: #b8860b; font-weight: 700; }
+[data-theme="light"] .myf-empty h2 { color: #2a1a3a; }
+[data-theme="light"] .myf-spinner { border-color: rgba(255, 107, 157, 0.18); border-top-color: #c2185b; }
 
 /* ─── 행운의 코디 카드 ─── */
 .myf-outfit { padding: 18px; margin-top: 12px; }
@@ -504,8 +535,15 @@
   box-shadow: 0 4px 12px rgba(255, 61, 127, 0.3);
 }
 .myf-cat-tab-icon { font-size: 16px; }
-[data-theme="light"] .myf-cat-tabs { background: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
-[data-theme="light"] .myf-cat-tab { color: #888; }
+[data-theme="light"] .myf-cat-tabs {
+  background: linear-gradient(180deg, rgba(255, 252, 254, 0.96) 0%, rgba(253, 245, 250, 0.90) 100%);
+  box-shadow:
+    0 2px 10px rgba(255, 107, 157, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 107, 157, 0.16);
+}
+[data-theme="light"] .myf-cat-tab { color: #886b80; }
+[data-theme="light"] .myf-cat-tab:hover { color: #c2185b; }
 [data-theme="light"] .myf-cat-tab.active { color: #fff; }
 
 .myf-cat-zodiac-title {
@@ -652,13 +690,15 @@
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
+[data-theme="light"] .myf-quicklink-sub { color: #886b80; }
+[data-theme="light"] .myf-quicklink-arrow { color: #c2185b; }
 [data-theme="light"] .myf-seg {
   background: #fff;
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
-[data-theme="light"] .myf-seg-btn { color: #888; }
-[data-theme="light"] .myf-seg-btn:hover { color: #333; }
+[data-theme="light"] .myf-seg-btn { color: #886b80; }
+[data-theme="light"] .myf-seg-btn:hover { color: #c2185b; }
 [data-theme="light"] .myf-seg-btn.active { color: #fff; }
 
 /* 컴팩트 결과 헤더 */
@@ -762,5 +802,5 @@
   background: linear-gradient(135deg, #fdf2f8, #faf5ff);
 }
 [data-theme="light"] .myf-quicklink-title { color: #2e2e45; }
-[data-theme="light"] .myf-quicklink-sub { color: #666; }
-[data-theme="light"] .myf-quicklink-arrow { color: #999; }
+[data-theme="light"] .myf-quicklink-sub { color: #886b80; }
+[data-theme="light"] .myf-quicklink-arrow { color: #c2185b; }

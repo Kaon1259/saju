@@ -106,7 +106,19 @@
 
 /* 라이트모드 */
 [data-theme="light"] .stream-text-header { color: var(--stream-color, #b8860b); }
-[data-theme="light"] .stream-text-content { color: #2e2e45; }
-[data-theme="light"] .stream-text-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
-[data-theme="light"] .stream-text-wrap::before { color: rgba(100, 60, 200, 0.08); text-shadow: 0 0 6px rgba(100, 60, 200, 0.1); }
-[data-theme="light"] .stream-text-wrap::after { color: rgba(184, 134, 11, 0.06); text-shadow: 0 0 6px rgba(184, 134, 11, 0.08); }
+[data-theme="light"] .stream-text-content { color: #2a1a3a; }
+[data-theme="light"] .stream-text-body::-webkit-scrollbar-thumb { background: rgba(255, 107, 157, 0.22); }
+[data-theme="light"] .stream-text-wrap::before { color: rgba(168, 85, 247, 0.14); text-shadow: 0 0 6px rgba(168, 85, 247, 0.18); }
+[data-theme="light"] .stream-text-wrap::after { color: rgba(184, 134, 11, 0.12); text-shadow: 0 0 6px rgba(184, 134, 11, 0.15); }
+/* 라이트의 라벨: 단순 무지개 → 핑크-골드-퍼플 진한 톤으로 (가독성) */
+[data-theme="light"] .stream-text-label {
+  background: linear-gradient(90deg, #c2185b, #b8860b, #7c3aed, #c2185b);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(255, 107, 157, 0.22));
+}
+[data-theme="light"] .stream-text-icon {
+  filter: drop-shadow(0 0 12px rgba(255, 107, 157, 0.45));
+}

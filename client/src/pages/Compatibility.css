@@ -205,17 +205,43 @@
 .compat-reset-btn:hover { border-color: var(--color-primary-light); color: var(--color-text); }
 
 /* ─── Light Theme ─── */
-[data-theme="light"] .compat-card-text { color: #475569; }
-[data-theme="light"] .compat-card-header h3 { color: #b45309; }
-[data-theme="light"] .compat-card--ai h3 { color: #6d28d9; }
-[data-theme="light"] .compat-person-pillar { color: #1e293b; }
-[data-theme="light"] .compat-score-num { color: #1e293b; }
-[data-theme="light"] .compat-hero-title { color: #1e293b; }
-[data-theme="light"] .compat-intro-title { background: linear-gradient(135deg, #b45309, #c2185b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-[data-theme="light"] .compat-reset-btn { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); color: #555; }
-[data-theme="light"] .compat-score-bar-bg { background: rgba(0,0,0,0.06); }
-[data-theme="light"] .compat-person-label { color: #4a4a5a; }
-[data-theme="light"] .compat-person-name { color: #222; }
+[data-theme="light"] .compat-card-text { color: #2a1a3a; }
+[data-theme="light"] .compat-card-header h3 { color: #b45309; font-weight: 700; }
+[data-theme="light"] .compat-card--ai h3 { color: #7c3aed; font-weight: 700; }
+[data-theme="light"] .compat-person-pillar { color: #2a1a3a; font-weight: 700; }
+[data-theme="light"] .compat-score-num {
+  background: linear-gradient(135deg, #d4145a, #d4380d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(212, 56, 13, 0.22));
+}
+[data-theme="light"] .compat-hero-title {
+  background: linear-gradient(135deg, #c2185b, #b8860b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(255, 107, 157, 0.20));
+}
+[data-theme="light"] .compat-intro-title {
+  background: linear-gradient(135deg, #b45309, #c2185b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(255, 107, 157, 0.18));
+}
+[data-theme="light"] .compat-reset-btn {
+  border-color: rgba(255, 107, 157, 0.25);
+  background: rgba(255, 248, 252, 0.7);
+  color: #886b80;
+}
+[data-theme="light"] .compat-reset-btn:hover {
+  border-color: rgba(255, 107, 157, 0.45);
+  color: #c2185b;
+  background: rgba(255, 240, 247, 0.85);
+}
+[data-theme="light"] .compat-score-bar-bg { background: rgba(255, 107, 157, 0.16); }
+[data-theme="light"] .compat-person-label { color: #5a3e5e; }
+[data-theme="light"] .compat-person-name { color: #2a1a3a; font-weight: 700; }
 
 /* ─── 360px 좁은 화면 보강 ─── */
 @media (max-width: 360px) {

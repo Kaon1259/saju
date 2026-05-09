@@ -295,6 +295,39 @@
   animation: streamingPendingBreathLight 2.6s ease-in-out infinite;
 }
 @keyframes streamingPendingBreathLight {
-  0%, 100% { box-shadow: 0 0 10px rgba(184, 134, 11, 0.10); }
-  50%      { box-shadow: 0 0 20px rgba(184, 134, 11, 0.22); }
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(255, 107, 157, 0.14),
+      0 1px 3px rgba(168, 85, 247, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 24px rgba(255, 107, 157, 0.26),
+      0 0 0 1px rgba(184, 134, 11, 0.32) inset,
+      0 2px 6px rgba(168, 85, 247, 0.10);
+  }
+}
+
+/* done 상태도 라이트 톤으로 (다크 배경 누수 방지) */
+[data-theme="light"] .streaming-card--done {
+  background:
+    linear-gradient(180deg, rgba(255, 252, 254, 0.96) 0%, rgba(253, 245, 250, 0.92) 100%);
+  border-color: rgba(255, 107, 157, 0.18);
+  box-shadow:
+    0 4px 14px rgba(255, 107, 157, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+/* 카드 진입 visible 상태에서도 미세한 핑크 글로우 */
+[data-theme="light"] .streaming-card--visible {
+  box-shadow:
+    0 4px 16px rgba(255, 107, 157, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+/* 타이틀: 단색 → 황동 + 깊은 로즈 그라데이션 */
+[data-theme="light"] .streaming-card-title {
+  background: linear-gradient(135deg, #b8860b 0%, #c2185b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(184, 134, 11, 0.18));
 }
