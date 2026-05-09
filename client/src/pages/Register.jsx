@@ -71,7 +71,7 @@ function Register() {
   const redirectTo = redirectToRef.current;
 
   const needProfile = searchParams.get('needProfile') === 'true';
-  const [step, setStep] = useState(needProfile ? 'profile' : 'kakao'); // 'kakao' | 'profile' | 'loading'
+  const [step, setStep] = useState(needProfile ? 'profile' : 'kakao'); // 'kakao' | 'terms' | 'profile' | 'loading'
   const [userId, setUserId] = useState(needProfile ? localStorage.getItem('userId') : null);
   const [form, setForm] = useState({
     name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
@@ -141,11 +141,11 @@ function Register() {
         window.dispatchEvent(new Event('auth:changed')); // AppContext 재초기화 (isLoggedIn 상태 갱신)
 
         if (result.profileComplete) {
-          // 프로필 완성됨 → 바로 이동
+          // 기존 사용자 — 프로필 완성됨 → 바로 이동 (약관 동의 스킵)
           clearKakaoReturnTo();
           navigate(redirectTo, { replace: true });
         } else {
-          // 프로필 미완성 → 프로필 입력 폼
+          // 신규 사용자 — 약관 동의 후 프로필 입력
           setUserId(user.id);
           setForm(prev => ({
             ...prev,
@@ -153,7 +153,7 @@ function Register() {
             gender: user.gender || 'M',
             birthDate: user.birthDate || '',
           }));
-          setStep('profile');
+          setStep('terms');
         }
       } catch (e) {
         console.error(e);
@@ -224,11 +224,43 @@ function Register() {
         </p>
       </section>
 
-      {/* ═══ 카카오 로그인 ═══ */}
+      {/* ═══ 카카오 로그인 (약관 동의는 신규 가입자만) ═══ */}
       {step === 'kakao' && (
         <div className="register-form glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <button className="kakao-login-btn" onClick={handleKakaoLogin}>
+            <svg className="kakao-logo" viewBox="0 0 24 24" width="22" height="22">
+              <path fill="#000" d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.16c-.1.36.32.65.64.44l4.94-3.26c.38.04.76.06 1.16.06 5.52 0 10-3.36 10-7.64C22 6.36 17.52 3 12 3z"/>
+            </svg>
+            카카오로 시작하기
+          </button>
+
+          {error && (
+            <div className="form-error animate-fade-in">
+              <span>&#x26A0;&#xFE0F;</span> {error}
+            </div>
+          )}
+
+          <p className="register-kakao-notice">
+            카카오 계정으로 간편하게 시작하세요
+          </p>
+          <p className="register-terms-note">
+            가입 시 <a href="/terms" onClick={(e) => { e.preventDefault(); navigate('/terms'); }}>이용약관</a> 및{' '}
+            <a href="/privacy" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>개인정보 처리방침</a>에 동의하게 됩니다
+          </p>
+        </div>
+      )}
+
+      {/* ═══ 약관 동의 (신규 가입자만) ═══ */}
+      {step === 'terms' && (
+        <div className="register-form glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <div className="register-terms-welcome">
+            <span className="register-terms-icon">📜</span>
+            <h3 className="register-terms-title">가입 전 약관 동의</h3>
+            <p className="register-terms-sub">서비스를 이용하려면 아래 약관에 동의해주세요</p>
+          </div>
+
           <div className="register-agree">
-            <label className="register-agree-row">
+            <label className="register-agree-row register-agree-row--all">
               <input
                 type="checkbox"
                 checked={allAgreed}
@@ -251,26 +283,31 @@ function Register() {
           </div>
 
           <button
-            className="kakao-login-btn"
-            onClick={handleKakaoLogin}
+            className="btn-gold register-submit"
+            onClick={() => setStep('profile')}
             disabled={!allAgreed}
             style={!allAgreed ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
           >
-            <svg className="kakao-logo" viewBox="0 0 24 24" width="22" height="22">
-              <path fill="#000" d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.16c-.1.36.32.65.64.44l4.94-3.26c.38.04.76.06 1.16.06 5.52 0 10-3.36 10-7.64C22 6.36 17.52 3 12 3z"/>
-            </svg>
-            카카오 로그인
+            다음 — 프로필 입력
           </button>
-
-          {error && (
-            <div className="form-error animate-fade-in">
-              <span>&#x26A0;&#xFE0F;</span> {error}
-            </div>
-          )}
-
-          <p className="register-kakao-notice">
-            {allAgreed ? '카카오 계정으로 간편하게 로그인하세요' : '약관에 동의해야 가입을 진행할 수 있어요'}
-          </p>
+          <button
+            className="register-back-step"
+            onClick={async () => {
+              // 동의 거부 — 로그아웃 + 첫 화면
+              try {
+                const { clearAuth } = await import('../utils/auth');
+                clearAuth();
+              } catch {}
+              localStorage.removeItem('userId');
+              localStorage.removeItem('userName');
+              localStorage.removeItem('userProfile');
+              setStep('kakao');
+              setAgreedTerms(false);
+              setAgreedPrivacy(false);
+            }}
+          >
+            동의하지 않음 (가입 취소)
+          </button>
         </div>
       )}
 
