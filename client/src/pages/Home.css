@@ -5279,7 +5279,8 @@
 /* ════════════════════════════════════════════════════════════════ */
 
 .home-jeomshin {
-  padding: 8px 12px 20px;
+  padding: 8px 12px 140px; /* 하단 RecentHistory drawer 가림 방지 + safe-area 여유 */
+  padding-bottom: calc(140px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -5725,6 +5726,50 @@
 .home-love-banner-arrow {
   font-size: 24px; color: rgba(255,255,255,0.85); font-weight: 600;
   flex-shrink: 0;
+}
+
+/* ── 컴팩트 변형 (시즌 4개 / 종합 10개 스택용) ── */
+.home-banner-stack--compact {
+  gap: 8px;
+}
+.home-love-banner--sm {
+  padding: 14px 14px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.22);
+}
+.home-love-banner--sm .home-love-banner-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  font-size: 22px;
+}
+.home-love-banner--sm .home-love-banner-title { font-size: 14.5px; }
+.home-love-banner--sm .home-love-banner-sub { font-size: 11.5px; }
+.home-love-banner--sm .home-love-banner-arrow { font-size: 20px; }
+.home-love-banner--sm:hover { box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.32); }
+
+/* 라이트 모드: 그라데이션이 너무 강해 보일 수 있어 살짝 부드럽게 + 그림자 핑크톤 */
+[data-theme="light"] .home-love-banner {
+  box-shadow:
+    0 6px 18px -8px color-mix(in srgb, var(--b-from, #ec4899) 65%, transparent),
+    0 2px 6px rgba(255, 107, 157, 0.08);
+}
+[data-theme="light"] .home-love-banner:hover {
+  box-shadow:
+    0 12px 28px -8px color-mix(in srgb, var(--b-from, #ec4899) 75%, transparent),
+    0 4px 10px rgba(255, 107, 157, 0.12);
+}
+[data-theme="light"] .home-love-banner--sm {
+  box-shadow:
+    0 4px 14px -6px color-mix(in srgb, var(--b-from, #ec4899) 60%, transparent),
+    0 1px 4px rgba(255, 107, 157, 0.06);
+}
+@supports not (background: color-mix(in srgb, red, blue)) {
+  [data-theme="light"] .home-love-banner {
+    box-shadow: 0 6px 18px -8px rgba(236, 72, 153, 0.4), 0 2px 6px rgba(255, 107, 157, 0.08);
+  }
+  [data-theme="light"] .home-love-banner--sm {
+    box-shadow: 0 4px 14px -6px rgba(236, 72, 153, 0.35), 0 1px 4px rgba(255, 107, 157, 0.06);
+  }
 }
 
 /* ──────────────────────────────────────────────────────────────── */

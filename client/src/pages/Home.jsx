@@ -1199,29 +1199,29 @@ function reorderLoveBanners(status) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// 시즌 운세 그리드 (2x2)
+// 시즌 운세 — 풀 가로 배너 (한 해 → 한 달 → 한 주 흐름)
 // ════════════════════════════════════════════════════════════════
 const SEASON_MENUS = [
-  { icon: '🎊', title: '신년운세',  sub: '한 해의 큰 흐름', path: '/year-fortune',    color: '#fbbf24' },
-  { icon: '📜', title: '토정비결',  sub: '12달 정통 운세',  path: '/tojeong',         color: '#a855f7' },
-  { icon: '📅', title: '월간운세',  sub: '이번 달 흐름',    path: '/monthly-fortune', color: '#06b6d4' },
-  { icon: '🗓️', title: '주간운세',  sub: '이번 주 변화',    path: '/weekly-fortune',  color: '#10b981' },
+  { icon: '🎊', title: '신년운세',  sub: '2026년 한 해의 큰 흐름',  badge: 'NEW',  path: '/year-fortune',    from: '#f59e0b', to: '#dc2626' },
+  { icon: '📜', title: '토정비결',  sub: '12달 정통 사주 운세',                   path: '/tojeong',         from: '#9333ea', to: '#6d28d9' },
+  { icon: '📅', title: '월간운세',  sub: '이번 달의 운세와 행운',                 path: '/monthly-fortune', from: '#0891b2', to: '#0e7490' },
+  { icon: '🗓️', title: '주간운세',  sub: '이번 주 7일간 변화',                    path: '/weekly-fortune',  from: '#10b981', to: '#047857' },
 ];
 
 // ════════════════════════════════════════════════════════════════
-// 종합/특수 가로 스크롤
+// 종합·특수 — 컬러풀 가로 배너 (각자 정체성 컬러)
 // ════════════════════════════════════════════════════════════════
 const OTHER_MENUS = [
-  { icon: '✨', label: '별자리',   path: '/constellation' },
-  { icon: '🩸', label: '혈액형',   path: '/bloodtype' },
-  { icon: '🧬', label: 'MBTI',     path: '/mbti' },
-  { icon: '🐯', label: '띠 운세',  path: '/zodiac' },
-  { icon: '💭', label: '꿈해몽',   path: '/dream' },
-  { icon: '🧠', label: '심리테스트', path: '/psych-test' },
-  { icon: '👤', label: '관상',     path: '/face-reading' },
-  { icon: '☯️', label: '사주 정통', path: '/traditional' },
-  { icon: '🌊', label: '바이오리듬', path: '/biorhythm' },
-  { icon: '🃏', label: '타로',     path: '/tarot' },
+  { icon: '✨', label: '별자리 운세',     sub: '12별자리 오늘의 운세',            path: '/constellation', from: '#6366f1', to: '#4338ca' },
+  { icon: '🐯', label: '띠 운세',         sub: '12간지로 보는 한 해',             path: '/zodiac',        from: '#f59e0b', to: '#b45309' },
+  { icon: '🃏', label: '타로 카드',       sub: '오늘의 메시지 78장 풀덱',         path: '/tarot',         from: '#d946ef', to: '#a21caf' },
+  { icon: '☯️', label: '사주 정통',       sub: '천간지지·격국·신살',              path: '/traditional',   from: '#475569', to: '#1e293b' },
+  { icon: '🩸', label: '혈액형 운세',     sub: 'A·B·O·AB 별 성향',                path: '/bloodtype',     from: '#ef4444', to: '#b91c1c' },
+  { icon: '🧬', label: 'MBTI 운세',       sub: '16유형 깊은 분석',                path: '/mbti',          from: '#10b981', to: '#047857' },
+  { icon: '👤', label: '관상 분석',       sub: 'AI가 보는 얼굴 운세',             path: '/face-reading',  from: '#3b82f6', to: '#1d4ed8' },
+  { icon: '🧠', label: '심리테스트',      sub: '나도 몰랐던 내 모습',             path: '/psych-test',    from: '#ec4899', to: '#be185d' },
+  { icon: '💭', label: '꿈 해몽',         sub: '간밤 꿈의 의미',                  path: '/dream',         from: '#a855f7', to: '#7c3aed' },
+  { icon: '🌊', label: '바이오리듬',      sub: '신체·감정·지성 사이클',           path: '/biorhythm',     from: '#06b6d4', to: '#0e7490' },
 ];
 
 // ════════════════════════════════════════════════════════════════
@@ -1723,42 +1723,59 @@ function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════ */}
-      {/* 6. 시즌 운세 — 신년/토정/월간/주간 (2x2 그리드)               */}
+      {/* 6. 시즌 운세 — 풀 가로 배너 (4개 스택)                        */}
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <div className="home-section-header">
           <h2 className="home-section-title">🎊 시즌 운세</h2>
           <span className="home-section-sub">한 해 · 한 달 · 한 주의 흐름</span>
         </div>
-        <div className="home-season-grid">
+        <div className="home-banner-stack">
           {SEASON_MENUS.map((s) => (
             <button
               key={s.title}
-              className="home-season-card"
-              style={{ '--s-color': s.color }}
+              className="home-love-banner"
+              style={{ '--b-from': s.from, '--b-to': s.to }}
               onClick={() => navigate(s.path)}
             >
-              <span className="home-season-icon">{s.icon}</span>
-              <span className="home-season-title">{s.title}</span>
-              <span className="home-season-sub">{s.sub}</span>
+              <span className="home-love-banner-icon">{s.icon}</span>
+              <div className="home-love-banner-text">
+                <div className="home-love-banner-title-row">
+                  <span className="home-love-banner-title">{s.title}</span>
+                  {s.badge && <span className="home-love-banner-badge">{s.badge}</span>}
+                </div>
+                <span className="home-love-banner-sub">{s.sub}</span>
+              </div>
+              <span className="home-love-banner-arrow">›</span>
             </button>
           ))}
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════ */}
-      {/* 7. 종합·특수 운세 가로 스크롤                                  */}
+      {/* 7. 종합·특수 운세 — 컬러풀 가로 배너 (10개 스택)              */}
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <div className="home-section-header">
           <h2 className="home-section-title">✨ 종합 · 특수</h2>
-          <span className="home-section-sub">별자리 · 혈액형 · MBTI · 그 외</span>
+          <span className="home-section-sub">별자리 · 띠 · 타로 · 그 외</span>
         </div>
-        <div className="home-other-strip">
+        <div className="home-banner-stack home-banner-stack--compact">
           {OTHER_MENUS.map((m) => (
-            <button key={m.label} className="home-other-chip" onClick={() => navigate(m.path)}>
-              <span className="home-other-chip-icon">{m.icon}</span>
-              <span className="home-other-chip-label">{m.label}</span>
+            <button
+              key={m.label}
+              className="home-love-banner home-love-banner--sm"
+              style={{ '--b-from': m.from, '--b-to': m.to }}
+              onClick={() => navigate(m.path)}
+            >
+              <span className="home-love-banner-icon">{m.icon}</span>
+              <div className="home-love-banner-text">
+                <div className="home-love-banner-title-row">
+                  <span className="home-love-banner-title">{m.label}</span>
+                </div>
+                <span className="home-love-banner-sub">{m.sub}</span>
+              </div>
+              <span className="home-love-banner-arrow">›</span>
             </button>
           ))}
         </div>
