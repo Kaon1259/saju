@@ -257,11 +257,14 @@ function MyFortune() {
   const pendingSetterRef = useRef(null);
   const cleanupRef = useRef(null);
   const stopAmbientRef = useRef(null);
+  // 분석 진행 중 ref — 더블탭/중복 호출 차단 (loading state 가 React batch 로 늦게 반영되는 timing 보완)
+  const inFlightRef = useRef(false);
   useEffect(() => () => { try { stopAmbientRef.current?.(); } catch {} }, []);
   const [viewMode, setViewMode] = useState('mine'); // 'mine' | 'partner' | 'other'
 
-  // 글로벌 ai:abort (하트 부족, 프로필 미완성 등) 시 안전 정리
+  // 글로벌 ai:abort (하트 부족, 프로필 미완성, 라우트 변경 등) 시 안전 정리
   useAiAbort(() => {
+    inFlightRef.current = false;
     try { cleanupRef.current?.(); } catch {}
     try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
     setLoading(false); setStreaming(false); setStreamText('');
@@ -611,6 +614,8 @@ function MyFortune() {
 
   const loadMyFortune = (targetDate) => {
     if (!userId) { setLoading(false); return; }
+    if (inFlightRef.current) return; // 진행 중이면 중복 호출 무시 (더블탭 가드)
+    inFlightRef.current = true;
     setData(null); setLoading(true); setStreamText(''); setStreaming(false);
     setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);
     let buffer = '';
@@ -620,6 +625,7 @@ function MyFortune() {
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     cleanupRef.current = getMyFortuneStream(userId, {
       onCached: (d) => {
+        inFlightRef.current = false;
         setData(d); setLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
       },
@@ -648,6 +654,7 @@ function MyFortune() {
         }
       },
       onDone: (fullText) => {
+        inFlightRef.current = false;
         setStreaming(false); setStreamText('');
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         // 스트리밍 텍스트에서 직접 파싱 → 완료 애니 후 표시
@@ -667,6 +674,7 @@ function MyFortune() {
         }
       },
       onError: () => {
+        inFlightRef.current = false;
         setStreaming(false); setStreamText('');
         setLoading(false);
         setStreamFields({}); setDoneFields(new Set()); setStreamHourly([]);

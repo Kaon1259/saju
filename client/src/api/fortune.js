@@ -19,13 +19,34 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 401 응답 — Phase 4 컷오버 후에만 강제 로그아웃. 듀얼모드 동안은 그대로 통과 (서버가 userId fallback)
+// 401 응답 처리 — 토큰 만료/무효 시 자동 로그아웃 + 진입 화면으로
+// (이전: Phase 4 컷오버 후만 활성화 주석 → UX 침묵 사고 발생 → 출시 전 활성화)
+let _authExpiredHandled = false;
 api.interceptors.response.use(
   (r) => r,
   (e) => {
-    if (e?.response?.status === 401) {
-      // 컷오버 시점에 활성화: clearAuth(); window.location.href = '/register';
-      // 현재 듀얼모드에선 그대로 reject
+    const status = e?.response?.status;
+    const url = e?.config?.url || '';
+    const hadToken = !!getToken();
+
+    // 401 + 토큰 보유 상태 + 인증 갱신 호출 자체가 아닐 때만 로그아웃
+    // (인증 엔드포인트 401 → register 페이지 자체가 처리)
+    const isAuthEndpoint = url.includes('/auth/sse-token') || url.includes('/auth/kakao/');
+    if (status === 401 && hadToken && !isAuthEndpoint && !_authExpiredHandled) {
+      _authExpiredHandled = true;
+      try {
+        clearAuth();
+        try { window.dispatchEvent(new CustomEvent('auth:expired')); } catch {}
+      } catch {}
+      // 진입 화면으로 이동 (현재 위치 보존)
+      try {
+        const cur = window.location.pathname + window.location.search;
+        const target = `/register${cur && cur !== '/' ? `?from=${encodeURIComponent(cur)}` : ''}`;
+        // SPA navigate 가 안전하지 못한 컨텍스트라 hard redirect
+        window.location.href = target;
+      } catch {}
+      // 약간의 지연 후 플래그 해제 (다음 세션에서 정상 동작)
+      setTimeout(() => { _authExpiredHandled = false; }, 5000);
     }
     return Promise.reject(e);
   }
@@ -261,15 +282,7 @@ export const getFortuneByUser = async (userId) => {
   return response.data;
 };
 
-export const registerUser = async (userData) => {
-  const response = await api.post('/users', userData);
-  return response.data;
-};
-
-export const loginUser = async (phone) => {
-  const response = await api.post('/users/login', { phone });
-  return response.data;
-};
+// (registerUser, loginUser 제거됨 — 카카오 OAuth만 사용. dead code 정리)
 
 // 카카오 로그인
 export const kakaoLogin = async (code, redirectUri) => {

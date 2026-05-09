@@ -71,9 +71,15 @@ function Profile() {
         // 음력 사용자는 반드시 calendarType 전달 — 안 그러면 서버가 양력으로 잘못 해석
         getDailyFortunes(u.birthDate, u.calendarType || 'SOLAR').then(setDailyFortunes).catch(() => {});
       }
-    }).catch(() => {
-      clearAuth();
-      navigate('/register', { state: { from: '/profile' } });
+    }).catch((e) => {
+      // 401(인증 만료)·403(타사용자 차단) 만 강제 로그아웃. 네트워크 끊김 등은 화면 유지
+      const status = e?.response?.status;
+      if (status === 401 || status === 403) {
+        clearAuth();
+        navigate('/register', { state: { from: '/profile' } });
+      } else {
+        toast?.('프로필을 불러오지 못했어요. 잠시 후 다시 시도해주세요.', 'error');
+      }
     }).finally(() => setLoading(false));
   }, [navigate]);
 

@@ -4,13 +4,17 @@ import com.saju.server.dto.UserRequest;
 import com.saju.server.dto.UserResponse;
 import com.saju.server.entity.User;
 import com.saju.server.repository.UserRepository;
+import com.saju.server.security.AuthUtil;
 import com.saju.server.service.KakaoAuthService;
 import com.saju.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -125,8 +129,14 @@ public class KakaoAuthController {
      * POST /api/auth/kakao/register
      */
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> kakaoRegister(@RequestBody Map<String, Object> body) {
-        Long userId = Long.valueOf(body.get("userId").toString());
+    public ResponseEntity<Map<String, Object>> kakaoRegister(@RequestBody Map<String, Object> body, HttpServletRequest req) {
+        Long bodyUserId = Long.valueOf(body.get("userId").toString());
+        // 본인 검증 — body.userId 가 인증된 userId 와 일치해야 함 (IDOR 차단)
+        Long authUserId = AuthUtil.requireUserId(req);
+        if (!authUserId.equals(bodyUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 정보만 등록 가능합니다.");
+        }
+        Long userId = bodyUserId;
         String name = (String) body.get("name");
         String birthDateStr = (String) body.get("birthDate");
         String calendarType = (String) body.getOrDefault("calendarType", "SOLAR");

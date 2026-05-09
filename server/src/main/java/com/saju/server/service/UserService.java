@@ -31,40 +31,6 @@ public class UserService {
     };
 
     @Transactional
-    public UserResponse register(UserRequest request) {
-        // 이미 등록된 번호인지 확인
-        if (request.getPhone() != null && !request.getPhone().isBlank()) {
-            String normalizedPhone = request.getPhone().replaceAll("[^0-9]", "");
-            userRepository.findByPhone(normalizedPhone).ifPresent(u -> {
-                throw new RuntimeException("이미 등록된 전화번호입니다. 로그인해주세요.");
-            });
-        }
-
-        String zodiacAnimal = calculateZodiac(request.getBirthDate().getYear());
-
-        User user = User.builder()
-                .phone(request.getPhone() != null ? request.getPhone().replaceAll("[^0-9]", "") : null)
-                .name(request.getName())
-                .birthDate(request.getBirthDate())
-                .calendarType(request.getCalendarType())
-                .birthTime(request.getBirthTime())
-                .gender(request.getGender())
-                .zodiacAnimal(zodiacAnimal)
-                .bloodType(request.getBloodType())
-                .mbtiType(request.getMbtiType())
-                .relationshipStatus(request.getRelationshipStatus())
-                .partnerBirthDate(request.getPartnerBirthDate())
-                .partnerBirthTime(request.getPartnerBirthTime())
-                .partnerCalendarType(request.getPartnerCalendarType())
-                .partnerBloodType(request.getPartnerBloodType())
-                .partnerMbtiType(request.getPartnerMbtiType())
-                .build();
-
-        User saved = userRepository.save(user);
-        return UserResponse.from(saved);
-    }
-
-    @Transactional
     public UserResponse updateUser(Long id, UserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));

@@ -5,7 +5,6 @@ import com.saju.server.dto.UserResponse;
 import com.saju.server.security.AuthUtil;
 import com.saju.server.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +24,6 @@ public class UserController {
         if (!uid.equals(pathId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 정보만 조회/수정 가능합니다.");
         }
-    }
-
-    @PostMapping
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRequest request) {
-        UserResponse response = userService.register(request);
-        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")

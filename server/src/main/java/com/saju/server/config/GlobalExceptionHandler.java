@@ -15,6 +15,7 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * 통합 에러 응답 — 클라이언트에 stack trace 노출 차단.
@@ -66,6 +67,27 @@ public class GlobalExceptionHandler {
         body.put("error", "잘못된 날짜 형식입니다 (yyyy-MM-dd)");
         body.put("message", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    /** 리소스 못 찾음 → 404 + 의미 있는 메시지 (생년월일 검색·user 조회 실패 등). */
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<Map<String, Object>> noSuchElement(NoSuchElementException e, HttpServletRequest req) {
+        log.warn("[NotFound] {} {}: {}", req.getMethod(), req.getRequestURI(), e.getMessage());
+        return body(404, e.getMessage() != null ? e.getMessage() : "요청한 리소스를 찾을 수 없습니다.", req);
+    }
+
+    /**
+     * 비즈니스 로직 RuntimeException → 메시지 그대로 노출 (400).
+     * 카카오 등에서 던지는 "사용자를 찾을 수 없습니다" 같은 명시적 메시지가 generic 500 으로 마스킹되는 것을 방지.
+     * stack trace 는 서버 로그에만 기록.
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> runtime(RuntimeException e, HttpServletRequest req) {
+        log.warn("[RuntimeException] {} {}: {}", req.getMethod(), req.getRequestURI(), e.getMessage());
+        String msg = (e.getMessage() != null && !e.getMessage().isBlank())
+                ? e.getMessage()
+                : "처리할 수 없는 요청입니다.";
+        return body(400, msg, req);
     }
 
     @ExceptionHandler(Exception.class)

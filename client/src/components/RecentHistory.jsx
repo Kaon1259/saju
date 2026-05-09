@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { listHistory, deleteHistory } from '../api/fortune';
+import { useConfirm } from './ConfirmDialog';
 import './RecentHistory.css';
 
 const TYPE_ICON = {
@@ -41,6 +42,7 @@ function formatDate(iso) {
  * - limit: 표시 개수 (기본 5)
  */
 function RecentHistory({ type, subType, onOpen, title = '최근 본 기록', emptyText, limit = 5, hideTitle = false }) {
+  const confirm = useConfirm();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,14 @@ function RecentHistory({ type, subType, onOpen, title = '최근 본 기록', emp
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
-    if (!window.confirm('이 기록을 삭제할까요?')) return;
+    const ok = await confirm({
+      title: '기록 삭제',
+      message: '이 기록을 삭제할까요?',
+      confirmText: '삭제',
+      cancelText: '취소',
+      danger: true,
+    });
+    if (!ok) return;
     try { await deleteHistory(id); } catch {}
     setItems(prev => prev.filter(x => x.id !== id));
   };

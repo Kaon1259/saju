@@ -42,6 +42,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static boolean isPublic(String path) {
         if (path == null) return true;
+        // 카카오 register 는 인증 필수 (IDOR 차단) — 콜백 직후 토큰 보유 상태에서만 호출
+        if (path.equals("/api/auth/kakao/register")) return false;
         return !path.startsWith("/api/")
                 || path.startsWith("/api/auth/kakao/")
                 || path.equals("/api/app/init")
