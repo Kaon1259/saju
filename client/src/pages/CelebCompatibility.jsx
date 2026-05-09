@@ -7,6 +7,7 @@ import StreamingCard from '../components/StreamingCard';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
@@ -14,6 +15,7 @@ import HeroIconButtons from '../components/HeroIconButtons';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import { useToast } from '../components/Toast';
 import './CelebCompatibility.css';
 
 const GRADE_COLORS = { '천생연분': '#ff3d7f', '좋은 인연': '#ff6b9d', '보통': '#fbbf24', '노력 필요': '#94a3b8', '상극': '#64748b' };
@@ -34,6 +36,7 @@ function saveUserCeleb(celeb) {
 function CelebCompatibility() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const initCeleb = location.state?.selectedCeleb || null;
   const [step, setStep] = useState(initCeleb ? 'input' : 'select');
   const [selectedCeleb, setSelectedCeleb] = useState(initCeleb);
@@ -399,7 +402,7 @@ function CelebCompatibility() {
         setMatrixShown(false);
         setStarFortuneLoading(false);
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
-        alert('하트가 부족합니다. 하트를 충전해주세요!');
+        toast('하트가 부족합니다. 하트를 충전해주세요!', 'error');
       },
       onError: (err) => {
         setStarStreaming(false); setStarStreamText(''); setStarFortuneLoading(false);
@@ -512,10 +515,7 @@ function CelebCompatibility() {
             </div>
             <div className="form-group">
               <label className="form-label">성별</label>
-              <div className="form-toggle">
-                <button type="button" className={`form-toggle__btn ${manualGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setManualGender('M')}><span className="g-circle g-male">♂</span></button>
-                <button type="button" className={`form-toggle__btn ${manualGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setManualGender('F')}><span className="g-circle g-female">♀</span></button>
-              </div>
+              <GenderPicker value={manualGender} onChange={setManualGender} />
             </div>
             <button className="btn-gold" onClick={handleManualSelect} disabled={!manualName || !manualBirth || !manualGender}
               style={{ opacity: manualName && manualBirth && manualGender ? 1 : 0.5 }}>
@@ -613,21 +613,11 @@ function CelebCompatibility() {
           )}
           <div className="form-group">
             <label className="form-label">성별</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${myGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyGender('M')}><span className="g-circle g-male">♂</span></button>
-              <button type="button" className={`form-toggle__btn ${myGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyGender('F')}><span className="g-circle g-female">♀</span></button>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">달력 구분</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${myCalType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyCalType('SOLAR')}>☀️ 양력</button>
-              <button type="button" className={`form-toggle__btn ${myCalType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyCalType('LUNAR')}>🌙 음력</button>
-            </div>
+            <GenderPicker value={myGender} onChange={setMyGender} />
           </div>
           <div className="form-group">
             <label className="form-label">생년월일</label>
-            <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
+            <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} onCalendarTypeChange={setMyCalType} />
           </div>
           <button className="btn-gold" onClick={() => guardCelebCompat(handleAnalyze)} disabled={!myBirth || !selectedCeleb} style={{ opacity: (myBirth && selectedCeleb) ? 1 : 0.5 }}>
             💫 {selectedCeleb.name}와(과) 궁합 분석하기 <HeartCost category="CELEB_COMPAT" />

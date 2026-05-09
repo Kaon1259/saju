@@ -152,3 +152,36 @@
 .star-fortune-card-arrow {
   font-size: 22px; color: var(--color-text-muted); opacity: 0.5;
 }
+
+/* ═══ 라이트 모드 보강 ═══ */
+[data-theme="light"] .star-fortune-page {
+  background: linear-gradient(180deg, #fff 0%, #fff7ed 60%, #fff 100%);
+}
+[data-theme="light"] .star-fortune-hero {
+  background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(219,39,119,0.06) 50%, rgba(217,119,6,0.05) 100%);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+[data-theme="light"] .star-fortune-hero-glow {
+  background: radial-gradient(circle, rgba(217,119,6,0.16) 0%, rgba(124,58,237,0.08) 40%, transparent 70%);
+}
+[data-theme="light"] .star-fortune-badge {
+  color: #b8860b;
+}
+[data-theme="light"] .star-fortune-title {
+  background: linear-gradient(135deg, #b8860b, #7c3aed, #db2777);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+[data-theme="light"] .star-fortune-desc {
+  color: #4a4a5a;
+}
+[data-theme="light"] .star-fortune-card-label {
+  color: #111;
+}
+[data-theme="light"] .star-fortune-card-desc {
+  color: #4a4a5a;
+}
+[data-theme="light"] .star-fortune-card-arrow {
+  color: #999; opacity: 0.7;
+}

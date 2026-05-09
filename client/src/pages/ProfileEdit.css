@@ -1,0 +1,432 @@
+/* ═══════════════════════════════════════════
+   ProfileEdit - List-Row 스타일
+   박스 중첩 제거, 큰 카드 1개 안에 row + 구분선
+   ═══════════════════════════════════════════ */
+
+/* register-form .glass-card 의 padding을 컴팩트하게 재정의 */
+.register-form.glass-card {
+  padding: 18px 16px;
+  gap: 0;
+}
+
+.pe-list {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pe-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  min-width: 0;
+}
+
+.pe-row:first-child {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.pe-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.pe-row-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
+
+.pe-row--stack .pe-row-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.pe-row-value {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pe-row--stack .pe-row-value {
+  justify-content: stretch;
+  overflow: visible;
+}
+
+/* inline 입력 (이름) */
+.pe-input-inline {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-align: right;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 4px 0;
+}
+
+.pe-input-inline::placeholder {
+  color: rgba(255, 255, 255, 0.32);
+  font-weight: 400;
+}
+
+/* 이름 + 성별 결합 row */
+.pe-row-combo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 16px;
+}
+
+.pe-input-icon {
+  font-size: 18px;
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.pe-input-name {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-align: left;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 6px 0;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease;
+}
+
+.pe-input-name:focus {
+  border-bottom-color: rgba(255, 107, 157, 0.55);
+}
+
+.pe-input-name::placeholder {
+  color: rgba(255, 255, 255, 0.34);
+  font-weight: 400;
+}
+
+.pe-select-inline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 7px 28px 7px 12px;
+  color: #fff;
+  font-size: 13.5px;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pe-select-inline option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.pe-select-inline:focus {
+  border-color: rgba(255, 107, 157, 0.5);
+  outline: none;
+}
+
+/* 칩 그리드 (혈액형, 연애상태) */
+.pe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.pe-row--stack .pe-chips {
+  justify-content: flex-start;
+}
+
+.pe-chip {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.pe-chip:hover:not(:disabled) {
+  border-color: rgba(255, 107, 157, 0.4);
+  color: #fff;
+}
+
+.pe-chip--active {
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(168, 85, 247, 0.16));
+  border-color: rgba(255, 107, 157, 0.55);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.22);
+}
+
+.pe-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* MBTI 4x4 미니 그리드 */
+.pe-mbti-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.pe-mbti-btn {
+  padding: 11px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  font-family: inherit;
+  letter-spacing: 0.4px;
+  min-width: 0;
+}
+
+.pe-mbti-btn:hover:not(:disabled) {
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #fff;
+}
+
+.pe-mbti-btn--active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(236, 72, 153, 0.16));
+  border-color: rgba(168, 85, 247, 0.55);
+  color: #fff;
+}
+
+.pe-mbti-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* 섹션 헤딩 (연인 정보 시작) */
+.pe-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 10px 4px 6px;
+  border-top: 1px solid rgba(255, 107, 157, 0.18);
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 107, 157, 0.95);
+  letter-spacing: 0.4px;
+}
+
+.pe-section-heading-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 107, 157, 0.3), transparent);
+}
+
+.pe-partner-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.pe-partner-hint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+/* 부가 정보 뱃지 (띠 + 별자리) */
+.pe-meta-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pe-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pe-meta-badge--zodiac {
+  background: rgba(251, 191, 36, 0.12);
+  color: #FBBF24;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.pe-meta-badge--const {
+  background: rgba(168, 85, 247, 0.12);
+  color: #c4b5fd;
+  border: 1px solid rgba(168, 85, 247, 0.28);
+}
+
+/* 저장 / 취소 버튼 영역 */
+.pe-actions {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════
+   라이트 모드
+   ═══════════════════════════════════════════ */
+
+[data-theme="light"] .register-form.glass-card {
+  padding: 18px 16px;
+}
+
+[data-theme="light"] .pe-row {
+  border-top-color: rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .pe-select-inline option {
+  background: #fff;
+  color: #111;
+}
+
+[data-theme="light"] .pe-row-label {
+  color: #555;
+}
+
+[data-theme="light"] .pe-row--stack .pe-row-label {
+  color: #888;
+}
+
+[data-theme="light"] .pe-input-inline {
+  color: #111;
+}
+
+[data-theme="light"] .pe-input-inline::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .pe-input-name {
+  color: #111;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .pe-input-name:focus {
+  border-bottom-color: rgba(212, 20, 90, 0.55);
+}
+
+[data-theme="light"] .pe-input-name::placeholder {
+  color: rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="light"] .pe-select-inline {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='rgba(0,0,0,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+}
+
+[data-theme="light"] .pe-chip {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #555;
+}
+
+[data-theme="light"] .pe-chip:hover:not(:disabled) {
+  border-color: rgba(212, 20, 90, 0.45);
+  color: #d4145a;
+}
+
+[data-theme="light"] .pe-chip--active {
+  background: linear-gradient(135deg, rgba(212, 20, 90, 0.1), rgba(168, 85, 247, 0.08));
+  border-color: rgba(212, 20, 90, 0.5);
+  color: #d4145a;
+}
+
+[data-theme="light"] .pe-mbti-btn {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+  color: #777;
+}
+
+[data-theme="light"] .pe-mbti-btn:hover:not(:disabled) {
+  border-color: rgba(124, 58, 237, 0.45);
+  color: #7c3aed;
+}
+
+[data-theme="light"] .pe-mbti-btn--active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(212, 20, 90, 0.08));
+  border-color: rgba(124, 58, 237, 0.55);
+  color: #7c3aed;
+}
+
+[data-theme="light"] .pe-section-heading {
+  border-top-color: rgba(212, 20, 90, 0.2);
+  color: #d4145a;
+}
+
+[data-theme="light"] .pe-section-heading-line {
+  background: linear-gradient(90deg, rgba(212, 20, 90, 0.3), transparent);
+}
+
+[data-theme="light"] .pe-partner-hint {
+  color: #888;
+}
+
+[data-theme="light"] .pe-meta-badge--zodiac {
+  background: rgba(251, 191, 36, 0.16);
+  color: #b8860b;
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+[data-theme="light"] .pe-meta-badge--const {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+/* 좁은 화면 — 4열 MBTI 그대로 두고 패딩만 줄임 */
+@media (max-width: 360px) {
+  .register-form.glass-card { padding: 14px 12px; }
+  .pe-mbti-btn { font-size: 11.5px; padding: 9px 2px; letter-spacing: 0.2px; }
+  .pe-input-inline { font-size: 14px; }
+  .pe-row { padding: 12px 0; gap: 10px; }
+  .pe-chip { padding: 6px 10px; font-size: 12px; }
+}

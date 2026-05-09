@@ -7,6 +7,7 @@ import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
 import { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -341,27 +342,16 @@ function LoveFortune() {
             </div>
           </div>
 
-          {/* 달력 / 생년월일 */}
+          {/* 생년월일 */}
           <div className="lf-form-group">
-            <label className="lf-label">달력 / 생년월일</label>
-            <div className="lf-toggle" style={{ marginBottom: 8 }}>
-              <button type="button" className={`lf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
-              <button type="button" className={`lf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
-            </div>
-            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+            <label className="lf-label">생년월일</label>
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
           </div>
 
           {/* 성별 */}
           <div className="lf-form-group">
             <label className="lf-label">성별</label>
-            <div className="lf-toggle">
-              <button className={`lf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                <span className="g-circle g-male">♂</span>
-              </button>
-              <button className={`lf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                <span className="g-circle g-female">♀</span>
-              </button>
-            </div>
+            <GenderPicker value={gender} onChange={setGender} />
           </div>
 
           <button className="lf-submit" onClick={() => guardLoveFortune(handleAnalyze)} disabled={!birthDate || !relationStatus}>

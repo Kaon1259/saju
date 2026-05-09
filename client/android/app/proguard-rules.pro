@@ -1,21 +1,33 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ════════════════════════════════════════════════════════════════
+# 1:1연애 앱 ProGuard 규칙 (R8 minify + shrinkResources)
+# ════════════════════════════════════════════════════════════════
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# 라인 번호 보존 (Crashlytics 등 stack trace 추적용)
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# WebView + JS interface 보존 (Capacitor 핵심)
+-keep class com.getcapacitor.** { *; }
+-keep class com.capacitorjs.** { *; }
+-keepclassmembers class * extends com.getcapacitor.Plugin { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# MainActivity 의 카카오 OAuth 딥링크 처리
+-keep class com.love.onetoone.MainActivity { *; }
+
+# Capacitor JavaScript bridge 어노테이션 보존
+-keepclasseswithmembers class * {
+    @com.getcapacitor.PluginMethod <methods>;
+}
+
+# JSON 직렬화 (만일 사용 시)
+-keepclassmembers class * {
+    @com.fasterxml.jackson.annotation.JsonProperty <fields>;
+}
+
+# AndroidX 기본
+-keep class androidx.appcompat.** { *; }
+-dontwarn androidx.**
+
+# Kotlin (Capacitor 의존)
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**

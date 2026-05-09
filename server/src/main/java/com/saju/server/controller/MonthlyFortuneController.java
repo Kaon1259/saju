@@ -10,6 +10,7 @@ import com.saju.server.service.MonthlyFortuneService;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/monthly-fortune")
 @RequiredArgsConstructor
+@Slf4j
 public class MonthlyFortuneController {
 
     private final MonthlyFortuneService monthlyFortuneService;
@@ -104,8 +106,16 @@ public class MonthlyFortuneController {
         // MyFortune(2500)보다는 더 필요해 3000으로 상향.
         return claudeApiService.generateStream(systemPrompt, userPrompt, 3000,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            monthlyFortuneService.saveStreamResult(resolvedBd, finalMonth, birthTime, gender, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, finalCategory, "월간운세");
+            try {
+                boolean ok = monthlyFortuneService.saveStreamResult(resolvedBd, finalMonth, birthTime, gender, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, finalCategory, "월간운세");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat={}, uid={}", finalCategory, uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 월간운세 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 }

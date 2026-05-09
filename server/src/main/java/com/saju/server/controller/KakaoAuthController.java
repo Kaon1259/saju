@@ -89,15 +89,26 @@ public class KakaoAuthController {
             }
         } else {
             // 신규 → 최소 정보로 회원 자동 생성
-            user = User.builder()
+            User newUser = User.builder()
                     .kakaoId(kakaoId)
                     .name(nickname.isBlank() ? "사용자" : nickname)
                     .profileImage(profileImage)
                     .build();
-            user = userRepository.save(user);
-            // 회원가입 보너스 하트 지급
-            heartPointService.grantSignupBonus(user.getId());
-            user = userRepository.findById(user.getId()).orElse(user);
+            boolean created = false;
+            try {
+                user = userRepository.save(newUser);
+                created = true;
+            } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+                // race: 동일 kakaoId 동시 가입 → 이미 저장된 행 재조회
+                log.warn("[Kakao] 신규 가입 race 감지, 기존 유저 재조회: kakaoId={}", kakaoId);
+                user = userRepository.findByKakaoId(kakaoId)
+                        .orElseThrow(() -> new RuntimeException("카카오 로그인 race 처리 실패"));
+            }
+            if (created) {
+                // 회원가입 보너스 하트 지급
+                heartPointService.grantSignupBonus(user.getId());
+                user = userRepository.findById(user.getId()).orElse(user);
+            }
         }
 
         boolean profileComplete = user.getBirthDate() != null && user.getGender() != null;

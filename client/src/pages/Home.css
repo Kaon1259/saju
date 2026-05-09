@@ -5680,3 +5680,14 @@
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
+
+/* ─── 360px 좁은 화면 보강 ─── */
+@media (max-width: 360px) {
+  /* 4열 → 3열로 다운그레이드 (한글 라벨 짧아 카드 너무 좁아짐 방지) */
+  .home-love-cards { grid-template-columns: repeat(3, 1fr); }
+  .home-menu-page { grid-template-columns: repeat(3, 1fr); }
+  .home-loading { grid-template-columns: repeat(3, 1fr); }
+  /* 3열 카드 padding 살짝 축소해 라벨 잘림 방지 */
+  .home-couple-card { padding: 12px 4px; }
+  .home-quick-item { padding: 14px 4px; }
+}

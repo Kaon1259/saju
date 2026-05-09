@@ -6,12 +6,14 @@ import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
 import { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson from '../utils/parseAiJson';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
+import { useToast } from '../components/Toast';
 import HeroIconButtons from '../components/HeroIconButtons';
 import WaitMessages from '../components/WaitMessages';
 import { WAIT_MESSAGES } from '../data/waitMessages';
@@ -80,6 +82,7 @@ function LoveTypeFortune() {
   const { type } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const userId = localStorage.getItem('userId');
   const info = LOVE_TYPES[type];
 
@@ -384,35 +387,17 @@ function LoveTypeFortune() {
             <>
               <div className="ltf-person-block">
                 <h3 className="ltf-person-title">👤 내 정보</h3>
-                <div className="ltf-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} />
-                <div className="ltf-toggle">
-                  <button className={`ltf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                    <span className="ltf-g-circle ltf-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`ltf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                    <span className="ltf-g-circle ltf-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={gender} onChange={setGender} />
                 </div>
               </div>
 
               <div className="ltf-person-block">
                 <h3 className="ltf-person-title">{partnerBlockLabel[type]}</h3>
-                <div className="ltf-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} />
-                <div className="ltf-toggle">
-                  <button className={`ltf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}>
-                    <span className="ltf-g-circle ltf-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`ltf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}>
-                    <span className="ltf-g-circle ltf-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} onCalendarTypeChange={setPartnerCalendarType} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={partnerGender} onChange={setPartnerGender} />
                 </div>
               </div>
             </>
@@ -420,25 +405,12 @@ function LoveTypeFortune() {
             /* 기존 폼 — 짝사랑/고백/소개팅 등 (상대방 정보 선택 토글) */
             <>
               <div className="ltf-field">
-                <label className="ltf-label">달력 / 생년월일</label>
-                <div className="ltf-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`ltf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} />
+                <label className="ltf-label">생년월일</label>
+                <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
               </div>
               <div className="ltf-field">
                 <label className="ltf-label">성별</label>
-                <div className="ltf-toggle">
-                  <button className={`ltf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                    <span className="ltf-g-circle ltf-g-male">♂</span>
-                    <span>남성</span>
-                  </button>
-                  <button className={`ltf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                    <span className="ltf-g-circle ltf-g-female">♀</span>
-                    <span>여성</span>
-                  </button>
-                </div>
+                <GenderPicker value={gender} onChange={setGender} />
               </div>
 
               {type === 'reunion' && (
@@ -462,25 +434,12 @@ function LoveTypeFortune() {
               {showPartner && (
                 <div className="ltf-partner fade-in">
                   <div className="ltf-field">
-                    <label className="ltf-label">상대방 달력 / 생년월일</label>
-                    <div className="ltf-toggle" style={{ marginBottom: 8 }}>
-                      <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('SOLAR')}>☀️ 양력</button>
-                      <button type="button" className={`ltf-toggle-btn ${partnerCalendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setPartnerCalendarType('LUNAR')}>🌙 음력</button>
-                    </div>
-                    <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} />
+                    <label className="ltf-label">상대방 생년월일</label>
+                    <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} onCalendarTypeChange={setPartnerCalendarType} />
                   </div>
                   <div className="ltf-field">
                     <label className="ltf-label">상대방 성별</label>
-                    <div className="ltf-toggle">
-                      <button className={`ltf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}>
-                        <span className="ltf-g-circle ltf-g-male">♂</span>
-                        <span>남성</span>
-                      </button>
-                      <button className={`ltf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}>
-                        <span className="ltf-g-circle ltf-g-female">♀</span>
-                        <span>여성</span>
-                      </button>
-                    </div>
+                    <GenderPicker value={partnerGender} onChange={setPartnerGender} />
                   </div>
                 </div>
               )}
@@ -575,7 +534,7 @@ function LoveTypeFortune() {
           <button className="ltf-share" onClick={async () => {
             const text = `[${info.label}]\n점수: ${result.score}점 (${result.grade})\n${(result.overall||'').split('.').slice(0,2).join('.')}.\n\nhttps://recipepig.kr`;
             const res = await shareResult({ title: `${info.label} 결과`, text });
-            if (res === 'copied') alert('클립보드에 복사되었습니다!');
+            if (res === 'copied') toast('클립보드에 복사되었습니다', 'success');
           }}>📤 공유하기</button>
           <button className="ltf-reset" onClick={handleReset}>다시 보기</button>
         </div>

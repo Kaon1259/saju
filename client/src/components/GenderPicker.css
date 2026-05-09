@@ -1,0 +1,82 @@
+/* ═══════════════════════════════════════════
+   GenderPicker - 캡슐 segmented control
+   ═══════════════════════════════════════════ */
+
+.gp-segmented {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.gp-seg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.55);
+  transition: all 0.22s ease;
+}
+
+.gp-seg-symbol {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.gp-seg:hover:not(:disabled) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.gp-seg-male.gp-seg--active {
+  background: linear-gradient(135deg, #5b8def, #6366f1);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(91, 141, 239, 0.4);
+}
+
+.gp-seg-female.gp-seg--active {
+  background: linear-gradient(135deg, #ff6b9d, #ec4899);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.4);
+}
+
+.gp-seg--active:hover { color: #fff; }
+
+.gp-disabled .gp-seg,
+.gp-seg:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* 라이트 모드 */
+[data-theme="light"] .gp-segmented {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .gp-seg {
+  color: #777;
+}
+
+[data-theme="light"] .gp-seg:hover:not(:disabled) {
+  color: #333;
+}
+
+[data-theme="light"] .gp-seg-male.gp-seg--active {
+  background: linear-gradient(135deg, #4263eb, #4f46e5);
+  box-shadow: 0 2px 8px rgba(66, 99, 235, 0.32);
+}
+
+[data-theme="light"] .gp-seg-female.gp-seg--active {
+  background: linear-gradient(135deg, #d4145a, #ec4899);
+  box-shadow: 0 2px 8px rgba(212, 20, 90, 0.32);
+}

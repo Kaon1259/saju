@@ -10,6 +10,7 @@ import com.saju.server.service.WeeklyFortuneService;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/weekly-fortune")
 @RequiredArgsConstructor
+@Slf4j
 public class WeeklyFortuneController {
 
     private final WeeklyFortuneService weeklyFortuneService;
@@ -94,8 +96,16 @@ public class WeeklyFortuneController {
         final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1600,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            weeklyFortuneService.saveStreamResult(resolvedBd, birthTime, gender, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "WEEKLY_FORTUNE", "주간운세");
+            try {
+                boolean ok = weeklyFortuneService.saveStreamResult(resolvedBd, birthTime, gender, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, "WEEKLY_FORTUNE", "주간운세");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat=WEEKLY_FORTUNE, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 주간운세 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 }

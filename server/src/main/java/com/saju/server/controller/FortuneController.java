@@ -9,6 +9,7 @@ import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/fortune")
 @RequiredArgsConstructor
+@Slf4j
 public class FortuneController {
 
     private final FortuneService fortuneService;
@@ -125,8 +127,16 @@ public class FortuneController {
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            fortuneService.parseAndSaveStreamResult(zodiacAnimal, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
+            try {
+                boolean ok = fortuneService.parseAndSaveStreamResult(zodiacAnimal, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat=TODAY_FORTUNE, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 오늘의 운세 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 

@@ -6,6 +6,7 @@ import StreamingCard from '../components/StreamingCard';
 import GROUPS, { GROUP_TYPES } from '../data/groups';
 import CELEBRITIES from '../data/celebrities';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -427,14 +428,11 @@ function GroupFortune() {
             )}
             <div className="form-group">
               <label className="form-label">성별</label>
-              <div className="form-toggle">
-                <button type="button" className={`form-toggle__btn ${myGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyGender('M')}><span className="g-circle g-male">♂</span></button>
-                <button type="button" className={`form-toggle__btn ${myGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setMyGender('F')}><span className="g-circle g-female">♀</span></button>
-              </div>
+              <GenderPicker value={myGender} onChange={setMyGender} />
             </div>
             <div className="form-group">
               <label className="form-label">생년월일</label>
-              <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} />
+              <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} onCalendarTypeChange={setMyCalType} />
             </div>
             {!selectedMember && (
               <p className="gf-compat-group-hint">

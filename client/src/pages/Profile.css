@@ -68,7 +68,29 @@
 .pf-badge--const { background: rgba(255,255,255,0.03); }
 .pf-badge--bt { border-color: rgba(244,114,182,0.4); color: #F472B6; background: rgba(244,114,182,0.08); }
 .pf-badge--mbti { border-color: rgba(52,211,153,0.4); color: #34D399; background: rgba(52,211,153,0.08); }
-.pf-badge--zodiac { border-color: rgba(251,191,36,0.4); color: #FBBF24; background: rgba(251,191,36,0.08); }
+.pf-badge--zodiac { border-color: rgba(251,191,36,0.4); color: #FBBF24; background: rgba(251,191,36,0.08); display: inline-flex; align-items: center; gap: 2px; }
+
+.pf-badge-gender {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+  margin-left: 6px;
+  color: #fff;
+  line-height: 1;
+}
+.pf-badge-gender--male {
+  background: linear-gradient(135deg, #5b8def, #6366f1);
+  box-shadow: 0 1px 4px rgba(91,141,239,0.45);
+}
+.pf-badge-gender--female {
+  background: linear-gradient(135deg, #ff6b9d, #ec4899);
+  box-shadow: 0 1px 4px rgba(255,107,157,0.45);
+}
 
 /* ─── 정보 카드 ─── */
 .pf-info { padding: 16px 18px; margin-bottom: 16px; }

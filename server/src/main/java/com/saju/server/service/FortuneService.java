@@ -194,12 +194,12 @@ public class FortuneService {
      * 스트리밍 완료 후 AI 응답을 파싱하여 기존 운세에 덮어씀
      */
     @Transactional
-    public void parseAndSaveStreamResult(String zodiacAnimal, String fullText) {
-        parseAndSaveStreamResult(zodiacAnimal, fullText, LocalDate.now());
+    public boolean parseAndSaveStreamResult(String zodiacAnimal, String fullText) {
+        return parseAndSaveStreamResult(zodiacAnimal, fullText, LocalDate.now());
     }
 
     @Transactional
-    public void parseAndSaveStreamResult(String zodiacAnimal, String fullText, LocalDate targetDate) {
+    public boolean parseAndSaveStreamResult(String zodiacAnimal, String fullText, LocalDate targetDate) {
         try {
             String json = fullText.trim();
             // 마크다운 코드블록 제거
@@ -264,8 +264,10 @@ public class FortuneService {
                 dailyFortuneRepository.save(fortune);
                 log.info("Daily fortune cache created: zodiac={}, date={}", zodiacAnimal, targetDate);
             }
+            return true;
         } catch (Exception e) {
             log.error("Failed to parse/save fortune stream result: zodiac={}, error={}", zodiacAnimal, e.getMessage(), e);
+            return false;
         }
     }
 

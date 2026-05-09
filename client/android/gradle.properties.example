@@ -1,0 +1,23 @@
+# ════════════════════════════════════════════════════════════════
+# 릴리즈 서명 키스토어 정보 — 실제 값으로 채워서 gradle.properties 로 복사
+# !!! gradle.properties 는 절대 git 커밋하지 말 것 !!!
+# ════════════════════════════════════════════════════════════════
+#
+# 1) keystore 파일 생성 (한 번만):
+#    cd client/android/app
+#    keytool -genkey -v -keystore release.keystore -alias love-app \
+#            -keyalg RSA -keysize 2048 -validity 10000
+#
+# 2) 아래 4줄을 client/android/gradle.properties (없으면 신규)에 추가
+#    실제 값을 채우고 따옴표 없이 저장
+#
+RELEASE_STORE_FILE=release.keystore
+RELEASE_STORE_PASSWORD=your_store_password_here
+RELEASE_KEY_ALIAS=love-app
+RELEASE_KEY_PASSWORD=your_key_password_here
+
+# 3) Android Studio: Build > Generate Signed Bundle / APK
+#    또는 CLI: cd client/android && ./gradlew bundleRelease
+#
+# 4) AAB 출력 경로:
+#    client/android/app/build/outputs/bundle/release/app-release.aab

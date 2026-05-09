@@ -139,34 +139,40 @@ public class FaceReadingService {
 
         return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt.toString(), 1000,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json != null) {
-                    Map<String, Object> result = new LinkedHashMap<>();
-                    result.put("faceShape", finalFaceShape);
-                    result.put("eyeShape", finalEyeShape);
-                    result.put("noseShape", noseShape);
-                    result.put("mouthShape", mouthShape);
-                    result.put("foreheadShape", foreheadShape);
-                    result.put("date", LocalDate.now().toString());
-                    JsonNode node = objectMapper.readTree(json);
-                    node.fields().forEachRemaining(e -> {
-                        if (e.getValue().isArray()) {
-                            List<String> list = new ArrayList<>();
-                            e.getValue().forEach(v -> list.add(v.asText()));
-                            result.put(e.getKey(), list);
-                        } else if (e.getValue().isNumber()) {
-                            result.put(e.getKey(), e.getValue().asInt());
-                        } else {
-                            result.put(e.getKey(), e.getValue().asText());
-                        }
-                    });
-                    saveToCache("face-reading", finalCacheKey, result);
+                if (json == null) {
+                    log.warn("[NoDeduct] face-reading JSON 추출 실패");
+                    return;
                 }
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("faceShape", finalFaceShape);
+                result.put("eyeShape", finalEyeShape);
+                result.put("noseShape", noseShape);
+                result.put("mouthShape", mouthShape);
+                result.put("foreheadShape", foreheadShape);
+                result.put("date", LocalDate.now().toString());
+                JsonNode node = objectMapper.readTree(json);
+                node.fields().forEachRemaining(e -> {
+                    if (e.getValue().isArray()) {
+                        List<String> list = new ArrayList<>();
+                        e.getValue().forEach(v -> list.add(v.asText()));
+                        result.put(e.getKey(), list);
+                    } else if (e.getValue().isNumber()) {
+                        result.put(e.getKey(), e.getValue().asInt());
+                    } else {
+                        result.put(e.getKey(), e.getValue().asText());
+                    }
+                });
+                saveToCache("face-reading", finalCacheKey, result);
+                ok = true;
             } catch (Exception e) {
-                log.warn("관상 스트림 캐시 저장 실패: {}", e.getMessage());
+                log.warn("[NoDeduct] 관상 스트림 캐시 저장 실패: {}", e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("face-reading onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 

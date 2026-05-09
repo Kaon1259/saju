@@ -280,15 +280,22 @@ public class ConstellationFortuneService {
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json == null) return;
+                if (json == null) {
+                    log.warn("[NoDeduct] constellation JSON 추출 실패: {}", sign);
+                    return;
+                }
                 ConstellationFortune fortune = parseToEntity(sign, today, json);
                 repository.save(fortune);
+                ok = true;
             } catch (Exception e) {
-                log.warn("constellation stream cache save failed for {}: {}", sign, e.getMessage());
+                log.warn("[NoDeduct] constellation stream cache save failed for {}: {}", sign, e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("constellation onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 }

@@ -4,6 +4,7 @@ import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGue
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -986,15 +987,8 @@ function MyFortune() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">달력 구분</label>
-                  <div className="form-toggle">
-                    <button type="button" className={`form-toggle__btn ${otherCalendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('SOLAR')}>양력</button>
-                    <button type="button" className={`form-toggle__btn ${otherCalendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherCalendarType('LUNAR')}>음력</button>
-                  </div>
-                </div>
-                <div className="form-group">
                   <label className="form-label">생년월일</label>
-                  <BirthDatePicker value={otherBirthDate} onChange={setOtherBirthDate} calendarType={otherCalendarType} />
+                  <BirthDatePicker value={otherBirthDate} onChange={setOtherBirthDate} calendarType={otherCalendarType} onCalendarTypeChange={setOtherCalendarType} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">태어난 시간 (선택)</label>
@@ -1016,10 +1010,7 @@ function MyFortune() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">성별</label>
-                  <div className="form-toggle">
-                    <button type="button" className={`form-toggle__btn ${otherGender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('M')}><span className="g-circle g-male">♂</span></button>
-                    <button type="button" className={`form-toggle__btn ${otherGender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setOtherGender('F')}><span className="g-circle g-female">♀</span></button>
-                  </div>
+                  <GenderPicker value={otherGender} onChange={setOtherGender} />
                 </div>
                 <button className="btn-gold" style={{ width: '100%', marginTop: 16, marginBottom: 24 }} disabled={!otherBirthDate || otherLoading || otherStreaming}
                   onClick={() => guardTodayFortune(() => startAnalysis(otherBirthDate, otherBirthTime, otherCalendarType, otherGender, {

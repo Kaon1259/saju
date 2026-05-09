@@ -13,6 +13,7 @@ import FortuneLoading from '../components/FortuneLoading';
 import StreamText from '../components/StreamText';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { useAiAbort } from '../hooks/useAiAbort';
+import { useToast } from '../components/Toast';
 import { pickRandomFrame } from '../utils/tarotFrames';
 import './Tarot.css';
 
@@ -231,6 +232,7 @@ function TarotIntro({ onDone }) {
 function Tarot() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   // 비로그인 사용자는 타로 랜딩 페이지로 보냄 (인트로 대신)
   useEffect(() => {
     if (!localStorage.getItem('userId')) {
@@ -1195,7 +1197,7 @@ function Tarot() {
       navigator.share({ title: '타로 리딩 결과', text }).catch(() => {});
     } else {
       navigator.clipboard?.writeText(text);
-      alert('결과가 복사되었습니다!');
+      toast('결과가 복사되었습니다', 'success');
     }
   };
 

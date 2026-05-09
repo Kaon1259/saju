@@ -113,18 +113,24 @@ public class DreamService {
 
         return claudeApiService.generateStream(SYSTEM_PROMPT, userPrompt, 1600,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json != null) {
-                    Map<String, Object> result = objectMapper.readValue(json, new TypeReference<>() {});
-                    result.put("success", true);
-                    result.put("source", "ai");
-                    saveToCache("dream", finalCacheKey, result);
+                if (json == null) {
+                    log.warn("[NoDeduct] dream JSON 추출 실패");
+                    return;
                 }
+                Map<String, Object> result = objectMapper.readValue(json, new TypeReference<>() {});
+                result.put("success", true);
+                result.put("source", "ai");
+                saveToCache("dream", finalCacheKey, result);
+                ok = true;
             } catch (Exception e) {
-                log.warn("꿈 해몽 스트림 캐시 저장 실패: {}", e.getMessage());
+                log.warn("[NoDeduct] 꿈 해몽 스트림 캐시 저장 실패: {}", e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("dream onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 

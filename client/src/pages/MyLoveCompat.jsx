@@ -12,6 +12,7 @@ import {
 } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
@@ -1031,39 +1032,17 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span>
-                    <span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span>
-                    <span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g1} onChange={setG1} />
                 </div>
               </div>
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span>
-                    <span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span>
-                    <span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 
@@ -1078,35 +1057,17 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g1} onChange={setG1} />
                 </div>
               </div>
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 
@@ -1123,35 +1084,17 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g1} onChange={setG1} />
                 </div>
               </div>
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 
@@ -1168,35 +1111,17 @@ function MyLoveCompat() {
             <>
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">👤 내 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt1('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct1 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt1('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g1 === 'M' ? 'active' : ''}`} onClick={() => setG1('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g1 === 'F' ? 'active' : ''}`} onClick={() => setG1('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g1} onChange={setG1} />
                 </div>
               </div>
 
               <div className="mlc-person-block">
                 <h3 className="mlc-person-title">💕 연인 정보</h3>
-                <div className="mlc-toggle" style={{ marginBottom: 8 }}>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'SOLAR' ? 'active' : ''}`} onClick={() => setCt2('SOLAR')}>☀️ 양력</button>
-                  <button type="button" className={`mlc-toggle-btn ${ct2 === 'LUNAR' ? 'active' : ''}`} onClick={() => setCt2('LUNAR')}>🌙 음력</button>
-                </div>
-                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} />
-                <div className="mlc-toggle">
-                  <button className={`mlc-toggle-btn ${g2 === 'M' ? 'active' : ''}`} onClick={() => setG2('M')}>
-                    <span className="mlc-g-circle mlc-g-male">♂</span><span>남자</span>
-                  </button>
-                  <button className={`mlc-toggle-btn ${g2 === 'F' ? 'active' : ''}`} onClick={() => setG2('F')}>
-                    <span className="mlc-g-circle mlc-g-female">♀</span><span>여자</span>
-                  </button>
+                <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
+                <div style={{ marginTop: 10 }}>
+                  <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 

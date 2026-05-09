@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { clearAuth } from '../utils/auth';
+import { useToast } from '../components/Toast';
 import './Settings.css';
 
 function Settings() {
@@ -127,6 +128,7 @@ function Settings() {
 }
 
 function HeartConfigSection() {
+  const toast = useToast();
   const [configs, setConfigs] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(null); // { category, cost }
@@ -146,7 +148,7 @@ function HeartConfigSection() {
       setConfigs(prev => prev.map(c => c.category === category ? { ...c, cost: newCost } : c));
       setEditing(null);
     } catch (e) {
-      alert('저장 실패: ' + (e.response?.data?.error || e.message));
+      toast('저장 실패: ' + (e.response?.data?.error || e.message), 'error');
     }
     setSaving(false);
   };

@@ -60,12 +60,12 @@ public class MonthlyFortuneService {
      * 스트리밍 완료 후 캐시 저장
      */
     @Transactional
-    public void saveStreamResult(String birthDate, int month, String birthTime, String gender, String fullText) {
+    public boolean saveStreamResult(String birthDate, int month, String birthTime, String gender, String fullText) {
         try {
             if (month < 1 || month > 12) month = LocalDate.now().getMonthValue();
             String cacheKey = buildCacheKey("monthly", birthDate, birthTime, gender, String.valueOf(month));
             String json = ClaudeApiService.extractJson(fullText);
-            if (json == null) return;
+            if (json == null) return false;
             Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
 
             LocalDate date = LocalDate.parse(birthDate);
@@ -89,8 +89,10 @@ public class MonthlyFortuneService {
             full.putAll(aiResult);
             full.put("source", "ai");
             saveToCache("monthly", cacheKey, full, month);
+            return true;
         } catch (Exception e) {
             log.warn("MonthlyFortune stream cache save failed: {}", e.getMessage());
+            return false;
         }
     }
 

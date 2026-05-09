@@ -188,9 +188,14 @@ public class CompatibilityService {
     /**
      * 스트리밍 완료 후 결과 파싱 + 캐시 저장 (서버에서 직접)
      */
-    public void parseAndSaveStreamResult(LocalDate bd1, String bt1, LocalDate bd2, String bt2,
+    public boolean parseAndSaveStreamResult(LocalDate bd1, String bt1, LocalDate bd2, String bt2,
                                           String gender1, String gender2, int score, String grade,
                                           String elementRelation, String branchRelation, String fullText) {
+        // AI JSON 추출 실패 시 캐시·차감 스킵 (basic 결과만으로는 가치 없음)
+        if (ClaudeApiService.extractJson(fullText) == null) {
+            log.warn("궁합 스트리밍 JSON 추출 실패 → 차감 스킵 (rawLen={})", fullText == null ? 0 : fullText.length());
+            return false;
+        }
         try {
             SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
             SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
@@ -212,17 +217,25 @@ public class CompatibilityService {
             String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
             saveToCache("compatibility", dbCacheKey, result);
             log.info("궁합 스트리밍 캐시 저장 완료: key={}", dbCacheKey);
+            return true;
         } catch (Exception e) {
             log.warn("궁합 스트리밍 캐시 저장 실패: {}", e.getMessage());
+            return false;
         }
     }
 
     /**
      * 결혼궁합 전용 스트리밍 파싱/캐시 저장. 일반 궁합과는 다른 필드 구조.
      */
-    public void parseAndSaveMarriageStreamResult(LocalDate bd1, String bt1, LocalDate bd2, String bt2,
+    public boolean parseAndSaveMarriageStreamResult(LocalDate bd1, String bt1, LocalDate bd2, String bt2,
                                                  String gender1, String gender2, int score,
                                                  String elementRelation, String branchRelation, String fullText) {
+        // 결혼궁합도 AI JSON 미추출 시 차감 스킵
+        String preExtract = ClaudeApiService.extractJson(fullText);
+        if (preExtract == null) {
+            log.warn("결혼궁합 스트리밍 JSON 추출 실패 → 차감 스킵 (rawLen={})", fullText == null ? 0 : fullText.length());
+            return false;
+        }
         try {
             SajuResult r1 = SajuCalculator.calculate(bd1, bt1);
             SajuResult r2 = SajuCalculator.calculate(bd2, bt2);
@@ -233,7 +246,7 @@ public class CompatibilityService {
             result.put("elementRelation", elementRelation);
             result.put("branchRelation", branchRelation);
 
-            String cleanJson = ClaudeApiService.extractJson(fullText);
+            String cleanJson = preExtract;
             if (cleanJson != null) {
                 JsonNode node = objectMapper.readTree(cleanJson);
                 if (node.has("summary")) result.put("aiSummary", node.get("summary").asText());
@@ -257,8 +270,10 @@ public class CompatibilityService {
             String dbCacheKey = buildCacheKey("marriage", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
             saveToCache("marriage", dbCacheKey, result);
             log.info("결혼궁합 스트리밍 캐시 저장 완료: key={}", dbCacheKey);
+            return true;
         } catch (Exception e) {
             log.warn("결혼궁합 스트리밍 캐시 저장 실패: {}", e.getMessage());
+            return false;
         }
     }
 

@@ -200,9 +200,22 @@ public class SajuController {
         // academic 필드 추가로 토큰 살짝 늘려 잘림 방지 (2500 → 3000)
         return claudeApiService.generateStream(systemPrompt, userPrompt, 3000,
                 com.saju.server.service.ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            // 오늘의 운세만 DB 캐시에 저장 (내일/지정일은 휘발성 — 오늘의 결과 덮어쓰기 방지)
-            if (isToday) {
-                sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
+            boolean parsed;
+            try {
+                if (isToday) {
+                    // 오늘의 운세만 DB 캐시에 저장 (내일/지정일은 휘발성 — 오늘의 결과 덮어쓰기 방지)
+                    parsed = sajuService.parseAndSaveStreamResult(finalBd, birthTime, gender, basicResult, fullText);
+                } else {
+                    // 내일/지정일은 캐시 저장 안 함 → 응답 자체 검증으로 결정
+                    parsed = com.saju.server.service.ClaudeApiService.extractJson(fullText) != null;
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] SAJU 파싱 실패: {}", e.getMessage(), e);
+                parsed = false;
+            }
+            if (!parsed) {
+                log.warn("[NoDeduct] 파싱 실패로 차감/히스토리 스킵: cat=SAJU_ANALYSIS, uid={}", uid);
+                return;
             }
             if (uid != null) heartPointService.deductPoints(uid, "SAJU_ANALYSIS", "사주분석");
 
@@ -363,8 +376,16 @@ public class SajuController {
         final String finalCacheKey = cacheKey;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2000,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            sajuService.parseManseryeokStreamResult(finalCacheKey, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "MANSERYEOK", "만세력 AI해석");
+            try {
+                boolean ok = sajuService.parseManseryeokStreamResult(finalCacheKey, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, "MANSERYEOK", "만세력 AI해석");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat=MANSERYEOK, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 만세력 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 

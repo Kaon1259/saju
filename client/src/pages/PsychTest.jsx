@@ -9,6 +9,7 @@ import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { useToast } from '../components/Toast';
 import './PsychTest.css';
 
 // ═══════════════════════════════════════════════════
@@ -73,6 +74,7 @@ const FALLBACK_TESTS = [
 
 function PsychTest() {
   const navigate = useNavigate();
+  const toast = useToast();
   // ─── 상태 ───
   const [step, setStep] = useState('select'); // select | quiz | loading | result
   const [tests, setTests] = useState(FALLBACK_TESTS);
@@ -229,7 +231,7 @@ function PsychTest() {
       navigator.share({ title: '심리테스트 결과', text }).catch(() => {});
     } else {
       navigator.clipboard?.writeText(text);
-      alert('결과가 복사되었습니다!');
+      toast('결과가 복사되었습니다', 'success');
     }
   };
 

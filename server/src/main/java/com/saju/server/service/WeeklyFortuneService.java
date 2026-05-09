@@ -65,14 +65,14 @@ public class WeeklyFortuneService {
      * 스트리밍 완료 후 캐시 저장
      */
     @Transactional
-    public void saveStreamResult(String birthDate, String birthTime, String gender, String fullText) {
+    public boolean saveStreamResult(String birthDate, String birthTime, String gender, String fullText) {
         try {
             LocalDate today = LocalDate.now();
             LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
             String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
             String json = ClaudeApiService.extractJson(fullText);
-            if (json == null) return;
+            if (json == null) return false;
             Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
 
             LocalDate date = LocalDate.parse(birthDate);
@@ -89,8 +89,10 @@ public class WeeklyFortuneService {
             full.putAll(aiResult);
             full.put("source", "ai");
             saveToCache("weekly", cacheKey, full, weekStart);
+            return true;
         } catch (Exception e) {
             log.warn("WeeklyFortune stream cache save failed: {}", e.getMessage());
+            return false;
         }
     }
 

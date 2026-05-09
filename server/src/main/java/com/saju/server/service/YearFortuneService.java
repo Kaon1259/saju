@@ -60,11 +60,11 @@ public class YearFortuneService {
      * 스트리밍 완료 후 캐시 저장
      */
     @Transactional
-    public void saveStreamResult(String birthDate, String birthTime, String gender, String calendarType, String fullText) {
+    public boolean saveStreamResult(String birthDate, String birthTime, String gender, String calendarType, String fullText) {
         try {
             String cacheKey = buildCacheKey("yearly", birthDate, birthTime, gender, calendarType);
             String json = ClaudeApiService.extractJson(fullText);
-            if (json == null) return;
+            if (json == null) return false;
             Map<String, Object> result = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
 
             LocalDate date = LocalDate.parse(birthDate);
@@ -84,8 +84,10 @@ public class YearFortuneService {
             full.putAll(result);
             full.put("source", "ai");
             saveToCache("yearly", cacheKey, full);
+            return true;
         } catch (Exception e) {
             log.warn("YearFortune stream cache save failed: {}", e.getMessage());
+            return false;
         }
     }
 

@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { getUser, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import './Register.css';
+import './ProfileEdit.css';
 
 const BIRTH_TIMES = [
   { value: '', label: '모름 / 선택안함' },
@@ -142,152 +144,207 @@ function ProfileEdit() {
       </section>
 
       <div className="register-form glass-card" style={{ animationDelay: '100ms' }}>
-        {/* 이름 */}
-        <div className="form-group">
-          <label className="form-label">이름</label>
-          <input type="text" className="form-input" value={form.name}
-            onChange={e => handleChange('name', e.target.value)} maxLength={20} />
-        </div>
-
-        {/* 달력/생년월일 */}
-        <div className="form-group">
-          <label className="form-label">달력</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${form.calendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`}
-              onClick={() => handleChange('calendarType', 'SOLAR')}>☀️ 양력</button>
-            <button type="button" className={`form-toggle__btn ${form.calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`}
-              onClick={() => handleChange('calendarType', 'LUNAR')}>🌙 음력</button>
+        <div className="pe-list">
+          {/* 이름 + 성별 — 한 줄 통합 */}
+          <div className="pe-row pe-row-combo">
+            <span className="pe-input-icon">👤</span>
+            <input
+              type="text"
+              className="pe-input-name"
+              value={form.name}
+              onChange={e => handleChange('name', e.target.value)}
+              maxLength={20}
+              placeholder="이름"
+            />
+            <GenderPicker value={form.gender} onChange={(v) => handleChange('gender', v)} />
           </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">생년월일</label>
-          <BirthDatePicker value={form.birthDate} onChange={(v) => handleChange('birthDate', v)} calendarType={form.calendarType} />
-        </div>
 
-        {/* 성별 */}
-        <div className="form-group">
-          <label className="form-label">성별</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${form.gender === 'M' ? 'form-toggle__btn--active' : ''}`}
-              onClick={() => handleChange('gender', 'M')}><span className="g-circle g-male">♂</span></button>
-            <button type="button" className={`form-toggle__btn ${form.gender === 'F' ? 'form-toggle__btn--active' : ''}`}
-              onClick={() => handleChange('gender', 'F')}><span className="g-circle g-female">♀</span></button>
-          </div>
-        </div>
-
-        {/* 태어난 시간 */}
-        <div className="form-group">
-          <label className="form-label">태어난 시간</label>
-          <select className="form-input form-select" value={form.birthTime}
-            onChange={e => handleChange('birthTime', e.target.value)}>
-            {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
-        </div>
-
-        {/* 혈액형 */}
-        <div className="form-group">
-          <label className="form-label">혈액형</label>
-          <div className="form-toggle form-toggle--4">
-            {['A','B','O','AB'].map(bt => (
-              <button key={bt} type="button" className={`form-toggle__btn ${form.bloodType === bt ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('bloodType', form.bloodType === bt ? '' : bt)}>{bt}형</button>
-            ))}
-          </div>
-        </div>
-
-        {/* MBTI */}
-        <div className="form-group">
-          <label className="form-label">MBTI</label>
-          <div className="form-mbti-grid">
-            {MBTI_TYPES.map(t => (
-              <button key={t} type="button" className={`form-mbti-btn ${form.mbtiType === t ? 'form-mbti-btn--active' : ''}`}
-                onClick={() => handleChange('mbtiType', form.mbtiType === t ? '' : t)}>{t}</button>
-            ))}
-          </div>
-        </div>
-
-        {/* ═══ 연애 상태 ═══ */}
-        <div className="form-group">
-          <label className="form-label">💝 연애 상태</label>
-          <div className="form-toggle" style={{ gap: '6px' }}>
-            {REL_STATUS.map(rs => (
-              <button key={rs.id} type="button"
-                className={`form-toggle__btn ${form.relationshipStatus === rs.id ? 'form-toggle__btn--active' : ''}`}
-                style={form.relationshipStatus === rs.id ? { borderColor: rs.color, background: `${rs.color}22` } : {}}
-                onClick={() => handleChange('relationshipStatus', rs.id)}>
-                {rs.icon} {rs.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ═══ 상대방 정보 ═══ */}
-        <div className={`pe-partner-section ${!isPartnerEnabled ? 'pe-partner--disabled' : ''}`}>
-          <label className="form-label">
-            {isPartnerEnabled ? '💑 상대방 정보' : '💑 상대방 정보 (솔로 시 비활성)'}
-          </label>
-
-          <div className="form-group">
-            <label className="form-label" style={{ fontSize: '12px' }}>상대방 달력 구분</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${form.partnerCalendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('partnerCalendarType', 'SOLAR')} disabled={!isPartnerEnabled}>☀️ 양력</button>
-              <button type="button" className={`form-toggle__btn ${form.partnerCalendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('partnerCalendarType', 'LUNAR')} disabled={!isPartnerEnabled}>🌙 음력</button>
+          {/* 생년월일 — stack (큼) */}
+          <div className="pe-row pe-row--stack">
+            <span className="pe-row-label">생년월일</span>
+            <div className="pe-row-value">
+              <BirthDatePicker
+                value={form.birthDate}
+                onChange={(v) => handleChange('birthDate', v)}
+                calendarType={form.calendarType}
+                onCalendarTypeChange={(v) => handleChange('calendarType', v)}
+              />
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" style={{ fontSize: '12px' }}>상대방 생년월일 ({form.partnerCalendarType === 'LUNAR' ? '음력' : '양력'})</label>
-            <BirthDatePicker value={form.partnerBirthDate} onChange={(v) => handleChange('partnerBirthDate', v)} calendarType={form.partnerCalendarType} />
-          </div>
-
-          {/* 상대방 띠 + 별자리 자동 표시 */}
-          {isPartnerEnabled && (partnerZodiac || partnerConstellation) && (
-            <div className="register-info-badges" style={{ margin: '4px 0 8px' }}>
-              {partnerZodiac && <div className="register-zodiac"><span className="register-zodiac__emoji">{partnerZodiac.emoji}</span><span className="register-zodiac__text">{partnerZodiac.name}띠</span></div>}
-              {partnerConstellation && <div className="register-constellation"><span className="register-constellation__emoji">{partnerConstellation.emoji}</span><span className="register-constellation__text">{partnerConstellation.name}</span></div>}
-            </div>
-          )}
-
-          <div className="form-group">
-            <label className="form-label" style={{ fontSize: '12px' }}>상대방 태어난 시간</label>
-            <select className="form-input form-select" value={form.partnerBirthTime}
-              onChange={e => handleChange('partnerBirthTime', e.target.value)} disabled={!isPartnerEnabled}>
-              {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" style={{ fontSize: '12px' }}>상대방 혈액형</label>
-            <div className="form-toggle form-toggle--4">
-              {['A','B','O','AB'].map(bt => (
-                <button key={bt} type="button" disabled={!isPartnerEnabled}
-                  className={`form-toggle__btn ${form.partnerBloodType === bt ? 'form-toggle__btn--active' : ''}`}
-                  onClick={() => handleChange('partnerBloodType', form.partnerBloodType === bt ? '' : bt)}>{bt}형</button>
-              ))}
+          {/* 태어난 시간 — inline select */}
+          <div className="pe-row">
+            <span className="pe-row-label">태어난 시간</span>
+            <div className="pe-row-value">
+              <select
+                className="pe-select-inline"
+                value={form.birthTime}
+                onChange={e => handleChange('birthTime', e.target.value)}
+              >
+                {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" style={{ fontSize: '12px' }}>상대방 MBTI</label>
-            <div className="form-mbti-grid">
-              {MBTI_TYPES.map(t => (
-                <button key={t} type="button" disabled={!isPartnerEnabled}
-                  className={`form-mbti-btn ${form.partnerMbtiType === t ? 'form-mbti-btn--active' : ''}`}
-                  onClick={() => handleChange('partnerMbtiType', form.partnerMbtiType === t ? '' : t)}>{t}</button>
-              ))}
+          {/* 혈액형 — chip row */}
+          <div className="pe-row">
+            <span className="pe-row-label">혈액형</span>
+            <div className="pe-row-value">
+              <div className="pe-chips">
+                {['A','B','O','AB'].map(bt => (
+                  <button
+                    key={bt}
+                    type="button"
+                    className={`pe-chip ${form.bloodType === bt ? 'pe-chip--active' : ''}`}
+                    onClick={() => handleChange('bloodType', form.bloodType === bt ? '' : bt)}
+                  >
+                    {bt}형
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* MBTI — stack (그리드 큼) */}
+          <div className="pe-row pe-row--stack">
+            <span className="pe-row-label">MBTI</span>
+            <div className="pe-row-value">
+              <div className="pe-mbti-grid">
+                {MBTI_TYPES.map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`pe-mbti-btn ${form.mbtiType === t ? 'pe-mbti-btn--active' : ''}`}
+                    onClick={() => handleChange('mbtiType', form.mbtiType === t ? '' : t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 연애 상태 — stack chips */}
+          <div className="pe-row pe-row--stack">
+            <span className="pe-row-label">연애 상태</span>
+            <div className="pe-row-value">
+              <div className="pe-chips">
+                {REL_STATUS.map(rs => (
+                  <button
+                    key={rs.id}
+                    type="button"
+                    className={`pe-chip ${form.relationshipStatus === rs.id ? 'pe-chip--active' : ''}`}
+                    style={form.relationshipStatus === rs.id ? { borderColor: rs.color, background: `${rs.color}22`, color: '#fff' } : {}}
+                    onClick={() => handleChange('relationshipStatus', rs.id)}
+                  >
+                    <span>{rs.icon}</span> {rs.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {error && <div className="form-error"><span>⚠️</span> {error}</div>}
-        {success && <div className="form-error" style={{ background: 'rgba(74,222,128,0.1)', borderColor: 'rgba(74,222,128,0.2)', color: '#4ade80' }}>✅ 저장되었습니다!</div>}
+        {/* ═══ 연인 정보 섹션 ═══ */}
+        <div className="pe-section-heading">
+          <span>💑 연인 정보</span>
+          <span className="pe-section-heading-line" />
+          {!isPartnerEnabled && <span className="pe-partner-hint">솔로 시 비활성</span>}
+        </div>
 
-        <button className="btn-gold register-submit" onClick={handleSave} disabled={saving}>
-          {saving ? '저장 중...' : '💾 저장'}
-        </button>
-        <button className="register-back-step" onClick={() => navigate('/profile')}>← 프로필로 돌아가기</button>
+        <div className={`pe-list ${!isPartnerEnabled ? 'pe-partner-disabled' : ''}`}>
+          {/* 연인 생년월일 — stack */}
+          <div className="pe-row pe-row--stack">
+            <span className="pe-row-label">연인 생년월일</span>
+            <div className="pe-row-value">
+              <BirthDatePicker
+                value={form.partnerBirthDate}
+                onChange={(v) => handleChange('partnerBirthDate', v)}
+                calendarType={form.partnerCalendarType}
+                onCalendarTypeChange={isPartnerEnabled ? (v) => handleChange('partnerCalendarType', v) : undefined}
+              />
+            </div>
+            {isPartnerEnabled && (partnerZodiac || partnerConstellation) && (
+              <div className="pe-meta-row">
+                {partnerZodiac && (
+                  <span className="pe-meta-badge pe-meta-badge--zodiac">
+                    {partnerZodiac.emoji} {partnerZodiac.name}띠
+                  </span>
+                )}
+                {partnerConstellation && (
+                  <span className="pe-meta-badge pe-meta-badge--const">
+                    {partnerConstellation.emoji} {partnerConstellation.name}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 연인 태어난 시간 — inline */}
+          <div className="pe-row">
+            <span className="pe-row-label">연인 태어난 시간</span>
+            <div className="pe-row-value">
+              <select
+                className="pe-select-inline"
+                value={form.partnerBirthTime}
+                onChange={e => handleChange('partnerBirthTime', e.target.value)}
+                disabled={!isPartnerEnabled}
+              >
+                {BIRTH_TIMES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* 연인 혈액형 — chip row */}
+          <div className="pe-row">
+            <span className="pe-row-label">연인 혈액형</span>
+            <div className="pe-row-value">
+              <div className="pe-chips">
+                {['A','B','O','AB'].map(bt => (
+                  <button
+                    key={bt}
+                    type="button"
+                    disabled={!isPartnerEnabled}
+                    className={`pe-chip ${form.partnerBloodType === bt ? 'pe-chip--active' : ''}`}
+                    onClick={() => handleChange('partnerBloodType', form.partnerBloodType === bt ? '' : bt)}
+                  >
+                    {bt}형
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 연인 MBTI — stack */}
+          <div className="pe-row pe-row--stack">
+            <span className="pe-row-label">연인 MBTI</span>
+            <div className="pe-row-value">
+              <div className="pe-mbti-grid">
+                {MBTI_TYPES.map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={!isPartnerEnabled}
+                    className={`pe-mbti-btn ${form.partnerMbtiType === t ? 'pe-mbti-btn--active' : ''}`}
+                    onClick={() => handleChange('partnerMbtiType', form.partnerMbtiType === t ? '' : t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pe-actions">
+          {error && <div className="form-error"><span>⚠️</span> {error}</div>}
+          {success && <div className="form-error" style={{ background: 'rgba(74,222,128,0.1)', borderColor: 'rgba(74,222,128,0.2)', color: '#4ade80' }}>✅ 저장되었습니다!</div>}
+
+          <button className="btn-gold register-submit" onClick={handleSave} disabled={saving}>
+            {saving ? '저장 중...' : '💾 저장'}
+          </button>
+          <button className="register-back-step" onClick={() => navigate('/profile')}>← 프로필로 돌아가기</button>
+        </div>
       </div>
     </div>
   );

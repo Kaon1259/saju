@@ -9,6 +9,7 @@ import com.saju.server.service.SpecialFortuneService;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/special")
 @RequiredArgsConstructor
+@Slf4j
 public class SpecialFortuneController {
 
     private final SpecialFortuneService specialFortuneService;
@@ -174,11 +176,22 @@ public class SpecialFortuneController {
             : "skinship".equals(type) ? 1800 : 1400;
         final Long uid = userId;
         // 비용 절감 — 1:1연애 전체 타입(스킨십/짝사랑/소개팅/고백/이상형 등) Haiku 4.5 적용.
+        final String finalConfigKey = configKey;
         return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
-                partnerDate, partnerGender, breakupDate, meetDate, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, configKey, "1:1연애운 - " + type);
+            boolean parsed;
+            try {
+                parsed = specialFortuneService.parseAndSaveLoveStreamResult(type, birthDate, gender,
+                    partnerDate, partnerGender, breakupDate, meetDate, fullText);
+            } catch (Exception e) {
+                log.error("[onComplete] 1:1연애운 파싱 실패: {}", e.getMessage(), e);
+                parsed = false;
+            }
+            if (!parsed) {
+                log.warn("[NoDeduct] 파싱 실패로 차감/히스토리 스킵: cat={}, uid={}, type={}", finalConfigKey, uid, type);
+                return;
+            }
+            if (uid != null) heartPointService.deductPoints(uid, finalConfigKey, "1:1연애운 - " + type);
 
             // 히스토리 저장 — 재열람 시 동일 입력값으로 캐시 히트
             if (uid != null) {

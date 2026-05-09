@@ -6,6 +6,7 @@ import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken } from '../api/
 import { setToken } from '../utils/auth';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import { startKakaoLogin, peekKakaoReturnTo, clearKakaoReturnTo, getKakaoRedirectUri } from '../utils/kakaoAuth';
 import './Register.css';
 
@@ -289,18 +290,13 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">달력 구분</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${form.calendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('calendarType', 'SOLAR')}>☀️ 양력</button>
-              <button type="button" className={`form-toggle__btn ${form.calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('calendarType', 'LUNAR')}>🌙 음력</button>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">생년월일 ({form.calendarType === 'SOLAR' ? '양력' : '음력'})</label>
-            <BirthDatePicker value={form.birthDate} onChange={(v) => handleChange('birthDate', v)} calendarType={form.calendarType} />
+            <label className="form-label">생년월일</label>
+            <BirthDatePicker
+              value={form.birthDate}
+              onChange={(v) => handleChange('birthDate', v)}
+              calendarType={form.calendarType}
+              onCalendarTypeChange={(v) => handleChange('calendarType', v)}
+            />
           </div>
 
           {(zodiac || constellation) && (
@@ -312,12 +308,7 @@ function Register() {
 
           <div className="form-group">
             <label className="form-label">성별</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${form.gender === 'M' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('gender', 'M')}><span className="g-circle g-male">♂</span></button>
-              <button type="button" className={`form-toggle__btn ${form.gender === 'F' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => handleChange('gender', 'F')}><span className="g-circle g-female">♀</span></button>
-            </div>
+            <GenderPicker value={form.gender} onChange={(v) => handleChange('gender', v)} />
           </div>
 
           <div className="form-group">

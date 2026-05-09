@@ -8,6 +8,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { useToast } from '../components/Toast';
 import './Biorhythm.css';
 
 // ═══════════════════════════════════════════════════
@@ -124,6 +125,7 @@ function buildSvgPath(data, cycleId, chartW, chartH, padX, padY) {
 
 function Biorhythm() {
   const navigate = useNavigate();
+  const toast = useToast();
   // ─── 상태 ───
   const [birthDate, setBirthDate] = useState('');
   const [calendarType, setCalendarType] = useState('SOLAR');
@@ -174,10 +176,10 @@ function Biorhythm() {
         setBirthDate(profile.birthDate);
         if (profile.calendarType) setCalendarType(profile.calendarType);
       } else {
-        alert('프로필에 생년월일을 등록해주세요.');
+        toast('프로필에 생년월일을 등록해주세요.', 'warn');
       }
     } catch {
-      alert('로그인이 필요합니다.');
+      toast('로그인이 필요합니다.', 'warn');
     }
   };
 

@@ -33,16 +33,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestBody java.util.Map<String, String> body) {
-        String phone = body.get("phone");
-        if (phone == null || phone.isBlank()) {
-            return ResponseEntity.badRequest().build();
-        }
-        UserResponse response = userService.login(phone);
-        return ResponseEntity.ok(response);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request, HttpServletRequest req) {
         requireSelf(req, id);

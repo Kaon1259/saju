@@ -9,6 +9,8 @@ import com.saju.server.repository.HeartPointLogRepository;
 import com.saju.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,11 @@ public class HeartPointService {
     private final UserRepository userRepository;
     private final HeartPointLogRepository heartPointLogRepository;
     private final HeartPointConfigRepository heartPointConfigRepository;
+
+    // Self-injection (트랜잭션 경계 보장: 재시도 시 새 트랜잭션 시작)
+    @Autowired
+    @Lazy
+    private HeartPointService self;
 
     private static final int DEFAULT_BASIC_COST = 5;
     private static final int DEFAULT_DEEP_COST = 15;
@@ -63,8 +70,20 @@ public class HeartPointService {
         }
     }
 
-    @Transactional
     public void deductPoints(Long userId, String analysisCategory, String endpointDesc) {
+        try {
+            self.doDeductPoints(userId, analysisCategory, endpointDesc);
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException
+                | org.springframework.dao.OptimisticLockingFailureException ex) {
+            // @Version 충돌 — 50ms 대기 후 1회 재조회 + 재시도 (새 트랜잭션 = self 호출)
+            log.warn("하트 차감 OptimisticLock 충돌, 재시도: userId={}, cat={}", userId, analysisCategory);
+            try { Thread.sleep(50); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
+            self.doDeductPoints(userId, analysisCategory, endpointDesc);
+        }
+    }
+
+    @Transactional
+    public void doDeductPoints(Long userId, String analysisCategory, String endpointDesc) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 

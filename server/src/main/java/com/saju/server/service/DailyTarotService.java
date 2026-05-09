@@ -94,9 +94,13 @@ public class DailyTarotService {
         final String nameEnFinal = cardNameEn;
         final String dmFinal = dm;
         return claudeApiService.generateStream(system, user, 2200, ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json == null) return;
+                if (json == null) {
+                    log.warn("[NoDeduct] daily-tarot JSON 추출 실패");
+                    return;
+                }
                 var node = objectMapper.readTree(json);
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("cardId", cidFinal);
@@ -110,10 +114,13 @@ public class DailyTarotService {
                 result.put("advice", node.path("advice").asText(""));
                 result.put("lucky", node.path("lucky").asText(""));
                 cache.put(key(uid, cidFinal), result);
+                ok = true;
             } catch (Exception e) {
-                log.warn("daily tarot cache save failed: {}", e.getMessage());
+                log.warn("[NoDeduct] daily tarot cache save failed: {}", e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("daily-tarot onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 }

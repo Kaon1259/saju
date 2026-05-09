@@ -396,19 +396,25 @@ public class PsychTestService {
 
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1000,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json != null) {
-                    Map<String, Object> result = objectMapper.readValue(json, new TypeReference<>() {});
-                    result.put("testId", finalTestId);
-                    result.put("testName", TEST_NAMES.get(finalTestId));
-                    result.put("answerScores", finalScores);
-                    saveToCache("psych-test", finalCacheKey, result);
+                if (json == null) {
+                    log.warn("[NoDeduct] psych-test JSON 추출 실패");
+                    return;
                 }
+                Map<String, Object> result = objectMapper.readValue(json, new TypeReference<>() {});
+                result.put("testId", finalTestId);
+                result.put("testName", TEST_NAMES.get(finalTestId));
+                result.put("answerScores", finalScores);
+                saveToCache("psych-test", finalCacheKey, result);
+                ok = true;
             } catch (Exception e) {
-                log.warn("심리테스트 스트림 캐시 저장 실패: {}", e.getMessage());
+                log.warn("[NoDeduct] 심리테스트 스트림 캐시 저장 실패: {}", e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("psych-test onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 

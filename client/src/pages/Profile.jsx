@@ -5,6 +5,8 @@ import { clearAuth } from '../utils/auth';
 import HeartCost from '../components/HeartCost';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import ConstellationMap from '../components/ConstellationMap';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 import './Profile.css';
 
 // 별자리 데이터
@@ -51,6 +53,8 @@ function getZodiacFromYear(year) {
 
 function Profile() {
   const navigate = useNavigate();
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -106,7 +110,17 @@ function Profile() {
 
       {/* 뱃지 */}
       <div className="pf-badges">
-        {zodiac && <span className="pf-badge pf-badge--zodiac">{zodiac.name}띠</span>}
+        {zodiac && (
+          <span className="pf-badge pf-badge--zodiac">
+            {zodiac.emoji && <span style={{ marginRight: 4 }}>{zodiac.emoji}</span>}
+            {zodiac.name}띠
+            {user.gender && (
+              <span className={`pf-badge-gender pf-badge-gender--${user.gender === 'M' ? 'male' : 'female'}`}>
+                {user.gender === 'M' ? '♂' : '♀'}
+              </span>
+            )}
+          </span>
+        )}
         {constellation && <span className="pf-badge pf-badge--const" style={{ borderColor: constellation.color, color: constellation.color }}>{constellation.icon} {constellation.name}</span>}
         {user.bloodType && <span className="pf-badge pf-badge--bt">{user.bloodType}형</span>}
         {user.mbtiType && <span className="pf-badge pf-badge--mbti">{user.mbtiType}</span>}
@@ -227,7 +241,7 @@ function Profile() {
                 setShowAllDaily(true);
                 window.dispatchEvent(new CustomEvent('heart:refresh'));
               } catch {
-                alert('하트가 부족합니다. 충전 후 다시 시도해주세요.');
+                toast('하트가 부족합니다. 충전 후 다시 시도해주세요.', 'error');
               }
               setDailyUnlocking(false);
             }}>
@@ -263,24 +277,34 @@ function Profile() {
           className="pf-btn pf-btn--logout"
           style={{ marginTop: 8, color: '#999', fontSize: '0.85rem' }}
           onClick={async () => {
-            const ok = window.confirm(
-              '정말 회원 탈퇴하시겠습니까?\n\n' +
-              '- 모든 운세 히스토리, 하트, 프로필 정보가 영구 삭제됩니다.\n' +
-              '- 잔여 하트는 복구되지 않습니다.\n' +
-              '- 같은 카카오 계정으로 재가입은 가능하지만 기존 데이터는 복구되지 않습니다.'
-            );
+            const ok = await confirm({
+              title: '회원 탈퇴',
+              message:
+                '모든 운세 히스토리, 하트, 프로필 정보가 영구 삭제됩니다.\n' +
+                '잔여 하트는 복구되지 않습니다.\n' +
+                '같은 카카오 계정으로 재가입은 가능하지만 기존 데이터는 복구되지 않습니다.',
+              confirmText: '계속',
+              cancelText: '취소',
+              danger: true,
+            });
             if (!ok) return;
-            const ok2 = window.confirm('탈퇴 후 복구가 불가능합니다. 정말 진행하시겠습니까?');
+            const ok2 = await confirm({
+              title: '마지막 확인',
+              message: '탈퇴 후에는 복구가 불가능합니다.\n정말 진행하시겠습니까?',
+              confirmText: '탈퇴',
+              cancelText: '취소',
+              danger: true,
+            });
             if (!ok2) return;
             try {
               const uid = localStorage.getItem('userId');
               await deleteUser(uid);
-              alert('탈퇴가 완료되었습니다.');
+              toast('탈퇴가 완료되었습니다.', 'success');
               clearAuth();
               localStorage.setItem('autoLogin', 'off');
               navigate('/register', { replace: true });
             } catch (e) {
-              alert('탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+              toast('탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error');
             }
           }}>
           회원 탈퇴

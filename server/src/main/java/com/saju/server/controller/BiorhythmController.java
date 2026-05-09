@@ -10,6 +10,7 @@ import com.saju.server.service.LunarCalendarService;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/biorhythm")
 @RequiredArgsConstructor
+@Slf4j
 public class BiorhythmController {
 
     private final BiorhythmService biorhythmService;
@@ -92,8 +94,16 @@ public class BiorhythmController {
         final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 1500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            biorhythmService.saveStreamResult(resolvedBd, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "BIORHYTHM", "바이오리듬");
+            try {
+                boolean ok = biorhythmService.saveStreamResult(resolvedBd, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, "BIORHYTHM", "바이오리듬");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat=BIORHYTHM, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] BIORHYTHM 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 }

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory, getUser } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import { shareResult } from '../utils/share';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -455,21 +456,11 @@ function Compatibility() {
         )}
         <div className="form-group">
           <label className="form-label">성별</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${g1 === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => { setG1('M'); setG2('F'); }}><span className="g-circle g-male">♂</span></button>
-            <button type="button" className={`form-toggle__btn ${g1 === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => { setG1('F'); setG2('M'); }}><span className="g-circle g-female">♀</span></button>
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">달력 구분</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${calType1 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('SOLAR')}>☀️ 양력</button>
-            <button type="button" className={`form-toggle__btn ${calType1 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType1('LUNAR')}>🌙 음력</button>
-          </div>
+          <GenderPicker value={g1} onChange={(v) => { setG1(v); setG2(v === 'M' ? 'F' : 'M'); }} />
         </div>
         <div className="form-group">
           <label className="form-label">생년월일</label>
-          <BirthDatePicker value={bd1} onChange={setBd1} calendarType={calType1} />
+          <BirthDatePicker value={bd1} onChange={setBd1} calendarType={calType1} onCalendarTypeChange={setCalType1} />
         </div>
         {!showTime && (
           <button className="compat-time-toggle" onClick={() => setShowTime(true)}>⏰ 태어난 시간 입력 (선택, 더 정확한 분석)</button>
@@ -540,21 +531,11 @@ function Compatibility() {
         )}
         <div className="form-group">
           <label className="form-label">상대방 성별</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${g2 === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setG2('M')}><span className="g-circle g-male">♂</span></button>
-            <button type="button" className={`form-toggle__btn ${g2 === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setG2('F')}><span className="g-circle g-female">♀</span></button>
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">달력 구분</label>
-          <div className="form-toggle">
-            <button type="button" className={`form-toggle__btn ${calType2 === 'SOLAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('SOLAR')}>☀️ 양력</button>
-            <button type="button" className={`form-toggle__btn ${calType2 === 'LUNAR' ? 'form-toggle__btn--active' : ''}`} onClick={() => setCalType2('LUNAR')}>🌙 음력</button>
-          </div>
+          <GenderPicker value={g2} onChange={setG2} />
         </div>
         <div className="form-group">
           <label className="form-label">생년월일</label>
-          <BirthDatePicker value={bd2} onChange={setBd2} calendarType={calType2} />
+          <BirthDatePicker value={bd2} onChange={setBd2} calendarType={calType2} onCalendarTypeChange={setCalType2} />
         </div>
         {showTime && (
           <div className="form-group">

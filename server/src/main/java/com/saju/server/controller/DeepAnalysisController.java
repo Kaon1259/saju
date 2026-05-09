@@ -120,9 +120,18 @@ public class DeepAnalysisController {
         String targetContext = promptBuilder.buildTargetContext(targetType, targetName);
         String userPrompt = deepAnalysisService.getUserPrompt(type, birthDate, birthTime, gender, calendarType, extra, context) + personContext + targetContext;
         final Long uid = userId;
+        final String finalConfigKey = configKey;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 4000, (fullText) -> {
-            deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, configKey, "심화분석 - " + type);
+            try {
+                boolean ok = deepAnalysisService.saveStreamResult(type, birthDate, birthTime, gender, calendarType, extra, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, finalConfigKey, "심화분석 - " + type);
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat={}, uid={}", finalConfigKey, uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 심화분석 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 
@@ -218,8 +227,16 @@ public class DeepAnalysisController {
         final Long uid = userId;
         // 기본(modelOverride 없음) → Sonnet 4.6 자동 사용. 1400자 평문 → 3500 토큰 여유.
         return claudeApiService.generateStream(systemPrompt, userPrompt, 3500, (fullText) -> {
-            deepAnalysisService.saveTarotDeepStreamResult(cardIds, reversals, spread, category, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "DEEP_TAROT", "심화분석 - 타로");
+            try {
+                boolean ok = deepAnalysisService.saveTarotDeepStreamResult(cardIds, reversals, spread, category, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, "DEEP_TAROT", "심화분석 - 타로");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 응답 부족으로 차감 스킵: cat=DEEP_TAROT, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 타로 심화 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 
@@ -292,9 +309,18 @@ public class DeepAnalysisController {
         int maxTokens = "marriage_compat".equalsIgnoreCase(type) ? 7500
                 : "compatibility".equalsIgnoreCase(type) ? 6000
                 : 4000;
+        final String finalConfigKey = configKey;
         return claudeApiService.generateStream(systemPrompt, userPrompt, maxTokens, (fullText) -> {
-            deepAnalysisService.saveCompatStreamResult(type, bd1, bt1, g1, bd2, bt2, g2, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, configKey, "심화분석 - " + type);
+            try {
+                boolean ok = deepAnalysisService.saveCompatStreamResult(type, bd1, bt1, g1, bd2, bt2, g2, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, finalConfigKey, "심화분석 - " + type);
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat={}, uid={}", finalConfigKey, uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 궁합 심화 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 

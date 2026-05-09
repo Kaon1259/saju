@@ -1,83 +1,568 @@
+/* ═══════════════════════════════════════════
+   BirthDatePicker - Soft Wheel
+   요약 박스 + 바텀시트 휠 피커
+   ═══════════════════════════════════════════ */
+
 .bdp-container { width: 100%; }
 
-.bdp-selects {
-  display: flex;
-  gap: 8px;
-}
-
-.bdp-select-wrap {
-  flex: 1;
-  position: relative;
-}
-
-.bdp-select {
+/* ───────── 요약 박스 (메인 폼) ───────── */
+.bdp-summary {
   width: 100%;
-  padding: 12px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(251, 191, 36, 0.04));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-family: inherit;
+}
+
+.bdp-summary:hover {
+  border-color: rgba(255, 107, 157, 0.45);
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.12), rgba(251, 191, 36, 0.06));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 107, 157, 0.18);
+}
+
+.bdp-summary--empty {
+  background: rgba(255, 255, 255, 0.04);
+  border-style: dashed;
+}
+
+.bdp-summary-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bdp-summary-date {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.bdp-summary-num {
+  background: linear-gradient(135deg, #ff6b9d, #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bdp-summary-dot {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+  margin: 0 2px;
+}
+
+.bdp-summary-placeholder {
+  color: rgba(255, 255, 255, 0.5);
   font-size: 15px;
   font-weight: 500;
-  text-align: center;
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
 }
 
-.bdp-select:focus {
-  outline: none;
-  border-color: var(--color-accent-gold, #FBBF24);
-  background: rgba(251, 191, 36, 0.08);
-}
-
-.bdp-select option {
-  background: #1a1a2e;
-  color: #fff;
-  font-size: 15px;
-}
-
-.bdp-select-wrap::after {
-  content: '▾';
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 10px;
-  pointer-events: none;
-}
-
-.bdp-lunar-hint {
-  display: block;
-  margin-top: 6px;
+.bdp-summary-arrow {
+  color: rgba(255, 255, 255, 0.5);
   font-size: 12px;
-  color: #FBBF24;
-  text-align: center;
 }
 
-/* Light mode */
-[data-theme="light"] .bdp-select {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #111;
+.bdp-summary-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  flex-wrap: wrap;
 }
 
-[data-theme="light"] .bdp-select:focus {
-  border-color: #7C3AED;
-  background: rgba(124, 58, 237, 0.06);
+.bdp-summary-cal {
+  background: rgba(255, 107, 157, 0.18);
+  color: #ff6b9d;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 11px;
 }
 
-[data-theme="light"] .bdp-select option {
-  background: #fff;
-  color: #111;
+.bdp-summary-divider {
+  color: rgba(255, 255, 255, 0.25);
 }
 
-[data-theme="light"] .bdp-select-wrap::after {
+/* ───────── 떠있는 카드형 시트 ───────── */
+.bdp-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 25, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: bdp-overlay-in 0.22s ease;
+}
+
+@keyframes bdp-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bdp-sheet {
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(32, 24, 54, 0.97), rgba(22, 16, 38, 0.99));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 107, 157, 0.28);
+  padding: 12px 22px 24px;
+  position: relative;
+  animation: bdp-sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 107, 157, 0.12),
+    0 0 40px rgba(255, 107, 157, 0.18);
+}
+
+@keyframes bdp-sheet-up {
+  from { transform: translateY(20px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.bdp-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  margin: 4px auto 14px;
+}
+
+.bdp-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.bdp-sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  background: linear-gradient(135deg, #ff6b9d, #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bdp-sheet-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.bdp-sheet-close:hover {
+  background: rgba(255, 107, 157, 0.2);
+  color: #ff6b9d;
+}
+
+/* ───────── 양력/음력/윤달 캡슐 ───────── */
+.bdp-cal-toggle {
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.bdp-cal-btn {
+  flex: 1;
+  padding: 9px 8px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.bdp-cal-btn--active {
+  background: linear-gradient(135deg, #ff6b9d, #ec4899);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 107, 157, 0.4);
+}
+
+/* ───────── 휠 피커 ───────── */
+.bdp-wheels {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  height: 264px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 107, 157, 0.1) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.025);
+}
+
+/* 위/아래 페이드 그라데이션 마스크 — 휠 끝부분 자연스럽게 */
+.bdp-wheels::before,
+.bdp-wheels::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 64px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.bdp-wheels::before {
+  top: 0;
+  background: linear-gradient(180deg, rgba(28, 22, 48, 0.95), transparent);
+}
+
+.bdp-wheels::after {
+  bottom: 0;
+  background: linear-gradient(0deg, rgba(28, 22, 48, 0.95), transparent);
+}
+
+.bdp-select-line {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+  border-top: 1px dashed rgba(255, 107, 157, 0.45);
+  border-bottom: 1px dashed rgba(251, 191, 36, 0.45);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bdp-select-line-heart {
+  position: absolute;
+  top: -8px;
+  font-size: 13px;
+  color: #ff6b9d;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 157, 0.7));
+}
+
+.bdp-heart-left { left: 30%; }
+.bdp-heart-right { right: 30%; }
+
+.bdp-wheel {
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+
+.bdp-wheel-scroll {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 2;
+}
+
+.bdp-wheel-scroll::-webkit-scrollbar { display: none; }
+
+.bdp-wheel-item {
+  height: 44px;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.18s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bdp-wheel-item--selected {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff6b9d, #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 12px rgba(255, 107, 157, 0.3);
+}
+
+.bdp-wheel-item--near {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 600;
+}
+
+.bdp-wheel-item--far {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.bdp-wheel-item--hidden {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* ───────── 미리보기 뱃지 ───────── */
+.bdp-preview-badges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+  min-height: 28px;
+}
+
+.bdp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 107, 157, 0.14);
+  border: 1px solid rgba(255, 107, 157, 0.3);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  animation: bdp-badge-in 0.32s ease;
+}
+
+@keyframes bdp-badge-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bdp-badge-emoji { font-size: 14px; }
+
+/* ───────── 확인 버튼 ───────── */
+.bdp-confirm {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ff6b9d 0%, #ec4899 50%, #FBBF24 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+}
+
+.bdp-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 107, 157, 0.55);
+}
+
+.bdp-confirm:active {
+  transform: translateY(0);
+}
+
+.bdp-confirm-heart {
+  font-size: 18px;
+  animation: bdp-heart-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes bdp-heart-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* ═══════════════════════════════════════════
+   라이트 모드
+   ═══════════════════════════════════════════ */
+
+[data-theme="light"] .bdp-summary {
+  border-color: rgba(255, 107, 157, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(251, 191, 36, 0.06));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .bdp-summary:hover {
+  border-color: rgba(255, 107, 157, 0.6);
+  box-shadow: 0 8px 22px rgba(255, 107, 157, 0.18);
+}
+
+[data-theme="light"] .bdp-summary--empty {
+  background: rgba(0, 0, 0, 0.02);
+  border-style: dashed;
+}
+
+[data-theme="light"] .bdp-summary-num {
+  background: linear-gradient(135deg, #d4145a, #d4380d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .bdp-summary-dot {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .bdp-summary-placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .bdp-summary-arrow {
   color: rgba(0, 0, 0, 0.4);
 }
 
-[data-theme="light"] .bdp-lunar-hint {
-  color: #b8860b;
+[data-theme="light"] .bdp-summary-meta {
+  color: #555;
+}
+
+[data-theme="light"] .bdp-summary-cal {
+  background: rgba(212, 20, 90, 0.12);
+  color: #d4145a;
+}
+
+[data-theme="light"] .bdp-summary-divider {
+  color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .bdp-sheet-overlay {
+  background: rgba(20, 15, 30, 0.4);
+}
+
+[data-theme="light"] .bdp-sheet {
+  background: linear-gradient(180deg, #ffffff 0%, #fff5f7 100%);
+  border-color: rgba(255, 107, 157, 0.4);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 107, 157, 0.12),
+    0 0 40px rgba(255, 107, 157, 0.18);
+}
+
+[data-theme="light"] .bdp-wheels::before {
+  background: linear-gradient(180deg, rgba(255, 245, 247, 0.95), transparent);
+}
+
+[data-theme="light"] .bdp-wheels::after {
+  background: linear-gradient(0deg, rgba(255, 245, 247, 0.95), transparent);
+}
+
+[data-theme="light"] .bdp-sheet-handle {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="light"] .bdp-sheet-title {
+  background: linear-gradient(135deg, #d4145a, #d4380d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .bdp-sheet-close {
+  background: rgba(0, 0, 0, 0.05);
+  color: #555;
+}
+
+[data-theme="light"] .bdp-sheet-close:hover {
+  background: rgba(212, 20, 90, 0.12);
+  color: #d4145a;
+}
+
+[data-theme="light"] .bdp-cal-toggle {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .bdp-cal-btn {
+  color: #777;
+}
+
+[data-theme="light"] .bdp-cal-btn--active {
+  background: linear-gradient(135deg, #d4145a, #ec4899);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(212, 20, 90, 0.3);
+}
+
+[data-theme="light"] .bdp-wheels {
+  background:
+    radial-gradient(ellipse at center, rgba(255, 107, 157, 0.06) 0%, transparent 60%),
+    rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .bdp-select-line {
+  border-top-color: rgba(212, 20, 90, 0.45);
+  border-bottom-color: rgba(212, 56, 13, 0.45);
+}
+
+[data-theme="light"] .bdp-select-line-heart {
+  color: #d4145a;
+}
+
+[data-theme="light"] .bdp-wheel-item {
+  color: rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="light"] .bdp-wheel-item--selected {
+  background: linear-gradient(135deg, #d4145a, #d4380d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .bdp-wheel-item--near {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+[data-theme="light"] .bdp-wheel-item--far {
+  color: rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="light"] .bdp-wheel-item--hidden {
+  color: rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="light"] .bdp-badge {
+  background: rgba(212, 20, 90, 0.1);
+  border-color: rgba(212, 20, 90, 0.3);
+  color: #d4145a;
+}
+
+[data-theme="light"] .bdp-confirm {
+  background: linear-gradient(135deg, #d4145a 0%, #ec4899 50%, #d4380d 100%);
+  box-shadow: 0 6px 20px rgba(212, 20, 90, 0.35);
+}
+
+/* 좁은 화면 */
+@media (max-width: 360px) {
+  .bdp-summary-date { font-size: 19px; }
+  .bdp-wheel-item--selected { font-size: 19px; }
+  .bdp-cal-btn { font-size: 12px; padding: 8px 6px; }
 }

@@ -320,9 +320,13 @@ public class MbtiFortuneService {
 
         return claudeApiService.generateStream(system, user, 2500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json == null) return;
+                if (json == null) {
+                    log.warn("[NoDeduct] mbti JSON 추출 실패: {}/{}", mbtiType, zodiacAnimal);
+                    return;
+                }
                 var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
 
                 MbtiFortune fortune = MbtiFortune.builder()
@@ -341,10 +345,13 @@ public class MbtiFortuneService {
                     .personality(PERSONALITY.getOrDefault(mbtiType, ""))
                     .build();
                 repository.save(fortune);
+                ok = true;
             } catch (Exception e) {
-                log.warn("mbti stream cache save failed for {}/{}: {}", mbtiType, zodiacAnimal, e.getMessage());
+                log.warn("[NoDeduct] mbti stream cache save failed for {}/{}: {}", mbtiType, zodiacAnimal, e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("mbti onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 }

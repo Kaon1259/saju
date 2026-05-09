@@ -7,12 +7,14 @@ import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson
 import { shareResult } from '../utils/share';
 import { getWeatherCompatBasic, getWeatherCompatStream, getMyFortune } from '../api/fortune';
 import { getCurrentWeather, getTimeBand } from '../utils/weather';
+import { useToast } from '../components/Toast';
 import './WeatherCompat.css';
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
 
 export default function WeatherCompat() {
   const navigate = useNavigate();
+  const toast = useToast();
   const userId = localStorage.getItem('userId');
 
   // localStorage 의 userProfile 에서 사주 정보 직접 로드 (서버 호출 실패해도 동작)
@@ -339,7 +341,7 @@ export default function WeatherCompat() {
               <button className="wc-share-btn" onClick={async () => {
                 const text = `[날씨 궁합 🌤️]\n오늘 ${result.conditionKo || result.condition} × 내 일간 ${result.dayMaster}\n점수: ${result.score}점 (${result.grade})\n${(result.overall || '').split('.').slice(0, 2).join('.')}.\n\nhttps://recipepig.kr`;
                 const r = await shareResult({ title: '날씨 궁합 결과', text });
-                if (r === 'copied') alert('클립보드에 복사되었습니다!');
+                if (r === 'copied') toast('클립보드에 복사되었습니다', 'success');
               }}>📤 공유하기</button>
               <button className="wc-reset-btn" onClick={() => { setResult(null); }}>다시 보기</button>
             </div>

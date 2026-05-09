@@ -450,18 +450,20 @@ public class DeepAnalysisService {
     }
 
     /** 스트리밍 완료 후 캐시 저장 */
-    public void saveStreamResult(String type, String birthDate, String birthTime, String gender, String calendarType, String extra, String fullText) {
+    public boolean saveStreamResult(String type, String birthDate, String birthTime, String gender, String calendarType, String extra, String fullText) {
         try {
             String json = ClaudeApiService.extractJson(fullText);
-            if (json == null) return;
+            if (json == null) return false;
             Map<String, Object> parsed = objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
             parsed.put("type", type);
             parsed.put("birthDate", birthDate);
             String fortuneType = "deep-" + type;
             String cacheKey = buildCacheKey(type, birthDate, birthTime, gender, calendarType, extra);
             saveToCache(fortuneType, cacheKey, parsed);
+            return true;
         } catch (Exception e) {
             // 파싱 실패 시 무시
+            return false;
         }
     }
 
@@ -615,13 +617,13 @@ public class DeepAnalysisService {
     }
 
     /** 궁합 심화분석 스트리밍 완료 후 캐시 저장 */
-    public void saveCompatStreamResult(String deepType, String bd1, String bt1, String g1, String bd2, String bt2, String g2, String fullText) {
+    public boolean saveCompatStreamResult(String deepType, String bd1, String bt1, String g1, String bd2, String bt2, String g2, String fullText) {
         int rawLen = fullText != null ? fullText.length() : 0;
         try {
             String json = ClaudeApiService.extractJson(fullText);
             if (json == null) {
                 log.warn("궁합 심화분석 JSON 추출 실패: type={}, rawLen={}", deepType, rawLen);
-                return;
+                return false;
             }
             int rawJsonLen = json.length();
             String repaired = repairJson(json);
@@ -636,8 +638,10 @@ public class DeepAnalysisService {
             saveCompatCache(deepType, cacheKey, parsed);
             log.info("궁합 심화 캐시 저장: type={}, rawLen={}, jsonLen={}, repaired={}, fields={}, totalChars={} ({}자/필드)",
                 deepType, rawLen, rawJsonLen, wasTruncated, fieldCount, totalCharLen, fieldCount > 0 ? totalCharLen / fieldCount : 0);
+            return true;
         } catch (Exception e) {
             log.warn("궁합 심화분석 캐시 저장 실패: type={}, rawLen={}, err={}", deepType, rawLen, e.getMessage());
+            return false;
         }
     }
 
@@ -708,23 +712,29 @@ public class DeepAnalysisService {
     }
 
     /** 타로 심화 스트림 완료 후 캐시 저장 */
-    public void saveTarotDeepStreamResult(String cardIds, String reversals, String spread, String category,
+    public boolean saveTarotDeepStreamResult(String cardIds, String reversals, String spread, String category,
                                            String fullText) {
+        // 평문 응답이라 JSON 파싱은 없지만, AI가 충분히 응답하지 못한 경우(빈 텍스트/너무 짧음) 차감 가드
+        if (fullText == null || fullText.trim().length() < 100) {
+            log.warn("타로 심화 응답 너무 짧음 (len={}), 캐시·차감 스킵", fullText == null ? 0 : fullText.length());
+            return false;
+        }
         try {
             String cacheKey = buildTarotDeepCacheKey(cardIds, reversals, spread, category);
             Map<String, Object> result = new LinkedHashMap<>();
-            result.put("detailAnalysis", fullText != null ? fullText.trim() : "");
+            result.put("detailAnalysis", fullText.trim());
             result.put("analysisDate", LocalDate.now().toString());
             var existing = specialFortuneRepository.findByFortuneTypeAndCacheKeyAndFortuneDate(
                 "deep-tarot", cacheKey, COMPAT_CACHE_ANCHOR);
-            if (existing.isPresent()) return;
+            if (existing.isPresent()) return true;
             specialFortuneRepository.save(SpecialFortune.builder()
                 .fortuneType("deep-tarot").cacheKey(cacheKey).fortuneDate(COMPAT_CACHE_ANCHOR)
                 .resultJson(objectMapper.writeValueAsString(result)).build());
-            log.info("타로 심화 캐시 저장: cacheKey={}, len={}", cacheKey,
-                fullText != null ? fullText.length() : 0);
+            log.info("타로 심화 캐시 저장: cacheKey={}, len={}", cacheKey, fullText.length());
+            return true;
         } catch (Exception e) {
             log.warn("타로 심화 캐시 저장 실패: {}", e.getMessage());
+            return false;
         }
     }
 

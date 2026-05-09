@@ -283,19 +283,20 @@ public class BiorhythmService {
      * 스트리밍 완료 후 캐시 저장
      */
     @Transactional
-    public void saveStreamResult(String birthDateStr, String fullText) {
+    public boolean saveStreamResult(String birthDateStr, String fullText) {
         try {
             LocalDate today = LocalDate.now();
             String dbCacheKey = buildCacheKey("biorhythm", birthDateStr, today.toString());
 
             String cleanJson = ClaudeApiService.extractJson(fullText);
-            if (cleanJson != null) {
-                Map<String, Object> resultMap = objectMapper.readValue(cleanJson, new TypeReference<Map<String, Object>>() {});
-                saveToCache("biorhythm", dbCacheKey, resultMap);
-                log.info("Biorhythm AI result cached for birthDate={}", birthDateStr);
-            }
+            if (cleanJson == null) return false;
+            Map<String, Object> resultMap = objectMapper.readValue(cleanJson, new TypeReference<Map<String, Object>>() {});
+            saveToCache("biorhythm", dbCacheKey, resultMap);
+            log.info("Biorhythm AI result cached for birthDate={}", birthDateStr);
+            return true;
         } catch (Exception e) {
             log.warn("Biorhythm stream cache save failed: {}", e.getMessage());
+            return false;
         }
     }
 

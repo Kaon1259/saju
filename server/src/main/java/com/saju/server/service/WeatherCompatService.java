@@ -132,9 +132,13 @@ public class WeatherCompatService {
         final String dmFinal = dm;
         final String condKoFinal = conditionKo;
         return claudeApiService.generateStream(system, user, 2400, ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json == null) return;
+                if (json == null) {
+                    log.warn("[NoDeduct] weather-compat JSON 추출 실패");
+                    return;
+                }
                 var node = objectMapper.readTree(json);
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("score", node.path("score").asInt(70));
@@ -151,10 +155,13 @@ public class WeatherCompatService {
                 result.put("dayMaster", dmFinal);
                 result.put("date", LocalDate.now().toString());
                 cache.put(key(uid, condFinal), result);
+                ok = true;
             } catch (Exception e) {
-                log.warn("weather compat cache save failed: {}", e.getMessage());
+                log.warn("[NoDeduct] weather compat cache save failed: {}", e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("weather-compat onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 }

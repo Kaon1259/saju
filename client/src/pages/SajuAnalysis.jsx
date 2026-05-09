@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { analyzeSaju, analyzeSajuStream, getUserSaju, getDailyFortunes, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneLoading from '../components/FortuneLoading';
 import AnalysisMatrix from '../components/AnalysisMatrix';
@@ -388,32 +389,12 @@ function SajuAnalysis() {
             }}>✨ 내 정보로 채우기</button>
           )}
           <div className="form-group">
-            <label className="form-label">달력 구분</label>
-            <div className="form-toggle">
-              <button
-                type="button"
-                className={`form-toggle__btn ${calendarType === 'SOLAR' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => setCalendarType('SOLAR')}
-              >
-                ☀️ 양력
-              </button>
-              <button
-                type="button"
-                className={`form-toggle__btn ${calendarType === 'LUNAR' ? 'form-toggle__btn--active' : ''}`}
-                onClick={() => setCalendarType('LUNAR')}
-              >
-                🌙 음력
-              </button>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">
-              생년월일 ({calendarType === 'SOLAR' ? '양력' : '음력'})
-            </label>
+            <label className="form-label">생년월일</label>
             <BirthDatePicker
               value={birthDate}
               onChange={setBirthDate}
               calendarType={calendarType}
+              onCalendarTypeChange={setCalendarType}
             />
           </div>
           <div className="form-group">
@@ -431,10 +412,7 @@ function SajuAnalysis() {
           </div>
           <div className="form-group">
             <label className="form-label">성별 (대운 분석용)</label>
-            <div className="form-toggle">
-              <button type="button" className={`form-toggle__btn ${gender === 'M' ? 'form-toggle__btn--active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
-              <button type="button" className={`form-toggle__btn ${gender === 'F' ? 'form-toggle__btn--active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
-            </div>
+            <GenderPicker value={gender} onChange={setGender} />
           </div>
           <button
             className="btn-gold"

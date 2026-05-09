@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { interpretDreamStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { useToast } from '../components/Toast';
 import './Dream.css';
 
 // ═══════════════════════════════════════════════════
@@ -51,6 +53,7 @@ function getScoreColor(score) {
 
 function Dream() {
   const navigate = useNavigate();
+  const toast = useToast();
   // ─── 상태 ───
   const [step, setStep] = useState('input');     // 'input' | 'loading' | 'streaming' | 'result'
   const [dreamText, setDreamText] = useState('');
@@ -185,7 +188,7 @@ function Dream() {
       navigator.share({ title: '꿈해몽 결과', text }).catch(() => {});
     } else {
       navigator.clipboard?.writeText(text);
-      alert('결과가 복사되었습니다!');
+      toast('결과가 복사되었습니다', 'success');
     }
   };
 
@@ -306,18 +309,7 @@ function Dream() {
                 </div>
                 <div className="dream-form-group">
                   <label className="dream-label">성별</label>
-                  <div className="dream-toggle">
-                    <button
-                      className={`dream-toggle-btn ${gender === 'M' ? 'active' : ''}`}
-                      onClick={() => setGender(gender === 'M' ? '' : 'M')}>
-                      <span className="g-circle g-male">♂</span>
-                    </button>
-                    <button
-                      className={`dream-toggle-btn ${gender === 'F' ? 'active' : ''}`}
-                      onClick={() => setGender(gender === 'F' ? '' : 'F')}>
-                      <span className="g-circle g-female">♀</span>
-                    </button>
-                  </div>
+                  <GenderPicker value={gender} onChange={(v) => setGender(gender === v ? '' : v)} />
                 </div>
               </div>
             )}

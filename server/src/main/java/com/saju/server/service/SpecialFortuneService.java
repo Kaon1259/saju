@@ -321,12 +321,12 @@ public class SpecialFortuneService {
     /**
      * 스트리밍 완료 후 결과 파싱 + 캐시 저장 (서버에서 직접)
      */
-    public void parseAndSaveLoveStreamResult(String type, String birthDate, String gender,
+    public boolean parseAndSaveLoveStreamResult(String type, String birthDate, String gender,
                                               String partnerDate, String partnerGender,
                                               String breakupDate, String meetDate, String fullText) {
         try {
             String json = ClaudeApiService.extractJson(fullText);
-            if (json == null) return;
+            if (json == null) return false;
 
             JsonNode node = objectMapper.readTree(json);
             Map<String, Object> result = new LinkedHashMap<>();
@@ -347,8 +347,10 @@ public class SpecialFortuneService {
             String cacheKey = buildCacheKey(type, birthDate, gender, partnerDate, partnerGender, breakupDate, meetDate);
             saveToCache(type, cacheKey, result);
             log.info("연애운 스트리밍 캐시 저장 완료: type={}, key={}", type, cacheKey);
+            return true;
         } catch (Exception e) {
             log.warn("연애운 스트리밍 캐시 저장 실패: {}", e.getMessage());
+            return false;
         }
     }
 

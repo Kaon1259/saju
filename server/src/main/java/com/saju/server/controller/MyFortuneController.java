@@ -8,6 +8,7 @@ import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/my")
 @RequiredArgsConstructor
+@Slf4j
 public class MyFortuneController {
 
     private final UserService userService;
@@ -218,7 +220,17 @@ public class MyFortuneController {
         // 비용 절감 테스트 — 오늘의 운세는 Haiku 4.5 사용 (Sonnet 대비 1/3 비용, 2~3배 속도)
         return claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
+            boolean parsed;
+            try {
+                parsed = fortuneService.parseAndSaveStreamResult(user.getZodiacAnimal(), fullText, finalDate);
+            } catch (Exception e) {
+                log.error("[onComplete] MyFortune 파싱 실패: {}", e.getMessage(), e);
+                parsed = false;
+            }
+            if (!parsed) {
+                log.warn("[NoDeduct] 파싱 실패로 차감/히스토리 스킵: cat=TODAY_FORTUNE, uid={}", uid);
+                return;
+            }
             if (uid != null) heartPointService.deductPoints(uid, "TODAY_FORTUNE", "오늘의 운세");
             // 히스토리 저장 — 사용자가 나중에 "최근 본 운세"에서 다시 볼 수 있게
             if (uid != null) {

@@ -4,11 +4,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
 import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 // sounds (kept for potential future use)
 import { shareResult } from '../utils/share';
 import parseAiJson from '../utils/parseAiJson';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import HeartCost from '../components/HeartCost';
+import { useToast } from '../components/Toast';
 import HistoryDrawer from '../components/HistoryDrawer';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import { getCurrentWeather, getTimeBand } from '../utils/weather';
@@ -1236,6 +1238,7 @@ const SUMMARY_DEFS = [
 function Home() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
 
 
   const userId = localStorage.getItem('userId');
@@ -1649,10 +1652,9 @@ function Home() {
           ) : (
             <div className="home-guest glass-card fade-in">
               <h3 className="home-guest__title">생년월일로 오늘의 운세 보기</h3>
-              <div className="home-guest__form-group"><label className="home-guest__label">달력</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button><button type="button" className={`home-guest__toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button></div></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} /></div>
+              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} onCalendarTypeChange={setCalendarType} /></div>
               <div className="home-guest__form-group"><label className="home-guest__label">태어난 시간 (선택)</label><select className="home-guest__input home-guest__select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>{BIRTH_TIMES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}</select></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">성별</label><div className="home-guest__toggle"><button type="button" className={`home-guest__toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button><button type="button" className={`home-guest__toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button></div></div>
+              <div className="home-guest__form-group"><label className="home-guest__label">성별</label><GenderPicker value={gender} onChange={setGender} /></div>
               <button className="home-guest__submit-full" onClick={handleGuestSubmit} disabled={!birthDate}>오늘의 운세 보기</button>
               <button className="home-guest__link" onClick={() => setShowForm(false)}>돌아가기</button>
             </div>
@@ -1793,10 +1795,7 @@ function Home() {
                   </div>
                   <div className="love-modal-field">
                     <label className="love-modal-label">성별</label>
-                    <div className="love-modal-toggle">
-                      <button className={`love-modal-toggle-btn ${loveGender === 'M' ? 'active' : ''}`} onClick={() => setLoveGender('M')}><span className="g-circle g-male">♂</span></button>
-                      <button className={`love-modal-toggle-btn ${loveGender === 'F' ? 'active' : ''}`} onClick={() => setLoveGender('F')}><span className="g-circle g-female">♀</span></button>
-                    </div>
+                    <GenderPicker value={loveGender} onChange={setLoveGender} />
                   </div>
 
                   {loveModal === 'reunion' && (
@@ -1858,10 +1857,7 @@ function Home() {
                       </div>
                       <div className="love-modal-field">
                         <label className="love-modal-label">상대방 성별</label>
-                        <div className="love-modal-toggle">
-                          <button className={`love-modal-toggle-btn ${lovePartnerGender === 'M' ? 'active' : ''}`} onClick={() => setLovePartnerGender('M')}><span className="g-circle g-male">♂</span></button>
-                          <button className={`love-modal-toggle-btn ${lovePartnerGender === 'F' ? 'active' : ''}`} onClick={() => setLovePartnerGender('F')}><span className="g-circle g-female">♀</span></button>
-                        </div>
+                        <GenderPicker value={lovePartnerGender} onChange={setLovePartnerGender} />
                       </div>
                     </div>
                   )}
@@ -1927,7 +1923,7 @@ function Home() {
                   <button className="love-modal-share" onClick={async () => {
                     const text = `[1:1연애 💕 ${loveInfo?.label}]\n점수: ${loveResult.score}점 (${loveResult.grade})\n${(loveResult.overall||'').split('.').slice(0,2).join('.')}.\n\nhttps://recipepig.kr`;
                     const res = await shareResult({ title: `${loveInfo?.label} 결과`, text });
-                    if (res === 'copied') alert('클립보드에 복사되었습니다!');
+                    if (res === 'copied') toast('클립보드에 복사되었습니다', 'success');
                   }}>📤 공유하기</button>
                   <button className="love-modal-reset" onClick={() => { setLoveResult(null); setLoveBirth(''); }}>다시 보기</button>
                 </div>

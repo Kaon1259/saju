@@ -216,3 +216,13 @@
 [data-theme="light"] .compat-score-bar-bg { background: rgba(0,0,0,0.06); }
 [data-theme="light"] .compat-person-label { color: #4a4a5a; }
 [data-theme="light"] .compat-person-name { color: #222; }
+
+/* ─── 360px 좁은 화면 보강 ─── */
+@media (max-width: 360px) {
+  .compat-vs-row { gap: 6px; }
+  .compat-person-card { min-width: 72px; }
+  .compat-gender-icon { width: 40px; height: 40px; font-size: 20px; }
+  .compat-person-pillar { font-size: 16px; }
+  .compat-score-center { width: 78px; height: 78px; }
+  .compat-score-num { font-size: 24px; }
+}

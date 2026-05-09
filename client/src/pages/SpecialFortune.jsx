@@ -4,6 +4,7 @@ import { getSpecialLoveFortune, getHourlyFortune, getTimeblockFortune } from '..
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './SpecialFortune.css';
 
@@ -174,22 +175,12 @@ function SpecialFortune() {
                 }}>✨ 내 정보로 채우기</button>
               )}
               <div className="sf-form-group">
-                <label className="sf-label">달력 구분</label>
-                <div className="sf-toggle">
-                  <button type="button" className={`sf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
-                  <button type="button" className={`sf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
-                </div>
-              </div>
-              <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
-                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
-                <div className="sf-toggle">
-                  <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
-                  <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
-                </div>
+                <GenderPicker value={gender} onChange={setGender} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">태어난 시간 (선택)</label>
@@ -261,10 +252,7 @@ function SpecialFortune() {
                   </div>
                   <div className="sf-form-group">
                     <label className="sf-label">상대방 성별</label>
-                    <div className="sf-toggle">
-                      <button className={`sf-toggle-btn ${partnerGender === 'M' ? 'active' : ''}`} onClick={() => setPartnerGender('M')}><span className="g-circle g-male">♂</span></button>
-                      <button className={`sf-toggle-btn ${partnerGender === 'F' ? 'active' : ''}`} onClick={() => setPartnerGender('F')}><span className="g-circle g-female">♀</span></button>
-                    </div>
+                    <GenderPicker value={partnerGender} onChange={setPartnerGender} />
                   </div>
                 </div>
               )}
@@ -351,22 +339,12 @@ function SpecialFortune() {
                 }}>✨ 내 정보로 채우기</button>
               )}
               <div className="sf-form-group">
-                <label className="sf-label">달력 구분</label>
-                <div className="sf-toggle">
-                  <button type="button" className={`sf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
-                  <button type="button" className={`sf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
-                </div>
-              </div>
-              <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
-                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">성별</label>
-                <div className="sf-toggle">
-                  <button className={`sf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
-                  <button className={`sf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
-                </div>
+                <GenderPicker value={gender} onChange={setGender} />
               </div>
               <div className="sf-form-group">
                 <label className="sf-label">태어난 시간 (선택)</label>

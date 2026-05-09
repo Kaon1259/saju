@@ -6,6 +6,7 @@ import FortuneCard from '../components/FortuneCard';
 import StreamingCard from '../components/StreamingCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -427,7 +428,12 @@ function YearFortune() {
               <h2 style={{ textAlign: 'center', marginBottom: 16 }}>다른 사람 2026 신년운세</h2>
               <div className="yf-form-group">
                 <label className="yf-label">생년월일</label>
-                <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+                <BirthDatePicker
+                  value={birthDate}
+                  onChange={setBirthDate}
+                  calendarType={(calendarType || 'solar').toUpperCase()}
+                  onCalendarTypeChange={(v) => setCalendarType(v.toLowerCase())}
+                />
               </div>
               <div className="yf-form-group">
                 <label className="yf-label">태어난 시간</label>
@@ -436,18 +442,8 @@ function YearFortune() {
                 </select>
               </div>
               <div className="yf-form-group">
-                <label className="yf-label">달력 유형</label>
-                <div className="yf-toggle">
-                  <button className={`yf-toggle-btn ${calendarType === 'solar' ? 'active' : ''}`} onClick={() => setCalendarType('solar')}>☀ 양력</button>
-                  <button className={`yf-toggle-btn ${calendarType === 'lunar' ? 'active' : ''}`} onClick={() => setCalendarType('lunar')}>☽ 음력</button>
-                </div>
-              </div>
-              <div className="yf-form-group">
                 <label className="yf-label">성별</label>
-                <div className="yf-toggle">
-                  <button className={`yf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}><span className="g-circle g-male">♂</span></button>
-                  <button className={`yf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}><span className="g-circle g-female">♀</span></button>
-                </div>
+                <GenderPicker value={gender} onChange={setGender} />
               </div>
               <button className="yf-submit" style={{ marginTop: 8 }} disabled={!birthDate || otherLoading} onClick={() => guardYear(() => startAnalysis(birthDate, birthTime, gender, calendarType, {
                 setResult: setOtherResult, setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming, cleanupRef: otherCleanupRef

@@ -278,9 +278,13 @@ public class BloodTypeFortuneService {
 
         return claudeApiService.generateStream(system, user, 2000,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
+            boolean ok = false;
             try {
                 String json = ClaudeApiService.extractJson(fullText);
-                if (json == null) return;
+                if (json == null) {
+                    log.warn("[NoDeduct] bloodtype JSON 추출 실패: {}형/{}", bloodType, zodiacAnimal);
+                    return;
+                }
                 var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
 
                 BloodTypeFortune fortune = BloodTypeFortune.builder()
@@ -299,10 +303,13 @@ public class BloodTypeFortuneService {
                     .dayAnalysis(node.path("dayAnalysis").asText(""))
                     .build();
                 repository.save(fortune);
+                ok = true;
             } catch (Exception e) {
-                log.warn("bloodtype stream cache save failed for {}형/{}: {}", bloodType, zodiacAnimal, e.getMessage());
+                log.warn("[NoDeduct] bloodtype stream cache save failed for {}형/{}: {}", bloodType, zodiacAnimal, e.getMessage());
             }
-            if (onSuccess != null) onSuccess.run();
+            if (ok && onSuccess != null) {
+                try { onSuccess.run(); } catch (Exception e) { log.error("bloodtype onSuccess 실패: {}", e.getMessage(), e); }
+            }
         });
     }
 }

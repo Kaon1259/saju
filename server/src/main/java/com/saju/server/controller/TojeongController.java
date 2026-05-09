@@ -9,6 +9,7 @@ import com.saju.server.service.*;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/tojeong")
 @RequiredArgsConstructor
+@Slf4j
 public class TojeongController {
 
     private final TojeongService tojeongService;
@@ -120,8 +122,17 @@ public class TojeongController {
         final String finalTargetName = targetName;
         SseEmitter emitter = claudeApiService.generateStream(systemPrompt, userPrompt, 2500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            tojeongService.saveStreamResult(finalBirthDate, finalGender, finalTargetType, finalTargetName, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "TOJEONG", "토정비결");
+            try {
+                // saveStreamResult는 성공 시 Map, 실패 시 null 반환
+                Map<String, Object> saved = tojeongService.saveStreamResult(finalBirthDate, finalGender, finalTargetType, finalTargetName, fullText);
+                if (saved != null && uid != null) {
+                    heartPointService.deductPoints(uid, "TOJEONG", "토정비결");
+                } else if (saved == null) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat=TOJEONG, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 토정비결 처리 실패: {}", e.getMessage(), e);
+            }
         });
 
         // AI 스트림 시작 전에 base 이벤트 전송 (sangsu/jungsu/hasu/totalGwae/gwaeName/monthlyFortunes 기본값)

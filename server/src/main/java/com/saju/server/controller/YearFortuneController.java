@@ -9,6 +9,7 @@ import com.saju.server.service.YearFortuneService;
 import com.saju.server.util.SseEmitterUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/year-fortune")
 @RequiredArgsConstructor
+@Slf4j
 public class YearFortuneController {
 
     private final YearFortuneService yearFortuneService;
@@ -78,8 +80,16 @@ public class YearFortuneController {
         final Long uid = userId;
         return claudeApiService.generateStream(systemPrompt, userPrompt, 3500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
-            yearFortuneService.saveStreamResult(birthDate, birthTime, gender, calendarType, fullText);
-            if (uid != null) heartPointService.deductPoints(uid, "YEAR_FORTUNE", "신년운세");
+            try {
+                boolean ok = yearFortuneService.saveStreamResult(birthDate, birthTime, gender, calendarType, fullText);
+                if (ok && uid != null) {
+                    heartPointService.deductPoints(uid, "YEAR_FORTUNE", "신년운세");
+                } else if (!ok) {
+                    log.warn("[NoDeduct] 파싱 실패로 차감 스킵: cat=YEAR_FORTUNE, uid={}", uid);
+                }
+            } catch (Exception e) {
+                log.error("[onComplete] 신년운세 처리 실패: {}", e.getMessage(), e);
+            }
         });
     }
 }

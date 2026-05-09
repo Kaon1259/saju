@@ -6,6 +6,7 @@ import StreamingCard from '../components/StreamingCard';
 import FortuneCard from '../components/FortuneCard';
 import DeepAnalysis from '../components/DeepAnalysis';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import StreamText from '../components/StreamText';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -230,28 +231,13 @@ function WeeklyFortune() {
           )}
 
           <div className="wf-form-group">
-            <label className="wf-label">달력 구분</label>
-            <div className="wf-toggle">
-              <button type="button" className={`wf-toggle-btn ${calendarType === 'SOLAR' ? 'active' : ''}`} onClick={() => setCalendarType('SOLAR')}>양력</button>
-              <button type="button" className={`wf-toggle-btn ${calendarType === 'LUNAR' ? 'active' : ''}`} onClick={() => setCalendarType('LUNAR')}>음력</button>
-            </div>
-          </div>
-
-          <div className="wf-form-group">
             <label className="wf-label">생년월일</label>
-            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} />
+            <BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
           </div>
 
           <div className="wf-form-group">
             <label className="wf-label">성별</label>
-            <div className="wf-toggle">
-              <button className={`wf-toggle-btn ${gender === 'M' ? 'active' : ''}`} onClick={() => setGender('M')}>
-                <span className="g-circle g-male">♂</span>
-              </button>
-              <button className={`wf-toggle-btn ${gender === 'F' ? 'active' : ''}`} onClick={() => setGender('F')}>
-                <span className="g-circle g-female">♀</span>
-              </button>
-            </div>
+            <GenderPicker value={gender} onChange={setGender} />
           </div>
 
           <div className="wf-form-group">

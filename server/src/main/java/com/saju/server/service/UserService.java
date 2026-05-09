@@ -64,14 +64,6 @@ public class UserService {
         return UserResponse.from(saved);
     }
 
-    @Transactional(readOnly = true)
-    public UserResponse login(String phone) {
-        String normalizedPhone = phone.replaceAll("[^0-9]", "");
-        User user = userRepository.findByPhone(normalizedPhone)
-                .orElseThrow(() -> new RuntimeException("등록되지 않은 전화번호입니다."));
-        return UserResponse.from(user);
-    }
-
     @Transactional
     public UserResponse updateUser(Long id, UserRequest request) {
         User user = userRepository.findById(id)

@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { analyzeFaceReadingStream, isGuest } from '../api/fortune';
 import FortuneCard from '../components/FortuneCard';
 import BirthDatePicker from '../components/BirthDatePicker';
+import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import { useToast } from '../components/Toast';
 import './FaceReading.css';
 
 // ═══════════════════════════════════════════════════
@@ -84,6 +86,7 @@ const ELEMENT_COLORS = {
 
 function FaceReading() {
   const navigate = useNavigate();
+  const toast = useToast();
   // ─── 상태 ───
   const [step, setStep] = useState('select'); // select | loading | result
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -294,7 +297,7 @@ function FaceReading() {
       navigator.share({ title: 'AI 관상 분석 결과', text }).catch(() => {});
     } else {
       navigator.clipboard?.writeText(text);
-      alert('결과가 복사되었습니다!');
+      toast('결과가 복사되었습니다', 'success');
     }
   };
 
@@ -425,16 +428,13 @@ function FaceReading() {
                 </div>
                 <div className="fr-field">
                   <label className="fr-label">성별</label>
-                  <div className="fr-toggle">
-                    <button
-                      className={`fr-toggle-btn ${gender === 'male' ? 'active' : ''}`}
-                      onClick={() => setGender(gender === 'male' ? '' : 'male')}
-                    ><span className="g-circle g-male">♂</span></button>
-                    <button
-                      className={`fr-toggle-btn ${gender === 'female' ? 'active' : ''}`}
-                      onClick={() => setGender(gender === 'female' ? '' : 'female')}
-                    ><span className="g-circle g-female">♀</span></button>
-                  </div>
+                  <GenderPicker
+                    value={gender === 'male' ? 'M' : gender === 'female' ? 'F' : ''}
+                    onChange={(v) => {
+                      const next = v === 'M' ? 'male' : 'female';
+                      setGender(gender === next ? '' : next);
+                    }}
+                  />
                 </div>
               </div>
             </div>

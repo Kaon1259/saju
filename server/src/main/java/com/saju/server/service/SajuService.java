@@ -226,12 +226,12 @@ public class SajuService {
      * 스트리밍 완료 후 AI 응답을 파싱하여 캐시 저장
      */
     @Transactional
-    public void parseAndSaveStreamResult(LocalDate birthDate, String birthTime, String gender, SajuResult basicResult, String fullText) {
+    public boolean parseAndSaveStreamResult(LocalDate birthDate, String birthTime, String gender, SajuResult basicResult, String fullText) {
         try {
             String json = ClaudeApiService.extractJson(fullText);
             if (json == null) {
                 log.error("Saju stream: JSON extraction failed from fullText length={}", fullText.length());
-                return;
+                return false;
             }
 
             JsonNode node = objectMapper.readTree(json);
@@ -271,8 +271,10 @@ public class SajuService {
             Map<String, Object> resultMap = objectMapper.convertValue(basicResult, new TypeReference<Map<String, Object>>() {});
             saveToCache("saju", dbCacheKey, resultMap);
             log.info("Saju stream result cached: birthDate={}", birthDate);
+            return true;
         } catch (Exception e) {
             log.error("Failed to parse/save saju stream result: {}", e.getMessage(), e);
+            return false;
         }
     }
 
@@ -303,18 +305,20 @@ public class SajuService {
      * 만세력 AI 스트리밍 완료 후 결과 파싱 및 캐시 저장
      */
     @Transactional
-    public void parseManseryeokStreamResult(String cacheKey, String fullText) {
+    public boolean parseManseryeokStreamResult(String cacheKey, String fullText) {
         try {
             String json = ClaudeApiService.extractJson(fullText);
             if (json == null) {
                 log.error("Manseryeok stream: JSON extraction failed from fullText length={}", fullText.length());
-                return;
+                return false;
             }
             Map<String, Object> resultMap = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
             saveToCache("manseryeok", cacheKey, resultMap);
             log.info("Manseryeok stream result cached: cacheKey={}", cacheKey);
+            return true;
         } catch (Exception e) {
             log.error("Failed to parse/save manseryeok stream result: {}", e.getMessage(), e);
+            return false;
         }
     }
 
