@@ -47,6 +47,8 @@ import Terms from './pages/Terms';
 import { HeartProvider } from './context/HeartContext';
 import { AppProvider } from './context/AppContext';
 import { useGlobalAiAbort } from './hooks/useAiAbort';
+import { useAndroidBackButton } from './hooks/useAndroidBackButton';
+import { clearAuth } from './utils/auth';
 import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
@@ -227,18 +229,13 @@ function App() {
   useFontSize();
   useLandingRedirect();
   useProfileGuard();
-  useGlobalAiAbort(); // 라우트 변경 시 모든 진행 중 SSE 자동 종료 (비용 누수 차단)
+  useGlobalAiAbort();    // 라우트 변경 시 모든 진행 중 SSE 자동 종료 (비용 누수 차단)
+  useAndroidBackButton(); // 안드로이드 하드웨어 백버튼: 시트 닫기 → 라우터 뒤로 → 앱 종료
 
   // 자동 로그인 off면 앱 시작 시 로그인 정보 제거
   useEffect(() => {
     if (localStorage.getItem('autoLogin') === 'off') {
-      // JWT 토큰까지 함께 정리 (clearAuth)
-      try {
-        localStorage.removeItem('authToken');
-      } catch {}
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userProfile');
+      clearAuth(); // JWT + 사용자 데이터 + 세션 키 일괄 정리
     }
   }, []);
 

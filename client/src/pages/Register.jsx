@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken } from '../api/fortune';
-import { setToken } from '../utils/auth';
+import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken, deleteUser } from '../api/fortune';
+import { setToken, clearAuth } from '../utils/auth';
+import { useToast } from '../components/Toast';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
@@ -64,6 +65,7 @@ function getConstellationFromDate(dateStr) {
 function Register() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const [searchParams] = useSearchParams();
   // OAuth 콜백으로 복귀할 때는 location.state 가 비어있으므로 sessionStorage 에 저장된 returnTo 도 확인.
   // peek 만 하고, 실제 navigate 성공 후에 clear — Strict Mode 더블 마운트로 값이 사라지는 것을 방지.
@@ -293,17 +295,22 @@ function Register() {
           <button
             className="register-back-step"
             onClick={async () => {
-              // 동의 거부 — 로그아웃 + 첫 화면
-              try {
-                const { clearAuth } = await import('../utils/auth');
-                clearAuth();
-              } catch {}
-              localStorage.removeItem('userId');
-              localStorage.removeItem('userName');
-              localStorage.removeItem('userProfile');
+              // 동의 거부 — 신규 사용자라서 서버 user 행 정리(stub user 누적 방지) + 로컬 정리
+              const stubUserId = localStorage.getItem('userId');
+              if (stubUserId) {
+                try {
+                  await deleteUser(stubUserId);
+                } catch (e) {
+                  // 삭제 실패해도 로컬은 정리 (서버는 abandoned 상태로 남음)
+                  // eslint-disable-next-line no-console
+                  if (typeof console !== 'undefined') console.warn('[abandon] deleteUser failed:', e?.response?.status);
+                }
+              }
+              clearAuth();
               setStep('kakao');
               setAgreedTerms(false);
               setAgreedPrivacy(false);
+              toast?.('가입이 취소되었습니다.', 'info');
             }}
           >
             동의하지 않음 (가입 취소)
