@@ -48,6 +48,15 @@ public class AttendanceService {
      */
     @Transactional
     public AttendanceResponse checkInToday(Long userId) {
+        try {
+            return doCheckInToday(userId);
+        } catch (Exception e) {
+            log.warn("[Attendance] checkInToday 실패 — 빈 상태 반환: userId={}, err={}", userId, e.getMessage());
+            return emptyStatus(userId);
+        }
+    }
+
+    private AttendanceResponse doCheckInToday(Long userId) {
         LocalDate today = LocalDate.now();
 
         // 이미 오늘 출석 받았는지 확인
@@ -116,40 +125,63 @@ public class AttendanceService {
 
     /**
      * 출석 상태 조회 (체크인 없음).
+     * 테이블 미생성/스키마 불일치 등 DB 예외 시에도 graceful — 빈 상태 반환.
      */
     @Transactional(readOnly = true)
     public AttendanceResponse getStatus(Long userId) {
-        LocalDate today = LocalDate.now();
-        Optional<DailyAttendance> todayRow = attendanceRepository.findByUserIdAndAttendDate(userId, today);
-        boolean checkedToday = todayRow.isPresent();
+        try {
+            LocalDate today = LocalDate.now();
+            Optional<DailyAttendance> todayRow = attendanceRepository.findByUserIdAndAttendDate(userId, today);
+            boolean checkedToday = todayRow.isPresent();
 
-        int consecutive;
-        if (checkedToday) {
-            consecutive = todayRow.get().getConsecutiveDays();
-        } else {
-            // 오늘 미출석 — 어제까지의 연속이 살아있는지 확인
-            Optional<DailyAttendance> last = attendanceRepository.findTopByUserIdOrderByAttendDateDesc(userId);
-            if (last.isPresent() && last.get().getAttendDate().equals(today.minusDays(1))) {
-                // 어제 출석 → 연속 유지 중 (오늘 안 받으면 +1 가능)
-                consecutive = last.get().getConsecutiveDays();
+            int consecutive;
+            if (checkedToday) {
+                consecutive = todayRow.get().getConsecutiveDays();
             } else {
-                consecutive = 0;
+                Optional<DailyAttendance> last = attendanceRepository.findTopByUserIdOrderByAttendDateDesc(userId);
+                if (last.isPresent() && last.get().getAttendDate().equals(today.minusDays(1))) {
+                    consecutive = last.get().getConsecutiveDays();
+                } else {
+                    consecutive = 0;
+                }
             }
-        }
 
+            return AttendanceResponse.builder()
+                .alreadyChecked(checkedToday)
+                .rewardAmount(checkedToday ? todayRow.get().getRewardAmount() : 0)
+                .baseReward(BASE_REWARD)
+                .milestoneBonus(checkedToday && todayRow.get().getMilestoneCategory() != null
+                    ? todayRow.get().getRewardAmount() - BASE_REWARD : 0)
+                .milestoneCategory(checkedToday ? todayRow.get().getMilestoneCategory() : null)
+                .consecutiveDays(consecutive)
+                .balanceAfter(currentBalance(userId))
+                .checkedToday(checkedToday)
+                .daysToNextMilestone(daysToNextMilestone(checkedToday ? consecutive : consecutive + 1))
+                .nextMilestoneReward(nextMilestoneReward(checkedToday ? consecutive : consecutive + 1))
+                .build();
+        } catch (Exception e) {
+            log.warn("[Attendance] getStatus 실패 — 빈 상태 반환: userId={}, err={}", userId, e.getMessage());
+            return emptyStatus(userId);
+        }
+    }
+
+    private AttendanceResponse emptyStatus(Long userId) {
         return AttendanceResponse.builder()
-            .alreadyChecked(checkedToday)
-            .rewardAmount(checkedToday ? todayRow.get().getRewardAmount() : 0)
+            .alreadyChecked(false)
+            .rewardAmount(0)
             .baseReward(BASE_REWARD)
-            .milestoneBonus(checkedToday && todayRow.get().getMilestoneCategory() != null
-                ? todayRow.get().getRewardAmount() - BASE_REWARD : 0)
-            .milestoneCategory(checkedToday ? todayRow.get().getMilestoneCategory() : null)
-            .consecutiveDays(consecutive)
-            .balanceAfter(currentBalance(userId))
-            .checkedToday(checkedToday)
-            .daysToNextMilestone(daysToNextMilestone(checkedToday ? consecutive : consecutive + 1))
-            .nextMilestoneReward(nextMilestoneReward(checkedToday ? consecutive : consecutive + 1))
+            .milestoneBonus(0)
+            .milestoneCategory(null)
+            .consecutiveDays(0)
+            .balanceAfter(currentBalanceSafe(userId))
+            .checkedToday(false)
+            .daysToNextMilestone(7)
+            .nextMilestoneReward(BONUS_7DAY)
             .build();
+    }
+
+    private int currentBalanceSafe(Long userId) {
+        try { return currentBalance(userId); } catch (Exception e) { return 0; }
     }
 
     /**
@@ -198,20 +230,25 @@ public class AttendanceService {
      */
     @Transactional(readOnly = true)
     public java.util.List<java.util.Map<String, Object>> getRecentHistory(Long userId, int days) {
-        LocalDate today = LocalDate.now();
-        LocalDate from = today.minusDays(Math.max(1, days) - 1);
-        return attendanceRepository
-            .findByUserIdAndAttendDateBetweenOrderByAttendDateAsc(userId, from, today)
-            .stream()
-            .map(a -> {
-                java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
-                m.put("date", a.getAttendDate().toString());
-                m.put("consecutiveDays", a.getConsecutiveDays());
-                m.put("rewardAmount", a.getRewardAmount());
-                m.put("milestoneCategory", a.getMilestoneCategory());
-                return m;
-            })
-            .toList();
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate from = today.minusDays(Math.max(1, days) - 1);
+            return attendanceRepository
+                .findByUserIdAndAttendDateBetweenOrderByAttendDateAsc(userId, from, today)
+                .stream()
+                .map(a -> {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("date", a.getAttendDate().toString());
+                    m.put("consecutiveDays", a.getConsecutiveDays());
+                    m.put("rewardAmount", a.getRewardAmount());
+                    m.put("milestoneCategory", a.getMilestoneCategory());
+                    return m;
+                })
+                .toList();
+        } catch (Exception e) {
+            log.warn("[Attendance] getRecentHistory 실패 — 빈 배열 반환: userId={}, err={}", userId, e.getMessage());
+            return java.util.Collections.emptyList();
+        }
     }
 
     private AttendanceResponse buildAlreadyChecked(DailyAttendance row, int balance) {

@@ -82,7 +82,7 @@ export default function Attendance() {
     }
   };
 
-  if (loading || !status) {
+  if (loading) {
     return (
       <div className="attend-page">
         <header className="attend-page-header">
@@ -95,7 +95,15 @@ export default function Attendance() {
     );
   }
 
-  const { consecutiveDays, checkedToday, daysToNextMilestone, nextMilestoneReward, balanceAfter } = status;
+  // status null 이어도 페이지는 그릴 수 있도록 fallback (서버 미가동/마이그레이션 중 대비)
+  const safeStatus = status || {
+    consecutiveDays: 0,
+    checkedToday: false,
+    daysToNextMilestone: 7,
+    nextMilestoneReward: 20,
+    balanceAfter: null,
+  };
+  const { consecutiveDays, checkedToday, daysToNextMilestone, nextMilestoneReward, balanceAfter } = safeStatus;
 
   return (
     <div className="attend-page">
