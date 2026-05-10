@@ -261,6 +261,15 @@ const PATHS = {
       <path d="M11 13l1.5 1.5" strokeLinecap="round" opacity="0.55" />
     </>
   ),
+  // 출석부 — 달력 + 체크마크
+  attendance: (
+    <>
+      <rect x="3.5" y="5" width="17" height="15" rx="2" />
+      <path d="M3.5 9h17" />
+      <path d="M8 3v4M16 3v4" />
+      <path d="M9 14l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
 };
 
 export default function MenuIcon({ name, size = 36, className = '', style }) {

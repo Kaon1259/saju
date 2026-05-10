@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAttendanceStatus } from '../api/fortune';
+import MenuIcon from './MenuIcon';
 import './AttendanceCard.css';
 
 /**
@@ -35,7 +36,9 @@ export default function AttendanceCard({ refreshKey = 0 }) {
       onClick={() => navigate('/attendance')}
       aria-label="출석부 전체 보기"
     >
-      <span className="attend-card-icon" aria-hidden="true">📆</span>
+      <span className="attend-card-icon" aria-hidden="true">
+        <MenuIcon name="attendance" size={24} />
+      </span>
       <div className="attend-card-body">
         <div className="attend-card-meta">
           <span className="attend-card-streak">
