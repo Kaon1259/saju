@@ -15,6 +15,7 @@ import { useToast } from '../components/Toast';
 import HistoryDrawer from '../components/HistoryDrawer';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import GuestFortuneModal from '../components/GuestFortuneModal';
+import AttendanceCard from '../components/AttendanceCard';
 import { getCurrentWeather, getTimeBand } from '../utils/weather';
 import { DAILY_TAROT_MINOR } from '../data/dailyTarotMinor';
 import { startKakaoLogin } from '../utils/kakaoAuth';
@@ -1316,6 +1317,7 @@ function Home() {
 
   // 일일 출석 자동 체크인 — 로그인 시 1회 (오늘 이미 받았으면 멱등으로 alreadyChecked=true)
   // localStorage 가드로 같은 날 재호출 방지 (서버도 멱등이지만 네트워크 절약)
+  const [attendanceRefreshKey, setAttendanceRefreshKey] = useState(0);
   useEffect(() => {
     if (!userId) return;
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -1327,6 +1329,7 @@ function Home() {
         const result = await checkInAttendance();
         if (cancelled || !result) return;
         localStorage.setItem(lastKey, today);
+        setAttendanceRefreshKey(k => k + 1); // 카드 새로고침
         if (!result.alreadyChecked && result.rewardAmount > 0) {
           // 보상 토스트 — 마일스톤이면 강조
           const milestone = result.milestoneCategory;
@@ -1646,6 +1649,9 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 2. (로그인) 가로 스크롤 운세 요약 띠                          */}
       {/* ════════════════════════════════════════════════════════════ */}
+      {/* 출석 카드 — 로그인 시만, /attendance 진입점 */}
+      {userId && <AttendanceCard refreshKey={attendanceRefreshKey} />}
+
       {/* 운세 요약 카드는 Hero에 통합됨 (좌: 연애 온도, 우: 총운, 하단: 4개 칩) */}
 
       {/* 비로그인 CTA — Hero 바로 아래 */}

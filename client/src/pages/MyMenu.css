@@ -328,3 +328,72 @@
 [data-theme="light"] .mymenu-general-label {
   color: #333;
 }
+
+/* ═══ 단일 가로 카드 (출석부 등) ═══ */
+.mymenu-cards {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 16px;
+}
+.mymenu-card {
+  width: 100%;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+  color: var(--color-text);
+}
+.mymenu-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+[data-theme="light"] .mymenu-card {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+[data-theme="light"] .mymenu-card:hover {
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.mymenu-card-icon {
+  flex: 0 0 auto;
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(135deg, #ffb84d, #f59e0b);
+  color: #fff;
+  box-shadow: 0 4px 10px -2px rgba(251, 191, 36, 0.4);
+}
+.mymenu-card--attendance .mymenu-card-icon {
+  background: linear-gradient(135deg, #ffb84d, #ff8c5a);
+}
+
+.mymenu-card-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.mymenu-card-title {
+  font-size: 15px; font-weight: 800;
+  color: var(--color-text);
+}
+[data-theme="light"] .mymenu-card-title { color: #1f1d2b; }
+.mymenu-card-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+[data-theme="light"] .mymenu-card-sub { color: #6b6878; }
+
+.mymenu-card-arrow {
+  font-size: 22px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+[data-theme="light"] .mymenu-card-arrow { color: #c084fc; }

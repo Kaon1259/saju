@@ -1,0 +1,252 @@
+/* ─── 출석부 페이지 ─── */
+.attend-page {
+  padding: 0 16px 80px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.attend-page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+  position: sticky; top: 0; z-index: 10;
+  background: var(--color-bg-start);
+}
+[data-theme="light"] .attend-page-header { background: transparent; }
+.attend-back {
+  width: 36px; height: 36px;
+  border-radius: 50%; border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text);
+  font-size: 22px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit;
+}
+[data-theme="light"] .attend-back { background: rgba(15, 23, 42, 0.04); }
+.attend-back--ghost { visibility: hidden; }
+.attend-page-title {
+  font-size: 17px; font-weight: 800; margin: 0;
+  color: var(--color-text);
+}
+
+.attend-loading {
+  text-align: center; padding: 40px 0;
+  color: var(--color-text-muted);
+}
+
+/* ─── Hero — 오늘 보상 + 연속 일수 ─── */
+.attend-hero {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 22px 18px;
+  text-align: center;
+}
+.attend-hero-streak {
+  display: flex; align-items: baseline; gap: 6px;
+}
+.attend-hero-streak-num {
+  font-size: 56px; font-weight: 900; line-height: 1;
+  background: linear-gradient(135deg, #ffb84d, #ff8c5a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -2px;
+  filter: drop-shadow(0 3px 6px rgba(255, 154, 60, 0.3));
+}
+.attend-hero-streak-suf {
+  font-size: 14px; font-weight: 700;
+  color: var(--color-text);
+}
+
+.attend-hero-cta {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ffb84d, #ff8c5a);
+  color: #fff;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 6px 20px rgba(255, 154, 60, 0.35);
+  transition: transform 0.15s, box-shadow 0.2s;
+  animation: attend-cta-glow 2.4s ease-in-out infinite;
+}
+@keyframes attend-cta-glow {
+  0%, 100% { box-shadow: 0 6px 20px rgba(255, 154, 60, 0.35); }
+  50%      { box-shadow: 0 8px 28px rgba(255, 154, 60, 0.55); }
+}
+.attend-hero-cta:hover { transform: translateY(-1px); }
+
+.attend-hero-done {
+  font-size: 14px; font-weight: 700;
+  color: #10b981;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  justify-content: center;
+}
+.attend-hero-next {
+  font-size: 12px; font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.attend-hero-balance {
+  font-size: 12px; font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+[data-theme="light"] .attend-hero-balance {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.06);
+}
+
+/* ─── 섹션 공통 ─── */
+.attend-section {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 6px;
+}
+.attend-section-title {
+  font-size: 14px; font-weight: 700; margin: 0 4px;
+  color: var(--color-text);
+}
+
+/* ─── 마일스톤 ─── */
+.attend-milestones {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.attend-ms {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex; flex-direction: column; gap: 8px;
+}
+[data-theme="light"] .attend-ms {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+.attend-ms--done {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+}
+[data-theme="light"] .attend-ms--done {
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.attend-ms-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.attend-ms-label {
+  font-size: 14px; font-weight: 700;
+  color: var(--color-text);
+}
+.attend-ms-reward {
+  font-size: 13px; font-weight: 800;
+  color: #ec4899;
+}
+.attend-ms-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+[data-theme="light"] .attend-ms-bar { background: rgba(15, 23, 42, 0.06); }
+.attend-ms-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffb84d, #ff8c5a);
+  border-radius: 999px;
+  transition: width 0.5s ease-out;
+}
+.attend-ms--done .attend-ms-bar-fill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+.attend-ms-status {
+  font-size: 11px; font-weight: 600;
+  color: var(--color-text-muted);
+}
+.attend-ms--done .attend-ms-status { color: #059669; font-weight: 700; }
+
+/* ─── 30일 캘린더 ─── */
+.attend-cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+[data-theme="light"] .attend-cal {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.05);
+}
+.attend-cal-cell {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  font-size: 12px; font-weight: 600;
+  color: var(--color-text-muted);
+}
+[data-theme="light"] .attend-cal-cell { background: rgba(15, 23, 42, 0.04); }
+.attend-cal-cell--attended {
+  background: linear-gradient(135deg, #ffb84d, #f59e0b);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(251, 191, 36, 0.3);
+}
+.attend-cal-cell--today {
+  outline: 2px solid #ec4899;
+  outline-offset: 1px;
+  color: var(--color-text);
+}
+.attend-cal-cell--attended.attend-cal-cell--today {
+  outline-color: #ec4899;
+  color: #fff;
+}
+.attend-cal-day {
+  font-weight: 700;
+}
+.attend-cal-cell--attended .attend-cal-day { font-size: 11px; opacity: 0.95; }
+.attend-cal-mark {
+  position: absolute;
+  bottom: 1px; right: 3px;
+  font-size: 9px;
+}
+.attend-cal-cell--demo {
+  width: 18px; height: 18px;
+  aspect-ratio: unset;
+  font-size: 0;
+  display: inline-flex;
+}
+
+.attend-cal-legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  padding: 0 4px;
+}
+.attend-cal-legend-item {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+/* ─── 안내 ─── */
+.attend-tip-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+[data-theme="light"] .attend-tip-list {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.05);
+}
+.attend-tip-list li {
+  font-size: 13px; line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+.attend-tip-list li strong {
+  color: #ec4899;
+  font-weight: 800;
+}

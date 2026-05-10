@@ -32,4 +32,13 @@ public class AttendanceController {
         Long userId = AuthUtil.requireUserId(req);
         return ResponseEntity.ok(attendanceService.checkInToday(userId));
     }
+
+    /** 최근 N일 출석 기록 — 캘린더/마일스톤 화면용 */
+    @GetMapping("/history")
+    public ResponseEntity<java.util.List<java.util.Map<String, Object>>> history(
+            @RequestParam(defaultValue = "30") int days,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
+        return ResponseEntity.ok(attendanceService.getRecentHistory(userId, days));
+    }
 }

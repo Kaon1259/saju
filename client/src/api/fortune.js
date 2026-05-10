@@ -1594,4 +1594,13 @@ export const checkInAttendance = async () => {
   }
 };
 
+export const getAttendanceHistory = async (days = 30) => {
+  try {
+    const res = await api.get('/attendance/history', { params: { days } });
+    return Array.isArray(res.data) ? res.data : [];
+  } catch {
+    return [];
+  }
+};
+
 export default api;

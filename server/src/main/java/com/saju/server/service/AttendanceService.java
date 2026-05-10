@@ -192,6 +192,28 @@ public class AttendanceService {
             .orElse(0);
     }
 
+    /**
+     * 최근 N일 출석 기록 — 캘린더/마일스톤 화면용.
+     * 반환 배열 각 항목: { date, consecutiveDays, rewardAmount, milestoneCategory }
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<java.util.Map<String, Object>> getRecentHistory(Long userId, int days) {
+        LocalDate today = LocalDate.now();
+        LocalDate from = today.minusDays(Math.max(1, days) - 1);
+        return attendanceRepository
+            .findByUserIdAndAttendDateBetweenOrderByAttendDateAsc(userId, from, today)
+            .stream()
+            .map(a -> {
+                java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                m.put("date", a.getAttendDate().toString());
+                m.put("consecutiveDays", a.getConsecutiveDays());
+                m.put("rewardAmount", a.getRewardAmount());
+                m.put("milestoneCategory", a.getMilestoneCategory());
+                return m;
+            })
+            .toList();
+    }
+
     private AttendanceResponse buildAlreadyChecked(DailyAttendance row, int balance) {
         int milestoneBonus = row.getMilestoneCategory() != null ? row.getRewardAmount() - BASE_REWARD : 0;
         return AttendanceResponse.builder()

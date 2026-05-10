@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Fortune from './pages/Fortune';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Attendance from './pages/Attendance';
 import SajuAnalysis from './pages/SajuAnalysis';
 import BloodType from './pages/BloodType';
 import Mbti from './pages/Mbti';
@@ -197,7 +198,7 @@ function useProfileGuard() {
     const safePaths = [
       '/register', '/auth/kakao/callback', '/settings', '/welcome',
       '/profile', '/profile/edit', '/my-menu', '/landing',
-      '/privacy', '/terms',
+      '/privacy', '/terms', '/attendance',
     ];
     if (safePaths.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))) return;
     // 홈은 Guest도 진입 (홈 안에서 개별 카드가 분기 처리)
@@ -359,6 +360,7 @@ function App() {
               <Route path="/my-star" element={<MyStar />} />
               <Route path="/weather-compat" element={<WeatherCompat />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/attendance" element={<Attendance />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
             </Routes>
