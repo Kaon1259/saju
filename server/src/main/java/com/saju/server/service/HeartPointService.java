@@ -73,8 +73,9 @@ public class HeartPointService {
     public void deductPoints(Long userId, String analysisCategory, String endpointDesc) {
         try {
             self.doDeductPoints(userId, analysisCategory, endpointDesc);
-        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException
-                | org.springframework.dao.OptimisticLockingFailureException ex) {
+        } catch (org.springframework.dao.OptimisticLockingFailureException ex) {
+            // ObjectOptimisticLockingFailureException 도 부모(OptimisticLockingFailureException) 의 자식이라 함께 잡힘.
+            // multi-catch 에 둘 다 명시하면 Java 컴파일러가 거부 (subclass relation) → 부모만 catch.
             // @Version 충돌 — 50ms 대기 후 1회 재조회 + 재시도 (새 트랜잭션 = self 호출)
             log.warn("하트 차감 OptimisticLock 충돌, 재시도: userId={}, cat={}", userId, analysisCategory);
             try { Thread.sleep(50); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
