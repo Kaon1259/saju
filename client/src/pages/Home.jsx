@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
-import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream } from '../api/fortune';
+import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream, analyzeSajuStream } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import MenuIcon from '../components/MenuIcon';
@@ -14,6 +14,7 @@ import HeartCost from '../components/HeartCost';
 import { useToast } from '../components/Toast';
 import HistoryDrawer from '../components/HistoryDrawer';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import GuestFortuneModal from '../components/GuestFortuneModal';
 import { getCurrentWeather, getTimeBand } from '../utils/weather';
 import { DAILY_TAROT_MINOR } from '../data/dailyTarotMinor';
 import { startKakaoLogin } from '../utils/kakaoAuth';
@@ -251,33 +252,33 @@ function getOrderedRelCards(profile) {
 // ════════════════════════════════════════════════════════════════
 const RECOMMEND_POOL = {
   guest: [
-    { icon: '🌟', title: '나의 사주 보기', sub: '정통 사주로 오늘의 운세 확인', path: '/traditional' },
+    { iconKey: 'overall', gradFrom: '#fbbf24', gradTo: '#f59e0b', title: '나의 사주 보기', sub: '정통 사주로 오늘의 운세 확인', path: '/traditional' },
   ],
   couple: [
-    { icon: '💑', title: '오늘 연인과의 데이트운', sub: '두 사람의 오늘 케미스트리', path: '/my-love-compat', state: { presetTab: 'date' } },
-    { icon: '💞', title: '우리 사주 궁합 점수', sub: '정통 궁합 다시 확인', path: '/my-love-compat', state: { presetTab: 'saju' } },
-    { icon: '🤝', title: '오늘 우리 스킨십 운', sub: '두 사람의 케미 분석', path: '/my-love-compat', state: { presetTab: 'skinship' } },
-    { icon: '💒', title: '결혼 시기 다시 보기', sub: '두 사람의 결혼 운', path: '/my-love-compat', state: { presetTab: 'marriage' } },
-    { icon: '📱', title: '오늘 먼저 연락해도 될까?', sub: '연락운으로 본 타이밍', path: '/love/contact_fortune' },
+    { iconKey: 'couple',       gradFrom: '#fb7185', gradTo: '#ec4899', title: '오늘 연인과의 데이트운', sub: '두 사람의 오늘 케미스트리', path: '/my-love-compat', state: { presetTab: 'date' } },
+    { iconKey: 'sparkleHeart', gradFrom: '#a855f7', gradTo: '#ec4899', title: '우리 사주 궁합 점수',   sub: '정통 궁합 다시 확인',         path: '/my-love-compat', state: { presetTab: 'saju' } },
+    { iconKey: 'handshake',    gradFrom: '#f97316', gradTo: '#ef4444', title: '오늘 우리 스킨십 운',     sub: '두 사람의 케미 분석',         path: '/my-love-compat', state: { presetTab: 'skinship' } },
+    { iconKey: 'ring',         gradFrom: '#ec4899', gradTo: '#a855f7', title: '결혼 시기 다시 보기',     sub: '두 사람의 결혼 운',           path: '/my-love-compat', state: { presetTab: 'marriage' } },
+    { iconKey: 'phone',        gradFrom: '#06b6d4', gradTo: '#a78bfa', title: '오늘 먼저 연락해도 될까?', sub: '연락운으로 본 타이밍',        path: '/love/contact_fortune' },
   ],
   some: [
-    { icon: '💌', title: '이 썸, 고백해도 될까?', sub: '고백 타이밍 운세', path: '/love/confession_timing' },
-    { icon: '🎯', title: '이 사람과 잘 맞을까?', sub: '썸 진단으로 확인', path: '/love/some_check' },
-    { icon: '📱', title: '먼저 연락해도 될까?', sub: '연락운으로 본 타이밍', path: '/love/contact_fortune' },
-    { icon: '💘', title: '내 짝사랑은 이뤄질까?', sub: '짝사랑 성공 가능성', path: '/love/crush' },
+    { iconKey: 'letter',     gradFrom: '#fb923c', gradTo: '#ef4444', title: '이 썸, 고백해도 될까?',  sub: '고백 타이밍 운세',     path: '/love/confession_timing' },
+    { iconKey: 'target',     gradFrom: '#f97316', gradTo: '#ec4899', title: '이 사람과 잘 맞을까?',   sub: '썸 진단으로 확인',     path: '/love/some_check' },
+    { iconKey: 'phone',      gradFrom: '#06b6d4', gradTo: '#a78bfa', title: '먼저 연락해도 될까?',     sub: '연락운으로 본 타이밍', path: '/love/contact_fortune' },
+    { iconKey: 'heartArrow', gradFrom: '#ec4899', gradTo: '#a855f7', title: '내 짝사랑은 이뤄질까?',   sub: '짝사랑 성공 가능성',   path: '/love/crush' },
   ],
   complicated: [
-    { icon: '🌙', title: '다시 만날 수 있을까?', sub: '재회운으로 인연 확인', path: '/love/reunion' },
-    { icon: '💍', title: '새로운 인연이 올 시기', sub: '재혼/재출발 운', path: '/love/remarriage' },
-    { icon: '🕯️', title: '마음 정리하고 회복하기', sub: '이별 회복 운', path: '/love/reunion' },
-    { icon: '📞', title: '먼저 연락해도 될까?', sub: '연락 타이밍 운', path: '/love/contact_fortune' },
+    { iconKey: 'moon',        gradFrom: '#6366f1', gradTo: '#a855f7', title: '다시 만날 수 있을까?',     sub: '재회운으로 인연 확인',   path: '/love/reunion' },
+    { iconKey: 'ring',        gradFrom: '#ec4899', gradTo: '#a855f7', title: '새로운 인연이 올 시기',    sub: '재혼/재출발 운',         path: '/love/remarriage' },
+    { iconKey: 'moon',        gradFrom: '#a78bfa', gradTo: '#6366f1', title: '마음 정리하고 회복하기',    sub: '이별 회복 운',           path: '/love/reunion' },
+    { iconKey: 'phone',       gradFrom: '#06b6d4', gradTo: '#a78bfa', title: '먼저 연락해도 될까?',       sub: '연락 타이밍 운',         path: '/love/contact_fortune' },
   ],
   solo: [
-    { icon: '🔮', title: '내 인연이 올 시기는?', sub: '사주로 보는 만남시기', path: '/love/meeting_timing' },
-    { icon: '👩‍❤️‍👨', title: '나에게 맞는 이상형은?', sub: '사주로 본 이상형 분석', path: '/love/ideal_type' },
-    { icon: '💕', title: '오늘의 1:1 연애운', sub: '솔로를 위한 오늘 운', path: '/love-fortune' },
-    { icon: '🤝', title: '소개팅 잘 풀릴까?', sub: '소개팅 운으로 확인', path: '/love/blind_date' },
-    { icon: '💒', title: '내가 결혼할 시기는?', sub: '결혼 시기 운', path: '/love/marriage' },
+    { iconKey: 'crystalBall', gradFrom: '#06b6d4', gradTo: '#a78bfa', title: '내 인연이 올 시기는?',  sub: '사주로 보는 만남시기',  path: '/love/meeting_timing' },
+    { iconKey: 'sparkleHeart',gradFrom: '#a855f7', gradTo: '#ec4899', title: '나에게 맞는 이상형은?',  sub: '사주로 본 이상형 분석', path: '/love/ideal_type' },
+    { iconKey: 'heart',       gradFrom: '#ff6b9d', gradTo: '#ec4899', title: '오늘의 1:1 연애운',     sub: '솔로를 위한 오늘 운',   path: '/love-fortune' },
+    { iconKey: 'handshake',   gradFrom: '#f97316', gradTo: '#ec4899', title: '소개팅 잘 풀릴까?',     sub: '소개팅 운으로 확인',    path: '/love/blind_date' },
+    { iconKey: 'ring',        gradFrom: '#ec4899', gradTo: '#a855f7', title: '내가 결혼할 시기는?',   sub: '결혼 시기 운',          path: '/love/marriage' },
   ],
 };
 
@@ -1170,14 +1171,14 @@ function pickDailyHeadline() {
 // 연애 배너 세로 스택 (점신 스타일)
 // ════════════════════════════════════════════════════════════════
 const LOVE_BANNERS = [
-  { id: 'mylove',  icon: '💑', title: '나의 연인',        sub: '정통·결혼·스킨십·데이트 통합 궁합',  gradFrom: '#fb7185', gradTo: '#ec4899', path: '/my-love-compat', badge: 'MY' },
-  { id: 'rel',     icon: '💕', title: '1:1 연애운',      sub: '오늘 나의 연애 흐름을 한눈에',     gradFrom: '#ff6b9d', gradTo: '#ec4899', path: '/love-fortune', badge: 'HOT' },
-  { id: 'compat',  icon: '💞', title: '사주 궁합',        sub: '두 사람의 운명적 케미 진단',        gradFrom: '#a855f7', gradTo: '#ec4899', path: '/compatibility' },
-  { id: 'some',    icon: '🎯', title: '썸 진단',          sub: '이 썸, 연애로 발전할까?',          gradFrom: '#f97316', gradTo: '#ec4899', path: '/love/some_check' },
-  { id: 'crush',   icon: '💘', title: '짝사랑',          sub: '내 마음, 이뤄질 수 있을까?',        gradFrom: '#ec4899', gradTo: '#a855f7', path: '/love/crush' },
-  { id: 'confess', icon: '💌', title: '고백 타이밍',      sub: '언제 말해야 답이 나올까?',          gradFrom: '#fb923c', gradTo: '#ef4444', path: '/love/confession_timing' },
-  { id: 'meet',    icon: '🔮', title: '만남 시기',        sub: '인연이 다가오는 그날',              gradFrom: '#06b6d4', gradTo: '#a78bfa', path: '/love/meeting_timing' },
-  { id: 'star',    icon: '⭐', title: '최애 스타 궁합',    sub: '내 최애와의 운명 케미',             gradFrom: '#facc15', gradTo: '#fb923c', path: '/celeb-compatibility' },
+  { id: 'mylove',  iconKey: 'couple',       title: '나의 연인',        sub: '정통·결혼·스킨십·데이트 통합 궁합',  gradFrom: '#fb7185', gradTo: '#ec4899', path: '/my-love-compat', badge: 'MY' },
+  { id: 'rel',     iconKey: 'heart',        title: '1:1 연애운',      sub: '오늘 나의 연애 흐름을 한눈에',     gradFrom: '#ff6b9d', gradTo: '#ec4899', path: '/love-fortune', badge: 'HOT' },
+  { id: 'compat',  iconKey: 'sparkleHeart', title: '사주 궁합',        sub: '두 사람의 운명적 케미 진단',        gradFrom: '#a855f7', gradTo: '#ec4899', path: '/compatibility' },
+  { id: 'some',    iconKey: 'target',       title: '썸 진단',          sub: '이 썸, 연애로 발전할까?',          gradFrom: '#f97316', gradTo: '#ec4899', path: '/love/some_check' },
+  { id: 'crush',   iconKey: 'heartArrow',   title: '짝사랑',          sub: '내 마음, 이뤄질 수 있을까?',        gradFrom: '#ec4899', gradTo: '#a855f7', path: '/love/crush' },
+  { id: 'confess', iconKey: 'letter',       title: '고백 타이밍',      sub: '언제 말해야 답이 나올까?',          gradFrom: '#fb923c', gradTo: '#ef4444', path: '/love/confession_timing' },
+  { id: 'meet',    iconKey: 'crystalBall',  title: '만남 시기',        sub: '인연이 다가오는 그날',              gradFrom: '#06b6d4', gradTo: '#a78bfa', path: '/love/meeting_timing' },
+  { id: 'star',    iconKey: 'star',         title: '최애 스타 궁합',    sub: '내 최애와의 운명 케미',             gradFrom: '#facc15', gradTo: '#fb923c', path: '/celeb-compatibility' },
 ];
 
 function reorderLoveBanners(status) {
@@ -1339,14 +1340,8 @@ function Home() {
     }
   }, [location.state]);
 
-  const handleGuestSubmit = async () => {
-    if (!birthDate) return;
-    setGuestLoading(true);
-    try { setGuestResult(await getGuestFortune(birthDate, birthTime || undefined, calendarType, gender || undefined)); }
-    catch (err) { console.error(err); }
-    finally { setGuestLoading(false); }
-  };
-
+  // 게스트 무료 운세 — 풀스크린 모달(GuestFortuneModal)에서 광고+스트리밍+결과 처리
+  // 홈에는 트리거(showForm=true)만 노출하고 결과는 모달 안에서 보여줌
   const handleGuestReset = () => { setGuestResult(null); setBirthDate(''); setBirthTime(''); setGender(''); setShowForm(false); };
 
   const openLoveModal = (typeId) => {
@@ -1543,22 +1538,59 @@ function Home() {
           <h1 className="home-hero-cs-headline">{headline}</h1>
         </div>
 
-        {/* 큰 하트 + 점수 */}
-        <div className="home-hero-cs-meter">
-          <HeartScore score={loveScore} color="#ec4899" />
-          <div className="home-hero-cs-meter-text">
-            <span className="home-hero-cs-meter-label">오늘의 연애 온도</span>
-            <span className="home-hero-cs-meter-grade">{loveGrade}</span>
-          </div>
-        </div>
+        {/* 로그인 시: 연애 온도 미니 + 총운 요약 (비로그인은 아래 home-guest-cta가 담당) */}
+        {userId && (() => {
+          const sajuObj = myData?.saju;
+          const overallScore = sajuObj?.aiAnalyzed && sajuObj?.score != null ? sajuObj.score : null;
+          const overallText  = sajuObj?.overall || sajuObj?.summary || null;
+          const overallGrade =
+            overallScore == null ? null :
+            overallScore >= 85 ? '대길' :
+            overallScore >= 70 ? '길' :
+            overallScore >= 50 ? '보통' :
+            overallScore >= 30 ? '주의' : '흉';
+          return (
+            <>
+              {/* 연애 온도 — 항상 보여주는 Hero 핵심 정보 (loveScore가 있을 때만) */}
+              {loveScore != null && (
+                <button
+                  className="home-hero-cs-love"
+                  onClick={(e) => { e.stopPropagation(); navigate('/love-fortune'); }}
+                  aria-label={`오늘의 연애 온도 ${loveScore}도, ${loveGrade}`}
+                >
+                  <span className="home-hero-cs-love-icon" aria-hidden="true">♥</span>
+                  <span className="home-hero-cs-love-meta">
+                    <span className="home-hero-cs-love-label">오늘의 연애 온도</span>
+                    <span className="home-hero-cs-love-grade">{loveGrade}</span>
+                  </span>
+                  <span className="home-hero-cs-love-score">
+                    {loveScore}<small>°</small>
+                  </span>
+                </button>
+              )}
 
-        {/* CTA */}
-        <button
-          className="home-hero-cs-cta"
-          onClick={(e) => { e.stopPropagation(); navigate(loveBtn.path); }}
-        >
-          {loveBtn.icon} {loveBtn.label} <span className="home-hero-cs-cta-arrow">›</span>
-        </button>
+              {/* 총운 요약 — overall 텍스트가 있을 때만 (없으면 깔끔하게 숨김) */}
+              {overallText && (
+                <button
+                  className="home-hero-cs-summary"
+                  onClick={(e) => { e.stopPropagation(); navigate('/my'); }}
+                  aria-label="오늘의 총운 자세히 보기"
+                >
+                  <div className="home-hero-cs-summary-head">
+                    <span className="home-hero-cs-summary-tag">★ 오늘의 총운</span>
+                    {overallScore != null && (
+                      <span className="home-hero-cs-summary-score">
+                        {overallScore}<small>점</small>
+                        {overallGrade && <em>· {overallGrade}</em>}
+                      </span>
+                    )}
+                  </div>
+                  <p className="home-hero-cs-summary-text">{overallText}</p>
+                </button>
+              )}
+            </>
+          );
+        })()}
       </section>
 
       {/* ════════════════════════════════════════════════════════════ */}
@@ -1588,52 +1620,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 2. (로그인) 가로 스크롤 운세 요약 띠                          */}
       {/* ════════════════════════════════════════════════════════════ */}
-      {userId && (
-        <section className="home-summary-strip">
-          <div className="home-summary-strip-header">
-            <span className="home-summary-strip-title">📊 오늘의 운세 요약</span>
-            <button className="home-summary-strip-more" onClick={() => navigate('/my')}>전체보기 ›</button>
-          </div>
-          <div className="home-summary-track">
-            {SUMMARY_DEFS.map((def) => {
-              const isLoading = fortuneLoading && !myData;
-              const saju = myData?.saju;
-              // 카테고리별 점수 매핑 (서버가 카테고리 점수 반환 — 없으면 overall fallback)
-              let score = null;
-              if (def.key === 'love') {
-                score = saju?.loveScore ?? loveTemp?.temperature ?? null;
-              } else if (def.key === 'overall') {
-                score = saju?.aiAnalyzed && saju?.score != null ? saju.score : null;
-              } else {
-                score = saju?.[`${def.key}Score`] ?? null;
-              }
-              return (
-                <button
-                  key={def.key}
-                  className={`home-summary-card ${isLoading ? 'home-summary-card--skeleton' : ''}`}
-                  style={{ '--sm-color': def.color }}
-                  onClick={() => !isLoading && navigate('/my')}
-                  disabled={isLoading}
-                >
-                  <div className="home-summary-card-head">
-                    <span className="home-summary-card-icon">
-                      <MenuIcon name={def.iconKey} size={26} />
-                    </span>
-                    <span className="home-summary-card-label">{def.label}</span>
-                  </div>
-                  {isLoading ? (
-                    <span className="home-summary-card-score-skel" />
-                  ) : score != null ? (
-                    <span className="home-summary-card-score">{score}<small>점</small></span>
-                  ) : (
-                    <span className="home-summary-card-score home-summary-card-score--empty">--</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {/* 운세 요약 카드는 Hero에 통합됨 (좌: 연애 온도, 우: 총운, 하단: 4개 칩) */}
 
       {/* 비로그인 CTA — Hero 바로 아래 */}
       {!userId && !showForm && (
@@ -1646,24 +1633,7 @@ function Home() {
       )}
 
       {/* 비로그인: 게스트 운세 입력폼 — Hero 직하 (showForm일 때 CTA 자리 대체) */}
-      {!userId && showForm && (
-        <section className="home-guest-section">
-          {guestLoading ? (
-            <AnalysisMatrix theme="saju" label="오늘의 운세를 분석하고 있어요" />
-          ) : guestResult ? (
-            renderGuestResult()
-          ) : (
-            <div className="home-guest glass-card fade-in">
-              <h3 className="home-guest__title">생년월일로 오늘의 운세 보기</h3>
-              <div className="home-guest__form-group"><label className="home-guest__label">생년월일</label><BirthDatePicker value={birthDate} onChange={setBirthDate} calendarType={calendarType} onCalendarTypeChange={setCalendarType} /></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">태어난 시간 (선택)</label><select className="home-guest__input home-guest__select" value={birthTime} onChange={(e) => setBirthTime(e.target.value)}>{BIRTH_TIMES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}</select></div>
-              <div className="home-guest__form-group"><label className="home-guest__label">성별</label><GenderPicker value={gender} onChange={setGender} /></div>
-              <button className="home-guest__submit-full" onClick={handleGuestSubmit} disabled={!birthDate}>오늘의 운세 보기</button>
-              <button className="home-guest__link" onClick={() => setShowForm(false)}>돌아가기</button>
-            </div>
-          )}
-        </section>
-      )}
+      {/* 게스트 무료 운세는 별도 풀스크린 모달(GuestFortuneModal)에서 처리 — 홈에 결과 인라인 노출 안 함 */}
 
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 3. 오늘의 추천 — 큰 배너 1개                                  */}
@@ -1678,10 +1648,16 @@ function Home() {
         };
         return (
           <section className="home-section">
-            <button className="home-recommend-card" onClick={handleClick}>
+            <button
+              className="home-recommend-card"
+              onClick={handleClick}
+              style={{ '--b-from': rec.gradFrom || '#ec4899', '--b-to': rec.gradTo || '#a855f7' }}
+            >
               <span className="home-recommend-badge">오늘의 추천 · {dateLabel}</span>
               <div className="home-recommend-body">
-                <span className="home-recommend-icon">{rec.icon}</span>
+                <span className="home-recommend-icon">
+                  {rec.iconKey ? <MenuIcon name={rec.iconKey} size={28} /> : rec.icon}
+                </span>
                 <div className="home-recommend-text">
                   <span className="home-recommend-title">{rec.title}</span>
                   <span className="home-recommend-sub">{rec.sub}</span>
@@ -1709,9 +1685,9 @@ function Home() {
               style={{ '--b-from': b.gradFrom, '--b-to': b.gradTo }}
               onClick={() => navigate(b.path, b.state ? { state: b.state } : undefined)}
             >
-              <div className="home-love-banner-icon">
-                <span>{b.icon}</span>
-              </div>
+              <span className="home-love-banner-icon">
+                <MenuIcon name={b.iconKey} size={28} />
+              </span>
               <div className="home-love-banner-text">
                 <div className="home-love-banner-title-row">
                   <span className="home-love-banner-title">{b.title}</span>
@@ -2000,6 +1976,12 @@ function Home() {
           }}
         />
       )}
+
+      {/* 게스트 무료 운세 풀스크린 모달 — 폼 → 광고 → progressive 카드 스트리밍 → 결과 */}
+      <GuestFortuneModal
+        open={!userId && showForm}
+        onClose={() => setShowForm(false)}
+      />
     </div>
   );
 }

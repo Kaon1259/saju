@@ -836,18 +836,18 @@
 }
 
 [data-theme="light"] .home-hero-new {
-  background:
-    radial-gradient(ellipse at top right, rgba(255, 200, 220, 0.45) 0%, transparent 60%),
-    linear-gradient(160deg, rgba(233,30,99,0.07), rgba(255,107,107,0.03), rgba(224,64,251,0.06));
-  border-color: rgba(255, 107, 157, 0.22);
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.05);
+  border-radius: 22px;
   box-shadow:
-    0 6px 22px rgba(255, 107, 157, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    0 1px 3px rgba(15, 23, 42, 0.03),
+    0 12px 32px rgba(255, 122, 138, 0.10),
+    0 4px 12px rgba(15, 23, 42, 0.04);
 }
-[data-theme="light"] .home-hero-new__greeting { color: #886b80; }
+[data-theme="light"] .home-hero-new__greeting { color: #8a8699; font-weight: 500; }
 [data-theme="light"] .home-hero-new__msg {
-  color: #2a1a3a;
-  font-weight: 600;
+  color: #1f1d2b;
+  font-weight: 700;
 }
 
 /* Hero 운세 한줄 요약 */
@@ -871,18 +871,19 @@
   overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 [data-theme="light"] .home-hero-fortune-summary {
-  background: linear-gradient(180deg, rgba(255, 252, 254, 0.92) 0%, rgba(253, 245, 250, 0.86) 100%);
-  border-color: rgba(255, 107, 157, 0.20);
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.05);
+  border-radius: 14px;
   box-shadow:
-    0 2px 10px rgba(255, 107, 157, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 6px 18px rgba(255, 122, 138, 0.08);
 }
 [data-theme="light"] .home-hero-fortune-summary:hover {
-  border-color: rgba(255, 107, 157, 0.35);
+  border-color: rgba(255, 122, 138, 0.28);
   transform: translateY(-1px);
   box-shadow:
-    0 6px 18px rgba(255, 107, 157, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 10px 24px rgba(255, 122, 138, 0.16);
 }
 
 /* 날씨 카드(어두운 그라데이션 배경) 위에서 운세 요약 — 흰색 톤으로 가독성 확보 */
@@ -939,16 +940,21 @@
   line-height: 1;
 }
 [data-theme="light"] .home-hero-fortune-cta {
-  background: linear-gradient(135deg, #fff, #fffbeb);
-  color: #b8860b;
-  border-color: rgba(184, 134, 11, 0.35);
-  box-shadow: 0 2px 10px rgba(184, 134, 11, 0.15);
+  background: linear-gradient(135deg, #ffb84d, #ff8c5a);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(255, 140, 90, 0.32);
+  font-weight: 700;
 }
-[data-theme="light"] .hero-fortune-badge.badge-great { background: rgba(74,222,128,0.12); color: #16a34a; }
-[data-theme="light"] .hero-fortune-badge.badge-good { background: rgba(251,191,36,0.12); color: #b8860b; }
-[data-theme="light"] .hero-fortune-badge.badge-normal { background: rgba(96,165,250,0.12); color: #2563eb; }
-[data-theme="light"] .hero-fortune-badge.badge-low { background: rgba(168,85,247,0.12); color: #7c3aed; }
-[data-theme="light"] .hero-fortune-text { color: #333; font-weight: 500; }
+[data-theme="light"] .home-hero-fortune-cta:hover {
+  background: linear-gradient(135deg, #ffa83a, #ff7a4a);
+  box-shadow: 0 8px 22px rgba(255, 140, 90, 0.42);
+}
+[data-theme="light"] .hero-fortune-badge.badge-great { background: rgba(94, 234, 212, 0.18); color: #0d9488; }
+[data-theme="light"] .hero-fortune-badge.badge-good { background: rgba(255, 184, 77, 0.18); color: #d97706; }
+[data-theme="light"] .hero-fortune-badge.badge-normal { background: rgba(129, 140, 248, 0.18); color: #4f46e5; }
+[data-theme="light"] .hero-fortune-badge.badge-low { background: rgba(192, 132, 252, 0.18); color: #7c3aed; }
+[data-theme="light"] .hero-fortune-text { color: #1f1d2b; font-weight: 500; }
 
 /* Hero 운세 미리보기 */
 .home-hero-fortune-wrap { margin-top: 12px; position: relative; z-index: 1; }
@@ -968,30 +974,36 @@
 .home-hero-fortune-btn:hover { background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(251,191,36,0.18)); }
 .home-hero-fortune-btn:active { transform: scale(0.98); }
 [data-theme="light"] .home-hero-fortune-peek {
-  border-color: rgba(184, 134, 11, 0.32);
+  border: 1px solid rgba(15, 23, 42, 0.04);
   background:
-    radial-gradient(ellipse at top right, rgba(255, 220, 180, 0.40) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(255, 252, 248, 0.95) 0%, rgba(255, 244, 230, 0.88) 100%);
+    radial-gradient(ellipse at top right, rgba(255, 218, 185, 0.55) 0%, transparent 65%),
+    linear-gradient(180deg, #ffffff 0%, #fff6ec 100%);
+  border-radius: 18px 18px 0 0;
   box-shadow:
-    0 4px 18px rgba(184, 134, 11, 0.14),
-    0 1px 4px rgba(255, 107, 157, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    0 1px 3px rgba(15, 23, 42, 0.03),
+    0 8px 22px rgba(255, 154, 60, 0.10);
 }
 [data-theme="light"] .home-hero-fortune-score {
-  background: linear-gradient(135deg, #d4145a, #d4380d);
+  background: linear-gradient(135deg, #ff5a7e 0%, #ff8c5a 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-size: 40px;
-  font-weight: 800;
-  filter: drop-shadow(0 2px 4px rgba(212, 56, 13, 0.22));
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  filter: drop-shadow(0 3px 6px rgba(255, 122, 138, 0.28));
 }
-[data-theme="light"] .home-hero-fortune-text { color: #2a1a3a; font-weight: 600; }
+[data-theme="light"] .home-hero-fortune-text { color: #1f1d2b; font-weight: 600; }
 [data-theme="light"] .home-hero-fortune-btn {
-  border-color: rgba(184, 134, 11, 0.42);
-  background: linear-gradient(135deg, rgba(184, 134, 11, 0.18), rgba(255, 107, 157, 0.10));
-  color: #b8860b;
-  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.16);
+  border: none;
+  background: linear-gradient(135deg, #ff5a7e 0%, #ff8c5a 100%);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(255, 122, 138, 0.28);
+}
+[data-theme="light"] .home-hero-fortune-btn:hover {
+  background: linear-gradient(135deg, #ff4a70 0%, #ff7c4a 100%);
+  box-shadow: 0 6px 18px rgba(255, 122, 138, 0.4);
 }
 
 /* 운세 로딩 스켈레톤 */
@@ -4329,89 +4341,148 @@
 .home-hero-v2-action:active { transform: scale(0.97); }
 
 /* ── 2. 오늘의 추천 카드 — 부드러운 분홍 톤 ── */
+/* ─── 오늘의 추천 카드 — 연애 배너 통일 패턴 (화이트 + 좌측 컬러 박스) ─── */
 .home-recommend-card {
   position: relative;
   width: 100%;
   display: block;
-  padding: 14px 14px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(236, 72, 153, 0.18);
-  background: linear-gradient(135deg,
-              rgba(236, 72, 153, 0.10),
-              rgba(168, 85, 247, 0.07));
-  color: var(--color-text);
+  padding: 16px 14px 14px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(135deg, var(--b-from, #ec4899), var(--b-to, #a855f7));
+  color: #ffffff;
   font-family: inherit;
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 3px 10px rgba(236, 72, 153, 0.10);
-  transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--b-from, #ec4899) 65%, transparent);
+  transition: transform 0.15s, box-shadow 0.2s;
   overflow: hidden;
+  isolation: isolate;
+}
+.home-recommend-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 80% at 100% 0%, rgba(255,255,255,0.18), transparent 55%);
+  z-index: -1;
 }
 .home-recommend-card:hover {
-  border-color: rgba(236, 72, 153, 0.35);
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--b-from, #ec4899) 75%, transparent);
 }
 .home-recommend-card:active { transform: scale(0.99); }
+
+/* 라이트 모드 — 화이트 베이스 + 좌상단 시그니처 글로우 */
 [data-theme="light"] .home-recommend-card {
-  background: linear-gradient(135deg,
-              rgba(236, 72, 153, 0.06),
-              rgba(168, 85, 247, 0.04));
-  border-color: rgba(236, 72, 153, 0.18);
-  color: #1e293b;
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--b-from, #ec4899) 12%, transparent), transparent 60%),
+    #ffffff;
+  color: #1f1d2b;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 8px 22px -6px color-mix(in srgb, var(--b-from, #ec4899) 18%, transparent);
 }
+[data-theme="light"] .home-recommend-card:hover {
+  box-shadow:
+    0 2px 6px rgba(15, 23, 42, 0.06),
+    0 14px 32px -6px color-mix(in srgb, var(--b-from, #ec4899) 30%, transparent);
+}
+
 .home-recommend-badge {
   display: inline-block;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.4px;
-  color: #db2777;
-  background: rgba(236, 72, 153, 0.08);
-  padding: 2px 8px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 3px 10px;
   border-radius: 999px;
-  margin-bottom: 8px;
-  border: 1px solid rgba(236, 72, 153, 0.18);
+  margin-bottom: 10px;
+  border: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
+[data-theme="light"] .home-recommend-badge {
+  background: linear-gradient(135deg, var(--b-from, #ec4899), var(--b-to, #a855f7));
+  color: #ffffff;
+  text-shadow: none;
+}
+
 .home-recommend-body {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
+
+/* 좌측 아이콘 박스 — 연애 배너 home-love-banner-icon 패턴 (다크: 반투명 화이트 / 라이트: 시그니처 그라데이션) */
 .home-recommend-icon {
-  font-size: 32px;
-  line-height: 1;
-  filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.30));
   flex: 0 0 auto;
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  font-size: 28px;
+  line-height: 1;
 }
+.home-recommend-icon .menu-icon {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+}
+[data-theme="light"] .home-recommend-icon {
+  background: linear-gradient(135deg, var(--b-from, #ec4899), var(--b-to, #a855f7));
+  color: #ffffff;
+  box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--b-from, #ec4899) 35%, transparent);
+}
+
 .home-recommend-text {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 .home-recommend-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--color-text);
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+[data-theme="light"] .home-recommend-title {
+  color: #1f1d2b;
+  text-shadow: none;
+  font-weight: 800;
 }
 .home-recommend-sub {
   font-size: 12px;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+[data-theme="light"] .home-recommend-sub {
+  color: #6b6878;
+  text-shadow: none;
+}
 .home-recommend-arrow {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
-  color: rgba(236, 72, 153, 0.75);
+  color: rgba(255, 255, 255, 0.85);
   flex: 0 0 auto;
   transition: transform 0.2s;
 }
+[data-theme="light"] .home-recommend-arrow {
+  color: color-mix(in srgb, var(--b-from, #ec4899) 70%, #999);
+}
 .home-recommend-card:hover .home-recommend-arrow { transform: translateX(3px); }
+
+@supports not (background: color-mix(in srgb, red, blue)) {
+  [data-theme="light"] .home-recommend-card { background: #ffffff; box-shadow: 0 8px 22px -6px rgba(236, 72, 153, 0.18); }
+  [data-theme="light"] .home-recommend-icon { background: linear-gradient(135deg, #ec4899, #a855f7); }
+  [data-theme="light"] .home-recommend-arrow { color: #999; }
+}
 
 /* ── 3. 메뉴 페이저 — 4×2 정사각 타일 × N페이지 (가로 스크롤 + snap) ── */
 .home-menu-pager-wrap {
@@ -5315,15 +5386,14 @@
 .home-hero-cs {
   position: relative;
   border-radius: 24px;
-  padding: 22px 22px 24px;
+  padding: 20px 18px 18px;
   overflow: hidden;
   background: linear-gradient(160deg, var(--w-from, #fb923c) 0%, var(--w-to, #ec4899) 60%, #1e1b4b 100%);
   box-shadow: 0 12px 36px -10px rgba(236, 72, 153, 0.45), 0 4px 14px rgba(0,0,0,0.18);
   isolation: isolate;
-  min-height: 360px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 .home-hero-cs::before {
   content: '';
@@ -5415,37 +5485,129 @@
   text-transform: uppercase; letter-spacing: 0.08em;
 }
 .home-hero-cs-headline {
-  font-size: 24px; line-height: 1.32; font-weight: 700;
+  font-size: 20px; line-height: 1.35; font-weight: 700;
   color: #fff;
   margin: 0;
   text-shadow: 0 2px 12px rgba(0,0,0,0.25);
   word-break: keep-all;
 }
 
-.home-hero-cs-meter {
+/* ─── Hero 연애 온도 미니 카드 (Hero 핵심 정보) ─── */
+.home-hero-cs-love {
   position: relative; z-index: 3;
-  display: flex; align-items: center; gap: 14px;
-  margin-top: auto;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s, transform 0.15s, border-color 0.18s;
 }
-.home-hero-cs-meter .home-hero-v2-score-gauge {
-  width: 76px !important; height: 76px !important;
+.home-hero-cs-love:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.32);
+  transform: translateY(-1px);
+}
+.home-hero-cs-love:active { transform: translateY(0); }
+.home-hero-cs-love-icon {
+  font-size: 22px; line-height: 1;
+  color: #ffc4d2;
+  text-shadow: 0 2px 8px rgba(244, 114, 182, 0.55);
   flex-shrink: 0;
-  filter: drop-shadow(0 4px 14px rgba(236, 72, 153, 0.5));
 }
-.home-hero-cs-meter .home-hero-v2-score-gauge svg { width: 76px; height: 76px; }
-.home-hero-cs-meter .home-hero-v2-score-num {
-  font-size: 20px !important; font-weight: 800;
-  color: #fff !important;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+.home-hero-cs-love-meta {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
 }
-.home-hero-cs-meter-text { display: flex; flex-direction: column; gap: 2px; }
-.home-hero-cs-meter-label {
-  font-size: 12px; color: rgba(255,255,255,0.78);
-  font-weight: 500;
+.home-hero-cs-love-label {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 0.3px;
 }
-.home-hero-cs-meter-grade {
-  font-size: 22px; font-weight: 800; color: #fff;
-  text-shadow: 0 2px 8px rgba(236, 72, 153, 0.6);
+.home-hero-cs-love-grade {
+  font-size: 15px; font-weight: 800; color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  letter-spacing: -0.3px;
+}
+.home-hero-cs-love-score {
+  font-size: 30px; font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -1px;
+  text-shadow: 0 3px 10px rgba(244, 114, 182, 0.6);
+  flex-shrink: 0;
+}
+.home-hero-cs-love-score small {
+  font-size: 14px; font-weight: 700; opacity: 0.78;
+  margin-left: 1px;
+}
+
+/* ─── Hero 총운 요약 카드 (텍스트 위주, button) ─── */
+.home-hero-cs-summary {
+  position: relative; z-index: 3;
+  display: block;
+  width: 100%;
+  margin-top: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s, transform 0.15s, border-color 0.18s;
+}
+.home-hero-cs-summary:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.30);
+  transform: translateY(-1px);
+}
+.home-hero-cs-summary:active { transform: translateY(0); }
+.home-hero-cs-summary-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.home-hero-cs-summary-tag {
+  font-size: 11px; font-weight: 700;
+  color: #ffe27a;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.home-hero-cs-summary-score {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  font-size: 24px; font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.28);
+}
+.home-hero-cs-summary-score small {
+  font-size: 12px; font-weight: 700; opacity: 0.78;
+}
+.home-hero-cs-summary-score em {
+  font-style: normal;
+  font-size: 13px; font-weight: 700; opacity: 0.85;
+  margin-left: 2px;
+}
+.home-hero-cs-summary-text {
+  font-size: 14px; line-height: 1.55;
+  color: rgba(255, 255, 255, 0.94);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.18);
 }
 
 .home-hero-cs-cta {
@@ -5488,6 +5650,203 @@
   font-size: 12px; cursor: pointer; padding: 0;
 }
 .home-summary-strip-more:hover { color: var(--color-primary); }
+
+/* ─── 운세 요약 단일 임팩트 카드 (총운 점수 + 한 줄 텍스트 + 카테고리 칩 4개) ─── */
+.home-summary-hero {
+  width: 100%;
+  display: block;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    radial-gradient(140% 80% at 100% 0%, rgba(251, 191, 36, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  color: var(--color-text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+.home-summary-hero:hover {
+  transform: translateY(-1px);
+  border-color: rgba(251, 191, 36, 0.32);
+  box-shadow: 0 6px 22px rgba(251, 191, 36, 0.16);
+}
+.home-summary-hero:active { transform: scale(0.995); }
+.home-summary-hero:disabled { cursor: default; opacity: 0.85; }
+
+[data-theme="light"] .home-summary-hero {
+  background:
+    radial-gradient(140% 90% at 100% 0%, rgba(255, 218, 185, 0.55), transparent 60%),
+    #ffffff;
+  border-color: rgba(15, 23, 42, 0.04);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(255, 154, 60, 0.10);
+}
+[data-theme="light"] .home-summary-hero:hover {
+  border-color: rgba(255, 154, 60, 0.28);
+  box-shadow:
+    0 2px 6px rgba(15, 23, 42, 0.05),
+    0 14px 32px rgba(255, 154, 60, 0.18);
+}
+
+.home-summary-hero-top {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+}
+.home-summary-hero-icon {
+  flex: 0 0 auto;
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #ffffff;
+  box-shadow: 0 4px 10px -2px rgba(251, 191, 36, 0.4);
+}
+.home-summary-hero-icon .menu-icon {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.18));
+}
+.home-summary-hero-meta {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.home-summary-hero-label {
+  font-size: 13px; font-weight: 600; color: var(--color-text-muted);
+  letter-spacing: 0.3px;
+}
+.home-summary-hero-grade {
+  font-size: 16px; font-weight: 800; color: var(--color-text);
+  letter-spacing: -0.3px;
+}
+[data-theme="light"] .home-summary-hero-grade { color: #1f1d2b; }
+
+.home-summary-hero-score {
+  flex: 0 0 auto;
+  font-size: 44px; font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.home-summary-hero-score small {
+  font-size: 16px; font-weight: 700; opacity: 0.7; margin-left: 2px;
+}
+.home-summary-hero-score--empty {
+  font-size: 30px; opacity: 0.4;
+}
+[data-theme="light"] .home-summary-hero-score {
+  background: linear-gradient(135deg, #ff5a7e 0%, #ff8c5a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 6px rgba(255, 122, 138, 0.28));
+}
+
+.home-summary-hero-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-summary-hero-text--empty { opacity: 0.5; font-style: italic; }
+[data-theme="light"] .home-summary-hero-text {
+  color: #4a4757;
+  font-weight: 500;
+}
+[data-theme="light"] .home-summary-hero-text--empty { color: #8a8699; }
+
+.home-summary-hero-text-skel {
+  display: block;
+  width: 90%; height: 30px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 0%,
+    rgba(255,255,255,0.14) 50%,
+    rgba(255,255,255,0.06) 100%);
+  background-size: 200% 100%;
+  animation: home-summary-shimmer 1.4s ease-in-out infinite;
+}
+[data-theme="light"] .home-summary-hero-text-skel {
+  background: linear-gradient(90deg,
+    rgba(15,23,42,0.06) 0%,
+    rgba(15,23,42,0.12) 50%,
+    rgba(15,23,42,0.06) 100%);
+  background-size: 200% 100%;
+}
+
+.home-summary-hero-score-skel {
+  display: inline-block;
+  width: 70px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 0%,
+    rgba(255,255,255,0.14) 50%,
+    rgba(255,255,255,0.06) 100%);
+  background-size: 200% 100%;
+  animation: home-summary-shimmer 1.4s ease-in-out infinite;
+}
+[data-theme="light"] .home-summary-hero-score-skel {
+  background: linear-gradient(90deg,
+    rgba(15,23,42,0.06) 0%,
+    rgba(15,23,42,0.12) 50%,
+    rgba(15,23,42,0.06) 100%);
+  background-size: 200% 100%;
+}
+
+/* 카테고리 4개 미니 칩 — 한 줄에 가로 정렬 */
+.home-summary-hero-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .home-summary-hero-chips {
+  border-top-color: rgba(15, 23, 42, 0.06);
+}
+.home-summary-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border-radius: 10px;
+  background: transparent;
+  transition: background 0.15s;
+}
+.home-summary-hero:hover .home-summary-chip { background: rgba(255, 255, 255, 0.03); }
+.home-summary-chip-icon {
+  display: inline-flex;
+  color: var(--sm-color, #fbbf24);
+  filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--sm-color, #fbbf24) 35%, transparent));
+}
+.home-summary-chip-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.2px;
+}
+.home-summary-chip-score {
+  font-size: 16px; font-weight: 800;
+  color: var(--sm-color, #fbbf24);
+  line-height: 1;
+}
+.home-summary-chip-score--empty { opacity: 0.35; font-size: 14px; }
+[data-theme="light"] .home-summary-chip-label { color: #6b6878; font-weight: 700; }
+[data-theme="light"] .home-summary-chip-score {
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--sm-color, #fbbf24) 30%, transparent));
+}
+
+@supports not (background: color-mix(in srgb, red, blue)) {
+  .home-summary-chip-icon { filter: none; }
+  [data-theme="light"] .home-summary-chip-score { filter: none; }
+}
 
 .home-summary-track {
   display: flex; gap: 10px;
@@ -5548,20 +5907,27 @@
 .home-summary-card-score--empty { font-size: 22px; opacity: 0.4; }
 
 [data-theme="light"] .home-summary-card {
-  background:
-    linear-gradient(180deg, rgba(255, 252, 254, 0.96) 0%, rgba(253, 245, 250, 0.92) 100%);
-  border: 1px solid rgba(255, 107, 157, 0.14);
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  border-radius: 18px;
   box-shadow:
-    0 4px 14px rgba(255, 107, 157, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 6px 16px rgba(15, 23, 42, 0.05);
 }
-[data-theme="light"] .home-summary-card::after { opacity: 0.18; }
+[data-theme="light"] .home-summary-card::after { opacity: 0.22; bottom: -25%; height: 70%; }
 [data-theme="light"] .home-summary-card:hover {
   border-color: var(--sm-color);
+  transform: translateY(-3px);
   box-shadow:
-    0 8px 22px rgba(255, 107, 157, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 12px 28px color-mix(in srgb, var(--sm-color, #ffb84d) 22%, transparent);
 }
+[data-theme="light"] .home-summary-card-score {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+[data-theme="light"] .home-summary-card-label { color: #5b5870; font-weight: 700; }
 
 /* 운세 요약 띠 스켈레톤 (fortuneLoading 상태) */
 .home-summary-card--skeleton { cursor: default; pointer-events: none; }
@@ -5661,12 +6027,21 @@
 }
 
 [data-theme="light"] .home-tarot-row {
-  background: linear-gradient(135deg, #faf5ff, #fdf2f8);
-  border-color: rgba(168, 85, 247, 0.2);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  background: linear-gradient(135deg, #f5f0ff 0%, #fff0f5 50%, #fff5e8 100%);
+  border-color: rgba(192, 132, 252, 0.18);
+  border-radius: 22px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.03),
+    0 8px 22px rgba(192, 132, 252, 0.10);
 }
-[data-theme="light"] .home-tarot-row-tag { color: #9333ea; }
-[data-theme="light"] .home-tarot-row-arrow { color: #999; }
+[data-theme="light"] .home-tarot-row:hover {
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 14px 32px rgba(192, 132, 252, 0.20);
+}
+[data-theme="light"] .home-tarot-row-tag { color: #9333ea; font-weight: 700; }
+[data-theme="light"] .home-tarot-row-arrow { color: #c084fc; }
 
 /* ──────────────────────────────────────────────────────────────── */
 /* 5. 연애 배너 세로 스택 (점신 스타일)                              */
@@ -5754,29 +6129,68 @@
 .home-love-banner--sm .home-love-banner-arrow { font-size: 20px; }
 .home-love-banner--sm:hover { box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.32); }
 
-/* 라이트 모드: 그라데이션이 너무 강해 보일 수 있어 살짝 부드럽게 + 그림자 핑크톤 */
+/* 라이트 모드 v3 — 점신 톤: 화이트 카드 + 좌측 아이콘 박스만 컬러풀
+   풀 컬러 배경은 채도가 높아 촌스러워 보임. 화이트 베이스 + 작은 컬러 액센트로 전환 */
 [data-theme="light"] .home-love-banner {
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--b-from, #ec4899) 12%, transparent), transparent 60%),
+    #ffffff;
   box-shadow:
-    0 6px 18px -8px color-mix(in srgb, var(--b-from, #ec4899) 65%, transparent),
-    0 2px 6px rgba(255, 107, 157, 0.08);
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 8px 22px -6px color-mix(in srgb, var(--b-from, #ec4899) 18%, transparent);
 }
 [data-theme="light"] .home-love-banner:hover {
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--b-from, #ec4899) 16%, transparent), transparent 60%),
+    #ffffff;
   box-shadow:
-    0 12px 28px -8px color-mix(in srgb, var(--b-from, #ec4899) 75%, transparent),
-    0 4px 10px rgba(255, 107, 157, 0.12);
+    0 2px 6px rgba(15, 23, 42, 0.06),
+    0 14px 32px -6px color-mix(in srgb, var(--b-from, #ec4899) 30%, transparent);
 }
 [data-theme="light"] .home-love-banner--sm {
   box-shadow:
-    0 4px 14px -6px color-mix(in srgb, var(--b-from, #ec4899) 60%, transparent),
-    0 1px 4px rgba(255, 107, 157, 0.06);
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 6px 16px -6px color-mix(in srgb, var(--b-from, #ec4899) 16%, transparent);
 }
+
+/* 라이트 모드: 좌측 아이콘 박스만 컬러풀하게 (점신 카테고리 카드 스타일) */
+[data-theme="light"] .home-love-banner-icon {
+  background: linear-gradient(135deg, var(--b-from, #ec4899), var(--b-to, #a855f7));
+  color: #ffffff;
+  box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--b-from, #ec4899) 35%, transparent);
+}
+
+/* 라이트 모드: 텍스트는 진한 슬레이트 (흰색 → 진한 톤) */
+[data-theme="light"] .home-love-banner-title {
+  color: #1f1d2b;
+  text-shadow: none;
+  font-weight: 800;
+}
+[data-theme="light"] .home-love-banner-sub {
+  color: #6b6878;
+  text-shadow: none;
+  font-weight: 500;
+}
+[data-theme="light"] .home-love-banner-arrow {
+  color: color-mix(in srgb, var(--b-from, #ec4899) 70%, #999);
+}
+
+/* NEW 뱃지: 라이트에서는 시그니처 컬러로 (흰 배경에 컬러 박스 좋음) */
+[data-theme="light"] .home-love-banner-badge {
+  background: linear-gradient(135deg, var(--b-from, #ec4899), var(--b-to, #a855f7));
+  color: #ffffff;
+  box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--b-from, #ec4899) 50%, transparent);
+}
+
 @supports not (background: color-mix(in srgb, red, blue)) {
   [data-theme="light"] .home-love-banner {
-    box-shadow: 0 6px 18px -8px rgba(236, 72, 153, 0.4), 0 2px 6px rgba(255, 107, 157, 0.08);
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 22px -6px rgba(236, 72, 153, 0.18);
   }
-  [data-theme="light"] .home-love-banner--sm {
-    box-shadow: 0 4px 14px -6px rgba(236, 72, 153, 0.35), 0 1px 4px rgba(255, 107, 157, 0.06);
+  [data-theme="light"] .home-love-banner-icon {
+    background: linear-gradient(135deg, #ec4899, #a855f7);
   }
+  [data-theme="light"] .home-love-banner-arrow { color: #999; }
 }
 
 /* ──────────────────────────────────────────────────────────────── */

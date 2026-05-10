@@ -166,6 +166,101 @@ const PATHS = {
       <path d="M3 12h4l2-5 4 10 2-5h6" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
+
+  // ─── 연애 배너 8종 (outline 통일) ───────────────────────
+  // 나의 연인 — 두 사람 실루엣
+  couple: (
+    <>
+      <circle cx="8" cy="7" r="2.5" />
+      <circle cx="16" cy="7" r="2.5" />
+      <path d="M3.5 20c0-3 2-5 4.5-5s4.5 2 4.5 5" />
+      <path d="M11.5 20c0-3 2-5 4.5-5s4.5 2 4.5 5" />
+    </>
+  ),
+  // 1:1 연애운 — 부드러운 하트 (single)
+  heart: (
+    <>
+      <path d="M12 20.3l-1.2-1.1C5.7 14.6 3 12 3 8.5 3 6 5 4 7.5 4c1.5 0 2.9.7 3.8 1.8l.7.8.7-.8C13.6 4.7 15 4 16.5 4 19 4 21 6 21 8.5c0 3.5-2.7 6.1-7.8 10.7L12 20.3z" />
+    </>
+  ),
+  // 사주 궁합 — 하트 + 스파클 (관계의 케미)
+  sparkleHeart: (
+    <>
+      <path d="M11 17.5l-.9-.8C6.4 13.4 4 11.4 4 8.7 4 6.7 5.6 5 7.6 5c1.1 0 2.2.5 2.9 1.4.7-.9 1.8-1.4 2.9-1.4C15.4 5 17 6.7 17 8.7c0 2.7-2.4 4.7-6.1 8L11 17.5z" />
+      <path d="M19 13l.6 1.5L21 15l-1.4.5L19 17l-.6-1.5L17 15l1.4-.5z" />
+      <path d="M19 4l.4 1L20.5 5.5 19.4 6 19 7l-.4-1L17.5 5.5 18.6 5z" />
+    </>
+  ),
+  // 썸 진단 — 과녁 (조준)
+  target: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // 짝사랑 — 하트에 큐피드 화살
+  heartArrow: (
+    <>
+      <path d="M12 19l-1-.9C6.5 14.4 4 12.4 4 9.7 4 7.7 5.6 6 7.6 6c1.1 0 2.2.5 2.9 1.4.7-.9 1.8-1.4 2.9-1.4 2 0 3.6 1.7 3.6 3.7 0 2.7-2.5 4.7-7 8.4L12 19z" />
+      <path d="M3 4l5 5M2.5 6.5l3-1 1-3M16 13l5 5M19.5 18l-1 3-3 1" strokeLinecap="round" />
+    </>
+  ),
+  // 고백 타이밍 — 봉투 (러브레터)
+  letter: (
+    <>
+      <rect x="3.5" y="6" width="17" height="13" rx="2" />
+      <path d="M3.5 7.5l8.5 6 8.5-6" />
+      <path d="M12 13.8l1 1.7 1.9.3-1.4 1.3.3 1.9-1.8-.9-1.8.9.3-1.9-1.4-1.3 1.9-.3z" opacity="0.5" />
+    </>
+  ),
+  // 만남 시기 — 수정구슬 + 받침대
+  crystalBall: (
+    <>
+      <circle cx="12" cy="11" r="6.5" />
+      <path d="M6.5 17l-1 3.5h13L17.5 17" strokeLinejoin="round" />
+      <path d="M9.5 8.5c-.8.6-1.3 1.5-1.5 2.5" strokeLinecap="round" opacity="0.55" />
+      <circle cx="9" cy="9" r="0.6" fill="currentColor" stroke="none" opacity="0.7" />
+    </>
+  ),
+  // 최애 스타 궁합 — 별 (단일)
+  star: (
+    <>
+      <path d="M12 3l2.6 6.1 6.4 1-4.6 4.5 1.1 6.4L12 17.7 6.5 21l1.1-6.4L3 10.1l6.4-1L12 3z" />
+    </>
+  ),
+
+  // ─── 추천/액션 아이콘 ────────────────────────────────────
+  // 반지 — 결혼/약혼
+  ring: (
+    <>
+      <path d="M9 4l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="15.5" r="5.5" />
+      <path d="M10 13.5l1 1.5-1 1.5" strokeLinecap="round" opacity="0.5" />
+    </>
+  ),
+  // 휴대폰 — 연락
+  phone: (
+    <>
+      <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
+      <path d="M10 18h4" strokeLinecap="round" />
+      <circle cx="12" cy="6" r="0.6" fill="currentColor" stroke="none" opacity="0.6" />
+    </>
+  ),
+  // 달 — 재회/회복/밤의 운세
+  moon: (
+    <>
+      <path d="M20 14a8 8 0 11-9.5-9.7 6 6 0 008.7 7.7c.5-.1.6.5.8 2z" />
+    </>
+  ),
+  // 악수 — 만남/소개팅
+  handshake: (
+    <>
+      <path d="M3 11l3-3h3l4 4-2 2-2-2-3 3-3-1V11z" strokeLinejoin="round" />
+      <path d="M21 11l-3-3h-3l-4 4 2 2 2-2 3 3 3-1V11z" strokeLinejoin="round" />
+      <path d="M11 13l1.5 1.5" strokeLinecap="round" opacity="0.55" />
+    </>
+  ),
 };
 
 export default function MenuIcon({ name, size = 36, className = '', style }) {
