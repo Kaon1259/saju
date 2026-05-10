@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
            columnNames = {"user_id", "attend_date"}
        ),
        indexes = {
-           @Index(name = "idx_attendance_user_date_desc", columnList = "user_id, attend_date DESC")
+           // DESC 키워드는 일부 Hibernate/MySQL 조합에서 DDL 생성 실패 → 단순 ASC 인덱스로 (조회는 어차피 user_id 매칭이 prune)
+           @Index(name = "idx_attendance_user_date", columnList = "user_id, attend_date")
        })
 @Getter
 @Setter

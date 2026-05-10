@@ -19,9 +19,11 @@ export default function AttendanceCard({ refreshKey = 0 }) {
     return () => { cancelled = true; };
   }, [refreshKey]);
 
-  if (!status) return null;
-
-  const { consecutiveDays, daysToNextMilestone, nextMilestoneReward, checkedToday } = status;
+  // status가 없어도 진입점은 항상 노출 (서버 미가동/배포 중에도 사용자가 카드 인지 가능)
+  const consecutiveDays = status?.consecutiveDays ?? 0;
+  const daysToNextMilestone = status?.daysToNextMilestone ?? 7;
+  const nextMilestoneReward = status?.nextMilestoneReward ?? 20;
+  const checkedToday = status?.checkedToday ?? false;
   // 7일 도트: 1~7 자리에 점, 채워진 칸 = consecutive % 7 (마지막 7배수면 7개 다 채움)
   const dotsCount = 7;
   const filled = consecutiveDays === 0 ? 0
