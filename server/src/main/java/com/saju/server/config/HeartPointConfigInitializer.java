@@ -16,12 +16,41 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // ── 기본 운세 ──
-        init("TODAY_FORTUNE",        5,  "기본운세",    "오늘의 운세");
-        init("SAJU_ANALYSIS",       5,  "기본운세",    "사주분석");
-        init("DAILY_FORTUNE_EXTRA", 10,  "기본운세",    "일운 더보기");
+        // ════════════════════════════════════════════════════════════
+        // 하트 1개당 가치: 약 5원 (충전 1000원 = 200하트 기준)
+        // 마진 목표: AI 토큰 비용 ÷ 하트 가격 ≤ 30% (마진 70%+)
+        //
+        // 모델별 토큰 단가 참고
+        //  - Haiku 4.5  : $0.80 input / $4.00 output per 1M
+        //  - Sonnet 4.6 : $3.00 input / $15.00 output per 1M
+        //
+        // 일반 = Haiku (3000~7000 토큰 범위), 심화·타로·12시진 = Sonnet
+        // ════════════════════════════════════════════════════════════
 
-        // ── 1:1연애운 (13개 서브타입) ──
+        // ── 룰 기반 (AI 거의 없음) ──
+        init("CONSTELLATION",        1,  "운세종합",    "별자리 운세");
+        init("ZODIAC",               1,  "운세종합",    "띠 운세");
+
+        // ── 짧은 AI (~1000 토큰) ──
+        init("BLOOD_TYPE",           3,  "운세종합",    "혈액형 운세");
+        init("MBTI",                 3,  "운세종합",    "MBTI 운세");
+        init("BIORHYTHM",            3,  "운세종합",    "바이오리듬");
+        init("WEATHER_COMPAT",       3,  "운세종합",    "날씨 궁합");
+        init("MBTI_COMPAT",          3,  "궁합",       "MBTI 궁합");
+        init("BLOODTYPE_COMPAT",     3,  "궁합",       "혈액형 궁합");
+        init("CELEB_COMPAT",         3,  "궁합",       "최애스타궁합");
+        init("CELEB_FORTUNE",        3,  "스타운세",    "스타 오늘의 운세");
+        init("GROUP_FORTUNE",        3,  "스타운세",    "그룹 운세");
+        init("GROUP_COMPAT",         3,  "스타운세",    "그룹 궁합");
+        init("CELEB_MATCH",          3,  "스타운세",    "나와 궁합 맞는 스타");
+
+        // ── 기본 사주 운세 (Haiku ~3000 토큰) ──
+        init("TODAY_FORTUNE",        5,  "기본운세",    "오늘의 운세");
+        init("SAJU_ANALYSIS",        5,  "기본운세",    "사주분석");
+        init("MANSERYEOK",           5,  "기본운세",    "만세력 AI해석");
+        init("DAILY_TAROT",          5,  "특수분석",    "오늘의 타로 한 장");
+
+        // ── 1:1연애운 13종 (Haiku ~3000 토큰) ──
         init("LOVE_RELATIONSHIP",    5,  "1:1연애운",   "연애운");
         init("LOVE_CRUSH",           5,  "1:1연애운",   "짝사랑");
         init("LOVE_SOME_CHECK",      5,  "1:1연애운",   "썸진단");
@@ -37,66 +66,55 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("LOVE_MEETING_TIMING",  5,  "1:1연애운",   "만남시기");
         init("LOVE_CONTACT",         5,  "1:1연애운",   "연락운");
 
-        // ── 궁합 ──
-        init("COMPATIBILITY",        5,  "궁합",       "사주궁합");
-        init("CELEB_COMPAT",         3,  "궁합",       "최애스타궁합");
-
-        init("MANSERYEOK",          5,  "기본운세",    "만세력 AI해석");
-
-        // ── 특수분석 ──
-        init("TAROT",                20, "특수분석",    "타로");
-        init("TAROT_ONE",            20, "특수분석",    "타로 원카드");
-        init("TAROT_THREE",          50, "특수분석",    "타로 쓰리카드");
-        init("TAROT_FIVE",           100,"특수분석",    "타로 켈틱크로스");
+        // ── 일반 분석 (Haiku ~3000~5000 토큰) ──
         init("DREAM",                5,  "특수분석",    "꿈해몽");
         init("FACE_READING",         5,  "특수분석",    "관상분석");
         init("PSYCH_TEST",           5,  "특수분석",    "심리테스트");
+        init("COMPATIBILITY",        8,  "궁합",       "사주궁합");        // 두 명 데이터, 토큰 ↑
 
-        // ── 운세종합 ──
-        init("BLOOD_TYPE",           3,  "운세종합",    "혈액형 운세");
-        init("MBTI",                 3,  "운세종합",    "MBTI 운세");
-        init("CONSTELLATION",        1,  "운세종합",    "별자리 운세");
-        init("ZODIAC",               1,  "운세종합",    "띠 운세");
+        // ── 기간 운세 (Haiku ~5000~7000 토큰) ──
+        init("YEAR_FORTUNE",         8,  "기간별운세",  "신년운세");        // 5 → 8
+        init("MONTHLY_FORTUNE",      8,  "기간별운세",  "월간운세");        // 5 → 8
+        init("WEEKLY_FORTUNE",       8,  "기간별운세",  "주간운세");        // 5 → 8
+        init("TOJEONG",              8,  "기간별운세",  "토정비결");        // 5 → 8
+        init("DAILY_FORTUNE_EXTRA",  8,  "기본운세",    "일운 더보기");     // 10 → 8 (소폭 하향)
+        init("MONTHLY_FORTUNE_EXTRA", 8, "기간별운세",  "월간운세 더보기"); // 5 → 8
 
-        // ── 운세종합 (추가) ──
-        init("BIORHYTHM",              3,  "운세종합",    "바이오리듬");
-        init("WEATHER_COMPAT",         3,  "운세종합",    "날씨 궁합");
-        init("DAILY_TAROT",            5,  "특수분석",    "오늘의 타로 한 장");
-        init("MBTI_COMPAT",            3,  "궁합",       "MBTI 궁합");
-        init("BLOODTYPE_COMPAT",       3,  "궁합",       "혈액형 궁합");
+        // ── 타로 (Sonnet — AI 호출 비중 높음) ──
+        // 기존 가격 역전 (타로 100 vs 심화 15) 해소
+        init("TAROT",                10, "특수분석",    "타로");           // 20 → 10 (심화보다 가벼움)
+        init("TAROT_ONE",            10, "특수분석",    "타로 원카드");    // 20 → 10
+        init("TAROT_THREE",          25, "특수분석",    "타로 쓰리카드"); // 50 → 25
+        init("TAROT_FIVE",           50, "특수분석",    "타로 켈틱크로스"); // 100 → 50
 
-        // ── 스타 운세 ──
-        init("CELEB_FORTUNE",          3,  "스타운세",    "스타 오늘의 운세");
-        init("GROUP_FORTUNE",          3,  "스타운세",    "그룹 운세");
-        init("GROUP_COMPAT",           3,  "스타운세",    "그룹 궁합");
-        init("CELEB_MATCH",            3,  "스타운세",    "나와 궁합 맞는 스타");
+        // ── 심화 일반 (Sonnet ~5500 토큰) ──
+        // 15 → 30 (Sonnet 가격 반영, 마진 확보)
+        init("DEEP_TODAY",          30,  "심화분석",    "심화 - 오늘의 운세");
+        init("DEEP_LOVE",           30,  "심화분석",    "심화 - 연애운");
+        init("DEEP_REUNION",        30,  "심화분석",    "심화 - 재회운");
+        init("DEEP_REMARRIAGE",     30,  "심화분석",    "심화 - 재혼운");
+        init("DEEP_BLIND_DATE",     30,  "심화분석",    "심화 - 소개팅운");
+        init("DEEP_YEARLY",         30,  "심화분석",    "심화 - 신년운세");
+        init("DEEP_MONTHLY",        30,  "심화분석",    "심화 - 월간운세");
+        init("DEEP_WEEKLY",         30,  "심화분석",    "심화 - 주간운세");
+        init("DEEP_BLOODTYPE",      30,  "심화분석",    "심화 - 혈액형");
+        init("DEEP_MBTI",           30,  "심화분석",    "심화 - MBTI");
+        init("DEEP_CONSTELLATION",  30,  "심화분석",    "심화 - 별자리");
+        init("DEEP_TOJEONG",        30,  "심화분석",    "심화 - 토정비결");
 
-        // ── 기간별 운세 ──
-        init("YEAR_FORTUNE",         5,  "기간별운세",  "신년운세");
-        init("MONTHLY_FORTUNE",      5,  "기간별운세",  "월간운세");
-        init("MONTHLY_FORTUNE_EXTRA", 5,  "기간별운세",  "월간운세 더보기");
-        init("WEEKLY_FORTUNE",       5,  "기간별운세",  "주간운세");
-        init("TOJEONG",              5,  "기간별운세",  "토정비결");
+        // ── 심화 프리미엄 (Sonnet ~6500 토큰) ──
+        // 200은 사용 차단 수준 → 80으로 하향, 3종 모두 통일
+        init("DEEP_COMPATIBILITY",  80,  "심화분석",    "심화 - 정통궁합");      // 200 → 80
+        init("DEEP_MARRIAGE_COMPAT", 80, "심화분석",   "심화 - 결혼궁합");       // 200 → 80
+        init("DEEP_TAROT",          80,  "심화분석",    "심화 - 타로 리딩");     // 200 → 80
 
-        // ── 심화분석 (12개 서브타입) ──
-        init("DEEP_TODAY",          15,  "심화분석",    "심화 - 오늘의 운세");
-        init("DEEP_LOVE",           15,  "심화분석",    "심화 - 연애운");
-        init("DEEP_REUNION",        15,  "심화분석",    "심화 - 재회운");
-        init("DEEP_REMARRIAGE",     15,  "심화분석",    "심화 - 재혼운");
-        init("DEEP_BLIND_DATE",     15,  "심화분석",    "심화 - 소개팅운");
-        init("DEEP_YEARLY",         15,  "심화분석",    "심화 - 신년운세");
-        init("DEEP_MONTHLY",        15,  "심화분석",    "심화 - 월간운세");
-        init("DEEP_WEEKLY",         15,  "심화분석",    "심화 - 주간운세");
-        init("DEEP_BLOODTYPE",      15,  "심화분석",    "심화 - 혈액형");
-        init("DEEP_MBTI",           15,  "심화분석",    "심화 - MBTI");
-        init("DEEP_CONSTELLATION",  15,  "심화분석",    "심화 - 별자리");
-        init("DEEP_TOJEONG",        15,  "심화분석",    "심화 - 토정비결");
-        init("DEEP_COMPATIBILITY",  200, "심화분석",    "심화 - 정통궁합");
-        init("DEEP_MARRIAGE_COMPAT", 200, "심화분석",   "심화 - 결혼궁합");
-        init("DEEP_TAROT",          200, "심화분석",    "심화 - 타로 리딩");
-
-        // ── 시스템 ──
-        init("SIGNUP_BONUS",       500,  "시스템",      "회원가입 보너스");
+        // ── 시스템 (보너스/지급) ──
+        init("SIGNUP_BONUS",        70,  "시스템",      "회원가입 보너스");      // 500 → 70 (어뷰징 방지)
+        init("PROFILE_COMPLETE",    30,  "시스템",      "프로필 완성 보너스");   // 신규 — 양질 데이터 유도
+        init("DAILY_ATTENDANCE",     5,  "시스템",      "일일 출석 보너스");     // 신규
+        init("ATTENDANCE_7DAY",     20,  "시스템",      "7일 연속 출석 보너스"); // 신규
+        init("ATTENDANCE_14DAY",    50,  "시스템",      "14일 연속 출석 보너스"); // 신규
+        init("ATTENDANCE_30DAY",   100,  "시스템",      "30일 연속 출석 보너스"); // 신규
     }
 
     private void init(String category, int cost, String group, String description) {

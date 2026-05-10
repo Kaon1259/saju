@@ -1574,4 +1574,24 @@ export const getScoreTrend = async (zodiacAnimal, days = 7) => {
   }
 };
 
+// ─── 일일 출석 보너스 ───
+export const getAttendanceStatus = async () => {
+  try {
+    const res = await api.get('/attendance/status');
+    return res.data;
+  } catch {
+    return null;
+  }
+};
+
+export const checkInAttendance = async () => {
+  try {
+    const res = await api.post('/attendance/checkin');
+    return res.data;
+  } catch (e) {
+    if (e?.response?.status === 401) return null; // 비로그인
+    throw e;
+  }
+};
+
 export default api;

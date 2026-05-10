@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
-import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream, analyzeSajuStream } from '../api/fortune';
+import { getGuestFortune, getLoveTemperature, getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getUser, getMyFortune, isGuest, getHistory, getDailyTarotBasic, getDailyTarotStream, analyzeSajuStream, checkInAttendance } from '../api/fortune';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import MenuIcon from '../components/MenuIcon';
@@ -1313,6 +1313,32 @@ function Home() {
   useEffect(() => {
     getLoveTemperature(userId || undefined).then(setLoveTemp).catch(() => {});
   }, [userId]);
+
+  // 일일 출석 자동 체크인 — 로그인 시 1회 (오늘 이미 받았으면 멱등으로 alreadyChecked=true)
+  // localStorage 가드로 같은 날 재호출 방지 (서버도 멱등이지만 네트워크 절약)
+  useEffect(() => {
+    if (!userId) return;
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const lastKey = `attendance:lastCheck:${userId}`;
+    if (localStorage.getItem(lastKey) === today) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const result = await checkInAttendance();
+        if (cancelled || !result) return;
+        localStorage.setItem(lastKey, today);
+        if (!result.alreadyChecked && result.rewardAmount > 0) {
+          // 보상 토스트 — 마일스톤이면 강조
+          const milestone = result.milestoneCategory;
+          const message = milestone
+            ? `🎉 ${result.consecutiveDays}일 연속 출석! +${result.rewardAmount}하트 지급`
+            : `✅ 출석 완료! +${result.rewardAmount}하트 지급 (${result.consecutiveDays}일째)`;
+          toast?.success?.(message);
+        }
+      } catch (_) {}
+    })();
+    return () => { cancelled = true; };
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!userId) return;

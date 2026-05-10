@@ -32,8 +32,8 @@ public class HeartPointService {
     private HeartPointService self;
 
     private static final int DEFAULT_BASIC_COST = 5;
-    private static final int DEFAULT_DEEP_COST = 15;
-    private static final int DEFAULT_SIGNUP_BONUS = 500;
+    private static final int DEFAULT_DEEP_COST = 30;        // Sonnet 가격 반영 (15 → 30)
+    private static final int DEFAULT_SIGNUP_BONUS = 70;     // 어뷰징 방지 (500 → 70)
     private static final int GUEST_BONUS = 10;
 
     public int getBalance(Long userId) {
