@@ -1,26 +1,27 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startKakaoLogin } from '../utils/kakaoAuth';
+import MenuIcon from '../components/MenuIcon';
 import './Landing.css';
 
 const FEATURES = [
   {
     id: 'love',
-    icon: '💕',
+    iconKey: 'heart',
     title: '1:1 연애운',
     desc: '오늘 그 사람과 나의 케미는?\n사주로 보는 매일의 연애 에너지',
     accent: '#EC4899',
   },
   {
     id: 'compat',
-    icon: '💑',
+    iconKey: 'couple',
     title: '사주 궁합',
     desc: '두 사람, 하늘이 정한 인연일까?\n정통/결혼/스킨십 궁합까지',
     accent: '#A78BFA',
   },
   {
     id: 'tarot',
-    icon: '🔮',
+    iconKey: 'tarot',
     title: '타로 12종 덱',
     desc: '카드가 들려주는 오늘의 운명\nK드라마·셀레스티얼·고양이덱까지',
     accent: '#F472B6',
@@ -106,7 +107,7 @@ function Landing() {
               className={`landing-feature-card ${i === slide ? 'active' : ''}`}
               style={{ '--accent': f.accent }}
             >
-              <div className="landing-feature-icon">{f.icon}</div>
+              <div className="landing-feature-icon">{f.iconKey ? <MenuIcon name={f.iconKey} size={56} /> : f.icon}</div>
               <h3 className="landing-feature-title">{f.title}</h3>
               <p className="landing-feature-desc">{f.desc}</p>
             </div>

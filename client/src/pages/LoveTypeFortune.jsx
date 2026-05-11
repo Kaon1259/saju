@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, isGuest, getHistory, getUser } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import StreamingCard from '../components/StreamingCard';
 import { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -20,20 +21,20 @@ import { WAIT_MESSAGES } from '../data/waitMessages';
 import './LoveTypeFortune.css';
 
 const LOVE_TYPES = {
-  relationship:      { label: '연애 진단',   icon: '💕', desc: '지금 연애 상태 총 진단', color: '#EC4899', particles: ['💕','💗','✨','💖','💘'] },
-  some_check:        { label: '썸진단',     icon: '🎯', desc: '이 썸, 연애로 발전할까?', color: '#FF9800', particles: ['💗','💭','✨','🎯','💫'] },
-  past_life:         { label: '전생인연',   icon: '🌌', desc: '전생에서의 우리 이야기', color: '#8B5CF6', particles: ['🌌','✨','⭐','💫','🔮'] },
-  crush:             { label: '짝사랑',     icon: '💘', desc: '내 마음이 이루어질까?', color: '#F472B6', particles: ['💘','💗','💓','💞','✨'] },
-  blind_date:        { label: '소개팅',     icon: '🤝', desc: '좋은 만남이 올까?', color: '#34D399', particles: ['🤝','💐','🌸','✨','💫'] },
-  couple_fortune:    { label: '데이트운',   icon: '💑', desc: '오늘 연인과의 하루', color: '#E91E63', particles: ['💑','💕','🌹','✨','💖'] },
-  confession_timing: { label: '고백타이밍', icon: '💌', desc: '언제 마음을 전할까?', color: '#EC4899', particles: ['💌','💘','💗','✨','🌹'] },
-  meeting_timing:    { label: '만남시기',   icon: '🔮', desc: '언제 인연을 만날까?', color: '#A78BFA', particles: ['🔮','✨','💫','⭐','🌙'] },
-  reunion:           { label: '재회운',     icon: '💔', desc: '다시 만날 수 있을까?', color: '#94A3B8', particles: ['💔','💧','✨','💫','🌙'] },
-  recovery:          { label: '이별 회복운', icon: '🕯️', desc: '언제쯤 마음이 정리될까?', color: '#A78BFA', particles: ['🕯️','💧','✨','🌙','💜'] },
-  contact_fortune:   { label: '연락 타이밍', icon: '📞', desc: '먼저 연락해도 될까?', color: '#3B82F6', particles: ['📞','💬','💭','✨','💗'] },
-  marriage:          { label: '결혼운',     icon: '💒', desc: '결혼 시기와 인연', color: '#F472B6', particles: ['💒','💍','💐','✨','👰'] },
-  remarriage:        { label: '재혼운',     icon: '💍', desc: '새로운 인연의 가능성', color: '#A78BFA', particles: ['💍','💒','✨','🌹','💫'] },
-  ideal_type:        { label: '이상형',     icon: '👩‍❤️‍👨', desc: '사주로 보는 나의 이상형', color: '#E91E63', particles: ['💕','💗','✨','💖','💘'] },
+  relationship:      { label: '연애 진단',   icon: '💕',    iconKey: 'love',         desc: '지금 연애 상태 총 진단', color: '#EC4899', particles: ['💕','💗','✨','💖','💘'] },
+  some_check:        { label: '썸진단',     icon: '🎯',    iconKey: 'target',       desc: '이 썸, 연애로 발전할까?', color: '#FF9800', particles: ['💗','💭','✨','🎯','💫'] },
+  past_life:         { label: '전생인연',   icon: '🌌',    iconKey: 'moon',         desc: '전생에서의 우리 이야기', color: '#8B5CF6', particles: ['🌌','✨','⭐','💫','🔮'] },
+  crush:             { label: '짝사랑',     icon: '💘',    iconKey: 'heartArrow',   desc: '내 마음이 이루어질까?', color: '#F472B6', particles: ['💘','💗','💓','💞','✨'] },
+  blind_date:        { label: '소개팅',     icon: '🤝',    iconKey: 'handshake',    desc: '좋은 만남이 올까?', color: '#34D399', particles: ['🤝','💐','🌸','✨','💫'] },
+  couple_fortune:    { label: '데이트운',   icon: '💑',    iconKey: 'couple',       desc: '오늘 연인과의 하루', color: '#E91E63', particles: ['💑','💕','🌹','✨','💖'] },
+  confession_timing: { label: '고백타이밍', icon: '💌',    iconKey: 'letter',       desc: '언제 마음을 전할까?', color: '#EC4899', particles: ['💌','💘','💗','✨','🌹'] },
+  meeting_timing:    { label: '만남시기',   icon: '🔮',    iconKey: 'crystalBall',  desc: '언제 인연을 만날까?', color: '#A78BFA', particles: ['🔮','✨','💫','⭐','🌙'] },
+  reunion:           { label: '재회운',     icon: '💔',    iconKey: 'moon',         desc: '다시 만날 수 있을까?', color: '#94A3B8', particles: ['💔','💧','✨','💫','🌙'] },
+  recovery:          { label: '이별 회복운', icon: '🕯️',  iconKey: 'moon',         desc: '언제쯤 마음이 정리될까?', color: '#A78BFA', particles: ['🕯️','💧','✨','🌙','💜'] },
+  contact_fortune:   { label: '연락 타이밍', icon: '📞',  iconKey: 'phone',        desc: '먼저 연락해도 될까?', color: '#3B82F6', particles: ['📞','💬','💭','✨','💗'] },
+  marriage:          { label: '결혼운',     icon: '💒',    iconKey: 'ring',         desc: '결혼 시기와 인연', color: '#F472B6', particles: ['💒','💍','💐','✨','👰'] },
+  remarriage:        { label: '재혼운',     icon: '💍',    iconKey: 'ring',         desc: '새로운 인연의 가능성', color: '#A78BFA', particles: ['💍','💒','✨','🌹','💫'] },
+  ideal_type:        { label: '이상형',     icon: '👩‍❤️‍👨', iconKey: 'sparkleHeart', desc: '사주로 보는 나의 이상형', color: '#E91E63', particles: ['💕','💗','✨','💖','💘'] },
 };
 
 const HEART_MAP = {
@@ -336,7 +337,7 @@ function LoveTypeFortune() {
         <div className="ltf-hero-iconwrap">
           <div className="ltf-hero-aura" />
           <div className="ltf-hero-aura ltf-hero-aura--2" />
-          <span className="ltf-hero-icon">{info.icon}</span>
+          <span className="ltf-hero-icon">{info.iconKey ? <MenuIcon name={info.iconKey} size={48} /> : info.icon}</span>
         </div>
         <h1 className="ltf-hero-title">{info.label}</h1>
         <p className="ltf-hero-desc">{info.desc}</p>
@@ -448,7 +449,7 @@ function LoveTypeFortune() {
 
           <button className="ltf-submit" onClick={() => guardLoveType(handleAnalyze)}
             disabled={!birth || (isPartnerRequired && !partnerDate)}>
-            {info.icon} {info.label} 보기 <HeartCost category={loveCategory} />
+            {info.iconKey ? <MenuIcon name={info.iconKey} size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} /> : info.icon} {info.label} 보기 <HeartCost category={loveCategory} />
           </button>
         </div>
         );
@@ -466,7 +467,7 @@ function LoveTypeFortune() {
           <div className="ltf-streaming-wrap">
             <div className="ltf-streaming-header">
               <div className="ltf-streaming-title">
-                <span className="ltf-streaming-orb">{info.icon}</span>
+                <span className="ltf-streaming-orb">{info.iconKey ? <MenuIcon name={info.iconKey} size={32} /> : info.icon}</span>
                 <span>AI가 {info.label}을 분석중이에요</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
@@ -517,7 +518,7 @@ function LoveTypeFortune() {
             </div>
           )}
 
-          <FortuneCard icon={info.icon} title={type === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'} description={result.overall} delay={0} />
+          <FortuneCard iconKey={info.iconKey} icon={info.icon} title={type === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'} description={result.overall} delay={0} />
           {type !== 'ideal_type' && result.timing && <FortuneCard icon="📅" title="최적 시기" description={result.timing} delay={80} />}
           {type !== 'ideal_type' && result.advice && <FortuneCard icon="💡" title="행동 조언" description={result.advice} delay={160} />}
           {result.caution && <FortuneCard icon="⚠️" title="주의사항" description={result.caution} delay={240} />}

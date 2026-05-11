@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
 import './MySomeCrush.css';
 
 const SOME_CRUSH_MENUS = [
-  { id: 'some_check',        icon: '🎯', label: '썸진단',     sub: '누가 먼저 끌리나요?',         desc: '이 썸, 연애로 발전할까?',          path: '/love/some_check' },
-  { id: 'crush',             icon: '💘', label: '짝사랑',     sub: '내 마음이 이루어질까?',       desc: '짝사랑 상대 마음과 인연 가능성',   path: '/love/crush' },
-  { id: 'confession_timing', icon: '💌', label: '고백타이밍', sub: '언제 마음을 전할까?',         desc: '고백 성공 확률 높은 타이밍 분석',  path: '/love/confession_timing' },
-  { id: 'contact_fortune',   icon: '📱', label: '연락운',     sub: '먼저 연락해도 될까?',         desc: '연락할 타이밍과 상대의 반응 예측', path: '/love/contact_fortune' },
+  { id: 'some_check',        icon: '🎯', iconKey: 'target',     label: '썸진단',     sub: '누가 먼저 끌리나요?',         desc: '이 썸, 연애로 발전할까?',          path: '/love/some_check' },
+  { id: 'crush',             icon: '💘', iconKey: 'heartArrow', label: '짝사랑',     sub: '내 마음이 이루어질까?',       desc: '짝사랑 상대 마음과 인연 가능성',   path: '/love/crush' },
+  { id: 'confession_timing', icon: '💌', iconKey: 'letter',     label: '고백타이밍', sub: '언제 마음을 전할까?',         desc: '고백 성공 확률 높은 타이밍 분석',  path: '/love/confession_timing' },
+  { id: 'contact_fortune',   icon: '📱', iconKey: 'phone',      label: '연락운',     sub: '먼저 연락해도 될까?',         desc: '연락할 타이밍과 상대의 반응 예측', path: '/love/contact_fortune' },
 ];
 
 function MySomeCrush() {
@@ -48,7 +49,7 @@ function MySomeCrush() {
             style={{ '--card-idx': idx }}
           >
             <div className="mysome-menu-icon-wrap">
-              <span className="mysome-menu-icon">{item.icon}</span>
+              <span className="mysome-menu-icon">{item.iconKey ? <MenuIcon name={item.iconKey} size={32} /> : item.icon}</span>
             </div>
             <div className="mysome-menu-text">
               <span className="mysome-menu-label">{item.label}</span>

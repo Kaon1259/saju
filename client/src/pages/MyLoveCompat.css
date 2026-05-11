@@ -309,19 +309,21 @@
   background: linear-gradient(135deg, rgba(233,30,99,0.22), rgba(139,92,246,0.15));
   color: #ff3d7f;
 }
-[data-theme="light"] .mlc-tabs { border-color: rgba(255, 107, 157, 0.20); }
+[data-theme="light"] .mlc-tabs {
+  background: transparent !important;
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
+  box-shadow: none;
+}
 [data-theme="light"] .mlc-tab {
-  background: rgba(255, 248, 252, 0.7);
+  background: transparent !important;
   color: #886b80;
-  border-right-color: rgba(255, 107, 157, 0.12);
+  border-right-color: rgba(236, 72, 153, 0.18);
 }
 [data-theme="light"] .mlc-tab.active {
-  background: linear-gradient(135deg, rgba(233, 30, 99, 0.14), rgba(139, 92, 246, 0.10));
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.14), rgba(168, 85, 247, 0.08)) !important;
   color: #c2185b;
   font-weight: 800;
-  box-shadow:
-    0 2px 8px rgba(233, 30, 99, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: none;
 }
 
 /* ═══ 폼 (재디자인 2026-04-27) ═══ */

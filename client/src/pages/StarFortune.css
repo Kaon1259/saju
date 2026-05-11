@@ -109,8 +109,9 @@
 }
 .star-fortune-card:active { transform: scale(0.97); }
 [data-theme="light"] .star-fortune-card {
-  background: #fff; border-color: rgba(0,0,0,0.06);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  background: transparent !important;
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
+  box-shadow: none;
 }
 .star-fortune-card-icon {
   width: 50px; height: 50px; border-radius: 14px;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUser, getDailyFortunes, deductHearts, deleteUser } from '../api/fortune';
 import { clearAuth } from '../utils/auth';
 import HeartCost from '../components/HeartCost';
+import MenuIcon from '../components/MenuIcon';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
 import ConstellationMap from '../components/ConstellationMap';
 import { useToast } from '../components/Toast';
@@ -135,7 +136,7 @@ function Profile() {
       {/* 정보 카드 */}
       <section className="pf-info glass-card">
         <div className="pf-info-row">
-          <span className="pf-info-label">📅 생년월일</span>
+          <span className="pf-info-label"><MenuIcon name="monthly" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />생년월일</span>
           <span className="pf-info-value">{formatDate(user.birthDate)} <span className="pf-info-tag">{user.calendarType === 'LUNAR' ? '음력' : '양력'}</span></span>
         </div>
         <div className="pf-info-divider" />
@@ -146,27 +147,27 @@ function Profile() {
         {user.birthTime && (<>
           <div className="pf-info-divider" />
           <div className="pf-info-row">
-            <span className="pf-info-label">🕐 태어난 시간</span>
+            <span className="pf-info-label"><MenuIcon name="clock" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />태어난 시간</span>
             <span className="pf-info-value">{user.birthTime}</span>
           </div>
         </>)}
         {user.bloodType && (<>
           <div className="pf-info-divider" />
           <div className="pf-info-row">
-            <span className="pf-info-label">🩸 혈액형</span>
+            <span className="pf-info-label"><MenuIcon name="bloodtype" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />혈액형</span>
             <span className="pf-info-value">{user.bloodType}형</span>
           </div>
         </>)}
         {user.mbtiType && (<>
           <div className="pf-info-divider" />
           <div className="pf-info-row">
-            <span className="pf-info-label">🧬 MBTI</span>
+            <span className="pf-info-label"><MenuIcon name="dna" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />MBTI</span>
             <span className="pf-info-value">{user.mbtiType}</span>
           </div>
         </>)}
         <div className="pf-info-divider" />
         <div className="pf-info-row">
-          <span className="pf-info-label">💕 연애 상태</span>
+          <span className="pf-info-label"><MenuIcon name="heart" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />연애 상태</span>
           <span className="pf-info-value">
             {user.relationshipStatus === 'IN_RELATIONSHIP' ? '💕 연애중' :
              user.relationshipStatus === 'SOME' ? '💗 썸' :
@@ -178,7 +179,7 @@ function Profile() {
       {/* 나의 연인 */}
       {user.partnerBirthDate && (
         <section className="pf-partner glass-card">
-          <h3 className="profile-section-title">💕 나의 연인</h3>
+          <h3 className="profile-section-title"><MenuIcon name="heart" size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />나의 연인</h3>
           <div className="pf-partner-info">
             <div className="pf-partner-row">
               <span className="pf-partner-label">생년월일</span>
@@ -208,7 +209,7 @@ function Profile() {
       {dailyFortunes && (
         <section className="profile-daily glass-card">
           <h3 className="profile-section-title">
-            📆 {new Date().getMonth() + 1}월 일운
+            <MenuIcon name="monthly" size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />{new Date().getMonth() + 1}월 일운
             {user?.birthDate && (
               <span style={{ display: 'block', fontSize: 11, fontWeight: 500, color: 'var(--color-text-muted)', marginTop: 4 }}>
                 {user.calendarType === 'LUNAR' ? '음력' : '양력'} {user.birthDate} 기준

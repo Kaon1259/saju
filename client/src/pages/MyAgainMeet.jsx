@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
 import './MyAgainMeet.css';
 
 // "다시 만날까?" — 옛 인연 / 이별 후 마음 정리에 관한 4개 묶음 메뉴
 const AGAIN_MENUS = [
-  { id: 'reunion',         icon: '💔', label: '재회운',      sub: '다시 만날 수 있을까?',     desc: '헤어진 인연과의 재회 가능성과 시기',     path: '/love/reunion' },
-  { id: 'remarriage',      icon: '💍', label: '재혼운',      sub: '새로운 결혼의 가능성',     desc: '이혼 후 맞을 재혼 시기와 인연 분석',     path: '/love/remarriage' },
-  { id: 'recovery',        icon: '🕯️', label: '이별 회복운', sub: '언제쯤 마음이 정리될까?',  desc: '회복 시기·자존감 회복 루틴 사주 분석',   path: '/love/recovery' },
-  { id: 'contact_fortune', icon: '📞', label: '연락 타이밍', sub: '먼저 연락해도 될까?',      desc: '오늘 일진으로 보는 연락 길흉 시간대',    path: '/love/contact_fortune' },
+  { id: 'reunion',         icon: '💔',  iconKey: 'moon',  label: '재회운',      sub: '다시 만날 수 있을까?',     desc: '헤어진 인연과의 재회 가능성과 시기',     path: '/love/reunion' },
+  { id: 'remarriage',      icon: '💍',  iconKey: 'ring',  label: '재혼운',      sub: '새로운 결혼의 가능성',     desc: '이혼 후 맞을 재혼 시기와 인연 분석',     path: '/love/remarriage' },
+  { id: 'recovery',        icon: '🕯️', iconKey: 'moon',  label: '이별 회복운', sub: '언제쯤 마음이 정리될까?',  desc: '회복 시기·자존감 회복 루틴 사주 분석',   path: '/love/recovery' },
+  { id: 'contact_fortune', icon: '📞', iconKey: 'phone', label: '연락 타이밍', sub: '먼저 연락해도 될까?',      desc: '오늘 일진으로 보는 연락 길흉 시간대',    path: '/love/contact_fortune' },
 ];
 
 function MyAgainMeet() {
@@ -49,7 +50,7 @@ function MyAgainMeet() {
             style={{ '--card-idx': idx }}
           >
             <div className="myagain-menu-icon-wrap">
-              <span className="myagain-menu-icon">{item.icon}</span>
+              <span className="myagain-menu-icon">{item.iconKey ? <MenuIcon name={item.iconKey} size={32} /> : item.icon}</span>
             </div>
             <div className="myagain-menu-text">
               <span className="myagain-menu-label">{item.label}</span>

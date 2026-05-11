@@ -270,6 +270,266 @@ const PATHS = {
       <path d="M9 14l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
+
+  // ─── 보조/세부 아이콘 ────────────────────────────────────
+  // 학업·자기계발 — 책
+  academic: (
+    <>
+      <path d="M4 4.5h6a2.5 2.5 0 012.5 2.5v13H6a2 2 0 01-2-2V4.5z" />
+      <path d="M20 4.5h-6a2.5 2.5 0 00-2.5 2.5v13H18a2 2 0 002-2V4.5z" />
+      <path d="M7 9h3M7 12h3M14 9h3M14 12h3" strokeLinecap="round" opacity="0.55" />
+    </>
+  ),
+  // 스파클 — ✨ 별빛
+  sparkle: (
+    <>
+      <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z" />
+      <path d="M18 14l.7 1.8 1.8.7-1.8.7L18 19l-.7-1.8L15.5 16.5l1.8-.7z" />
+      <path d="M5 16l.5 1.4L7 18l-1.5.6L5 20l-.5-1.4L3 18l1.5-.6z" opacity="0.6" />
+    </>
+  ),
+  // 보석 — 💎 다이아몬드 (성격/가치)
+  gem: (
+    <>
+      <path d="M5 9l3.5-4.5h7L19 9l-7 11.5L5 9z" strokeLinejoin="round" />
+      <path d="M5 9h14M8.5 4.5L12 9l3.5-4.5M9 9l3 11.5L15 9" />
+    </>
+  ),
+  // 발자국 — 🐾 띠/동물
+  paw: (
+    <>
+      <ellipse cx="6.5" cy="9.5" rx="1.7" ry="2.3" />
+      <ellipse cx="10.5" cy="6.5" rx="1.7" ry="2.3" />
+      <ellipse cx="14.5" cy="6.5" rx="1.7" ry="2.3" />
+      <ellipse cx="18.5" cy="9.5" rx="1.7" ry="2.3" />
+      <path d="M8.5 14.5c0-2.2 1.6-3.5 4-3.5s4 1.3 4 3.5c0 3-2 5-4 5s-4-2-4-5z" />
+    </>
+  ),
+  // DNA — 🧬 유전자/MBTI
+  dna: (
+    <>
+      <path d="M7 3c4 3 6 6 6 9s2 6 6 9" />
+      <path d="M17 3c-4 3-6 6-6 9s-2 6-6 9" />
+      <path d="M9 6h6M9 18h6M10 9h4M10 15h4" strokeLinecap="round" opacity="0.55" />
+    </>
+  ),
+  // 위치 핀 — 📍 장소
+  pin: (
+    <>
+      <path d="M12 3a7 7 0 017 7c0 5-7 11-7 11S5 15 5 10a7 7 0 017-7z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </>
+  ),
+  // 시간/시계 — 일정/시기
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" strokeLinecap="round" />
+    </>
+  ),
+  // 검색/돋보기
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M16 16l4.5 4.5" strokeLinecap="round" />
+    </>
+  ),
+  // 그래프/통계
+  chart: (
+    <>
+      <path d="M4 20V8M10 20V4M16 20v-7M22 20H2" strokeLinecap="round" />
+    </>
+  ),
+  // 사용자 — 마이/프로필
+  user: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4.5 3.5-8 8-8s8 3.5 8 8" />
+    </>
+  ),
+  // 홈
+  home: (
+    <>
+      <path d="M3 11.5L12 3l9 8.5V20a1.5 1.5 0 01-1.5 1.5h-4v-7h-7v7h-4A1.5 1.5 0 013 20v-8.5z" strokeLinejoin="round" />
+    </>
+  ),
+  // 히스토리 — 시계 + 화살표
+  history: (
+    <>
+      <path d="M3 12a9 9 0 109-9c-2.5 0-4.7 1-6.4 2.6L3 8" />
+      <path d="M3 4v4h4" strokeLinecap="round" />
+      <path d="M12 8v4l3 2" strokeLinecap="round" />
+    </>
+  ),
+  // 설정 — 톱니바퀴
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" strokeLinecap="round" />
+    </>
+  ),
+  // 종/알림
+  bell: (
+    <>
+      <path d="M6 16V11a6 6 0 1112 0v5l2 2H4l2-2z" strokeLinejoin="round" />
+      <path d="M10 20a2 2 0 004 0" strokeLinecap="round" />
+    </>
+  ),
+  // 카메라
+  camera: (
+    <>
+      <path d="M4 8h3l1.5-2h7L17 8h3a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0120 20H4a1.5 1.5 0 01-1.5-1.5v-9A1.5 1.5 0 014 8z" />
+      <circle cx="12" cy="13.5" r="3.5" />
+    </>
+  ),
+  // 공유
+  share: (
+    <>
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="5" r="2.5" />
+      <circle cx="18" cy="19" r="2.5" />
+      <path d="M8 11l8-5M8 13l8 5" strokeLinecap="round" />
+    </>
+  ),
+  // 잠금 — 보안/유료
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 018 0v3" />
+    </>
+  ),
+  // 행운 — 클로버
+  clover: (
+    <>
+      <path d="M12 12c0-2 1-4 3-4s3 2 3 4-2 3-3 3-3-1-3-3z" />
+      <path d="M12 12c0-2-1-4-3-4s-3 2-3 4 2 3 3 3 3-1 3-3z" />
+      <path d="M12 12c-2 0-4 1-4 3s2 3 4 3 3-2 3-3-1-3-3-3z" />
+      <path d="M12 12c2 0 4-1 4-3s-2-3-4-3-3 2-3 3 1 3 3 3z" />
+    </>
+  ),
+  // 팔레트 — 행운의 색
+  palette: (
+    <>
+      <path d="M12 3a9 9 0 100 18c.8 0 1.5-.4 1.5-1.2 0-.5-.3-.9-.6-1.2-.3-.3-.5-.7-.5-1.1 0-1 .9-1.5 2-1.5h2c2 0 3.6-1.6 3.6-4 0-4.5-3.6-9-8-9z" />
+      <circle cx="7" cy="11" r="1" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="7" r="1" fill="currentColor" stroke="none" />
+      <circle cx="13" cy="6" r="1" fill="currentColor" stroke="none" />
+      <circle cx="17" cy="9" r="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // 해시 — 행운 숫자
+  hash: (
+    <>
+      <path d="M5 9h14M5 15h14M10 4l-2 16M16 4l-2 16" strokeLinecap="round" />
+    </>
+  ),
+  // 나침반 — 방위
+  compass: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7l2.5 7L7 16l5-9z" strokeLinejoin="round" />
+    </>
+  ),
+  // 음식/그릇 — 행운의 음식
+  food: (
+    <>
+      <path d="M4 11h16a8 8 0 01-8 8 8 8 0 01-8-8z" strokeLinejoin="round" />
+      <path d="M3 11h18" strokeLinecap="round" />
+      <path d="M9 7c0-1.5 1-2.5 1.5-3M13 7c0-1.5 1-2.5 1.5-3" strokeLinecap="round" opacity="0.6" />
+    </>
+  ),
+  // 옷 — 추천 스타일
+  shirt: (
+    <>
+      <path d="M8 3l-5 3 2 4 3-1v12h8V9l3 1 2-4-5-3-2 2c-.6.6-1.4 1-2 1s-1.4-.4-2-1l-2-2z" strokeLinejoin="round" />
+    </>
+  ),
+  // 선물 — 행운 아이템
+  gift: (
+    <>
+      <rect x="3.5" y="9" width="17" height="11" rx="1.5" />
+      <path d="M3.5 13h17" />
+      <path d="M12 9v11" />
+      <path d="M8.5 5c0-1 .7-2 1.7-2C12 3 12 7 12 7s0-4 1.8-4c1 0 1.7 1 1.7 2 0 2-1.5 4-3.5 4S8.5 7 8.5 5z" strokeLinejoin="round" />
+    </>
+  ),
+  // 사람들 — 행운의 사람
+  people: (
+    <>
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 19c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M14 19c0-2.2 1.7-4 4-4s2.5.8 3 2" strokeLinecap="round" />
+    </>
+  ),
+  // 입술 — 스킨십
+  kiss: (
+    <>
+      <path d="M3.5 11c0-2 2-3 4-3 1.5 0 3 .8 4.5 2 1.5-1.2 3-2 4.5-2 2 0 4 1 4 3 0 1.5-1 2.5-2.5 3.5 1.5 1 2.5 2 2.5 3.5 0 2-2 3-4 3-1.5 0-3-.8-4.5-2-1.5 1.2-3 2-4.5 2-2 0-4-1-4-3 0-1.5 1-2.5 2.5-3.5C4.5 13.5 3.5 12.5 3.5 11z" />
+      <path d="M3.5 11l4 3.5L11.5 11M20.5 11l-4 3.5L12.5 11" opacity="0.5" />
+    </>
+  ),
+  // 결혼식 — 더 화려한 결혼/예식
+  wedding: (
+    <>
+      <path d="M5 20h14" strokeLinecap="round" />
+      <path d="M7 20l-1-8 4 2 2-7 2 7 4-2-1 8" strokeLinejoin="round" />
+      <circle cx="9" cy="6" r="1" />
+      <circle cx="15" cy="6" r="1" />
+    </>
+  ),
+  // 컵/음료
+  cup: (
+    <>
+      <path d="M5 7h12v8a4 4 0 01-4 4H9a4 4 0 01-4-4V7z" />
+      <path d="M17 9h2a2 2 0 010 4h-2" />
+      <path d="M9 3c0 1 1 1 1 2M12 3c0 1 1 1 1 2" strokeLinecap="round" opacity="0.55" />
+    </>
+  ),
+  // 비행기 — 여행/행운
+  plane: (
+    <>
+      <path d="M10 4l-2 5L3 11l2 1 1 3 2-1 3 7 1-3 4-4 5 2-2-5-7-2-3-5z" strokeLinejoin="round" />
+    </>
+  ),
+  // 책 — 학업/일지
+  book: (
+    <>
+      <path d="M4 4.5h11a3 3 0 013 3v13H7a3 3 0 01-3-3V4.5z" />
+      <path d="M4 4.5a2 2 0 100 4h11" />
+      <path d="M18 17H7a2 2 0 100 4h11" opacity="0.5" />
+    </>
+  ),
+  // 마이크 — 활동/방송
+  mic: (
+    <>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 12a7 7 0 0014 0M12 19v3M9 22h6" strokeLinecap="round" />
+    </>
+  ),
+  // 채팅
+  chat: (
+    <>
+      <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2h-9l-4 3v-3H6a2 2 0 01-2-2V6z" strokeLinejoin="round" />
+      <circle cx="9" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // 해 — 오늘의 운세
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" strokeLinecap="round" />
+    </>
+  ),
+  // 점/별 기타
+  spark: (
+    <>
+      <path d="M12 4v6M12 14v6M4 12h6M14 12h6" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="1.5" />
+    </>
+  ),
 };
 
 export default function MenuIcon({ name, size = 36, className = '', style }) {

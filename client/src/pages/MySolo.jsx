@@ -1,17 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
 import './MySolo.css';
 
 // 완전 솔로 대상 — 아직 관심 대상 없거나 인연을 찾는 중.
 // 썸/짝사랑 4개는 /my-some-crush, 재회/재혼/회복/연락은 /again-meet 으로 이동.
 const SOLO_MENUS = [
-  { id: 'love_fortune',   icon: '💕',       label: '1:1연애운', sub: '오늘 연애 기운은?',      desc: '솔로를 위한 오늘의 연애 에너지',      path: '/love-fortune' },
-  { id: 'ideal_type',     icon: '👩‍❤️‍👨', label: '이상형',    sub: '사주로 보는 나의 이상형', desc: '나와 잘 맞는 이상형 스타일 분석',     path: '/love/ideal_type' },
-  { id: 'meeting_timing', icon: '🔮',       label: '만남시기',  sub: '언제 인연을 만날까?',     desc: '내게 다가올 인연의 시기 예측',        path: '/love/meeting_timing' },
-  { id: 'blind_date',     icon: '🤝',       label: '소개팅',    sub: '새로운 인연이 올까요?',   desc: '소개팅 성공 가능성과 궁합',           path: '/love/blind_date' },
-  { id: 'past_life',      icon: '🌌',       label: '전생인연',  sub: '전생에 어떤 사이였을까?', desc: '전생에서부터 이어지는 운명의 인연',   path: '/love/past_life' },
-  { id: 'marriage',       icon: '💒',       label: '결혼운',    sub: '결혼 시기와 인연',        desc: '내 결혼 시점과 배우자 궁합 예측',     path: '/love/marriage' },
+  { id: 'love_fortune',   icon: '💕',       iconKey: 'heart',        label: '1:1연애운', sub: '오늘 연애 기운은?',      desc: '솔로를 위한 오늘의 연애 에너지',      path: '/love-fortune' },
+  { id: 'ideal_type',     icon: '👩‍❤️‍👨', iconKey: 'sparkleHeart', label: '이상형',    sub: '사주로 보는 나의 이상형', desc: '나와 잘 맞는 이상형 스타일 분석',     path: '/love/ideal_type' },
+  { id: 'meeting_timing', icon: '🔮',       iconKey: 'crystalBall',  label: '만남시기',  sub: '언제 인연을 만날까?',     desc: '내게 다가올 인연의 시기 예측',        path: '/love/meeting_timing' },
+  { id: 'blind_date',     icon: '🤝',       iconKey: 'handshake',    label: '소개팅',    sub: '새로운 인연이 올까요?',   desc: '소개팅 성공 가능성과 궁합',           path: '/love/blind_date' },
+  { id: 'past_life',      icon: '🌌',       iconKey: 'moon',         label: '전생인연',  sub: '전생에 어떤 사이였을까?', desc: '전생에서부터 이어지는 운명의 인연',   path: '/love/past_life' },
+  { id: 'marriage',       icon: '💒',       iconKey: 'ring',         label: '결혼운',    sub: '결혼 시기와 인연',        desc: '내 결혼 시점과 배우자 궁합 예측',     path: '/love/marriage' },
 ];
 
 function MySolo() {
@@ -52,7 +53,7 @@ function MySolo() {
             style={{ '--card-idx': idx }}
           >
             <div className="mysolo-menu-icon-wrap">
-              <span className="mysolo-menu-icon">{item.icon}</span>
+              <span className="mysolo-menu-icon">{item.iconKey ? <MenuIcon name={item.iconKey} size={32} /> : item.icon}</span>
             </div>
             <div className="mysolo-menu-text">
               <span className="mysolo-menu-label">{item.label}</span>

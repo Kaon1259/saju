@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import MenuIcon from './MenuIcon';
 import './FloatingMenu.css';
 
 function FloatingMenu() {
@@ -77,9 +78,9 @@ function FloatingMenu() {
 
   const path = location.pathname;
   const items = [
-    path !== '/my' && { id: 'fortune', icon: '🔮', label: '오늘운세', path: '/my' },
-    path !== '/' && { id: 'love', icon: '💕', label: '연애운', path: '/', state: { openLove: 'relationship' } },
-    path !== '/compatibility' && { id: 'compat', icon: '💑', label: '궁합', path: '/compatibility' },
+    path !== '/my' && { id: 'fortune', iconKey: 'crystalBall', label: '오늘운세', path: '/my' },
+    path !== '/' && { id: 'love', iconKey: 'heart', label: '연애운', path: '/', state: { openLove: 'relationship' } },
+    path !== '/compatibility' && { id: 'compat', iconKey: 'couple', label: '궁합', path: '/compatibility' },
   ].filter(Boolean);
 
   if (items.length === 0) return null;
@@ -116,14 +117,16 @@ function FloatingMenu() {
         onClick={handleClick(() => setCollapsed(!collapsed))}
       >
         {collapsed
-          ? <><span className="floating-toggle-icon">💕</span><span className="floating-toggle-text">메뉴</span></>
-          : <><span className="floating-toggle-icon">💕</span><span className="floating-toggle-text">감추기</span></>
+          ? <><span className="floating-toggle-icon"><MenuIcon name="heart" size={20} /></span><span className="floating-toggle-text">메뉴</span></>
+          : <><span className="floating-toggle-icon"><MenuIcon name="heart" size={20} /></span><span className="floating-toggle-text">감추기</span></>
         }
       </button>
       {!collapsed && items.map((item) => (
         <button key={item.id} className="floating-btn floating--love"
           onClick={handleClick(() => navigate(item.path, { state: item.state }))}>
-          <span className="floating-icon">{item.icon}</span>
+          <span className="floating-icon">
+            {item.iconKey ? <MenuIcon name={item.iconKey} size={20} /> : item.icon}
+          </span>
           <span className="floating-label">{item.label}</span>
         </button>
       ))}

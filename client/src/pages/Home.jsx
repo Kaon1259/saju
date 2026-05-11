@@ -47,20 +47,20 @@ const CATEGORY_CONFIG = [
 
 const LOVE_TYPES = [
   // 솔로
-  { id: 'crush',              label: '짝사랑',    icon: '💘', desc: '내 마음이 이루어질까?', group: 'solo' },
-  { id: 'blind_date',         label: '소개팅',    icon: '🤝', desc: '좋은 만남이 올까?', group: 'solo' },
-  { id: 'meeting_timing',     label: '만남시기',   icon: '🔮', desc: '언제 인연을 만날까', group: 'solo' },
-  { id: 'ideal_type',         label: '이상형',    icon: '👩‍❤️‍👨', desc: '사주로 보는 나의 이상형', group: 'solo' },
+  { id: 'crush',              label: '짝사랑',    icon: '💘',    iconKey: 'heartArrow',   desc: '내 마음이 이루어질까?', group: 'solo' },
+  { id: 'blind_date',         label: '소개팅',    icon: '🤝',    iconKey: 'handshake',    desc: '좋은 만남이 올까?', group: 'solo' },
+  { id: 'meeting_timing',     label: '만남시기',   icon: '🔮',    iconKey: 'crystalBall',  desc: '언제 인연을 만날까', group: 'solo' },
+  { id: 'ideal_type',         label: '이상형',    icon: '👩‍❤️‍👨', iconKey: 'sparkleHeart', desc: '사주로 보는 나의 이상형', group: 'solo' },
   // 썸/연애
-  { id: 'couple_fortune',     label: '데이트운',   icon: '💑', desc: '오늘 연인과의 하루', group: 'love' },
-  { id: 'confession_timing',  label: '고백타이밍',    icon: '💌', desc: '고백 타이밍은?', group: 'love' },
-  { id: 'some_check',         label: '썸진단',    icon: '🎯', desc: '이 썸, 연애로 발전할까?', group: 'love' },
-  { id: 'contact_fortune',    label: '연락운',    icon: '📱', desc: '먼저 연락해도 될까?', group: 'love' },
+  { id: 'couple_fortune',     label: '데이트운',   icon: '💑',    iconKey: 'couple',       desc: '오늘 연인과의 하루', group: 'love' },
+  { id: 'confession_timing',  label: '고백타이밍',  icon: '💌',    iconKey: 'letter',       desc: '고백 타이밍은?', group: 'love' },
+  { id: 'some_check',         label: '썸진단',    icon: '🎯',    iconKey: 'target',       desc: '이 썸, 연애로 발전할까?', group: 'love' },
+  { id: 'contact_fortune',    label: '연락운',    icon: '📱',    iconKey: 'phone',        desc: '먼저 연락해도 될까?', group: 'love' },
   // 결혼/인연
-  { id: 'marriage',           label: '결혼운',    icon: '💒', desc: '결혼 시기와 인연', group: 'marriage' },
-  { id: 'remarriage',         label: '재혼운',    icon: '💍', desc: '새로운 인연의 가능성', group: 'marriage' },
-  { id: 'reunion',            label: '재회운',    icon: '💔', desc: '다시 만날 수 있을까?', group: 'marriage' },
-  { id: 'past_life',          label: '전생인연',   icon: '🌌', desc: '전생에서의 우리 이야기', group: 'marriage' },
+  { id: 'marriage',           label: '결혼운',    icon: '💒',    iconKey: 'ring',         desc: '결혼 시기와 인연', group: 'marriage' },
+  { id: 'remarriage',         label: '재혼운',    icon: '💍',    iconKey: 'ring',         desc: '새로운 인연의 가능성', group: 'marriage' },
+  { id: 'reunion',            label: '재회운',    icon: '💔',    iconKey: 'moon',         desc: '다시 만날 수 있을까?', group: 'marriage' },
+  { id: 'past_life',          label: '전생인연',   icon: '🌌',    iconKey: 'moon',         desc: '전생에서의 우리 이야기', group: 'marriage' },
 ];
 
 const LOVE_GROUPS = [
@@ -189,11 +189,12 @@ const REL_CARDS = {
     title: '나의 연인',
     sub: '정통 · 결혼 · 스킨십 궁합',
     icon: '💑',
+    iconKey: 'couple',
     accentFrom: '#ec4899',
     accentTo: '#f472b6',
     shortcuts: [
-      { icon: '💞', label: '정통궁합',   path: '/my-love-compat', state: { presetTab: 'saju' } },
-      { icon: '💑', label: '데이트운',   path: '/my-love-compat', state: { presetTab: 'date' } },
+      { icon: '💞', iconKey: 'sparkleHeart', label: '정통궁합', path: '/my-love-compat', state: { presetTab: 'saju' } },
+      { icon: '💑', iconKey: 'couple',       label: '데이트운', path: '/my-love-compat', state: { presetTab: 'date' } },
     ],
   },
   some: {
@@ -202,11 +203,12 @@ const REL_CARDS = {
     title: '나의 썸·짝사랑',
     sub: '썸 · 짝사랑 · 고백 · 연락',
     icon: '💘',
+    iconKey: 'heartArrow',
     accentFrom: '#a855f7',
     accentTo: '#ec4899',
     shortcuts: [
-      { icon: '🎯', label: '썸진단', path: '/love/some_check' },
-      { icon: '💘', label: '짝사랑', path: '/love/crush' },
+      { icon: '🎯', iconKey: 'target',     label: '썸진단', path: '/love/some_check' },
+      { icon: '💘', iconKey: 'heartArrow', label: '짝사랑', path: '/love/crush' },
     ],
   },
   solo: {
@@ -215,11 +217,12 @@ const REL_CARDS = {
     title: '나는 솔로',
     sub: '연애운 · 이상형 · 만남시기',
     icon: '🙋',
+    iconKey: 'user',
     accentFrom: '#06b6d4',
     accentTo: '#a78bfa',
     shortcuts: [
-      { icon: '💕', label: '1:1연애운', path: '/love-fortune' },
-      { icon: '👩‍❤️‍👨', label: '이상형', path: '/love/ideal_type' },
+      { icon: '💕', iconKey: 'heart',        label: '1:1연애운', path: '/love-fortune' },
+      { icon: '👩‍❤️‍👨', iconKey: 'sparkleHeart', label: '이상형',   path: '/love/ideal_type' },
     ],
   },
 };
@@ -1055,7 +1058,9 @@ function RelationshipCarousel({ navigate, myData }) {
               </div>
 
               <div className="home-rel-card-icon">
-                <span className="home-rel-card-icon-main">{card.icon}</span>
+                <span className="home-rel-card-icon-main">
+                  {card.iconKey ? <MenuIcon name={card.iconKey} size={48} /> : card.icon}
+                </span>
               </div>
 
               <h3 className="home-rel-card-title">{card.title}</h3>
@@ -1079,7 +1084,9 @@ function RelationshipCarousel({ navigate, myData }) {
                     }}
                     tabIndex={isCenter ? 0 : -1}
                   >
-                    <span className="home-rel-shortcut-icon">{sc.icon}</span>
+                    <span className="home-rel-shortcut-icon">
+                      {sc.iconKey ? <MenuIcon name={sc.iconKey} size={18} /> : sc.icon}
+                    </span>
                     <span className="home-rel-shortcut-label">{sc.label}</span>
                   </button>
                 ))}
@@ -1709,7 +1716,7 @@ function Home() {
           <h2 className="home-section-title">💕 연애 운세</h2>
           <span className="home-section-sub">당신의 연애를 위한 모든 운세</span>
         </div>
-        <div className="home-banner-stack">
+        <div className="home-banner-stack home-banner-stack--love">
           {loveBanners.map((b) => (
             <button
               key={b.id}
@@ -1895,7 +1902,10 @@ function Home() {
                   )}
 
                   <button className="love-modal-submit" onClick={handleLoveAnalyze} disabled={!loveBirth}>
-                    {loveInfo?.icon === 'couple' ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span> : loveInfo?.icon === 'wedding' ? '💒' : loveInfo?.icon} {loveInfo?.label} 보기
+                    {loveInfo?.iconKey
+                      ? <MenuIcon name={loveInfo.iconKey} size={20} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                      : loveInfo?.icon}
+                    {' '}{loveInfo?.label} 보기
                     <HeartCost category={LOVE_HEART_MAP[loveModal] || 'LOVE_RELATIONSHIP'} />
                   </button>
                 </div>
@@ -1909,7 +1919,7 @@ function Home() {
                 <div className="love-modal-result love-result-reveal" ref={loveResultRef} style={{ '--heart-color': loveHeartColor }}>
                   {loveModal === 'ideal_type' ? (
                     <div style={{ textAlign: 'center', padding: '10px 0 6px' }}>
-                      <span style={{ fontSize: 40 }}>👩‍❤️‍👨</span>
+                      <MenuIcon name="sparkleHeart" size={40} style={{ color: 'var(--color-love, #ec4899)' }} />
                       <h3 style={{ fontSize: 18, fontWeight: 800, margin: '8px 0 4px', color: 'var(--color-text)' }}>나의 이상형 분석</h3>
                     </div>
                   ) : (
@@ -1924,18 +1934,18 @@ function Home() {
                     </div>
                   )}
 
-                  <FortuneCard icon={loveModal === 'ideal_type' ? '🔮' : loveInfo?.icon === 'couple' ? '💕' : loveInfo?.icon === 'wedding' ? '💒' : loveInfo?.icon} title={loveModal === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'} description={loveResult.overall} delay={0} />
+                  <FortuneCard iconKey={loveModal === 'ideal_type' ? 'crystalBall' : loveInfo?.iconKey} icon={loveInfo?.icon} title={loveModal === 'ideal_type' ? '사주로 본 나의 이상형' : '종합 분석'} description={loveResult.overall} delay={0} />
 
                   {/* 이상형 전용 카드 */}
                   {loveModal === 'ideal_type' && (
                     <>
-                      {loveResult.lookType && <FortuneCard icon="✨" title="이상형 외모/분위기" description={loveResult.lookType} delay={80} />}
-                      {loveResult.personalityType && <FortuneCard icon="💎" title="이상형 성격/가치관" description={loveResult.personalityType} delay={160} />}
-                      {loveResult.bestZodiac && <FortuneCard icon="🐾" title="잘 맞는 띠 TOP3" description={loveResult.bestZodiac} delay={240} />}
-                      {loveResult.bestMbti && <FortuneCard icon="🧬" title="잘 맞는 MBTI" description={loveResult.bestMbti} delay={320} />}
-                      {loveResult.celebMatch && <FortuneCard icon="🌟" title="나와 궁합 좋은 연예인" description={loveResult.celebMatch} delay={400} />}
-                      {loveResult.meetingPlace && <FortuneCard icon="📍" title="만남 장소 추천" description={loveResult.meetingPlace} delay={480} />}
-                      {loveResult.meetingTiming && <FortuneCard icon="📅" title="인연 만날 시기" description={loveResult.meetingTiming} delay={560} />}
+                      {loveResult.lookType && <FortuneCard iconKey="sparkle" title="이상형 외모/분위기" description={loveResult.lookType} delay={80} />}
+                      {loveResult.personalityType && <FortuneCard iconKey="gem" title="이상형 성격/가치관" description={loveResult.personalityType} delay={160} />}
+                      {loveResult.bestZodiac && <FortuneCard iconKey="paw" title="잘 맞는 띠 TOP3" description={loveResult.bestZodiac} delay={240} />}
+                      {loveResult.bestMbti && <FortuneCard iconKey="dna" title="잘 맞는 MBTI" description={loveResult.bestMbti} delay={320} />}
+                      {loveResult.celebMatch && <FortuneCard iconKey="star" title="나와 궁합 좋은 연예인" description={loveResult.celebMatch} delay={400} />}
+                      {loveResult.meetingPlace && <FortuneCard iconKey="pin" title="만남 장소 추천" description={loveResult.meetingPlace} delay={480} />}
+                      {loveResult.meetingTiming && <FortuneCard iconKey="clock" title="인연 만날 시기" description={loveResult.meetingTiming} delay={560} />}
                     </>
                   )}
 

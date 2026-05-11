@@ -4,6 +4,7 @@ import { getLoveFortuneBasic, getLoveFortuneStream, saveLoveFortuneCache, getCel
 import HistoryDrawer from '../components/HistoryDrawer';
 import CELEBRITIES from '../data/celebrities';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import StreamingCard from '../components/StreamingCard';
 import { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import BirthDatePicker from '../components/BirthDatePicker';
@@ -18,11 +19,11 @@ import { useAiAbort } from '../hooks/useAiAbort';
 import './LoveFortune.css';
 
 const RELATION_STATUSES = [
-  { value: 'SINGLE', label: '솔로', icon: '💫' },
-  { value: 'SOME', label: '썸', icon: '💗' },
-  { value: 'IN_RELATIONSHIP', label: '연애중', icon: '💕' },
-  { value: 'MARRIED', label: '기혼', icon: '💍' },
-  { value: 'COMPLICATED', label: '복잡', icon: '💔' },
+  { value: 'SINGLE',          label: '솔로',   icon: '💫', iconKey: 'sparkle'      },
+  { value: 'SOME',            label: '썸',     icon: '💗', iconKey: 'heart'        },
+  { value: 'IN_RELATIONSHIP', label: '연애중', icon: '💕', iconKey: 'love'         },
+  { value: 'MARRIED',         label: '기혼',   icon: '💍', iconKey: 'ring'         },
+  { value: 'COMPLICATED',     label: '복잡',   icon: '💔', iconKey: 'moon'         },
 ];
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
@@ -335,7 +336,7 @@ function LoveFortune() {
                   className={`lf-status-chip ${relationStatus === s.value ? 'active' : ''}`}
                   onClick={() => setRelationStatus(s.value)}
                 >
-                  <span className="lf-status-icon">{s.icon}</span>
+                  <span className="lf-status-icon">{s.iconKey ? <MenuIcon name={s.iconKey} size={20} /> : s.icon}</span>
                   <span className="lf-status-label">{s.label}</span>
                 </button>
               ))}
@@ -355,7 +356,8 @@ function LoveFortune() {
           </div>
 
           <button className="lf-submit" onClick={() => guardLoveFortune(handleAnalyze)} disabled={!birthDate || !relationStatus}>
-            💕 오늘의 연애운 보기 <HeartCost category="LOVE_RELATIONSHIP" />
+            <MenuIcon name="love" size={20} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            오늘의 연애운 보기 <HeartCost category="LOVE_RELATIONSHIP" />
           </button>
         </div>
       )}
@@ -400,13 +402,13 @@ function LoveFortune() {
               <span className="lf-heart-unit">점</span>
             </div>
             <span className="lf-heart-grade" style={{ color: GRADE_COLORS[result.grade] || heartColor }}>{result.grade}</span>
-            {statusInfo && <span className="lf-heart-status">{statusInfo.icon} {statusInfo.label}</span>}
+            {statusInfo && <span className="lf-heart-status">{statusInfo.iconKey ? <MenuIcon name={statusInfo.iconKey} size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> : statusInfo.icon} {statusInfo.label}</span>}
           </div>
 
-          <FortuneCard icon="💕" title="종합 분석" description={result.overall} delay={0} />
-          {result.timing && <FortuneCard icon="📅" title="최적 시기" description={result.timing} delay={80} />}
-          {result.advice && <FortuneCard icon="💡" title="행동 조언" description={result.advice} delay={160} />}
-          {result.caution && <FortuneCard icon="⚠️" title="주의사항" description={result.caution} delay={240} />}
+          <FortuneCard iconKey="love" title="종합 분석" description={result.overall} delay={0} />
+          {result.timing && <FortuneCard iconKey="clock" title="최적 시기" description={result.timing} delay={80} />}
+          {result.advice && <FortuneCard iconKey="sparkle" title="행동 조언" description={result.advice} delay={160} />}
+          {result.caution && <FortuneCard iconKey="bell" title="주의사항" description={result.caution} delay={240} />}
 
           <div className="lf-lucky">
             {result.luckyDay && <div className="lf-lucky-item"><span className="lf-lucky-label">행운의 날</span><span className="lf-lucky-value">{result.luckyDay}</span></div>}

@@ -240,6 +240,11 @@ function App() {
     }
   }, []);
 
+  // 카드 탭 시 하트/별 버블 이펙트 글로벌 핸들러 등록
+  useEffect(() => {
+    import('./utils/tapBubble').then(({ initTapBubble }) => initTapBubble());
+  }, []);
+
   // 타로 자산 유휴 시간 프리로드 — 페이지/셔플/카드 노출 지연 제거
   useEffect(() => {
     const DECK_IDS = ['newclassic','jester','masterpiece','cartoon_girl','cartoon_boy','kdrama','celestial','lady'];

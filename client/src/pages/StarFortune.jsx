@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
 import './StarFortune.css';
 
 const STAR_MENUS = [
-  { id: 'my-star', icon: '⭐', label: '나의 스타', desc: '즐겨찾기한 최애 스타 관리', path: '/my-star', color: '#FF9800' },
-  { id: 'celeb-compat', icon: '💫', label: '스타와 나의 궁합', desc: '최애와 사주 궁합 분석', path: '/celeb-compatibility', color: '#E91E63' },
-  { id: 'celeb-fortune', icon: '🌟', label: '보이그룹·걸그룹 궁합', desc: '좋아하는 그룹과 사주 궁합', path: '/celeb-fortune', color: '#9B59B6' },
-  { id: 'celeb-match', icon: '🔮', label: '나와 궁합이 맞는 스타', desc: '사주로 찾는 운명의 스타', path: '/celeb-match', color: '#FF6B6B' },
+  { id: 'my-star',       iconKey: 'star',         label: '나의 스타',           desc: '즐겨찾기한 최애 스타 관리', path: '/my-star',             color: '#FF9800' },
+  { id: 'celeb-compat',  iconKey: 'sparkleHeart', label: '스타와 나의 궁합',    desc: '최애와 사주 궁합 분석',     path: '/celeb-compatibility', color: '#E91E63' },
+  { id: 'celeb-fortune', iconKey: 'constellation',label: '보이그룹·걸그룹 궁합', desc: '좋아하는 그룹과 사주 궁합', path: '/celeb-fortune',       color: '#9B59B6' },
+  { id: 'celeb-match',   iconKey: 'crystalBall',  label: '나와 궁합이 맞는 스타', desc: '사주로 찾는 운명의 스타',   path: '/celeb-match',         color: '#FF6B6B' },
 ];
 
 const STAR_PARTICLES = 25;
@@ -41,7 +42,7 @@ function StarFortune() {
         {STAR_MENUS.map((item, idx) => (
           <button key={item.id} className="star-fortune-card" onClick={() => navigate(item.path)} style={{ '--sf-color': item.color, '--card-delay': `${idx * 100}ms` }}>
             <div className={`star-fortune-card-icon sf-anim--${item.id}`}>
-              <span>{item.icon}</span>
+              <span>{item.iconKey ? <MenuIcon name={item.iconKey} size={32} /> : item.icon}</span>
             </div>
             <div className="star-fortune-card-info">
               <span className="star-fortune-card-label">{item.label}</span>

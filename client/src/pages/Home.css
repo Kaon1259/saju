@@ -4374,18 +4374,16 @@
 
 /* 라이트 모드 — 화이트 베이스 + 좌상단 시그니처 글로우 */
 [data-theme="light"] .home-recommend-card {
-  background:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--b-from, #ec4899) 12%, transparent), transparent 60%),
-    #ffffff;
+  background: transparent !important;
   color: #1f1d2b;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.04),
-    0 8px 22px -6px color-mix(in srgb, var(--b-from, #ec4899) 18%, transparent);
+  box-shadow: none !important;
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
 }
+[data-theme="light"] .home-recommend-card::before { background: none; }
 [data-theme="light"] .home-recommend-card:hover {
-  box-shadow:
-    0 2px 6px rgba(15, 23, 42, 0.06),
-    0 14px 32px -6px color-mix(in srgb, var(--b-from, #ec4899) 30%, transparent);
+  background: rgba(236, 72, 153, 0.04) !important;
+  box-shadow: none !important;
+  border-color: rgba(236, 72, 153, 0.55);
 }
 
 .home-recommend-badge {
@@ -4479,7 +4477,7 @@
 .home-recommend-card:hover .home-recommend-arrow { transform: translateX(3px); }
 
 @supports not (background: color-mix(in srgb, red, blue)) {
-  [data-theme="light"] .home-recommend-card { background: #ffffff; box-shadow: 0 8px 22px -6px rgba(236, 72, 153, 0.18); }
+  [data-theme="light"] .home-recommend-card { background: transparent; box-shadow: none; border: 1.5px solid rgba(236, 72, 153, 0.4); }
   [data-theme="light"] .home-recommend-icon { background: linear-gradient(135deg, #ec4899, #a855f7); }
   [data-theme="light"] .home-recommend-arrow { color: #999; }
 }
@@ -5628,11 +5626,100 @@
 .home-hero-cs-cta:active { transform: translateY(0); }
 .home-hero-cs-cta-arrow { font-size: 18px; font-weight: 600; }
 
+/* 라이트 모드 Hero — 외곽선만 + 내부는 페이지 배경 동일 (transparent)
+   외곽선 유지하고 카드 안팎이 같은 톤으로 보이도록 */
 [data-theme="light"] .home-hero-cs {
-  background: linear-gradient(160deg, var(--w-from, #fb923c) 0%, var(--w-to, #ec4899) 70%, #7c3aed 100%);
-  box-shadow: 0 14px 40px -8px rgba(236, 72, 153, 0.4), 0 4px 14px rgba(0,0,0,0.10);
+  background: transparent !important;
+  box-shadow: none;
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
 }
-[data-theme="light"] .home-hero-cs-cta { background: #fff; color: #c2185b; }
+[data-theme="light"] .home-hero-cs::before {
+  background: none;
+}
+/* 블러 오브 — 매우 약한 핑크 */
+[data-theme="light"] .home-hero-cs-orb--1 { background: rgba(252, 165, 165, 0.4); opacity: 0.6; }
+[data-theme="light"] .home-hero-cs-orb--2 { background: rgba(244, 114, 182, 0.32); opacity: 0.5; }
+/* 떠오르는 하트 — 살짝 진한 핑크 */
+[data-theme="light"] .home-hero-cs-heart {
+  color: rgba(236, 72, 153, 0.5);
+  text-shadow: 0 0 6px rgba(244, 114, 182, 0.3);
+}
+/* 상단 meta (날짜·요일·날씨) */
+[data-theme="light"] .home-hero-cs-meta { color: #6b6680; }
+[data-theme="light"] .home-hero-cs-meta-sep { color: rgba(107, 102, 128, 0.4); }
+[data-theme="light"] .home-hero-cs-meta-weather {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: rgba(236, 72, 153, 0.18);
+  color: #c2185b;
+}
+[data-theme="light"] .home-hero-cs-meta-weather:hover:not(:disabled) {
+  background: rgba(236, 72, 153, 0.14);
+}
+/* 시그니처(인사·헤드라인) */
+[data-theme="light"] .home-hero-cs-greeting { color: #ec4899; }
+[data-theme="light"] .home-hero-cs-headline {
+  color: #1f1d2b;
+  text-shadow: none;
+  font-weight: 800;
+}
+/* 연애 온도 미니 카드 (서브카드) */
+[data-theme="light"] .home-hero-cs-love {
+  background: rgba(236, 72, 153, 0.06);
+  border-color: rgba(236, 72, 153, 0.14);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+[data-theme="light"] .home-hero-cs-love:hover {
+  background: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.22);
+}
+[data-theme="light"] .home-hero-cs-love-icon {
+  color: #ec4899;
+  text-shadow: 0 1px 6px rgba(236, 72, 153, 0.18);
+}
+[data-theme="light"] .home-hero-cs-love-label { color: #8a7a90; }
+[data-theme="light"] .home-hero-cs-love-grade {
+  color: #1f1d2b;
+  text-shadow: none;
+}
+[data-theme="light"] .home-hero-cs-love-score {
+  color: #c2185b;
+  text-shadow: 0 2px 6px rgba(244, 114, 182, 0.18);
+}
+/* 총운 요약 카드 (서브카드) */
+[data-theme="light"] .home-hero-cs-summary {
+  background: rgba(168, 85, 247, 0.05);
+  border-color: rgba(168, 85, 247, 0.12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+[data-theme="light"] .home-hero-cs-summary:hover {
+  background: rgba(168, 85, 247, 0.09);
+  border-color: rgba(168, 85, 247, 0.2);
+}
+[data-theme="light"] .home-hero-cs-summary-tag { color: #d4380d; }
+[data-theme="light"] .home-hero-cs-summary-score {
+  color: #1f1d2b;
+  text-shadow: none;
+}
+[data-theme="light"] .home-hero-cs-summary-text {
+  color: #2e2e45;
+  text-shadow: none;
+}
+/* CTA 버튼 — 흰→핑크 그라데이션으로 반전 (배경이 흰색이라 임팩트 필요) */
+[data-theme="light"] .home-hero-cs-cta {
+  background: linear-gradient(135deg, #ec4899, #f472b6);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 6px 18px -4px rgba(236, 72, 153, 0.45);
+}
+[data-theme="light"] .home-hero-cs-cta:hover {
+  background: linear-gradient(135deg, #db2777, #ec4899);
+  box-shadow: 0 8px 22px -4px rgba(236, 72, 153, 0.55);
+}
+
+/* 연애 운세 modifier(home-banner-stack--love)는 전체 home-love-banner 공통
+   라이트 모드 규칙(투명 + 핑크 외곽선)으로 처리됨 — 별도 오버라이드 불필요 */
 
 /* ──────────────────────────────────────────────────────────────── */
 /* 2. 운세 요약 띠 — 가로 스크롤                                     */
@@ -6129,29 +6216,22 @@
 .home-love-banner--sm .home-love-banner-arrow { font-size: 20px; }
 .home-love-banner--sm:hover { box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.32); }
 
-/* 라이트 모드 v3 — 점신 톤: 화이트 카드 + 좌측 아이콘 박스만 컬러풀
-   풀 컬러 배경은 채도가 높아 촌스러워 보임. 화이트 베이스 + 작은 컬러 액센트로 전환 */
+/* 라이트 모드 — 모든 home-love-banner(연애/시즌/종합·특수 공통):
+   투명 배경 + 핑크 외곽선만 (Hero/출석/추천과 동일 톤) */
 [data-theme="light"] .home-love-banner {
-  background:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--b-from, #ec4899) 12%, transparent), transparent 60%),
-    #ffffff;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.04),
-    0 8px 22px -6px color-mix(in srgb, var(--b-from, #ec4899) 18%, transparent);
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
 }
 [data-theme="light"] .home-love-banner:hover {
-  background:
-    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--b-from, #ec4899) 16%, transparent), transparent 60%),
-    #ffffff;
-  box-shadow:
-    0 2px 6px rgba(15, 23, 42, 0.06),
-    0 14px 32px -6px color-mix(in srgb, var(--b-from, #ec4899) 30%, transparent);
+  background: rgba(236, 72, 153, 0.04) !important;
+  box-shadow: none !important;
+  border-color: rgba(236, 72, 153, 0.55);
 }
 [data-theme="light"] .home-love-banner--sm {
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.04),
-    0 6px 16px -6px color-mix(in srgb, var(--b-from, #ec4899) 16%, transparent);
+  box-shadow: none !important;
 }
+[data-theme="light"] .home-love-banner::before { background: none; }
 
 /* 라이트 모드: 좌측 아이콘 박스만 컬러풀하게 (점신 카테고리 카드 스타일) */
 [data-theme="light"] .home-love-banner-icon {

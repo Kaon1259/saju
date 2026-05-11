@@ -194,12 +194,16 @@
 [data-theme="light"] .ts-menu-arrow { color: rgba(0,0,0,0.55); }
 
 [data-theme="light"] .ts-menu-card {
-  border-color: rgba(0,0,0,0.15);
-  background: rgba(0,0,0,0.02);
+  background: transparent !important;
+  border: 1.5px solid rgba(236, 72, 153, 0.4);
+  box-shadow: none;
 }
-
+[data-theme="light"] .ts-menu-card:hover {
+  background: rgba(236, 72, 153, 0.04) !important;
+  border-color: rgba(236, 72, 153, 0.55);
+}
 [data-theme="light"] .ts-menu-card:active {
-  background: rgba(0,0,0,0.05);
+  background: rgba(236, 72, 153, 0.06) !important;
 }
 
 [data-theme="light"] .ts-menu-icon {

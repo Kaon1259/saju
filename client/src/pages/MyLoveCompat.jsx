@@ -15,6 +15,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import StreamingCard from '../components/StreamingCard';
 import StreamText from '../components/StreamText';
 import AnalysisComplete from '../components/AnalysisComplete';
@@ -28,10 +29,10 @@ import { useAiAbort } from '../hooks/useAiAbort';
 import './MyLoveCompat.css';
 
 const TABS = [
-  { id: 'saju',     icon: '🔮', label: '정통궁합' },
-  { id: 'marriage', icon: '💒', label: '결혼궁합' },
-  { id: 'skinship', icon: '💋', label: '스킨십궁합' },
-  { id: 'date',     icon: '💑', label: '데이트운' },
+  { id: 'saju',     iconKey: 'sparkleHeart', label: '정통궁합' },
+  { id: 'marriage', iconKey: 'ring',         label: '결혼궁합' },
+  { id: 'skinship', iconKey: 'kiss',         label: '스킨십궁합' },
+  { id: 'date',     iconKey: 'couple',       label: '데이트운' },
 ];
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -1010,7 +1011,7 @@ function MyLoveCompat() {
             className={`mlc-tab ${tab === t.id ? 'active' : ''}`}
             onClick={() => handleTabChange(t.id)}
           >
-            <span className="mlc-tab-icon">{t.icon}</span>
+            <span className="mlc-tab-icon">{t.iconKey ? <MenuIcon name={t.iconKey} size={20} /> : t.icon}</span>
             <span className="mlc-tab-label">{t.label}</span>
           </button>
         ))}

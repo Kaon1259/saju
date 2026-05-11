@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getMyFortune, getMyFortuneStream, analyzeSaju, analyzeSajuStream, isGuest, getHistory, getScoreTrend } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import DeepAnalysis, { hasDeepResult } from '../components/DeepAnalysis';
@@ -43,20 +44,20 @@ function StarRating({ score }) {
 function LuckyGrid({ f }) {
   if (!f) return null;
   const items = [
-    { icon: '🎨', label: '행운의 색', value: f.luckyColor },
-    { icon: '🔢', label: '행운의 숫자', value: f.luckyNumber },
-    { icon: '🧭', label: '길한 방위', value: f.luckyDirection },
-    { icon: '🍀', label: '행운의 음식', value: f.luckyFood },
-    { icon: '👕', label: '추천 스타일', value: f.luckyFashion },
-    { icon: '🎁', label: '행운의 아이템', value: f.luckyItem },
-    { icon: '👥', label: '행운의 사람', value: f.luckyPerson },
+    { iconKey: 'palette',  label: '행운의 색',     value: f.luckyColor },
+    { iconKey: 'hash',     label: '행운의 숫자',   value: f.luckyNumber },
+    { iconKey: 'compass',  label: '길한 방위',     value: f.luckyDirection },
+    { iconKey: 'clover',   label: '행운의 음식',   value: f.luckyFood },
+    { iconKey: 'shirt',    label: '추천 스타일',   value: f.luckyFashion },
+    { iconKey: 'gift',     label: '행운의 아이템', value: f.luckyItem },
+    { iconKey: 'people',   label: '행운의 사람',   value: f.luckyPerson },
   ].filter(it => it.value !== undefined && it.value !== null && it.value !== '');
   if (items.length === 0) return null;
   return (
     <div className="myf-lucky-grid glass-card">
       {items.map((it, i) => (
         <div className="myf-lucky-cell" key={i} style={{ animationDelay: `${i * 60}ms` }}>
-          <div className="myf-lucky-cell-icon">{it.icon}</div>
+          <div className="myf-lucky-cell-icon"><MenuIcon name={it.iconKey} size={24} /></div>
           <div className="myf-lucky-cell-label">{it.label}</div>
           <div className="myf-lucky-cell-value">{it.value}</div>
         </div>
@@ -739,7 +740,7 @@ function MyFortune() {
 
   const user = (data && data.user) || {};
   const saju = data && data.saju;
-  const tabs = [{ id: 'saju', label: '사주 운세', icon: '☯️', data: saju }];
+  const tabs = [{ id: 'saju', label: '사주 운세', iconKey: 'traditional', data: saju }];
   const active = tabs.find(t => t.id === activeTab) || tabs[0];
   const f = active?.data;
   const partnerInfo = getPartnerInfo();

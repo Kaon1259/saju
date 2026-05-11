@@ -1,19 +1,48 @@
 import { useEffect, useState, useCallback } from 'react';
 import { listHistory, deleteHistory } from '../api/fortune';
 import { useConfirm } from './ConfirmDialog';
+import MenuIcon from './MenuIcon';
 import './RecentHistory.css';
 
-const TYPE_ICON = {
-  tarot: '🔮',
-  today_fortune: '☀️',
-  love_11: '💕',
-  compatibility: '💑',
-  celeb_compatibility: '🌟',
-  my_love_compat: '💗',
-  marriage_compat: '💒',
-  skinship_compat: '💋',
-  partner_fortune: '👫',
-  other_fortune: '👤',
+// 히스토리 타입 → MenuIcon 키 (흰색 외곽선 SVG로 통일)
+const TYPE_ICON_KEY = {
+  tarot: 'tarot',
+  today_fortune: 'sun',
+  love_11: 'heart',
+  compatibility: 'sparkleHeart',
+  celeb_compatibility: 'star',
+  my_love_compat: 'couple',
+  marriage_compat: 'ring',
+  skinship_compat: 'kiss',
+  partner_fortune: 'couple',
+  other_fortune: 'user',
+  // 추가 잠재 타입 (서버에서 늘어날 수 있음)
+  year_fortune: 'newyear',
+  monthly_fortune: 'monthly',
+  weekly_fortune: 'weekly',
+  tojeong: 'tojeong',
+  constellation: 'constellation',
+  zodiac: 'zodiac',
+  bloodtype: 'bloodtype',
+  mbti: 'mbti',
+  dream: 'dream',
+  psych: 'psych',
+  face_reading: 'face',
+  biorhythm: 'biorhythm',
+  manseryeok: 'traditional',
+  saju: 'traditional',
+  love_ideal_type: 'sparkleHeart',
+  love_meeting_timing: 'crystalBall',
+  love_crush: 'heartArrow',
+  love_confession_timing: 'letter',
+  love_some_check: 'target',
+  love_contact_fortune: 'phone',
+  love_blind_date: 'handshake',
+  love_couple_fortune: 'couple',
+  love_marriage: 'ring',
+  love_remarriage: 'ring',
+  love_reunion: 'moon',
+  love_past_life: 'moon',
 };
 
 function formatDate(iso) {
@@ -87,7 +116,7 @@ function RecentHistory({ type, subType, onOpen, title = '최근 본 기록', emp
       <ul className="recent-history-list">
         {items.map(item => (
           <li key={item.id} className="recent-history-item" onClick={() => onOpen?.(item)}>
-            <span className="recent-history-icon">{TYPE_ICON[item.type] || '✨'}</span>
+            <span className="recent-history-icon"><MenuIcon name={TYPE_ICON_KEY[item.type] || 'sparkle'} size={22} /></span>
             <div className="recent-history-body">
               <div className="recent-history-head">
                 <span className="recent-history-title-row">{item.title}</span>
