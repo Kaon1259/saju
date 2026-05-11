@@ -1,3 +1,14 @@
+[완료] 출시 준비 6차 — 라이트 v3 Jeomsin 톤 + Hero 통합 + 게스트 모달 + 하트 v2 + 출석 시스템 (2026-05-10, 커밋 017500f~c2583d5)
+- 라이트 모드 v3: 핑크 펄 → 따뜻한 아이보리(#fdfcfa), 메인 #ff5a7e 코랄 로즈, soft shadow, 시간대 6단계 명확화, 카테고리 시그니처 컬러 7종
+- 홈 카드 톤다운: home-love-banner 라이트 풀컬러 → 화이트+좌측 컬러박스, 시즌·종합·연애·추천 모두 outline SVG 통일
+- MenuIcon 13종 추가: couple/heart/sparkleHeart/target/heartArrow/letter/crystalBall/star/ring/phone/moon/handshake/attendance
+- Hero 통합: 별도 운세요약 카드 제거 → 연애 온도 미니 카드 + 총운 요약 카드(텍스트+점수). 비로그인/데이터없음 가드. CTA 버튼 제거
+- 게스트 무료 운세: GuestFortuneModal 풀스크린 모달(폼→광고→Progressive 카드 스트리밍→결과). RewardedAdModal+adMob.js Phase 0 시뮬레이션. 홈 인라인 폼/결과 영역 제거
+- 하트 가격 재조정: 가입 500→70 / 심화 일반 15→30 / 심화 프리미엄 200→80 / 타로 100→50 등 (1하트≈5원 기준 마진 70%+)
+- 출석 시스템: DailyAttendance 엔티티 + AttendanceController(status/checkin/history) + AttendanceCard(홈) + /attendance 페이지(30일 캘린더+마일스톤). +5/20/50/100 4단계 보너스
+- 핫픽스: HeartPointService multi-catch 컴파일 에러(직전 6개 push 모두 빌드 실패의 진짜 원인) + DailyAttendance @Index DESC 제거 + 서버/클라 graceful try-catch
+- dev 환경: client/.env.development VITE_API_URL을 Railway 백엔드로 (로컬 백엔드 토글 코멘트)
+
 [완료] Claude API 비용 최적화 Phase 1 (2026-04-18)
 - 심화분석 UI 완전 차단: DeepAnalysis.jsx에 DEEP_ANALYSIS_HIDDEN 플래그 → 버튼/자동호출 모두 차단 (캐시 결과는 계속 노출)
 - 오늘의 운세(내 운세 탭) 자동 호출 제거 → 수동 버튼 ("오늘의 운세 보기" 클릭 시만 AI 호출)

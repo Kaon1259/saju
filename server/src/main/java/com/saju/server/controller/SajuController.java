@@ -168,12 +168,14 @@ public class SajuController {
 
 【작성 규칙】
 1. 반드시 JSON만 응답 (설명 텍스트 없이)
-2. personalityReading: 핵심 성격(장점+단점), 대인관계 스타일, 연애 스타일을 6-8문장으로
-3. overall~work 각 항목은 3-4문장, 구체적 시간/행동/색상 포함
-4. 점수는 45-98 사이""";
+2. personalityReading: 핵심 성격(장점+단점), 대인관계 스타일, 연애 스타일을 8-10문장으로 풍부하게
+3. overall: 오전/오후/저녁/밤 시간대별 기운 변화 + 구체적 행동, 6-8문장
+4. love/money/health/work/academic 각 항목은 5-7문장, 구체적 시간/장소/행동/색상/사람 키워드 포함
+5. 점수는 45-98 사이
+6. 추상적 표현 금지 ("좋아요/노력하세요" X) → 구체 상황·행동·시간 명시""";
 
         boolean isIdol = "idol".equals(context);
-        String workLabel = isIdol ? "활동운 (무대·팬·컨텐츠·그룹 활동 관련, 3-4문장)" : "직장운 (3-4문장)";
+        String workLabel = isIdol ? "활동운 (무대·팬·컨텐츠·그룹 활동 관련, 5-7문장)" : "직장운 (5-7문장)";
         String idolNote = isIdol ? "※ 이 사람은 아이돌/연예인입니다. 직장이 아닌 연예 활동, 무대, 팬 관계, 그룹 케미 관점에서 해석해주세요.\n" : "";
 
         String personContext = promptBuilder.buildPersonContext(birthDateStr, gender);
@@ -183,22 +185,22 @@ public class SajuController {
             idolNote +
             "위 사주 정보와 오늘의 천기를 종합하여 성격 분석과 오늘의 운세를 함께 작성하세요.\n" +
             "반드시 아래 JSON 형식으로만 응답:\n" +
-            "{\"personalityReading\":\"성격 분석 (6-8문장)\"," +
-            "\"overall\":\"총운 (오전/오후/저녁 시간대별 기운 변화, 4-5문장)\"," +
-            "\"love\":\"애정운 (3-4문장)\"," +
-            "\"money\":\"재물운 (3-4문장)\"," +
-            "\"health\":\"건강운 (3-4문장)\"," +
+            "{\"personalityReading\":\"성격 분석 (8-10문장)\"," +
+            "\"overall\":\"총운 (오전/오후/저녁/밤 시간대별 기운 변화 + 구체적 행동, 6-8문장)\"," +
+            "\"love\":\"애정운 (5-7문장, 구체 상황·만남 키워드)\"," +
+            "\"money\":\"재물운 (5-7문장, 지출·수입·기회 구체화)\"," +
+            "\"health\":\"건강운 (5-7문장, 신체 부위·시간대·습관 구체화)\"," +
             "\"work\":\"" + workLabel + "\"," +
-            "\"academic\":\"학업·자기계발운 (집중력·성취·새로운 도전 조언, 3-4문장)\"," +
+            "\"academic\":\"학업·자기계발운 (집중력·성취·새로운 도전 조언, 5-7문장)\"," +
             "\"score\":점수(45-98)," +
             "\"luckyNumber\":행운숫자(1-99)," +
             "\"luckyColor\":\"행운색상\"}";
 
         final LocalDate finalBd = birthDate;
         final Long uid = userId;
-        // 비용 절감 — 일일 사주 운세(연인/다른사람/스타/사주분석 공용)도 Haiku 4.5로
-        // academic 필드 추가로 토큰 살짝 늘려 잘림 방지 (2500 → 3000)
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 3000,
+        // 비용 절감 — 일일 사주 운세(연인/다른사람/스타/사주분석 공용) Haiku 4.5
+        // 프롬프트 풍부화(각 항목 3-4→5-7문장)로 토큰 상향 (3000 → 4500)
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 4500,
                 com.saju.server.service.ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             boolean parsed;
             try {
