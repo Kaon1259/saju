@@ -1603,4 +1603,51 @@ export const getAttendanceHistory = async (days = 30) => {
   }
 };
 
+// ─── 친구 초대 ───
+export const getReferralCode = async () => {
+  try {
+    const res = await api.get('/referral/code');
+    return res.data?.code || null;
+  } catch {
+    return null;
+  }
+};
+
+export const getReferralStats = async () => {
+  try {
+    const res = await api.get('/referral/stats');
+    return res.data || null;
+  } catch {
+    return null;
+  }
+};
+
+export const applyReferralCode = async (code) => {
+  try {
+    const res = await api.post('/referral/apply', { code });
+    return res.data || { ok: false, reason: 'unknown' };
+  } catch (e) {
+    return { ok: false, reason: e?.response?.status === 401 ? 'unauthorized' : 'network' };
+  }
+};
+
+// ─── Play Store 평점 보너스 ───
+export const getRatingStatus = async () => {
+  try {
+    const res = await api.get('/rating/status');
+    return res.data || { claimed: false, reward: 50 };
+  } catch {
+    return { claimed: false, reward: 50 };
+  }
+};
+
+export const claimRatingReward = async () => {
+  try {
+    const res = await api.post('/rating/claim');
+    return res.data || { ok: false };
+  } catch (e) {
+    return { ok: false, reason: e?.response?.status === 401 ? 'unauthorized' : 'network' };
+  }
+};
+
 export default api;

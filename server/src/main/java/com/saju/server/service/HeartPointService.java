@@ -131,6 +131,34 @@ public class HeartPointService {
         log.info("회원가입 보너스 지급: userId={}, bonus={}", userId, bonus);
     }
 
+    /**
+     * 보너스 지급 — 카테고리 cost 만큼 +지급. 출석/초대/평점 등 비AI 보너스 공용.
+     * 음수 amount 는 거부 (보너스는 항상 양수).
+     */
+    @Transactional
+    public int grantBonus(Long userId, String category, String description) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        int bonus = getCost(category);
+        if (bonus <= 0) return 0;
+
+        int current = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
+        user.setHeartPoints(current + bonus);
+        userRepository.save(user);
+
+        heartPointLogRepository.save(HeartPointLog.builder()
+                .userId(userId)
+                .transactionType(category)
+                .amount(bonus)
+                .balanceAfter(user.getHeartPoints())
+                .description(description)
+                .build());
+
+        log.info("보너스 지급: userId={}, type={}, amount={}, balance={}", userId, category, bonus, user.getHeartPoints());
+        return bonus;
+    }
+
     @Transactional
     public void adminAdjust(Long userId, int amount, String description) {
         User user = userRepository.findById(userId)

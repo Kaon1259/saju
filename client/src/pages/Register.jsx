@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken, deleteUser } from '../api/fortune';
+import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken, deleteUser, applyReferralCode } from '../api/fortune';
 import { setToken, clearAuth } from '../utils/auth';
 import { useToast } from '../components/Toast';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
@@ -78,7 +78,9 @@ function Register() {
   const [form, setForm] = useState({
     name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
     birthTime: '', bloodType: '', mbtiType: '',
+    referralCode: searchParams.get('ref') || '',
   });
+  const [referralResult, setReferralResult] = useState(null); // { ok, reason, inviterName, inviteeBonus, inviterBonus }
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [agreedTerms, setAgreedTerms] = useState(false);
@@ -190,6 +192,18 @@ function Register() {
       if (result.token) {
         setToken(result.token);
         prefetchSseToken(true).catch(() => {});
+      }
+      // 초대 코드 적용 (선택) — 가입 직후 1회 시도, 실패해도 가입 자체는 OK
+      const ref = (form.referralCode || '').trim();
+      if (ref) {
+        try {
+          const r = await applyReferralCode(ref);
+          setReferralResult(r);
+          if (r?.ok) {
+            // 하트 잔액 갱신 알림 — Hero/MyMenu 즉시 반영
+            window.dispatchEvent(new Event('heart:refresh'));
+          }
+        } catch {}
       }
       // 자동로그인 여부를 한 번 묻고, 응답 후 completeLogin 호출
       setAutoLoginAsk({ user: result.user });
@@ -385,6 +399,21 @@ function Register() {
             </div>
           </div>
 
+          {/* 친구 초대 코드 (선택) — 입력 시 양쪽 +30하트 */}
+          <div className="form-group">
+            <label className="form-label">친구 초대 코드 (선택)</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="예: AB23CDEF"
+              maxLength={12}
+              value={form.referralCode}
+              onChange={(e) => handleChange('referralCode', e.target.value.toUpperCase().replace(/\s/g, ''))}
+              autoComplete="off"
+            />
+            <p className="register-referral-hint">친구 코드를 입력하면 둘 다 +30하트를 받아요</p>
+          </div>
+
           {error && <div className="form-error animate-fade-in"><span>&#x26A0;&#xFE0F;</span> {error}</div>}
 
           <button type="submit" className="btn-gold register-submit" disabled={submitting}>
@@ -397,6 +426,12 @@ function Register() {
       {autoLoginAsk && (
         <div className="autologin-ask-overlay" role="dialog" aria-modal="true">
           <div className="autologin-ask-modal">
+            {referralResult?.ok && (
+              <div className="autologin-ask-referral">
+                💗 친구 초대 보너스 <strong>+{referralResult.inviteeBonus}하트</strong> 지급!
+                {referralResult.inviterName ? <small>{referralResult.inviterName}님이 초대해주셨어요</small> : null}
+              </div>
+            )}
             <div className="autologin-ask-icon">🔐</div>
             <h3 className="autologin-ask-title">자동 로그인할까요?</h3>
             <p className="autologin-ask-desc">

@@ -115,6 +115,11 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("ATTENDANCE_7DAY",     20,  "시스템",      "7일 연속 출석 보너스"); // 신규
         init("ATTENDANCE_14DAY",    50,  "시스템",      "14일 연속 출석 보너스"); // 신규
         init("ATTENDANCE_30DAY",   100,  "시스템",      "30일 연속 출석 보너스"); // 신규
+
+        // ── 친구 초대 / 평점 (양방향 보너스) ──
+        init("INVITE_INVITER",      30,  "시스템",      "친구 초대 보너스 (초대자)");
+        init("INVITE_INVITEE",      30,  "시스템",      "친구 초대 보너스 (피초대자)");
+        init("RATING_REWARD",       50,  "시스템",      "Play Store 평점 보너스 (1회)");
     }
 
     private void init(String category, int cost, String group, String description) {

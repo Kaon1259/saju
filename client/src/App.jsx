@@ -40,6 +40,8 @@ import Landing from './pages/Landing';
 import MyStar from './pages/MyStar';
 import CelebMatch from './pages/CelebMatch';
 import MyMenu from './pages/MyMenu';
+import Invite from './pages/Invite';
+import RatingClaim from './pages/RatingClaim';
 import StarFortune from './pages/StarFortune';
 import Settings from './pages/Settings';
 import WeatherCompat from './pages/WeatherCompat';
@@ -199,6 +201,7 @@ function useProfileGuard() {
       '/register', '/auth/kakao/callback', '/settings', '/welcome',
       '/profile', '/profile/edit', '/my-menu', '/landing',
       '/privacy', '/terms', '/attendance',
+      '/invite', '/rating',
     ];
     if (safePaths.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))) return;
     // 홈은 Guest도 진입 (홈 안에서 개별 카드가 분기 처리)
@@ -366,6 +369,8 @@ function App() {
               <Route path="/weather-compat" element={<WeatherCompat />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/attendance" element={<Attendance />} />
+              <Route path="/invite" element={<Invite />} />
+              <Route path="/rating" element={<RatingClaim />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
             </Routes>

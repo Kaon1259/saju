@@ -54,6 +54,17 @@ public class User {
     @Builder.Default
     private Integer heartPoints = 0;
 
+    /** 친구 초대 — 가입 시 자동 생성되는 8자 코드 (대소문자 + 숫자). 다른 유저에게 공유. */
+    @Column(length = 12, unique = true)
+    private String referralCode;
+
+    /** 친구 초대 — 이 유저를 가입시킨 초대자 id. apply 1회만 허용 (NULL 인 경우만 set). */
+    private Long referredBy;
+
+    /** Play Store 평점 보너스 1회 지급 여부. true 면 재청구 차단. */
+    @Builder.Default
+    private Boolean ratingClaimed = false;
+
     // 상대방 정보
     private LocalDate partnerBirthDate;
     private String partnerBirthTime;
