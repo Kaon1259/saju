@@ -7,6 +7,8 @@ import DeepAnalysis from '../components/DeepAnalysis';
 import StreamText from '../components/StreamText';
 import HeartCost from '../components/HeartCost';
 import HeroIconButtons from '../components/HeroIconButtons';
+import FortuneSkeleton from '../components/Skeleton';
+import StatusView from '../components/StatusView';
 import './MyFortune.css';
 import './Fortune.css';
 
@@ -196,24 +198,26 @@ function Fortune() {
   if (error) {
     return (
       <div className="fortune-page">
-        <div className="fortune-error glass-card">
-          <p>{error}</p>
-          <button className="btn-gold" onClick={() => navigate('/')}>
-            홈으로 돌아가기
-          </button>
-        </div>
+        <StatusView
+          variant="error"
+          title="운세를 불러오지 못했어요"
+          message={error}
+          action={{ label: '다시 시도', onClick: () => { setError(null); setCacheChecking(true); } }}
+          secondaryAction={{ label: '홈으로', onClick: () => navigate('/') }}
+        />
       </div>
     );
   }
 
-  // 캐시 확인중 — 모래시계 애니메이션
+  // 캐시 확인중 — 콘텐츠 자리 스켈레톤으로 layout shift 방지
   if (cacheChecking && !fortune) {
     return (
       <div className="fortune-page">
-        <div className="myf-other-form glass-card myf-cache-check">
+        <div className="myf-cache-check myf-cache-check--inline">
           <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
           <p className="myf-cache-check-text">저장된 운세 확인중</p>
         </div>
+        <FortuneSkeleton scoreLabel="띠 운세" cards={4} />
       </div>
     );
   }

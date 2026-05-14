@@ -363,6 +363,10 @@
 
 /* 캐시 확인중 — 모래시계 상하 회전 + 점 깜빡임 */
 .myf-cache-check { text-align: center; padding: 32px 20px; }
+/* 인라인 헤더 — 콘텐츠 스켈레톤 위에 작게 표시 */
+.myf-cache-check--inline { padding: 16px 0 8px; }
+.myf-cache-check--inline .myf-cache-check-icon { font-size: 28px; margin-bottom: 6px; }
+.myf-cache-check--inline .myf-cache-check-text { font-size: 13px; }
 .myf-cache-check-icon {
   display: inline-block;
   font-size: 40px;

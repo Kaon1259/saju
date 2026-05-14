@@ -407,52 +407,54 @@
    라이트 모드
    ═══════════════════════════════════════════ */
 
+/* 라이트 v3 — 코랄 로즈(#ff5a7e) + 아이보리 베이스 통일 */
 [data-theme="light"] .bdp-summary {
-  border-color: rgba(255, 107, 157, 0.3);
-  background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(251, 191, 36, 0.06));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: rgba(255, 90, 126, 0.32);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
 [data-theme="light"] .bdp-summary:hover {
-  border-color: rgba(255, 107, 157, 0.6);
-  box-shadow: 0 8px 22px rgba(255, 107, 157, 0.18);
+  border-color: rgba(255, 90, 126, 0.55);
+  background: rgba(255, 245, 247, 0.6);
+  box-shadow: 0 8px 22px rgba(255, 90, 126, 0.16);
 }
 
 [data-theme="light"] .bdp-summary--empty {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.5);
   border-style: dashed;
 }
 
 [data-theme="light"] .bdp-summary-num {
-  background: linear-gradient(135deg, #d4145a, #d4380d);
+  background: linear-gradient(135deg, #ff5a7e, #ff8c5a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 [data-theme="light"] .bdp-summary-dot {
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(31, 29, 43, 0.28);
 }
 
 [data-theme="light"] .bdp-summary-placeholder {
-  color: rgba(0, 0, 0, 0.5);
+  color: #8a8699;
 }
 
 [data-theme="light"] .bdp-summary-arrow {
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(31, 29, 43, 0.4);
 }
 
 [data-theme="light"] .bdp-summary-meta {
-  color: #555;
+  color: #5b5870;
 }
 
 [data-theme="light"] .bdp-summary-cal {
-  background: rgba(212, 20, 90, 0.12);
-  color: #d4145a;
+  background: rgba(255, 90, 126, 0.12);
+  color: #e63970;
 }
 
 [data-theme="light"] .bdp-summary-divider {
-  color: rgba(0, 0, 0, 0.2);
+  color: rgba(31, 29, 43, 0.2);
 }
 
 [data-theme="light"] .bdp-sheet-overlay {
@@ -460,104 +462,104 @@
 }
 
 [data-theme="light"] .bdp-sheet {
-  background: linear-gradient(180deg, #ffffff 0%, #fff5f7 100%);
-  border-color: rgba(255, 107, 157, 0.4);
+  background: linear-gradient(180deg, #fffefb 0%, #faf5ee 100%);
+  border-color: rgba(255, 90, 126, 0.35);
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.18),
-    0 0 0 1px rgba(255, 107, 157, 0.12),
-    0 0 40px rgba(255, 107, 157, 0.18);
+    0 24px 60px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 90, 126, 0.1),
+    0 0 40px rgba(255, 90, 126, 0.14);
 }
 
 [data-theme="light"] .bdp-wheels::before {
-  background: linear-gradient(180deg, rgba(255, 245, 247, 0.95), transparent);
+  background: linear-gradient(180deg, rgba(253, 252, 250, 0.96), transparent);
 }
 
 [data-theme="light"] .bdp-wheels::after {
-  background: linear-gradient(0deg, rgba(255, 245, 247, 0.95), transparent);
+  background: linear-gradient(0deg, rgba(253, 252, 250, 0.96), transparent);
 }
 
 [data-theme="light"] .bdp-sheet-handle {
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(31, 29, 43, 0.18);
 }
 
 [data-theme="light"] .bdp-sheet-title {
-  background: linear-gradient(135deg, #d4145a, #d4380d);
+  background: linear-gradient(135deg, #ff5a7e, #ff8c5a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 [data-theme="light"] .bdp-sheet-close {
-  background: rgba(0, 0, 0, 0.05);
-  color: #555;
+  background: rgba(31, 29, 43, 0.05);
+  color: #5b5870;
 }
 
 [data-theme="light"] .bdp-sheet-close:hover {
-  background: rgba(212, 20, 90, 0.12);
-  color: #d4145a;
+  background: rgba(255, 90, 126, 0.12);
+  color: #e63970;
 }
 
 [data-theme="light"] .bdp-cal-toggle {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(31, 29, 43, 0.04);
 }
 
 [data-theme="light"] .bdp-cal-btn {
-  color: #777;
+  color: #8a8699;
 }
 
 [data-theme="light"] .bdp-cal-btn--active {
-  background: linear-gradient(135deg, #d4145a, #ec4899);
+  background: linear-gradient(135deg, #ff5a7e, #ff7a8a);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(212, 20, 90, 0.3);
+  box-shadow: 0 4px 14px rgba(255, 90, 126, 0.3);
 }
 
 [data-theme="light"] .bdp-wheels {
   background:
-    radial-gradient(ellipse at center, rgba(255, 107, 157, 0.06) 0%, transparent 60%),
-    rgba(0, 0, 0, 0.02);
+    radial-gradient(ellipse at center, rgba(255, 90, 126, 0.06) 0%, transparent 60%),
+    rgba(31, 29, 43, 0.02);
 }
 
 [data-theme="light"] .bdp-select-line {
-  border-top-color: rgba(212, 20, 90, 0.45);
-  border-bottom-color: rgba(212, 56, 13, 0.45);
+  border-top-color: rgba(255, 90, 126, 0.45);
+  border-bottom-color: rgba(255, 140, 90, 0.45);
 }
 
 [data-theme="light"] .bdp-select-line-heart {
-  color: #d4145a;
+  color: #ff5a7e;
 }
 
 [data-theme="light"] .bdp-wheel-item {
-  color: rgba(0, 0, 0, 0.32);
+  color: rgba(31, 29, 43, 0.32);
 }
 
 [data-theme="light"] .bdp-wheel-item--selected {
-  background: linear-gradient(135deg, #d4145a, #d4380d);
+  background: linear-gradient(135deg, #ff5a7e, #ff8c5a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 [data-theme="light"] .bdp-wheel-item--near {
-  color: rgba(0, 0, 0, 0.62);
+  color: rgba(31, 29, 43, 0.62);
 }
 
 [data-theme="light"] .bdp-wheel-item--far {
-  color: rgba(0, 0, 0, 0.32);
+  color: rgba(31, 29, 43, 0.32);
 }
 
 [data-theme="light"] .bdp-wheel-item--hidden {
-  color: rgba(0, 0, 0, 0.18);
+  color: rgba(31, 29, 43, 0.18);
 }
 
 [data-theme="light"] .bdp-badge {
-  background: rgba(212, 20, 90, 0.1);
-  border-color: rgba(212, 20, 90, 0.3);
-  color: #d4145a;
+  background: rgba(255, 90, 126, 0.1);
+  border-color: rgba(255, 90, 126, 0.3);
+  color: #e63970;
 }
 
 [data-theme="light"] .bdp-confirm {
-  background: linear-gradient(135deg, #d4145a 0%, #ec4899 50%, #d4380d 100%);
-  box-shadow: 0 6px 20px rgba(212, 20, 90, 0.35);
+  background: linear-gradient(135deg, #ff5a7e 0%, #ff7a8a 50%, #ff8c5a 100%);
+  box-shadow: 0 6px 20px rgba(255, 90, 126, 0.32);
 }
 
 /* 좁은 화면 */

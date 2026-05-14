@@ -5,6 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
+import { SkeletonCard } from '../components/Skeleton';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -275,12 +276,19 @@ function Manseryeok() {
             </div>
           </section>
 
-          {/* AI 해석 캐시 확인중 */}
+          {/* AI 해석 캐시 확인중 — 인라인 헤더 + 카드 스켈레톤 3장 */}
           {!aiResult && aiCacheChecking && !aiStreaming && !aiLoading && (
-            <section className="glass-card myf-cache-check">
-              <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
-              <p className="myf-cache-check-text">저장된 AI 해석 확인중</p>
-            </section>
+            <>
+              <div className="myf-cache-check myf-cache-check--inline">
+                <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+                <p className="myf-cache-check-text">저장된 AI 해석 확인중</p>
+              </div>
+              <div className="sk-page">
+                <SkeletonCard titleWidth="40%" lines={3} />
+                <SkeletonCard titleWidth="34%" lines={3} />
+                <SkeletonCard titleWidth="44%" lines={2} />
+              </div>
+            </>
           )}
 
           {/* AI 해석 없음 → 버튼 노출 */}

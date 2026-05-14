@@ -17,6 +17,7 @@ import { mapLuckyOutfit } from '../utils/luckyOutfitTemplate';
 import { getZodiacByYearList } from '../utils/zodiacByYearTemplate';
 import CELEBRITIES from '../data/celebrities';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import FortuneSkeleton from '../components/Skeleton';
 import { useAiAbort } from '../hooks/useAiAbort';
 import './MyFortune.css';
 
@@ -883,12 +884,15 @@ function MyFortune() {
       {/* ════════ 연인 운세 ════════ */}
       {viewMode === 'partner' && (
         <div className="myf-other-view">
-          {/* 저장된 운세 확인중 */}
+          {/* 저장된 운세 확인중 — 콘텐츠 자리 스켈레톤으로 layout shift 방지 */}
           {partnerCacheChecking && !partnerData && !partnerLoading && !partnerStreaming && (
-            <div className="myf-other-form glass-card myf-cache-check">
-              <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
-              <p className="myf-cache-check-text">저장된 연인 운세 확인중</p>
-            </div>
+            <>
+              <div className="myf-cache-check myf-cache-check--inline">
+                <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+                <p className="myf-cache-check-text">저장된 연인 운세 확인중</p>
+              </div>
+              <FortuneSkeleton scoreLabel="연인 운세" cards={3} />
+            </>
           )}
 
           {!partnerCacheChecking && (
@@ -1065,10 +1069,13 @@ function MyFortune() {
 
       {/* ════════ 내 운세 ════════ (월간/연간이 아닐 때만) */}
       {viewMode === 'mine' && !data && cacheChecking && (
-        <div className="myf-other-form glass-card myf-cache-check">
-          <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
-          <p className="myf-cache-check-text">저장된 운세 확인중</p>
-        </div>
+        <>
+          <div className="myf-cache-check myf-cache-check--inline">
+            <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+            <p className="myf-cache-check-text">저장된 운세 확인중</p>
+          </div>
+          <FortuneSkeleton scoreLabel="오늘의 운세" cards={3} />
+        </>
       )}
 
       {viewMode === 'mine' && !cacheChecking && (

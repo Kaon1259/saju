@@ -57,26 +57,26 @@
   opacity: 0.45;
 }
 
-/* 라이트 모드 */
+/* 라이트 v3 — 코랄 로즈 통일 */
 [data-theme="light"] .gp-segmented {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(31, 29, 43, 0.04);
+  border-color: rgba(31, 29, 43, 0.08);
 }
 
 [data-theme="light"] .gp-seg {
-  color: #777;
+  color: #8a8699;
 }
 
 [data-theme="light"] .gp-seg:hover:not(:disabled) {
-  color: #333;
+  color: #1f1d2b;
 }
 
 [data-theme="light"] .gp-seg-male.gp-seg--active {
-  background: linear-gradient(135deg, #4263eb, #4f46e5);
-  box-shadow: 0 2px 8px rgba(66, 99, 235, 0.32);
+  background: linear-gradient(135deg, #5b8def, #818cf8);
+  box-shadow: 0 2px 8px rgba(91, 141, 239, 0.3);
 }
 
 [data-theme="light"] .gp-seg-female.gp-seg--active {
-  background: linear-gradient(135deg, #d4145a, #ec4899);
-  box-shadow: 0 2px 8px rgba(212, 20, 90, 0.32);
+  background: linear-gradient(135deg, #ff5a7e, #ff7a8a);
+  box-shadow: 0 2px 8px rgba(255, 90, 126, 0.32);
 }

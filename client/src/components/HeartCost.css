@@ -10,9 +10,9 @@
 .heart-cost-icon { font-size: 10px; }
 .heart-cost-num { font-size: 11px; }
 [data-theme="light"] .heart-cost-badge {
-  background: rgba(219,39,119,0.08);
-  border-color: rgba(219,39,119,0.2);
-  color: #db2777;
+  background: rgba(255, 90, 126, 0.1);
+  border-color: rgba(255, 90, 126, 0.28);
+  color: #e63970;
 }
 /* 하트 부족 상태 */
 .heart-cost-badge--low {

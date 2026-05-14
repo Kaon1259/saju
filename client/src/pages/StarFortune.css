@@ -95,9 +95,9 @@
 }
 .star-fortune-card {
   display: flex; align-items: center; gap: 14px;
-  background: var(--color-surface, rgba(255,255,255,0.06));
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px; padding: 16px 14px;
+  background: var(--color-glass, rgba(255,255,255,0.05));
+  border: 1px solid var(--color-glass-border, rgba(167,139,250,0.22));
+  border-radius: var(--radius-card, 22px); padding: 16px 14px;
   cursor: pointer; transition: all 0.3s; text-align: left;
   color: inherit; width: 100%;
   animation: cardSlideIn 0.5s ease-out both;

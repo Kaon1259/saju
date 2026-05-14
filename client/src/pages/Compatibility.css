@@ -170,9 +170,9 @@
   to { opacity: 1; transform: translateY(0); }
 }
 [data-theme="light"] .compat-progress-bar {
-  color: #c2185b;
-  border-color: rgba(194, 24, 91, 0.3);
-  background: linear-gradient(135deg, rgba(194, 24, 91, 0.06), rgba(251, 191, 36, 0.05));
+  color: #e63970;
+  border-color: rgba(255, 90, 126, 0.32);
+  background: linear-gradient(135deg, rgba(255, 90, 126, 0.06), rgba(255, 184, 77, 0.05));
 }
 .compat-card { padding: 16px; }
 .compat-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
@@ -181,14 +181,14 @@
 .compat-card-text { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); margin: 0; }
 .compat-card--summary { text-align: center; border: 1.5px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
 .compat-summary-text { font-size: 16px; font-weight: 800; color: #F472B6; margin: 0; line-height: 1.6; }
-[data-theme="light"] .compat-summary-text { color: #db2777; }
-[data-theme="light"] .compat-card--summary { background: rgba(236,72,153,0.05); border-color: rgba(236,72,153,0.2); }
+[data-theme="light"] .compat-summary-text { color: #e63970; }
+[data-theme="light"] .compat-card--summary { background: rgba(255, 90, 126, 0.06); border-color: rgba(255, 90, 126, 0.22); }
 .compat-card--ai { border-left: 3px solid rgba(124,58,237,0.5); }
 .compat-card--ai h3 { color: #A78BFA; }
 
 .compat-share-btn { padding: 8px 18px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(244,114,182,0.08); color: #F472B6; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .compat-share-btn:hover { background: rgba(244,114,182,0.15); }
-[data-theme="light"] .compat-share-btn { border-color: rgba(236,72,153,0.3); color: #db2777; background: rgba(236,72,153,0.06); }
+[data-theme="light"] .compat-share-btn { border-color: rgba(255, 90, 126, 0.32); color: #e63970; background: rgba(255, 90, 126, 0.08); }
 .compat-share-btn--bottom { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
 
 /* 스트리밍 */
@@ -210,38 +210,38 @@
 [data-theme="light"] .compat-card--ai h3 { color: #7c3aed; font-weight: 700; }
 [data-theme="light"] .compat-person-pillar { color: #2a1a3a; font-weight: 700; }
 [data-theme="light"] .compat-score-num {
-  background: linear-gradient(135deg, #d4145a, #d4380d);
+  background: linear-gradient(135deg, #ff5a7e, #ff8c5a);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(212, 56, 13, 0.22));
+  filter: drop-shadow(0 2px 4px rgba(255, 140, 90, 0.22));
 }
 [data-theme="light"] .compat-hero-title {
-  background: linear-gradient(135deg, #c2185b, #b8860b);
+  background: linear-gradient(135deg, #ff5a7e, #d97706);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(255, 107, 157, 0.20));
+  filter: drop-shadow(0 2px 4px rgba(255, 90, 126, 0.20));
 }
 [data-theme="light"] .compat-intro-title {
-  background: linear-gradient(135deg, #b45309, #c2185b);
+  background: linear-gradient(135deg, #d97706, #ff5a7e);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 2px rgba(255, 107, 157, 0.18));
+  filter: drop-shadow(0 1px 2px rgba(255, 90, 126, 0.18));
 }
 [data-theme="light"] .compat-reset-btn {
-  border-color: rgba(255, 107, 157, 0.25);
-  background: rgba(255, 248, 252, 0.7);
-  color: #886b80;
+  border-color: rgba(255, 90, 126, 0.28);
+  background: rgba(255, 255, 255, 0.7);
+  color: #5b5870;
 }
 [data-theme="light"] .compat-reset-btn:hover {
-  border-color: rgba(255, 107, 157, 0.45);
-  color: #c2185b;
-  background: rgba(255, 240, 247, 0.85);
+  border-color: rgba(255, 90, 126, 0.5);
+  color: #e63970;
+  background: rgba(255, 245, 247, 0.85);
 }
-[data-theme="light"] .compat-score-bar-bg { background: rgba(255, 107, 157, 0.16); }
-[data-theme="light"] .compat-person-label { color: #5a3e5e; }
-[data-theme="light"] .compat-person-name { color: #2a1a3a; font-weight: 700; }
+[data-theme="light"] .compat-score-bar-bg { background: rgba(255, 90, 126, 0.16); }
+[data-theme="light"] .compat-person-label { color: #5b5870; }
+[data-theme="light"] .compat-person-name { color: #1f1d2b; font-weight: 700; }
 
 /* ─── 360px 좁은 화면 보강 ─── */
 @media (max-width: 360px) {

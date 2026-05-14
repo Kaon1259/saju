@@ -1,0 +1,136 @@
+/* ════════════════════════════════════════════════════════
+   Skeleton — shimmer placeholder
+   캐시 체크 / 데이터 로딩 시 빈 화면 방지
+   ════════════════════════════════════════════════════════ */
+
+.sk {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skShimmer 1.4s linear infinite;
+  border-radius: 8px;
+  vertical-align: middle;
+}
+
+@keyframes skShimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.sk--line {
+  display: block;
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.sk--box {
+  display: block;
+  width: 100%;
+  height: 80px;
+  border-radius: 14px;
+}
+
+.sk--circle {
+  border-radius: 50%;
+}
+
+.sk--pill {
+  display: inline-block;
+  border-radius: 999px;
+  height: 28px;
+  min-width: 60px;
+}
+
+/* ─── 텍스트 라인 묶음 ─── */
+.sk-text {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── 카드 스켈레톤 ─── */
+.sk-card {
+  padding: 16px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  animation: skFadeIn 0.3s ease forwards;
+}
+
+.sk-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sk-card-header .sk--line {
+  flex: 0 0 auto;
+}
+
+@keyframes skFadeIn {
+  to { opacity: 1; }
+}
+
+/* ─── 점수 스켈레톤 ─── */
+.sk-score {
+  padding: 24px 16px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  animation: skFadeIn 0.3s ease forwards;
+}
+
+.sk-score-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.4px;
+}
+
+.sk-score-orb {
+  display: block;
+  position: relative;
+}
+
+.sk-score-sub {
+  margin-top: 4px;
+}
+
+/* ─── 페이지 컨테이너 ─── */
+.sk-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.sk-page .sk-card:nth-child(1) { animation-delay: 0ms; }
+.sk-page .sk-card:nth-child(2) { animation-delay: 60ms; }
+.sk-page .sk-card:nth-child(3) { animation-delay: 120ms; }
+.sk-page .sk-card:nth-child(4) { animation-delay: 180ms; }
+.sk-page .sk-card:nth-child(5) { animation-delay: 240ms; }
+
+/* ════════ Light theme — v3 코랄 톤 ════════ */
+[data-theme="light"] .sk {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 90, 126, 0.06) 0%,
+    rgba(255, 90, 126, 0.16) 50%,
+    rgba(255, 90, 126, 0.06) 100%
+  );
+  background-size: 200% 100%;
+}
+
+[data-theme="light"] .sk-score-label {
+  color: #8a8699;
+}

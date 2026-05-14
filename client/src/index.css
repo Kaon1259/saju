@@ -10,8 +10,8 @@
   --color-accent-gold-light: #fde68a;
   --color-surface: rgba(255, 255, 255, 0.06);
   --color-surface-hover: rgba(255, 255, 255, 0.1);
-  --color-glass: rgba(255, 255, 255, 0.08);
-  --color-glass-border: rgba(255, 255, 255, 0.15);
+  --color-glass: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(167, 139, 250, 0.22);
   --color-text: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #64748b;
@@ -20,6 +20,9 @@
   --color-money: #fbbf24;
   --color-health: #34d399;
   --color-work: #60a5fa;
+
+  /* 라이트와 동일한 카드 라운드 토큰 — 다크에서도 큰 라운드 통일 */
+  --radius-card: 22px;
 
   /* Spacing */
   --space-xs: 4px;
@@ -776,20 +779,20 @@ button {
 [data-theme="light"] .sf-autofill-btn { color: #7c3aed; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.3); }
 [data-theme="light"] .sf-autofill-btn:hover { background: rgba(124,58,237,0.1); }
 
-/* Glass Card Base Style */
+/* Glass Card Base Style — 다크: 옅은 화이트 + 라벤더 외곽선 (라이트의 핑크 외곽선과 대칭) */
 .glass-card {
   background: var(--color-glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card, 22px);
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
 }
 
 .glass-card:hover {
   background: var(--color-surface-hover);
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(167, 139, 250, 0.36);
   box-shadow: var(--shadow-lg), var(--shadow-glow);
   transform: translateY(-2px);
 }
@@ -1053,9 +1056,10 @@ button {
 [data-theme="light"] .ltf-toggle-btn.active, [data-theme="light"] .mf-toggle-btn.active,
 [data-theme="light"] .sf-toggle-btn.active, [data-theme="light"] .wf-toggle-btn.active,
 [data-theme="light"] .yf-toggle-btn.active {
-  background: linear-gradient(135deg, #ec4899, #a855f7) !important;
+  background: linear-gradient(135deg, #ff5a7e, #ff8c5a) !important;
   color: #fff !important;
   font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(255, 90, 126, 0.32) !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────
