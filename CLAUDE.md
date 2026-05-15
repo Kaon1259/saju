@@ -1,3 +1,14 @@
+[완료] 출시 준비 7차 — 하트 운영툴 점검 + 게스트 자동정리 + 초대 상한 (2026-05-15, 커밋 e780025)
+- 하트 차감 전략 점검: 모든 AI 컨트롤러 basic→checkPoints(확인만)→캐시히트 무료→onComplete deductPoints 패턴 일관 확인
+- 운영툴(management) 하트 관리 화면: getConfigsByPage defs 에 신규 키 12개 페이지 배치(DAILY_TAROT→타로, WEATHER_COMPAT→날씨궁합 신설, 시스템 보너스 4섹션 — 가입·프로필/출석/초대/평점). "미분류" 누락 해소
+- 운영툴 getAiModelMap 보강: DAILY_TAROT·WEATHER_COMPAT→Haiku, 시스템 보너스 9종→"-" ("미매핑" 배지 해소)
+- 운영툴 NPE 수정: adjustHeartPoints/bulkGrantHearts 가 heartPoints null 유저에서 터지던 문제 → null-safe
+- 운영툴 게스트 제외: 유저 목록·검색·대시보드 통계에서 guest_* 필터, guestUsers 수 별도 표시
+- 게스트 자동정리: GuestCleanupScheduler 신설(매일 04시, 생성 14일 경과 게스트 계정+하트로그 일괄 삭제), ServerApplication @EnableScheduling
+- 초대 어뷰징 방어: ReferralService 초대자 보너스 1인당 최대 20명 상한(MAX_INVITER_REWARDS), 초과분은 피초대자만 지급(inviterCapped 플래그)
+- 스키마 변경 없음 → DB 마이그레이션 불필요. 서버=Railway 자동 재배포 / 운영툴=별도 호스팅 재배포 필요
+- 출시 전 미결정 3종(비즈니스 판단 대기): ① AdMob 실연동(현재 adMob.js Phase 0 시뮬레이션) ② IAP 유료 충전 경로 부재 ③ 무료 적립 과다(신규 즉시 150하트+출석 매일+5)
+
 [완료] 출시 준비 6차 — 라이트 v3 Jeomsin 톤 + Hero 통합 + 게스트 모달 + 하트 v2 + 출석 시스템 (2026-05-10, 커밋 017500f~c2583d5)
 - 라이트 모드 v3: 핑크 펄 → 따뜻한 아이보리(#fdfcfa), 메인 #ff5a7e 코랄 로즈, soft shadow, 시간대 6단계 명확화, 카테고리 시그니처 컬러 7종
 - 홈 카드 톤다운: home-love-banner 라이트 풀컬러 → 화이트+좌측 컬러박스, 시즌·종합·연애·추천 모두 outline SVG 통일
