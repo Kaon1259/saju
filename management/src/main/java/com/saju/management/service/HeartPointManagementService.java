@@ -29,10 +29,11 @@ public class HeartPointManagementService {
     private final HeartPointConfigRepository heartPointConfigRepository;
 
     public Page<User> getUsers(String search, Pageable pageable) {
+        // 게스트(guest_*) 계정은 운영툴 유저 목록에서 제외 — 통계/목록 오염 방지
         if (search != null && !search.isBlank()) {
-            return userRepository.findByNameContainingIgnoreCase(search.trim(), pageable);
+            return userRepository.searchNonGuest(search.trim(), pageable);
         }
-        return userRepository.findAll(pageable);
+        return userRepository.findAllNonGuest(pageable);
     }
 
     public User getUserDetail(Long userId) {
@@ -49,7 +50,8 @@ public class HeartPointManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        user.setHeartPoints(Math.max(0, user.getHeartPoints() + amount));
+        int cur = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
+        user.setHeartPoints(Math.max(0, cur + amount));
         userRepository.save(user);
 
         heartPointLogRepository.save(HeartPointLog.builder()
@@ -68,7 +70,8 @@ public class HeartPointManagementService {
     public int bulkGrantHearts(int amount, String description) {
         List<User> allUsers = userRepository.findAll();
         for (User user : allUsers) {
-            user.setHeartPoints(user.getHeartPoints() + amount);
+            int cur = user.getHeartPoints() != null ? user.getHeartPoints() : 0;
+            user.setHeartPoints(cur + amount);
             userRepository.save(user);
 
             heartPointLogRepository.save(HeartPointLog.builder()
@@ -86,16 +89,18 @@ public class HeartPointManagementService {
 
     public Map<String, Object> getDashboardStats() {
         Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("totalUsers", userRepository.count());
+        // 게스트(guest_*) 제외한 정회원 기준 통계
+        stats.put("totalUsers", userRepository.countNonGuest());
+        stats.put("guestUsers", userRepository.countGuests());
         stats.put("totalHeartPoints", userRepository.sumAllHeartPoints());
         stats.put("totalGranted", heartPointLogRepository.sumTotalGranted());
         stats.put("totalDeducted", heartPointLogRepository.sumTotalDeducted());
 
         LocalDateTime todayStart = LocalDateTime.now().with(LocalTime.MIN);
-        stats.put("newUsersToday", userRepository.countNewUsersSince(todayStart));
+        stats.put("newUsersToday", userRepository.countNonGuestNewUsersSince(todayStart));
 
         LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
-        stats.put("newUsersWeek", userRepository.countNewUsersSince(weekStart));
+        stats.put("newUsersWeek", userRepository.countNonGuestNewUsersSince(weekStart));
 
         return stats;
     }
@@ -135,15 +140,23 @@ public class HeartPointManagementService {
         m.put("TAROT_ONE", "Sonnet 4.6");
         m.put("TAROT_THREE", "Sonnet 4.6");
         m.put("TAROT_FIVE", "Sonnet 4.6");
-        m.put("SIGNUP_BONUS", "-");
+
+        // 보너스/시스템 — AI 호출 없음
+        String[] systemKeys = {
+            "SIGNUP_BONUS", "PROFILE_COMPLETE",
+            "DAILY_ATTENDANCE", "ATTENDANCE_7DAY", "ATTENDANCE_14DAY", "ATTENDANCE_30DAY",
+            "INVITE_INVITER", "INVITE_INVITEE", "RATING_REWARD"
+        };
+        for (String k : systemKeys) m.put(k, "-");
 
         String[] haikuKeys = {
             "TODAY_FORTUNE", "SAJU_ANALYSIS", "DAILY_FORTUNE_EXTRA", "MANSERYEOK",
+            "DAILY_TAROT",
             "LOVE_RELATIONSHIP", "LOVE_CRUSH", "LOVE_SOME_CHECK", "LOVE_BLIND_DATE",
             "LOVE_COUPLE", "LOVE_CONFESSION", "LOVE_IDEAL_TYPE", "LOVE_REUNION",
             "LOVE_REMARRIAGE", "LOVE_MARRIAGE", "LOVE_PAST_LIFE", "LOVE_MEETING_TIMING",
             "LOVE_CONTACT",
-            "COMPATIBILITY", "CELEB_COMPAT", "MBTI_COMPAT", "BLOODTYPE_COMPAT",
+            "COMPATIBILITY", "CELEB_COMPAT", "MBTI_COMPAT", "BLOODTYPE_COMPAT", "WEATHER_COMPAT",
             "DREAM", "FACE_READING", "PSYCH_TEST",
             "BLOOD_TYPE", "MBTI", "CONSTELLATION", "BIORHYTHM",
             "CELEB_FORTUNE", "GROUP_FORTUNE", "GROUP_COMPAT", "CELEB_MATCH",
@@ -217,15 +230,19 @@ public class HeartPointManagementService {
             {"📞", "1:1 연애운 — 만남시기 / 연락", "/love", new String[]{"LOVE_MEETING_TIMING", "LOVE_CONTACT"}},
             {"💑", "사주 궁합 (나의 연인)", "/my-love-compat", new String[]{"COMPATIBILITY", "DEEP_COMPATIBILITY", "DEEP_MARRIAGE_COMPAT"}},
             {"⭐", "최애 스타 / 그룹 운세", "/celeb-fortune", new String[]{"CELEB_COMPAT", "CELEB_FORTUNE", "CELEB_MATCH", "GROUP_FORTUNE", "GROUP_COMPAT"}},
-            {"🃏", "타로 카드", "/tarot", new String[]{"TAROT", "TAROT_ONE", "TAROT_THREE", "TAROT_FIVE", "DEEP_TAROT"}},
+            {"🃏", "타로 카드", "/tarot", new String[]{"DAILY_TAROT", "TAROT", "TAROT_ONE", "TAROT_THREE", "TAROT_FIVE", "DEEP_TAROT"}},
             {"🌙", "꿈 해몽", "/dream", new String[]{"DREAM"}},
             {"👤", "관상 분석", "/face-reading", new String[]{"FACE_READING"}},
             {"🎭", "심리 테스트", "/psych-test", new String[]{"PSYCH_TEST"}},
             {"💓", "바이오리듬", "/biorhythm", new String[]{"BIORHYTHM"}},
+            {"🌤️", "날씨 궁합", "/weather-compat", new String[]{"WEATHER_COMPAT"}},
             {"🩸", "혈액형 운세 / 궁합", "/bloodtype", new String[]{"BLOOD_TYPE", "BLOODTYPE_COMPAT", "DEEP_BLOODTYPE"}},
             {"🧬", "MBTI 운세 / 궁합", "/mbti", new String[]{"MBTI", "MBTI_COMPAT", "DEEP_MBTI"}},
             {"✨", "별자리 운세", "/constellation", new String[]{"CONSTELLATION", "DEEP_CONSTELLATION"}},
-            {"🎁", "시스템 · 회원가입 보너스", "/", new String[]{"SIGNUP_BONUS"}},
+            {"🎁", "시스템 · 가입 / 프로필 보너스", "/", new String[]{"SIGNUP_BONUS", "PROFILE_COMPLETE"}},
+            {"📅", "시스템 · 출석 보너스", "/attendance", new String[]{"DAILY_ATTENDANCE", "ATTENDANCE_7DAY", "ATTENDANCE_14DAY", "ATTENDANCE_30DAY"}},
+            {"🤝", "시스템 · 친구 초대", "/invite", new String[]{"INVITE_INVITER", "INVITE_INVITEE"}},
+            {"📝", "시스템 · 평점 후기", "/rating", new String[]{"RATING_REWARD"}},
         };
 
         List<PageSection> sections = new java.util.ArrayList<>();

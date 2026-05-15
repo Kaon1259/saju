@@ -4,13 +4,20 @@ import com.saju.server.entity.HeartPointLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface HeartPointLogRepository extends JpaRepository<HeartPointLog, Long> {
+
+    /** 게스트 정리 시 해당 유저들의 하트 로그 일괄 삭제 */
+    @Modifying
+    @Query("DELETE FROM HeartPointLog l WHERE l.userId IN :userIds")
+    int deleteByUserIdIn(Collection<Long> userIds);
 
     Page<HeartPointLog> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 

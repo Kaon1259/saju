@@ -33,6 +33,9 @@ public class ReferralService {
     private static final int MAX_GEN_ATTEMPTS = 8;
     private static final SecureRandom RNG = new SecureRandom();
 
+    /** 초대자가 보너스를 받을 수 있는 최대 인원 — 부계정 어뷰징 방어. 초과분은 피초대자만 지급. */
+    private static final int MAX_INVITER_REWARDS = 20;
+
     /** 내 referralCode 조회. 없으면 생성 후 저장. */
     @Transactional
     public String getOrCreateMyCode(Long userId) {
@@ -88,16 +91,28 @@ public class ReferralService {
 
         int inviteeBonus = heartPointService.grantBonus(invitee.getId(), "INVITE_INVITEE",
                 "친구 초대 보너스 (코드 사용)");
-        int inviterBonus = heartPointService.grantBonus(inviter.getId(), "INVITE_INVITER",
-                "친구 초대 보너스 (초대 완료) - userId=" + invitee.getId());
 
-        log.info("초대 코드 적용: invitee={}, inviter={}, inviteeBonus={}, inviterBonus={}",
-                invitee.getId(), inviter.getId(), inviteeBonus, inviterBonus);
+        // 초대자 보너스 — 상한(MAX_INVITER_REWARDS) 초과 시 미지급 (부계정 어뷰징 방어).
+        // referredBy 저장 후 count 라 방금 적용분이 포함됨 → 21번째부터 capped.
+        long inviterInviteCount = userRepository.countByReferredBy(inviter.getId());
+        boolean inviterCapped = inviterInviteCount > MAX_INVITER_REWARDS;
+        int inviterBonus = 0;
+        if (inviterCapped) {
+            log.info("초대 상한 초과 — 초대자 보너스 미지급: inviter={}, count={}",
+                    inviter.getId(), inviterInviteCount);
+        } else {
+            inviterBonus = heartPointService.grantBonus(inviter.getId(), "INVITE_INVITER",
+                    "친구 초대 보너스 (초대 완료) - userId=" + invitee.getId());
+        }
+
+        log.info("초대 코드 적용: invitee={}, inviter={}, inviteeBonus={}, inviterBonus={}, capped={}",
+                invitee.getId(), inviter.getId(), inviteeBonus, inviterBonus, inviterCapped);
 
         result.put("ok", true);
         result.put("inviterName", inviter.getName());
         result.put("inviteeBonus", inviteeBonus);
         result.put("inviterBonus", inviterBonus);
+        result.put("inviterCapped", inviterCapped);
         return result;
     }
 
