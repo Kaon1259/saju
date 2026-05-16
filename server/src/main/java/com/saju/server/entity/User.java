@@ -65,6 +65,10 @@ public class User {
     @Builder.Default
     private Boolean ratingClaimed = false;
 
+    /** 프로필 완성 보너스(PROFILE_COMPLETE) 1회 지급 여부. true 면 재지급 차단. NULL=미지급(레거시). */
+    @Builder.Default
+    private Boolean profileBonusClaimed = false;
+
     // 상대방 정보
     private LocalDate partnerBirthDate;
     private String partnerBirthTime;

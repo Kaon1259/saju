@@ -21,6 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FortuneHistoryRepository fortuneHistoryRepository;
     private final HeartPointLogRepository heartPointLogRepository;
+    private final HeartPointService heartPointService;
 
     @PersistenceContext
     private EntityManager em;
@@ -52,7 +53,24 @@ public class UserService {
         user.setPartnerBloodType(request.getPartnerBloodType());
         user.setPartnerMbtiType(request.getPartnerMbtiType());
 
+        // 프로필 완성 보너스 — 생년월일+성별이 처음 채워지면 1회 +30 (PROFILE_COMPLETE).
+        // 카카오 가입 직후엔 name 만 있고 birthDate/gender 가 NULL → ProfileEdit 완료 시점에만 지급.
+        // 진성 유저는 가입40 + 완성30 = 70 / 봇·일회용 계정은 가입40만 → 어뷰징 적립 억제.
+        boolean grantProfileBonus = !Boolean.TRUE.equals(user.getProfileBonusClaimed())
+                && user.getBirthDate() != null && user.getGender() != null;
+        if (grantProfileBonus) {
+            user.setProfileBonusClaimed(true);
+        }
+
         User saved = userRepository.save(user);
+
+        if (grantProfileBonus) {
+            // grantBonus 는 같은 트랜잭션·영속성 컨텍스트에서 동일 user 인스턴스의 heartPoints 를
+            // 갱신하므로, 아래 UserResponse.from(saved) 는 갱신된 잔액을 그대로 반영한다.
+            int bonus = heartPointService.grantBonus(saved.getId(), "PROFILE_COMPLETE", "프로필 완성 보너스");
+            log.info("프로필 완성 보너스 지급: userId={}, bonus={}", saved.getId(), bonus);
+        }
+
         return UserResponse.from(saved);
     }
 

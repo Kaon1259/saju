@@ -109,12 +109,14 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("DEEP_TAROT",          80,  "심화분석",    "심화 - 타로 리딩");     // 200 → 80
 
         // ── 시스템 (보너스/지급) ──
-        init("SIGNUP_BONUS",        70,  "시스템",      "회원가입 보너스");      // 500 → 70 (어뷰징 방지)
-        init("PROFILE_COMPLETE",    30,  "시스템",      "프로필 완성 보너스");   // 신규 — 양질 데이터 유도
-        init("DAILY_ATTENDANCE",     5,  "시스템",      "일일 출석 보너스");     // 신규
-        init("ATTENDANCE_7DAY",     20,  "시스템",      "7일 연속 출석 보너스"); // 신규
-        init("ATTENDANCE_14DAY",    50,  "시스템",      "14일 연속 출석 보너스"); // 신규
-        init("ATTENDANCE_30DAY",   100,  "시스템",      "30일 연속 출석 보너스"); // 신규
+        // 무료 적립 균형 조정 (2026-05-16): 가입+출석 무한 적립 과다 → 절반 수준으로 하향.
+        // 신규 가입은 40 + 프로필 완성 30 = 진성 유저 70 / 어뷰징 계정 40.
+        init("SIGNUP_BONUS",        40,  "시스템",      "회원가입 보너스");      // 70 → 40 (적립 과다 조정)
+        init("PROFILE_COMPLETE",    30,  "시스템",      "프로필 완성 보너스");   // 양질 데이터 유도 — UserService 연동
+        init("DAILY_ATTENDANCE",     3,  "시스템",      "일일 출석 보너스");     // 5 → 3 (무한 적립 억제)
+        init("ATTENDANCE_7DAY",     15,  "시스템",      "7일 연속 출석 보너스"); // 20 → 15
+        init("ATTENDANCE_14DAY",    30,  "시스템",      "14일 연속 출석 보너스"); // 50 → 30
+        init("ATTENDANCE_30DAY",    60,  "시스템",      "30일 연속 출석 보너스"); // 100 → 60
 
         // ── 친구 초대 / 평점 (양방향 보너스) ──
         init("INVITE_INVITER",      30,  "시스템",      "친구 초대 보너스 (초대자)");

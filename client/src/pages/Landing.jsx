@@ -29,12 +29,12 @@ const SLIDES = [
     id: 'start',
     iconKey: 'gift',
     accent: '#F472B6',
-    title: ['가입하면', '70하트 즉시 지급'],
-    sub: '매일 출석 +5하트 · 7일 연속 +20',
+    title: ['가입 + 프로필 완성', '70하트 지급'],
+    sub: '매일 출석 +3하트 · 7일 연속 +15',
     perks: [
-      { iconKey: 'attendance', label: '매일 출석', value: '+5' },
-      { iconKey: 'star', label: '7일 연속', value: '+20' },
-      { iconKey: 'sparkleHeart', label: '가입 보너스', value: '+70' },
+      { iconKey: 'attendance', label: '매일 출석', value: '+3' },
+      { iconKey: 'star', label: '7일 연속', value: '+15' },
+      { iconKey: 'sparkleHeart', label: '가입+프로필', value: '+70' },
     ],
   },
 ];

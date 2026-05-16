@@ -17,11 +17,11 @@ import java.util.Optional;
 /**
  * 일일 출석 보너스 서비스.
  *
- * 정책:
- *  - 매일 첫 출석:    +5하트 (DAILY_ATTENDANCE)
- *  - 7일 연속:        +20하트 추가 (ATTENDANCE_7DAY)
- *  - 14일 연속:       +50하트 추가 (ATTENDANCE_14DAY)
- *  - 30일 연속:       +100하트 추가 (ATTENDANCE_30DAY)
+ * 정책 (2026-05-16 적립 과다 조정 — 무한 적립 억제):
+ *  - 매일 첫 출석:    +3하트 (DAILY_ATTENDANCE)
+ *  - 7일 연속:        +15하트 추가 (ATTENDANCE_7DAY)
+ *  - 14일 연속:       +30하트 추가 (ATTENDANCE_14DAY)
+ *  - 30일 연속:       +60하트 추가 (ATTENDANCE_30DAY)
  *  - 연속 깨지면 1일부터 다시 시작
  *
  * 마일스톤은 7/14/30 의 정확한 day 도달 시 1회 지급 (예: 8일째에는 안 줌, 14일째에 +50, 그 이후 21일째엔 +20 다시).
@@ -38,10 +38,10 @@ public class AttendanceService {
     private final HeartPointService heartPointService;
     private final UserRepository userRepository;
 
-    private static final int BASE_REWARD = 5;
-    private static final int BONUS_7DAY = 20;
-    private static final int BONUS_14DAY = 50;
-    private static final int BONUS_30DAY = 100;
+    private static final int BASE_REWARD = 3;
+    private static final int BONUS_7DAY = 15;
+    private static final int BONUS_14DAY = 30;
+    private static final int BONUS_30DAY = 60;
 
     /**
      * 오늘 출석 체크인. 이미 받았으면 alreadyChecked=true 반환.

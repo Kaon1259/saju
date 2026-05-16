@@ -5,9 +5,9 @@ import { useToast } from '../components/Toast';
 import './Attendance.css';
 
 const MILESTONES = [
-  { day: 7,  reward: 20,  label: '7일 연속' },
-  { day: 14, reward: 50,  label: '14일 연속' },
-  { day: 30, reward: 100, label: '30일 연속' },
+  { day: 7,  reward: 15, label: '7일 연속' },
+  { day: 14, reward: 30, label: '14일 연속' },
+  { day: 30, reward: 60, label: '30일 연속' },
 ];
 
 function formatDate(d) {
@@ -100,7 +100,7 @@ export default function Attendance() {
     consecutiveDays: 0,
     checkedToday: false,
     daysToNextMilestone: 7,
-    nextMilestoneReward: 20,
+    nextMilestoneReward: 15,
     balanceAfter: null,
   };
   const { consecutiveDays, checkedToday, daysToNextMilestone, nextMilestoneReward, balanceAfter } = safeStatus;
@@ -121,7 +121,7 @@ export default function Attendance() {
         </div>
         {!checkedToday ? (
           <button className="attend-hero-cta" onClick={handleCheckIn}>
-            🎁 오늘의 출석 보상 받기 (+5)
+            🎁 오늘의 출석 보상 받기 (+3)
           </button>
         ) : (
           <div className="attend-hero-done">
@@ -199,10 +199,10 @@ export default function Attendance() {
       <section className="attend-section attend-tips">
         <h2 className="attend-section-title">💡 출석 보상 안내</h2>
         <ul className="attend-tip-list">
-          <li>매일 첫 로그인 시 <strong>+5하트</strong> 자동 지급</li>
-          <li>7일 연속 출석마다 <strong>+20하트</strong> 추가</li>
-          <li>14일 연속 1회 <strong>+50하트</strong> 보너스</li>
-          <li>30일 연속 1회 <strong>+100하트</strong> 보너스</li>
+          <li>매일 첫 로그인 시 <strong>+3하트</strong> 자동 지급</li>
+          <li>7일 연속 출석마다 <strong>+15하트</strong> 추가</li>
+          <li>14일 연속 1회 <strong>+30하트</strong> 보너스</li>
+          <li>30일 연속 1회 <strong>+60하트</strong> 보너스</li>
           <li>하루라도 빠지면 1일부터 다시 시작합니다</li>
         </ul>
       </section>

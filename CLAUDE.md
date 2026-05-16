@@ -1,3 +1,15 @@
+[완료] 출시 준비 8차 — 무료 하트 적립 균형 조정 (2026-05-16)
+- 미결정 3종 중 #3(무료 적립 과다) 처리. 방향=균형 조정(적립 절반 수준) + PROFILE_COMPLETE 실연동
+- 적립 하향: SIGNUP_BONUS 70→40 / DAILY_ATTENDANCE 5→3 / 마일스톤 ATTENDANCE_7·14·30DAY 20·50·100→15·30·60
+  - HeartPointConfigInitializer(init cost) + AttendanceService(BASE_REWARD/BONUS_7·14·30DAY 상수) + HeartPointService(DEFAULT_SIGNUP_BONUS 폴백) 3중 동기화
+  - 적극 사용자 월 누적 약 430→270하트로 무한 적립 억제
+- PROFILE_COMPLETE(30) 실연동: 죽은 config였던 것을 UserService.updateUser 에 연결 — 생년월일+성별 처음 채워지면 1회 +30
+  - User.profileBonusClaimed(Boolean) 플래그 신규로 재지급 차단. 진성 유저 40+30=70(이전과 동일) / 봇·일회용 계정 40만 → 적립총량↓ + 실사용자 무손해
+- 클라 표기 동기화: Attendance.jsx(MILESTONES·CTA·보상안내), AttendanceCard.jsx(fallback), Landing.jsx(가입 슬라이드 +3/+15, "70하트 즉시"→"가입+프로필 70하트")
+- 스키마: User.profileBonusClaimed 컬럼만 ddl-auto:update 자동 추가. 기존 row NULL=미지급 처리되어 안전(백필 불필요)
+- 서버=Railway 재배포 시 config 자동 업데이트 / 앱=npx cap sync 후 재빌드 필요
+- 미결정 잔여 2종: ① AdMob 실연동(adMob.js Phase 0) ② IAP 유료 충전 경로 부재
+
 [완료] 출시 준비 7차 — 하트 운영툴 점검 + 게스트 자동정리 + 초대 상한 (2026-05-15, 커밋 e780025)
 - 하트 차감 전략 점검: 모든 AI 컨트롤러 basic→checkPoints(확인만)→캐시히트 무료→onComplete deductPoints 패턴 일관 확인
 - 운영툴(management) 하트 관리 화면: getConfigsByPage defs 에 신규 키 12개 페이지 배치(DAILY_TAROT→타로, WEATHER_COMPAT→날씨궁합 신설, 시스템 보너스 4섹션 — 가입·프로필/출석/초대/평점). "미분류" 누락 해소
