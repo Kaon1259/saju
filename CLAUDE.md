@@ -1,3 +1,15 @@
+[완료] 심플 홈 신설 — gpt추천 시안 기반 클린 홈 + 홈 스타일 선택 화면 (2026-05-16)
+- 기존 감성 홈(Home.jsx)은 그대로 보존, 심플 홈(HomeNew.jsx/css) 신규 — 두 홈 중 택1 구조
+- HomeNew 구성: 인사말 + 히어로(오늘의 총 운세 점수 + 오각형 레이더 차트) + 오늘의 행운 띠 + 퀵액션 패널(4) + 출석카드 + 섹션 3개(연애/시즌/정통)
+  - 레이더 5항목(연애/재물/인간관계/건강/직장): 유저ID+날짜 시드 결정적 산출(hashFloat). 총운은 실제 saju.score(aiAnalyzed) 있으면 사용, 없으면 시드값
+  - 섹션 카드: 흰 박스 제거 → 4열 아이콘 타일+타이틀 2줄(가운데 정렬). 퀵액션은 1개 패널에 타일 4개로 묶음
+- ChooseHome.jsx/css 신규 — /choose-home 선택 화면(감성 홈/심플 홈 미리보기 2카드, 현재 스타일 프리셀렉트)
+- App.jsx: / 가 localStorage.homeStyle('classic'|'new')에 따라 Home/HomeNew 분기(HomeRouter), /choose-home 라우트, useHomeStyleRedirect(미선택자 1회 유도 — 첫방문 비로그인은 /welcome 먼저 양보), safePaths에 /choose-home 등록
+- Settings: 화면 섹션에 "홈 화면 스타일" 행 추가 → 탭 시 /choose-home 이동(재선택 동선)
+- 라이트 모드 개선: HomeNew 페이지에 따뜻한 연그레이 배경(#f1edf0) → 흰 카드 부각(흰 배경+흰 카드=허전 해소), 히어로 코랄 그라데이션. 다크 모드는 변경 없음. data-theme는 main.jsx에서 항상 설정(기본 dark)
+- 스키마/서버 변경 없음 — 클라 전용. 앱 반영은 npm run build → npx cap sync 필요
+- 후속 미결정: 레이더 5항목 점수 AI 실연동(현재 결정적 산출값), 퀵/섹션 타일 vs AttendanceCard 톤 통일
+
 [완료] 출시 준비 8차 — 무료 하트 적립 균형 조정 (2026-05-16)
 - 미결정 3종 중 #3(무료 적립 과다) 처리. 방향=균형 조정(적립 절반 수준) + PROFILE_COMPLETE 실연동
 - 적립 하향: SIGNUP_BONUS 70→40 / DAILY_ATTENDANCE 5→3 / 마일스톤 ATTENDANCE_7·14·30DAY 20·50·100→15·30·60

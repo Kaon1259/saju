@@ -3,6 +3,8 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { TransitionProvider } from './components/PageTransition';
 import Header from './components/Header';
 import Home from './pages/Home';
+import HomeNew from './pages/HomeNew';
+import ChooseHome from './pages/ChooseHome';
 import Fortune from './pages/Fortune';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -188,6 +190,27 @@ function useLandingRedirect() {
   }, [location.pathname]);
 }
 
+// homeStyle 미선택 사용자 → /choose-home 으로 1회 유도 (선택 후 localStorage.homeStyle 기록)
+function useHomeStyleRedirect() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== '/') return;
+    if (localStorage.getItem('homeStyle')) return;
+    // 첫 방문 비로그인 사용자는 온보딩(/welcome)을 먼저 보도록 양보
+    const seen = localStorage.getItem('landingSeen');
+    const userId = localStorage.getItem('userId');
+    if (!seen && !userId) return;
+    navigate('/choose-home', { replace: true });
+  }, [location.pathname]);
+}
+
+// 홈 진입점 — homeStyle 에 따라 감성 홈(Home) / 심플 홈(HomeNew) 분기
+function HomeRouter() {
+  return localStorage.getItem('homeStyle') === 'new' ? <HomeNew /> : <Home />;
+}
+
 // 프로필 미완성 사용자 리다이렉트
 // - 로그인 유저 + birthDate 없음 → /register?needProfile=true
 // - Guest 유저 + AI 라우트 진입 → /register?needProfile=true (AI 호출이 사주 정보를 요구하므로)
@@ -199,7 +222,7 @@ function useProfileGuard() {
     // 사주 정보가 필요 없는 라우트 (Guest도 자유롭게 진입 가능)
     const safePaths = [
       '/register', '/auth/kakao/callback', '/settings', '/welcome',
-      '/profile', '/profile/edit', '/my-menu', '/landing',
+      '/profile', '/profile/edit', '/my-menu', '/landing', '/choose-home',
       '/privacy', '/terms', '/attendance',
       '/invite', '/rating',
     ];
@@ -232,6 +255,7 @@ function App() {
   useTimeTheme();
   useFontSize();
   useLandingRedirect();
+  useHomeStyleRedirect();
   useProfileGuard();
   useGlobalAiAbort();    // 라우트 변경 시 모든 진행 중 SSE 자동 종료 (비용 누수 차단)
   useAndroidBackButton(); // 안드로이드 하드웨어 백버튼: 시트 닫기 → 라우터 뒤로 → 앱 종료
@@ -327,7 +351,8 @@ function App() {
           <Header onHomeSplash={triggerSplash} onTabIntro={triggerTabIntro} />
           <main className="app-main">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<HomeRouter />} />
+              <Route path="/choose-home" element={<ChooseHome />} />
               <Route path="/fortune" element={<Fortune />} />
               <Route path="/register" element={<Register />} />
               <Route path="/auth/kakao/callback" element={<Register />} />

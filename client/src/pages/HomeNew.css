@@ -1,0 +1,350 @@
+/* ════════════════════════════════════════════════════════════
+   HomeNew — gpt추천.png 시안 기반 클린 카드형 홈
+   티맵 톤: 화이트 카드 · 넉넉한 여백 · 외곽선 아이콘 · 코랄 포인트 1개
+   ════════════════════════════════════════════════════════════ */
+.hn {
+  /* 라이트 — 따뜻한 연그레이 배경 위에 흰 카드가 떠 보이게 */
+  --hn-page: #f1edf0;
+  --hn-surface: #ffffff;
+  --hn-surface-2: #f6f4f6;
+  --hn-text: #20242e;
+  --hn-text-2: #8b8a96;
+  --hn-border: #ebe6ea;
+  --hn-accent: #ff5a7e;
+  --hn-accent-soft: #ffe7ed;
+  --hn-shadow: 0 3px 14px rgba(45, 30, 40, 0.07);
+  --hn-hero-bg: linear-gradient(142deg, #ffffff 52%, #fff3f6 100%);
+
+  min-height: 100%;
+  padding: 16px 16px 44px;
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--hn-page);
+}
+[data-theme='dark'] .hn {
+  --hn-page: transparent;
+  --hn-surface: #1d1c2b;
+  --hn-surface-2: #16151f;
+  --hn-text: #f1eff7;
+  --hn-text-2: #9b96b0;
+  --hn-border: rgba(255, 255, 255, 0.08);
+  --hn-accent: #ff7a98;
+  --hn-accent-soft: rgba(255, 90, 126, 0.14);
+  --hn-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  --hn-hero-bg: #1d1c2b;
+}
+
+/* ── 인사말 ─────────────────────────────────────────────────── */
+.hn-greet {
+  padding: 6px 2px 0;
+}
+.hn-greet-date {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hn-accent);
+  letter-spacing: 0.2px;
+}
+.hn-greet-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--hn-text);
+  line-height: 1.3;
+}
+.hn-greet-title strong {
+  color: var(--hn-accent);
+  font-weight: 800;
+}
+.hn-greet-sub {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: var(--hn-text-2);
+}
+
+/* ── 히어로 — 총 운세 점수 + 레이더 ─────────────────────────── */
+.hn-hero {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hn-hero-bg);
+  border: 1px solid var(--hn-border);
+  border-radius: 20px;
+  padding: 18px 18px 16px;
+  box-shadow: var(--hn-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.hn-hero:active {
+  transform: scale(0.99);
+}
+.hn-hero-main {
+  flex: 1;
+  min-width: 0;
+}
+.hn-hero-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--hn-text-2);
+}
+.hn-hero-score {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 4px 0 8px;
+  flex-wrap: wrap;
+}
+.hn-hero-score strong {
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--hn-accent);
+  letter-spacing: -1px;
+}
+.hn-hero-out {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hn-text-2);
+}
+.hn-hero-grade {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: 2px;
+}
+.hn-hero-grade--best { background: #ffe3ea; color: #e0356b; }
+.hn-hero-grade--good { background: #ffe9ef; color: #ec4f7e; }
+.hn-hero-grade--soso { background: #fff3d6; color: #c9890d; }
+.hn-hero-grade--warn { background: #ffe7d6; color: #c96a1a; }
+.hn-hero-grade--bad  { background: #eceef2; color: #6b7280; }
+[data-theme='dark'] .hn-hero-grade--best,
+[data-theme='dark'] .hn-hero-grade--good { background: rgba(255, 90, 126, 0.2); color: #ff9bb3; }
+[data-theme='dark'] .hn-hero-grade--soso { background: rgba(251, 191, 36, 0.18); color: #fbd24e; }
+[data-theme='dark'] .hn-hero-grade--warn { background: rgba(249, 115, 22, 0.18); color: #fb9b4e; }
+[data-theme='dark'] .hn-hero-grade--bad  { background: rgba(255, 255, 255, 0.1); color: #b8b6c4; }
+.hn-hero-desc {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--hn-text-2);
+}
+.hn-hero-chart {
+  flex-shrink: 0;
+}
+
+/* ── 레이더 차트 SVG ────────────────────────────────────────── */
+.hn-radar-grid {
+  fill: none;
+  stroke: var(--hn-border);
+  stroke-width: 1;
+}
+.hn-radar-axis {
+  stroke: var(--hn-border);
+  stroke-width: 1;
+}
+.hn-radar-area {
+  fill: var(--hn-accent);
+  fill-opacity: 0.18;
+  stroke: var(--hn-accent);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.hn-radar-dot {
+  fill: var(--hn-accent);
+}
+.hn-radar-label {
+  fill: var(--hn-text-2);
+  font-size: 8.5px;
+  font-weight: 600;
+}
+
+/* ── 히어로 — 비로그인 ─────────────────────────────────────── */
+.hn-hero--guest {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  cursor: default;
+}
+.hn-hero--guest:active {
+  transform: none;
+}
+.hn-hero-guest-body {
+  text-align: center;
+}
+.hn-hero-guest-text {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--hn-text-2);
+}
+
+/* ── 오늘의 행운 ───────────────────────────────────────────── */
+.hn-lucky {
+  display: flex;
+  align-items: center;
+  background: var(--hn-surface);
+  border: 1px solid var(--hn-border);
+  border-radius: 16px;
+  padding: 12px 8px;
+  box-shadow: var(--hn-shadow);
+}
+.hn-lucky-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.hn-lucky-key {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--hn-text-2);
+}
+.hn-lucky-key .menu-icon {
+  color: var(--hn-accent);
+}
+.hn-lucky-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--hn-text);
+}
+.hn-lucky-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 0;
+  background: var(--hn-border);
+}
+
+/* ── 퀵 액션 ───────────────────────────────────────────────── */
+.hn-quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: var(--hn-surface);
+  border: 1px solid var(--hn-border);
+  border-radius: 18px;
+  padding: 14px 6px;
+  box-shadow: var(--hn-shadow);
+}
+.hn-quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.hn-quick-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 17px;
+  background: var(--hn-accent-soft);
+  color: var(--hn-accent);
+  transition: transform 0.15s ease;
+}
+.hn-quick-btn:active .hn-quick-icon {
+  transform: scale(0.93);
+}
+.hn-quick-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--hn-text);
+  text-align: center;
+}
+
+/* ── 출석 카드 래퍼 ────────────────────────────────────────── */
+.hn-attendance {
+  margin: 0;
+}
+
+/* ── 섹션 + 카드 그리드 ────────────────────────────────────── */
+.hn-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hn-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+.hn-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--hn-text);
+}
+.hn-more {
+  background: none;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--hn-text-2);
+  cursor: pointer;
+  padding: 4px;
+}
+.hn-more span {
+  color: var(--hn-accent);
+  font-weight: 700;
+}
+.hn-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.hn-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.hn-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--hn-surface);
+  border: 1px solid var(--hn-border);
+  box-shadow: var(--hn-shadow);
+  color: var(--hn-accent);
+  transition: transform 0.15s ease;
+}
+.hn-card:active .hn-card-icon {
+  transform: scale(0.93);
+}
+.hn-card-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--hn-text);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ── 푸터 ──────────────────────────────────────────────────── */
+.hn-foot {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--hn-text-2);
+}
