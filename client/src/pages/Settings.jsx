@@ -21,6 +21,7 @@ function Settings() {
   const selectHomeStyle = (id) => {
     setHomeStyle(id);
     try { localStorage.setItem('homeStyle', id); } catch (_) {}
+    document.documentElement.setAttribute('data-homestyle', id); // 전역 스킨 즉시 반영
     const s = HOME_STYLES.find((h) => h.id === id);
     toast?.(`${s.name}으로 변경됐어요`, 'success');
   };

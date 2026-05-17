@@ -58,6 +58,7 @@ import { clearAuth } from './utils/auth';
 import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
+import './homestyle.css';
 
 const TITLE_IMAGES = Array.from({ length: 20 }, (_, i) => `/title/title_${String(i).padStart(2, '0')}.jpg`);
 
@@ -207,6 +208,15 @@ function useHomeStyleRedirect() {
   }, [location.pathname]);
 }
 
+// homeStyle 을 <html data-homestyle> 로 노출 — 전역 스킨(homestyle.css)이 전 페이지에 적용
+function useHomeStyleAttr() {
+  const location = useLocation();
+  useEffect(() => {
+    const hs = localStorage.getItem('homeStyle') || 'classic';
+    document.documentElement.setAttribute('data-homestyle', hs);
+  }, [location.pathname]);
+}
+
 // 홈 진입점 — homeStyle 에 따라 감성 홈(Home) / 심플 홈(HomeNew) / 동화 홈(HomeStory) 분기
 function HomeRouter() {
   const style = localStorage.getItem('homeStyle');
@@ -260,6 +270,7 @@ function App() {
   useFontSize();
   useLandingRedirect();
   useHomeStyleRedirect();
+  useHomeStyleAttr();
   useProfileGuard();
   useGlobalAiAbort();    // 라우트 변경 시 모든 진행 중 SSE 자동 종료 (비용 누수 차단)
   useAndroidBackButton(); // 안드로이드 하드웨어 백버튼: 시트 닫기 → 라우터 뒤로 → 앱 종료

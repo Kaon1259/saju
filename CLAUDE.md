@@ -1,3 +1,12 @@
+[진행중] 홈 스타일 전역 스킨 — data-homestyle 글로벌 적용 (2026-05-17)
+- 피드백: 선택한 홈 테마를 나머지 페이지(40여 개)에도 적용. 감성=그대로, 심플=기본, 동화=크레파스 곳곳
+- 방식 확정: 글로벌 스킨(전 페이지 일괄) + 크레파스 데코 점진 적용
+- 1단계 완료 — 글로벌 스킨 기반:
+  - App.jsx useHomeStyleAttr: <html data-homestyle="classic|new|story"> 속성 노출(라우트 변경마다 동기화)
+  - homestyle.css 신규: [data-homestyle="story"] 전 페이지 배경=파스텔 노을 + body::after 크레파스 그레인 오버레이 + 별필드 off + glass-card=종이 카드. classic/new는 기본 톤 유지(규칙 없음)
+  - Settings selectHomeStyle: 선택 즉시 data-homestyle 반영
+- 다음: 핵심 페이지(운세/타로/궁합 등)에 크레파스 일러스트 데코 점진 추가
+
 [완료] 동화 홈 히어로 크레파스 손그림 일러스트 (2026-05-17)
 - 피드백: 동화 홈 상단 그림이 밋밋함 → new.png처럼 크레파스로 그린 듯한 느낌 요청
 - HeroArt — CSS div(언덕/달/나무) → 인라인 SVG 일러스트로 교체

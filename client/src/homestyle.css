@@ -1,0 +1,51 @@
+/* ════════════════════════════════════════════════════════════
+   homestyle.css — homeStyle(감성/심플/동화)별 전역 스킨
+   <html data-homestyle="classic|new|story"> 속성으로 전 페이지에
+   배경·질감·카드 톤을 일괄 적용한다.
+   - classic(감성) : 기존 스타일 그대로 — 규칙 없음
+   - new(심플)     : 앱 기본 톤 그대로 (깔끔) — 규칙 없음
+   - story(동화)   : 파스텔 노을 배경 + 크레파스 그레인 + 종이 카드
+   ════════════════════════════════════════════════════════════ */
+
+/* ── 동화(story) 전역 배경 ──────────────────────────────────── */
+[data-homestyle="story"] body {
+  background: linear-gradient(180deg, #241c2c 0%, #2a1e2f 55%, #2c2034 100%) !important;
+}
+[data-homestyle="story"][data-theme="light"] body {
+  background: linear-gradient(180deg, #ffe9e4 0%, #fbe4ec 40%, #efe3f3 74%, #e7e1f4 100%) !important;
+}
+
+/* 우주 별필드(body::before) 끄기 — 동화 톤과 안 어울림 */
+[data-homestyle="story"] body::before { display: none !important; }
+
+/* ── 크레파스 그레인 — 전 화면 왁스 질감 오버레이 ───────────── */
+[data-homestyle="story"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='hsn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23hsn)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+  opacity: 0.45;
+}
+[data-homestyle="story"][data-theme="light"] body::after { opacity: 0.7; }
+
+/* ── glass-card → 종이 카드 ─────────────────────────────────── */
+[data-homestyle="story"] .glass-card {
+  background: #2e2638;
+  border: 1.5px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+[data-homestyle="story"][data-theme="light"] .glass-card {
+  background: #fff8f2;
+  border: 1.5px solid #f0d9df;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 4px 18px rgba(150, 90, 120, 0.1);
+}
+[data-homestyle="story"] .glass-card:hover {
+  transform: none;
+}
