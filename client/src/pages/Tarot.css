@@ -1620,13 +1620,14 @@
   border-color: rgba(218, 165, 32, 0.35) !important;
 }
 [data-theme="light"] .tarot-setup-screen .setup-question-toggle {
-  background: linear-gradient(135deg, #fff, #f5f0ff) !important;
-  border-color: rgba(124, 58, 237, 0.3) !important;
-  color: #6c3483 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(218, 165, 32, 0.32) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 [data-theme="light"] .tarot-setup-screen .setup-question-input {
-  background: linear-gradient(135deg, #fff, #f5f0ff) !important;
-  border-color: rgba(124, 58, 237, 0.3) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(218, 165, 32, 0.32) !important;
+  color: #fff !important;
 }
 
 /* 카드 셔플 시작 버튼 */
@@ -1641,10 +1642,10 @@
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 32px rgba(218, 165, 32, 0.35) !important;
 }
 [data-theme="light"] .tarot-setup-screen .tarot-start-btn {
-  background: linear-gradient(135deg, #fff, #ede4ff) !important;
-  border-color: rgba(124, 58, 237, 0.55) !important;
-  color: #6c3483 !important;
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2) !important;
+  background: linear-gradient(135deg, rgba(67, 33, 100, 0.6), rgba(20, 10, 40, 0.85)) !important;
+  border: 1.5px solid rgba(218, 165, 32, 0.55) !important;
+  color: #F5DEB3 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 24px rgba(218, 165, 32, 0.18) !important;
 }
 
 /* 펼치기 미니 — 컨테이너 배경 카드화 */
@@ -1656,8 +1657,8 @@
   margin-top: 12px;
 }
 [data-theme="light"] .tarot-setup-screen .setup-pickmode-mini {
-  background: linear-gradient(135deg, #fff, #f5f0ff);
-  border-color: rgba(124, 58, 237, 0.2);
+  background: linear-gradient(135deg, rgba(67, 33, 100, 0.45), rgba(20, 10, 40, 0.65));
+  border-color: rgba(218, 165, 32, 0.25);
 }
 
 /* 작은 라벨 칩 (왼쪽 위) */
@@ -1762,13 +1763,13 @@
   transform: scale(1.06);
 }
 [data-theme="light"] .setup-pickmode-mini-btn {
-  background: rgba(255,255,255,0.6);
-  border-color: rgba(147,51,234,0.18);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(218, 165, 32, 0.3);
 }
 [data-theme="light"] .setup-pickmode-mini-btn.active {
-  background: rgba(147,51,234,0.14);
-  border-color: rgba(147,51,234,0.4);
-  box-shadow: 0 0 0 2px rgba(147,51,234,0.15);
+  background: linear-gradient(135deg, #9b59b6, #c9a86a);
+  border-color: rgba(218, 165, 32, 0.6);
+  box-shadow: none;
 }
 
 /* ── 칩 (질문 분야) ── */
