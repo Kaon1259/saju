@@ -94,7 +94,7 @@ public class WeeklyFortuneController {
         }
 
         final Long uid = userId;
-        return claudeApiService.generateStream(systemPrompt, userPrompt, 1600,
+        return claudeApiService.generateStream(systemPrompt, userPrompt, 4500,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {
             try {
                 boolean ok = weeklyFortuneService.saveStreamResult(resolvedBd, birthTime, gender, fullText);

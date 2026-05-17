@@ -1,0 +1,71 @@
+/* 크레파스 손그림 데코 레이어 — data-homestyle="story" 에서만 노출 */
+.story-decor { display: none; }
+
+[data-homestyle="story"] .story-decor {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.story-decor-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.story-decor-item {
+  position: fixed;
+  opacity: 0.42;
+}
+[data-theme="light"] .story-decor-item { opacity: 0.55; }
+
+/* 모서리 배치 */
+.sd-pos-moon   { width: 60px; height: 60px; top: 64px;    left: 5px; }
+.sd-pos-stars  { width: 64px; height: 52px; top: 100px;   right: 6px; }
+.sd-pos-cloud  { width: 68px; height: 42px; top: 41%;     left: 3px; }
+.sd-pos-spark  { width: 44px; height: 56px; top: 60%;     right: 5px; }
+.sd-pos-flower { width: 48px; height: 58px; bottom: 86px; left: 7px; }
+
+/* 크레파스 색 — 달 */
+.sd-moon {
+  fill: #fff0cf;
+  stroke: rgba(208, 138, 88, 0.5);
+  stroke-width: 2;
+}
+.sd-ring {
+  fill: none;
+  stroke: rgba(208, 138, 88, 0.45);
+  stroke-width: 1.6;
+  stroke-dasharray: 3 5;
+}
+/* 별·반짝임 */
+.sd-stars path {
+  fill: #ffd98a;
+  stroke: rgba(198, 128, 70, 0.42);
+  stroke-width: 1;
+}
+/* 구름 */
+.sd-cloud ellipse {
+  fill: #ffffff;
+  stroke: rgba(150, 110, 140, 0.34);
+  stroke-width: 1.8;
+}
+[data-theme="light"] .sd-cloud ellipse { fill: #fbeef4; }
+/* 꽃 */
+.sd-stem {
+  stroke: #8fae6e;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.sd-petal {
+  fill: #ffc4d4;
+  stroke: rgba(200, 90, 120, 0.42);
+  stroke-width: 1.2;
+}
+.sd-core { fill: #ffd98a; }
+
+@media (max-width: 360px) {
+  .story-decor-item { opacity: 0.32; }
+}

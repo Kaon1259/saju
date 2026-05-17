@@ -43,7 +43,7 @@ public class WeeklyFortuneService {
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-        String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
+        String cacheKey = buildCacheKey("weekly-v2", birthDate, birthTime, gender, weekStart.toString());
         Map<String, Object> cached = getFromCache("weekly", cacheKey, weekStart);
         if (cached != null) {
             return new Object[]{ null, null, cacheKey, cached };
@@ -70,7 +70,7 @@ public class WeeklyFortuneService {
             LocalDate today = LocalDate.now();
             LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-            String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
+            String cacheKey = buildCacheKey("weekly-v2", birthDate, birthTime, gender, weekStart.toString());
             String json = ClaudeApiService.extractJson(fullText);
             if (json == null) return false;
             Map<String, Object> aiResult = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
@@ -105,7 +105,7 @@ public class WeeklyFortuneService {
         LocalDate weekEnd = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
         // DB cache check
-        String cacheKey = buildCacheKey("weekly", birthDate, birthTime, gender, weekStart.toString());
+        String cacheKey = buildCacheKey("weekly-v2", birthDate, birthTime, gender, weekStart.toString());
         Map<String, Object> cached = getFromCache("weekly", cacheKey, weekStart);
         if (cached != null) {
             log.debug("Weekly fortune DB cache hit: {}", cacheKey);
@@ -138,7 +138,7 @@ public class WeeklyFortuneService {
                 String systemPrompt = buildSystemPrompt();
                 String userPrompt = buildUserPrompt(date, birthTime, gender, yearPillar, dayPillar,
                     weekStart, weekEnd, weekDayPillars, today);
-                String response = claudeApiService.generate(systemPrompt, userPrompt, 1600, ClaudeApiService.HAIKU_MODEL);
+                String response = claudeApiService.generate(systemPrompt, userPrompt, 4500, ClaudeApiService.HAIKU_MODEL);
                 String json = ClaudeApiService.extractJson(response);
 
                 if (json != null) {

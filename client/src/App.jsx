@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { TransitionProvider } from './components/PageTransition';
 import Header from './components/Header';
+import StoryDecor from './components/StoryDecor';
 import Home from './pages/Home';
 import HomeNew from './pages/HomeNew';
 import HomeStory from './pages/HomeStory';
@@ -362,6 +363,7 @@ function App() {
       {showSplash && <Splash key={splashKey} onDone={handleSplashDone} />}
       {tabIntro && <TabIntro key={tabIntro.key} tabKey={tabIntro.tabKey} onDone={() => setTabIntro(null)} />}
       <div className="app" style={{ display: showSplash ? 'none' : undefined }}>
+        <StoryDecor />
         <TransitionProvider>
           <Header onHomeSplash={triggerSplash} onTabIntro={triggerTabIntro} />
           <main className="app-main">

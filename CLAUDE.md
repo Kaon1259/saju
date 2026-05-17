@@ -1,3 +1,10 @@
+[완료] 크레파스 데코 레이어 + 주간운세 days 토큰 잘림 수정 (2026-05-17)
+- StoryDecor 컴포넌트 신규: data-homestyle="story" 일 때 전 페이지 모서리에 크레파스 손그림(달·별·구름·반짝임·꽃) 데코 표시. roughen 필터, App.jsx 전역 렌더(CSS로 노출 제어)
+- 주간운세 days 미표시 진짜 원인: max_tokens=1600 — JSON 맨 끝 days 배열이 잘려 나감
+  - WeeklyFortuneController(스트리밍)·WeeklyFortuneService(비스트리밍) 1600 → 4500
+  - 이미 잘린 채 캐시된 결과 무효화: cacheKey "weekly" → "weekly-v2" (3개소)
+  - 서버 변경 → Railway 재배포 필요. 재배포 후 주간운세 재생성 시 7일 카드 정상 표시
+
 [완료] 주간운세 일별 재구성 + 동화 홈 다섯 빛 탭 연결 (2026-05-17)
 - 주간운세: 7일치(days 배열)가 작은 가로 스크롤로만 보이던 것 → 월~일 풀폭 일별 카드(wf-dayrow)로 재구성
   - 각 일별 카드: 요일·날짜 + 점수 + 가로 점수바 + 키워드 + tip + advice + BEST/주의 뱃지
