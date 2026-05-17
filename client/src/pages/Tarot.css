@@ -6667,3 +6667,31 @@
   border-color: rgba(160, 110, 40, 0.7);
 }
 
+/* [정제] 카드별 해석 — 과거/현재/미래 라벨을 또렷한 골드 배지로
+   (작은 글자가 왼쪽 끝에 붙어 안 보이던 것 개선) */
+.tarot-card-row {
+  grid-template-columns: 70px 1fr;
+  gap: 5px 12px;
+}
+.tarot-card-row-pos {
+  align-self: center;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffe2a6;
+  background: rgba(222, 169, 87, 0.16);
+  border: 1px solid rgba(222, 169, 87, 0.42);
+  border-radius: 8px;
+  padding: 5px 9px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+[data-theme="light"] .tarot-card-row-pos {
+  color: #9a6b00;
+  background: rgba(184, 134, 11, 0.12);
+  border-color: rgba(184, 134, 11, 0.4);
+}
+
