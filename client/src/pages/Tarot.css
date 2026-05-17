@@ -6413,6 +6413,23 @@
 .deck-info-name--clickable:hover { color: #ffd98a; }
 [data-theme="light"] .deck-info-name--clickable:hover { color: #7b3fa0; }
 
+/* [Phase 2 정제] 카테고리 화면 보라 글자 대비 강화 — 라이트 모드
+   #6c3483 중간 보라 → #3a1d52 딥 퍼플 (덱 이름과 동일 톤) */
+[data-theme="light"] .setup-substep-title,
+[data-theme="light"] .cat-tarot-label,
+[data-theme="light"] .setup-spread-card-num,
+[data-theme="light"] .setup-confirm-cat-label,
+[data-theme="light"] .setup-spread.active .setup-spread-name {
+  color: #3a1d52;
+}
+[data-theme="light"] .setup-more-link {
+  color: #5b3a8a;
+  border-color: rgba(91, 58, 138, 0.4);
+}
+[data-theme="light"] .setup-confirm-tag-inline {
+  color: #5f4090;
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
