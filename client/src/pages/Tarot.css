@@ -6481,6 +6481,30 @@
   font-weight: 700;
 }
 
+/* [Phase 3 정제] 한 페이지가 한눈에 들어오도록 압축 */
+.setup-onepage { gap: 10px; }
+.setup-section-label { margin: 2px 0 0; font-size: 14px; }
+/* 카테고리: 큰 타로카드형(5:7) → 4열 컴팩트 타일 */
+.setup-onepage .setup-cat-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.setup-onepage .setup-cat-tarot-card {
+  aspect-ratio: auto;
+  min-height: 72px;
+  padding: 9px 4px;
+  gap: 4px;
+  border-radius: 12px;
+}
+.setup-onepage .cat-tarot-icon svg { width: 21px; height: 21px; }
+.setup-onepage .cat-tarot-label { font-size: 10.5px; }
+.setup-onepage .cat-tarot-corner { font-size: 6px; }
+/* 스프레드: 카드 높이 압축 */
+.setup-onepage .setup-spread-stack { gap: 7px; }
+.setup-onepage .setup-spread-card { padding: 9px 13px; gap: 11px; }
+/* 더보기 링크 컴팩트 */
+.setup-onepage .setup-more-link { padding: 7px; font-size: 12px; }
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
