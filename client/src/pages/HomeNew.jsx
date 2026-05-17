@@ -103,20 +103,24 @@ function RadarChart({ data, size = 138 }) {
   );
 }
 
-/* ── 섹션 카드 그리드 ──────────────────────────────────────────── */
-function CardSection({ title, more, items, onNav }) {
+/* ── 섹션 카드 그리드 ── 더보기 = 인라인 펼침(메뉴 더 보여줌) ────── */
+function CardSection({ title, items, onNav }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = items.length > 4;
+  const shown = hasMore && !expanded ? items.slice(0, 4) : items;
   return (
     <section className="hn-section">
       <div className="hn-section-head">
         <h2 className="hn-section-title">{title}</h2>
-        {more && (
-          <button className="hn-more" onClick={() => onNav(more)}>
-            더보기 <span aria-hidden="true">›</span>
+        {hasMore && (
+          <button className="hn-more" onClick={() => setExpanded((v) => !v)}>
+            {expanded ? '접기' : '더보기'}{' '}
+            <span aria-hidden="true">{expanded ? '▴' : '▾'}</span>
           </button>
         )}
       </div>
       <div className="hn-grid">
-        {items.map((it) => (
+        {shown.map((it) => (
           <button key={it.label} className="hn-card" onClick={() => onNav(it.path)}>
             <span className="hn-card-icon">
               <MenuIcon name={it.icon} size={28} />
@@ -137,24 +141,36 @@ const QUICK = [
 ];
 
 const SECTION_LOVE = [
-  { label: '1:1연애',   icon: 'heart',      path: '/my-solo' },
-  { label: '썸·짝사랑', icon: 'heartArrow', path: '/my-some-crush' },
-  { label: '데이트',    icon: 'couple',     path: '/my-love-compat' },
-  { label: '스타궁합',  icon: 'star',       path: '/my-star' },
+  { label: '1:1연애',   icon: 'heart',        path: '/my-solo' },
+  { label: '썸·짝사랑', icon: 'heartArrow',   path: '/my-some-crush' },
+  { label: '데이트운',  icon: 'couple',       path: '/my-love-compat' },
+  { label: '스타궁합',  icon: 'star',         path: '/my-star' },
+  { label: '재회운',    icon: 'refresh',      path: '/again-meet' },
+  { label: '사주궁합',  icon: 'sparkleHeart', path: '/compatibility' },
+  { label: '스타매칭',  icon: 'people',       path: '/celeb-match' },
+  { label: '그룹궁합',  icon: 'handshake',    path: '/celeb-fortune' },
 ];
 
 const SECTION_SEASON = [
-  { label: '신년운세', icon: 'newyear', path: '/year-fortune' },
-  { label: '월간운세', icon: 'monthly', path: '/monthly-fortune' },
-  { label: '주간운세', icon: 'weekly',  path: '/weekly-fortune' },
-  { label: '토정비결', icon: 'tojeong', path: '/tojeong' },
+  { label: '신년운세', icon: 'newyear',       path: '/year-fortune' },
+  { label: '월간운세', icon: 'monthly',       path: '/monthly-fortune' },
+  { label: '주간운세', icon: 'weekly',        path: '/weekly-fortune' },
+  { label: '토정비결', icon: 'tojeong',       path: '/tojeong' },
+  { label: '오늘운세', icon: 'sun',           path: '/my' },
+  { label: '띠 운세',  icon: 'zodiac',        path: '/fortune' },
+  { label: '별자리',   icon: 'constellation', path: '/constellation' },
+  { label: '바이오리듬', icon: 'biorhythm',   path: '/biorhythm' },
 ];
 
 const SECTION_TRAD = [
-  { label: '정통사주', icon: 'traditional',   path: '/traditional' },
-  { label: '만세력',   icon: 'compass',       path: '/manseryeok' },
-  { label: 'MBTI',     icon: 'mbti',          path: '/mbti' },
-  { label: '별자리',   icon: 'constellation', path: '/constellation' },
+  { label: '정통사주',   icon: 'traditional', path: '/traditional' },
+  { label: '만세력',     icon: 'compass',     path: '/manseryeok' },
+  { label: 'MBTI',       icon: 'mbti',        path: '/mbti' },
+  { label: '혈액형',     icon: 'bloodtype',   path: '/bloodtype' },
+  { label: '관상',       icon: 'face',        path: '/face-reading' },
+  { label: '꿈해몽',     icon: 'dream',       path: '/dream' },
+  { label: '심리테스트', icon: 'psych',       path: '/psych-test' },
+  { label: '띠 성격',    icon: 'zodiac',      path: '/zodiac' },
 ];
 
 function HomeNew() {
@@ -320,9 +336,9 @@ function HomeNew() {
       )}
 
       {/* ── 섹션 — 연애 / 시즌 / 정통 ───────────────────────── */}
-      <CardSection title="연애 운세"   more="/love-fortune" items={SECTION_LOVE}   onNav={go} />
-      <CardSection title="시즌 운세"   more="/fortune"      items={SECTION_SEASON} onNav={go} />
-      <CardSection title="정통·종합 운세" more="/fortune"    items={SECTION_TRAD}   onNav={go} />
+      <CardSection title="연애 운세"      items={SECTION_LOVE}   onNav={go} />
+      <CardSection title="시즌 운세"      items={SECTION_SEASON} onNav={go} />
+      <CardSection title="정통·종합 운세" items={SECTION_TRAD}   onNav={go} />
 
       <p className="hn-foot">오늘도 좋은 기운이 함께하길 바라요 ✦</p>
     </div>
