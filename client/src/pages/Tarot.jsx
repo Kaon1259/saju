@@ -365,6 +365,7 @@ function Tarot() {
   }); // 선택된 뒷면 이미지 경로
   const resultRef = useRef(null);
   const startBtnRef = useRef(null);
+  const setupSpreadRef = useRef(null);
   const cleanupRef = useRef(null);
 
   // 글로벌 ai:abort (하트 부족 등) 시 안전 정리
@@ -1624,7 +1625,10 @@ function Tarot() {
                             key={item.id}
                             className={`setup-cat-tarot-card ${category === item.id ? 'active' : ''} ${bgImg ? 'has-deck-bg' : ''}`}
                             style={{ '--card-i': i, ...(bgImg ? { '--deck-bg': `url(${bgImg})` } : {}) }}
-                            onClick={() => setCategory(item.id)}
+                            onClick={() => {
+                              setCategory(item.id);
+                              setTimeout(() => setupSpreadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 90);
+                            }}
                           >
                             {bgImg && <span className="cat-tarot-deck-bg" aria-hidden="true" />}
                             <span className="cat-tarot-corner cat-tarot-corner-tl">✦</span>
@@ -1645,7 +1649,7 @@ function Tarot() {
                     )}
 
                     {/* ② 카드 수 선택 */}
-                    <h3 className="setup-section-label">
+                    <h3 className="setup-section-label" ref={setupSpreadRef}>
                       <span className="setup-section-no">2</span> 몇 장 뽑을까요?
                     </h3>
                     <div className="setup-spread-stack">
@@ -1654,7 +1658,10 @@ function Tarot() {
                           key={s.id}
                           className={`setup-spread-card ${spread === s.id ? 'active' : ''}`}
                           style={{ '--spread-i': i }}
-                          onClick={() => setSpread(s.id)}
+                          onClick={() => {
+                            setSpread(s.id);
+                            setTimeout(() => startBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 90);
+                          }}
                         >
                           <div className="setup-spread-visual">
                             {Array.from({ length: s.count }).map((_, k) => (

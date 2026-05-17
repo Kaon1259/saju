@@ -1075,7 +1075,7 @@
 }
 /* 콘텐츠를 하단으로 밀어내는 상단 여백 */
 .tarot-setup-spacer {
-  height: 15vh;
+  height: 5vh;
 }
 /* ── 상단 바 ── */
 .setup-top-bar {
