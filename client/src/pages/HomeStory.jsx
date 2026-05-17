@@ -20,11 +20,11 @@ function hashFloat(seed, salt) {
 
 /* ── 오늘의 다섯 빛 (운세 5항목) ──────────────────────────────── */
 const LIGHTS = [
-  { key: 'love',   label: '사랑',   icon: 'heart' },
-  { key: 'money',  label: '재물',   icon: 'money' },
-  { key: 'social', label: '인연',   icon: 'people' },
-  { key: 'health', label: '건강',   icon: 'clover' },
-  { key: 'work',   label: '하루',   icon: 'work' },
+  { key: 'love',   label: '사랑', icon: 'heart' },
+  { key: 'money',  label: '재물', icon: 'money' },
+  { key: 'social', label: '인연', icon: 'people' },
+  { key: 'health', label: '건강', icon: 'clover' },
+  { key: 'work',   label: '하루', icon: 'work' },
 ];
 
 function deriveLights(seed, base) {
@@ -61,60 +61,77 @@ const QUICK = [
   { label: '출석체크', icon: 'attendance',   path: '/attendance' },
 ];
 
-/* ── 챕터별 카드 ──────────────────────────────────────────────── */
+/* ── 챕터별 일러스트 패널 ─────────────────────────────────────── */
 const CHAPTERS = [
   {
     no: '제1장', title: '사랑 이야기', tint: 'rose', more: '/love-fortune',
     items: [
-      { label: '1:1연애',   icon: 'heart',      path: '/my-solo' },
-      { label: '썸·짝사랑', icon: 'heartArrow', path: '/my-some-crush' },
-      { label: '데이트',    icon: 'couple',     path: '/my-love-compat' },
-      { label: '스타궁합',  icon: 'star',       path: '/my-star' },
+      { label: '1:1연애',   sub: '둘만의 인연',   icon: 'heart',      path: '/my-solo' },
+      { label: '썸·짝사랑', sub: '설레는 마음',   icon: 'heartArrow', path: '/my-some-crush' },
+      { label: '데이트운',  sub: '함께한 하루',   icon: 'couple',     path: '/my-love-compat' },
+      { label: '스타궁합',  sub: '별과 나',       icon: 'star',       path: '/my-star' },
     ],
   },
   {
     no: '제2장', title: '계절 이야기', tint: 'peach', more: '/fortune',
     items: [
-      { label: '신년운세', icon: 'newyear', path: '/year-fortune' },
-      { label: '월간운세', icon: 'monthly', path: '/monthly-fortune' },
-      { label: '주간운세', icon: 'weekly',  path: '/weekly-fortune' },
-      { label: '토정비결', icon: 'tojeong', path: '/tojeong' },
+      { label: '신년운세', sub: '새해 첫 장',     icon: 'newyear', path: '/year-fortune' },
+      { label: '월간운세', sub: '이번 달 이야기', icon: 'monthly', path: '/monthly-fortune' },
+      { label: '주간운세', sub: '한 주의 흐름',   icon: 'weekly',  path: '/weekly-fortune' },
+      { label: '토정비결', sub: '올해의 길',      icon: 'tojeong', path: '/tojeong' },
     ],
   },
   {
     no: '제3장', title: '운명 이야기', tint: 'lilac', more: '/fortune',
     items: [
-      { label: '정통사주', icon: 'traditional',   path: '/traditional' },
-      { label: '만세력',   icon: 'compass',       path: '/manseryeok' },
-      { label: 'MBTI',     icon: 'mbti',          path: '/mbti' },
-      { label: '별자리',   icon: 'constellation', path: '/constellation' },
+      { label: '정통사주', sub: '타고난 기운',   icon: 'traditional',   path: '/traditional' },
+      { label: '만세력',   sub: '운명의 책력',   icon: 'compass',       path: '/manseryeok' },
+      { label: 'MBTI',     sub: '나라는 사람',   icon: 'mbti',          path: '/mbti' },
+      { label: '별자리',   sub: '하늘이 그린',   icon: 'constellation', path: '/constellation' },
     ],
   },
 ];
 
-/* ── 챕터 섹션 ────────────────────────────────────────────────── */
-function StoryChapter({ no, title, tint, more, items, onNav }) {
+/* ── 모서리 장식 4개 ──────────────────────────────────────────── */
+function Corners() {
   return (
-    <section className="hs-chapter" data-tint={tint}>
-      <div className="hs-chapter-head">
-        <span className="hs-chapter-no">{no}</span>
-        <h2 className="hs-chapter-title">{title}</h2>
-        <span className="hs-chapter-rule" aria-hidden="true" />
-        {more && (
-          <button className="hs-chapter-more" onClick={() => onNav(more)}>
-            더보기 <span aria-hidden="true">›</span>
-          </button>
-        )}
-      </div>
-      <div className="hs-grid">
-        {items.map((it) => (
-          <button key={it.label} className="hs-tile" onClick={() => onNav(it.path)}>
-            <span className="hs-tile-icon">
-              <MenuIcon name={it.icon} size={26} />
-            </span>
-            <span className="hs-tile-label">{it.label}</span>
-          </button>
-        ))}
+    <>
+      <span className="hs-corner hs-corner--tl" aria-hidden="true">✦</span>
+      <span className="hs-corner hs-corner--tr" aria-hidden="true">✦</span>
+      <span className="hs-corner hs-corner--bl" aria-hidden="true">✦</span>
+      <span className="hs-corner hs-corner--br" aria-hidden="true">✦</span>
+    </>
+  );
+}
+
+/* ── 챕터 한 페이지 (장식 액자 + 2열 일러스트 패널) ──────────── */
+function StoryPage({ no, title, tint, more, items, onNav }) {
+  return (
+    <section className="hs-page" data-tint={tint}>
+      <div className="hs-page-frame">
+        <Corners />
+        <div className="hs-page-head">
+          <span className="hs-page-no">{no}</span>
+          <h2 className="hs-page-title">{title}</h2>
+          {more && (
+            <button className="hs-page-more" onClick={() => onNav(more)}>
+              더보기 <span aria-hidden="true">›</span>
+            </button>
+          )}
+        </div>
+        <div className="hs-panels">
+          {items.map((it) => (
+            <button key={it.label} className="hs-panel" onClick={() => onNav(it.path)}>
+              <span className="hs-panel-icon">
+                <MenuIcon name={it.icon} size={24} />
+              </span>
+              <span className="hs-panel-text">
+                <span className="hs-panel-label">{it.label}</span>
+                <span className="hs-panel-sub">{it.sub}</span>
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -204,30 +221,15 @@ function HomeStory() {
 
   return (
     <div className="hs">
-      {/* 페이지 전체에 흩날리는 반짝임 장식 */}
-      <div className="hs-sparkles" aria-hidden="true">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <span
-            key={i}
-            className="hs-sparkle"
-            style={{
-              left: `${(i * 11 + 6) % 96}%`,
-              top: `${(i * 37 + 12) % 90}%`,
-              animationDelay: `${(i * 0.7) % 5}s`,
-              fontSize: `${8 + (i % 3) * 4}px`,
-            }}
-          >
-            ✦
-          </span>
-        ))}
-      </div>
+      {/* 거친 그레인(노이즈) 텍스처 — 페이지 전체 */}
+      <div className="hs-grain" aria-hidden="true" />
 
       {/* ── 챕터 표지 인사말 ──────────────────────────────────── */}
       <header className="hs-cover">
         <span className="hs-cover-chapter">
-          <span className="hs-cover-ornament" aria-hidden="true">✦</span>
+          <span className="hs-cover-orn" aria-hidden="true">✦</span>
           오늘의 이야기
-          <span className="hs-cover-ornament" aria-hidden="true">✦</span>
+          <span className="hs-cover-orn" aria-hidden="true">✦</span>
         </span>
         <p className="hs-cover-date">{dateLabel}</p>
         <h1 className="hs-cover-title">
@@ -237,56 +239,77 @@ function HomeStory() {
             <>오늘의 이야기를 펼쳐 보세요</>
           )}
         </h1>
+        <span className="hs-cover-rule" aria-hidden="true" />
       </header>
 
-      {/* ── 히어로 — 삽화풍 운세 장면 ─────────────────────────── */}
-      <section
-        className={`hs-hero ${loggedIn ? '' : 'hs-hero--guest'}`}
-        onClick={loggedIn ? () => go('/my') : undefined}
-      >
-        {/* 밤하늘 삽화 */}
-        <div className="hs-sky">
-          <span className="hs-moon" aria-hidden="true" />
-          <span className="hs-cloud hs-cloud--1" aria-hidden="true" />
-          <span className="hs-cloud hs-cloud--2" aria-hidden="true" />
-          <span className="hs-cloud hs-cloud--3" aria-hidden="true" />
-          {Array.from({ length: 7 }).map((_, i) => (
+      {/* ── 히어로 — 동화 풍경 삽화 + 종이 쪽지 ───────────────── */}
+      <section className="hs-hero">
+        <div
+          className={`hs-scene ${loggedIn ? '' : 'hs-scene--guest'}`}
+          onClick={loggedIn ? () => go('/my') : undefined}
+        >
+          {/* 하늘 — 별 */}
+          {Array.from({ length: 11 }).map((_, i) => (
             <span
               key={i}
               className="hs-star"
               style={{
-                left: `${(i * 13 + 8) % 92}%`,
-                top: `${(i * 23 + 10) % 60}%`,
-                animationDelay: `${(i * 0.55) % 3}s`,
+                left: `${(i * 8.7 + 5) % 94}%`,
+                top: `${(i * 19 + 7) % 56}%`,
+                animationDelay: `${(i * 0.4) % 3}s`,
+                fontSize: `${7 + (i % 3) * 4}px`,
               }}
             >
-              ·
+              ✦
             </span>
           ))}
-          <div className={`hs-orb hs-orb--${g.cls}`}>
+          {/* 구름 */}
+          <span className="hs-cloud hs-cloud--a" aria-hidden="true" />
+          <span className="hs-cloud hs-cloud--b" aria-hidden="true" />
+
+          {/* 달 = 오늘의 점수 */}
+          <div className={`hs-moon hs-moon--${g.cls}`}>
+            <span className="hs-moon-halo" aria-hidden="true" />
             {loggedIn ? (
               <>
-                <span className="hs-orb-score">{overall}</span>
-                <span className="hs-orb-grade">{g.label}</span>
+                <strong className="hs-moon-score">{overall}</strong>
+                <span className="hs-moon-cap">오늘의 운세</span>
               </>
             ) : (
-              <span className="hs-orb-q">?</span>
+              <strong className="hs-moon-score">?</strong>
             )}
           </div>
+
+          {/* 땅 — 언덕과 나무 */}
+          <span className="hs-hill hs-hill--3" aria-hidden="true" />
+          <span className="hs-hill hs-hill--2" aria-hidden="true" />
+          <span className="hs-tree" aria-hidden="true">
+            <span className="hs-tree-top" />
+            <span className="hs-tree-trunk" />
+          </span>
+          <span className="hs-hill hs-hill--1" aria-hidden="true" />
+
+          {/* 장면 위 거친 그레인 */}
+          <div className="hs-scene-grain" aria-hidden="true" />
         </div>
 
-        {/* 이야기 본문 */}
-        <div className="hs-hero-body">
+        {/* 종이 쪽지 — 오늘의 이야기 한 줄 */}
+        <div className="hs-note">
+          <span className="hs-note-pin" aria-hidden="true" />
           {loggedIn ? (
             <>
-              <span className="hs-hero-cap">오늘의 총 운세</span>
-              <p className="hs-hero-line">{STORY_DESC[g.cls]}</p>
-              <span className="hs-hero-link">오늘의 운세 펼쳐보기 ›</span>
+              <span className="hs-note-cap">
+                오늘의 총 운세 · <em className={`hs-note-grade hs-note-grade--${g.cls}`}>{g.label}</em>
+              </span>
+              <p className="hs-note-line">{STORY_DESC[g.cls]}</p>
+              <button className="hs-note-link" onClick={() => go('/my')}>
+                오늘의 운세 펼쳐보기 <span aria-hidden="true">›</span>
+              </button>
             </>
           ) : (
             <>
-              <span className="hs-hero-cap">나만의 이야기</span>
-              <p className="hs-hero-line">
+              <span className="hs-note-cap">나만의 이야기</span>
+              <p className="hs-note-line">
                 로그인하면 사주로 풀어낸 오늘의 운세와<br />
                 다섯 가지 빛을 이야기로 들려드려요.
               </p>
@@ -296,20 +319,21 @@ function HomeStory() {
         </div>
       </section>
 
-      {/* ── 오늘의 다섯 빛 ────────────────────────────────────── */}
+      {/* ── 오늘의 다섯 빛 — 매달린 별빛 ──────────────────────── */}
       {loggedIn && (
-        <section className="hs-lights">
-          <h2 className="hs-block-title">오늘의 다섯 빛</h2>
-          <div className="hs-lights-row">
-            {lights.map((l) => (
-              <div key={l.key} className="hs-light">
-                <span className="hs-light-icon">
-                  <MenuIcon name={l.icon} size={20} />
+        <section className="hs-block">
+          <h2 className="hs-h">오늘의 다섯 빛</h2>
+          <div className="hs-string">
+            {lights.map((l, i) => (
+              <div key={l.key} className="hs-lamp" style={{ '--i': i }}>
+                <span className="hs-lamp-wire" aria-hidden="true" />
+                <span className="hs-lamp-orb">
+                  <MenuIcon name={l.icon} size={19} />
                 </span>
-                <span className="hs-light-label">{l.label}</span>
-                <span className="hs-light-stars" aria-label={`${l.stars}점`}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <i key={i} className={i < l.stars ? 'on' : ''}>★</i>
+                <span className="hs-lamp-label">{l.label}</span>
+                <span className="hs-lamp-stars" aria-label={`${l.stars}점`}>
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <i key={s} className={s < l.stars ? 'on' : ''}>★</i>
                   ))}
                 </span>
               </div>
@@ -319,54 +343,57 @@ function HomeStory() {
       )}
 
       {/* ── 오늘 함께하는 행운 ────────────────────────────────── */}
-      <section className="hs-luck">
-        <h2 className="hs-block-title">오늘 함께하는 행운</h2>
-        <div className="hs-luck-row">
-          <div className="hs-bubble">
-            <span className="hs-bubble-icon"><MenuIcon name="palette" size={18} /></span>
-            <span className="hs-bubble-key">행운의 색</span>
-            <span className="hs-bubble-val">{lucky.color}</span>
+      <section className="hs-block">
+        <h2 className="hs-h">오늘 함께하는 행운</h2>
+        <div className="hs-luck">
+          <div className="hs-luck-item">
+            <span className="hs-luck-icon"><MenuIcon name="palette" size={17} /></span>
+            <span className="hs-luck-key">행운의 색</span>
+            <span className="hs-luck-val">{lucky.color}</span>
           </div>
-          <div className="hs-bubble">
-            <span className="hs-bubble-icon"><MenuIcon name="hash" size={18} /></span>
-            <span className="hs-bubble-key">행운의 숫자</span>
-            <span className="hs-bubble-val">{lucky.number}</span>
+          <div className="hs-luck-item">
+            <span className="hs-luck-icon"><MenuIcon name="hash" size={17} /></span>
+            <span className="hs-luck-key">행운의 숫자</span>
+            <span className="hs-luck-val">{lucky.number}</span>
           </div>
-          <div className="hs-bubble">
-            <span className="hs-bubble-icon"><MenuIcon name="pin" size={18} /></span>
-            <span className="hs-bubble-key">행운의 장소</span>
-            <span className="hs-bubble-val">{lucky.place}</span>
+          <div className="hs-luck-item">
+            <span className="hs-luck-icon"><MenuIcon name="pin" size={17} /></span>
+            <span className="hs-luck-key">행운의 장소</span>
+            <span className="hs-luck-val">{lucky.place}</span>
           </div>
         </div>
       </section>
 
-      {/* ── 오늘 펼쳐볼 페이지 (퀵) ───────────────────────────── */}
+      {/* ── 오늘 펼쳐볼 페이지 (책갈피형 퀵) ──────────────────── */}
       <section className="hs-quick">
         {QUICK.map((q) => (
-          <button key={q.label} className="hs-quick-btn" onClick={() => go(q.path)}>
-            <span className="hs-quick-icon">
-              <MenuIcon name={q.icon} size={24} />
+          <button key={q.label} className="hs-mark" onClick={() => go(q.path)}>
+            <span className="hs-mark-icon">
+              <MenuIcon name={q.icon} size={22} />
             </span>
-            <span className="hs-quick-label">{q.label}</span>
+            <span className="hs-mark-label">{q.label}</span>
           </button>
         ))}
       </section>
 
       {/* ── 출석 카드 (로그인 시) ─────────────────────────────── */}
       {loggedIn && (
-        <div className="hs-attendance">
+        <div className="hs-att">
           <AttendanceCard refreshKey={attendanceRefreshKey} />
         </div>
       )}
 
-      {/* ── 챕터들 ────────────────────────────────────────────── */}
+      {/* ── 챕터 페이지들 ─────────────────────────────────────── */}
       {CHAPTERS.map((c) => (
-        <StoryChapter key={c.title} {...c} onNav={go} />
+        <StoryPage key={c.title} {...c} onNav={go} />
       ))}
 
-      <p className="hs-foot">
-        <span aria-hidden="true">✦</span> 이야기는 내일도 계속돼요 <span aria-hidden="true">✦</span>
-      </p>
+      <footer className="hs-foot">
+        <span className="hs-foot-rule" aria-hidden="true" />
+        <p className="hs-foot-text">
+          <span aria-hidden="true">✦</span> 이야기는 내일도 계속돼요 <span aria-hidden="true">✦</span>
+        </p>
+      </footer>
     </div>
   );
 }

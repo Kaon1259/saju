@@ -46,16 +46,17 @@ function PreviewNew() {
   );
 }
 
-/* 동화 홈 미리보기 — 동화책형 (삽화풍 히어로 + 종이 카드) */
+/* 동화 홈 미리보기 — 동화책형 (거친 질감 노을 삽화 + 종이 쪽지) */
 function PreviewStory() {
   return (
     <div className="ch-preview ch-preview--story">
       <div className="ch-pv-sky">
-        <span className="ch-pv-moon" />
-        {[18, 44, 66, 84].map((l, i) => (
-          <span key={i} className="ch-pv-twinkle" style={{ left: `${l}%`, top: `${12 + (i % 2) * 22}%` }}>·</span>
+        {[14, 40, 62, 86].map((l, i) => (
+          <span key={i} className="ch-pv-twinkle" style={{ left: `${l}%`, top: `${10 + (i % 2) * 20}%` }}>✦</span>
         ))}
-        <span className="ch-pv-orb">82</span>
+        <span className="ch-pv-moon">82</span>
+        <span className="ch-pv-hill ch-pv-hill--b" />
+        <span className="ch-pv-hill ch-pv-hill--a" />
       </div>
       <div className="ch-pv-paper">
         <span className="ch-pv-line ch-pv-w50" />

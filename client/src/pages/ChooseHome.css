@@ -261,53 +261,56 @@
   min-height: 0;
 }
 
-/* 동화 홈 미리보기 */
+/* 동화 홈 미리보기 — 노을 삽화 + 종이 쪽지 + 패널 */
 .ch-preview--story {
-  gap: 9px;
+  gap: 8px;
 }
 .ch-pv-sky {
   position: relative;
-  flex: 1.5;
-  border-radius: 12px;
-  background: linear-gradient(165deg, #ffd9c8 0%, #ffc3d5 48%, #e7c2e6 100%);
+  flex: 1.55;
+  border-radius: 15px 12px 14px 13px / 13px 14px 12px 15px;
+  background: linear-gradient(176deg, #ffd9c2 0%, #ffbfce 30%, #e9b3da 62%, #b89ad9 100%);
   overflow: hidden;
-}
-.ch-pv-moon {
-  position: absolute;
-  top: 12px;
-  left: 16px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff6e4;
-  box-shadow: 0 0 12px 3px rgba(255, 244, 220, 0.6);
 }
 .ch-pv-twinkle {
   position: absolute;
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 14px;
+  color: rgba(255, 252, 240, 0.95);
+  font-size: 8px;
   line-height: 0;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 5px rgba(255, 250, 230, 0.85);
 }
-.ch-pv-orb {
+.ch-pv-moon {
   position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #ffffff 0%, #fff3df 62%, #ffe1c9 100%);
+  right: 15px;
+  top: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 49% 51% 50% 50% / 50% 49% 51% 50%;
+  background: radial-gradient(circle at 38% 32%, #fffaf0 0%, #fff0d5 60%, #ffe1bb 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
-  color: #e0577a;
-  box-shadow: 0 0 18px 5px rgba(255, 220, 190, 0.55);
+  color: #d75479;
+  box-shadow: 0 0 16px 5px rgba(255, 238, 205, 0.6);
+}
+.ch-pv-hill {
+  position: absolute;
+  bottom: 0;
+}
+.ch-pv-hill--b {
+  width: 150%; height: 44px; left: -10%;
+  background: #c098d2;
+  border-radius: 48% 52% 0 0 / 100% 100% 0 0;
+}
+.ch-pv-hill--a {
+  width: 160%; height: 28px; left: -30%;
+  background: #a87fc4;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
 }
 .ch-pv-paper {
-  flex: 0.55;
+  flex: 0.5;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -315,16 +318,16 @@
   padding: 0 12px;
   background: var(--ch-surface);
   border: 1px solid var(--ch-border);
-  border-radius: 11px;
+  border-radius: 12px 10px 11px 12px / 11px 12px 10px 11px;
 }
 .ch-pv-story-row {
-  flex: 0.5;
+  flex: 0.62;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
 }
 .ch-pv-dot {
-  border-radius: 10px;
+  border-radius: 11px 8px 10px 9px / 9px 10px 8px 11px;
   background: var(--ch-surface);
   border: 1px solid var(--ch-border);
 }
