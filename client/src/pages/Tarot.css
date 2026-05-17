@@ -6351,6 +6351,16 @@
 .tarot-reset-btn:active,
 .tarot-retry-btn:active { transform: scale(0.97); }
 
+/* [Phase 1-b] 이모지 → MenuIcon SVG 교체 후 인라인 정렬 */
+.cat-tarot-icon svg,
+.setup-confirm-cat-icon svg,
+.deck-info-name-icon svg,
+.setup-desc-cat svg,
+.tarot-history-handle-label svg,
+.setup-spread-card-cost svg {
+  vertical-align: middle;
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,

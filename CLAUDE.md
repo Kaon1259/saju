@@ -1,9 +1,11 @@
 [진행중] 타로 페이지 정제 (Phase 1) — 2026-05-17
 - 진단: 타로는 "디자인 시스템 섬" — MenuIcon 0개(이모지 사용), btn-primary 0개(버튼 7종 제각각), StreamingCard 0개, CSS 6292줄
-- Phase 1-a 완료 — 버튼 통일: 7종(deck-select/tarot-start/action/reset/retry/share/pick-auto) 시각 스킨을
-  primary(보라+골드 그라데이션)/ghost(글래스+골드 테두리) 2종으로. Tarot.css 끝에 통일 오버라이드 블록 추가
-  (레이아웃·위치·패딩은 미변경 — 시각 스킨만 통일해 저위험)
-- Phase 1-b 예정 — 이모지 → MenuIcon SVG 전수 교체 (데이터 배열 ~30 + 인라인 UI 이모지)
+- Phase 1-a 완료 — 버튼 통일: 7종 시각 스킨을 primary(보라+골드 그라데이션)/ghost(글래스+골드 테두리) 2종으로
+- Phase 1-b 완료 — 이모지 → MenuIcon SVG: TAROT_MAIN_CATS·TAROT_MORE_CATS 카테고리 아이콘 15종(heart/search/
+  crystalBall/money/work/health/wedding/heartArrow/letter/handshake/couple/clock/moon/sparkleHeart) + 렌더 3곳
+  + 인라인(덱명 search·히스토리 history·코스트 heart). MenuIcon import. 장식 ✦/✧는 유지
+  - 잔여(후속): 갤러리 속도(🐢▶⚡)·픽모드(🎴🃏🌙)·챕터 토글(▲▼) — MenuIcon 대응 없어 보류
+- Phase 2 예정 — 결과 화면을 공용 FortuneCard/StreamingCard로 정제, 배경 효과 절제, CSS 정리
 
 [완료] 크레파스 데코 레이어 + 주간운세 days 토큰 잘림 수정 (2026-05-17)
 - StoryDecor 컴포넌트 신규: data-homestyle="story" 일 때 전 페이지 모서리에 크레파스 손그림(달·별·구름·반짝임·꽃) 데코 표시. roughen 필터, App.jsx 전역 렌더(CSS로 노출 제어)

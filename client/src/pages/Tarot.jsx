@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getTarotReadingStream, drawTarotCards, isGuest, getHistory } from '../api/fortune';
 import RecentHistory from '../components/RecentHistory';
+import MenuIcon from '../components/MenuIcon';
 import FortuneCard from '../components/FortuneCard';
 import TarotCardArt from '../components/TarotCardArt';
 import { playTarotReveal, playCardShuffle, playCardChaosGather, playCardSpin, playCardPick, playAnalyzeStart, startAnalyzeAmbient, playSpotlightTick, playSpotlightFinal } from '../utils/sounds';
@@ -116,27 +117,27 @@ const SPREADS = [
   { id: 'five',  label: '켈틱',     count: 5, icon: '✨', desc: '상황·장애·조언·결과', color: '#E91E63', cost: 5 },
 ];
 
-// ── 타로 메인 카테고리 (기본 표시) ──
+// ── 타로 메인 카테고리 (기본 표시) ── icon = MenuIcon SVG 키
 const TAROT_MAIN_CATS = [
-  { id: 'relationship', label: '연애운',     icon: '💕' },
-  { id: 'mind_reading', label: '속마음',     icon: '🔍' },
-  { id: 'general',      label: '종합운',     icon: '🔮' },
-  { id: 'money',        label: '재물운',     icon: '💰' },
-  { id: 'career',       label: '직업운',     icon: '💼' },
-  { id: 'health',       label: '건강운',     icon: '💚' },
-  { id: 'marriage',     label: '결혼·인연',  icon: '💒' },
+  { id: 'relationship', label: '연애운',     icon: 'heart' },
+  { id: 'mind_reading', label: '속마음',     icon: 'search' },
+  { id: 'general',      label: '종합운',     icon: 'crystalBall' },
+  { id: 'money',        label: '재물운',     icon: 'money' },
+  { id: 'career',       label: '직업운',     icon: 'work' },
+  { id: 'health',       label: '건강운',     icon: 'health' },
+  { id: 'marriage',     label: '결혼·인연',  icon: 'wedding' },
 ];
 
-// ── 타로 세부 카테고리 (더보기) ──
+// ── 타로 세부 카테고리 (더보기) ── icon = MenuIcon SVG 키
 const TAROT_MORE_CATS = [
-  { id: 'crush',              label: '짝사랑',     icon: '💘' },
-  { id: 'confession_timing',  label: '고백타이밍',  icon: '💌' },
-  { id: 'blind_date',         label: '소개팅',     icon: '🤝' },
-  { id: 'couple_fortune',     label: '데이트',     icon: '💑' },
-  { id: 'meeting_timing',     label: '만남시기',   icon: '⏳' },
-  { id: 'reunion',            label: '재회운',     icon: '💔' },
-  { id: 'past_life',          label: '전생인연',   icon: '🌌' },
-  { id: 'ideal_type',         label: '이상형',     icon: '👩‍❤️‍👨' },
+  { id: 'crush',              label: '짝사랑',     icon: 'heartArrow' },
+  { id: 'confession_timing',  label: '고백타이밍',  icon: 'letter' },
+  { id: 'blind_date',         label: '소개팅',     icon: 'handshake' },
+  { id: 'couple_fortune',     label: '데이트',     icon: 'couple' },
+  { id: 'meeting_timing',     label: '만남시기',   icon: 'clock' },
+  { id: 'reunion',            label: '재회운',     icon: 'heart' },
+  { id: 'past_life',          label: '전생인연',   icon: 'moon' },
+  { id: 'ideal_type',         label: '이상형',     icon: 'sparkleHeart' },
 ];
 
 // 하위호환용 (서버/AI에서 참조)
@@ -1424,7 +1425,7 @@ function Tarot() {
                 onClick={() => openDeckGallery(curDeck)}
                 title="이 덱의 카드 전체 보기"
               >
-                {curDeck.name} <span className="deck-info-name-icon">🔍</span>
+                {curDeck.name} <span className="deck-info-name-icon"><MenuIcon name="search" size={15} /></span>
               </h1>
               <p className="deck-info-sub">{curDeck.sub}</p>
             </div>
@@ -1511,7 +1512,7 @@ function Tarot() {
                 aria-expanded={historyOpen}
                 aria-label="최근 본 타로 토글">
                 <span className="tarot-history-handle-grip" aria-hidden="true" />
-                <span className="tarot-history-handle-label">📚 최근 본 타로</span>
+                <span className="tarot-history-handle-label"><MenuIcon name="history" size={15} /> 최근 본 타로</span>
                 <span className={`tarot-history-handle-chev ${historyOpen ? 'open' : ''}`} aria-hidden="true">▲</span>
               </button>
               <div className="tarot-history-content">
@@ -1640,7 +1641,7 @@ function Tarot() {
                             <span className="cat-tarot-corner cat-tarot-corner-tr">✦</span>
                             <span className="cat-tarot-corner cat-tarot-corner-bl">✦</span>
                             <span className="cat-tarot-corner cat-tarot-corner-br">✦</span>
-                            <span className="cat-tarot-icon">{item.icon}</span>
+                            <span className="cat-tarot-icon"><MenuIcon name={item.icon} size={26} /></span>
                             <span className="cat-tarot-label">{item.label}</span>
                             <span className="cat-tarot-shine" />
                           </button>
@@ -1670,7 +1671,7 @@ function Tarot() {
                       <span className="setup-title-quote">」</span>
                     </h2>
                     <p className="setup-substep-desc">
-                      <span className="setup-desc-cat">{cat?.icon} {cat?.label}</span>
+                      <span className="setup-desc-cat">{cat && <MenuIcon name={cat.icon} size={15} />} {cat?.label}</span>
                     </p>
                     <div className="setup-spread-stack">
                       {SPREADS.map((s, i) => {
@@ -1694,7 +1695,7 @@ function Tarot() {
                               <span className="setup-spread-card-num">{s.label}</span>
                               <span className="setup-spread-card-desc">{desc}</span>
                             </div>
-                            <span className="setup-spread-card-cost">💗 {s.cost}</span>
+                            <span className="setup-spread-card-cost"><MenuIcon name="heart" size={12} /> {s.cost}</span>
                           </button>
                         );
                       })}
@@ -1725,7 +1726,7 @@ function Tarot() {
                       <div className="setup-spread-card setup-confirm-card" style={{ pointerEvents: 'none' }}>
                         <span className="setup-confirm-tag-inline">선택한 분야</span>
                         <div className="setup-confirm-row">
-                          <span className="setup-confirm-cat-icon">{c?.icon}</span>
+                          <span className="setup-confirm-cat-icon">{c && <MenuIcon name={c.icon} size={22} />}</span>
                           <span className="setup-confirm-cat-label">{c?.label}</span>
                         </div>
                       </div>
@@ -1742,7 +1743,7 @@ function Tarot() {
                             <span className="setup-spread-card-num">{sp?.label}</span>
                             <span className="setup-spread-card-desc">{spreadDesc}</span>
                           </div>
-                          <span className="setup-spread-card-cost">💗 {sp?.cost}</span>
+                          <span className="setup-spread-card-cost"><MenuIcon name="heart" size={12} /> {sp?.cost}</span>
                         </div>
                       </div>
                     </div>
