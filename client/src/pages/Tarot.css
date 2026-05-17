@@ -6667,6 +6667,29 @@
   border-color: rgba(160, 110, 40, 0.7);
 }
 
+/* [정제] 덱 선택 화면 리디자인 — 차분하고 또렷하게
+   활성 카드가 끊임없이 호흡(scale)+시머 스윕해 산만하던 것 정리 */
+.deck-slide-active img,
+.deck-slide-card .deck-cover-wrap img {
+  animation: none !important;
+  transform: none !important;
+  filter: contrast(1.05) saturate(1.06) !important;
+}
+.deck-cover-active::after { display: none !important; }
+.deck-slide-card {
+  border-width: 1.5px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.deck-slide-active {
+  border-color: rgba(222, 169, 87, 0.85);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(222, 169, 87, 0.3);
+}
+[data-theme="light"] .deck-slide-active {
+  border-color: rgba(155, 89, 182, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(155, 89, 182, 0.25);
+}
+
 /* [정제] 카드별 해석 — 과거/현재/미래 라벨을 또렷한 골드 배지로
    (작은 글자가 왼쪽 끝에 붙어 안 보이던 것 개선) */
 .tarot-card-row {

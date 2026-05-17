@@ -1,21 +1,16 @@
-[진행중] 타로 페이지 정제 — 2026-05-17
-- Phase 3 — 설정 화면 단순화: 분야→카드수→확인 3단계 위저드를 한 페이지(setup-onepage)로 통합
-  - 단계 점/뒤로 로직 제거, 섹션 라벨(①분야 ②카드수)로 한 화면. 시작 버튼 disabled(분야·카드수 미선택 시)
-  - 펼치기 방식 이모지(🎴🃏🌙) → 텍스트(한 장씩/전체/부채꼴), 질문 토글 ✏️ 제거
-  - 스프레드 num/desc 버그 수정(parseInt(s.id) NaN → s.count/s.desc 직접 사용)
-- 가독성: 덱 이름 그라데이션텍스트 → 솔리드, 카테고리 화면 라이트 모드 텍스트 흰색(배경이 다크 카드이미지)
-- 덱 화살표 축소·배경 별 절제·프레임 오버레이 제거
-
-[진행중] 타로 페이지 정제 (Phase 1) — 2026-05-17
-- 진단: 타로는 "디자인 시스템 섬" — MenuIcon 0개(이모지 사용), btn-primary 0개(버튼 7종 제각각), StreamingCard 0개, CSS 6292줄
-- Phase 1-a 완료 — 버튼 통일: 7종 시각 스킨을 primary(보라+골드 그라데이션)/ghost(글래스+골드 테두리) 2종으로
-- Phase 1-b 완료 — 이모지 → MenuIcon SVG: TAROT_MAIN_CATS·TAROT_MORE_CATS 카테고리 아이콘 15종(heart/search/
-  crystalBall/money/work/health/wedding/heartArrow/letter/handshake/couple/clock/moon/sparkleHeart) + 렌더 3곳
-  + 인라인(덱명 search·히스토리 history·코스트 heart). MenuIcon import. 장식 ✦/✧는 유지
-  - 잔여(후속): 갤러리 속도(🐢▶⚡)·픽모드(🎴🃏🌙)·챕터 토글(▲▼) — MenuIcon 대응 없어 보류
-- Phase 2 진행 — 결과 화면 정제: 제목 이모지 → MenuIcon SVG(🃏→tarot·📜→book·🌟→star·📤→share·🔄/↻→refresh),
-  중복 "다시하기" 버튼 3개 → 2개로 정리(tarot-overall-retry 제거). 결과 화면은 이미 glass-card·FortuneCard 사용 중
-  - 잔여: tarot-framed-card 액자 오버레이 절제 여부(의도된 타로 미감이라 보류), 6292줄 CSS 정리
+[완료] 타로 페이지 정제 — 전 단계 (2026-05-17)
+- 진단: 타로는 "디자인 시스템 섬" — MenuIcon 0개·버튼 7종 제각각·CSS 6292줄
+- 버튼 통일: 7종 → primary(보라+골드 그라데이션)/ghost(글래스+골드) 2종 스킨
+- 이모지 → MenuIcon SVG: 카테고리 아이콘 15종 + 결과 화면 제목(🃏📜🌟📤🔄) + 인라인(덱명·히스토리·코스트)
+- 결과 화면: 중복 "다시하기" 버튼 3→2, 카드별 해석 박스 padding 18px, 과거/현재/미래 라벨을 골드 배지로
+- 설정 화면: 분야→카드수→확인 3단계 위저드를 한 페이지(setup-onepage)로 통합. 시작 버튼 disabled 가드.
+  카테고리 타일 4열 컴팩트 클린(카드이미지배경·모서리별·비네트 제거), 선택 시 자동 스크롤(①→②→시작)
+  스프레드 num/desc 버그 수정(parseInt(s.id) NaN → s.count/s.desc)
+- 라이트 모드: 설정 화면 배경이 다크 카드이미지라 라이트 규칙(#fff !important)이 흰색으로 만들던 것
+  소스 직접 수정해 다크 톤 통일 (질문 토글·시작 버튼·펼치기·스프레드 텍스트)
+- 덱 선택 화면: 화살표 축소·배경 별 50→22·프레임 오버레이 제거·덱 이름 솔리드,
+  활성 카드 호흡(scale) 애니메이션 + 골드 시머 스윕 제거 → 차분하고 또렷하게
+- 잔여(후속): 갤러리 속도(🐢▶⚡)·챕터 토글(▲▼) 이모지, 6292줄 CSS 죽은 규칙 정리, 동선 단축은 보류(사용자 결정)
 
 [완료] 크레파스 데코 레이어 + 주간운세 days 토큰 잘림 수정 (2026-05-17)
 - StoryDecor 컴포넌트 신규: data-homestyle="story" 일 때 전 페이지 모서리에 크레파스 손그림(달·별·구름·반짝임·꽃) 데코 표시. roughen 필터, App.jsx 전역 렌더(CSS로 노출 제어)
