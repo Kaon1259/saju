@@ -1399,7 +1399,6 @@ function Tarot() {
 
         return (
           <div className="tarot-deck-screen">
-            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
             {/* ─── 라디얼 스포트라이트 + 별빛 (정적) ─── */}
             <div className="deck-bg-spotlight" aria-hidden="true">
               {Array.from({ length: 22 }).map((_, i) => {

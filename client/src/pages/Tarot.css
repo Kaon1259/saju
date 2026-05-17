@@ -6392,6 +6392,12 @@
   border-color: rgba(155, 89, 182, 0.55);
 }
 
+/* [Phase 2 정제] 덱 이름 — 32px/900 → 작고 가볍게 */
+[data-fontsize] .deck-info-name {
+  font-size: calc(22px * var(--fs-scale)) !important;
+  font-weight: 700;
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
