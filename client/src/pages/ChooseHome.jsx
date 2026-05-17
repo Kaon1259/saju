@@ -46,6 +46,30 @@ function PreviewNew() {
   );
 }
 
+/* 동화 홈 미리보기 — 동화책형 (삽화풍 히어로 + 종이 카드) */
+function PreviewStory() {
+  return (
+    <div className="ch-preview ch-preview--story">
+      <div className="ch-pv-sky">
+        <span className="ch-pv-moon" />
+        {[18, 44, 66, 84].map((l, i) => (
+          <span key={i} className="ch-pv-twinkle" style={{ left: `${l}%`, top: `${12 + (i % 2) * 22}%` }}>·</span>
+        ))}
+        <span className="ch-pv-orb">82</span>
+      </div>
+      <div className="ch-pv-paper">
+        <span className="ch-pv-line ch-pv-w50" />
+        <span className="ch-pv-line ch-pv-w70" />
+      </div>
+      <div className="ch-pv-story-row">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <span key={i} className="ch-pv-dot" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const OPTIONS = [
   {
     id: 'classic',
@@ -57,9 +81,16 @@ const OPTIONS = [
   {
     id: 'new',
     name: '심플 홈',
-    tag: 'NEW',
+    tag: 'SIMPLE',
     desc: '오늘의 운세 점수와 항목별 차트, 깔끔한 카드 그리드 중심의 홈',
     Preview: PreviewNew,
+  },
+  {
+    id: 'story',
+    name: '동화 홈',
+    tag: 'NEW',
+    desc: '삽화풍 히어로와 흩날리는 별, 동화책처럼 펼쳐 보는 파스텔 톤 홈',
+    Preview: PreviewStory,
   },
 ];
 
@@ -77,7 +108,7 @@ function ChooseHome() {
     <div className="ch-page">
       <header className="ch-header">
         <h1 className="ch-title">홈 화면을 골라주세요</h1>
-        <p className="ch-sub">두 가지 스타일 중 마음에 드는 홈으로 시작할 수 있어요.<br />나중에 설정에서 언제든 바꿀 수 있습니다.</p>
+        <p className="ch-sub">세 가지 스타일 중 마음에 드는 홈으로 시작할 수 있어요.<br />나중에 설정에서 언제든 바꿀 수 있습니다.</p>
       </header>
 
       <div className="ch-options">

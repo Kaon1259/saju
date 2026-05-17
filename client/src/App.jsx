@@ -4,6 +4,7 @@ import { TransitionProvider } from './components/PageTransition';
 import Header from './components/Header';
 import Home from './pages/Home';
 import HomeNew from './pages/HomeNew';
+import HomeStory from './pages/HomeStory';
 import ChooseHome from './pages/ChooseHome';
 import Fortune from './pages/Fortune';
 import Register from './pages/Register';
@@ -206,9 +207,12 @@ function useHomeStyleRedirect() {
   }, [location.pathname]);
 }
 
-// 홈 진입점 — homeStyle 에 따라 감성 홈(Home) / 심플 홈(HomeNew) 분기
+// 홈 진입점 — homeStyle 에 따라 감성 홈(Home) / 심플 홈(HomeNew) / 동화 홈(HomeStory) 분기
 function HomeRouter() {
-  return localStorage.getItem('homeStyle') === 'new' ? <HomeNew /> : <Home />;
+  const style = localStorage.getItem('homeStyle');
+  if (style === 'new') return <HomeNew />;
+  if (style === 'story') return <HomeStory />;
+  return <Home />;
 }
 
 // 프로필 미완성 사용자 리다이렉트

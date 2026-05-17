@@ -71,9 +71,9 @@ function Settings() {
         {/* 홈 화면 스타일 — 미리보기 선택 화면으로 이동 */}
         <div className="settings-row" onClick={() => navigate('/choose-home')} style={{ cursor: 'pointer' }}>
           <span className="settings-label">홈 화면 스타일</span>
-          <span className="settings-value">{homeStyle === 'new' ? '심플 홈' : '감성 홈'} ›</span>
+          <span className="settings-value">{homeStyle === 'new' ? '심플 홈' : homeStyle === 'story' ? '동화 홈' : '감성 홈'} ›</span>
         </div>
-        <p className="settings-desc">미리보기에서 감성 홈 / 심플 홈을 다시 선택합니다</p>
+        <p className="settings-desc">미리보기에서 감성 홈 / 심플 홈 / 동화 홈을 다시 선택합니다</p>
       </section>
 
       {/* 계정 설정 */}
