@@ -6398,6 +6398,21 @@
   font-weight: 700;
 }
 
+/* [Phase 2 정제] 덱 선택 화면 텍스트 가독성 — 그라데이션 텍스트 → 솔리드 */
+.deck-info-name { font-weight: 700; letter-spacing: -0.3px; }
+[data-theme="light"] .deck-info-name {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #3a1d52;          /* 솔리드 딥 퍼플 — 라이트 배경에서 또렷하게 */
+  filter: none;
+  text-shadow: none;
+}
+.deck-info-sub { color: rgba(255, 255, 255, 0.74); letter-spacing: 0.3px; }
+[data-theme="light"] .deck-info-sub { color: #4a3550; font-weight: 600; }
+.deck-info-name--clickable:hover { color: #ffd98a; }
+[data-theme="light"] .deck-info-name--clickable:hover { color: #7b3fa0; }
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
