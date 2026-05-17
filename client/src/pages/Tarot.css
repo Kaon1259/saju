@@ -6290,3 +6290,80 @@
   margin-bottom: 0;
 }
 
+/* ════════════════════════════════════════════════════════════
+   [Phase 1 정제] 버튼 통일 — 7종 제각각 → primary / ghost 2종
+   레이아웃(위치·패딩·display)은 건드리지 않고 시각 스킨만 통일
+   ════════════════════════════════════════════════════════════ */
+
+/* primary — 주요 액션 (덱 시작·운세 시작·자동 뽑기) */
+.deck-select-btn,
+.tarot-setup-screen .tarot-start-btn,
+.tarot-start-btn,
+.pick-auto-btn {
+  background: linear-gradient(135deg, #7b3fa0 0%, #9b59b6 52%, #c9a86a 100%);
+  color: #fff;
+  border: 1.5px solid rgba(222, 169, 87, 0.55);
+  border-radius: 16px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 6px 22px rgba(120, 60, 150, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.deck-select-btn:hover,
+.tarot-setup-screen .tarot-start-btn:hover,
+.tarot-start-btn:hover,
+.pick-auto-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 10px 30px rgba(120, 60, 150, 0.52),
+              inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.deck-select-btn:active,
+.tarot-start-btn:active,
+.pick-auto-btn:active { transform: translateY(0) scale(0.99); }
+
+/* ghost — 보조 액션 (다시·공유·리셋·결과 상단 다시) */
+.tarot-action-btn,
+.tarot-share-btn,
+.tarot-reset-btn,
+.tarot-retry-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(222, 169, 87, 0.4);
+  color: var(--color-text);
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.tarot-action-btn:hover,
+.tarot-share-btn:hover,
+.tarot-reset-btn:hover,
+.tarot-retry-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(222, 169, 87, 0.85);
+  background: rgba(222, 169, 87, 0.12);
+}
+.tarot-action-btn:active,
+.tarot-share-btn:active,
+.tarot-reset-btn:active,
+.tarot-retry-btn:active { transform: scale(0.97); }
+
+[data-theme="light"] .tarot-action-btn,
+[data-theme="light"] .tarot-share-btn,
+[data-theme="light"] .tarot-reset-btn,
+[data-theme="light"] .tarot-retry-btn {
+  background: rgba(123, 63, 160, 0.05);
+  border-color: rgba(160, 110, 40, 0.4);
+  color: #5b3a72;
+}
+[data-theme="light"] .tarot-action-btn:hover,
+[data-theme="light"] .tarot-share-btn:hover,
+[data-theme="light"] .tarot-reset-btn:hover,
+[data-theme="light"] .tarot-retry-btn:hover {
+  background: rgba(160, 110, 40, 0.1);
+  border-color: rgba(160, 110, 40, 0.7);
+}
+

@@ -1,3 +1,10 @@
+[진행중] 타로 페이지 정제 (Phase 1) — 2026-05-17
+- 진단: 타로는 "디자인 시스템 섬" — MenuIcon 0개(이모지 사용), btn-primary 0개(버튼 7종 제각각), StreamingCard 0개, CSS 6292줄
+- Phase 1-a 완료 — 버튼 통일: 7종(deck-select/tarot-start/action/reset/retry/share/pick-auto) 시각 스킨을
+  primary(보라+골드 그라데이션)/ghost(글래스+골드 테두리) 2종으로. Tarot.css 끝에 통일 오버라이드 블록 추가
+  (레이아웃·위치·패딩은 미변경 — 시각 스킨만 통일해 저위험)
+- Phase 1-b 예정 — 이모지 → MenuIcon SVG 전수 교체 (데이터 배열 ~30 + 인라인 UI 이모지)
+
 [완료] 크레파스 데코 레이어 + 주간운세 days 토큰 잘림 수정 (2026-05-17)
 - StoryDecor 컴포넌트 신규: data-homestyle="story" 일 때 전 페이지 모서리에 크레파스 손그림(달·별·구름·반짝임·꽃) 데코 표시. roughen 필터, App.jsx 전역 렌더(CSS로 노출 제어)
 - 주간운세 days 미표시 진짜 원인: max_tokens=1600 — JSON 맨 끝 days 배열이 잘려 나감
