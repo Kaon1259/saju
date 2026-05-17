@@ -2229,7 +2229,7 @@ function Tarot() {
         return (
         <div className="tarot-result-stage fade-in">
             <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
-            <button className="tarot-retry-btn" onClick={resetAll}>다시하기 ↻</button>
+            <button className="tarot-retry-btn" onClick={resetAll}><MenuIcon name="refresh" size={14} /> 다시하기</button>
           {(shuffleBgSrc || curDeck?.img) && (
             <div className="reveal-gif-bg">
               <img src={shuffleBgSrc || curDeck.img} alt="" className="reveal-bg-static" />
@@ -2263,18 +2263,14 @@ function Tarot() {
             <div className="reveal-ai-area fade-in" ref={resultRef}>
               <div className="tarot-overall glass-card tarot-framed-card">
                 <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
-                <button className="tarot-overall-retry" onClick={resetAll} aria-label="다시하기">
-                  <span className="tarot-overall-retry-icon">↻</span>
-                  <span className="tarot-overall-retry-label">다시하기</span>
-                </button>
-                <div className="tarot-overall-icon">🌟</div>
+                <div className="tarot-overall-icon"><MenuIcon name="star" size={30} /></div>
                 <p className="tarot-overall-text">{reading.overallMessage}</p>
               </div>
 
               {reading.cards && reading.cards.length > 0 && (
                 <div className="tarot-cards-table glass-card tarot-framed-card">
                   <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
-                  <h3 className="tarot-interp-title"><span>🃏</span> 카드별 해석</h3>
+                  <h3 className="tarot-interp-title"><span><MenuIcon name="tarot" size={17} /></span> 카드별 해석</h3>
                   <div className="tarot-cards-table-body">
                     {reading.cards.map((card, i) => (
                       <div key={i} className="tarot-card-row">
@@ -2289,7 +2285,7 @@ function Tarot() {
 
               <div className="tarot-interpretation glass-card tarot-framed-card">
                 <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
-                <h3 className="tarot-interp-title"><span>📜</span> 타로 마스터의 해석</h3>
+                <h3 className="tarot-interp-title"><span><MenuIcon name="book" size={17} /></span> 타로 마스터의 해석</h3>
                 <div className="tarot-interp-body">
                   {(reading.interpretation || '').split('\n').map((line, i) => (
                     <p key={i}>{line}</p>
@@ -2306,10 +2302,10 @@ function Tarot() {
 
               <div className="tarot-actions">
                 <button className="tarot-action-btn tarot-share-btn" onClick={handleShare}>
-                  <span>📤</span> 공유하기
+                  <MenuIcon name="share" size={15} /> 공유하기
                 </button>
                 <button className="tarot-action-btn tarot-reset-btn" onClick={resetAll}>
-                  <span>🔄</span> 다시 뽑기
+                  <MenuIcon name="refresh" size={15} /> 다시 뽑기
                 </button>
               </div>
             </div>

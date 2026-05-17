@@ -5,7 +5,9 @@
   crystalBall/money/work/health/wedding/heartArrow/letter/handshake/couple/clock/moon/sparkleHeart) + 렌더 3곳
   + 인라인(덱명 search·히스토리 history·코스트 heart). MenuIcon import. 장식 ✦/✧는 유지
   - 잔여(후속): 갤러리 속도(🐢▶⚡)·픽모드(🎴🃏🌙)·챕터 토글(▲▼) — MenuIcon 대응 없어 보류
-- Phase 2 예정 — 결과 화면을 공용 FortuneCard/StreamingCard로 정제, 배경 효과 절제, CSS 정리
+- Phase 2 진행 — 결과 화면 정제: 제목 이모지 → MenuIcon SVG(🃏→tarot·📜→book·🌟→star·📤→share·🔄/↻→refresh),
+  중복 "다시하기" 버튼 3개 → 2개로 정리(tarot-overall-retry 제거). 결과 화면은 이미 glass-card·FortuneCard 사용 중
+  - 잔여: tarot-framed-card 액자 오버레이 절제 여부(의도된 타로 미감이라 보류), 6292줄 CSS 정리
 
 [완료] 크레파스 데코 레이어 + 주간운세 days 토큰 잘림 수정 (2026-05-17)
 - StoryDecor 컴포넌트 신규: data-homestyle="story" 일 때 전 페이지 모서리에 크레파스 손그림(달·별·구름·반짝임·꽃) 데코 표시. roughen 필터, App.jsx 전역 렌더(CSS로 노출 제어)
