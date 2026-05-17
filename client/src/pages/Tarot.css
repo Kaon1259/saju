@@ -6413,21 +6413,27 @@
 .deck-info-name--clickable:hover { color: #ffd98a; }
 [data-theme="light"] .deck-info-name--clickable:hover { color: #7b3fa0; }
 
-/* [Phase 2 정제] 카테고리 화면 보라 글자 대비 강화 — 라이트 모드
-   #6c3483 중간 보라 → #3a1d52 딥 퍼플 (덱 이름과 동일 톤) */
+/* [Phase 2 정제] 카테고리 화면 — 배경이 다크 타로 카드 이미지라
+   라이트 모드에서도 텍스트는 흰색이어야 가독성 확보 (보라 X) */
 [data-theme="light"] .setup-substep-title,
 [data-theme="light"] .cat-tarot-label,
 [data-theme="light"] .setup-spread-card-num,
 [data-theme="light"] .setup-confirm-cat-label,
 [data-theme="light"] .setup-spread.active .setup-spread-name {
-  color: #3a1d52;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+[data-theme="light"] .setup-substep-desc,
+[data-theme="light"] .setup-spread-card-desc {
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
 }
 [data-theme="light"] .setup-more-link {
-  color: #5b3a8a;
-  border-color: rgba(91, 58, 138, 0.4);
+  color: #ffe6b8;
+  border-color: rgba(255, 215, 140, 0.5);
 }
 [data-theme="light"] .setup-confirm-tag-inline {
-  color: #5f4090;
+  color: rgba(255, 225, 170, 0.95);
 }
 
 [data-theme="light"] .tarot-action-btn,
