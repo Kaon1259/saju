@@ -24,7 +24,7 @@
 
   --sky: linear-gradient(176deg, #ffd9c2 0%, #ffbfce 26%, #e9b3da 55%, #c9a6e2 80%, #b89ad9 100%);
   --hill-3: #d3aedd;  --hill-2: #c098d2;  --hill-1: #a87fc4;
-  --tree: #8a6aae;
+  --tree-leaf: #b3d49a;  --tree-trunk: #c2a17e;
   --moon: radial-gradient(circle at 38% 32%, #fffaf0 0%, #fff0d5 60%, #ffe1bb 100%);
   --moon-glow: rgba(255, 238, 205, 0.6);
 
@@ -55,7 +55,7 @@
 
   --sky: linear-gradient(176deg, #4a3152 0%, #5b3550 38%, #6a3d52 66%, #54375a 100%);
   --hill-3: #5a4368;  --hill-2: #6a4a6e;  --hill-1: #7d5380;
-  --tree: #3f2f4d;
+  --tree-leaf: #6f8a5e;  --tree-trunk: #6e5a48;
   --moon: radial-gradient(circle at 38% 32%, #fff7e6 0%, #ffe6c2 60%, #ffd3a4 100%);
   --moon-glow: rgba(255, 224, 180, 0.42);
 
@@ -141,143 +141,76 @@
 }
 .hs-scene:not(.hs-scene--guest) { cursor: pointer; }
 
-/* 별 */
-.hs-star {
+/* 크레파스 손그림 일러스트 (SVG + roughen 필터) */
+.hs-art {
   position: absolute;
-  color: rgba(255, 252, 240, 0.95);
-  line-height: 0;
-  text-shadow: 0 0 6px rgba(255, 250, 230, 0.9);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hs-art-cloud { fill: rgba(255, 255, 255, 0.6); }
+[data-theme='dark'] .hs-art-cloud { fill: rgba(255, 255, 255, 0.14); }
+
+.hs-art-hill3 { fill: var(--hill-3); }
+.hs-art-hill2 { fill: var(--hill-2); }
+.hs-art-hill1 { fill: var(--hill-1); }
+.hs-art-hill3, .hs-art-hill2, .hs-art-hill1 {
+  stroke: rgba(74, 42, 70, 0.2);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+[data-theme='dark'] .hs-art-hill3,
+[data-theme='dark'] .hs-art-hill2,
+[data-theme='dark'] .hs-art-hill1 { stroke: rgba(0, 0, 0, 0.3); }
+
+.hs-art-trunk {
+  fill: var(--tree-trunk);
+  stroke: rgba(70, 44, 30, 0.42);
+  stroke-width: 1.6;
+}
+.hs-art-leaf {
+  fill: var(--tree-leaf);
+  stroke: rgba(54, 70, 40, 0.42);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.hs-art-stem { stroke: var(--tree-leaf); stroke-width: 1.8; stroke-linecap: round; }
+.hs-art-petal { fill: #ffd0dd; stroke: rgba(200, 90, 120, 0.35); stroke-width: 1; }
+.hs-art-core  { fill: #ffd98a; }
+
+.hs-art-glow { fill: rgba(255, 240, 205, 0.6); }
+[data-theme='dark'] .hs-art-glow { fill: rgba(255, 226, 175, 0.4); }
+.hs-art-moon { stroke: rgba(214, 150, 92, 0.45); stroke-width: 2; }
+.hs-art-ring {
+  fill: none;
+  stroke: rgba(255, 246, 222, 0.62);
+  stroke-width: 1.6;
+  stroke-dasharray: 3 6;
+  stroke-linecap: round;
+}
+
+.hs-art-star {
+  fill: rgba(255, 252, 240, 0.95);
   animation: hs-twinkle 3s ease-in-out infinite;
 }
 @keyframes hs-twinkle {
-  0%, 100% { opacity: 0.35; transform: scale(0.7); }
-  50%      { opacity: 1;    transform: scale(1); }
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
 }
 
-/* 구름 */
-.hs-cloud {
-  position: absolute;
-  height: 17px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.62);
-  filter: blur(0.4px);
-}
-.hs-cloud::before {
-  content: '';
-  position: absolute;
-  bottom: 5px;
-  left: 13px;
-  width: 62%;
-  height: 19px;
-  border-radius: 999px;
-  background: inherit;
-}
-.hs-cloud--a { width: 70px; top: 30px; left: 18px;  animation: hs-drift 30s ease-in-out infinite; }
-.hs-cloud--b { width: 52px; top: 64px; right: 22px; opacity: 0.8; animation: hs-drift 38s ease-in-out infinite reverse; }
-[data-theme='dark'] .hs-cloud { background: rgba(255, 255, 255, 0.12); }
-@keyframes hs-drift {
-  0%, 100% { transform: translateX(0); }
-  50%      { transform: translateX(14px); }
-}
-
-/* 달 = 오늘의 점수 */
-.hs-moon {
-  position: absolute;
-  top: 26px;
-  right: 30px;
-  width: 96px;
-  height: 96px;
-  border-radius: 49% 51% 50% 50% / 50% 49% 51% 50%;
-  background: var(--moon);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 30px 11px var(--moon-glow),
-              inset 0 -8px 16px rgba(255, 190, 130, 0.32);
-  animation: hs-float 6s ease-in-out infinite;
-}
-@keyframes hs-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
-}
-.hs-moon-halo {
-  position: absolute;
-  inset: -8px;
-  border: 1.5px dashed rgba(255, 246, 222, 0.55);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: hs-spin 40s linear infinite;
-}
-@keyframes hs-spin {
-  to { transform: rotate(360deg); }
-}
-.hs-moon-score {
-  font-size: 35px;
+.hs-art-score {
+  font-size: 33px;
   font-weight: 800;
-  line-height: 1;
   letter-spacing: -1.5px;
-  color: #d75479;
+  fill: #d75479;
 }
-.hs-moon-cap {
-  margin-top: 3px;
-  font-size: 9.5px;
+.hs-art-score--soso, .hs-art-score--warn { fill: #c47b1f; }
+.hs-art-score--bad  { fill: #7a7088; }
+.hs-art-scorecap {
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #b06b53;
-}
-.hs-moon--soso .hs-moon-score,
-.hs-moon--warn .hs-moon-score { color: #c47b1f; }
-.hs-moon--bad  .hs-moon-score { color: #7a7088; }
-
-/* 언덕 */
-.hs-hill {
-  position: absolute;
-  bottom: 0;
-}
-.hs-hill--3 {
-  width: 152%; height: 98px; left: -26%;
-  background: var(--hill-3);
-  border-radius: 52% 48% 0 0 / 100% 100% 0 0;
-}
-.hs-hill--2 {
-  width: 140%; height: 70px; left: 8%;
-  background: var(--hill-2);
-  border-radius: 46% 54% 0 0 / 100% 100% 0 0;
-}
-.hs-hill--1 {
-  width: 162%; height: 52px; left: -32%;
-  background: var(--hill-1);
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-}
-
-/* 나무 — 앞 언덕 위 실루엣 */
-.hs-tree {
-  position: absolute;
-  bottom: 38px;
-  left: 22%;
-  width: 34px;
-  height: 46px;
-}
-.hs-tree-top {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 34px;
-  height: 34px;
-  background: var(--tree);
-  border-radius: 56% 44% 52% 48% / 52% 56% 44% 48%;
-}
-.hs-tree-trunk {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 7px;
-  height: 16px;
-  background: var(--tree);
-  border-radius: 2px 2px 0 0;
+  fill: #b06b53;
 }
 
 /* 장면 위 거친 그레인 */
@@ -677,7 +610,7 @@
 
 /* ── 모션 최소화 환경 ───────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .hs-star, .hs-cloud, .hs-moon, .hs-moon-halo, .hs-lamp-orb {
+  .hs-art-star, .hs-lamp-orb {
     animation: none !important;
   }
 }

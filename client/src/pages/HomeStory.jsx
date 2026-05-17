@@ -114,6 +114,111 @@ function Corners() {
   );
 }
 
+/* ── 크레파스 손그림 히어로 일러스트 (SVG + roughen 필터) ────── */
+const HERO_STARS = [
+  [30, 30, 1], [70, 74, 0.8], [106, 26, 1.05], [148, 58, 0.82], [34, 112, 0.78],
+  [178, 98, 0.9], [214, 40, 0.95], [122, 126, 0.7], [86, 150, 0.72], [198, 132, 0.78],
+];
+const STAR_D = 'M0,-4 L1.1,-1.1 L4,0 L1.1,1.1 L0,4 L-1.1,1.1 L-4,0 L-1.1,-1.1 Z';
+
+/* 동화 나무 — 둥근 잎 + 줄기 */
+function Tree({ x, y, s = 1 }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <rect className="hs-art-trunk" x="-3.6" y="-15" width="7.2" height="17" rx="2.6" />
+      <circle className="hs-art-leaf" cx="0" cy="-29" r="15" />
+      <circle className="hs-art-leaf" cx="-10" cy="-19" r="11" />
+      <circle className="hs-art-leaf" cx="10" cy="-19" r="11" />
+    </g>
+  );
+}
+
+/* 동화 꽃 — 줄기 + 다섯 꽃잎 */
+function Flower({ x, y }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <line className="hs-art-stem" x1="0" y1="0" x2="0" y2="-10" />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <circle
+          key={i}
+          className="hs-art-petal"
+          cx={(Math.cos((i / 5) * 6.2832) * 3.6).toFixed(2)}
+          cy={(-13 + Math.sin((i / 5) * 6.2832) * 3.6).toFixed(2)}
+          r="2.7"
+        />
+      ))}
+      <circle className="hs-art-core" cx="0" cy="-13" r="2.1" />
+    </g>
+  );
+}
+
+/* 히어로 풍경 일러스트 */
+function HeroArt({ overall, gradeCls, loggedIn }) {
+  return (
+    <svg className="hs-art" viewBox="0 0 360 236" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <filter id="hs-rough" x="-12%" y="-12%" width="124%" height="124%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="3" seed="8" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="6.5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter id="hs-soft" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="6" />
+        </filter>
+        <radialGradient id="hs-moonfill" cx="38%" cy="30%" r="78%">
+          <stop offset="0%" stopColor="#fffaf0" />
+          <stop offset="58%" stopColor="#fff0d5" />
+          <stop offset="100%" stopColor="#ffe1bb" />
+        </radialGradient>
+      </defs>
+
+      {/* 달무리 글로우 */}
+      <circle className="hs-art-glow" cx="284" cy="62" r="53" filter="url(#hs-soft)" />
+
+      {/* 크레파스 손그림 — roughen 필터로 윤곽선 울렁임 */}
+      <g filter="url(#hs-rough)">
+        <ellipse className="hs-art-cloud" cx="74" cy="42" rx="32" ry="12" />
+        <ellipse className="hs-art-cloud" cx="182" cy="28" rx="21" ry="9" />
+
+        <path className="hs-art-hill3" d="M-12,148 C70,126 132,158 200,144 C268,131 322,154 372,142 L372,236 L-12,236 Z" />
+        <Tree x={146} y={166} s={0.78} />
+        <Tree x={308} y={156} s={0.62} />
+
+        <path className="hs-art-hill2" d="M-12,176 C84,154 152,188 232,172 C300,158 344,180 372,170 L372,236 L-12,236 Z" />
+        <Tree x={214} y={196} s={0.92} />
+
+        <path className="hs-art-hill1" d="M-12,202 C70,186 142,212 214,198 C284,187 332,209 372,198 L372,236 L-12,236 Z" />
+        <Tree x={66} y={220} s={1.2} />
+        <Tree x={322} y={216} s={0.72} />
+        <Flower x={116} y={210} />
+        <Flower x={150} y={214} />
+        <Flower x={258} y={208} />
+
+        <circle className="hs-art-ring" cx="284" cy="62" r="47" />
+        <circle className="hs-art-moon" cx="284" cy="62" r="42" fill="url(#hs-moonfill)" />
+      </g>
+
+      {/* 별 — 잔잔한 반짝임 */}
+      <g className="hs-art-stars">
+        {HERO_STARS.map((p, i) => (
+          <path
+            key={i}
+            className="hs-art-star"
+            style={{ animationDelay: `${(i * 0.4) % 3}s` }}
+            transform={`translate(${p[0]} ${p[1]}) scale(${p[2]})`}
+            d={STAR_D}
+          />
+        ))}
+      </g>
+
+      {/* 점수 — 또렷하게 (필터 밖) */}
+      <text className={`hs-art-score hs-art-score--${gradeCls}`} x="284" y="72" textAnchor="middle">
+        {loggedIn ? overall : '?'}
+      </text>
+      <text className="hs-art-scorecap" x="284" y="86" textAnchor="middle">오늘의 운세</text>
+    </svg>
+  );
+}
+
 /* ── 챕터 한 페이지 (장식 액자 + 2열 일러스트 패널) ──────────── */
 function StoryPage({ no, title, tint, more, items, onNav }) {
   return (
@@ -259,48 +364,8 @@ function HomeStory() {
           className={`hs-scene ${loggedIn ? '' : 'hs-scene--guest'}`}
           onClick={loggedIn ? () => go('/my') : undefined}
         >
-          {/* 하늘 — 별 */}
-          {Array.from({ length: 11 }).map((_, i) => (
-            <span
-              key={i}
-              className="hs-star"
-              style={{
-                left: `${(i * 8.7 + 5) % 94}%`,
-                top: `${(i * 19 + 7) % 56}%`,
-                animationDelay: `${(i * 0.4) % 3}s`,
-                fontSize: `${7 + (i % 3) * 4}px`,
-              }}
-            >
-              ✦
-            </span>
-          ))}
-          {/* 구름 */}
-          <span className="hs-cloud hs-cloud--a" aria-hidden="true" />
-          <span className="hs-cloud hs-cloud--b" aria-hidden="true" />
-
-          {/* 달 = 오늘의 점수 */}
-          <div className={`hs-moon hs-moon--${g.cls}`}>
-            <span className="hs-moon-halo" aria-hidden="true" />
-            {loggedIn ? (
-              <>
-                <strong className="hs-moon-score">{overall}</strong>
-                <span className="hs-moon-cap">오늘의 운세</span>
-              </>
-            ) : (
-              <strong className="hs-moon-score">?</strong>
-            )}
-          </div>
-
-          {/* 땅 — 언덕과 나무 */}
-          <span className="hs-hill hs-hill--3" aria-hidden="true" />
-          <span className="hs-hill hs-hill--2" aria-hidden="true" />
-          <span className="hs-tree" aria-hidden="true">
-            <span className="hs-tree-top" />
-            <span className="hs-tree-trunk" />
-          </span>
-          <span className="hs-hill hs-hill--1" aria-hidden="true" />
-
-          {/* 장면 위 거친 그레인 */}
+          <HeroArt overall={overall} gradeCls={g.cls} loggedIn={loggedIn} />
+          {/* 장면 위 거친 그레인 — 크레파스 왁스 질감 */}
           <div className="hs-scene-grain" aria-hidden="true" />
         </div>
 

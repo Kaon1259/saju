@@ -1,3 +1,12 @@
+[완료] 동화 홈 히어로 크레파스 손그림 일러스트 (2026-05-17)
+- 피드백: 동화 홈 상단 그림이 밋밋함 → new.png처럼 크레파스로 그린 듯한 느낌 요청
+- HeroArt — CSS div(언덕/달/나무) → 인라인 SVG 일러스트로 교체
+  - feTurbulence + feDisplacementMap "roughen" 필터를 일러스트 그룹 전체에 적용 → 모든 윤곽선이 손그림처럼 울렁임
+  - 풍경 구성: 노을 하늘 + 구름 2 + 언덕 3겹 + 둥근잎 나무 5그루(Tree) + 다섯잎 꽃 3송이(Flower) + 별 10 + 달(점수)
+  - 나무=소프트 그린, 꽃=핑크, 달=크림 — 크레파스 풍 컬러. 윤곽선 stroke로 손그림 테두리
+  - 점수 text는 roughen 그룹 밖 → 또렷하게 유지. 그레인 오버레이로 왁스 질감
+- 로컬 개발용 .env.development VITE_API_URL 주석 처리(커밋 제외) — '/api' 상대경로 → vite proxy(localhost:8080) 경유로 CORS/502 해소
+
 [완료] 홈 데이터 AI 실연동 + 설정 홈 선택 개선 (2026-05-17)
 - 심플 홈(HomeNew)·동화 홈(HomeStory) 모두 시드 산출이던 항목들을 AI 분석값에 실연동
   - 레이더 5항목/다섯 빛: 서버가 이미 내려주던 loveScore/moneyScore/healthScore/workScore 사용
