@@ -401,20 +401,27 @@ function HomeStory() {
           <h2 className="hs-h">오늘의 다섯 빛</h2>
           <div className="hs-string">
             {lights.map((l, i) => (
-              <div key={l.key} className="hs-lamp" style={{ '--i': i }}>
+              <button
+                key={l.key}
+                className="hs-lamp"
+                style={{ '--i': i }}
+                onClick={() => go('/my')}
+                aria-label={`${l.label} ${l.stars}점 — 오늘의 운세 보기`}
+              >
                 <span className="hs-lamp-wire" aria-hidden="true" />
                 <span className="hs-lamp-orb">
                   <MenuIcon name={l.icon} size={19} />
                 </span>
                 <span className="hs-lamp-label">{l.label}</span>
-                <span className="hs-lamp-stars" aria-label={`${l.stars}점`}>
+                <span className="hs-lamp-stars">
                   {Array.from({ length: 5 }).map((_, s) => (
                     <i key={s} className={s < l.stars ? 'on' : ''}>★</i>
                   ))}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
+          <p className="hs-string-hint">탭하면 오늘의 운세를 자세히 볼 수 있어요</p>
         </section>
       )}
 

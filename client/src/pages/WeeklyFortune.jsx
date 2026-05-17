@@ -314,36 +314,50 @@ function WeeklyFortune() {
             </div>
           )}
 
-          {/* 7일 타임라인 */}
+          {/* 요일별 운세 — 월~일 하루단위 풀폭 카드 */}
           {result.days && result.days.length > 0 && (
             <div className="wf-section">
               <h3 className="wf-section-title"><span>&#128197;</span> 요일별 운세</h3>
-              <div className="wf-days-scroll" ref={daysScrollRef}>
+              <div className="wf-daylist">
                 {result.days.map((day, i) => {
-                  const isBest = day.dayLabel === bestDayName || day.day === bestDayName;
-                  const isCaution = day.dayLabel === cautionDayName || day.day === cautionDayName;
+                  const label = day.dayLabel || day.day || DAY_LABELS[i] || '';
+                  const isBest = bestDayName && (label === bestDayName || bestDayName.includes(label));
+                  const isCaution = cautionDayName && (label === cautionDayName || cautionDayName.includes(label));
                   const scoreColor = getScoreColor(day.score);
                   return (
                     <div
                       key={i}
-                      className={`wf-day-card glass-card ${isBest ? 'wf-day--best' : ''} ${isCaution ? 'wf-day--caution' : ''}`}
+                      className={`wf-dayrow glass-card ${isBest ? 'wf-dayrow--best' : ''} ${isCaution ? 'wf-dayrow--caution' : ''}`}
                     >
-                      {isBest && <span className="wf-day-badge wf-day-badge--best">BEST</span>}
-                      {isCaution && <span className="wf-day-badge wf-day-badge--caution">&#9888;</span>}
-                      <span className="wf-day-label">{day.dayLabel || DAY_LABELS[i] || ''}</span>
-                      <span className="wf-day-date">{day.date || ''}</span>
-                      <div className="wf-day-score-bar">
-                        <div className="wf-day-score-fill" style={{ height: `${day.score}%`, background: scoreColor }} />
+                      <div className="wf-dayrow-head">
+                        <div className="wf-dayrow-daybox">
+                          <span className="wf-dayrow-label">{label}</span>
+                          {day.date && <span className="wf-dayrow-date">{day.date}</span>}
+                        </div>
+                        {isBest && <span className="wf-dayrow-badge wf-dayrow-badge--best">BEST</span>}
+                        {isCaution && <span className="wf-dayrow-badge wf-dayrow-badge--caution">주의</span>}
+                        <div className="wf-dayrow-scorebox">
+                          <span className="wf-dayrow-score" style={{ color: scoreColor }}>{day.score ?? 0}</span>
+                          <span className="wf-dayrow-score-unit">점</span>
+                        </div>
                       </div>
-                      <span className="wf-day-score" style={{ color: scoreColor }}>{day.score}</span>
-                      <span className="wf-day-keyword">{day.keyword || ''}</span>
-                      {day.tip && <span className="wf-day-tip">{day.tip}</span>}
+                      <div className="wf-dayrow-bar">
+                        <div className="wf-dayrow-bar-fill" style={{ width: `${day.score ?? 0}%`, background: scoreColor }} />
+                      </div>
+                      {day.keyword && <span className="wf-dayrow-keyword">{day.keyword}</span>}
+                      {day.tip && <p className="wf-dayrow-tip">{day.tip}</p>}
+                      {day.advice && (
+                        <p className="wf-dayrow-advice"><span>&#128161;</span>{day.advice}</p>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
           )}
+
+          {/* 이번 주 전체 흐름 (주간 종합) */}
+          <h3 className="wf-section-title"><span>&#128202;</span> 이번 주 전체 흐름</h3>
 
           {/* 운세 카드들 (Progressive 모드: streamingActive일 때 placeholder + typewriter) */}
           {(() => {

@@ -335,6 +335,21 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.hs-lamp:active .hs-lamp-orb {
+  transform: scale(0.9);
+}
+.hs-string-hint {
+  margin: 9px 0 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-2);
 }
 .hs-lamp-wire {
   width: 1.5px;
