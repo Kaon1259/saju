@@ -6560,6 +6560,52 @@
   color: #ffe9a8;
 }
 
+/* [Phase 3 정제] ② 카드 수 카드 — 카테고리 타일과 톤 통일 */
+.setup-onepage .setup-spread-card {
+  border: 1.5px solid rgba(218, 165, 32, 0.28);
+  background: linear-gradient(160deg, rgba(72, 40, 108, 0.66), rgba(28, 16, 48, 0.84));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  animation: none;
+  border-radius: 14px;
+}
+.setup-onepage .setup-spread-card.active {
+  border-color: #DAA520;
+  box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.45);
+}
+/* 코스트 배지 — 핑크 → 골드 톤 통일 */
+.setup-onepage .setup-spread-card-cost {
+  background: rgba(218, 165, 32, 0.16);
+  border-color: rgba(218, 165, 32, 0.42);
+  color: #f0d68a;
+}
+
+/* [Phase 3 정제] 펼치기 — 이모지용 32px 원형 잔재 → 깔끔한 골드 핀 */
+.setup-pickmode-mini { gap: 6px; margin-top: 4px; }
+.setup-pickmode-mini-btn,
+[data-theme="light"] .setup-pickmode-mini-btn {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.62);
+}
+.setup-pickmode-mini-btn.active,
+[data-theme="light"] .setup-pickmode-mini-btn.active {
+  background: linear-gradient(135deg, #9b59b6, #c9a86a);
+  border-color: rgba(218, 165, 32, 0.6);
+  color: #fff;
+}
+.setup-pickmode-mini-label,
+[data-theme="light"] .setup-pickmode-mini-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
