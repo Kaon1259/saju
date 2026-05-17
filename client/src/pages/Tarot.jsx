@@ -1598,33 +1598,24 @@ function Tarot() {
               <div className="setup-top-bar">
                 <button
                   className="setup-deck-change"
-                  onClick={() => {
-                    if (setupStep === 'spread') setSetupStep('category');
-                    else if (setupStep === 'confirm') setSetupStep('spread');
-                    else flipToStep(() => setStep('deck'));
-                  }}
+                  onClick={() => flipToStep(() => setStep('deck'))}
                 >
-                  ← {setupStep === 'category' ? '덱 변경' : '뒤로'}
+                  ← 덱 변경
                 </button>
                 <span className="setup-deck-name">{curDeck.name}</span>
-                <div className="setup-step-dots" aria-label="진행 단계">
-                  <span className={`setup-step-dot ${setupStep === 'category' ? 'active' : 'done'}`} />
-                  <span className={`setup-step-dot ${setupStep === 'spread' ? 'active' : setupStep === 'confirm' ? 'done' : ''}`} />
-                  <span className={`setup-step-dot ${setupStep === 'confirm' ? 'active' : ''}`} />
-                </div>
+                <span className="setup-top-spacer" aria-hidden="true" />
               </div>
 
-              {/* ════════ STEP A: 카테고리 ════════ */}
-              {setupStep === 'category' && (() => {
+              {/* ════════ 한 페이지 — 분야 + 카드 수 + 시작 ════════ */}
+              {(() => {
                 const allCats = [...TAROT_MAIN_CATS, ...(sheetExpanded ? TAROT_MORE_CATS : [])];
+                const ready = !!category && !!spread;
                 return (
-                  <div className="setup-substep fade-in">
-                    <h2 className="setup-substep-title">
-                      <span className="setup-title-quote">「</span>
-                      무엇을 물어볼까요?
-                      <span className="setup-title-quote">」</span>
-                    </h2>
-                    <p className="setup-substep-desc">카드에게 던질 질문의 분야를 골라주세요</p>
+                  <div className="setup-onepage fade-in">
+                    {/* ① 분야 선택 */}
+                    <h3 className="setup-section-label">
+                      <span className="setup-section-no">1</span> 무엇을 물어볼까요?
+                    </h3>
                     <div className="setup-cat-grid">
                       {allCats.map((item, i) => {
                         const bgImg = categoryBgImages[item.id];
@@ -1633,7 +1624,7 @@ function Tarot() {
                             key={item.id}
                             className={`setup-cat-tarot-card ${category === item.id ? 'active' : ''} ${bgImg ? 'has-deck-bg' : ''}`}
                             style={{ '--card-i': i, ...(bgImg ? { '--deck-bg': `url(${bgImg})` } : {}) }}
-                            onClick={() => { setCategory(item.id); setSetupStep('spread'); }}
+                            onClick={() => setCategory(item.id)}
                           >
                             {bgImg && <span className="cat-tarot-deck-bg" aria-hidden="true" />}
                             <span className="cat-tarot-corner cat-tarot-corner-tl">✦</span>
@@ -1648,113 +1639,45 @@ function Tarot() {
                       })}
                     </div>
                     {!sheetExpanded && (
-                      <button
-                        className="setup-more-link"
-                        onClick={() => setSheetExpanded(true)}
-                      >
+                      <button className="setup-more-link" onClick={() => setSheetExpanded(true)}>
                         + 더 많은 분야 보기
                       </button>
                     )}
-                  </div>
-                );
-              })()}
 
-              {/* ════════ STEP B: 카드 수 ════════ */}
-              {setupStep === 'spread' && (() => {
-                const cat = [...TAROT_MAIN_CATS, ...TAROT_MORE_CATS].find(x => x.id === category);
-                return (
-                  <div className="setup-substep fade-in">
-                    <h2 className="setup-substep-title">
-                      <span className="setup-title-quote">「</span>
-                      몇 장 뽑을까요?
-                      <span className="setup-title-quote">」</span>
-                    </h2>
-                    <p className="setup-substep-desc">
-                      <span className="setup-desc-cat">{cat && <MenuIcon name={cat.icon} size={15} />} {cat?.label}</span>
-                    </p>
+                    {/* ② 카드 수 선택 */}
+                    <h3 className="setup-section-label">
+                      <span className="setup-section-no">2</span> 몇 장 뽑을까요?
+                    </h3>
                     <div className="setup-spread-stack">
-                      {SPREADS.map((s, i) => {
-                        const num = parseInt(s.id, 10) || 1;
-                        const desc = s.id === '1' ? '한 장의 명확한 답'
-                                   : s.id === '3' ? '과거 · 현재 · 미래'
-                                   : '깊이 있는 켈틱 크로스';
-                        return (
-                          <button
-                            key={s.id}
-                            className={`setup-spread-card ${spread === s.id ? 'active' : ''}`}
-                            style={{ '--spread-i': i }}
-                            onClick={() => { setSpread(s.id); setSetupStep('confirm'); }}
-                          >
-                            <div className="setup-spread-visual">
-                              {Array.from({ length: num }).map((_, k) => (
-                                <span key={k} className="spread-mini-card" style={{ '--mc-i': k, '--mc-total': num }} />
-                              ))}
-                            </div>
-                            <div className="setup-spread-card-main">
-                              <span className="setup-spread-card-num">{s.label}</span>
-                              <span className="setup-spread-card-desc">{desc}</span>
-                            </div>
-                            <span className="setup-spread-card-cost"><MenuIcon name="heart" size={12} /> {s.cost}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* ════════ STEP C: 시작 / 옵션 ════════ */}
-              {setupStep === 'confirm' && (() => {
-                const c = [...TAROT_MAIN_CATS, ...TAROT_MORE_CATS].find(x => x.id === category);
-                const sp = SPREADS.find(x => x.id === spread);
-                const num = parseInt(spread, 10) || 1;
-                const spreadDesc = spread === '1' ? '한 장의 명확한 답'
-                                : spread === '3' ? '과거 · 현재 · 미래'
-                                : '깊이 있는 켈틱 크로스';
-                const catBgImg = categoryBgImages[category];
-                return (
-                  <div className="setup-substep fade-in">
-                    <h2 className="setup-substep-title">
-                      <span className="setup-title-quote">「</span>
-                      준비 완료
-                      <span className="setup-title-quote">」</span>
-                    </h2>
-
-                    {/* 선택한 분야 + 카드 수 — Step B 카드와 동일한 보라/다크 그라데이션 배경 */}
-                    <div className="setup-confirm-grid">
-                      <div className="setup-spread-card setup-confirm-card" style={{ pointerEvents: 'none' }}>
-                        <span className="setup-confirm-tag-inline">선택한 분야</span>
-                        <div className="setup-confirm-row">
-                          <span className="setup-confirm-cat-icon">{c && <MenuIcon name={c.icon} size={22} />}</span>
-                          <span className="setup-confirm-cat-label">{c?.label}</span>
-                        </div>
-                      </div>
-
-                      <div className="setup-spread-card setup-confirm-card" style={{ pointerEvents: 'none' }}>
-                        <span className="setup-confirm-tag-inline">카드 수</span>
-                        <div className="setup-confirm-row">
+                      {SPREADS.map((s, i) => (
+                        <button
+                          key={s.id}
+                          className={`setup-spread-card ${spread === s.id ? 'active' : ''}`}
+                          style={{ '--spread-i': i }}
+                          onClick={() => setSpread(s.id)}
+                        >
                           <div className="setup-spread-visual">
-                            {Array.from({ length: num }).map((_, k) => (
-                              <span key={k} className="spread-mini-card" style={{ '--mc-i': k, '--mc-total': num }} />
+                            {Array.from({ length: s.count }).map((_, k) => (
+                              <span key={k} className="spread-mini-card" style={{ '--mc-i': k, '--mc-total': s.count }} />
                             ))}
                           </div>
-                          <div className="setup-spread-card-main" style={{ flex: 1 }}>
-                            <span className="setup-spread-card-num">{sp?.label}</span>
-                            <span className="setup-spread-card-desc">{spreadDesc}</span>
+                          <div className="setup-spread-card-main">
+                            <span className="setup-spread-card-num">{s.label}</span>
+                            <span className="setup-spread-card-desc">{s.desc}</span>
                           </div>
-                          <span className="setup-spread-card-cost"><MenuIcon name="heart" size={12} /> {sp?.cost}</span>
-                        </div>
-                      </div>
+                          <span className="setup-spread-card-cost"><MenuIcon name="heart" size={12} /> {s.cost}</span>
+                        </button>
+                      ))}
                     </div>
 
-                    {/* 질문 추가 (선택) — 아코디언 */}
+                    {/* 질문 추가 (선택) */}
                     <button
                       type="button"
                       className="setup-question-toggle"
                       onClick={() => setQuestionOpen(v => !v)}
                       aria-expanded={questionOpen}
                     >
-                      <span>✏️ 직접 질문 추가 <span className="setup-optional">(선택)</span></span>
+                      <span>직접 질문 추가 <span className="setup-optional">(선택)</span></span>
                       <span className="setup-question-toggle-arrow">{questionOpen ? '▲' : '▼'}</span>
                     </button>
                     {questionOpen && (
@@ -1765,35 +1688,36 @@ function Tarot() {
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
                         maxLength={100}
-                        autoFocus
                       />
                     )}
 
                     {/* 시작 버튼 */}
-                    <button className="tarot-start-btn" ref={startBtnRef} onClick={() => guardedShuffleStart(startShuffle)}>
-                      <span>카드 셔플 시작</span>
-                      <HeartCost category={tarotCategory} />
+                    <button
+                      className="tarot-start-btn"
+                      ref={startBtnRef}
+                      disabled={!ready}
+                      onClick={() => { if (ready) guardedShuffleStart(startShuffle); }}
+                    >
+                      <span>{ready ? '카드 셔플 시작' : '분야와 카드 수를 선택하세요'}</span>
+                      {ready && <HeartCost category={tarotCategory} />}
                       <span className="tarot-start-glow" />
                     </button>
 
-                    {/* 펼치기 방식 — 시작 버튼 아래 미니 토글 */}
+                    {/* 펼치기 방식 */}
                     <div className="setup-pickmode-mini" role="group" aria-label="카드 펼치기 방식">
                       <span className="setup-pickmode-mini-label">펼치기</span>
                       <button
                         className={`setup-pickmode-mini-btn ${pickMode === 'carousel' ? 'active' : ''}`}
                         onClick={() => { setPickMode('carousel'); localStorage.setItem('tarotPickMode', 'carousel'); }}
-                        title="한 장씩 넘기기"
-                      >🎴</button>
+                      >한 장씩</button>
                       <button
                         className={`setup-pickmode-mini-btn ${pickMode === 'line' ? 'active' : ''}`}
                         onClick={() => { setPickMode('line'); localStorage.setItem('tarotPickMode', 'line'); }}
-                        title="전체 펼쳐서 선택"
-                      >🃏</button>
+                      >전체</button>
                       <button
                         className={`setup-pickmode-mini-btn ${pickMode === 'fan' ? 'active' : ''}`}
                         onClick={() => { setPickMode('fan'); localStorage.setItem('tarotPickMode', 'fan'); }}
-                        title="전통 부채꼴"
-                      >🌙</button>
+                      >부채꼴</button>
                     </div>
                   </div>
                 );

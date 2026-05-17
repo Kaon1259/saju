@@ -6436,6 +6436,51 @@
   color: rgba(255, 225, 170, 0.95);
 }
 
+/* [Phase 2 정제] 타로 설정 — 3단계 위저드 → 한 페이지 */
+.setup-onepage {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.setup-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.setup-section-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9b59b6, #c9a86a);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.setup-top-spacer { width: 56px; flex-shrink: 0; }
+.tarot-start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+/* 펼치기 방식 버튼 — 이모지 → 텍스트 라벨 대응 */
+.setup-pickmode-mini-btn {
+  width: auto;
+  min-width: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
