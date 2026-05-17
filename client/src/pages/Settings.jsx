@@ -5,11 +5,25 @@ import { clearAuth } from '../utils/auth';
 import { useToast } from '../components/Toast';
 import './Settings.css';
 
+const HOME_STYLES = [
+  { id: 'classic', name: '감성 홈', desc: '하트·배너 감성' },
+  { id: 'new',     name: '심플 홈', desc: '점수·차트 깔끔' },
+  { id: 'story',   name: '동화 홈', desc: '삽화·동화책' },
+];
+
 function Settings() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [fontSize, setFontSize] = useState(localStorage.getItem('fontSize') || 'normal');
   const [autoLogin, setAutoLogin] = useState(localStorage.getItem('autoLogin') !== 'off');
-  const [homeStyle] = useState(localStorage.getItem('homeStyle') || 'classic');
+  const [homeStyle, setHomeStyle] = useState(localStorage.getItem('homeStyle') || 'classic');
+
+  const selectHomeStyle = (id) => {
+    setHomeStyle(id);
+    try { localStorage.setItem('homeStyle', id); } catch (_) {}
+    const s = HOME_STYLES.find((h) => h.id === id);
+    toast?.(`${s.name}으로 변경됐어요`, 'success');
+  };
   const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
   const [theme, setTheme] = useState(isDark ? 'dark' : 'light');
 
@@ -68,12 +82,26 @@ function Settings() {
 
         <div className="settings-divider" />
 
-        {/* 홈 화면 스타일 — 미리보기 선택 화면으로 이동 */}
-        <div className="settings-row" onClick={() => navigate('/choose-home')} style={{ cursor: 'pointer' }}>
+        {/* 홈 화면 스타일 — 3가지 인라인 선택 */}
+        <div className="settings-row">
           <span className="settings-label">홈 화면 스타일</span>
-          <span className="settings-value">{homeStyle === 'new' ? '심플 홈' : homeStyle === 'story' ? '동화 홈' : '감성 홈'} ›</span>
         </div>
-        <p className="settings-desc">미리보기에서 감성 홈 / 심플 홈 / 동화 홈을 다시 선택합니다</p>
+        <div className="settings-homestyle-picker">
+          {HOME_STYLES.map((s) => (
+            <button
+              key={s.id}
+              className={`settings-homestyle-btn ${homeStyle === s.id ? 'settings-homestyle-btn--active' : ''}`}
+              onClick={() => selectHomeStyle(s.id)}
+            >
+              <span className="settings-homestyle-name">{s.name}</span>
+              <span className="settings-homestyle-desc">{s.desc}</span>
+            </button>
+          ))}
+        </div>
+        <p className="settings-desc">
+          탭하면 바로 적용됩니다 ·{' '}
+          <span className="settings-link" onClick={() => navigate('/choose-home')}>큰 미리보기 ›</span>
+        </p>
       </section>
 
       {/* 계정 설정 */}

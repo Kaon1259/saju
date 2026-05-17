@@ -60,6 +60,67 @@
 [data-theme="light"] .settings-fontsize-label { color: rgba(0,0,0,0.45); }
 [data-theme="light"] .settings-fontsize-btn--active .settings-fontsize-label { color: #6d28d9; }
 
+/* 홈 화면 스타일 선택 */
+.settings-homestyle-picker {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.settings-homestyle-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 13px 6px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.settings-homestyle-btn--active {
+  border-color: #7C3AED;
+  background: rgba(124,58,237,0.15);
+}
+.settings-homestyle-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+.settings-homestyle-desc {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  line-height: 1.3;
+}
+.settings-homestyle-btn--active .settings-homestyle-name,
+.settings-homestyle-btn--active .settings-homestyle-desc {
+  color: #a78bfa;
+}
+.settings-link {
+  color: #a78bfa;
+  font-weight: 700;
+  cursor: pointer;
+}
+[data-theme="light"] .settings-homestyle-btn {
+  border-color: rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.02);
+}
+[data-theme="light"] .settings-homestyle-btn--active {
+  border-color: #7C3AED;
+  background: rgba(124,58,237,0.08);
+}
+[data-theme="light"] .settings-homestyle-desc {
+  color: rgba(0,0,0,0.45);
+}
+[data-theme="light"] .settings-homestyle-btn--active .settings-homestyle-name,
+[data-theme="light"] .settings-homestyle-btn--active .settings-homestyle-desc {
+  color: #6d28d9;
+}
+[data-theme="light"] .settings-link { color: #6d28d9; }
+
 /* 로그아웃 */
 .settings-logout-btn {
   width: 100%; padding: 12px; border-radius: 10px;

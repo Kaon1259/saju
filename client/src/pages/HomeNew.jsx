@@ -20,18 +20,29 @@ function hashFloat(seed, salt) {
 
 /* ── 레이더 차트 5개 항목 ──────────────────────────────────────── */
 const RADAR_AXES = [
-  { key: 'love',   label: '연애운' },
-  { key: 'money',  label: '재물운' },
-  { key: 'social', label: '인간관계' },
-  { key: 'health', label: '건강운' },
-  { key: 'work',   label: '직장운' },
+  { key: 'love',   label: '연애운',   scoreKey: 'loveScore' },
+  { key: 'money',  label: '재물운',   scoreKey: 'moneyScore' },
+  { key: 'social', label: '인간관계', scoreKey: null },
+  { key: 'health', label: '건강운',   scoreKey: 'healthScore' },
+  { key: 'work',   label: '직장운',   scoreKey: 'workScore' },
 ];
 
-function deriveRadar(seed, base) {
-  const b = base || 72;
+/* AI 분석값(loveScore 등)이 있으면 실연동, 없으면 시드 산출 폴백.
+   인간관계는 AI 항목이 없어 연애·직장 점수 평균으로 산출. */
+function buildRadar(seed, base, saju) {
+  const real = saju?.aiAnalyzed ? saju : null;
+  const clamp = (v) => Math.max(40, Math.min(98, Math.round(v)));
+  const derived = (key) => clamp((base || 72) + (hashFloat(seed, key) - 0.5) * 34);
   return RADAR_AXES.map((a) => {
-    const off = Math.round((hashFloat(seed, a.key) - 0.5) * 34); // -17 ~ +17
-    return { ...a, value: Math.max(40, Math.min(98, b + off)) };
+    let value;
+    if (real && a.scoreKey && real[a.scoreKey] != null) {
+      value = clamp(real[a.scoreKey]);
+    } else if (a.key === 'social' && real && real.loveScore != null && real.workScore != null) {
+      value = clamp((real.loveScore + real.workScore) / 2);
+    } else {
+      value = derived(a.key);
+    }
+    return { ...a, value };
   });
 }
 
@@ -197,7 +208,7 @@ function HomeNew() {
           const msg = result.milestoneCategory
             ? `🎉 ${result.consecutiveDays}일 연속 출석! +${result.rewardAmount}하트 지급`
             : `✅ 출석 완료! +${result.rewardAmount}하트 지급 (${result.consecutiveDays}일째)`;
-          toast?.success?.(msg);
+          toast?.(msg, 'success');
         }
       } catch (_) {}
     })();
@@ -211,19 +222,20 @@ function HomeNew() {
     if (saju?.aiAnalyzed && saju?.score != null) return saju.score;
     return 56 + Math.round(hashFloat(seed, 'overall') * 40); // 56~96
   }, [myData, seed]);
-  const radar = useMemo(() => deriveRadar(seed, overall), [seed, overall]);
+  const radar = useMemo(() => buildRadar(seed, overall, myData?.saju), [seed, overall, myData]);
   const g = grade(overall);
 
-  // 오늘의 행운 (결정적)
+  // 오늘의 행운 — AI 분석값이 있으면 실연동, 없으면 시드 산출 폴백
   const lucky = useMemo(() => {
     const COLORS = ['코랄 핑크', '아이보리', '라벤더', '민트', '소프트 옐로', '스카이 블루'];
-    const PLACES = ['카페', '서점', '공원', '강변 산책로', '미술관', '꽃집'];
+    const DIRS = ['동쪽', '서쪽', '남쪽', '북쪽', '남동쪽', '북서쪽'];
+    const real = myData?.saju?.aiAnalyzed ? myData.saju : null;
     return {
-      color: COLORS[Math.floor(hashFloat(seed, 'color') * COLORS.length)],
-      number: 1 + Math.floor(hashFloat(seed, 'num') * 45),
-      place: PLACES[Math.floor(hashFloat(seed, 'place') * PLACES.length)],
+      color: real?.luckyColor || COLORS[Math.floor(hashFloat(seed, 'color') * COLORS.length)],
+      number: real?.luckyNumber != null ? real.luckyNumber : 1 + Math.floor(hashFloat(seed, 'num') * 45),
+      direction: real?.luckyDirection || DIRS[Math.floor(hashFloat(seed, 'place') * DIRS.length)],
     };
-  }, [seed]);
+  }, [seed, myData]);
 
   const go = (path) => navigate(path);
 
@@ -283,8 +295,8 @@ function HomeNew() {
         </div>
         <div className="hn-lucky-sep" />
         <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="pin" size={16} /> 행운의 장소</span>
-          <span className="hn-lucky-val">{lucky.place}</span>
+          <span className="hn-lucky-key"><MenuIcon name="compass" size={16} /> 행운의 방향</span>
+          <span className="hn-lucky-val">{lucky.direction}</span>
         </div>
       </section>
 

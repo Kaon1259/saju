@@ -1,3 +1,15 @@
+[완료] 홈 데이터 AI 실연동 + 설정 홈 선택 개선 (2026-05-17)
+- 심플 홈(HomeNew)·동화 홈(HomeStory) 모두 시드 산출이던 항목들을 AI 분석값에 실연동
+  - 레이더 5항목/다섯 빛: 서버가 이미 내려주던 loveScore/moneyScore/healthScore/workScore 사용
+    (MyFortuneController — cachedFortune. aiAnalyzed 시). 인간관계/인연은 AI 항목 없음 → 연애·직장 평균
+  - 오늘의 행운: luckyColor/luckyNumber 실연동. "행운의 장소"(시드) → "행운의 방향"(luckyDirection 실연동)
+  - aiAnalyzed=false(오늘 분석 전)면 기존대로 시드 산출 폴백 — buildRadar/buildLights
+- 출석 토스트 버그 수정: HomeNew/HomeStory 가 toast?.success?.(msg) 호출 → useToast는 (msg,type) 함수라
+  실제로 안 뜨던 것을 toast?.(msg,'success') 로 수정
+- Settings 홈 화면 스타일: /choose-home 이동 행 1개 → 3가지(감성/심플/동화) 인라인 선택기로 개선
+  탭 즉시 적용 + 토스트, "큰 미리보기" 링크로 /choose-home 보존. 글자크기 피커와 동일 톤
+- 서버/스키마 변경 없음 — 클라 전용. 앱 반영은 npm run build → npx cap sync 필요
+
 [완료] 동화 홈 신설 + 거친 질감 전면 재작업 — 세 번째 홈 스타일 (2026-05-17)
 - new.png(인스타 SNS 화면) 참고 요청 → 사용자 의도는 "파스텔 톤 + 거친 질감의 동화 일러스트 분위기"
 - HomeStory.jsx/css 신규 — 감성 홈(Home)/심플 홈(HomeNew)에 이은 세 번째 홈. homeStyle='story'
