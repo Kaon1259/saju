@@ -6606,6 +6606,50 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+/* [Phase 3 정제] 설정 화면은 다크 카드이미지 배경 — 라이트 모드에서도
+   다크 톤 유지 (기존 라이트 규칙이 흰색으로 만들던 것 덮어씀) */
+[data-theme="light"] .tarot-setup-screen .setup-question-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(218, 165, 32, 0.3);
+  color: rgba(255, 255, 255, 0.82);
+}
+[data-theme="light"] .tarot-setup-screen .setup-question-toggle .setup-optional {
+  color: rgba(255, 255, 255, 0.45);
+}
+[data-theme="light"] .tarot-setup-screen .setup-question-input {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(218, 165, 32, 0.3);
+  color: #fff;
+}
+[data-theme="light"] .tarot-setup-screen .tarot-start-btn {
+  background: linear-gradient(135deg, #7b3fa0 0%, #9b59b6 52%, #c9a86a 100%);
+  color: #fff;
+  border: 1.5px solid rgba(222, 169, 87, 0.55);
+}
+[data-theme="light"] .tarot-setup-screen .setup-pickmode-mini-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  color: rgba(255, 255, 255, 0.62);
+}
+[data-theme="light"] .tarot-setup-screen .setup-pickmode-mini-btn.active {
+  background: linear-gradient(135deg, #9b59b6, #c9a86a);
+  border-color: rgba(218, 165, 32, 0.6);
+  color: #fff;
+}
+[data-theme="light"] .tarot-setup-screen .setup-pickmode-mini-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+/* 카드 수 카드 텍스트 — 라이트 모드에서 어두운 색이라 안 보이던 것 */
+[data-theme="light"] .tarot-setup-screen .setup-spread-card-num {
+  color: #f5deb3;
+}
+[data-theme="light"] .tarot-setup-screen .setup-spread-card-desc {
+  color: rgba(255, 255, 255, 0.66);
+}
+[data-theme="light"] .tarot-setup-screen .setup-spread-card {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
