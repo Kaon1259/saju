@@ -6505,6 +6505,61 @@
 /* 더보기 링크 컴팩트 */
 .setup-onepage .setup-more-link { padding: 7px; font-size: 12px; }
 
+/* [Phase 3 정제] 메뉴 선택 화면 — 카테고리 타일 깔끔하게 재정비
+   작은 타일에 카드이미지 배경·모서리별·비네트가 산만 → 균일 클린 타일 */
+.setup-onepage .cat-tarot-deck-bg,
+.setup-onepage .setup-cat-tarot-card::after,
+.setup-onepage .cat-tarot-corner,
+.setup-onepage .cat-tarot-shine {
+  display: none !important;
+}
+.setup-onepage .setup-cat-tarot-card,
+.setup-onepage .setup-cat-tarot-card.has-deck-bg {
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 5px;
+  border: 1.5px solid rgba(218, 165, 32, 0.28);
+  background: linear-gradient(160deg, rgba(72, 40, 108, 0.66), rgba(28, 16, 48, 0.84));
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+  animation: none;
+}
+/* 아이콘 — 둥근 배지 */
+.setup-onepage .cat-tarot-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(218, 165, 32, 0.14);
+  filter: none;
+  color: #f0d68a;
+  font-size: inherit;
+}
+.setup-onepage .cat-tarot-icon svg { width: 21px; height: 21px; }
+.setup-onepage .cat-tarot-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: none;
+  color: #f3e6c8;
+}
+/* 호버 — 회전 제거, 담백하게 */
+.setup-onepage .setup-cat-tarot-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(218, 165, 32, 0.7);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+/* 선택 — 깔끔한 골드 강조 */
+.setup-onepage .setup-cat-tarot-card.active {
+  border-color: #DAA520;
+  box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.45);
+  background: linear-gradient(160deg, rgba(112, 72, 152, 0.82), rgba(46, 26, 74, 0.92));
+}
+.setup-onepage .setup-cat-tarot-card.active .cat-tarot-icon {
+  background: rgba(218, 165, 32, 0.3);
+  color: #ffe9a8;
+}
+
 [data-theme="light"] .tarot-action-btn,
 [data-theme="light"] .tarot-share-btn,
 [data-theme="light"] .tarot-reset-btn,
