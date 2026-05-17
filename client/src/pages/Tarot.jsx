@@ -1402,7 +1402,7 @@ function Tarot() {
             <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
             {/* ─── 라디얼 스포트라이트 + 별빛 (정적) ─── */}
             <div className="deck-bg-spotlight" aria-hidden="true">
-              {Array.from({ length: 50 }).map((_, i) => {
+              {Array.from({ length: 22 }).map((_, i) => {
                 // 의사 랜덤 분포 (시드 기반, 매번 같은 위치)
                 const seed = i * 9301 + 49297;
                 const rx = ((seed * 233) % 10000) / 100;
