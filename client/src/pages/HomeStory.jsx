@@ -74,30 +74,42 @@ const QUICK = [
 /* ── 챕터별 일러스트 패널 ─────────────────────────────────────── */
 const CHAPTERS = [
   {
-    no: '제1장', title: '사랑 이야기', tint: 'rose', more: '/love-fortune',
+    no: '제1장', title: '사랑 이야기', tint: 'rose',
     items: [
-      { label: '1:1연애',   sub: '둘만의 인연',   icon: 'heart',      path: '/my-solo' },
-      { label: '썸·짝사랑', sub: '설레는 마음',   icon: 'heartArrow', path: '/my-some-crush' },
-      { label: '데이트운',  sub: '함께한 하루',   icon: 'couple',     path: '/my-love-compat' },
-      { label: '스타궁합',  sub: '별과 나',       icon: 'star',       path: '/my-star' },
+      { label: '1:1연애',   sub: '둘만의 인연',   icon: 'heart',        path: '/my-solo' },
+      { label: '썸·짝사랑', sub: '설레는 마음',   icon: 'heartArrow',   path: '/my-some-crush' },
+      { label: '데이트운',  sub: '함께한 하루',   icon: 'couple',       path: '/my-love-compat' },
+      { label: '스타궁합',  sub: '별과 나',       icon: 'star',         path: '/my-star' },
+      { label: '재회운',    sub: '다시 만날까',   icon: 'refresh',      path: '/again-meet' },
+      { label: '사주궁합',  sub: '우리 둘',       icon: 'sparkleHeart', path: '/compatibility' },
+      { label: '스타매칭',  sub: '최애와 나',     icon: 'people',       path: '/celeb-match' },
+      { label: '그룹궁합',  sub: '여럿의 인연',   icon: 'handshake',    path: '/celeb-fortune' },
     ],
   },
   {
-    no: '제2장', title: '계절 이야기', tint: 'peach', more: '/fortune',
+    no: '제2장', title: '계절 이야기', tint: 'peach',
     items: [
-      { label: '신년운세', sub: '새해 첫 장',     icon: 'newyear', path: '/year-fortune' },
-      { label: '월간운세', sub: '이번 달 이야기', icon: 'monthly', path: '/monthly-fortune' },
-      { label: '주간운세', sub: '한 주의 흐름',   icon: 'weekly',  path: '/weekly-fortune' },
-      { label: '토정비결', sub: '올해의 길',      icon: 'tojeong', path: '/tojeong' },
+      { label: '신년운세', sub: '새해 첫 장',     icon: 'newyear',       path: '/year-fortune' },
+      { label: '월간운세', sub: '이번 달 이야기', icon: 'monthly',       path: '/monthly-fortune' },
+      { label: '주간운세', sub: '한 주의 흐름',   icon: 'weekly',        path: '/weekly-fortune' },
+      { label: '토정비결', sub: '올해의 길',      icon: 'tojeong',       path: '/tojeong' },
+      { label: '오늘운세', sub: '오늘의 한 장',   icon: 'sun',           path: '/my' },
+      { label: '띠 운세',  sub: '열두 띠의 운',   icon: 'zodiac',        path: '/fortune' },
+      { label: '별자리',   sub: '하늘의 별',      icon: 'constellation', path: '/constellation' },
+      { label: '바이오리듬', sub: '몸과 마음',    icon: 'biorhythm',     path: '/biorhythm' },
     ],
   },
   {
-    no: '제3장', title: '운명 이야기', tint: 'lilac', more: '/fortune',
+    no: '제3장', title: '운명 이야기', tint: 'lilac',
     items: [
-      { label: '정통사주', sub: '타고난 기운',   icon: 'traditional',   path: '/traditional' },
-      { label: '만세력',   sub: '운명의 책력',   icon: 'compass',       path: '/manseryeok' },
-      { label: 'MBTI',     sub: '나라는 사람',   icon: 'mbti',          path: '/mbti' },
-      { label: '별자리',   sub: '하늘이 그린',   icon: 'constellation', path: '/constellation' },
+      { label: '정통사주',   sub: '타고난 기운',   icon: 'traditional', path: '/traditional' },
+      { label: '만세력',     sub: '운명의 책력',   icon: 'compass',     path: '/manseryeok' },
+      { label: 'MBTI',       sub: '나라는 사람',   icon: 'mbti',        path: '/mbti' },
+      { label: '혈액형',     sub: '피가 그린',     icon: 'bloodtype',   path: '/bloodtype' },
+      { label: '관상',       sub: '얼굴의 운',     icon: 'face',        path: '/face-reading' },
+      { label: '꿈해몽',     sub: '꿈의 의미',     icon: 'dream',       path: '/dream' },
+      { label: '심리테스트', sub: '마음 들여다보기', icon: 'psych',     path: '/psych-test' },
+      { label: '띠 성격',    sub: '띠가 말하는',   icon: 'zodiac',      path: '/zodiac' },
     ],
   },
 ];
@@ -219,8 +231,12 @@ function HeroArt({ overall, gradeCls, loggedIn }) {
   );
 }
 
-/* ── 챕터 한 페이지 (장식 액자 + 2열 일러스트 패널) ──────────── */
-function StoryPage({ no, title, tint, more, items, onNav }) {
+/* ── 챕터 한 페이지 (장식 액자 + 2열 일러스트 패널) ──────────────
+   더보기 = 인라인 펼침(메뉴 더 보여줌) */
+function StoryPage({ no, title, tint, items, onNav }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = items.length > 4;
+  const shown = hasMore && !expanded ? items.slice(0, 4) : items;
   return (
     <section className="hs-page" data-tint={tint}>
       <div className="hs-page-frame">
@@ -228,14 +244,15 @@ function StoryPage({ no, title, tint, more, items, onNav }) {
         <div className="hs-page-head">
           <span className="hs-page-no">{no}</span>
           <h2 className="hs-page-title">{title}</h2>
-          {more && (
-            <button className="hs-page-more" onClick={() => onNav(more)}>
-              더보기 <span aria-hidden="true">›</span>
+          {hasMore && (
+            <button className="hs-page-more" onClick={() => setExpanded((v) => !v)}>
+              {expanded ? '접기' : '더보기'}{' '}
+              <span aria-hidden="true">{expanded ? '▴' : '▾'}</span>
             </button>
           )}
         </div>
         <div className="hs-panels">
-          {items.map((it) => (
+          {shown.map((it) => (
             <button key={it.label} className="hs-panel" onClick={() => onNav(it.path)}>
               <span className="hs-panel-icon">
                 <MenuIcon name={it.icon} size={24} />
