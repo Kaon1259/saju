@@ -255,8 +255,8 @@ function Tarot() {
   const [galleryFocusIdx, setGalleryFocusIdx] = useState(null); // 선택된 카드 인덱스
   const galleryRafRef = useRef(null);
   const galleryLastTsRef = useRef(0);
-  const [step, setStep] = useState('deck'); // deck → tone → setup → shuffle → pick → reveal → result
-  const [historyOpen, setHistoryOpen] = useState(false); // 덱 화면 하단 "최근 본 타로" drawer 토글
+  const [step, setStep] = useState('setup'); // setup(메뉴) → shuffle → pick → reveal → result
+  const [deckPickerOpen, setDeckPickerOpen] = useState(false); // 덱 선택 = 메뉴 위 오버레이
 
   // ─── Y축 페이지 플립 헬퍼 (step 변경을 플립 애니메이션으로 감싸기) ───
   const [flipPhase, setFlipPhase] = useState(null); // null | 'out' | 'in'
@@ -644,13 +644,6 @@ function Tarot() {
     if (e) e.stopPropagation();
     setGalleryFocusIdx(idx);
   };
-
-  // tone → setup 자동 전환 (2.5초)
-  useEffect(() => {
-    if (step !== 'tone') return;
-    const t = setTimeout(() => setStep('setup'), 2500);
-    return () => clearTimeout(t);
-  }, [step]);
 
   // deck 변경 시 selectedBack 동기화 — 현재 덱에 속하지 않으면 랜덤 재선택
   useEffect(() => {
@@ -1142,11 +1135,17 @@ function Tarot() {
     } catch {}
   };
 
+  // 덱 선택 — 오버레이를 닫고 메뉴로 복귀 (스텝 전환 아님)
   const selectDeckWithFlip = (d) => {
-    flipToStep(() => {
-      handleDeckChange(d);
-      setStep('setup');
-    });
+    handleDeckChange(d);
+    setDeckPickerOpen(false);
+  };
+
+  // 메뉴 상단 덱 칩 탭 → 현재 덱에 캐러셀 맞춘 뒤 오버레이 열기
+  const openDeckPicker = () => {
+    const idx = DECK_LIST.findIndex(d => d.id === deck);
+    if (idx >= 0) setDeckSwipeIdx(idx);
+    setDeckPickerOpen(true);
   };
 
   const handleVariantChange = (v) => {
@@ -1155,10 +1154,10 @@ function Tarot() {
   };
 
   const resetAll = () => {
-    // AI 분석 결과 → 덱 선택으로 페이지 플립
+    // AI 분석 결과 → 메뉴로 페이지 플립
     flipToStep(() => {
       cleanupRef.current?.();
-      setStep('deck');
+      setStep('setup');
       setSpread('three');
       setCategory('relationship');
       setQuestion('');
@@ -1365,7 +1364,8 @@ function Tarot() {
       )}
 
       {!showIntro && <>
-      {/* ── 신비로운 배경 ── */}
+      {/* ── 신비로운 배경 — 메뉴(허브)에선 끄고 앱 일반 배경 노출 ── */}
+      {step !== 'setup' && (
       <div className="tarot-mystical-bg">
         {/* 별 파티클 */}
         {Array.from({ length: 40 }).map((_, i) => (
@@ -1381,9 +1381,10 @@ function Tarot() {
         <div className="tarot-mist tarot-mist--1" />
         <div className="tarot-mist tarot-mist--2" />
       </div>
+      )}
 
-      {/* ═══ STEP 0: 덱 선택 — 슬라이드 캐러셀 (순환) ═══ */}
-      {step === 'deck' && (() => {
+      {/* ═══ 덱 선택 — 메뉴 위에 뜨는 오버레이 (슬라이드 캐러셀, 순환) ═══ */}
+      {deckPickerOpen && (() => {
         const curDeck = DECK_LIST[deckSwipeIdx];
         const isDrag = deckDragRef.current.dragging;
         // 드래그 비율: -1(완전히 왼쪽) ~ 0(중앙) ~ 1(완전히 오른쪽)
@@ -1399,7 +1400,13 @@ function Tarot() {
         }));
 
         return (
-          <div className="tarot-deck-screen">
+          <div className="tarot-deck-screen deck-picker-overlay">
+            {/* 닫기 — 덱 변경 없이 메뉴로 복귀 */}
+            <button
+              className="deck-picker-close"
+              onClick={() => setDeckPickerOpen(false)}
+              aria-label="덱 선택 닫기"
+            >✕</button>
             {/* ─── 라디얼 스포트라이트 + 별빛 (정적) ─── */}
             <div className="deck-bg-spotlight" aria-hidden="true">
               {Array.from({ length: 22 }).map((_, i) => {
@@ -1499,23 +1506,160 @@ function Tarot() {
                 ))}
               </div>
               <button className="deck-select-btn" onClick={() => selectDeckWithFlip(curDeck.id)}>
-                이 덱으로 시작하기
+                이 덱 선택
               </button>
             </div>
+          </div>
+        );
+      })()}
 
-            {/* 최근 본 타로 — 하단 drawer: 헤더 탭하면 위로 올라옴 */}
-            <div className={`tarot-history-drawer ${historyOpen ? 'open' : ''}`}>
+      {/* ═══ 메뉴 화면 — 홈형 허브 (인사 + 분야 + 카드 수 + 최근) ═══ */}
+      {step === 'setup' && (() => {
+        const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
+        const allCats = [...TAROT_MAIN_CATS, ...(sheetExpanded ? TAROT_MORE_CATS : [])];
+        const ready = !!category && !!spread;
+        return (
+          <div className="tarot-hub">
+            <div className="tarot-hub-inner fade-in">
+              {/* 히어로 / 인사 */}
+              <header className="tarot-hub-hero">
+                <p className="tarot-hub-eyebrow">오늘의 카드</p>
+                <h1 className="tarot-hub-title">타로 리딩</h1>
+                <p className="tarot-hub-sub">오늘 어떤 질문이 떠오르나요?</p>
+              </header>
+
+              {/* ① 분야 — 7개 + 더보기/접기 타일로 4열 그리드를 꽉 채움 */}
+              <section className="tarot-hub-section">
+                <h2 className="tarot-hub-section-title">무엇을 물어볼까요</h2>
+                <div className="tarot-hub-cat-grid">
+                  {allCats.map((item) => (
+                    <button
+                      key={item.id}
+                      className={`tarot-hub-cat ${category === item.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setCategory(item.id);
+                        setTimeout(() => setupSpreadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 90);
+                      }}
+                    >
+                      <span className="tarot-hub-cat-icon"><MenuIcon name={item.icon} size={26} /></span>
+                      <span className="tarot-hub-cat-label">{item.label}</span>
+                    </button>
+                  ))}
+                  <button
+                    className="tarot-hub-cat tarot-hub-cat--more"
+                    onClick={() => setSheetExpanded(v => !v)}
+                    aria-expanded={sheetExpanded}
+                  >
+                    <span className="tarot-hub-cat-icon tarot-hub-cat-icon--more">{sheetExpanded ? '–' : '+'}</span>
+                    <span className="tarot-hub-cat-label">{sheetExpanded ? '접기' : '더보기'}</span>
+                  </button>
+                </div>
+              </section>
+
+              {/* ② 카드 수 */}
+              <section className="tarot-hub-section" ref={setupSpreadRef}>
+                <h2 className="tarot-hub-section-title">몇 장 뽑을까요</h2>
+                <div className="tarot-hub-spread-row">
+                  {SPREADS.map((s) => (
+                    <button
+                      key={s.id}
+                      className={`tarot-hub-spread ${spread === s.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSpread(s.id);
+                        setTimeout(() => startBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 90);
+                      }}
+                    >
+                      <span className="tarot-hub-spread-visual">
+                        {Array.from({ length: s.count }).map((_, k) => {
+                          const offset = k - (s.count - 1) / 2;
+                          return (
+                            <img
+                              key={k}
+                              src={selectedBack || curDeck.img}
+                              alt=""
+                              draggable={false}
+                              className="tarot-hub-spread-mini"
+                              style={{ transform: `rotate(${offset * 13}deg)`, zIndex: 9 - Math.abs(offset) }}
+                            />
+                          );
+                        })}
+                      </span>
+                      <span className="tarot-hub-spread-num">{s.label}</span>
+                      <span className="tarot-hub-spread-desc">{s.desc}</span>
+                      <span className="tarot-hub-spread-cost"><MenuIcon name="heart" size={11} /> {s.cost}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* 질문 추가 (선택) — 조용한 텍스트 토글 */}
               <button
                 type="button"
-                className="tarot-history-handle"
-                onClick={() => setHistoryOpen(v => !v)}
-                aria-expanded={historyOpen}
-                aria-label="최근 본 타로 토글">
-                <span className="tarot-history-handle-grip" aria-hidden="true" />
-                <span className="tarot-history-handle-label"><MenuIcon name="history" size={15} /> 최근 본 타로</span>
-                <span className={`tarot-history-handle-chev ${historyOpen ? 'open' : ''}`} aria-hidden="true">▲</span>
+                className="tarot-hub-qtoggle"
+                onClick={() => setQuestionOpen(v => !v)}
+                aria-expanded={questionOpen}
+              >
+                <span className="tarot-hub-qtoggle-sign">{questionOpen ? '–' : '+'}</span>
+                직접 질문 추가
+                <span className="tarot-hub-qtoggle-opt">선택</span>
               </button>
-              <div className="tarot-history-content">
+              {questionOpen && (
+                <input
+                  type="text"
+                  className="tarot-hub-qinput fade-in"
+                  placeholder="예) 이 사람과 잘 될 수 있을까?"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  maxLength={100}
+                />
+              )}
+
+              {/* 시작 버튼 — 주 흐름의 끝 */}
+              <button
+                className="tarot-hub-start"
+                ref={startBtnRef}
+                disabled={!ready}
+                onClick={() => { if (ready) guardedShuffleStart(startShuffle); }}
+              >
+                <span>{ready ? '카드 셔플 시작' : '분야와 카드 수를 선택하세요'}</span>
+                {ready && <HeartCost category={tarotCategory} />}
+              </button>
+
+              {/* 보조 옵션 — 펼치기 방식 + 덱 (한 패널) */}
+              <div className="tarot-hub-options">
+                <div className="tarot-hub-opt-row">
+                  <span className="tarot-hub-opt-key">펼치기</span>
+                  <div className="tarot-hub-seg" role="group" aria-label="카드 펼치기 방식">
+                    <button
+                      className={`tarot-hub-seg-btn ${pickMode === 'carousel' ? 'active' : ''}`}
+                      onClick={() => { setPickMode('carousel'); localStorage.setItem('tarotPickMode', 'carousel'); }}
+                    >한 장씩</button>
+                    <button
+                      className={`tarot-hub-seg-btn ${pickMode === 'line' ? 'active' : ''}`}
+                      onClick={() => { setPickMode('line'); localStorage.setItem('tarotPickMode', 'line'); }}
+                    >전체</button>
+                    <button
+                      className={`tarot-hub-seg-btn ${pickMode === 'fan' ? 'active' : ''}`}
+                      onClick={() => { setPickMode('fan'); localStorage.setItem('tarotPickMode', 'fan'); }}
+                    >부채꼴</button>
+                  </div>
+                </div>
+                <button
+                  className="tarot-hub-opt-row tarot-hub-opt-row--btn"
+                  onClick={openDeckPicker}
+                  aria-label={`덱 선택 — 현재 ${curDeck.name}`}
+                >
+                  <span className="tarot-hub-opt-key">덱</span>
+                  <span className="tarot-hub-opt-val">{curDeck.name}</span>
+                  <span className="tarot-hub-opt-caret" aria-hidden="true">›</span>
+                </button>
+              </div>
+
+              {/* 최근 본 타로 */}
+              <section className="tarot-hub-section tarot-hub-history">
+                <h2 className="tarot-hub-section-title">
+                  <MenuIcon name="history" size={15} /> 최근 본 타로
+                </h2>
                 <RecentHistory
                   type="tarot"
                   hideTitle
@@ -1531,204 +1675,11 @@ function Tarot() {
                       if (p.category) setCategory(p.category);
                       if (p.deck) setDeck(p.deck);
                       if (p.deckVariant != null) setDeckVariant(p.deckVariant);
-                      setHistoryOpen(false);
                       setStep('result');
                     } catch {}
                   }}
                 />
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ═══ STEP 0.5: 덱 커버 풀스크린 인트로 → 자동 메뉴 전환 ═══ */}
-      {step === 'tone' && (() => {
-        const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const phrases = [
-          '카드가 당신의 운명을 속삭입니다',
-          '별들이 당신의 이야기를 준비합니다',
-          '운명의 카드가 펼쳐집니다',
-          '신비로운 에너지가 모이고 있습니다',
-          '카드 속 비밀이 드러나려 합니다',
-        ];
-        return (
-          <div className="tarot-tone-screen">
-            <img src={curDeck.img} alt={curDeck.name} className="tone-fullscreen-cover" />
-            <div className="tone-fullscreen-overlay" />
-            <div className="tone-phrase">
-              <p className="tone-phrase-text">{phrases[Math.floor(Math.random() * phrases.length)]}</p>
-              <p className="tone-phrase-deck">{curDeck.name}</p>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ═══ STEP 1: 메뉴 화면 (타로 스타일) ═══ */}
-      {step === 'setup' && (() => {
-        const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const bgPaths = { newclassic: '/tarot-newclassic', jester: '/tarot-jester', masterpiece: '/tarot-masterpiece', cartoon_girl: '/tarot-cartoon-girl', cartoon_boy: '/tarot-cartoon-boy', kdrama: '/tarot-kdrama', celestial: '/tarot-celestial', lady: '/tarot-lady' };
-        const bgBase = bgPaths[deck] || '';
-        const bgSuffix = curDeck.hasVariants ? `_v${deckVariant}` : '';
-        const curBgCard = SETUP_BG_CARDS[setupBgIdx % SETUP_BG_CARDS.length];
-        const bgSrc = `${bgBase}/m${String(curBgCard).padStart(2,'0')}${bgSuffix}.webp`;
-        return (
-          <div className="tarot-setup-screen">
-            <img src={frameSrc} alt="" className="stage-frame-overlay" draggable={false} />
-            <div className="tarot-setup-bg">
-              <img key={`bg-${setupBgIdx}`} src={bgSrc} alt="" draggable={false} className="setup-bg-slide" />
-            </div>
-            <div className="tarot-setup-overlay" />
-
-            {/* 별 파티클 — 차분하게 8개로 축소 */}
-            <div className="tarot-setup-stars">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <span key={i} className="tarot-setup-star tarot-setup-star--soft" style={{
-                  '--ts-x': `${5 + (i * 12) % 90}%`,
-                  '--ts-delay': `${i * 0.7}s`,
-                  '--ts-dur': `${5 + (i % 3) * 1.2}s`,
-                  '--ts-size': `${10 + (i % 3) * 4}px`,
-                  '--ts-drift': `${-10 + (i % 5) * 4}px`,
-                }}>{i % 2 === 0 ? '✦' : '✧'}</span>
-              ))}
-            </div>
-
-            <div className="tarot-setup-content">
-              <div className="tarot-setup-spacer" />
-              {/* 상단 바 — 뒤로(덱 변경 또는 이전 단계) + 덱 이름 + 진행 표시 */}
-              <div className="setup-top-bar">
-                <button
-                  className="setup-deck-change"
-                  onClick={() => flipToStep(() => setStep('deck'))}
-                >
-                  ← 덱 변경
-                </button>
-                <span className="setup-deck-name">{curDeck.name}</span>
-                <span className="setup-top-spacer" aria-hidden="true" />
-              </div>
-
-              {/* ════════ 한 페이지 — 분야 + 카드 수 + 시작 ════════ */}
-              {(() => {
-                const allCats = [...TAROT_MAIN_CATS, ...(sheetExpanded ? TAROT_MORE_CATS : [])];
-                const ready = !!category && !!spread;
-                return (
-                  <div className="setup-onepage fade-in">
-                    {/* ① 분야 선택 */}
-                    <h3 className="setup-section-label">
-                      <span className="setup-section-no">1</span> 무엇을 물어볼까요?
-                    </h3>
-                    <div className="setup-cat-grid">
-                      {allCats.map((item, i) => {
-                        const bgImg = categoryBgImages[item.id];
-                        return (
-                          <button
-                            key={item.id}
-                            className={`setup-cat-tarot-card ${category === item.id ? 'active' : ''} ${bgImg ? 'has-deck-bg' : ''}`}
-                            style={{ '--card-i': i, ...(bgImg ? { '--deck-bg': `url(${bgImg})` } : {}) }}
-                            onClick={() => {
-                              setCategory(item.id);
-                              setTimeout(() => setupSpreadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 90);
-                            }}
-                          >
-                            {bgImg && <span className="cat-tarot-deck-bg" aria-hidden="true" />}
-                            <span className="cat-tarot-corner cat-tarot-corner-tl">✦</span>
-                            <span className="cat-tarot-corner cat-tarot-corner-tr">✦</span>
-                            <span className="cat-tarot-corner cat-tarot-corner-bl">✦</span>
-                            <span className="cat-tarot-corner cat-tarot-corner-br">✦</span>
-                            <span className="cat-tarot-icon"><MenuIcon name={item.icon} size={26} /></span>
-                            <span className="cat-tarot-label">{item.label}</span>
-                            <span className="cat-tarot-shine" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {!sheetExpanded && (
-                      <button className="setup-more-link" onClick={() => setSheetExpanded(true)}>
-                        + 더 많은 분야 보기
-                      </button>
-                    )}
-
-                    {/* ② 카드 수 선택 */}
-                    <h3 className="setup-section-label" ref={setupSpreadRef}>
-                      <span className="setup-section-no">2</span> 몇 장 뽑을까요?
-                    </h3>
-                    <div className="setup-spread-stack">
-                      {SPREADS.map((s, i) => (
-                        <button
-                          key={s.id}
-                          className={`setup-spread-card ${spread === s.id ? 'active' : ''}`}
-                          style={{ '--spread-i': i }}
-                          onClick={() => {
-                            setSpread(s.id);
-                            setTimeout(() => startBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 90);
-                          }}
-                        >
-                          <div className="setup-spread-visual">
-                            {Array.from({ length: s.count }).map((_, k) => (
-                              <span key={k} className="spread-mini-card" style={{ '--mc-i': k, '--mc-total': s.count }} />
-                            ))}
-                          </div>
-                          <div className="setup-spread-card-main">
-                            <span className="setup-spread-card-num">{s.label}</span>
-                            <span className="setup-spread-card-desc">{s.desc}</span>
-                          </div>
-                          <span className="setup-spread-card-cost"><MenuIcon name="heart" size={12} /> {s.cost}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* 질문 추가 (선택) */}
-                    <button
-                      type="button"
-                      className="setup-question-toggle"
-                      onClick={() => setQuestionOpen(v => !v)}
-                      aria-expanded={questionOpen}
-                    >
-                      <span>직접 질문 추가 <span className="setup-optional">(선택)</span></span>
-                      <span className="setup-question-toggle-arrow">{questionOpen ? '▲' : '▼'}</span>
-                    </button>
-                    {questionOpen && (
-                      <input
-                        type="text"
-                        className="setup-question-input fade-in"
-                        placeholder="예) 이 사람과 잘 될 수 있을까?"
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        maxLength={100}
-                      />
-                    )}
-
-                    {/* 시작 버튼 */}
-                    <button
-                      className="tarot-start-btn"
-                      ref={startBtnRef}
-                      disabled={!ready}
-                      onClick={() => { if (ready) guardedShuffleStart(startShuffle); }}
-                    >
-                      <span>{ready ? '카드 셔플 시작' : '분야와 카드 수를 선택하세요'}</span>
-                      {ready && <HeartCost category={tarotCategory} />}
-                      <span className="tarot-start-glow" />
-                    </button>
-
-                    {/* 펼치기 방식 */}
-                    <div className="setup-pickmode-mini" role="group" aria-label="카드 펼치기 방식">
-                      <span className="setup-pickmode-mini-label">펼치기</span>
-                      <button
-                        className={`setup-pickmode-mini-btn ${pickMode === 'carousel' ? 'active' : ''}`}
-                        onClick={() => { setPickMode('carousel'); localStorage.setItem('tarotPickMode', 'carousel'); }}
-                      >한 장씩</button>
-                      <button
-                        className={`setup-pickmode-mini-btn ${pickMode === 'line' ? 'active' : ''}`}
-                        onClick={() => { setPickMode('line'); localStorage.setItem('tarotPickMode', 'line'); }}
-                      >전체</button>
-                      <button
-                        className={`setup-pickmode-mini-btn ${pickMode === 'fan' ? 'active' : ''}`}
-                        onClick={() => { setPickMode('fan'); localStorage.setItem('tarotPickMode', 'fan'); }}
-                      >부채꼴</button>
-                    </div>
-                  </div>
-                );
-              })()}
+              </section>
             </div>
           </div>
         );

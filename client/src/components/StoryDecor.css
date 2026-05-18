@@ -27,6 +27,8 @@
 .sd-pos-cloud  { width: 68px; height: 42px; top: 41%;     left: 3px; }
 .sd-pos-spark  { width: 44px; height: 56px; top: 60%;     right: 5px; }
 .sd-pos-flower { width: 48px; height: 58px; bottom: 86px; left: 7px; }
+/* 우하단 — 페이지 테마 모티프 */
+.sd-pos-motif  { width: 56px; height: 58px; bottom: 88px; right: 8px; }
 
 /* 크레파스 색 — 달 */
 .sd-moon {
@@ -65,6 +67,36 @@
   stroke-width: 1.2;
 }
 .sd-core { fill: #ffd98a; }
+
+/* ── 페이지 테마 모티프 ─────────────────────────────────────── */
+/* 운세 — 해 */
+.sd-sun-body {
+  fill: #ffd98a;
+  stroke: rgba(198, 128, 70, 0.46);
+  stroke-width: 2;
+}
+.sd-sun-ray {
+  stroke: #ffce6e;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+/* 타로 — 카드 */
+.sd-card-body {
+  fill: #fdeccb;
+  stroke: rgba(198, 128, 70, 0.5);
+  stroke-width: 2;
+}
+.sd-card-star {
+  fill: #ffce6e;
+  stroke: rgba(198, 128, 70, 0.4);
+  stroke-width: 1;
+}
+/* 궁합·연애 — 하트 */
+.sd-heart {
+  fill: #ffc4d4;
+  stroke: rgba(200, 90, 120, 0.45);
+  stroke-width: 1.4;
+}
 
 @media (max-width: 360px) {
   .story-decor-item { opacity: 0.32; }
