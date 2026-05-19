@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getTarotReadingStream, drawTarotCards, isGuest, getHistory } from '../api/fortune';
-import RecentHistory from '../components/RecentHistory';
+import HistoryDrawer from '../components/HistoryDrawer';
 import MenuIcon from '../components/MenuIcon';
 import FortuneCard from '../components/FortuneCard';
 import TarotCardArt from '../components/TarotCardArt';
@@ -257,6 +257,11 @@ function Tarot() {
   const galleryLastTsRef = useRef(0);
   const [step, setStep] = useState('setup'); // setup(메뉴) → shuffle → pick → reveal → result
   const [deckPickerOpen, setDeckPickerOpen] = useState(false); // 덱 선택 = 메뉴 위 오버레이
+  // 책 위저드 — 0 표지 / 1 분야 / 2 카드수
+  const [hubPage, setHubPage] = useState(0);
+  const [bookPrev, setBookPrev] = useState(null);   // 넘어가는 동안 떠나는 장
+  const [bookDir, setBookDir] = useState(null);     // 'fwd' | 'back'
+  const bookDirRef = useRef(null);
 
   // ─── Y축 페이지 플립 헬퍼 (step 변경을 플립 애니메이션으로 감싸기) ───
   const [flipPhase, setFlipPhase] = useState(null); // null | 'out' | 'in'
@@ -938,6 +943,16 @@ function Tarot() {
     }, delay + 500);
   }, [autoPickRunning, pickingCard, shuffledCards, selectedIndices, requiredCount, filledSlots, handleCardPick]);
 
+  // 수동 선택 없음 — pick 단계 진입 시 자동 선택을 걸어 리빌·AI 분석까지 자동 진행
+  const handleRandomPickRef = useRef(handleRandomPick);
+  handleRandomPickRef.current = handleRandomPick;
+  useEffect(() => {
+    if (step !== 'pick' || shuffledCards.length === 0) return;
+    if (autoPickRef.current || filledRef.current.length > 0) return;
+    const t = setTimeout(() => { handleRandomPickRef.current?.(); }, 250);
+    return () => clearTimeout(t);
+  }, [step, shuffledCards.length]);
+
   const handleReshuffle = () => {
     setPickingCard(null);
     setFilledSlots([]);
@@ -1153,11 +1168,27 @@ function Tarot() {
     localStorage.setItem('tarotDeckVariant', String(v));
   };
 
+  // 책장 넘기기 — 표지/분야/카드수 사이를 page-turn 애니메이션으로 이동
+  const goPage = (target) => {
+    if (bookDirRef.current) return;               // 넘기는 중 중복 방지
+    if (target < 0 || target > 2 || target === hubPage) return;
+    const dir = target > hubPage ? 'fwd' : 'back';
+    bookDirRef.current = dir;
+    setBookPrev(hubPage);
+    setBookDir(dir);
+    setHubPage(target);
+    setTimeout(() => {
+      setBookPrev(null); setBookDir(null); bookDirRef.current = null;
+    }, 470);
+  };
+
   const resetAll = () => {
     // AI 분석 결과 → 메뉴로 페이지 플립
     flipToStep(() => {
       cleanupRef.current?.();
       setStep('setup');
+      setHubPage(0);
+      setBookPrev(null); setBookDir(null); bookDirRef.current = null;
       setSpread('three');
       setCategory('relationship');
       setQuestion('');
@@ -1513,86 +1544,124 @@ function Tarot() {
         );
       })()}
 
-      {/* ═══ 메뉴 화면 — 홈형 허브 (인사 + 분야 + 카드 수 + 최근) ═══ */}
+      {/* ═══ 메뉴 화면 — 책 위저드 (표지 → 분야 → 카드수) ═══ */}
       {step === 'setup' && (() => {
         const curDeck = DECK_LIST.find(d => d.id === deck) || DECK_LIST[0];
-        const allCats = [...TAROT_MAIN_CATS, ...(sheetExpanded ? TAROT_MORE_CATS : [])];
-        const ready = !!category && !!spread;
-        return (
-          <div className="tarot-hub">
-            <div className="tarot-hub-inner fade-in">
-              {/* 히어로 / 인사 */}
-              <header className="tarot-hub-hero">
-                <p className="tarot-hub-eyebrow">오늘의 카드</p>
-                <h1 className="tarot-hub-title">타로 리딩</h1>
-                <p className="tarot-hub-sub">오늘 어떤 질문이 떠오르나요?</p>
-              </header>
+        const allCats = [...TAROT_MAIN_CATS, ...TAROT_MORE_CATS];
 
-              {/* ① 분야 — 7개 + 더보기/접기 타일로 4열 그리드를 꽉 채움 */}
-              <section className="tarot-hub-section">
-                <h2 className="tarot-hub-section-title">무엇을 물어볼까요</h2>
+        const renderPage = (idx) => {
+          // ── 표지 — 선택한 덱의 움직이는 카드 ──
+          if (idx === 0) {
+            return (
+              <div className="tarot-book-page-inner tbook-cover">
+                <div className="tbook-cover-head">
+                  <p className="tbook-cover-eyebrow"><span className="th-spark">✦</span> 오늘의 타로</p>
+                  <h1 className="tbook-cover-title">어떤 질문이 떠오르나요?</h1>
+                </div>
+                <div className="tbook-cover-card">
+                  <img
+                    src={curDeck.gif || curDeck.img}
+                    alt={curDeck.name}
+                    className="tbook-cover-card-img"
+                    draggable={false}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="tbook-cover-deck"
+                  onClick={openDeckPicker}
+                  aria-label={`덱 선택 — 현재 ${curDeck.name}`}
+                >
+                  {curDeck.name} 덱 · 바꾸기 ›
+                </button>
+                <button className="tarot-hub-start" onClick={() => goPage(1)}>
+                  <span>리딩 시작</span>
+                  <span className="tbook-start-caret" aria-hidden="true">›</span>
+                </button>
+              </div>
+            );
+          }
+
+          // ── ① 분야 ──
+          if (idx === 1) {
+            return (
+              <div className="tarot-book-page-inner">
+                <div className="tbook-head">
+                  <p className="tbook-step">첫 번째 장</p>
+                  <h2 className="tbook-q"><span className="th-spark">✦</span> 무엇을 물어볼까요</h2>
+                  <p className="tbook-hint">분야를 고르면 다음 장이 펼쳐집니다</p>
+                </div>
                 <div className="tarot-hub-cat-grid">
                   {allCats.map((item) => (
                     <button
                       key={item.id}
                       className={`tarot-hub-cat ${category === item.id ? 'active' : ''}`}
-                      onClick={() => {
-                        setCategory(item.id);
-                        setTimeout(() => setupSpreadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 90);
-                      }}
+                      onClick={() => { setCategory(item.id); setTimeout(() => goPage(2), 280); }}
                     >
                       <span className="tarot-hub-cat-icon"><MenuIcon name={item.icon} size={26} /></span>
                       <span className="tarot-hub-cat-label">{item.label}</span>
                     </button>
                   ))}
+                </div>
+              </div>
+            );
+          }
+
+          // ── ② 카드 수 ──
+          const ready = !!category && !!spread;
+          const selSpread = SPREADS.find((s) => s.id === spread) || SPREADS[1];
+          return (
+            <div className="tarot-book-page-inner tbook-count">
+              <div className="tbook-head">
+                <p className="tbook-step">두 번째 장</p>
+                <h2 className="tbook-q"><span className="th-spark">✦</span> 몇 장 뽑을까요</h2>
+              </div>
+              {/* 첫 화면 덱 카드(앞면)를 선택한 장수만큼 부채꼴로 겹쳐 미리보기 */}
+              <div className="tbook-count-fan">
+                {Array.from({ length: selSpread.count }).map((_, k) => {
+                  const offset = k - (selSpread.count - 1) / 2;
+                  return (
+                    <img
+                      key={k}
+                      src={curDeck.gif || curDeck.img}
+                      alt=""
+                      draggable={false}
+                      className="tbook-count-fan-card"
+                      style={{ transform: `rotate(${offset * 12}deg)`, zIndex: 9 - Math.abs(offset) }}
+                    />
+                  );
+                })}
+              </div>
+              <div className="tarot-hub-spread-row">
+                {SPREADS.map((s) => (
                   <button
-                    className="tarot-hub-cat tarot-hub-cat--more"
-                    onClick={() => setSheetExpanded(v => !v)}
-                    aria-expanded={sheetExpanded}
+                    key={s.id}
+                    className={`tarot-hub-spread ${spread === s.id ? 'active' : ''}`}
+                    onClick={() => setSpread(s.id)}
                   >
-                    <span className="tarot-hub-cat-icon tarot-hub-cat-icon--more">{sheetExpanded ? '–' : '+'}</span>
-                    <span className="tarot-hub-cat-label">{sheetExpanded ? '접기' : '더보기'}</span>
+                    <span className="tarot-hub-spread-visual">
+                      {Array.from({ length: s.count }).map((_, k) => {
+                        const offset = k - (s.count - 1) / 2;
+                        return (
+                          <img
+                            key={k}
+                            src={selectedBack || curDeck.img}
+                            alt=""
+                            draggable={false}
+                            className="tarot-hub-spread-mini"
+                            style={{ transform: `rotate(${offset * 13}deg)`, zIndex: 9 - Math.abs(offset) }}
+                          />
+                        );
+                      })}
+                    </span>
+                    <span className="tarot-hub-spread-num">{s.label}</span>
+                    <span className="tarot-hub-spread-desc">{s.desc}</span>
+                    <span className="tarot-hub-spread-cost"><MenuIcon name="heart" size={11} /> {s.cost}</span>
                   </button>
-                </div>
-              </section>
+                ))}
+              </div>
 
-              {/* ② 카드 수 */}
-              <section className="tarot-hub-section" ref={setupSpreadRef}>
-                <h2 className="tarot-hub-section-title">몇 장 뽑을까요</h2>
-                <div className="tarot-hub-spread-row">
-                  {SPREADS.map((s) => (
-                    <button
-                      key={s.id}
-                      className={`tarot-hub-spread ${spread === s.id ? 'active' : ''}`}
-                      onClick={() => {
-                        setSpread(s.id);
-                        setTimeout(() => startBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 90);
-                      }}
-                    >
-                      <span className="tarot-hub-spread-visual">
-                        {Array.from({ length: s.count }).map((_, k) => {
-                          const offset = k - (s.count - 1) / 2;
-                          return (
-                            <img
-                              key={k}
-                              src={selectedBack || curDeck.img}
-                              alt=""
-                              draggable={false}
-                              className="tarot-hub-spread-mini"
-                              style={{ transform: `rotate(${offset * 13}deg)`, zIndex: 9 - Math.abs(offset) }}
-                            />
-                          );
-                        })}
-                      </span>
-                      <span className="tarot-hub-spread-num">{s.label}</span>
-                      <span className="tarot-hub-spread-desc">{s.desc}</span>
-                      <span className="tarot-hub-spread-cost"><MenuIcon name="heart" size={11} /> {s.cost}</span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              {/* 질문 추가 (선택) — 조용한 텍스트 토글 */}
+              {/* 질문 추가 (선택) */}
               <button
                 type="button"
                 className="tarot-hub-qtoggle"
@@ -1614,76 +1683,89 @@ function Tarot() {
                 />
               )}
 
-              {/* 시작 버튼 — 주 흐름의 끝 */}
+              {/* 셔플 시작 — 마지막 장 */}
               <button
                 className="tarot-hub-start"
-                ref={startBtnRef}
                 disabled={!ready}
                 onClick={() => { if (ready) guardedShuffleStart(startShuffle); }}
               >
-                <span>{ready ? '카드 셔플 시작' : '분야와 카드 수를 선택하세요'}</span>
+                <span>{ready ? '카드 셔플 시작' : '카드 수를 선택하세요'}</span>
                 {ready && <HeartCost category={tarotCategory} />}
               </button>
+            </div>
+          );
+        };
 
-              {/* 보조 옵션 — 펼치기 방식 + 덱 (한 패널) */}
-              <div className="tarot-hub-options">
-                <div className="tarot-hub-opt-row">
-                  <span className="tarot-hub-opt-key">펼치기</span>
-                  <div className="tarot-hub-seg" role="group" aria-label="카드 펼치기 방식">
-                    <button
-                      className={`tarot-hub-seg-btn ${pickMode === 'carousel' ? 'active' : ''}`}
-                      onClick={() => { setPickMode('carousel'); localStorage.setItem('tarotPickMode', 'carousel'); }}
-                    >한 장씩</button>
-                    <button
-                      className={`tarot-hub-seg-btn ${pickMode === 'line' ? 'active' : ''}`}
-                      onClick={() => { setPickMode('line'); localStorage.setItem('tarotPickMode', 'line'); }}
-                    >전체</button>
-                    <button
-                      className={`tarot-hub-seg-btn ${pickMode === 'fan' ? 'active' : ''}`}
-                      onClick={() => { setPickMode('fan'); localStorage.setItem('tarotPickMode', 'fan'); }}
-                    >부채꼴</button>
-                  </div>
-                </div>
-                <button
-                  className="tarot-hub-opt-row tarot-hub-opt-row--btn"
-                  onClick={openDeckPicker}
-                  aria-label={`덱 선택 — 현재 ${curDeck.name}`}
-                >
-                  <span className="tarot-hub-opt-key">덱</span>
-                  <span className="tarot-hub-opt-val">{curDeck.name}</span>
-                  <span className="tarot-hub-opt-caret" aria-hidden="true">›</span>
-                </button>
+        // 넘기는 중: 떠나는 장 + 들어오는 장을 동시 슬라이드
+        const animing = bookDir != null;
+        const leavingClass = bookDir === 'fwd' ? 'tbook-slide-out-left' : 'tbook-slide-out-right';
+        const enteringClass = bookDir === 'fwd' ? 'tbook-slide-in-right' : 'tbook-slide-in-left';
+
+        return (
+          <div className="tarot-hub">
+            {/* 책 상단 — 뒤로 + 페이지 표시 */}
+            <div className="tarot-book-chrome">
+              <button
+                className="tbook-back"
+                onClick={() => goPage(hubPage - 1)}
+                style={{ visibility: hubPage > 0 ? 'visible' : 'hidden' }}
+                aria-label="이전 장으로"
+              >
+                <span className="tbook-back-arrow" aria-hidden="true">‹</span>
+                이전 장
+              </button>
+              <div className="tbook-dots">
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className={`tbook-dot ${i === hubPage ? 'active' : ''}`} />
+                ))}
               </div>
-
-              {/* 최근 본 타로 */}
-              <section className="tarot-hub-section tarot-hub-history">
-                <h2 className="tarot-hub-section-title">
-                  <MenuIcon name="history" size={15} /> 최근 본 타로
-                </h2>
-                <RecentHistory
-                  type="tarot"
-                  hideTitle
-                  onOpen={async (item) => {
-                    try {
-                      const full = await getHistory(item.id);
-                      const p = full?.payload;
-                      if (!p) return;
-                      const cards = Array.isArray(p.cards) ? p.cards : [];
-                      setRevealedCards(cards);
-                      setReading(p);
-                      if (p.spread) setSpread(p.spread);
-                      if (p.category) setCategory(p.category);
-                      if (p.deck) setDeck(p.deck);
-                      if (p.deckVariant != null) setDeckVariant(p.deckVariant);
-                      setStep('result');
-                    } catch {}
-                  }}
-                />
-              </section>
+              <span className="tbook-back tbook-back--spacer" aria-hidden="true">
+                <span className="tbook-back-arrow">‹</span>이전 장
+              </span>
+            </div>
+            {/* 본문 — Tinder식 순차 슬라이드 */}
+            <div className="tarot-book">
+              {animing ? (
+                <>
+                  <div className={`tarot-book-page ${leavingClass}`} key={`l${bookPrev}`}>
+                    {renderPage(bookPrev)}
+                  </div>
+                  <div className={`tarot-book-page ${enteringClass}`} key={`e${hubPage}`}>
+                    {renderPage(hubPage)}
+                  </div>
+                </>
+              ) : (
+                <div className="tarot-book-page" key={`p${hubPage}`}>
+                  {renderPage(hubPage)}
+                </div>
+              )}
             </div>
           </div>
         );
       })()}
+
+      {/* 최근 본 타로 — 하단 pull-up 드로어 (홈 "최근 본 운세"와 동일) */}
+      {step === 'setup' && (
+        <HistoryDrawer
+          type="tarot"
+          label="📚 최근 본 타로"
+          onOpen={async (item) => {
+            try {
+              const full = await getHistory(item.id);
+              const p = full?.payload;
+              if (!p) return;
+              const cards = Array.isArray(p.cards) ? p.cards : [];
+              setRevealedCards(cards);
+              setReading(p);
+              if (p.spread) setSpread(p.spread);
+              if (p.category) setCategory(p.category);
+              if (p.deck) setDeck(p.deck);
+              if (p.deckVariant != null) setDeckVariant(p.deckVariant);
+              setStep('result');
+            } catch {}
+          }}
+        />
+      )}
 
       {/* ═══ STEP 2: 셔플 v2 — 뒷면만 카오스/모임/분산 ═══ */}
       {step === 'shuffle' && shuffledCards.length > 0 && (() => {
