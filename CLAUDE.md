@@ -46,6 +46,27 @@
 
 ═══════════════════════════════════════════════════════════════
 
+[완료] 스타궁합 페이지 폴리싱 + "스타 운세" 진입 배너 4곳 (2026-05-20, 커밋 4ffd51b)
+- 사용자 피드백 "만들다 만 느낌" 전면 폴리싱:
+- 카드 아바타: 단색 ♂/♀ 칩 → **카테고리 시그니처 그라데이션 + 이니셜 + 데코 이모지**
+  9종 컬러(idol/actor/singer/entertainer/athlete/model/influencer/trot/custom)
+- 검색바: 🔍 아이콘 + ✕ 클리어 + 코랄 4px glow 포커스
+- **카테고리 탭 폐지** (사용자 요청 — 전체/보이그룹/걸그룹/배우/트로트 등 삭제)
+  검색만으로 그룹+개인 통합 필터링. activeCategory state 제거.
+- 빈 상태: "찾으시는 스타가 없네요" + "직접 추가" CTA (검색어 자동 채움)
+- 선택된 스타 카드: 큰 아바타 64×64 + aura 펄스 + 카테고리 라벨
+- 스타 운세 카드 7종 컬러 액센트 바: 🔮성격(purple)/🌟총운(gold)/💕애정(pink)/
+  💰재물(green)/💪건강(mint)/💼활동(blue)/📚도전(cyan)
+- 행운 정보: 색·숫자 분리 카드로 강조
+- **상단 뒤로가기 + StarHero 제거** → 컴팩트 타이틀 한 줄로 교체 (전체 위로)
+- "스타 운세" 진입 배너 4곳 → **/star-fortune** (사용자 요청 "허브" 제거):
+  CelebCompatibility / HomeNew / HomeStory / Home(감성) 모두 골드→코랄→퍼플
+  그라데이션 + 별 트윙클. 라벨 통일 "최애 스타의 오늘 운세·궁합·그룹 운세 모아보기"
+- ⚠️ 다음 세션: StarFortune (/star-fortune), MyStar (/my-star), SpecialFortune
+  (/special), GroupFortune (/celeb-fortune), CelebMatch (/celeb-match) 도 동일
+  톤(아바타 그라데이션·컬러 액센트·컴팩트 타이틀)으로 통일 필요 — 사용자 피드백
+  "다른 페이지도 동일한 느낌으로 — 다르면 이상함"
+
 [완료] 최애스타궁합 커뮤니티 DB + 스타 운세 필드 확장 (2026-05-20, 커밋 2ce9046 push)
 - 문제: 내장 CELEBRITIES 498명만으론 부족 + Claude 검색 결과를 localStorage에만 저장
   → 같은 스타 매번 다시 검색 + 다른 사용자 공유 불가
