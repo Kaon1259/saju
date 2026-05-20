@@ -46,6 +46,25 @@
 
 ═══════════════════════════════════════════════════════════════
 
+[완료] 최애스타궁합 커뮤니티 DB + 스타 운세 필드 확장 (2026-05-20, 커밋 2ce9046 push)
+- 문제: 내장 CELEBRITIES 498명만으론 부족 + Claude 검색 결과를 localStorage에만 저장
+  → 같은 스타 매번 다시 검색 + 다른 사용자 공유 불가
+- 해결: CelebCommunity 엔티티 신규 — 모든 사용자가 검색한 스타를 서버 DB에 자동 저장 + 공유
+  · 이름+생일 UNIQUE, searchCount 가중치(검색될 때마다 increment)
+  · /api/celeb/search 가 Claude 응답 → community DB 자동 저장 (found=true 시)
+  · /api/celeb/community GET — 통합 풀 (searchCount DESC 정렬, category 필터)
+  · 카테고리 화이트리스트 8종(idol/actor/singer/entertainer/athlete/model/influencer/trot)
+    외는 'custom' 통일 (Claude 임의 응답 방어)
+  · 클라: 진입 시 1회 fetch → 내장 + 커뮤니티 + localStorage 머지, 이름+생일 중복 제거
+- 스타 운세 필드 확장: 서버는 이미 7필드(personalityReading + academic 포함) 반환 중
+  이었으나 UI는 5필드만 표시 → 단순 피드백. 추출 필드 5→7:
+  · 🔮 사주로 본 성격·매력 (personalityReading 8-10문장 — 팬덤 가장 흥미)
+  · 🌟 총운 / 💕 애정운 / 💰 재물운 / 💪 건강운 / 💼 활동운 (idol→활동)
+  · 📚 자기계발·도전운 (academic 5-7문장)
+  Progressive 스트리밍 카드도 7개로 확장
+- 스키마: celeb_community 신규 → ddl-auto:update 자동 생성 (마이그레이션 불필요)
+- 효과: 새 스타 발견 시 즉시 모두에게 노출 / Claude API 호출 비용 점진 절감
+
 [완료] 결정 상담 — 간판 유료 상품 신설 (2026-05-20, 커밋 2da9445 push)
 - CLAUDE.md [전략 검토 2026-05-18] 액션 #2 실행 — A안(브랜드 유지, 연애 결정 한정)
 - 4가지 카테고리: 재회(reunion) / 이별(breakup) / 고백(confess) / 결혼(marriage)
