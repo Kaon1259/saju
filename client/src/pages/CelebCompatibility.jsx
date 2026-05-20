@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
+import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, getCelebCommunity, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import StreamingCard from '../components/StreamingCard';
@@ -98,8 +98,38 @@ function CelebCompatibility() {
     }
   }, []);
 
-  // 내장 DB + 사용자 추가 DB 병합
-  const allCelebs = useMemo(() => [...CELEBRITIES, ...getUserCelebs()], [step]);
+  // 커뮤니티 DB (서버 — 모든 사용자가 검색한 연예인 풀)
+  const [communityCelebs, setCommunityCelebs] = useState([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await getCelebCommunity();
+        // 서버 응답 → 내장 DB 형식으로 정규화 (group/birth/category/name)
+        const normalized = (list || []).map((c) => ({
+          name: c.name,
+          birth: c.birth,
+          gender: c.gender,
+          category: c.category || 'custom',
+          group: c.group || null,
+          info: c.info || '',
+          _community: true, // 출처 표시 (UI 뱃지용)
+        }));
+        setCommunityCelebs(normalized);
+      } catch {}
+    })();
+  }, []);
+
+  // 내장 DB + 커뮤니티 DB + 로컬 사용자 추가 DB 병합 (이름 중복 제거)
+  const allCelebs = useMemo(() => {
+    const merged = [...CELEBRITIES, ...communityCelebs, ...getUserCelebs()];
+    const seen = new Set();
+    return merged.filter((c) => {
+      const k = `${c.name}|${c.birth}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }, [communityCelebs, step]);
 
   // 통합 목록: 그룹 + 개인 스타를 하나로
   const filteredItems = useMemo(() => {
@@ -370,7 +400,7 @@ function CelebCompatibility() {
         setStarStreaming(true);
         starBufferRef.current += text;
         setStarStreamText(prev => prev + text);
-        const SF_FIELDS = ['overall', 'love', 'money', 'health', 'work'];
+        const SF_FIELDS = ['personalityReading', 'overall', 'love', 'money', 'health', 'work', 'academic'];
         const partial = extractStreamingFieldsPartial(starBufferRef.current, SF_FIELDS);
         const next = {}; const newDone = [];
         for (const k of SF_FIELDS) {
@@ -392,7 +422,18 @@ function CelebCompatibility() {
         try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
         const parsed = parseAiJson(fullText);
         if (parsed) {
-          pendingStarRef.current = { overall: parsed.overall, love: parsed.love, money: parsed.money, health: parsed.health, work: parsed.work, score: parsed.score || 70, luckyNumber: parsed.luckyNumber, luckyColor: parsed.luckyColor };
+          pendingStarRef.current = {
+            personalityReading: parsed.personalityReading,
+            overall: parsed.overall,
+            love: parsed.love,
+            money: parsed.money,
+            health: parsed.health,
+            work: parsed.work,
+            academic: parsed.academic,
+            score: parsed.score || 70,
+            luckyNumber: parsed.luckyNumber,
+            luckyColor: parsed.luckyColor,
+          };
           setMatrixShown(false);
           setCompleting(true);
         }
@@ -596,11 +637,13 @@ function CelebCompatibility() {
           </button>
           {starFortune && (
             <div className="celeb-star-fortune-result fade-in">
+              {starFortune.personalityReading && <div className="celeb-sf-item"><span className="celeb-sf-label">🔮 사주로 본 성격·매력</span><p>{starFortune.personalityReading}</p></div>}
               {starFortune.overall && <div className="celeb-sf-item"><span className="celeb-sf-label">🌟 총운</span><p>{starFortune.overall}</p></div>}
               {starFortune.love && <div className="celeb-sf-item"><span className="celeb-sf-label">💕 애정운</span><p>{starFortune.love}</p></div>}
               {starFortune.money && <div className="celeb-sf-item"><span className="celeb-sf-label">💰 재물운</span><p>{starFortune.money}</p></div>}
               {starFortune.health && <div className="celeb-sf-item"><span className="celeb-sf-label">💪 건강운</span><p>{starFortune.health}</p></div>}
               {starFortune.work && <div className="celeb-sf-item"><span className="celeb-sf-label">💼 활동운</span><p>{starFortune.work}</p></div>}
+              {starFortune.academic && <div className="celeb-sf-item"><span className="celeb-sf-label">📚 자기계발·도전운</span><p>{starFortune.academic}</p></div>}
               {starFortune.luckyColor && <p className="celeb-sf-lucky">행운의 색: {starFortune.luckyColor} | 행운의 숫자: {starFortune.luckyNumber}</p>}
             </div>
           )}

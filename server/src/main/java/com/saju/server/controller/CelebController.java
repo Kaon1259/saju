@@ -1,13 +1,18 @@
 package com.saju.server.controller;
 
+import com.saju.server.entity.CelebCommunity;
+import com.saju.server.repository.CelebCommunityRepository;
 import com.saju.server.service.ClaudeApiService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -17,46 +22,100 @@ import java.util.Map;
 public class CelebController {
 
     private final ClaudeApiService claudeApiService;
+    private final CelebCommunityRepository communityRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * 연예인 검색.
+     * 흐름:
+     *  1) celeb_community DB 에서 이름 매칭 → 있으면 즉시 반환 (searchCount++).
+     *  2) 없으면 Claude API 호출 → 결과를 community DB 에 자동 저장.
+     *  3) 다음 검색부터 모든 사용자가 즉시 hit.
+     */
     @PostMapping("/search")
+    @Transactional
     public ResponseEntity<?> searchCeleb(@RequestBody Map<String, String> body) {
         String name = body.get("name");
         if (name == null || name.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "이름을 입력해주세요"));
+        }
+        String trimmed = name.trim();
+
+        // 1) Community DB 선조회 (이름만으로)
+        var existing = communityRepository.findFirstByName(trimmed);
+        if (existing.isPresent()) {
+            CelebCommunity c = existing.get();
+            communityRepository.incrementSearchCount(c.getId());
+            log.info("[Celeb] Community DB hit: {} (count={})", trimmed, c.getSearchCount() + 1);
+            return ResponseEntity.ok(buildResultFromEntity(c, true));
         }
 
         if (!claudeApiService.isAvailable()) {
             return ResponseEntity.ok(Map.of("found", false, "message", "AI 검색을 사용할 수 없습니다"));
         }
 
+        // 2) Claude API 호출
         try {
             String system = "당신은 한국 연예인 정보 전문가입니다. 사용자가 연예인 이름을 입력하면 정확한 정보를 JSON으로 응답하세요.\n\n" +
                 "【규칙】\n" +
                 "1. 반드시 JSON만 응답\n" +
                 "2. 실제 존재하는 연예인만 응답 (가상 인물 X)\n" +
-                "3. 생년월일은 양력 YYYY-MM-DD 형식\n" +
-                "4. 찾을 수 없으면 {\"found\":false}\n\n" +
+                "3. 생년월일은 양력 YYYY-MM-DD 형식 (정확히 알아야만, 모르면 found:false)\n" +
+                "4. category 는 정확히 다음 중 하나: idol / actor / singer / entertainer / athlete / model / influencer / trot\n" +
+                "5. 찾을 수 없거나 정보가 불확실하면 {\"found\":false}\n\n" +
                 "응답 형식:\n" +
-                "{\"found\":true,\"name\":\"정확한 활동명\",\"realName\":\"본명(있으면)\",\"birth\":\"YYYY-MM-DD\",\"gender\":\"M 또는 F\",\"category\":\"idol/actor/singer/entertainer\",\"group\":\"소속그룹(있으면, 없으면 null)\",\"info\":\"간단한 소개 한 줄\"}";
+                "{\"found\":true,\"name\":\"정확한 활동명\",\"realName\":\"본명(있으면, 없으면 빈 문자열)\",\"birth\":\"YYYY-MM-DD\",\"gender\":\"M 또는 F\",\"category\":\"위 8가지 중 하나\",\"group\":\"소속그룹(있으면, 없으면 null)\",\"info\":\"간단한 소개 한 줄\"}";
 
-            String user = "'" + name + "' 연예인의 정보를 알려주세요.";
-            String response = claudeApiService.generate(system, user, 300);
+            String user = "'" + trimmed + "' 연예인의 정보를 알려주세요.";
+            String response = claudeApiService.generate(system, user, 400);
             String json = ClaudeApiService.extractJson(response);
 
             if (json != null) {
                 JsonNode root = objectMapper.readTree(json);
                 if (root.path("found").asBoolean(false)) {
-                    return ResponseEntity.ok(Map.of(
-                        "found", true,
-                        "name", root.path("name").asText(name),
-                        "realName", root.path("realName").asText(""),
-                        "birth", root.path("birth").asText(""),
-                        "gender", root.path("gender").asText(""),
-                        "category", root.path("category").asText(""),
-                        "group", root.path("group").asText(""),
-                        "info", root.path("info").asText("")
-                    ));
+                    String resolvedName = root.path("name").asText(trimmed);
+                    String birth = root.path("birth").asText("");
+                    String gender = root.path("gender").asText("");
+                    String category = normalizeCategory(root.path("category").asText(""));
+                    String group = root.path("group").asText("");
+                    String realName = root.path("realName").asText("");
+                    String info = root.path("info").asText("");
+
+                    // 3) DB 자동 저장 (이름+생일 unique. 이미 있으면 skip)
+                    if (!birth.isBlank() && !gender.isBlank()) {
+                        try {
+                            var dupe = communityRepository.findByNameAndBirth(resolvedName, birth);
+                            if (dupe.isEmpty()) {
+                                CelebCommunity saved = communityRepository.save(CelebCommunity.builder()
+                                    .name(resolvedName)
+                                    .realName(realName.isBlank() ? null : realName)
+                                    .birth(birth)
+                                    .gender(gender)
+                                    .category(category)
+                                    .groupName(group.isBlank() || "null".equalsIgnoreCase(group) ? null : group)
+                                    .info(info.isBlank() ? null : info)
+                                    .searchCount(1)
+                                    .build());
+                                log.info("[Celeb] Auto-saved to community DB: {} ({}, {})", resolvedName, category, birth);
+                            } else {
+                                communityRepository.incrementSearchCount(dupe.get().getId());
+                            }
+                        } catch (Exception saveErr) {
+                            log.warn("[Celeb] community 저장 실패 (응답은 정상): {}", saveErr.getMessage());
+                        }
+                    }
+
+                    Map<String, Object> out = new LinkedHashMap<>();
+                    out.put("found", true);
+                    out.put("name", resolvedName);
+                    out.put("realName", realName);
+                    out.put("birth", birth);
+                    out.put("gender", gender);
+                    out.put("category", category);
+                    out.put("group", group);
+                    out.put("info", info);
+                    out.put("savedToCommunity", true);
+                    return ResponseEntity.ok(out);
                 }
             }
             return ResponseEntity.ok(Map.of("found", false, "message", "해당 연예인을 찾을 수 없습니다"));
@@ -64,5 +123,50 @@ public class CelebController {
             log.warn("AI celeb search failed: {}", e.getMessage());
             return ResponseEntity.ok(Map.of("found", false, "message", "검색 중 오류가 발생했습니다"));
         }
+    }
+
+    /**
+     * 커뮤니티 DB 전체 목록 (모든 사용자가 발견한 연예인 풀).
+     * 클라이언트 초기 로드 시 1회 가져와 내장 DB 와 머지.
+     * category 파라미터 있으면 분류 필터.
+     */
+    @GetMapping("/community")
+    public ResponseEntity<List<Map<String, Object>>> getCommunity(
+            @RequestParam(value = "category", required = false) String category) {
+        List<CelebCommunity> list = (category == null || category.isBlank() || "all".equalsIgnoreCase(category))
+            ? communityRepository.findAllByOrderBySearchCountDescUpdatedAtDesc()
+            : communityRepository.findByCategoryOrderBySearchCountDescUpdatedAtDesc(category);
+
+        List<Map<String, Object>> out = list.stream()
+            .map(c -> buildResultFromEntity(c, false))
+            .toList();
+        return ResponseEntity.ok(out);
+    }
+
+    private Map<String, Object> buildResultFromEntity(CelebCommunity c, boolean withFoundFlag) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        if (withFoundFlag) m.put("found", true);
+        m.put("name", c.getName());
+        m.put("realName", c.getRealName() == null ? "" : c.getRealName());
+        m.put("birth", c.getBirth());
+        m.put("gender", c.getGender());
+        m.put("category", c.getCategory() == null ? "custom" : c.getCategory());
+        m.put("group", c.getGroupName());
+        m.put("info", c.getInfo() == null ? "" : c.getInfo());
+        m.put("searchCount", c.getSearchCount());
+        m.put("source", "community");
+        return m;
+    }
+
+    /**
+     * Claude가 임의의 카테고리를 응답할 가능성 대비 — 화이트리스트 외에는 'custom' 으로 통일.
+     */
+    private String normalizeCategory(String raw) {
+        if (raw == null || raw.isBlank()) return "custom";
+        String c = raw.trim().toLowerCase();
+        return switch (c) {
+            case "idol", "actor", "singer", "entertainer", "athlete", "model", "influencer", "trot" -> c;
+            default -> "custom";
+        };
     }
 }

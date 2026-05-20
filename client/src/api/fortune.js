@@ -1540,6 +1540,18 @@ export const searchCeleb = async (name) => {
   return response.data;
 };
 
+// 커뮤니티 DB — 모든 사용자가 검색해서 발견한 연예인 통합 풀.
+// CelebCompatibility 진입 시 1회 fetch → 내장 CELEBRITIES와 머지.
+export const getCelebCommunity = async (category = null) => {
+  try {
+    const params = category && category !== 'all' ? { category } : {};
+    const response = await api.get('/celeb/community', { params });
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (e) {
+    return [];
+  }
+};
+
 // ─── 운세 히스토리 ───
 export const listHistory = async (type, limit = 20, subType = null) => {
   const userId = localStorage.getItem('userId');
