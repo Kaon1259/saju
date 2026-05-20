@@ -101,7 +101,7 @@ public class FaceReadingService {
         String cacheKey = buildCacheKey(faceShape, eyeShape, noseShape, mouthShape, foreheadShape, birthDate, gender);
         Map<String, Object> cached = getFromCache("face-reading", cacheKey);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(30000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 String json = objectMapper.writeValueAsString(cached);
                 emitter.send(SseEmitter.event().name("cached").data(json));

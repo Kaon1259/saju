@@ -77,7 +77,7 @@ public class MonthlyFortuneController {
         Map<String, Object> cached = (Map<String, Object>) ctx[3];
 
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 emitter.send(SseEmitter.event().name("cached").data(objectMapper.writeValueAsString(cached)));
                 emitter.complete();

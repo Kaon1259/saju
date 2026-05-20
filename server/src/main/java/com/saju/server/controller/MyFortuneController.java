@@ -144,7 +144,7 @@ public class MyFortuneController {
         requireSelf(req, userId);
         UserResponse user = userService.getUser(userId);
         if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
-            SseEmitter emitter = new SseEmitter(30000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try { emitter.send(SseEmitter.event().name("error").data("프로필을 먼저 완성해주세요.")); emitter.complete(); }
                 catch (Exception ignored) {}
@@ -168,7 +168,7 @@ public class MyFortuneController {
             SajuResult sajuResult = sajuService.buildBasicResult(bd, user.getBirthTime(), user.getGender());
 
             // timeout: 5s → 30s — 캐시 히트 응답이 풀 대기 등으로 늦어져도 끊기지 않도록 여유
-            SseEmitter emitter = new SseEmitter(30000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             final Map<String, Object> data = buildMyFortuneData(user, cached);
             @SuppressWarnings("unchecked")
             Map<String, Object> sajuMap = (Map<String, Object>) data.get("saju");
@@ -209,7 +209,7 @@ public class MyFortuneController {
 
         // cacheOnly 모드: 캐시 없으면 AI 호출 없이 no-cache 이벤트로 종료
         if (cacheOnly) {
-            SseEmitter emitter = new SseEmitter(30000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try { emitter.send(SseEmitter.event().name("no-cache").data("{}")); emitter.complete(); }
                 catch (Exception ignored) {}

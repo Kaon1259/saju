@@ -372,7 +372,7 @@ public class PsychTestService {
         String cacheKey = buildCacheKey(testId, answers, birthDate, gender);
         Map<String, Object> cached = getFromCache("psych-test", cacheKey);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(30000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 String json = objectMapper.writeValueAsString(cached);
                 emitter.send(SseEmitter.event().name("cached").data(json));

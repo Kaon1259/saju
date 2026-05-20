@@ -97,7 +97,7 @@ public class TojeongController {
         TojeongResult base = ctx.length >= 5 ? (TojeongResult) ctx[4] : null;
 
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 emitter.send(SseEmitter.event().name("cached").data(objectMapper.writeValueAsString(cached)));
                 emitter.complete();

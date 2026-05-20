@@ -575,7 +575,7 @@ public class TarotService {
                     log.warn("tarot cache-hit history save failed: {}", e.getMessage());
                 }
             }
-            SseEmitter emitter = new SseEmitter(30000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 String json = objectMapper.writeValueAsString(cached);
                 emitter.send(SseEmitter.event().name("cached").data(json));

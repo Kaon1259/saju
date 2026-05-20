@@ -92,7 +92,7 @@ public class DeepAnalysisController {
         // 캐시 확인 - 있으면 즉시 완료 (무료)
         Map<String, Object> cached = deepAnalysisService.getCached(type, birthDate, birthTime, gender, calendarType, extra);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try {
                     emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
@@ -194,7 +194,7 @@ public class DeepAnalysisController {
         // 캐시 확인 — 같은 카드 조합은 영속 캐시 (한 번만 결제)
         Map<String, Object> cached = deepAnalysisService.getCachedTarot(cardIds, reversals, spread, category);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try {
                     emitter.send(SseEmitter.event().name("cached").data(
@@ -279,7 +279,7 @@ public class DeepAnalysisController {
         // 캐시 확인
         Map<String, Object> cached = deepAnalysisService.getCachedCompat(type, bd1, bt1, g1, bd2, bt2, g2);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try {
                     emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));

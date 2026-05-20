@@ -119,7 +119,7 @@ public class SajuController {
                         savePartnerHistory ? "partner_fortune" : "other_fortune", e.getMessage());
                 }
             }
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             final SajuResult result = cached;
             new Thread(() -> {
                 try {
@@ -135,7 +135,7 @@ public class SajuController {
 
         // cacheOnly 모드: 캐시 미스 시 AI 호출 없이 no-cache 이벤트로 종료
         if (cacheOnly) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try {
                     emitter.send(SseEmitter.event().name("no-cache").data("{}"));
@@ -305,7 +305,7 @@ public class SajuController {
         String cacheKey = sajuService.buildManseryeokCacheKey(date.toString(), birthDateStr);
         Map<String, Object> cached = sajuService.getManseryeokCache(cacheKey);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try {
                     String json = objectMapper.writeValueAsString(cached);
@@ -320,7 +320,7 @@ public class SajuController {
 
         // cacheOnly 모드: 캐시 없으면 AI 호출 없이 no-cache 이벤트로 종료
         if (cacheOnly) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
                 try { emitter.send(SseEmitter.event().name("no-cache").data("{}")); emitter.complete(); }
                 catch (Exception ignored) {}

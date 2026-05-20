@@ -51,7 +51,7 @@ public class WeatherCompatController {
         // 캐시 확인
         Map<String, Object> cached = weatherCompatService.getCached(userId, condition);
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 String json = objectMapper.writeValueAsString(cached);
                 emitter.send(SseEmitter.event().name("cached").data(json));

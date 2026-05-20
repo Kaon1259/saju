@@ -5,7 +5,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseEmitterUtils {
 
     public static SseEmitter insufficientHearts(int required, int available) {
-        SseEmitter emitter = new SseEmitter(5000L);
+        SseEmitter emitter = new SseEmitter(10000L);
         new Thread(() -> {
             try {
                 String json = String.format("{\"required\":%d,\"available\":%d}", required, available);
@@ -17,7 +17,7 @@ public class SseEmitterUtils {
     }
 
     public static SseEmitter errorEmitter(String message) {
-        SseEmitter emitter = new SseEmitter(5000L);
+        SseEmitter emitter = new SseEmitter(10000L);
         new Thread(() -> {
             try {
                 emitter.send(SseEmitter.event().name("error").data(message));

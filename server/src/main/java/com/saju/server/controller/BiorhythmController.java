@@ -72,7 +72,7 @@ public class BiorhythmController {
 
         // 캐시 히트 → 즉시 반환
         if (cached != null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(10000L);
             try {
                 emitter.send(SseEmitter.event().name("cached").data(objectMapper.writeValueAsString(cached)));
                 emitter.complete();

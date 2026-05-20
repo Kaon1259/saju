@@ -121,37 +121,54 @@ public class SpecialFortuneController {
             type, birthDate, birthTime, gender, calendarType,
             partnerDate, partnerGender, breakupDate, meetDate, relationshipStatus);
         if (cached.containsKey("score") && cached.containsKey("overall")) {
-            // 캐시 히트도 '본 운세'이므로 히스토리에 1회 저장 (중복 시 스킵)
-            if (userId != null) {
-                Map<String, Object> payload = new java.util.LinkedHashMap<>(cached);
-                payload.put("type", type);
-                payload.put("birthDate", birthDate);
-                payload.put("birthTime", birthTime);
-                payload.put("gender", gender);
-                payload.put("calendarType", calendarType);
-                payload.put("partnerDate", partnerDate);
-                payload.put("partnerGender", partnerGender);
-                payload.put("breakupDate", breakupDate);
-                payload.put("meetDate", meetDate);
-                payload.put("relationshipStatus", relationshipStatus);
-                boolean isSkinship = "skinship".equals(type);
-                String historyType = isSkinship ? "skinship_compat" : "love_11";
-                String title = isSkinship
-                    ? "스킨십 궁합 (" + birthDate + (partnerDate != null && !partnerDate.isBlank() ? " × " + partnerDate : "") + ")"
-                    : buildLoveTitle(type, birthDate, partnerDate);
-                Object score = cached.get("score");
-                Object overall = cached.get("overall");
-                String summary = (score != null ? score + "점" : "")
-                    + (overall != null ? " · " + overall : "");
-                fortuneHistoryService.saveIfAbsent(userId, historyType, title, summary, payload);
-            }
-            // 캐시 히트 → cached 이벤트로 즉시 반환
-            SseEmitter emitter = new SseEmitter(5000L);
+            // 캐시 히트 → cached 이벤트로 즉시 반환 (timeout 5s→30s, 풀 대기 마진)
+            SseEmitter emitter = new SseEmitter(10000L);
+            final Long uidForHistory = userId;
+            final Map<String, Object> cachedSnap = cached;
+            final String typeSnap = type;
+            final String birthDateSnap = birthDate;
+            final String birthTimeSnap = birthTime;
+            final String genderSnap = gender;
+            final String calTypeSnap = calendarType;
+            final String partnerDateSnap = partnerDate;
+            final String partnerGenderSnap = partnerGender;
+            final String breakupDateSnap = breakupDate;
+            final String meetDateSnap = meetDate;
+            final String relSnap = relationshipStatus;
             new Thread(() -> {
+                // ⚡ cached 이벤트 먼저 발사 — 사용자 응답 최우선
                 try {
-                    emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cached)));
+                    emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(cachedSnap)));
                     emitter.complete();
                 } catch (Exception ignored) {}
+                // 응답 후 히스토리 저장 — 실패해도 사용자 응답에 영향 없음
+                try {
+                    if (uidForHistory != null) {
+                        Map<String, Object> payload = new java.util.LinkedHashMap<>(cachedSnap);
+                        payload.put("type", typeSnap);
+                        payload.put("birthDate", birthDateSnap);
+                        payload.put("birthTime", birthTimeSnap);
+                        payload.put("gender", genderSnap);
+                        payload.put("calendarType", calTypeSnap);
+                        payload.put("partnerDate", partnerDateSnap);
+                        payload.put("partnerGender", partnerGenderSnap);
+                        payload.put("breakupDate", breakupDateSnap);
+                        payload.put("meetDate", meetDateSnap);
+                        payload.put("relationshipStatus", relSnap);
+                        boolean isSkinship = "skinship".equals(typeSnap);
+                        String historyType = isSkinship ? "skinship_compat" : "love_11";
+                        String title = isSkinship
+                            ? "스킨십 궁합 (" + birthDateSnap + (partnerDateSnap != null && !partnerDateSnap.isBlank() ? " × " + partnerDateSnap : "") + ")"
+                            : buildLoveTitle(typeSnap, birthDateSnap, partnerDateSnap);
+                        Object score = cachedSnap.get("score");
+                        Object overall = cachedSnap.get("overall");
+                        String summary = (score != null ? score + "점" : "")
+                            + (overall != null ? " · " + overall : "");
+                        fortuneHistoryService.saveIfAbsent(uidForHistory, historyType, title, summary, payload);
+                    }
+                } catch (Exception e) {
+                    log.warn("[SpecialFortune] async history save failed: {}", e.getMessage());
+                }
             }).start();
             return emitter;
         }
