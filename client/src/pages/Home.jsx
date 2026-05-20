@@ -1709,6 +1709,20 @@ function Home() {
       })()}
 
       {/* ════════════════════════════════════════════════════════════ */}
+      {/* 4.4. 스타 운세 배너                                     */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      <section className="home-section">
+        <button className="home-mystar-banner" onClick={() => navigate('/star-fortune')}>
+          <span className="home-mystar-icon">🌟</span>
+          <div className="home-mystar-text">
+            <span className="home-mystar-title">스타 운세</span>
+            <span className="home-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
+          </div>
+          <span className="home-mystar-arrow">›</span>
+        </button>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════ */}
       {/* 4.5. 결정 상담 (간판 유료 상품)                              */}
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">

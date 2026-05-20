@@ -319,6 +319,16 @@ function HomeNew() {
         </div>
       </section>
 
+      {/* ── 스타 운세 배너 ─────────────────────────────── */}
+      <button className="hn-mystar-banner" onClick={() => go('/star-fortune')}>
+        <span className="hn-mystar-icon">🌟</span>
+        <div className="hn-mystar-text">
+          <span className="hn-mystar-title">스타 운세</span>
+          <span className="hn-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
+        </div>
+        <span className="hn-mystar-arrow">›</span>
+      </button>
+
       {/* ── 결정 상담 (간판 유료 상품) — hn-section 패턴 통일 ─── */}
       <section className="hn-section hn-section--decision">
         <div className="hn-section-head">

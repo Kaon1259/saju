@@ -4,7 +4,7 @@ import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream
 import HistoryDrawer from '../components/HistoryDrawer';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import StreamingCard from '../components/StreamingCard';
-import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
+import CELEBRITIES from '../data/celebrities';
 import GROUPS from '../data/groups';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
@@ -20,6 +20,29 @@ import './CelebCompatibility.css';
 
 const GRADE_COLORS = { '천생연분': '#ff3d7f', '좋은 인연': '#ff6b9d', '보통': '#fbbf24', '노력 필요': '#94a3b8', '상극': '#64748b' };
 const USER_CELEBS_KEY = 'userCelebrities';
+
+// 카테고리별 시그니처 컬러 — 아바타 그라데이션·뱃지 톤
+const CATEGORY_COLORS = {
+  idol:         { from: '#ec4899', to: '#a855f7', label: '아이돌',      emoji: '✨' },
+  actor:        { from: '#f59e0b', to: '#ef4444', label: '배우',        emoji: '🎬' },
+  singer:       { from: '#06b6d4', to: '#3b82f6', label: '가수',        emoji: '🎤' },
+  entertainer:  { from: '#10b981', to: '#22d3ee', label: '예능인',      emoji: '🎙️' },
+  athlete:      { from: '#84cc16', to: '#22c55e', label: '운동선수',    emoji: '🏆' },
+  model:        { from: '#d946ef', to: '#ec4899', label: '모델',        emoji: '👗' },
+  influencer:   { from: '#f43f5e', to: '#fb7185', label: '인플루언서',  emoji: '📱' },
+  trot:         { from: '#fbbf24', to: '#f59e0b', label: '트로트',      emoji: '🎼' },
+  custom:       { from: '#a855f7', to: '#ec4899', label: '스타',        emoji: '🌟' },
+};
+function catColor(celeb) {
+  const k = celeb?.category || 'custom';
+  return CATEGORY_COLORS[k] || CATEGORY_COLORS.custom;
+}
+// 이름 첫 글자 (아바타용)
+function initial(name) {
+  if (!name) return '★';
+  // 한글/영문 첫 1자
+  return name.trim().slice(0, 1).toUpperCase();
+}
 
 function getUserCelebs() {
   try { return JSON.parse(localStorage.getItem(USER_CELEBS_KEY) || '[]'); }
@@ -41,7 +64,6 @@ function CelebCompatibility() {
   const [step, setStep] = useState(initCeleb ? 'input' : 'select');
   const [selectedCeleb, setSelectedCeleb] = useState(initCeleb);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
 
   // 직접 입력
   const [showManual, setShowManual] = useState(false);
@@ -131,31 +153,18 @@ function CelebCompatibility() {
     });
   }, [communityCelebs, step]);
 
-  // 통합 목록: 그룹 + 개인 스타를 하나로
+  // 통합 목록: 그룹 + 모든 개인 스타. 검색어로만 필터링 (카테고리 탭 폐지)
   const filteredItems = useMemo(() => {
     const items = [];
     const q = searchQuery.trim().toLowerCase();
 
-    // 보이그룹/걸그룹 카테고리 → 그룹만
-    if (activeCategory === 'boygroup' || activeCategory === 'girlgroup') {
-      let groups = GROUPS.filter(g => activeCategory === 'boygroup' ? g.type === 'boy' : g.type === 'girl');
-      if (q) groups = groups.filter(g => g.name.toLowerCase().includes(q));
-      groups.forEach(g => items.push({ _type: 'group', ...g }));
-      return items;
-    }
-
-    // 전체/아이돌 → 그룹도 포함
-    if (activeCategory === 'all' || activeCategory === 'idol') {
-      let groups = GROUPS;
-      if (q) groups = groups.filter(g => g.name.toLowerCase().includes(q));
-      else if (activeCategory === 'idol') { /* 아이돌이면 그룹 전체 표시 */ }
-      groups.forEach(g => items.push({ _type: 'group', ...g }));
-    }
+    // 그룹
+    let groups = GROUPS;
+    if (q) groups = groups.filter(g => g.name.toLowerCase().includes(q));
+    groups.forEach(g => items.push({ _type: 'group', ...g }));
 
     // 개인 스타
     let celebs = allCelebs;
-    if (activeCategory === 'idol') celebs = celebs.filter(c => c.category === 'idol');
-    else if (activeCategory !== 'all') celebs = celebs.filter(c => c.category === activeCategory);
     if (q) {
       celebs = celebs.filter(c =>
         c.name.toLowerCase().includes(q) ||
@@ -165,7 +174,7 @@ function CelebCompatibility() {
     celebs.forEach(c => items.push({ _type: 'celeb', ...c }));
 
     return items;
-  }, [activeCategory, searchQuery, allCelebs]);
+  }, [searchQuery, allCelebs]);
 
   const handleSelectCeleb = (celeb) => {
     setSelectedCeleb(celeb);
@@ -472,68 +481,90 @@ function CelebCompatibility() {
   // ─── 연예인 선택 화면 ───
   if (step === 'select') {
     return (
-      <div className="celeb-page">
-        <StarHero
-          icon="💫"
-          title="스타와 나의 궁합"
-          desc="최애와 사주 궁합을 확인해보세요"
-          color="#E91E63"
-          particles={['💖','💫','✨','💘','🌟']}
-          topButtons={<HeroIconButtons color="#E91E63" onBack={() => navigate('/star-fortune')} />}
-        />
-
-        <div className="celeb-search-wrap">
-          <input className="celeb-search" type="text" placeholder="스타 이름 또는 그룹 검색..."
-            value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+      <div className="celeb-page celeb-page--select">
+        {/* 컴팩트 타이틀 — 뒤로가기 제거, 패딩 최소화 */}
+        <div className="celeb-compact-hero">
+          <h1 className="celeb-compact-title">💫 스타와 나의 궁합</h1>
         </div>
 
-        <div className="celeb-categories">
-          {CELEB_CATEGORIES.map(cat => (
-            <button key={cat.key} className={`celeb-cat-btn ${activeCategory === cat.key ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat.key)}>{cat.label}</button>
-          ))}
+        {/* 스타 운세 진입 배너 */}
+        <button className="celeb-mystar-banner" onClick={() => navigate('/star-fortune')}>
+          <span className="celeb-mystar-icon">🌟</span>
+          <div className="celeb-mystar-text">
+            <span className="celeb-mystar-title">스타 운세</span>
+            <span className="celeb-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
+          </div>
+          <span className="celeb-mystar-arrow">›</span>
+        </button>
+
+        <div className="celeb-search-wrap">
+          <span className="celeb-search-icon" aria-hidden="true">🔍</span>
+          <input className="celeb-search" type="text" placeholder="스타 이름 또는 그룹 검색"
+            value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          {searchQuery && (
+            <button className="celeb-search-clear" onClick={() => setSearchQuery('')} aria-label="검색어 지우기">✕</button>
+          )}
         </div>
 
         <div className="celeb-list">
           {filteredItems.length > 0 ? filteredItems.map((item, i) => (
             item._type === 'group' ? (
               <button key={`group-${item.name}`} className="celeb-item celeb-item--group" onClick={() => handleSelectGroup(item)}>
-                <span className={`celeb-item-sym ${item.type === 'boy' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>
-                  {item.type === 'boy' ? '♂' : '♀'}
+                <span className={`celeb-avatar celeb-avatar--${item.type === 'boy' ? 'boy' : 'girl'}`}>
+                  <span className="celeb-avatar-text">{initial(item.name)}</span>
+                  <span className="celeb-avatar-deco" aria-hidden="true">{item.type === 'boy' ? '♂' : '♀'}</span>
                 </span>
                 <div className="celeb-item-info">
                   <span className="celeb-item-name">{item.name}</span>
                   <span className="celeb-item-detail">
                     <span className="celeb-tag celeb-tag--group">{item.type === 'boy' ? '보이그룹' : '걸그룹'}</span>
-                    <span>{item.members.length}명</span>
-                    <span>{item.agency}</span>
-                  </span>
-                </div>
-                <span className="celeb-item-arrow">›</span>
-              </button>
-            ) : (
-              <button key={`${item.name}-${item.birth}-${i}`} className="celeb-item" onClick={() => handleSelectCeleb(item)}>
-                <span className={`celeb-item-sym ${item.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>{item.gender === 'M' ? '♂' : '♀'}</span>
-                <div className="celeb-item-info">
-                  <span className="celeb-item-name">{item.name}</span>
-                  <span className="celeb-item-detail">
-                    {item.group && <span className="celeb-tag celeb-tag--group">{item.group}</span>}
+                    <span className="celeb-tag celeb-tag--count">👥 {item.members.length}명</span>
                     {item.agency && <span className="celeb-tag celeb-tag--agency">{item.agency}</span>}
-                    <span>{item.birth.slice(0, 4)}년생</span>
                   </span>
                 </div>
                 <span className="celeb-item-arrow">›</span>
               </button>
-            )
+            ) : (() => {
+              const cc = catColor(item);
+              return (
+                <button key={`${item.name}-${item.birth}-${i}`} className="celeb-item"
+                  onClick={() => handleSelectCeleb(item)}
+                  style={{ '--cc-from': cc.from, '--cc-to': cc.to }}>
+                  <span className="celeb-avatar celeb-avatar--celeb">
+                    <span className="celeb-avatar-text">{initial(item.name)}</span>
+                    <span className="celeb-avatar-deco" aria-hidden="true">{cc.emoji}</span>
+                  </span>
+                  <div className="celeb-item-info">
+                    <span className="celeb-item-name">
+                      {item.name}
+                      {item._community && <span className="celeb-tag celeb-tag--community">팬 추가</span>}
+                    </span>
+                    <span className="celeb-item-detail">
+                      <span className="celeb-tag celeb-tag--cat">{cc.label}</span>
+                      {item.group && <span className="celeb-tag celeb-tag--group">{item.group}</span>}
+                      {item.agency && <span className="celeb-tag celeb-tag--agency">{item.agency}</span>}
+                      <span className="celeb-item-year">{item.birth.slice(0, 4)}년생</span>
+                    </span>
+                  </div>
+                  <span className="celeb-item-arrow">›</span>
+                </button>
+              );
+            })()
           )) : (
             <div className="celeb-empty">
-              <p>검색 결과가 없습니다</p>
+              <div className="celeb-empty-icon">🔍</div>
+              <p className="celeb-empty-title">찾으시는 스타가 없네요</p>
+              <p className="celeb-empty-sub">검색어를 바꿔보거나 아래에서 직접 입력해 보세요</p>
+              <button className="celeb-empty-cta" onClick={() => { setShowManual(true); setManualName(searchQuery); }}>
+                ✏️ "{searchQuery}" 직접 추가
+              </button>
             </div>
           )}
         </div>
 
-        <button className="celeb-manual-toggle" onClick={() => setShowManual(!showManual)}>
-          {showManual ? '접기' : '찾는 스타가 없나요? ✏️ 직접 입력'}
+        <button className={`celeb-manual-toggle ${showManual ? 'celeb-manual-toggle--open' : ''}`}
+          onClick={() => setShowManual(!showManual)}>
+          {showManual ? '▲ 직접 입력 접기' : '✏️ 찾는 스타가 없나요? 직접 입력 / AI 검색'}
         </button>
 
         {showManual && (
@@ -616,35 +647,108 @@ function CelebCompatibility() {
           }}
         />
         <button className="celeb-back-btn" onClick={() => { setStep('select'); setStarFortune(null); }}>← 스타 목록으로</button>
-        <section className="celeb-selected glass-card">
-          <span className={`celeb-item-sym celeb-sym--lg ${selectedCeleb.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>
-            {selectedCeleb.gender === 'M' ? '♂' : '♀'}
-          </span>
-          <div className="celeb-selected-info">
-            <span className="celeb-selected-name">{selectedCeleb.name}</span>
-            <span className="celeb-selected-detail">
-              {selectedCeleb.group && <span className="celeb-tag celeb-tag--group">{selectedCeleb.group}</span>}
-              {selectedCeleb.agency && <span className="celeb-tag celeb-tag--agency">{selectedCeleb.agency}</span>}
-              <span>{selectedCeleb.birth}</span>
-            </span>
-          </div>
-        </section>
+
+        {(() => {
+          const cc = catColor(selectedCeleb);
+          return (
+            <section className="celeb-selected glass-card" style={{ '--cc-from': cc.from, '--cc-to': cc.to }}>
+              <div className="celeb-selected-aura" aria-hidden="true" />
+              <span className="celeb-avatar celeb-avatar--lg celeb-avatar--celeb">
+                <span className="celeb-avatar-text">{initial(selectedCeleb.name)}</span>
+                <span className="celeb-avatar-deco celeb-avatar-deco--lg" aria-hidden="true">{cc.emoji}</span>
+              </span>
+              <div className="celeb-selected-info">
+                <span className="celeb-selected-cat">{cc.label} · 선택된 스타</span>
+                <span className="celeb-selected-name">{selectedCeleb.name}</span>
+                <span className="celeb-selected-detail">
+                  {selectedCeleb.group && <span className="celeb-tag celeb-tag--group">{selectedCeleb.group}</span>}
+                  {selectedCeleb.agency && <span className="celeb-tag celeb-tag--agency">{selectedCeleb.agency}</span>}
+                  <span className="celeb-selected-birth">📅 {selectedCeleb.birth}</span>
+                </span>
+              </div>
+            </section>
+          );
+        })()}
 
         {/* 스타 운세 보기 */}
         <div className="celeb-star-fortune glass-card">
+          <div className="celeb-sf-intro">
+            <span className="celeb-sf-intro-icon">🔮</span>
+            <div>
+              <div className="celeb-sf-intro-title">{selectedCeleb.name}의 사주로 보는 오늘</div>
+              <div className="celeb-sf-intro-sub">성격·매력 + 5가지 분야 운세를 한 번에</div>
+            </div>
+          </div>
           <button className="celeb-star-fortune-btn" onClick={() => guardCelebFortune(handleStarFortune)} disabled={starFortuneLoading || starStreaming}>
             {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : <>{`🌟 ${selectedCeleb.name}의 오늘 운세 보기`} <HeartCost category="CELEB_FORTUNE" /></>}
           </button>
           {starFortune && (
             <div className="celeb-star-fortune-result fade-in">
-              {starFortune.personalityReading && <div className="celeb-sf-item"><span className="celeb-sf-label">🔮 사주로 본 성격·매력</span><p>{starFortune.personalityReading}</p></div>}
-              {starFortune.overall && <div className="celeb-sf-item"><span className="celeb-sf-label">🌟 총운</span><p>{starFortune.overall}</p></div>}
-              {starFortune.love && <div className="celeb-sf-item"><span className="celeb-sf-label">💕 애정운</span><p>{starFortune.love}</p></div>}
-              {starFortune.money && <div className="celeb-sf-item"><span className="celeb-sf-label">💰 재물운</span><p>{starFortune.money}</p></div>}
-              {starFortune.health && <div className="celeb-sf-item"><span className="celeb-sf-label">💪 건강운</span><p>{starFortune.health}</p></div>}
-              {starFortune.work && <div className="celeb-sf-item"><span className="celeb-sf-label">💼 활동운</span><p>{starFortune.work}</p></div>}
-              {starFortune.academic && <div className="celeb-sf-item"><span className="celeb-sf-label">📚 자기계발·도전운</span><p>{starFortune.academic}</p></div>}
-              {starFortune.luckyColor && <p className="celeb-sf-lucky">행운의 색: {starFortune.luckyColor} | 행운의 숫자: {starFortune.luckyNumber}</p>}
+              {starFortune.personalityReading && (
+                <div className="celeb-sf-item celeb-sf-item--purple">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">🔮 사주로 본 성격·매력</span>
+                  <p>{starFortune.personalityReading}</p>
+                </div>
+              )}
+              {starFortune.overall && (
+                <div className="celeb-sf-item celeb-sf-item--gold">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">🌟 오늘의 총운</span>
+                  <p>{starFortune.overall}</p>
+                </div>
+              )}
+              {starFortune.love && (
+                <div className="celeb-sf-item celeb-sf-item--pink">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">💕 애정운</span>
+                  <p>{starFortune.love}</p>
+                </div>
+              )}
+              {starFortune.money && (
+                <div className="celeb-sf-item celeb-sf-item--green">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">💰 재물운</span>
+                  <p>{starFortune.money}</p>
+                </div>
+              )}
+              {starFortune.health && (
+                <div className="celeb-sf-item celeb-sf-item--mint">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">💪 건강운</span>
+                  <p>{starFortune.health}</p>
+                </div>
+              )}
+              {starFortune.work && (
+                <div className="celeb-sf-item celeb-sf-item--blue">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">💼 활동운</span>
+                  <p>{starFortune.work}</p>
+                </div>
+              )}
+              {starFortune.academic && (
+                <div className="celeb-sf-item celeb-sf-item--cyan">
+                  <div className="celeb-sf-bar" />
+                  <span className="celeb-sf-label">📚 자기계발·도전운</span>
+                  <p>{starFortune.academic}</p>
+                </div>
+              )}
+              {(starFortune.luckyColor || starFortune.luckyNumber) && (
+                <div className="celeb-sf-lucky-card">
+                  {starFortune.luckyColor && (
+                    <div className="celeb-sf-lucky-item">
+                      <span className="celeb-sf-lucky-key">행운의 색</span>
+                      <span className="celeb-sf-lucky-val">{starFortune.luckyColor}</span>
+                    </div>
+                  )}
+                  {starFortune.luckyNumber && (
+                    <div className="celeb-sf-lucky-item">
+                      <span className="celeb-sf-lucky-key">행운의 숫자</span>
+                      <span className="celeb-sf-lucky-val">{starFortune.luckyNumber}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

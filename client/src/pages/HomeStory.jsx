@@ -466,6 +466,16 @@ function HomeStory() {
         </div>
       </section>
 
+      {/* ── 스타 운세 배너 ─────────────────────────────── */}
+      <button className="hs-mystar-banner" onClick={() => go('/star-fortune')}>
+        <span className="hs-mystar-icon">🌟</span>
+        <div className="hs-mystar-text">
+          <span className="hs-mystar-title">스타 운세</span>
+          <span className="hs-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
+        </div>
+        <span className="hs-mystar-arrow">›</span>
+      </button>
+
       {/* ── 결정 상담 (간판 유료 상품) — 동화풍 카드 ─────────── */}
       <section className="hs-decision" onClick={() => go('/decision')}>
         <div className="hs-decision-frame">
