@@ -141,8 +141,14 @@ public class MyFortuneController {
             @RequestParam(value = "date", required = false) String dateStr,
             @RequestParam(value = "cacheOnly", required = false, defaultValue = "false") boolean cacheOnly,
             HttpServletRequest req) {
+        // [DIAG] 라이브 30s 캐시 히트 지연 원인 추적 — 각 단계별 timing 측정
+        final long _t0 = System.currentTimeMillis();
         requireSelf(req, userId);
+        final long _t1 = System.currentTimeMillis();
         UserResponse user = userService.getUser(userId);
+        final long _t2 = System.currentTimeMillis();
+        log.info("[timing-stream] uid={} cacheOnly={} requireSelf={}ms getUser={}ms",
+            userId, cacheOnly, (_t1 - _t0), (_t2 - _t1));
         if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
             SseEmitter emitter = new SseEmitter(10000L);
             new Thread(() -> {
@@ -155,21 +161,30 @@ public class MyFortuneController {
         LocalDate targetDate = (dateStr != null && !dateStr.isBlank()) ? LocalDate.parse(dateStr) : LocalDate.now();
 
         // 캐시 체크 — 구버전 캐시(hourlyFortune 없음)는 stale로 간주하여 재생성
+        final long _t3 = System.currentTimeMillis();
         var cached = fortuneService.getCachedFortune(user.getZodiacAnimal(), targetDate);
+        final long _t4 = System.currentTimeMillis();
         boolean cacheFresh = cached != null
             && cached.getOverall() != null && !cached.getOverall().isBlank()
             && cached.getHourlyFortuneJson() != null && !cached.getHourlyFortuneJson().isBlank();
+        log.info("[timing-stream] uid={} targetDate={} getCachedFortune={}ms cacheFresh={}",
+            userId, targetDate, (_t4 - _t3), cacheFresh);
         if (cacheFresh) {
             // 빠른 사주 기본 계산 (AI 호출 없음)
             LocalDate bd = user.getBirthDate();
             if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
                 bd = lunarCalendarService.lunarToSolar(bd);
             }
+            final long _t5 = System.currentTimeMillis();
             SajuResult sajuResult = sajuService.buildBasicResult(bd, user.getBirthTime(), user.getGender());
+            final long _t6 = System.currentTimeMillis();
 
             // timeout: 5s → 30s — 캐시 히트 응답이 풀 대기 등으로 늦어져도 끊기지 않도록 여유
             SseEmitter emitter = new SseEmitter(10000L);
             final Map<String, Object> data = buildMyFortuneData(user, cached);
+            final long _t7 = System.currentTimeMillis();
+            log.info("[timing-stream] uid={} buildBasicResult={}ms buildMyFortuneData={}ms TOTAL_PRE_SEND={}ms",
+                userId, (_t6 - _t5), (_t7 - _t6), (_t7 - _t0));
             @SuppressWarnings("unchecked")
             Map<String, Object> sajuMap = (Map<String, Object>) data.get("saju");
             if (sajuResult != null) {
@@ -182,9 +197,15 @@ public class MyFortuneController {
             final var cachedSnap = cached;
             final UserResponse finalUser = user;
             new Thread(() -> {
+                final long _ts = System.currentTimeMillis();
                 try {
-                    emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(data)));
+                    String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(data);
+                    final long _tj = System.currentTimeMillis();
+                    emitter.send(SseEmitter.event().name("cached").data(json));
                     emitter.complete();
+                    final long _te = System.currentTimeMillis();
+                    log.info("[timing-stream] uid={} bg jsonSerialize={}ms emitterSend={}ms totalFromRequest={}ms",
+                        uidForHistory, (_tj - _ts), (_te - _tj), (_te - _t0));
                 } catch (Exception ignored) {}
                 // 응답 완료 후 히스토리 저장 (중복 시 스킵). 실패해도 사용자 응답에 영향 없음.
                 try {
