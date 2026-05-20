@@ -466,6 +466,22 @@ function HomeStory() {
         </div>
       </section>
 
+      {/* ── 결정 상담 (간판 유료 상품) — 동화풍 카드 ─────────── */}
+      <section className="hs-decision" onClick={() => go('/decision')}>
+        <div className="hs-decision-frame">
+          <div className="hs-decision-badge">✦ 마음의 갈림길</div>
+          <h3 className="hs-decision-title">결정이 어려울 때, 사주가 답해드려요</h3>
+          <p className="hs-decision-sub">재회 · 이별 · 고백 · 결혼 — 지금이 맞는 때일까?</p>
+          <div className="hs-decision-chips">
+            <span className="hs-decision-chip">💔 재회</span>
+            <span className="hs-decision-chip">🚪 이별</span>
+            <span className="hs-decision-chip">💌 고백</span>
+            <span className="hs-decision-chip">💒 결혼</span>
+          </div>
+          <span className="hs-decision-cta">상담 펼쳐 보기 →</span>
+        </div>
+      </section>
+
       {/* ── 오늘 펼쳐볼 페이지 (책갈피형 퀵) ──────────────────── */}
       <section className="hs-quick">
         {QUICK.map((q) => (

@@ -6369,3 +6369,77 @@
   .home-couple-card { padding: 12px 4px; }
   .home-quick-item { padding: 14px 4px; }
 }
+
+/* ─── 결정 상담 배너 (간판 유료 상품) ─── */
+.home-decision-banner {
+  position: relative;
+  padding: 22px 22px 24px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 60%, #6366f1 100%);
+  color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.34);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.home-decision-banner:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(168, 85, 247, 0.44); }
+.home-decision-banner:active { transform: scale(0.99); }
+.home-decision-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 85% 18%, rgba(255,255,255,0.24), transparent 50%),
+    radial-gradient(circle at 14% 80%, rgba(255,255,255,0.14), transparent 50%);
+  pointer-events: none;
+}
+.home-decision-body { position: relative; }
+.home-decision-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.24);
+  backdrop-filter: blur(6px);
+  margin-bottom: 14px;
+}
+.home-decision-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+.home-decision-sub {
+  margin: 0 0 16px;
+  font-size: 13px;
+  opacity: 0.92;
+  line-height: 1.55;
+}
+.home-decision-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.home-decision-chip {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.home-decision-cta {
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: #fff;
+  color: #a855f7;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+}

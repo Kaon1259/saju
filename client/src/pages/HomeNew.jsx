@@ -319,6 +319,23 @@ function HomeNew() {
         </div>
       </section>
 
+      {/* ── 결정 상담 (간판 유료 상품) ───────────────────────── */}
+      <section className="hn-decision" onClick={() => go('/decision')}>
+        <div className="hn-decision-bg" aria-hidden="true" />
+        <div className="hn-decision-body">
+          <div className="hn-decision-badge">간판 · 결정 상담</div>
+          <h3 className="hn-decision-title">고민되는 연애 결정, 사주가 답해드려요</h3>
+          <p className="hn-decision-sub">재회 · 이별 · 고백 · 결혼 — 지금이 맞는 타이밍일까?</p>
+          <div className="hn-decision-chips">
+            <span className="hn-decision-chip">💔 재회</span>
+            <span className="hn-decision-chip">🚪 이별</span>
+            <span className="hn-decision-chip">💌 고백</span>
+            <span className="hn-decision-chip">💒 결혼</span>
+          </div>
+          <span className="hn-decision-cta">상담 시작 →</span>
+        </div>
+      </section>
+
       {/* ── 퀵 액션 ─────────────────────────────────────────── */}
       <section className="hn-quick">
         {QUICK.map((q) => (

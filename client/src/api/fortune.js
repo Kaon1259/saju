@@ -1650,4 +1650,41 @@ export const claimRatingReward = async () => {
   }
 };
 
+// ─── 결정 상담 (간판 유료 상품) ───
+// category: reunion / breakup / confess / marriage
+export const getDecisionBasic = async (category, { birthDate, gender, partnerInfo, situation, history } = {}) => {
+  const params = { category, birthDate };
+  if (gender) params.gender = gender;
+  if (partnerInfo) params.partnerInfo = partnerInfo;
+  if (situation) params.situation = situation;
+  if (history) params.history = history;
+  const res = await api.get('/decision/basic', { params });
+  return res.data;
+};
+
+export const getDecisionStream = (category, { birthDate, birthTime, gender, partnerInfo, situation, history,
+    onChunk, onDone, onError, onInsufficientHearts } = {}) => {
+  if (!requireLogin(onError)) return () => {};
+  if (!requireBirthDate(birthDate, onError)) return () => {};
+  const params = new URLSearchParams({ category, birthDate });
+  if (birthTime) params.set('birthTime', birthTime);
+  if (gender) params.set('gender', gender);
+  if (partnerInfo) params.set('partnerInfo', partnerInfo);
+  if (situation) params.set('situation', situation);
+  if (history) params.set('history', history);
+  appendUserId(params);
+  const baseURL = import.meta.env.VITE_API_URL || '/api';
+  const url = `${baseURL}/decision/stream?${params.toString()}`;
+  const eventSource = new EventSource(url);
+  addHeartListener(eventSource, { onInsufficientHearts, onError });
+
+  const __chunker = rafBatchChunks(onChunk);
+  eventSource.addEventListener('chunk', (e) => __chunker.push(e.data));
+  eventSource.addEventListener('done', (e) => { __chunker.flush(); onDone?.(e.data); eventSource.close(); });
+  eventSource.addEventListener('error', (e) => { __chunker.flush(); onError?.(e.data || 'Stream error'); eventSource.close(); });
+  eventSource.onerror = () => { __chunker.cancel(); onError?.('Connection lost'); eventSource.close(); };
+
+  return () => { __chunker.cancel(); eventSource.close(); };
+};
+
 export default api;

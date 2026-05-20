@@ -36,6 +36,7 @@ import MonthlyFortune from './pages/MonthlyFortune';
 import WeeklyFortune from './pages/WeeklyFortune';
 import LoveFortune from './pages/LoveFortune';
 import LoveTypeFortune from './pages/LoveTypeFortune';
+import Decision from './pages/Decision';
 import MyLoveCompat from './pages/MyLoveCompat';
 import MySomeCrush from './pages/MySomeCrush';
 import MySolo from './pages/MySolo';
@@ -400,6 +401,7 @@ function App() {
               <Route path="/weekly-fortune" element={<WeeklyFortune />} />
               <Route path="/love-fortune" element={<LoveFortune />} />
               <Route path="/love/:type" element={<LoveTypeFortune />} />
+              <Route path="/decision" element={<Decision />} />
               <Route path="/my-love-compat" element={<MyLoveCompat />} />
               <Route path="/my-some-crush" element={<MySomeCrush />} />
               <Route path="/my-solo" element={<MySolo />} />
