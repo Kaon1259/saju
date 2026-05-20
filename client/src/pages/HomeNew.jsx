@@ -47,6 +47,8 @@ function buildRadar(seed, base, saju) {
 }
 
 function grade(score) {
+  // 분석 전(null) — 시드 점수 노출 금지, "분석 전" 상태로
+  if (score == null) return { label: '분석 전', cls: 'pending' };
   if (score >= 88) return { label: '대길', cls: 'best' };
   if (score >= 72) return { label: '길',   cls: 'good' };
   if (score >= 55) return { label: '보통', cls: 'soso' };
@@ -55,6 +57,7 @@ function grade(score) {
 }
 
 const SCORE_DESC = {
+  pending: '탭하여 오늘의 운세를 분석해 보세요',
   best: '오늘은 기운의 흐름이 아주 좋아요. 마음먹은 일을 밀어붙여 보세요.',
   good: '전반적으로 안정적인 하루예요. 연애운의 흐름도 함께 살펴보세요.',
   soso: '차분하게 흘러가는 하루. 무리하지 말고 페이스를 지키세요.',
@@ -231,12 +234,12 @@ function HomeNew() {
     return () => { cancelled = true; };
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 점수 — 실제 AI 분석값이 있으면 사용, 없으면 오늘 날짜+유저 시드로 결정적 산출
+  // 점수 — AI 분석 완료 시에만 노출. 분석 전엔 null → '—' 로 표시 (시드 점수 → 실 점수 전환은 신뢰도 ↓)
   const seed = `${userId || 'guest'}:${ymd}`;
   const overall = useMemo(() => {
     const saju = myData?.saju;
     if (saju?.aiAnalyzed && saju?.score != null) return saju.score;
-    return 56 + Math.round(hashFloat(seed, 'overall') * 40); // 56~96
+    return null;
   }, [myData, seed]);
   const radar = useMemo(() => buildRadar(seed, overall, myData?.saju), [seed, overall, myData]);
   const g = grade(overall);
@@ -276,11 +279,11 @@ function HomeNew() {
           <div className="hn-hero-main">
             <span className="hn-hero-label">오늘의 총 운세</span>
             <div className="hn-hero-score">
-              <strong>{overall}</strong>
+              <strong>{overall ?? '—'}</strong>
               <span className="hn-hero-out">/100</span>
               <em className={`hn-hero-grade hn-hero-grade--${g.cls}`}>{g.label}</em>
             </div>
-            <p className="hn-hero-desc">{SCORE_DESC[g.cls]}</p>
+            <p className="hn-hero-desc">{overall != null ? SCORE_DESC[g.cls] : '탭하여 오늘의 운세를 분석해 보세요'}</p>
           </div>
           <div className="hn-hero-chart">
             <RadarChart data={radar} />

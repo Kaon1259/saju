@@ -47,6 +47,7 @@ function buildLights(seed, base, saju) {
 }
 
 function grade(score) {
+  if (score == null) return { label: '분석 전', cls: 'pending' };
   if (score >= 88) return { label: '대길', cls: 'best' };
   if (score >= 72) return { label: '길',   cls: 'good' };
   if (score >= 55) return { label: '보통', cls: 'soso' };
@@ -56,6 +57,7 @@ function grade(score) {
 
 /* 동화풍 시적 한 줄 — 등급별 ─────────────────────────────────── */
 const STORY_DESC = {
+  pending: '오늘의 운세 페이지를 펼치면 별빛이 깨어나요.',
   best: '별빛이 가장 환하게 비추는 날이에요. 마음 가는 길로 한 걸음 내디뎌 보세요.',
   good: '잔잔하고 따뜻한 하루가 펼쳐져요. 곁에 있는 인연을 살며시 들여다보세요.',
   soso: '구름이 천천히 흐르는 하루예요. 서두르지 않아도 괜찮아요.',
@@ -222,9 +224,9 @@ function HeroArt({ overall, gradeCls, loggedIn }) {
         ))}
       </g>
 
-      {/* 점수 — 또렷하게 (필터 밖) */}
+      {/* 점수 — 또렷하게 (필터 밖). null(분석 전)이면 '—' 표시 (시드 점수 노출 금지). */}
       <text className={`hs-art-score hs-art-score--${gradeCls}`} x="284" y="72" textAnchor="middle">
-        {loggedIn ? overall : '?'}
+        {loggedIn ? (overall ?? '—') : '?'}
       </text>
       <text className="hs-art-scorecap" x="284" y="86" textAnchor="middle">오늘의 운세</text>
     </svg>
@@ -327,12 +329,12 @@ function HomeStory() {
     return () => { cancelled = true; };
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 점수 — 실제 AI 분석값이 있으면 사용, 없으면 오늘 날짜+유저 시드로 결정적 산출
+  // 점수 — AI 분석 완료 시에만 노출. 분석 전엔 null → '—' (시드 점수 → 실 점수 전환은 신뢰도 ↓)
   const seed = `${userId || 'guest'}:${ymd}`;
   const overall = useMemo(() => {
     const saju = myData?.saju;
     if (saju?.aiAnalyzed && saju?.score != null) return saju.score;
-    return 56 + Math.round(hashFloat(seed, 'overall') * 40); // 56~96
+    return null;
   }, [myData, seed]);
   const lights = useMemo(() => buildLights(seed, overall, myData?.saju), [seed, overall, myData]);
   const g = grade(overall);
