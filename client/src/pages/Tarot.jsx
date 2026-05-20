@@ -369,6 +369,7 @@ function Tarot() {
     return null;
   }); // 선택된 뒷면 이미지 경로
   const resultRef = useRef(null);
+  const cardsTableRef = useRef(null); // 카드별 해석 섹션 — AI 완료 후 자동 스크롤 타깃
   const startBtnRef = useRef(null);
   const setupSpreadRef = useRef(null);
   const cleanupRef = useRef(null);
@@ -1043,7 +1044,16 @@ function Tarot() {
       setTimeout(() => {
         flipToStep(() => {
           setStep('result');
-          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 200);
+          // 결과 진입 후 '카드별 해석' 섹션을 화면 상단으로 끌어올려 바로 읽히게.
+          // ref가 아직 마운트 전일 수 있어 약간 대기 → 없으면 페이지 최상단으로 폴백.
+          setTimeout(() => {
+            const el = cardsTableRef.current;
+            if (el && typeof el.scrollIntoView === 'function') {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }, 250);
         });
       }, wait);
     };
@@ -2231,7 +2241,7 @@ function Tarot() {
               </div>
 
               {reading.cards && reading.cards.length > 0 && (
-                <div className="tarot-cards-table glass-card tarot-framed-card">
+                <div className="tarot-cards-table glass-card tarot-framed-card" ref={cardsTableRef}>
                   <img src={frameSrc} alt="" className="text-frame-overlay" draggable={false} />
                   <h3 className="tarot-interp-title"><span><MenuIcon name="tarot" size={17} /></span> 카드별 해석</h3>
                   <div className="tarot-cards-table-body">

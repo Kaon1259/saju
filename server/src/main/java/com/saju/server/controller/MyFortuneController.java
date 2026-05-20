@@ -144,7 +144,7 @@ public class MyFortuneController {
         requireSelf(req, userId);
         UserResponse user = userService.getUser(userId);
         if (user.getBirthDate() == null || user.getZodiacAnimal() == null) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(30000L);
             new Thread(() -> {
                 try { emitter.send(SseEmitter.event().name("error").data("프로필을 먼저 완성해주세요.")); emitter.complete(); }
                 catch (Exception ignored) {}
@@ -167,7 +167,8 @@ public class MyFortuneController {
             }
             SajuResult sajuResult = sajuService.buildBasicResult(bd, user.getBirthTime(), user.getGender());
 
-            SseEmitter emitter = new SseEmitter(5000L);
+            // timeout: 5s → 30s — 캐시 히트 응답이 풀 대기 등으로 늦어져도 끊기지 않도록 여유
+            SseEmitter emitter = new SseEmitter(30000L);
             final Map<String, Object> data = buildMyFortuneData(user, cached);
             @SuppressWarnings("unchecked")
             Map<String, Object> sajuMap = (Map<String, Object>) data.get("saju");
@@ -175,31 +176,40 @@ public class MyFortuneController {
                 sajuMap.put("dayMaster", sajuResult.getDayMasterHanja() + " " + sajuResult.getDayMaster());
                 sajuMap.put("personalityReading", sajuResult.getPersonalityReading());
             }
-            // 캐시 히트도 '본 운세'이므로 히스토리에 1회 저장 (중복 시 스킵)
-            if (userId != null) {
-                java.time.LocalDate today2 = java.time.LocalDate.now();
-                String dayLabel = targetDate.equals(today2) ? "오늘"
-                    : targetDate.equals(today2.plusDays(1)) ? "내일"
-                    : targetDate.toString();
-                Map<String, Object> payload = new java.util.LinkedHashMap<>(data);
-                payload.put("targetDate", targetDate.toString());
-                String summary = (cached.getScore() != null ? cached.getScore() + "점" : "")
-                    + (cached.getOverall() != null ? " · " + cached.getOverall() : "");
-                String title = (user.getName() != null ? user.getName() + "님의 " : "") + dayLabel + " 운세 (" + targetDate + ")";
-                fortuneHistoryService.saveIfAbsent(userId, "today_fortune", title, summary, payload);
-            }
+            // ⚡ cached 이벤트를 먼저 발사하고 → 히스토리 저장은 비동기 (DB 쓰기가 응답을 막지 않도록)
+            final Long uidForHistory = userId;
+            final LocalDate finalTargetDate = targetDate;
+            final var cachedSnap = cached;
+            final UserResponse finalUser = user;
             new Thread(() -> {
                 try {
                     emitter.send(SseEmitter.event().name("cached").data(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(data)));
                     emitter.complete();
                 } catch (Exception ignored) {}
+                // 응답 완료 후 히스토리 저장 (중복 시 스킵). 실패해도 사용자 응답에 영향 없음.
+                try {
+                    if (uidForHistory != null) {
+                        java.time.LocalDate today2 = java.time.LocalDate.now();
+                        String dayLabel = finalTargetDate.equals(today2) ? "오늘"
+                            : finalTargetDate.equals(today2.plusDays(1)) ? "내일"
+                            : finalTargetDate.toString();
+                        Map<String, Object> payload = new java.util.LinkedHashMap<>(data);
+                        payload.put("targetDate", finalTargetDate.toString());
+                        String summary = (cachedSnap.getScore() != null ? cachedSnap.getScore() + "점" : "")
+                            + (cachedSnap.getOverall() != null ? " · " + cachedSnap.getOverall() : "");
+                        String title = (finalUser.getName() != null ? finalUser.getName() + "님의 " : "") + dayLabel + " 운세 (" + finalTargetDate + ")";
+                        fortuneHistoryService.saveIfAbsent(uidForHistory, "today_fortune", title, summary, payload);
+                    }
+                } catch (Exception e) {
+                    log.warn("[MyFortune] async history save failed: {}", e.getMessage());
+                }
             }).start();
             return emitter;
         }
 
         // cacheOnly 모드: 캐시 없으면 AI 호출 없이 no-cache 이벤트로 종료
         if (cacheOnly) {
-            SseEmitter emitter = new SseEmitter(5000L);
+            SseEmitter emitter = new SseEmitter(30000L);
             new Thread(() -> {
                 try { emitter.send(SseEmitter.event().name("no-cache").data("{}")); emitter.complete(); }
                 catch (Exception ignored) {}

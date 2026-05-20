@@ -8,7 +8,13 @@ spring:
     password: ${MYSQLPASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 5
+      # SSE 스트림이 connection 을 길게 잡는 특성 + saveIfAbsent 동기 쓰기 → 풀 고갈 위험.
+      # Railway MySQL 동시 연결 한도 안에서 보수적으로 확대 (5 → 10).
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 8000       # ms — 풀 대기 한도 (기본 30s 너무 김)
+      validation-timeout: 3000
+      leak-detection-threshold: 30000 # 30s 초과 연결 보유 시 경고 로그
 
   sql:
     init:

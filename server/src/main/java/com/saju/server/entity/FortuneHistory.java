@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @Table(name = "fortune_history",
        indexes = {
            @Index(name = "idx_user_type_created", columnList = "userId,type,createdAt"),
-           @Index(name = "idx_user_created", columnList = "userId,createdAt")
+           @Index(name = "idx_user_created", columnList = "userId,createdAt"),
+           // saveIfAbsent → existsByUserIdAndTypeAndTitle 쿼리 최적화 (캐시 히트 경로 동기 호출)
+           @Index(name = "idx_user_type_title", columnList = "userId,type,title")
        })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class FortuneHistory {

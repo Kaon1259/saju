@@ -4844,7 +4844,8 @@
 }
 
 /* 카드별 해석 테이블 */
-.tarot-cards-table { margin-bottom: 12px; padding: 18px; }
+/* scroll-margin-top: AI 완료 시 scrollIntoView로 끌어올릴 때 fixed Header(50px) 아래로 안 가림 */
+.tarot-cards-table { margin-bottom: 12px; padding: 18px; scroll-margin-top: 70px; }
 .tarot-cards-table-body { display: flex; flex-direction: column; gap: 0; }
 .tarot-card-row {
   display: grid;
