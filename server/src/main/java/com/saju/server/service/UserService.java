@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -76,9 +78,16 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponse getUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + id));
-        return UserResponse.from(user);
+        // [DIAG] getUser 1.3초 의문 — findById 자체 SQL vs transaction/connection overhead 구분
+        final long _gt0 = System.currentTimeMillis();
+        Optional<User> opt = userRepository.findById(id);
+        final long _gt1 = System.currentTimeMillis();
+        User user = opt.orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + id));
+        UserResponse resp = UserResponse.from(user);
+        final long _gt2 = System.currentTimeMillis();
+        log.info("[timing-getUser] uid={} findById={}ms toDto={}ms total={}ms",
+            id, (_gt1 - _gt0), (_gt2 - _gt1), (_gt2 - _gt0));
+        return resp;
     }
 
     public String calculateZodiac(int year) {

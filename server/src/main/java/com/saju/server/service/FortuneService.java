@@ -133,9 +133,16 @@ public class FortuneService {
 
     @Transactional(readOnly = true)
     public FortuneResponse getCachedFortune(String zodiacAnimal, LocalDate date) {
+        // [DIAG] getCachedFortune 1.1초 의문 — findBy 자체 SQL vs transaction/connection overhead 구분
+        final long _ft0 = System.currentTimeMillis();
         Optional<DailyFortune> existing = dailyFortuneRepository
                 .findByZodiacAnimalAndFortuneDate(zodiacAnimal, date);
-        return existing.map(FortuneResponse::from).orElse(null);
+        final long _ft1 = System.currentTimeMillis();
+        FortuneResponse resp = existing.map(FortuneResponse::from).orElse(null);
+        final long _ft2 = System.currentTimeMillis();
+        log.info("[timing-getCachedFortune] zodiac={} date={} findBy={}ms toDto={}ms total={}ms found={}",
+            zodiacAnimal, date, (_ft1 - _ft0), (_ft2 - _ft1), (_ft2 - _ft0), existing.isPresent());
+        return resp;
     }
 
     @Transactional(readOnly = true)
