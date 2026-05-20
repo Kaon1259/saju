@@ -349,79 +349,48 @@
   color: var(--hn-text-2);
 }
 
-/* ── 결정 상담 배너 (간판 유료 상품) ─────────────────────────── */
-.hn-decision {
-  position: relative;
-  margin: 4px 0 14px;
-  padding: 20px 22px 22px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 60%, #6366f1 100%);
-  color: #fff;
-  cursor: pointer;
-  overflow: hidden;
-  box-shadow: 0 10px 28px rgba(168, 85, 247, 0.32);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ── 결정 상담 (간판 유료 상품) — hn-section 패턴 통일 ─────── */
+.hn-section--decision .hn-section-head { align-items: flex-start; }
+.hn-section--decision .hn-section-title {
+  display: inline-flex; align-items: center; gap: 8px;
 }
-.hn-decision:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(168, 85, 247, 0.42); }
-.hn-decision:active { transform: scale(0.99); }
-.hn-decision-bg {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(circle at 85% 20%, rgba(255,255,255,0.22), transparent 50%),
-    radial-gradient(circle at 15% 80%, rgba(255,255,255,0.12), transparent 50%);
-  pointer-events: none;
-}
-.hn-decision-body { position: relative; }
 .hn-decision-badge {
   display: inline-block;
-  padding: 4px 11px;
+  padding: 3px 9px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.06em;
-  background: rgba(255,255,255,0.22);
-  backdrop-filter: blur(6px);
-  margin-bottom: 12px;
+  background: var(--hn-accent);
+  color: #fff;
+  vertical-align: 2px;
 }
-.hn-decision-title {
-  margin: 0 0 6px;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.35;
-  letter-spacing: -0.015em;
+.hn-decision-q {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hn-accent);
+  margin-top: 2px;
 }
-.hn-decision-sub {
-  margin: 0 0 14px;
-  font-size: 12.5px;
-  opacity: 0.92;
-  line-height: 1.5;
+/* 결정 상담 카드 — hn-card 패턴 + 서브텍스트 추가 */
+.hn-card--decision {
+  position: relative;
 }
-.hn-decision-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 14px;
+.hn-card--decision .hn-card-icon {
+  color: var(--hn-accent);
+  background: color-mix(in srgb, var(--hn-accent) 8%, var(--hn-surface));
+  border-color: color-mix(in srgb, var(--hn-accent) 22%, var(--hn-border));
 }
-.hn-decision-chip {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 700;
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255,255,255,0.16);
+.hn-card--decision:hover .hn-card-icon {
+  background: color-mix(in srgb, var(--hn-accent) 14%, var(--hn-surface));
+  transform: translateY(-1px);
 }
-.hn-decision-cta {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 800;
-  padding: 7px 16px;
-  border-radius: 999px;
-  background: #fff;
-  color: #a855f7;
+.hn-card-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--hn-text-2);
+  margin-top: -1px;
+  text-align: center;
+  line-height: 1.3;
   letter-spacing: -0.01em;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
-[data-theme="light"] .hn-decision { box-shadow: 0 8px 24px rgba(168, 85, 247, 0.28); }
 

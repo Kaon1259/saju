@@ -46,6 +46,46 @@
 
 ═══════════════════════════════════════════════════════════════
 
+[완료] 결정 상담 — 간판 유료 상품 신설 (2026-05-20, 커밋 2da9445 push)
+- CLAUDE.md [전략 검토 2026-05-18] 액션 #2 실행 — A안(브랜드 유지, 연애 결정 한정)
+- 4가지 카테고리: 재회(reunion) / 이별(breakup) / 고백(confess) / 결혼(marriage)
+- 서버 신규: DecisionController + DecisionService.
+  · 캐시: SpecialFortune 재활용. fortuneType="decision_{cat}", anchor=2000-01-01 영속.
+    cacheKey = SHA256(birthDate+gender+category+partnerInfo+situation+history) → 같은 입력 = 같은 결과.
+  · AI: Sonnet 4.6 + 4500 토큰. ClaudeApiService.generateStream (modelOverride 미사용, 기본 sonnet).
+  · 패턴: basic(캐시 선조회) → 히트면 즉시 반환 / 미스면 stream → onComplete에서 캐시 저장 + 차감.
+  · checkPoints → onComplete deductPoints (다른 컨트롤러와 동일 패턴).
+- 프롬프트 3원칙 강제 (시스템 프롬프트 마지막 블록):
+  1. 두루뭉술 금지 — 구체적 타이밍 / 행동 / 조건 명시
+  2. 단정 금지 — yes/no 한 단어보다 "어떤 조건에서 / 언제 / 어떻게" 답
+  3. 정직함 — 운세 관점임을 분명히, 본인 판단 권유 (ownerNote 필드 의무)
+- 12필드 JSON 출력: verdict(yes/no/wait) + verdictLabel + confidence(0-100) + headline + overall
+  + timing + bestPeriod + worstPeriod + actionPlan + conditions + redFlags + ownerNote + closing
+- 카테고리별 전용 프레임워크 4종 (각 일간 오행 분석 관점 다름):
+  · reunion — 이별 원인 오행 + 헤어진 시기와 현재 천기 비교 + 재회 NO 신호 솔직히
+  · breakup — 권태기 vs 본질적 부조화 구분 + 헤어져야/노력해야 신호 명확히
+  · confess — 4주 중 최적 날짜/시간대 + 너 일간 맞춤 고백 방식
+  · marriage — 정재/정관 십성 + 결혼 시기 + 갈등 패턴 (가볍게 단정 금지)
+- 클라 신규: /decision 라우트 (App.jsx) + Decision.jsx (542줄) + Decision.css (470줄)
+  · 4탭 카테고리 전환 + 상단 질문 배너 (카테고리별 질문 문구)
+  · 내 정보 / 상대 정보 2블록 (정통궁합 패턴 차용) + 가이드 텍스트 2종(상황/관계 흐름, 각 300자)
+  · autoFill 버튼 — 프로필 + 파트너 정보 일괄 채움
+  · Progressive 7카드 스트리밍 (StreamingCard) — headline/overall/timing/bestPeriod/actionPlan/conditions/closing
+  · Verdict 배지 (✅/🛑/⏳ + 확신도 바 애니메이션)
+  · 시기 2분할 그리드 (가장 좋은 시기 / 피할 시기) — 좁은 화면은 1열
+  · ownerNote 정직함 노트 (보라 좌측 보더)
+  · 공유 / 다시보기 버튼
+- 홈 진입점 3종 (간판 배지 + 4칩 + 그라데이션 배너):
+  · HomeNew  : 코랄→퍼플→인디고 그라데이션, 흰색 CTA 칩
+  · HomeStory: 동화풍 점선 프레임 + 액센트 컬러 동적 (--accent)
+  · Home(감성): 섹션 4.5 신규, 연애 운세 위에 배치
+- 하트: DECISION_CONSULT 80하트 (HeartPointConfigInitializer). menuGroup="결정상담" 신규.
+  · 일반 운세 5하트 / 심화 30하트 / 심화 프리미엄 80하트와 동급 — 간판 포지셔닝.
+- 스키마 변경 없음 (SpecialFortune 재활용) — DB 마이그레이션 불필요.
+- 서버 push 완료 → Railway 자동 재배포 트리거됨. 앱 반영은 npx cap sync 후 APK 재빌드.
+- ⚠️ 미해결: IAP 결제 경로 부재 — 신규 가입 70하트로 결정 상담 1회만 가능.
+  결정 상담 출시했지만 결제 경로 없으면 매출 0 위험. 다음 우선순위 = IAP/AdMob 실연동.
+
 [완료] 타로 메뉴 → 카드 위저드 전면 재구성 + 자동 선택 (2026-05-19)
 - 어제 개편(8f95cc9)이 HomeNew 토큰 통째 복제 → "홈 복제본" 피드백. 여러 차례 반복하며 진화:
 - 구조: 한 화면 스크롤 허브 → 3단계 카드 위저드(표지 → ① 분야 → ② 카드수). 상단 크롬(‹ 이전 장 + 페이지 점)
