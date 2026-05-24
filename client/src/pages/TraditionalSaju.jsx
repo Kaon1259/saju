@@ -21,7 +21,7 @@ const TIME_MENUS = [
 ];
 
 const TYPE_MENUS = [
-  { id: 'psych', path: '/psych-test', icon: '🎭', iconKey: 'psych',     label: '심리테스트',   desc: '내 마음속 연애 유형',     color: '#EC4899', cost: 5 },
+  // 심리테스트(/psych-test): 내용 없어 일단 진입점에서 제거 (페이지/라우트는 유지)
   { id: 'mbti',  path: '/mbti',      icon: '🧬', iconKey: 'mbti',      label: 'MBTI 운세',   desc: 'MBTI로 보는 연애 궁합',  color: '#4DD0E1', cost: 3 },
   { id: 'blood', path: '/bloodtype', icon: '🩸', iconKey: 'bloodtype', label: '혈액형 운세', desc: '혈액형별 연애 스타일',    color: '#E74C3C', cost: 3 },
 ];
