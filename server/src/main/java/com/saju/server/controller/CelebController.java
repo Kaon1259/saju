@@ -228,6 +228,12 @@ public class CelebController {
      * 클라이언트 초기 로드 시 1회 가져와 내장 DB 와 머지.
      * category 파라미터 있으면 분류 필터.
      */
+    /** [임시 진단] Anthropic 비스트림 호출 실제 응답/에러 노출 — 스타검색 0건 원인 식별용. 진단 후 제거. */
+    @GetMapping("/_diag")
+    public ResponseEntity<Map<String, Object>> diag() {
+        return ResponseEntity.ok(claudeApiService.diagnose());
+    }
+
     @GetMapping("/community")
     public ResponseEntity<List<Map<String, Object>>> getCommunity(
             @RequestParam(value = "category", required = false) String category) {
