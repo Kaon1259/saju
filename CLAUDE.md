@@ -46,6 +46,22 @@
 
 ═══════════════════════════════════════════════════════════════
 
+[완료] 나의연인 탭 통일 + 나의스타 카테고리 제거 + AI 스타검색 디버깅 결론 (2026-05-24)
+- 나의 연인(/my-love-compat) 탭 메뉴 → 결정상담(/decision) 메뉴 스타일로 통일: 세그먼트 바 → 분리된 둥근
+  카드 그리드(.mlc-tabs grid + .mlc-tab 카드 radius16), 활성 시 탭별 컬러(--tc) 틴트/그림자/리프트.
+  TABS에 color 부여(정통 #fb7185·결혼 #f472b6·스킨십 #f43f5e·데이트 #a78bfa), 아이콘 22px. (.dec-tab 패턴 차용)
+- 나의 스타 관리(/my-star) "스타 추가" 하단 카테고리 필터(전체/아이돌 등) 제거 — 검색만으로 필터.
+  activeCategory state + CELEB_CATEGORIES import 제거.
+- ⭐ AI 스타검색(search-list) "안 나옴" 디버깅 결론: **서버는 정상이었음.**
+  · 최초 원인: search-list 엔드포인트가 워킹트리에만 있고 Railway 미배포(POST → 500). → 배포로 해결.
+  · 그 뒤 "여전히 0건"은 **내 PowerShell 테스트의 한글 인코딩 버그**(POST body의 한글이 기본 인코딩으로 깨져 전송)
+    였음. UTF-8 명시 전송 시 아이유/배기성/뉴진스/정국 모두 정상 반환. 브라우저/앱은 UTF-8이라 실제 정상.
+  · 부수 개선(유지): search/search-list 명시적 HAIKU_MODEL 사용 + 컨트롤러 @Transactional 제거 +
+    CelebCommunityRepository.incrementSearchCount @Transactional(저장 실패가 응답 오염 못 하게).
+  · 임시 진단 엔드포인트(/api/celeb/_diag, _diag-search, ClaudeApiService.diagnose)는 추가→확인 후 제거 완료.
+  · 교훈: Railway/외부 API는 [[project_local_dev_no_api_key]]대로 배포 후 확인하되, PowerShell로 한글 POST 테스트
+    시 [System.Text.Encoding]::UTF8.GetBytes + charset=utf-8 명시 필수(기본 인코딩이 한글 깨뜨려 오진 유발).
+
 [진행중] 스타 섹션 4페이지 일괄 재설계 — 홈 톤 통일 + 외곽선 아이콘 + 논리적 연결 (2026-05-21)
 - 대상: 나의스타(/my-star)·스타와나의궁합(/celeb-compatibility)·보이/걸그룹궁합(/celeb-fortune)·나와궁합맞는스타(/celeb-match)
   + 허브 /star-fortune. 사용자 피드백: "아마추어 같다, 서비스 불가 → 각 홈 스타일에 맞게 완전 재설계, 외곽선 이미지로"
