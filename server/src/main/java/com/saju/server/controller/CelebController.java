@@ -67,7 +67,9 @@ public class CelebController {
                 "{\"found\":true,\"name\":\"정확한 활동명\",\"realName\":\"본명(있으면, 없으면 빈 문자열)\",\"birth\":\"YYYY-MM-DD\",\"gender\":\"M 또는 F\",\"category\":\"위 8가지 중 하나\",\"group\":\"소속그룹(있으면, 없으면 null)\",\"info\":\"간단한 소개 한 줄\"}";
 
             String user = "'" + trimmed + "' 연예인의 정보를 알려주세요.";
-            String response = claudeApiService.generate(system, user, 400);
+            // 명시적 Haiku 사용 — 비용 정책상 검색=경량 + 기본 claude.model 설정 의존 회피(비스트림 generate가
+            // 기본 모델로 실패하면 결과 비어버림). 스트리밍 기능들과 동일하게 known-good 모델 명시.
+            String response = claudeApiService.generate(system, user, 400, ClaudeApiService.HAIKU_MODEL);
             String json = ClaudeApiService.extractJson(response);
 
             if (json != null) {
@@ -157,7 +159,8 @@ public class CelebController {
                 "{\"results\":[{\"name\":\"활동명\",\"realName\":\"본명(없으면 빈 문자열)\",\"birth\":\"YYYY-MM-DD\",\"gender\":\"M 또는 F\",\"category\":\"위 8가지 중 하나\",\"group\":\"소속그룹(없으면 null)\",\"info\":\"간단한 소개 한 줄\"}]}";
 
             String user = "'" + trimmed + "' 로 연예인을 검색해줘.";
-            String response = claudeApiService.generate(system, user, 1400);
+            // 명시적 Haiku — 위 /search 와 동일 이유 (기본 claude.model 의존 회피, 비용 경량)
+            String response = claudeApiService.generate(system, user, 1400, ClaudeApiService.HAIKU_MODEL);
             String json = ClaudeApiService.extractJson(response);
 
             List<Map<String, Object>> results = new java.util.ArrayList<>();
