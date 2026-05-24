@@ -33,7 +33,6 @@ public class CelebController {
      *  3) 다음 검색부터 모든 사용자가 즉시 hit.
      */
     @PostMapping("/search")
-    @Transactional
     public ResponseEntity<?> searchCeleb(@RequestBody Map<String, String> body) {
         String name = body.get("name");
         if (name == null || name.isBlank()) {
@@ -133,7 +132,6 @@ public class CelebController {
      * (단일 /search 와 달리 사용자가 리스트에서 직접 고르도록 여러 후보 제공)
      */
     @PostMapping("/search-list")
-    @Transactional
     public ResponseEntity<?> searchCelebList(@RequestBody Map<String, String> body) {
         String query = body.get("query");
         if (query == null || query.isBlank()) query = body.get("name");
@@ -259,6 +257,7 @@ public class CelebController {
             out.put("extractedSnippet", json == null ? null : json.substring(0, Math.min(700, json.length())));
             int rawCount = 0, kept = 0;
             List<String> dropped = new java.util.ArrayList<>();
+            List<String> saveErrors = new java.util.ArrayList<>();
             if (json != null) {
                 JsonNode root = objectMapper.readTree(json);
                 JsonNode arr = root.path("results");
@@ -272,6 +271,20 @@ public class CelebController {
                         if (name.isBlank() || birth.isBlank() || gender.isBlank()) {
                             dropped.add(name + "|birth=" + birth + "|gender=" + gender); continue;
                         }
+                        // 실제 저장 재현 — saveAndFlush로 DB 예외 즉시 표면화(컨트롤러 비트랜잭션이라 격리됨)
+                        try {
+                            var dupe = communityRepository.findByNameAndBirth(name, birth);
+                            if (dupe.isEmpty()) {
+                                communityRepository.saveAndFlush(CelebCommunity.builder()
+                                    .name(name).birth(birth).gender(gender)
+                                    .category(normalizeCategory(node.path("category").asText("")))
+                                    .searchCount(1).build());
+                            } else {
+                                communityRepository.incrementSearchCount(dupe.get().getId());
+                            }
+                        } catch (Exception se) {
+                            saveErrors.add(name + " -> " + se.getClass().getName() + ": " + se.getMessage());
+                        }
                         kept++;
                     }
                 }
@@ -279,6 +292,7 @@ public class CelebController {
             out.put("rawCount", rawCount);
             out.put("kept", kept);
             out.put("dropped", dropped);
+            out.put("saveErrors", saveErrors);
         } catch (Exception e) {
             out.put("exception", e.getClass().getName() + ": " + e.getMessage());
         }
