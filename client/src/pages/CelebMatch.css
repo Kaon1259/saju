@@ -47,8 +47,9 @@
 
 /* Results */
 .cm-results-count { font-size: 12px; color: rgba(255,255,255,0.4); margin: 0; }
-.cm-results-list { display: flex; flex-direction: column; gap: 6px; }
-.cm-result-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
+.cm-results-list { display: flex; flex-direction: column; gap: 10px; }
+.cm-result-item { display: flex; align-items: center; gap: 11px; padding: 14px; border-radius: 18px; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+.cm-result-item:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(255,107,107,0.18); }
 .cm-result--top { border-color: rgba(255,61,127,0.25); background: rgba(255,61,127,0.04); }
 
 .cm-result-rank { flex-shrink: 0; width: 24px; text-align: center; }
@@ -58,7 +59,7 @@
 .cm-result-sym { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; font-size: 16px; font-weight: 900; flex-shrink: 0; }
 
 .cm-result-info { flex: 1; min-width: 0; }
-.cm-result-name { font-size: 14px; font-weight: 800; color: var(--color-text); display: block; }
+.cm-result-name { font-size: 15px; font-weight: 800; color: var(--color-text); display: block; }
 .cm-result-detail { font-size: 11px; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 4px; margin-top: 1px; }
 .cm-result-grade { font-size: 11px; font-weight: 700; margin-top: 1px; display: block; }
 

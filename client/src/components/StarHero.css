@@ -80,10 +80,22 @@
   position: relative;
   font-size: 64px;
   line-height: 1;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   animation: shIconBounce 2s ease-in-out infinite;
   filter: drop-shadow(0 4px 18px color-mix(in srgb, var(--sh-color, #FF9800) 55%, transparent));
 }
+/* 외곽선 아이콘(MenuIcon) 모드 — 대표 이미지를 홈처럼 외곽선 스타일로 */
+.star-hero-icon--svg {
+  color: var(--sh-color, #FF9800);
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sh-color, #FF9800) 14%, transparent);
+  border: 2px solid color-mix(in srgb, var(--sh-color, #FF9800) 38%, transparent);
+}
+.star-hero-icon--svg .menu-icon { stroke-width: 1.7; }
 @keyframes shIconBounce {
   0%, 100% { transform: translateY(0) scale(1); }
   35%      { transform: translateY(-7px) scale(1.05); }

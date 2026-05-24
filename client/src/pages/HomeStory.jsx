@@ -73,6 +73,14 @@ const QUICK = [
   { label: '출석체크', icon: 'attendance',   path: '/attendance' },
 ];
 
+/* ── 결정 상담 4종 (간판 — 심플 홈과 동일 카테고리) ──────────── */
+const DECISIONS = [
+  { key: 'reunion',  label: '재회', icon: 'refresh', desc: '다시 만날까' },
+  { key: 'breakup',  label: '이별', icon: 'moon',    desc: '끝낼까' },
+  { key: 'confess',  label: '고백', icon: 'letter',  desc: '마음 전할까' },
+  { key: 'marriage', label: '결혼', icon: 'ring',    desc: '평생 약속할까' },
+];
+
 /* ── 챕터별 일러스트 패널 ─────────────────────────────────────── */
 const CHAPTERS = [
   {
@@ -476,19 +484,29 @@ function HomeStory() {
         <span className="hs-mystar-arrow">›</span>
       </button>
 
-      {/* ── 결정 상담 (간판 유료 상품) — 동화풍 카드 ─────────── */}
-      <section className="hs-decision" onClick={() => go('/decision')}>
-        <div className="hs-decision-frame">
-          <div className="hs-decision-badge">✦ 마음의 갈림길</div>
-          <h3 className="hs-decision-title">결정이 어려울 때, 사주가 답해드려요</h3>
-          <p className="hs-decision-sub">재회 · 이별 · 고백 · 결혼 — 지금이 맞는 때일까?</p>
-          <div className="hs-decision-chips">
-            <span className="hs-decision-chip">💔 재회</span>
-            <span className="hs-decision-chip">🚪 이별</span>
-            <span className="hs-decision-chip">💌 고백</span>
-            <span className="hs-decision-chip">💒 결혼</span>
+      {/* ── 결정 상담 (간판 유료 상품) — 챕터 패널 톤 통일 ─────── */}
+      <section className="hs-page hs-page--decision" data-tint="rose">
+        <div className="hs-page-frame">
+          <Corners />
+          <div className="hs-page-head">
+            <span className="hs-page-no hs-page-no--flag">간판</span>
+            <h2 className="hs-page-title">결정 상담</h2>
           </div>
-          <span className="hs-decision-cta">상담 펼쳐 보기 →</span>
+          <p className="hs-decision-q">"결정이 어려울 때, 사주가 답해드려요"</p>
+          <div className="hs-panels">
+            {DECISIONS.map((d) => (
+              <button key={d.key} className="hs-panel"
+                onClick={() => navigate('/decision', { state: { category: d.key } })}>
+                <span className="hs-panel-icon">
+                  <MenuIcon name={d.icon} size={24} />
+                </span>
+                <span className="hs-panel-text">
+                  <span className="hs-panel-label">{d.label}</span>
+                  <span className="hs-panel-sub">{d.desc}</span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

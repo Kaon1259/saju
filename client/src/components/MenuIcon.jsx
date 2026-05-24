@@ -327,6 +327,21 @@ const PATHS = {
       <path d="M12 7v5l3.5 2" strokeLinecap="round" />
     </>
   ),
+  // 달력 — 생일/날짜 (깔끔한 캘린더)
+  calendar: (
+    <>
+      <rect x="3.5" y="5" width="17" height="15" rx="2" />
+      <path d="M3.5 9.5h17" />
+      <path d="M8 3v4M16 3v4" strokeLinecap="round" />
+    </>
+  ),
+  // 전구 — 조언/팁/아이디어 (💡 대체)
+  lightbulb: (
+    <>
+      <path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1 .9 1.6l.2 1h5l.2-1c.1-.6.4-1.2.9-1.6A6 6 0 0012 3z" />
+      <path d="M9.5 19h5M10.5 21.5h3" strokeLinecap="round" />
+    </>
+  ),
   // 검색/돋보기
   search: (
     <>
@@ -561,6 +576,10 @@ const PATHS = {
       <path d="M3 13l3-8h12l3 8v6a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
       <path d="M3 13h5l1 3h6l1-3h5" />
     </>
+  ),
+  // 왼쪽 셰브론 — 뒤로가기
+  chevronLeft: (
+    <path d="M15 5l-7 7 7 7" />
   ),
 };
 

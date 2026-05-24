@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCeleb, getCelebCommunity, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
+import { getSajuCompatibility, getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, searchCelebList, getCelebCommunity, analyzeSajuStream, isGuest, getHistory } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import StreamingCard from '../components/StreamingCard';
@@ -11,7 +11,10 @@ import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
+import CelebAvatar, { catColor } from '../components/CelebAvatar';
+import MenuIcon from '../components/MenuIcon';
 import HeroIconButtons from '../components/HeroIconButtons';
+import { addMyStar } from '../utils/myStars';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -20,29 +23,6 @@ import './CelebCompatibility.css';
 
 const GRADE_COLORS = { '천생연분': '#ff3d7f', '좋은 인연': '#ff6b9d', '보통': '#fbbf24', '노력 필요': '#94a3b8', '상극': '#64748b' };
 const USER_CELEBS_KEY = 'userCelebrities';
-
-// 카테고리별 시그니처 컬러 — 아바타 그라데이션·뱃지 톤
-const CATEGORY_COLORS = {
-  idol:         { from: '#ec4899', to: '#a855f7', label: '아이돌',      emoji: '✨' },
-  actor:        { from: '#f59e0b', to: '#ef4444', label: '배우',        emoji: '🎬' },
-  singer:       { from: '#06b6d4', to: '#3b82f6', label: '가수',        emoji: '🎤' },
-  entertainer:  { from: '#10b981', to: '#22d3ee', label: '예능인',      emoji: '🎙️' },
-  athlete:      { from: '#84cc16', to: '#22c55e', label: '운동선수',    emoji: '🏆' },
-  model:        { from: '#d946ef', to: '#ec4899', label: '모델',        emoji: '👗' },
-  influencer:   { from: '#f43f5e', to: '#fb7185', label: '인플루언서',  emoji: '📱' },
-  trot:         { from: '#fbbf24', to: '#f59e0b', label: '트로트',      emoji: '🎼' },
-  custom:       { from: '#a855f7', to: '#ec4899', label: '스타',        emoji: '🌟' },
-};
-function catColor(celeb) {
-  const k = celeb?.category || 'custom';
-  return CATEGORY_COLORS[k] || CATEGORY_COLORS.custom;
-}
-// 이름 첫 글자 (아바타용)
-function initial(name) {
-  if (!name) return '★';
-  // 한글/영문 첫 1자
-  return name.trim().slice(0, 1).toUpperCase();
-}
 
 function getUserCelebs() {
   try { return JSON.parse(localStorage.getItem(USER_CELEBS_KEY) || '[]'); }
@@ -65,16 +45,10 @@ function CelebCompatibility() {
   const [selectedCeleb, setSelectedCeleb] = useState(initCeleb);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 직접 입력
-  const [showManual, setShowManual] = useState(false);
-  const [manualName, setManualName] = useState('');
-  const [manualBirth, setManualBirth] = useState('');
-  const [manualGender, setManualGender] = useState('');
-
-  // AI 검색 팝업
-  const [aiSearching, setAiSearching] = useState(false);
-  const [aiResult, setAiResult] = useState(null);
-  const [showAiPopup, setShowAiPopup] = useState(false);
+  // AI 리스트 검색
+  const [aiListLoading, setAiListLoading] = useState(false);
+  const [aiListResults, setAiListResults] = useState([]);
+  const [aiSearched, setAiSearched] = useState(false);
 
   // 내 정보
   const [myBirth, setMyBirth] = useState('');
@@ -185,65 +159,29 @@ function CelebCompatibility() {
     navigate('/celeb-fortune', { state: { selectedGroup: group } });
   };
 
-  // 직접 입력 → 확인 버튼
-  const handleManualConfirm = async () => {
-    if (!manualName.trim()) return;
-
-    // 1) 내장 + 사용자 DB에서 검색
-    const q = manualName.trim().toLowerCase();
-    const dbMatch = allCelebs.find(c => c.name.toLowerCase() === q);
-    if (dbMatch) {
-      setSelectedCeleb(dbMatch);
-      setStep('input');
-      return;
-    }
-
-    // 2) AI 검색
-    setAiSearching(true);
+  // AI 리스트 검색 — 검색어로 실제 연예인 후보 여러 명 받아 리스트로 표시
+  const handleAiListSearch = async () => {
+    const q = searchQuery.trim();
+    if (!q || aiListLoading) return;
+    setAiListLoading(true);
+    setAiSearched(true);
     try {
-      const res = await searchCeleb(manualName.trim());
-      if (res.found) {
-        setAiResult(res);
-        setShowAiPopup(true);
-      } else {
-        // AI도 못 찾음 → 직접 입력 폼 표시
-        setAiResult(null);
-        setShowAiPopup(false);
-      }
+      const res = await searchCelebList(q);
+      setAiListResults(res || []);
     } catch {
-      // 에러 시 직접 입력으로 진행
+      setAiListResults([]);
     }
-    setAiSearching(false);
+    setAiListLoading(false);
   };
 
-  // AI 결과 확인 → DB 저장 + 궁합 진행
-  const handleAiConfirm = () => {
+  // AI 검색 결과에서 선택 → 로컬 DB 저장 + 궁합 진행
+  const handleSelectAiCeleb = (c) => {
     const celeb = {
-      name: aiResult.name,
-      birth: aiResult.birth,
-      gender: aiResult.gender,
-      category: aiResult.category || 'custom',
-      group: aiResult.group || null,
+      name: c.name, birth: c.birth, gender: c.gender,
+      category: c.category || 'custom', group: c.group || null,
     };
     saveUserCeleb(celeb);
-    setSelectedCeleb(celeb);
-    setShowAiPopup(false);
-    setAiResult(null);
-    setStep('input');
-  };
-
-  // AI 결과 거절 → 직접 입력한 값으로 궁합만 (DB 저장 X)
-  const handleAiReject = () => {
-    setShowAiPopup(false);
-    setAiResult(null);
-    // 직접 입력 폼이 보이도록 유지
-  };
-
-  // 직접 입력 폼으로 궁합 보기 (DB 저장 X)
-  const handleManualSelect = () => {
-    if (!manualName || !manualBirth || !manualGender) return;
-    setSelectedCeleb({ name: manualName, birth: manualBirth, gender: manualGender, category: 'custom' });
-    setStep('input');
+    handleSelectCeleb(celeb);
   };
 
   const handleAutoFill = () => {
@@ -472,33 +410,26 @@ function CelebCompatibility() {
     setStarStreamText('');
     setStarStreaming(false);
     setSearchQuery('');
-    setShowManual(false);
-    setManualName('');
-    setManualBirth('');
-    setManualGender('');
+    setAiSearched(false);
+    setAiListResults([]);
   };
 
   // ─── 연예인 선택 화면 ───
   if (step === 'select') {
     return (
       <div className="celeb-page celeb-page--select">
-        {/* 컴팩트 타이틀 — 뒤로가기 제거, 패딩 최소화 */}
-        <div className="celeb-compact-hero">
-          <h1 className="celeb-compact-title">💫 스타와 나의 궁합</h1>
-        </div>
-
-        {/* 스타 운세 진입 배너 */}
-        <button className="celeb-mystar-banner" onClick={() => navigate('/star-fortune')}>
-          <span className="celeb-mystar-icon">🌟</span>
-          <div className="celeb-mystar-text">
-            <span className="celeb-mystar-title">스타 운세</span>
-            <span className="celeb-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
-          </div>
-          <span className="celeb-mystar-arrow">›</span>
-        </button>
+        <StarHero
+          icon="💫"
+          iconName="sparkleHeart"
+          title="스타와 나의 궁합"
+          desc="최애 스타와 사주 궁합을 확인해보세요"
+          color="#E91E63"
+          particles={['💫','✨','💕','⭐','🌟']}
+          topButtons={<HeroIconButtons color="#E91E63" onBack={() => navigate('/star-fortune')} />}
+        />
 
         <div className="celeb-search-wrap">
-          <span className="celeb-search-icon" aria-hidden="true">🔍</span>
+          <span className="celeb-search-icon" aria-hidden="true"><MenuIcon name="search" size={16} /></span>
           <input className="celeb-search" type="text" placeholder="스타 이름 또는 그룹 검색"
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           {searchQuery && (
@@ -510,15 +441,12 @@ function CelebCompatibility() {
           {filteredItems.length > 0 ? filteredItems.map((item, i) => (
             item._type === 'group' ? (
               <button key={`group-${item.name}`} className="celeb-item celeb-item--group" onClick={() => handleSelectGroup(item)}>
-                <span className={`celeb-avatar celeb-avatar--${item.type === 'boy' ? 'boy' : 'girl'}`}>
-                  <span className="celeb-avatar-text">{initial(item.name)}</span>
-                  <span className="celeb-avatar-deco" aria-hidden="true">{item.type === 'boy' ? '♂' : '♀'}</span>
-                </span>
+                <CelebAvatar name={item.name} groupType={item.type === 'boy' ? 'boy' : 'girl'} size="md" />
                 <div className="celeb-item-info">
                   <span className="celeb-item-name">{item.name}</span>
                   <span className="celeb-item-detail">
                     <span className="celeb-tag celeb-tag--group">{item.type === 'boy' ? '보이그룹' : '걸그룹'}</span>
-                    <span className="celeb-tag celeb-tag--count">👥 {item.members.length}명</span>
+                    <span className="celeb-tag celeb-tag--count"><MenuIcon name="people" size={11} style={{ verticalAlign: '-2px', marginRight: 2 }} />{item.members.length}명</span>
                     {item.agency && <span className="celeb-tag celeb-tag--agency">{item.agency}</span>}
                   </span>
                 </div>
@@ -530,10 +458,7 @@ function CelebCompatibility() {
                 <button key={`${item.name}-${item.birth}-${i}`} className="celeb-item"
                   onClick={() => handleSelectCeleb(item)}
                   style={{ '--cc-from': cc.from, '--cc-to': cc.to }}>
-                  <span className="celeb-avatar celeb-avatar--celeb">
-                    <span className="celeb-avatar-text">{initial(item.name)}</span>
-                    <span className="celeb-avatar-deco" aria-hidden="true">{cc.emoji}</span>
-                  </span>
+                  <CelebAvatar name={item.name} category={item.category} size="md" />
                   <div className="celeb-item-info">
                     <span className="celeb-item-name">
                       {item.name}
@@ -552,75 +477,48 @@ function CelebCompatibility() {
             })()
           )) : (
             <div className="celeb-empty">
-              <div className="celeb-empty-icon">🔍</div>
+              <div className="celeb-empty-icon"><MenuIcon name="search" size={34} /></div>
               <p className="celeb-empty-title">찾으시는 스타가 없네요</p>
-              <p className="celeb-empty-sub">검색어를 바꿔보거나 아래에서 직접 입력해 보세요</p>
-              <button className="celeb-empty-cta" onClick={() => { setShowManual(true); setManualName(searchQuery); }}>
-                ✏️ "{searchQuery}" 직접 추가
-              </button>
+              <p className="celeb-empty-sub">아래 <b>AI 검색</b>으로 찾아보세요</p>
             </div>
           )}
         </div>
 
-        <button className={`celeb-manual-toggle ${showManual ? 'celeb-manual-toggle--open' : ''}`}
-          onClick={() => setShowManual(!showManual)}>
-          {showManual ? '▲ 직접 입력 접기' : '✏️ 찾는 스타가 없나요? 직접 입력 / AI 검색'}
-        </button>
+        {/* AI 검색 — 검색어로 실제 연예인 후보 리스트 받기 */}
+        <div className="celeb-ai-search">
+          <button className="celeb-ai-search-btn" onClick={handleAiListSearch}
+            disabled={!searchQuery.trim() || aiListLoading}>
+            {aiListLoading
+              ? <><span className="celeb-ai-spinner" aria-hidden="true" /> AI가 스타를 찾고 있어요...</>
+              : <><MenuIcon name="search" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />AI로 "{searchQuery.trim() || '스타'}" 검색하기</>}
+          </button>
+          <p className="celeb-ai-search-hint">목록에 없는 스타도 AI가 찾아드려요</p>
 
-        {showManual && (
-          <div className="celeb-manual glass-card fade-in">
-            <h3 className="celeb-manual-title">직접 입력</h3>
-            <div className="form-group">
-              <label className="form-label">이름</label>
-              <div className="celeb-manual-name-row">
-                <input className="form-input" placeholder="스타 이름" value={manualName} onChange={e => setManualName(e.target.value)} />
-                <button className="celeb-confirm-btn" onClick={handleManualConfirm} disabled={!manualName.trim() || aiSearching}>
-                  {aiSearching ? '검색중...' : '확인'}
-                </button>
+          {aiSearched && !aiListLoading && (
+            aiListResults.length > 0 ? (
+              <div className="celeb-ai-results fade-in">
+                <p className="celeb-ai-results-title">AI 검색 결과 {aiListResults.length}명 · 눌러서 선택</p>
+                {aiListResults.map((c, i) => (
+                  <button key={`ai-${c.name}-${c.birth}-${i}`} className="celeb-item"
+                    onClick={() => handleSelectAiCeleb(c)}>
+                    <CelebAvatar name={c.name} category={c.category} size="md" />
+                    <div className="celeb-item-info">
+                      <span className="celeb-item-name">{c.name}</span>
+                      <span className="celeb-item-detail">
+                        <span className="celeb-tag celeb-tag--cat">{catColor(c).label}</span>
+                        {c.group && <span className="celeb-tag celeb-tag--group">{c.group}</span>}
+                        {c.birth && <span className="celeb-item-year">{c.birth.slice(0, 4)}년생</span>}
+                      </span>
+                    </div>
+                    <span className="celeb-item-arrow">›</span>
+                  </button>
+                ))}
               </div>
-            </div>
-
-            {/* AI가 못 찾았을 때 직접 입력 폼 */}
-            <div className="form-group">
-              <label className="form-label">생년월일</label>
-              <BirthDatePicker value={manualBirth} onChange={setManualBirth} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">성별</label>
-              <GenderPicker value={manualGender} onChange={setManualGender} />
-            </div>
-            <button className="btn-gold" onClick={handleManualSelect} disabled={!manualName || !manualBirth || !manualGender}
-              style={{ opacity: manualName && manualBirth && manualGender ? 1 : 0.5 }}>
-              직접 입력한 정보로 궁합 보기
-            </button>
-          </div>
-        )}
-
-        {/* AI 검색 결과 팝업 */}
-        {showAiPopup && aiResult && (
-          <div className="celeb-ai-overlay" onClick={() => setShowAiPopup(false)}>
-            <div className="celeb-ai-popup glass-card" onClick={e => e.stopPropagation()}>
-              <h3 className="celeb-ai-popup-title">🔍 AI 검색 결과</h3>
-              <div className="celeb-ai-info">
-                <span className={`celeb-item-sym celeb-sym--lg ${aiResult.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f'}`}>
-                  {aiResult.gender === 'M' ? '♂' : '♀'}
-                </span>
-                <div className="celeb-ai-detail">
-                  <span className="celeb-ai-name">{aiResult.name}</span>
-                  {aiResult.realName && <span className="celeb-ai-sub">본명: {aiResult.realName}</span>}
-                  <span className="celeb-ai-sub">생년월일: {aiResult.birth}</span>
-                  {aiResult.group && <span className="celeb-ai-sub">그룹: {aiResult.group}</span>}
-                  {aiResult.info && <span className="celeb-ai-sub">{aiResult.info}</span>}
-                </div>
-              </div>
-              <p className="celeb-ai-notice">이 정보가 맞나요? 확인하면 DB에 저장됩니다.</p>
-              <div className="celeb-ai-btns">
-                <button className="celeb-ai-btn celeb-ai-btn--confirm" onClick={handleAiConfirm}>✅ 확인</button>
-                <button className="celeb-ai-btn celeb-ai-btn--reject" onClick={handleAiReject}>❌ 거절</button>
-              </div>
-            </div>
-          </div>
-        )}
+            ) : (
+              <p className="celeb-ai-noresult">검색 결과가 없어요. 다른 검색어로 시도해 보세요.</p>
+            )
+          )}
+        </div>
       </div>
     );
   }
@@ -646,24 +544,21 @@ function CelebCompatibility() {
             }
           }}
         />
-        <button className="celeb-back-btn" onClick={() => { setStep('select'); setStarFortune(null); }}>← 스타 목록으로</button>
+        <button className="celeb-back-btn" onClick={() => { setStep('select'); setStarFortune(null); }}><MenuIcon name="chevronLeft" size={15} /> 스타 목록으로</button>
 
         {(() => {
           const cc = catColor(selectedCeleb);
           return (
             <section className="celeb-selected glass-card" style={{ '--cc-from': cc.from, '--cc-to': cc.to }}>
               <div className="celeb-selected-aura" aria-hidden="true" />
-              <span className="celeb-avatar celeb-avatar--lg celeb-avatar--celeb">
-                <span className="celeb-avatar-text">{initial(selectedCeleb.name)}</span>
-                <span className="celeb-avatar-deco celeb-avatar-deco--lg" aria-hidden="true">{cc.emoji}</span>
-              </span>
+              <CelebAvatar name={selectedCeleb.name} category={selectedCeleb.category} size="lg" />
               <div className="celeb-selected-info">
                 <span className="celeb-selected-cat">{cc.label} · 선택된 스타</span>
                 <span className="celeb-selected-name">{selectedCeleb.name}</span>
                 <span className="celeb-selected-detail">
                   {selectedCeleb.group && <span className="celeb-tag celeb-tag--group">{selectedCeleb.group}</span>}
                   {selectedCeleb.agency && <span className="celeb-tag celeb-tag--agency">{selectedCeleb.agency}</span>}
-                  <span className="celeb-selected-birth">📅 {selectedCeleb.birth}</span>
+                  <span className="celeb-selected-birth"><MenuIcon name="calendar" size={13} />{selectedCeleb.birth}</span>
                 </span>
               </div>
             </section>
@@ -673,63 +568,65 @@ function CelebCompatibility() {
         {/* 스타 운세 보기 */}
         <div className="celeb-star-fortune glass-card">
           <div className="celeb-sf-intro">
-            <span className="celeb-sf-intro-icon">🔮</span>
+            <span className="celeb-sf-intro-icon"><MenuIcon name="crystalBall" size={26} /></span>
             <div>
               <div className="celeb-sf-intro-title">{selectedCeleb.name}의 사주로 보는 오늘</div>
               <div className="celeb-sf-intro-sub">성격·매력 + 5가지 분야 운세를 한 번에</div>
             </div>
           </div>
           <button className="celeb-star-fortune-btn" onClick={() => guardCelebFortune(handleStarFortune)} disabled={starFortuneLoading || starStreaming}>
-            {starFortuneLoading || starStreaming ? '🔮 AI 분석중...' : <>{`🌟 ${selectedCeleb.name}의 오늘 운세 보기`} <HeartCost category="CELEB_FORTUNE" /></>}
+            {starFortuneLoading || starStreaming
+              ? <><MenuIcon name="crystalBall" size={17} /> AI 분석중...</>
+              : <><MenuIcon name="star" size={17} /> {`${selectedCeleb.name}의 오늘 운세 보기`} <HeartCost category="CELEB_FORTUNE" /></>}
           </button>
           {starFortune && (
             <div className="celeb-star-fortune-result fade-in">
               {starFortune.personalityReading && (
                 <div className="celeb-sf-item celeb-sf-item--purple">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">🔮 사주로 본 성격·매력</span>
+                  <span className="celeb-sf-label"><MenuIcon name="crystalBall" size={15} /> 사주로 본 성격·매력</span>
                   <p>{starFortune.personalityReading}</p>
                 </div>
               )}
               {starFortune.overall && (
                 <div className="celeb-sf-item celeb-sf-item--gold">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">🌟 오늘의 총운</span>
+                  <span className="celeb-sf-label"><MenuIcon name="overall" size={15} /> 오늘의 총운</span>
                   <p>{starFortune.overall}</p>
                 </div>
               )}
               {starFortune.love && (
                 <div className="celeb-sf-item celeb-sf-item--pink">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">💕 애정운</span>
+                  <span className="celeb-sf-label"><MenuIcon name="love" size={15} /> 애정운</span>
                   <p>{starFortune.love}</p>
                 </div>
               )}
               {starFortune.money && (
                 <div className="celeb-sf-item celeb-sf-item--green">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">💰 재물운</span>
+                  <span className="celeb-sf-label"><MenuIcon name="money" size={15} /> 재물운</span>
                   <p>{starFortune.money}</p>
                 </div>
               )}
               {starFortune.health && (
                 <div className="celeb-sf-item celeb-sf-item--mint">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">💪 건강운</span>
+                  <span className="celeb-sf-label"><MenuIcon name="health" size={15} /> 건강운</span>
                   <p>{starFortune.health}</p>
                 </div>
               )}
               {starFortune.work && (
                 <div className="celeb-sf-item celeb-sf-item--blue">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">💼 활동운</span>
+                  <span className="celeb-sf-label"><MenuIcon name="work" size={15} /> 활동운</span>
                   <p>{starFortune.work}</p>
                 </div>
               )}
               {starFortune.academic && (
                 <div className="celeb-sf-item celeb-sf-item--cyan">
                   <div className="celeb-sf-bar" />
-                  <span className="celeb-sf-label">📚 자기계발·도전운</span>
+                  <span className="celeb-sf-label"><MenuIcon name="academic" size={15} /> 자기계발·도전운</span>
                   <p>{starFortune.academic}</p>
                 </div>
               )}
@@ -756,7 +653,7 @@ function CelebCompatibility() {
         <div className="celeb-form glass-card">
           <h3 className="celeb-form-title">내 정보 입력 (궁합 분석)</h3>
           {localStorage.getItem('userId') && (
-            <button className="sf-autofill-btn" onClick={handleAutoFill}>✨ 내 정보로 채우기</button>
+            <button className="sf-autofill-btn" onClick={handleAutoFill}><MenuIcon name="sparkle" size={15} style={{ verticalAlign: '-3px', marginRight: 4 }} />내 정보로 채우기</button>
           )}
           <div className="form-group">
             <label className="form-label">성별</label>
@@ -767,7 +664,7 @@ function CelebCompatibility() {
             <BirthDatePicker value={myBirth} onChange={setMyBirth} calendarType={myCalType} onCalendarTypeChange={setMyCalType} />
           </div>
           <button className="btn-gold" onClick={() => guardCelebCompat(handleAnalyze)} disabled={!myBirth || !selectedCeleb} style={{ opacity: (myBirth && selectedCeleb) ? 1 : 0.5 }}>
-            💫 {selectedCeleb.name}와(과) 궁합 분석하기 <HeartCost category="CELEB_COMPAT" />
+            <MenuIcon name="sparkleHeart" size={17} style={{ verticalAlign: '-3px', marginRight: 5 }} />{selectedCeleb.name}와(과) 궁합 분석하기 <HeartCost category="CELEB_COMPAT" />
           </button>
         </div>
         {/* 하단 pull-up drawer — 최근 본 스타궁합 */}
@@ -825,17 +722,17 @@ function CelebCompatibility() {
           return (
             <div className="celeb-streaming-wrap">
               <div className="celeb-streaming-header">
-                <span className="celeb-streaming-orb">💫</span>
+                <span className="celeb-streaming-orb"><MenuIcon name="sparkleHeart" size={22} /></span>
                 <span className="celeb-streaming-title">{matrixLabel}</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
               <div className="celeb-streaming-cards">
-                <StreamingCard icon="💕" title="한 줄 요약"     text={compatStreamFields.summary       || ''} status={st('summary')}       delay={0}   />
-                <StreamingCard icon="🔮" title="종합 분석"     text={compatStreamFields.overall       || ''} status={st('overall')}       delay={80}  />
-                <StreamingCard icon="💖" title="연애 궁합"     text={compatStreamFields.loveCompat    || ''} status={st('loveCompat')}    delay={160} />
-                <StreamingCard icon="🤝" title="일 / 협력 궁합" text={compatStreamFields.workCompat    || ''} status={st('workCompat')}    delay={240} />
-                <StreamingCard icon="⚠️" title="갈등 포인트"   text={compatStreamFields.conflictPoint || ''} status={st('conflictPoint')} delay={320} />
-                <StreamingCard icon="💡" title="관계 조언"     text={compatStreamFields.advice        || ''} status={st('advice')}        delay={400} />
+                <StreamingCard icon={<MenuIcon name="love" size={18} />}        title="한 줄 요약"     text={compatStreamFields.summary       || ''} status={st('summary')}       delay={0}   />
+                <StreamingCard icon={<MenuIcon name="crystalBall" size={18} />} title="종합 분석"     text={compatStreamFields.overall       || ''} status={st('overall')}       delay={80}  />
+                <StreamingCard icon={<MenuIcon name="love" size={18} />}        title="연애 궁합"     text={compatStreamFields.loveCompat    || ''} status={st('loveCompat')}    delay={160} />
+                <StreamingCard icon={<MenuIcon name="handshake" size={18} />}   title="일 / 협력 궁합" text={compatStreamFields.workCompat    || ''} status={st('workCompat')}    delay={240} />
+                <StreamingCard icon={<MenuIcon name="alert" size={18} />}       title="갈등 포인트"   text={compatStreamFields.conflictPoint || ''} status={st('conflictPoint')} delay={320} />
+                <StreamingCard icon={<MenuIcon name="lightbulb" size={18} />}   title="관계 조언"     text={compatStreamFields.advice        || ''} status={st('advice')}        delay={400} />
               </div>
             </div>
           );
@@ -870,16 +767,16 @@ function CelebCompatibility() {
           return (
             <div className="celeb-streaming-wrap">
               <div className="celeb-streaming-header">
-                <span className="celeb-streaming-orb">⭐</span>
+                <span className="celeb-streaming-orb"><MenuIcon name="star" size={22} /></span>
                 <span className="celeb-streaming-title">{matrixLabel}</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
               <div className="celeb-streaming-cards">
-                <StreamingCard icon="🌟" title="총운"   text={starStreamFields.overall || ''} status={st('overall')} delay={0}   />
-                <StreamingCard icon="💕" title="애정운" text={starStreamFields.love    || ''} status={st('love')}    delay={80}  />
-                <StreamingCard icon="💰" title="재물운" text={starStreamFields.money   || ''} status={st('money')}   delay={160} />
-                <StreamingCard icon="💪" title="건강운" text={starStreamFields.health  || ''} status={st('health')}  delay={240} />
-                <StreamingCard icon="💼" title="직장운" text={starStreamFields.work    || ''} status={st('work')}    delay={320} />
+                <StreamingCard icon={<MenuIcon name="overall" size={18} />} title="총운"   text={starStreamFields.overall || ''} status={st('overall')} delay={0}   />
+                <StreamingCard icon={<MenuIcon name="love" size={18} />}    title="애정운" text={starStreamFields.love    || ''} status={st('love')}    delay={80}  />
+                <StreamingCard icon={<MenuIcon name="money" size={18} />}   title="재물운" text={starStreamFields.money   || ''} status={st('money')}   delay={160} />
+                <StreamingCard icon={<MenuIcon name="health" size={18} />}  title="건강운" text={starStreamFields.health  || ''} status={st('health')}  delay={240} />
+                <StreamingCard icon={<MenuIcon name="work" size={18} />}    title="직장운" text={starStreamFields.work    || ''} status={st('work')}    delay={320} />
               </div>
             </div>
           );
@@ -887,7 +784,7 @@ function CelebCompatibility() {
         {matrixShown && !starStreaming && (
           <AnalysisMatrix theme="star" label={matrixLabel} streamText={streamText} exiting={matrixExiting} />
         )}
-        <button className="celeb-back-btn" onClick={handleReset}>← 스타 목록으로</button>
+        <button className="celeb-back-btn" onClick={handleReset}><MenuIcon name="chevronLeft" size={15} /> 스타 목록으로</button>
         <section className="celeb-result-hero">
           <h2 className="celeb-result-title">나 ♥ {result._celebName}</h2>
           {result._celebGroup && <p className="celeb-result-group">{result._celebGroup}</p>}
@@ -904,7 +801,7 @@ function CelebCompatibility() {
           </div>
           <span className="celeb-grade" style={{ color: GRADE_COLORS[result.grade] || scoreColor }}>{result.grade}</span>
           <div className="celeb-result-actions">
-            <button className="celeb-share-btn" onClick={handleShare}>📤 공유하기</button>
+            <button className="celeb-share-btn" onClick={handleShare}><MenuIcon name="share" size={14} style={{ verticalAlign: '-2px', marginRight: 5 }} />공유하기</button>
           </div>
           {shareMsg && <p className="celeb-share-msg">{shareMsg}</p>}
         </section>
@@ -914,24 +811,37 @@ function CelebCompatibility() {
             <div className="celeb-card glass-card celeb-card--summary"><p className="celeb-summary-text">{result.aiSummary}</p></div>
           )}
           {result.aiAnalysis && (
-            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span>🔮</span><h3>종합 분석</h3></div><p className="celeb-card-text">{result.aiAnalysis}</p></div>
+            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span><MenuIcon name="crystalBall" size={18} /></span><h3>종합 분석</h3></div><p className="celeb-card-text">{result.aiAnalysis}</p></div>
           )}
           {result.aiLoveCompat && (
-            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span>💕</span><h3>연애 궁합</h3></div><p className="celeb-card-text">{result.aiLoveCompat}</p></div>
+            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span><MenuIcon name="love" size={18} /></span><h3>연애 궁합</h3></div><p className="celeb-card-text">{result.aiLoveCompat}</p></div>
           )}
-          <div className="celeb-card glass-card"><div className="celeb-card-header"><span>☯️</span><h3>음양 조화</h3></div><p className="celeb-card-text">{result.yinyangBalance}</p></div>
+          <div className="celeb-card glass-card"><div className="celeb-card-header"><span><MenuIcon name="traditional" size={18} /></span><h3>음양 조화</h3></div><p className="celeb-card-text">{result.yinyangBalance}</p></div>
           {result.aiWorkCompat && (
-            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span>🤝</span><h3>성격 궁합</h3></div><p className="celeb-card-text">{result.aiWorkCompat}</p></div>
+            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span><MenuIcon name="handshake" size={18} /></span><h3>성격 궁합</h3></div><p className="celeb-card-text">{result.aiWorkCompat}</p></div>
           )}
           {result.aiConflictPoint && (
-            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span>⚠️</span><h3>갈등 포인트</h3></div><p className="celeb-card-text">{result.aiConflictPoint}</p></div>
+            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span><MenuIcon name="alert" size={18} /></span><h3>갈등 포인트</h3></div><p className="celeb-card-text">{result.aiConflictPoint}</p></div>
           )}
           {result.aiAdvice && (
-            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span>💡</span><h3>이상형 매칭도</h3></div><p className="celeb-card-text">{result.aiAdvice}</p></div>
+            <div className="celeb-card glass-card celeb-card--ai"><div className="celeb-card-header"><span><MenuIcon name="lightbulb" size={18} /></span><h3>이상형 매칭도</h3></div><p className="celeb-card-text">{result.aiAdvice}</p></div>
           )}
-          <div className="celeb-card glass-card"><div className="celeb-card-header"><span>⚡</span><h3>오행 관계</h3></div><p className="celeb-card-text">{result.elementRelation}</p></div>
+          <div className="celeb-card glass-card"><div className="celeb-card-header"><span><MenuIcon name="spark" size={18} /></span><h3>오행 관계</h3></div><p className="celeb-card-text">{result.elementRelation}</p></div>
         </section>
 
+        <div className="celeb-result-links">
+          {selectedCeleb && (
+            <button className="celeb-result-link" onClick={() => {
+              addMyStar(selectedCeleb);
+              toast(`${selectedCeleb.name}을(를) 나의 스타에 저장했어요`, 'success');
+            }}>
+              <MenuIcon name="star" size={16} /> 내 스타에 저장
+            </button>
+          )}
+          <button className="celeb-result-link" onClick={() => navigate('/celeb-match')}>
+            <MenuIcon name="crystalBall" size={16} /> 나와 맞는 스타 찾기
+          </button>
+        </div>
         <button className="celeb-reset-btn" onClick={handleReset}>다른 스타와 궁합 보기</button>
       </div>
     );

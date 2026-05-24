@@ -1726,21 +1726,14 @@ function Home() {
       {/* 4.5. 결정 상담 (간판 유료 상품)                              */}
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
-        <div className="home-decision-banner" onClick={() => navigate('/decision')}>
-          <div className="home-decision-bg" aria-hidden="true" />
-          <div className="home-decision-body">
-            <div className="home-decision-badge">간판 · 결정 상담</div>
-            <h3 className="home-decision-title">고민되는 연애 결정,<br />사주가 답해드려요</h3>
-            <p className="home-decision-sub">재회 · 이별 · 고백 · 결혼 — 지금이 맞는 타이밍일까?</p>
-            <div className="home-decision-chips">
-              <span className="home-decision-chip">💔 재회</span>
-              <span className="home-decision-chip">🚪 이별</span>
-              <span className="home-decision-chip">💌 고백</span>
-              <span className="home-decision-chip">💒 결혼</span>
-            </div>
-            <span className="home-decision-cta">상담 시작 →</span>
+        <button className="home-decision-banner" onClick={() => navigate('/decision')}>
+          <span className="home-decision-icon">🧭</span>
+          <div className="home-decision-text">
+            <span className="home-decision-title">고민되는 연애 결정, 사주가 답해드려요</span>
+            <span className="home-decision-sub">재회 · 이별 · 고백 · 결혼</span>
           </div>
-        </div>
+          <span className="home-decision-arrow">›</span>
+        </button>
       </section>
 
       {/* ════════════════════════════════════════════════════════════ */}

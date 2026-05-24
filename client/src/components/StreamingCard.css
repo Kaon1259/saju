@@ -16,7 +16,8 @@
   gap: 8px;
   margin-bottom: 10px;
 }
-.streaming-card-icon { font-size: 18px; }
+.streaming-card-icon { font-size: 18px; display: inline-flex; align-items: center; color: var(--streaming-accent, #fbbf24); }
+.streaming-card-icon svg { display: block; }
 .streaming-card-title {
   font-size: 14px;
   font-weight: 700;

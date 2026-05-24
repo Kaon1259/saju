@@ -1540,6 +1540,17 @@ export const searchCeleb = async (name) => {
   return response.data;
 };
 
+// AI 연예인 리스트 검색 — 검색어에 해당/관련된 실제 연예인 후보 여러 명 반환.
+// 반환: [{ name, realName, birth, gender, category, group, info }, ...]
+export const searchCelebList = async (query) => {
+  try {
+    const response = await api.post('/celeb/search-list', { query });
+    return Array.isArray(response.data?.results) ? response.data.results : [];
+  } catch (e) {
+    return [];
+  }
+};
+
 // 커뮤니티 DB — 모든 사용자가 검색해서 발견한 연예인 통합 풀.
 // CelebCompatibility 진입 시 1회 fetch → 내장 CELEBRITIES와 머지.
 export const getCelebCommunity = async (category = null) => {

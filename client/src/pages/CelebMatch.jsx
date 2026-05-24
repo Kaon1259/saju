@@ -1,12 +1,14 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSajuCompatibility } from '../api/fortune';
-import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
+import CELEBRITIES from '../data/celebrities';
 import GROUPS from '../data/groups';
 import { shareResult } from '../utils/share';
 import StarHero from '../components/StarHero';
+import CelebAvatar from '../components/CelebAvatar';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
+import { getMyStars, toggleMyStar } from '../utils/myStars';
 import './CelebMatch.css';
 
 // ─── 사주 오행 기반 간이 궁합 계산 ───
@@ -60,116 +62,58 @@ function getGrade(score) {
   return '상극';
 }
 
-const MY_STAR_KEY = 'myStarList';
-function getMyStars() { try { return JSON.parse(localStorage.getItem(MY_STAR_KEY)||'[]'); } catch { return []; } }
-function saveMyStars(list) { localStorage.setItem(MY_STAR_KEY, JSON.stringify(list)); }
-
-// 카테고리에 그룹 추가
-const ALL_CATEGORIES = [
-  ...CELEB_CATEGORIES,
-  { key: 'group', label: '그룹' },
-];
-
 function CelebMatch() {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userId');
   const [myStars, setMyStars] = useState(getMyStars);
-  const [activeCategory, setActiveCategory] = useState('all');
   const [shareMsg, setShareMsg] = useState('');
   const [threshold, setThreshold] = useState(70);
-  const [aiScores, setAiScores] = useState({}); // { key: { score, grade, done } }
-  const [aiLoading, setAiLoading] = useState(false);
-  const aiRanRef = useRef(false);
 
   const userProfile = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('userProfile')||'{}'); } catch { return {}; }
   }, []);
   const myBirth = userProfile.birthDate || '';
-  const myCalType = userProfile.calendarType || 'SOLAR';
 
   const isSaved = useCallback((item) => {
     return myStars.some(s => s.name === item.name && s.birth === item.birth);
   }, [myStars]);
 
   const toggleStar = (item) => {
-    if (isSaved(item)) {
-      const next = myStars.filter(s => !(s.name === item.name && s.birth === item.birth));
-      setMyStars(next); saveMyStars(next);
-    } else {
-      const next = [...myStars, { name: item.name, birth: item.birth, gender: item.gender || null, category: item.category, group: item.group || null, agency: item.agency || null }];
-      setMyStars(next); saveMyStars(next);
-    }
+    toggleMyStar(item);
+    setMyStars(getMyStars());
   };
 
-  // 전체 스타 + 그룹 궁합 점수 계산
+  // 전체 스타 + 그룹 궁합 점수 계산 (로컬 오행 계산 — 자동 AI 호출 없음)
   const allScored = useMemo(() => {
     if (!myBirth) return [];
     const items = [];
     // 개인 스타
     CELEBRITIES.forEach(c => {
-      const key = `celeb-${c.name}-${c.birth}`;
-      const ai = aiScores[key];
       const baseScore = calcCompatScore(myBirth, c.birth);
       items.push({
-        ...c, _type: 'celeb', _key: key,
-        score: ai?.done ? ai.score : baseScore,
-        grade: ai?.done ? ai.grade : getGrade(baseScore),
-        _aiDone: !!ai?.done,
+        ...c, _type: 'celeb', _key: `celeb-${c.name}-${c.birth}`,
+        score: baseScore, grade: getGrade(baseScore),
       });
     });
     // 그룹
     GROUPS.forEach(g => {
-      const key = `group-${g.name}-${g.debut}`;
-      const ai = aiScores[key];
       const baseScore = calcCompatScore(myBirth, g.debut);
       items.push({
         name: g.name, birth: g.debut, gender: null,
         category: 'group', group: null, agency: g.agency,
-        _type: 'group', _key: key,
+        _type: 'group', _key: `group-${g.name}-${g.debut}`,
         _groupType: g.type, _members: g.members,
-        score: ai?.done ? ai.score : baseScore,
-        grade: ai?.done ? ai.grade : getGrade(baseScore),
-        _aiDone: !!ai?.done,
+        score: baseScore, grade: getGrade(baseScore),
       });
     });
     items.sort((a, b) => b.score - a.score);
     return items;
-  }, [myBirth, aiScores]);
-
-  // 상위 10명 AI 재분석 (최초 1회)
-  useEffect(() => {
-    if (!myBirth || !allScored.length || aiRanRef.current) return;
-    aiRanRef.current = true;
-    const top10 = allScored.slice(0, 10);
-    setAiLoading(true);
-
-    (async () => {
-      const results = {};
-      // 순차 처리 (서버 부하 방지)
-      for (const item of top10) {
-        try {
-          const data = await getSajuCompatibility(myBirth, item.birth, undefined, undefined, myCalType, 'SOLAR');
-          results[item._key] = { score: data.score, grade: data.grade, done: true };
-          setAiScores(prev => ({ ...prev, [item._key]: results[item._key] }));
-        } catch {
-          // AI 실패 시 기존 점수 유지
-        }
-      }
-      setAiLoading(false);
-    })();
-  }, [myBirth, allScored.length > 0]);
+  }, [myBirth]);
 
   // 카테고리 + 점수 필터링
   const filtered = useMemo(() => {
-    let list = allScored.filter(c => c.score >= threshold);
-    if (activeCategory !== 'all') {
-      if (activeCategory === 'group') list = list.filter(c => c._type === 'group');
-      else if (activeCategory === 'boygroup') list = list.filter(c => (c._type === 'group' && c._groupType === 'boy') || (c.category === 'idol' && c.gender === 'M'));
-      else if (activeCategory === 'girlgroup') list = list.filter(c => (c._type === 'group' && c._groupType === 'girl') || (c.category === 'idol' && c.gender === 'F'));
-      else list = list.filter(c => c.category === activeCategory);
-    }
-    return list;
-  }, [allScored, activeCategory, threshold]);
+    return allScored.filter(c => c.score >= threshold);
+  }, [allScored, threshold]);
 
   // 상위 점수 통계
   const topStats = useMemo(() => {
@@ -194,14 +138,17 @@ function CelebMatch() {
   if (!isLoggedIn) {
     return (
       <div className="cm-page">
-        <section className="cm-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
-          <HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />
-          <span className="cm-hero-icon">🔮</span>
-          <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
-          <p className="cm-hero-desc">사주로 찾는 운명의 스타</p>
-        </section>
+        <StarHero
+          icon="🔮"
+          iconName="crystalBall"
+          title="나와 궁합이 맞는 스타"
+          desc="사주로 찾는 운명의 스타"
+          color="#FF6B6B"
+          particles={['🔮','✨','💫','⭐','💖']}
+          topButtons={<HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />}
+        />
         <section className="mystar-login-card glass-card">
-          <span className="mystar-login-icon">🔒</span>
+          <span className="mystar-login-icon"><MenuIcon name="lock" size={44} style={{ display: 'block', margin: '0 auto', color: '#FF6B6B' }} /></span>
           <h2 className="mystar-login-title">로그인이 필요해요</h2>
           <p className="mystar-login-desc">나와 궁합이 맞는 스타를 찾으려면<br/>로그인 또는 회원가입을 해주세요</p>
           <div className="mystar-login-btns">
@@ -209,8 +156,8 @@ function CelebMatch() {
           </div>
         </section>
         <section className="cm-quick">
-          <button className="cm-quick-btn" onClick={() => navigate('/celeb-compatibility')}><span>💫</span> 스타와 궁합 보기</button>
-          <button className="cm-quick-btn" onClick={() => navigate('/celeb-fortune')}><span>🌟</span> 보이그룹, 걸그룹과 궁합</button>
+          <button className="cm-quick-btn" onClick={() => navigate('/celeb-compatibility')}><MenuIcon name="sparkleHeart" size={16} /> 스타와 궁합 보기</button>
+          <button className="cm-quick-btn" onClick={() => navigate('/celeb-fortune')}><MenuIcon name="people" size={16} /> 보이그룹, 걸그룹과 궁합</button>
         </section>
       </div>
     );
@@ -220,14 +167,17 @@ function CelebMatch() {
   if (!myBirth) {
     return (
       <div className="cm-page">
-        <section className="cm-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
-          <HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />
-          <span className="cm-hero-icon">🔮</span>
-          <h1 className="cm-hero-title">나와 궁합이 맞는 스타</h1>
-          <p className="cm-hero-desc">사주로 찾는 운명의 스타</p>
-        </section>
+        <StarHero
+          icon="🔮"
+          iconName="crystalBall"
+          title="나와 궁합이 맞는 스타"
+          desc="사주로 찾는 운명의 스타"
+          color="#FF6B6B"
+          particles={['🔮','✨','💫','⭐','💖']}
+          topButtons={<HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />}
+        />
         <section className="cm-no-birth glass-card">
-          <span className="cm-no-birth-icon">📝</span>
+          <span className="cm-no-birth-icon"><MenuIcon name="user" size={40} style={{ display: 'block', margin: '0 auto', color: '#FF6B6B' }} /></span>
           <p className="cm-no-birth-text">프로필에 생년월일을 등록해주세요</p>
           <p className="cm-no-birth-sub">생년월일 정보가 있어야 궁합을 분석할 수 있어요</p>
           <button className="mystar-login-btn mystar-login-btn--primary" onClick={() => navigate('/profile/edit')}>프로필 수정하기</button>
@@ -240,6 +190,7 @@ function CelebMatch() {
     <div className="cm-page">
       <StarHero
         icon="🔮"
+        iconName="crystalBall"
         title="나와 궁합이 맞는 스타"
         desc="사주 오행 + AI 분석으로 찾는 운명의 스타"
         color="#FF6B6B"
@@ -247,25 +198,16 @@ function CelebMatch() {
         topButtons={<HeroIconButtons color="#FF6B6B" onBack={() => navigate('/star-fortune')} />}
       />
 
-      {/* AI 분석 진행 표시 */}
-      {aiLoading && (
-        <div className="cm-ai-badge">
-          <span className="cm-ai-dot" />
-          AI가 상위 10명을 정밀 분석중...
-        </div>
-      )}
-
       {/* 상위 궁합 요약 */}
       {topStats && (
         <section className="cm-summary glass-card">
           <div className="cm-summary-top">
-            <span className="cm-summary-crown">👑</span>
+            <span className="cm-summary-crown"><MenuIcon name="star" size={28} style={{ color: '#fbbf24' }} /></span>
             <div className="cm-summary-top-info">
               <span className="cm-summary-top-label">나의 1위 궁합 {topStats.top1._type === 'group' ? '그룹' : '스타'}</span>
               <span className="cm-summary-top-name">
                 {topStats.top1.name}
                 {topStats.top1._type === 'celeb' && topStats.top1.group ? ` (${topStats.top1.group})` : ''}
-                {topStats.top1._aiDone && <span className="cm-ai-tag">AI</span>}
               </span>
             </div>
             <span className="cm-summary-top-score">{topStats.top1.score}점</span>
@@ -289,14 +231,6 @@ function CelebMatch() {
         </div>
       </div>
 
-      {/* 카테고리 */}
-      <div className="cm-categories">
-        {ALL_CATEGORIES.map(cat => (
-          <button key={cat.key} className={`cm-cat-btn ${activeCategory === cat.key ? 'active' : ''}`}
-            onClick={() => setActiveCategory(cat.key)}>{cat.label}</button>
-        ))}
-      </div>
-
       {/* 스타 + 그룹 리스트 */}
       <section className="cm-results">
         <p className="cm-results-count">{filtered.length}명</p>
@@ -306,17 +240,20 @@ function CelebMatch() {
             const saved = isSaved(star);
             const isGroup = star._type === 'group';
             return (
-              <div key={star._key + '-' + i} className={`cm-result-item glass-card ${i < 3 && activeCategory === 'all' && threshold <= 70 ? 'cm-result--top' : ''}`}>
+              <div key={star._key + '-' + i} className={`cm-result-item glass-card ${i < 3 && threshold <= 70 ? 'cm-result--top' : ''}`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => isGroup
+                  ? navigate('/celeb-fortune', { state: { selectedGroup: { name: star.name, type: star._groupType, debut: star.birth, members: star._members, agency: star.agency } } })
+                  : navigate('/celeb-compatibility', { state: { selectedCeleb: { name: star.name, birth: star.birth, gender: star.gender, category: star.category, group: star.group, agency: star.agency } } })}>
                 <div className="cm-result-rank">
                   <span className={`cm-rank-num ${i < 3 ? 'cm-rank--gold' : ''}`}>{i + 1}</span>
                 </div>
-                <span className={`cm-result-sym ${isGroup ? (star._groupType === 'boy' ? 'celeb-sym--m' : 'celeb-sym--f') : (star.gender === 'M' ? 'celeb-sym--m' : 'celeb-sym--f')}`}>
-                  {isGroup ? '★' : (star.gender === 'M' ? '♂' : '♀')}
-                </span>
+                {isGroup
+                  ? <CelebAvatar name={star.name} groupType={star._groupType === 'boy' ? 'boy' : 'girl'} size="md" />
+                  : <CelebAvatar name={star.name} category={star.category} size="md" />}
                 <div className="cm-result-info">
                   <span className="cm-result-name">
                     {star.name}
-                    {star._aiDone && <span className="cm-ai-tag">AI</span>}
                   </span>
                   <span className="cm-result-detail">
                     {isGroup && <span className="celeb-tag celeb-tag--group">{star._groupType === 'boy' ? '보이그룹' : '걸그룹'}</span>}
@@ -332,8 +269,8 @@ function CelebMatch() {
                     <span className="cm-score-unit">점</span>
                   </div>
                   <button className={`cm-star-btn ${saved ? 'cm-star-btn--saved' : ''}`}
-                    onClick={() => toggleStar(star)} title={saved ? '나의 스타 해제' : '나의 스타 등록'}>
-                    {saved ? '⭐' : '☆'}
+                    onClick={(e) => { e.stopPropagation(); toggleStar(star); }} title={saved ? '나의 스타 해제' : '나의 스타 등록'}>
+                    {saved ? '★' : '☆'}
                   </button>
                 </div>
               </div>
@@ -346,8 +283,8 @@ function CelebMatch() {
       </section>
 
       <div className="cm-bottom-actions">
-        <button className="cm-share-btn" onClick={handleShare}>📤 공유하기</button>
-        <button className="cm-quick-btn" onClick={() => navigate('/my-star')}>⭐ 나의 스타 관리</button>
+        <button className="cm-share-btn" onClick={handleShare}><MenuIcon name="share" size={14} style={{ verticalAlign: '-2px', marginRight: 5 }} />공유하기</button>
+        <button className="cm-quick-btn" onClick={() => navigate('/my-star')}><MenuIcon name="star" size={16} /> 나의 스타 관리</button>
       </div>
       {shareMsg && <p className="cm-share-msg">{shareMsg}</p>}
     </div>

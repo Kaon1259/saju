@@ -111,7 +111,7 @@
   box-shadow: 0 4px 16px color-mix(in srgb, var(--tc, #EC4899) 25%, transparent);
   transform: translateY(-2px);
 }
-.dec-tab-icon { font-size: 22px; line-height: 1; }
+.dec-tab-icon { display: flex; align-items: center; justify-content: center; line-height: 1; }
 .dec-tab-label { font-size: 12px; }
 [data-theme="light"] .dec-tab {
   background: #fff;

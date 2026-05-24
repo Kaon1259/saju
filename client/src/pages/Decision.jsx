@@ -20,31 +20,31 @@ import { WAIT_MESSAGES } from '../data/waitMessages';
 import './Decision.css';
 
 const CATEGORIES = {
-  reunion:  { label: '재회',   icon: '💔', iconKey: 'moon',         color: '#A78BFA',
+  reunion:  { label: '재회',   icon: '💔', iconKey: 'refresh',      color: '#A78BFA',
               title: '재회 결정 상담',
               question: '헤어진 사람과 다시 만나야 할까?',
-              partnerLabel: '💔 헤어진 사람 정보',
+              partnerLabel: '헤어진 사람 정보',
               situationPlaceholder: '얼마나 만났는지, 누가 먼저 헤어지자 했는지, 지금 연락 상태는 어떤지...',
               historyPlaceholder: '헤어진 후 다시 연락이 닿은 적이 있는지, 미련이 어느 정도인지...',
               particles: ['💔','💧','✨','💫','🌙'] },
   breakup:  { label: '이별',   icon: '🚪', iconKey: 'moon',         color: '#94A3B8',
               title: '이별 결정 상담',
               question: '이 관계를 끝내야 할까?',
-              partnerLabel: '🚪 상대방 정보',
+              partnerLabel: '상대방 정보',
               situationPlaceholder: '얼마나 만났는지, 어떤 점이 힘든지, 무엇 때문에 헤어지고 싶은지...',
               historyPlaceholder: '얼마나 자주 다투는지, 권태기인지 본질적 갈등인지...',
               particles: ['🚪','💧','✨','🌙','💫'] },
   confess:  { label: '고백',   icon: '💌', iconKey: 'letter',       color: '#EC4899',
               title: '고백 결정 상담',
               question: '이 마음을 전해도 될까?',
-              partnerLabel: '💌 좋아하는 사람 정보',
+              partnerLabel: '좋아하는 사람 정보',
               situationPlaceholder: '어떻게 알게 됐는지, 얼마나 좋아했는지, 상대 반응은 어떤지...',
               historyPlaceholder: '연락은 얼마나 자주 하는지, 둘만 만난 적이 있는지...',
               particles: ['💌','💘','💗','✨','🌹'] },
   marriage: { label: '결혼',   icon: '💒', iconKey: 'ring',         color: '#F472B6',
               title: '결혼 결정 상담',
               question: '이 사람과 평생을 약속해도 될까?',
-              partnerLabel: '💒 예비 배우자 정보',
+              partnerLabel: '예비 배우자 정보',
               situationPlaceholder: '얼마나 만났는지, 양가 분위기는 어떤지, 무엇이 마음에 걸리는지...',
               historyPlaceholder: '큰 갈등이나 가치관 차이가 있었는지, 어떻게 풀어왔는지...',
               particles: ['💒','💍','💐','✨','👰'] },
@@ -317,7 +317,7 @@ function Decision() {
             className={`dec-tab ${category === key ? 'dec-tab--active' : ''}`}
             onClick={() => setCategory(key)}
             style={category === key ? { '--tc': c.color } : {}}>
-            <span className="dec-tab-icon">{c.icon}</span>
+            <span className="dec-tab-icon"><MenuIcon name={c.iconKey} size={22} /></span>
             <span className="dec-tab-label">{c.label}</span>
           </button>
         ))}
@@ -351,12 +351,16 @@ function Decision() {
         <div className="dec-form fade-in">
           {userId && (
             <button className="dec-autofill" onClick={handleAutoFill}>
-              ✨ 내 정보 / 상대 정보로 채우기
+              <MenuIcon name="sparkle" size={15} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              내 정보 / 상대 정보로 채우기
             </button>
           )}
 
           <div className="dec-person-block">
-            <h3 className="dec-person-title">👤 내 정보</h3>
+            <h3 className="dec-person-title">
+              <MenuIcon name="user" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              내 정보
+            </h3>
             <BirthDatePicker value={birth} onChange={setBirth}
               calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
             <div style={{ marginTop: 10 }}>
@@ -365,7 +369,9 @@ function Decision() {
           </div>
 
           <div className="dec-person-block">
-            <h3 className="dec-person-title">{info.partnerLabel}
+            <h3 className="dec-person-title">
+              <MenuIcon name="heart" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              {info.partnerLabel}
               <span className="dec-opt"> (선택 — 입력 시 더 정확)</span>
             </h3>
             <BirthDatePicker value={partnerDate} onChange={setPartnerDate}
@@ -376,7 +382,9 @@ function Decision() {
           </div>
 
           <div className="dec-guide-block">
-            <h3 className="dec-guide-title">📝 지금 상황 알려줘
+            <h3 className="dec-guide-title">
+              <MenuIcon name="chat" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              지금 상황 알려줘
               <span className="dec-opt"> (선택 — 더 정확한 상담을 위해)</span>
             </h3>
             <textarea className="dec-textarea"
@@ -387,7 +395,9 @@ function Decision() {
           </div>
 
           <div className="dec-guide-block">
-            <h3 className="dec-guide-title">💭 관계의 흐름
+            <h3 className="dec-guide-title">
+              <MenuIcon name="history" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              관계의 흐름
               <span className="dec-opt"> (선택)</span>
             </h3>
             <textarea className="dec-textarea"

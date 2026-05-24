@@ -27,3 +27,9 @@ client/android/gradle.properties
 client/android/app/release.keystore
 client/android/app/*.keystore
 *.jks
+
+# 런타임 로그 (dev 서버 출력 — devserver.log / bootrun.log 등)
+*.log
+
+# 루트 참고 스크린샷 (new.png / gpt추천.png / 타로이미지.png 등 — 커밋 제외)
+/*.png

@@ -2,19 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
 import StarHero from '../components/StarHero';
+import CelebAvatar from '../components/CelebAvatar';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
+import { getMyStars, saveMyStars } from '../utils/myStars';
 import './MyStar.css';
-
-const STORAGE_KEY = 'myStarList';
-
-function getMyStars() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-function saveMyStars(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
 
 function MyStar() {
   const navigate = useNavigate();
@@ -60,6 +53,7 @@ function MyStar() {
       <div className="mystar-page">
         <StarHero
           icon="⭐"
+          iconName="star"
           title="나의 스타"
           desc="나만의 최애 스타를 등록하고 관리하세요"
           color="#FF9800"
@@ -68,7 +62,7 @@ function MyStar() {
         />
 
         <section className="mystar-login-card glass-card">
-          <span className="mystar-login-icon">🔒</span>
+          <span className="mystar-login-icon"><MenuIcon name="lock" size={44} style={{ display: 'block', margin: '0 auto', color: '#FF9800' }} /></span>
           <h2 className="mystar-login-title">로그인이 필요해요</h2>
           <p className="mystar-login-desc">나의 스타를 등록하고 관리하려면<br/>로그인 또는 회원가입을 해주세요</p>
           <div className="mystar-login-btns">
@@ -78,10 +72,10 @@ function MyStar() {
 
         <section className="mystar-quick">
           <button className="mystar-quick-btn" onClick={() => navigate('/celeb-compatibility')}>
-            <span>💫</span> 스타와 궁합 보기
+            <MenuIcon name="sparkleHeart" size={16} /> 스타와 궁합 보기
           </button>
           <button className="mystar-quick-btn" onClick={() => navigate('/celeb-fortune')}>
-            <span>🌟</span> 스타 오늘의 운세
+            <MenuIcon name="star" size={16} /> 스타 오늘의 운세
           </button>
         </section>
       </div>
@@ -93,6 +87,7 @@ function MyStar() {
     <div className="mystar-page">
       <StarHero
         icon="⭐"
+        iconName="star"
         title="나의 스타"
         desc="나만의 최애 스타를 등록하고 관리하세요"
         color="#FF9800"
@@ -109,9 +104,7 @@ function MyStar() {
               <div key={`${star.name}-${star.birth}-${i}`} className="mystar-item"
                 onClick={() => navigate('/celeb-compatibility', { state: { selectedCeleb: star } })}
                 style={{ cursor: 'pointer' }}>
-                <span className={`mystar-sym ${star.gender === 'M' ? 'mystar-sym--m' : 'mystar-sym--f'}`}>
-                  {star.gender === 'M' ? '♂' : '♀'}
-                </span>
+                <CelebAvatar name={star.name} category={star.category} size="md" />
                 <div className="mystar-item-info">
                   <span className="mystar-item-name">{star.name}</span>
                   <span className="mystar-item-detail">
@@ -120,7 +113,7 @@ function MyStar() {
                   </span>
                 </div>
                 <div className="mystar-item-actions">
-                  <button className="mystar-compat-btn" onClick={(e) => { e.stopPropagation(); navigate('/celeb-compatibility', { state: { selectedCeleb: star } }); }} title="궁합 보기">💫</button>
+                  <button className="mystar-compat-btn" onClick={(e) => { e.stopPropagation(); navigate('/celeb-compatibility', { state: { selectedCeleb: star } }); }} title="궁합 보기"><MenuIcon name="sparkleHeart" size={18} /></button>
                   {removeConfirm === i ? (
                     <div className="mystar-confirm-wrap">
                       <button className="mystar-confirm-yes" onClick={() => removeStar(star)}>삭제</button>
@@ -136,7 +129,7 @@ function MyStar() {
         </section>
       ) : (
         <section className="mystar-empty glass-card">
-          <span className="mystar-empty-icon">🌟</span>
+          <span className="mystar-empty-icon"><MenuIcon name="star" size={44} style={{ display: 'block', margin: '0 auto', color: '#FF9800' }} /></span>
           <p className="mystar-empty-text">아직 등록한 스타가 없어요</p>
           <p className="mystar-empty-sub">아래에서 좋아하는 스타를 추가해보세요!</p>
         </section>
@@ -144,7 +137,7 @@ function MyStar() {
 
       {/* 스타 추가 토글 */}
       <button className="mystar-add-toggle" onClick={() => setShowAdd(!showAdd)}>
-        {showAdd ? '접기 ▲' : '⭐ 스타 추가하기 ▼'}
+        {showAdd ? '접기 ▲' : <><MenuIcon name="star" size={15} style={{ verticalAlign: '-2px', marginRight: 4 }} />스타 추가하기 ▼</>}
       </button>
 
       {/* 스타 검색 & 추가 */}
@@ -169,16 +162,14 @@ function MyStar() {
                 <button key={`${celeb.name}-${celeb.birth}-${i}`}
                   className={`mystar-add-item ${saved ? 'mystar-add-item--saved' : ''}`}
                   onClick={() => !saved && addStar(celeb)} disabled={saved}>
-                  <span className={`mystar-sym mystar-sym--sm ${celeb.gender === 'M' ? 'mystar-sym--m' : 'mystar-sym--f'}`}>
-                    {celeb.gender === 'M' ? '♂' : '♀'}
-                  </span>
+                  <CelebAvatar name={celeb.name} category={celeb.category} size="sm" />
                   <div className="mystar-add-item-info">
                     <span className="mystar-add-item-name">{celeb.name}</span>
                     <span className="mystar-add-item-detail">
                       {celeb.group && <span className="mystar-tag">{celeb.group}</span>}
                     </span>
                   </div>
-                  <span className="mystar-add-check">{saved ? '⭐' : '☆'}</span>
+                  <span className="mystar-add-check">{saved ? '★' : '☆'}</span>
                 </button>
               );
             })}
@@ -192,10 +183,10 @@ function MyStar() {
       {/* 빠른 바로가기 */}
       <section className="mystar-quick">
         <button className="mystar-quick-btn" onClick={() => navigate('/celeb-compatibility')}>
-          <span>💫</span> 스타와 궁합 보기
+          <MenuIcon name="sparkleHeart" size={16} /> 스타와 궁합 보기
         </button>
         <button className="mystar-quick-btn" onClick={() => navigate('/celeb-fortune')}>
-          <span>🌟</span> 스타 오늘의 운세
+          <MenuIcon name="star" size={16} /> 스타 오늘의 운세
         </button>
       </section>
     </div>

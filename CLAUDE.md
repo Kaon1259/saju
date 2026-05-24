@@ -46,6 +46,55 @@
 
 ═══════════════════════════════════════════════════════════════
 
+[진행중] 스타 섹션 4페이지 일괄 재설계 — 홈 톤 통일 + 외곽선 아이콘 + 논리적 연결 (2026-05-21)
+- 대상: 나의스타(/my-star)·스타와나의궁합(/celeb-compatibility)·보이/걸그룹궁합(/celeb-fortune)·나와궁합맞는스타(/celeb-match)
+  + 허브 /star-fortune. 사용자 피드백: "아마추어 같다, 서비스 불가 → 각 홈 스타일에 맞게 완전 재설계, 외곽선 이미지로"
+- 확정 방향(AskUserQuestion): ① 현재 선택된 홈에 자동 적응(테마/홈스타일 토큰) ② 스타 이미지=카테고리 외곽선 아이콘
+- 완료:
+  · 공용 CelebAvatar 컴포넌트(components/CelebAvatar.jsx/.css) → 그라데이션 아바타에서 **카테고리 외곽선 아이콘 타일**로
+    (가수→mic·배우→face·아이돌→star·예능→chat·운동→target·모델→shirt·인플루→camera·그룹→people). 4페이지 공유. catColor/CATEGORY_COLORS export 유지
+  · StarHero 외곽선 아이콘 지원(iconName prop, MenuIcon 렌더) → 4페이지 대표 이미지 외곽선화(sparkleHeart/star/people/crystalBall) + .star-hero-icon--svg
+  · HeroIconButtons 뒤로가기 ‹→외곽선 chevronLeft, 다시하기 ↻→refresh (전 페이지 공통). MenuIcon에 chevronLeft 신규
+  · 리스트 행 → 입체 카드 통일(여백·radius 18·그림자·호버 lift, 라이트=흰카드+그림자): celeb-item/mystar-item/gf-item/cm-result-item
+  · "스타와 나의 궁합" 리스트 2개만 보이던 버그 수정(.celeb-page--select 고정높이→자연 스크롤, .celeb-list overflow 제거), 중복 "스타 운세" 배너 제거
+  · "나와 궁합맞는 스타" 카테고리 필터(전체/아이돌/보이그룹…) 삭제 + 진입 시 자동 AI 10연속 호출(429/CORS 원인) 제거 → 로컬 오행 calcCompatScore만
+  · 찜 단일화 utils/myStars.js(myStarList) — MyStar/CelebMatch/CelebCompat 공용. funnel: CelebMatch 카드→궁합(개인)/그룹운세(그룹) 이동+♡토글(stopPropagation), CelebCompat 결과 하단 [⭐내 스타 저장]·[🔮맞는 스타 찾기]
+  · AI 연예인 리스트 검색: 서버 CelebController POST /api/celeb/search-list(Claude 후보 최대8 → community DB 자동저장) + 클라 searchCelebList + CelebCompat "직접추가/직접입력"→하단 "AI 검색하기"(리스트 선택). ⚠️ Railway 배포해야 작동(서버 변경)
+- 클라 빌드 통과(CSS 경고는 기존 파일 잔존). HMR 반영 → 브라우저 하드 새로고침 필요. 검증=헤드리스 Chrome(--headless=new --virtual-time-budget) 캡처로 직접 확인
+- ✅ 잔여 1·2 완료 (2026-05-24):
+  1. ✅ CelebCompatibility input 화면 이모지 전부 외곽선화 — celeb-sf-intro 🔮→crystalBall,
+     스타 운세 7라벨(🔮→crystalBall·🌟→overall·💕→love·💰→money·💪→health·💼→work·📚→academic),
+     운세 보기 버튼 🔮/🌟→crystalBall/star, ✨내정보채우기→sparkle, 💫분석버튼→sparkleHeart,
+     📅생일→신규 calendar 아이콘(MenuIcon 추가), 뒤로가기 ←→chevronLeft(input+result 둘 다).
+     관련 CSS: sf-label·sf-intro-icon·star-fortune-btn flex+gap+color, selected-birth inline-flex.
+  2. ✅ autofill 아바타 축소 버그 수정 — 진짜 원인: .celeb-page(input)가 고정 height:calc(100vh-60px)
+     + flex 컬럼 → autofill로 폼이 길어지면 자식 전체 압축, .celeb-selected(overflow:hidden) 안 아바타 잘림.
+     → .celeb-page를 min-height로 변경(select 처리와 동일) + .celeb-selected flex-shrink:0 방어.
+  3. ✅ AI 검색(search-list) Railway 배포 — 이번 커밋+푸시로 배포(서버 변경분). 진단: search-list는
+     워킹트리에만 있어 Railway(커밋본)엔 없어 500이었고, 로컬 서버는 claude.api-key 미설정이라 "AI 사용 불가".
+     → 푸시로 Railway 반영(Railway엔 키 있음). 로컬은 AI 키 없어 AI 기능 테스트 불가(스킨/레이아웃만 검증 가능).
+
+[완료] 스타 4페이지 이모지 전수 외곽선화 + 사주궁합 연애 길이 확대 + 스트리밍 전수 점검 (2026-05-24)
+- 전수 점검 의뢰(질문 금지·완료 후 자동 커밋/푸시):
+  · ① AI 스트리밍 점검 결과: 사용자 대면 장문 AI 분석 27개 전부 이미 SSE 스트리밍(generateStream+SseEmitter).
+    비스트리밍은 계산/검색/출석 등 비장문 유틸뿐 → 변환 불필요(검색 search-list도 리스트 반환이라 대상 아님).
+  · ② 아이콘 전수 외곽선화 — 스타 4페이지 남은 이모지 전부 MenuIcon으로:
+    - StreamingCard icon prop을 노드 허용 활용 → CelebCompat/GroupFortune 스트리밍 카드 아이콘 SVG화
+      (.streaming-card-icon color=accent 틴트 추가, 이모지 카드는 영향 없음)
+    - CelebCompat 결과 카드 헤더 7종(🔮💕☯️🤝⚠️💡⚡→crystalBall/love/traditional/handshake/alert/lightbulb/spark),
+      스트리밍 오브(💫⭐→sparkleHeart/star), 그룹수(👥→people), 공유(📤→share)
+    - CelebMatch: 🔒→lock·💫→sparkleHeart·🌟→people·📝→user·👑→star·📤→share·⭐→star, ⭐토글→★(텍스트)
+    - MyStar: 🔒→lock·🌟empty→star·💫/🌟 퀵→sparkleHeart/star·⭐추가토글→star·⭐토글→★, 로그인 StarHero iconName=star 누락 수정
+    - GroupFortune: 오브⭐→star·스트리밍5카드→outline·섹션타이틀 🌟💕→star/love·✨→sparkle·⚠️힌트→alert·💕카드→love·📤→share·←→chevronLeft
+    - MenuIcon 신규: calendar, lightbulb. StarHero는 iconName 있으면 emoji 미렌더(폴백) — hero icon= 잔존은 무해
+    - 유지(의도): particles 배열·share 텍스트 문자열·텍스트기호(✕★☆♂♀♥›)·FortuneCard는 title→아이콘 자동매핑이라 CATEGORY_CONFIG.icon 死코드
+  · ③ 사주궁합(정통) 연애 길이 확대 — 앱이 연애 앱이라 loveCompat을 핵심으로:
+    CompatibilityService buildStreamPrompts general + analyzeSaju 프롬프트 → loveCompat 7-9문장(서로 끌림·썸~연애·
+    애정표현/연락/데이트·설렘/권태기·스킨십·장기 커플상), overall 4-5·conflict/advice 4-5문장. 스트림 토큰 2500→4000, 비스트림 1500→4000.
+    캐시 무효화: cacheKey "compatibility"→"compatibility_v2"(weekly-v2 선례) — 기존 짧은 캐시 결과 바이패스(스타궁합 캐시도 함께 갱신).
+- 검증: 클라 npm run build 성공(7.5s), 4페이지+컴포넌트 Vite transform 200, 서버 compileJava BUILD SUCCESSFUL.
+- ⚠️ 클라 변경은 APK 재빌드(npx cap sync) 전엔 앱 미반영(dev localhost:3000은 HMR로 즉시). 서버는 푸시→Railway 자동 재배포.
+
 [완료] 스타궁합 페이지 폴리싱 + "스타 운세" 진입 배너 4곳 (2026-05-20, 커밋 4ffd51b)
 - 사용자 피드백 "만들다 만 느낌" 전면 폴리싱:
 - 카드 아바타: 단색 ♂/♀ 칩 → **카테고리 시그니처 그라데이션 + 이니셜 + 데코 이모지**

@@ -31,7 +31,7 @@ public class CompatibilityService {
 
     public Map<String, Object> analyzeSaju(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
         // DB 캐시 체크
-        String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+        String dbCacheKey = buildCacheKey("compatibility_v2", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
         Map<String, Object> dbCached = getFromCache("compatibility", dbCacheKey);
         if (dbCached != null) {
             return dbCached;
@@ -105,19 +105,21 @@ public class CompatibilityService {
                 String systemPrompt = FortunePromptBuilder.COMMON_TONE_RULES + "\n"
                         + "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 대화하는 사주 궁합 전문가.\n"
                         + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n"
-                        + "JSON만 응답:\n"
+                        + "⚠️ 연애 앱 — 연애 궁합(loveCompat)이 핵심이라 제일 길고 풍부하게.\n"
+                        + "JSON만 응답 (각 필드 문장 수만큼 충분히, 구체적인 장면/예시로):\n"
                         + "- summary: 한 줄 요약\n"
-                        + "- overall: 전반적 궁합 3-4문장\n"
-                        + "- loveCompat: 연애 궁합 3-4문장\n"
-                        + "- workCompat: 업무 궁합 2-3문장\n"
-                        + "- conflictPoint: 갈등+해결 3-4문장\n"
-                        + "- advice: 실천 조언 3-4문장\n"
+                        + "- overall: 전반적 궁합 4-5문장\n"
+                        + "- loveCompat: 연애 궁합 7-9문장 — 서로 끌리는 점, 썸~연애 흐름, 애정표현·데이트·연락 스타일,\n"
+                        + "  설렘과 권태기, 스킨십 궁합, 오래 만나면 어떤 커플이 되는지까지 구체적인 장면으로\n"
+                        + "- workCompat: 성격/케미 궁합 3-4문장\n"
+                        + "- conflictPoint: 연애 갈등 포인트+해결법 4-5문장\n"
+                        + "- advice: 이 사람과 연애 잘 하는 실천 조언 4-5문장\n"
                         + "- score: 1-100, grade: 천생연분/좋은 인연/보통/노력 필요/상극\n"
                         + "{\"summary\":\"\",\"overall\":\"\",\"loveCompat\":\"\",\"workCompat\":\"\",\"conflictPoint\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
 
                 String userPrompt = buildCompatPrompt(r1, r2, score, relationship, branchRelation, label1, label2);
-                // 비용 절감 — 정통궁합 비스트림 분석도 Haiku 4.5
-                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 1500, ClaudeApiService.HAIKU_MODEL);
+                // 비용 절감 — 정통궁합 비스트림 분석도 Haiku 4.5 (연애 중심으로 길어져 토큰 1500→4000)
+                String aiResponse = claudeApiService.generate(systemPrompt, userPrompt, 4000, ClaudeApiService.HAIKU_MODEL);
 
                 if (aiResponse != null && !aiResponse.isBlank()) {
                     parseAndApplyCompatAI(result, aiResponse, score, grade);
@@ -181,7 +183,7 @@ public class CompatibilityService {
         // 빈 문자열을 null로 통일 (basic 조회 시 null로 들어오므로)
         if (bt1 != null && bt1.isBlank()) bt1 = null;
         if (bt2 != null && bt2.isBlank()) bt2 = null;
-        String dbCacheKey = buildCacheKey("compatibility", bd1, bt1, bd2, bt2, gender1, gender2);
+        String dbCacheKey = buildCacheKey("compatibility_v2", bd1, bt1, bd2, bt2, gender1, gender2);
         saveToCache("compatibility", dbCacheKey, result);
     }
 
@@ -214,7 +216,7 @@ public class CompatibilityService {
 
             parseAndApplyCompatAI(result, fullText, score, grade);
 
-            String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+            String dbCacheKey = buildCacheKey("compatibility_v2", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
             saveToCache("compatibility", dbCacheKey, result);
             log.info("궁합 스트리밍 캐시 저장 완료: key={}", dbCacheKey);
             return true;
@@ -431,7 +433,7 @@ public class CompatibilityService {
      */
     public Map<String, Object> analyzeSajuBasic(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
         // DB 캐시 체크
-        String dbCacheKey = buildCacheKey("compatibility", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+        String dbCacheKey = buildCacheKey("compatibility_v2", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
         log.info("Basic 캐시 조회: key={}, bd1={}, bt1={}, bd2={}, bt2={}, g1={}, g2={}", dbCacheKey, bd1, bt1, bd2, bt2, gender1, gender2);
         Map<String, Object> dbCached = getFromCache("compatibility", dbCacheKey);
         if (dbCached != null) {
@@ -535,18 +537,24 @@ public class CompatibilityService {
                 + "카페에서 친구 커플 궁합 봐주듯이 자연스럽게 얘기하는 사주 궁합 전문가야.\n"
                 + "20대가 이해하기 쉽게 친근한 반말로 풀어줘.\n"
                 + "'너네 둘이~', '이 남자는~', '이 여자는~' 같은 자연스러운 호칭 사용.\n"
-                + "'오행/일간/상생상극/사주명리' 같은 한자 용어 그대로 쓰지 말고 의미만 풀어서.\n\n"
-                + "JSON만 응답:\n"
+                + "'오행/일간/상생상극/사주명리' 같은 한자 용어 그대로 쓰지 말고 의미만 풀어서.\n"
+                + "⚠️ 이건 연애 앱이야. 연애 궁합(loveCompat)이 이 분석의 핵심 — 제일 길고 풍부하게,\n"
+                + "   썸부터 연애·오래 만났을 때까지 둘의 케미를 구체적인 장면으로 생생하게 그려줘.\n\n"
+                + "JSON만 응답 (각 필드 아래 문장 수만큼 충분히 채우고, 두루뭉술 금지·구체적인 장면/예시로):\n"
                 + "- summary: 한 줄 요약 (30자 이내, 임팩트 있게)\n"
-                + "- overall: 전반적 궁합 3-4문장\n"
-                + "- loveCompat: 연애 궁합 3-4문장\n"
-                + "- workCompat: 성격/케미 궁합 2-3문장\n"
-                + "- conflictPoint: 갈등 포인트와 해결법 3-4문장\n"
-                + "- advice: 실천 조언 3-4문장\n"
+                + "- overall: 전반적 궁합 4-5문장 (둘이 만나면 전체적으로 어떤 그림인지)\n"
+                + "- loveCompat: 연애 궁합 7-9문장 — 가장 길고 핵심. 서로 끌리는 매력 포인트, 썸~연애 초반 흐름,\n"
+                + "  애정표현·연락·데이트 스타일 차이, 설레는 순간과 권태기 올 때 양상, 스킨십·표현 궁합,\n"
+                + "  오래 만나면 어떤 커플이 되는지까지 구체적인 장면으로 풀어줘\n"
+                + "- workCompat: 성격/케미 궁합 3-4문장 (가치관·생활 리듬·일상 합)\n"
+                + "- conflictPoint: 연애하며 부딪히는 갈등 포인트와 해결법 4-5문장 (실제 다툼 상황 예시 1개 포함)\n"
+                + "- advice: 이 사람과 연애 잘 하는 실천 조언 4-5문장 (구체적 행동 팁)\n"
                 + "- score: 1-100, grade: 천생연분/좋은 인연/보통/노력 필요/상극\n"
                 + "{\"summary\":\"\",\"overall\":\"\",\"loveCompat\":\"\",\"workCompat\":\"\",\"conflictPoint\":\"\",\"advice\":\"\",\"score\":75,\"grade\":\"\"}";
 
-        String userPrompt = buildCompatPrompt(r1, r2, score, elementRelation, branchRelation, label1, label2);
+        String userPrompt = buildCompatPrompt(r1, r2, score, elementRelation, branchRelation, label1, label2)
+                + "\n\n⚠️ 연애 앱이야. 연애 궁합(loveCompat)을 가장 길고 풍부하게 — 둘이 사귀면 어떤 연애가 펼쳐질지\n"
+                + "구체적인 장면으로 생생하게 그려줘. 다른 필드도 짧게 줄이지 말고 위 문장 수만큼 충분히 채워줘.";
         return new String[]{systemPrompt, userPrompt};
     }
 

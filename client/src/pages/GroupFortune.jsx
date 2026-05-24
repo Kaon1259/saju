@@ -11,7 +11,9 @@ import FortuneCard from '../components/FortuneCard';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StarHero from '../components/StarHero';
+import CelebAvatar from '../components/CelebAvatar';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
 import { shareResult } from '../utils/share';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -244,6 +246,7 @@ function GroupFortune() {
       <div className="gf-page">
         <StarHero
           icon="🌟"
+          iconName="people"
           title="보이그룹·걸그룹 궁합"
           desc="좋아하는 그룹과 사주 궁합을 확인해보세요"
           color="#9B59B6"
@@ -264,9 +267,7 @@ function GroupFortune() {
         <div className="gf-list">
           {filtered.map((group, i) => (
             <button key={i} className="gf-item" onClick={() => handleSelectGroup(group)}>
-              <span className={`gf-item-badge ${group.type === 'boy' ? 'gf-badge--boy' : 'gf-badge--girl'}`}>
-                {group.type === 'boy' ? '♂' : '♀'}
-              </span>
+              <CelebAvatar name={group.name} groupType={group.type === 'boy' ? 'boy' : 'girl'} size="md" />
               <div className="gf-item-info">
                 <span className="gf-item-name">{group.name}</span>
                 <span className="gf-item-detail">
@@ -310,16 +311,16 @@ function GroupFortune() {
         return (
           <div className="gf-streaming-wrap">
             <div className="gf-streaming-header">
-              <span className="gf-streaming-orb">⭐</span>
+              <span className="gf-streaming-orb"><MenuIcon name="star" size={22} /></span>
               <span className="gf-streaming-title">{matrixLabel}</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>
             <div className="gf-streaming-cards">
-              <StreamingCard icon="🌟" title="총운"   text={fortuneStreamFields.overall || ''} status={st('overall')} delay={0}   />
-              <StreamingCard icon="💕" title="애정운" text={fortuneStreamFields.love    || ''} status={st('love')}    delay={80}  />
-              <StreamingCard icon="💰" title="재물운" text={fortuneStreamFields.money   || ''} status={st('money')}   delay={160} />
-              <StreamingCard icon="💪" title="건강운" text={fortuneStreamFields.health  || ''} status={st('health')}  delay={240} />
-              <StreamingCard icon="💼" title="직장운" text={fortuneStreamFields.work    || ''} status={st('work')}    delay={320} />
+              <StreamingCard icon={<MenuIcon name="overall" size={18} />} title="총운"   text={fortuneStreamFields.overall || ''} status={st('overall')} delay={0}   />
+              <StreamingCard icon={<MenuIcon name="love" size={18} />}    title="애정운" text={fortuneStreamFields.love    || ''} status={st('love')}    delay={80}  />
+              <StreamingCard icon={<MenuIcon name="money" size={18} />}   title="재물운" text={fortuneStreamFields.money   || ''} status={st('money')}   delay={160} />
+              <StreamingCard icon={<MenuIcon name="health" size={18} />}  title="건강운" text={fortuneStreamFields.health  || ''} status={st('health')}  delay={240} />
+              <StreamingCard icon={<MenuIcon name="work" size={18} />}    title="직장운" text={fortuneStreamFields.work    || ''} status={st('work')}    delay={320} />
             </div>
           </div>
         );
@@ -328,13 +329,11 @@ function GroupFortune() {
         <AnalysisMatrix theme={matrixTheme} label={matrixLabel} streamText={fortuneStreamText} exiting={matrixExiting} />
       )}
       {/* 뒤로가기 */}
-      <button className="celeb-back-btn" onClick={() => { setMode('list'); setSelectedGroup(null); setFortuneResult(null); setCompatResult(null); }}>← 그룹 목록으로</button>
+      <button className="celeb-back-btn" onClick={() => { setMode('list'); setSelectedGroup(null); setFortuneResult(null); setCompatResult(null); }}><MenuIcon name="chevronLeft" size={15} /> 그룹 목록으로</button>
 
       {/* 그룹 헤더 */}
       <section className="gf-group-header glass-card">
-        <span className={`gf-item-badge gf-badge--lg ${selectedGroup.type === 'boy' ? 'gf-badge--boy' : 'gf-badge--girl'}`}>
-          {selectedGroup.type === 'boy' ? '♂' : '♀'}
-        </span>
+        <CelebAvatar name={selectedGroup.name} groupType={selectedGroup.type === 'boy' ? 'boy' : 'girl'} size="lg" />
         <div className="gf-group-info">
           <h2 className="gf-group-name">{selectedGroup.name}</h2>
           <span className="gf-group-detail">
@@ -373,7 +372,7 @@ function GroupFortune() {
       {/* 그룹 오늘의 운세 */}
       <section className="gf-fortune-section glass-card">
         <div className="gf-section-header">
-          <h3 className="gf-section-title">🌟 {fortuneTargetName} 오늘의 운세</h3>
+          <h3 className="gf-section-title"><MenuIcon name="star" size={16} style={{ verticalAlign: '-2px', marginRight: 5, color: '#fbbf24' }} />{fortuneTargetName} 오늘의 운세</h3>
           {fortuneResult && (
             <button className="gf-fold-btn" onClick={() => setFortuneOpen(!fortuneOpen)}>
               {fortuneOpen ? '접기 ▲' : '펼치기 ▼'}
@@ -397,7 +396,7 @@ function GroupFortune() {
                 </div>
                 <button className="gf-share-btn" onClick={() => handleShare(
                   `[1:1연애 💕 스타 운세]\n${fortuneTargetName} 오늘의 운세: ${fortuneResult.todayFortune?.score || 0}점\n\nhttps://recipepig.kr`
-                )}>📤 공유</button>
+                )}><MenuIcon name="share" size={14} style={{ verticalAlign: '-2px', marginRight: 4 }} />공유</button>
                 {shareMsg && <p className="gf-share-msg">{shareMsg}</p>}
               </div>
             )}
@@ -406,7 +405,7 @@ function GroupFortune() {
           <div style={{ minHeight: 120 }} />
         ) : (
           <button className="btn-gold" onClick={() => guardGroupFortune(handleGroupFortune)} style={{ width: '100%' }}>
-            🌟 {fortuneTargetName} 오늘의 운세 보기 <HeartCost category="GROUP_FORTUNE" />
+            <MenuIcon name="star" size={17} style={{ verticalAlign: '-3px', marginRight: 5 }} />{fortuneTargetName} 오늘의 운세 보기 <HeartCost category="GROUP_FORTUNE" />
           </button>
         )}
       </section>
@@ -414,7 +413,7 @@ function GroupFortune() {
       {/* 나와 궁합 */}
       <section className="gf-compat-section glass-card" ref={resultRef}>
         <div className="gf-section-header">
-          <h3 className="gf-section-title">💕 나와 {compatTargetName} 궁합</h3>
+          <h3 className="gf-section-title"><MenuIcon name="love" size={16} style={{ verticalAlign: '-2px', marginRight: 5, color: '#ff6b9d' }} />나와 {compatTargetName} 궁합</h3>
           {compatResult && (
             <button className="gf-fold-btn" onClick={() => setCompatOpen(!compatOpen)}>
               {compatOpen ? '접기 ▲' : '펼치기 ▼'}
@@ -424,7 +423,7 @@ function GroupFortune() {
         {!compatResult && !compatLoading && (
           <div className="gf-compat-form">
             {localStorage.getItem('userId') && (
-              <button className="sf-autofill-btn" onClick={handleAutoFill}>✨ 내 정보로 채우기</button>
+              <button className="sf-autofill-btn" onClick={handleAutoFill}><MenuIcon name="sparkle" size={15} style={{ verticalAlign: '-3px', marginRight: 4 }} />내 정보로 채우기</button>
             )}
             <div className="form-group">
               <label className="form-label">성별</label>
@@ -436,7 +435,7 @@ function GroupFortune() {
             </div>
             {!selectedMember && (
               <p className="gf-compat-group-hint">
-                ⚠️ 그룹 전체와의 궁합은 분석할 수 없어요. 위에서 멤버를 선택해주세요.
+                <MenuIcon name="alert" size={14} style={{ verticalAlign: '-2px', marginRight: 4 }} />그룹 전체와의 궁합은 분석할 수 없어요. 위에서 멤버를 선택해주세요.
               </p>
             )}
             <button
@@ -445,7 +444,7 @@ function GroupFortune() {
               disabled={!myBirth || !selectedMember}
               style={{ width: '100%', opacity: (myBirth && selectedMember) ? 1 : 0.5 }}
             >
-              💕 {compatTargetName}와(과) 궁합 분석하기 <HeartCost category="GROUP_COMPAT" />
+              <MenuIcon name="sparkleHeart" size={17} style={{ verticalAlign: '-3px', marginRight: 5 }} />{compatTargetName}와(과) 궁합 분석하기 <HeartCost category="GROUP_COMPAT" />
             </button>
           </div>
         )}
@@ -463,11 +462,11 @@ function GroupFortune() {
               <>
                 {compatResult.aiAnalysis && <p className="gf-compat-text">{compatResult.aiAnalysis}</p>}
                 {compatResult.aiLoveCompat && (
-                  <div className="gf-compat-card"><span>💕</span><p>{compatResult.aiLoveCompat}</p></div>
+                  <div className="gf-compat-card"><span><MenuIcon name="love" size={16} style={{ color: '#ff6b9d' }} /></span><p>{compatResult.aiLoveCompat}</p></div>
                 )}
                 <button className="gf-share-btn" onClick={() => handleShare(
                   `[1:1연애 💕 궁합]\n나와 ${compatTargetName}의 궁합: ${compatResult.score}점 (${compatResult.grade})\n\nhttps://recipepig.kr`
-                )}>📤 공유</button>
+                )}><MenuIcon name="share" size={14} style={{ verticalAlign: '-2px', marginRight: 4 }} />공유</button>
                 {shareMsg && <p className="gf-share-msg">{shareMsg}</p>}
               </>
             )}

@@ -175,7 +175,8 @@ public class CompatibilityController {
         final boolean isMarriage = "marriage".equalsIgnoreCase(mode);
         // 결혼은 9필드(summary/overall/marriageTiming/familyHarmony/childLuck/spouseTrait/
         // inLawRelation/financeTogether/advice), 정통은 6필드. 3500으로는 결혼 advice 필드에서 토큰 부족으로 잘림.
-        int maxTokens = isMarriage ? 5500 : 2500;
+        // 정통(연애) 궁합은 loveCompat 7-9문장 등 연애 중심으로 풍부해져 2500→4000 (앱이 연애 앱).
+        int maxTokens = isMarriage ? 5500 : 4000;
         // 비용 절감 — 일반 궁합(정통/결혼)은 Haiku 4.5 사용. 심화는 DeepAnalysisController에서 Sonnet 유지.
         return claudeApiService.generateStream(prompts[0], prompts[1], maxTokens,
                 ClaudeApiService.HAIKU_MODEL, (fullText) -> {

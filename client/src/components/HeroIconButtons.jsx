@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import MenuIcon from './MenuIcon';
 
 /**
  * 페이지 히어로 카드 안쪽 좌우 상단에 들어가는 작은 원형 아이콘 버튼.
@@ -21,7 +22,7 @@ function HeroIconButtons({ onBack, onReset, color }) {
         style={style}
         aria-label="뒤로"
       >
-        <span>‹</span>
+        <MenuIcon name="chevronLeft" size={20} />
       </button>
       {onReset && (
         <button
@@ -30,7 +31,7 @@ function HeroIconButtons({ onBack, onReset, color }) {
           style={style}
           aria-label="다시하기"
         >
-          <span>↻</span>
+          <MenuIcon name="refresh" size={18} />
         </button>
       )}
     </>
