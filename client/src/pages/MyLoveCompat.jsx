@@ -29,10 +29,10 @@ import { useAiAbort } from '../hooks/useAiAbort';
 import './MyLoveCompat.css';
 
 const TABS = [
-  { id: 'saju',     iconKey: 'sparkleHeart', label: '정통궁합' },
-  { id: 'marriage', iconKey: 'ring',         label: '결혼궁합' },
-  { id: 'skinship', iconKey: 'kiss',         label: '스킨십궁합' },
-  { id: 'date',     iconKey: 'couple',       label: '데이트운' },
+  { id: 'saju',     iconKey: 'sparkleHeart', label: '정통궁합',   color: '#fb7185' },
+  { id: 'marriage', iconKey: 'ring',         label: '결혼궁합',   color: '#f472b6' },
+  { id: 'skinship', iconKey: 'kiss',         label: '스킨십궁합', color: '#f43f5e' },
+  { id: 'date',     iconKey: 'couple',       label: '데이트운',   color: '#a78bfa' },
 ];
 
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
@@ -1010,8 +1010,9 @@ function MyLoveCompat() {
             key={t.id}
             className={`mlc-tab ${tab === t.id ? 'active' : ''}`}
             onClick={() => handleTabChange(t.id)}
+            style={tab === t.id ? { '--tc': t.color } : {}}
           >
-            <span className="mlc-tab-icon">{t.iconKey ? <MenuIcon name={t.iconKey} size={20} /> : t.icon}</span>
+            <span className="mlc-tab-icon">{t.iconKey ? <MenuIcon name={t.iconKey} size={22} /> : t.icon}</span>
             <span className="mlc-tab-label">{t.label}</span>
           </button>
         ))}

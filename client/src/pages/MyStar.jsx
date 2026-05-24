@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CELEBRITIES, { CELEB_CATEGORIES } from '../data/celebrities';
+import CELEBRITIES from '../data/celebrities';
 import StarHero from '../components/StarHero';
 import CelebAvatar from '../components/CelebAvatar';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
@@ -15,7 +15,6 @@ function MyStar() {
   const [myStars, setMyStars] = useState(getMyStars);
   const [showAdd, setShowAdd] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
   const [removeConfirm, setRemoveConfirm] = useState(null);
 
   const isSaved = useCallback((celeb) => {
@@ -39,13 +38,12 @@ function MyStar() {
 
   const filtered = useMemo(() => {
     let list = CELEBRITIES;
-    if (activeCategory !== 'all') list = list.filter(c => c.category === activeCategory);
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       list = list.filter(c => c.name.toLowerCase().includes(q) || (c.group && c.group.toLowerCase().includes(q)));
     }
     return list;
-  }, [activeCategory, searchQuery]);
+  }, [searchQuery]);
 
   // ─── 비로그인 상태 ───
   if (!isLoggedIn) {
@@ -146,13 +144,6 @@ function MyStar() {
           <div className="mystar-search-wrap">
             <input className="mystar-search" type="text" placeholder="스타 이름 또는 그룹 검색..."
               value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-          </div>
-
-          <div className="mystar-categories">
-            {CELEB_CATEGORIES.map(cat => (
-              <button key={cat.key} className={`mystar-cat-btn ${activeCategory === cat.key ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.key)}>{cat.label}</button>
-            ))}
           </div>
 
           <div className="mystar-add-list">

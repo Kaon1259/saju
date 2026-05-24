@@ -226,32 +226,31 @@
 [data-theme="light"] .mlc-related-arrow { color: #c2185b; }
 
 /* ═══ 탭 ═══ */
+/* 결정상담(Decision) 메뉴 스타일과 통일 — 분리된 둥근 카드 그리드 + 활성 시 카테고리 컬러 틴트/리프트 */
 .mlc-tabs {
-  display: flex;
-  gap: 0;
-  margin-bottom: 16px;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1.5px solid rgba(255,255,255,0.12);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  margin: 10px 0 14px;
 }
 .mlc-tab {
-  flex: 1;
-  padding: 11px 0;
-  font-size: 13px;
-  font-weight: 700;
-  border: none;
-  background: rgba(255,255,255,0.04);
-  color: rgba(255,255,255,0.55);
-  cursor: pointer;
-  transition: all 0.25s;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  border-right: 1px solid rgba(255,255,255,0.08);
+  gap: 4px;
+  padding: 12px 6px 10px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
 }
-.mlc-tab:last-child { border-right: none; }
-.mlc-tab-icon { font-size: 17px; }
+.mlc-tab:hover { transform: translateY(-2px); }
+.mlc-tab-icon { display: flex; align-items: center; justify-content: center; line-height: 1; }
 .mlc-tab-label { font-size: 12px; }
 
 /* 스킨십 oneLiner 배너 */
@@ -306,24 +305,27 @@
   border-color: rgba(236,72,153,0.3);
 }
 .mlc-tab.active {
-  background: linear-gradient(135deg, rgba(233,30,99,0.22), rgba(139,92,246,0.15));
-  color: #ff3d7f;
+  border-color: var(--tc, #EC4899);
+  background: color-mix(in srgb, var(--tc, #EC4899) 12%, transparent);
+  color: #fff;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--tc, #EC4899) 25%, transparent);
+  transform: translateY(-2px);
 }
 [data-theme="light"] .mlc-tabs {
-  background: transparent !important;
-  border: 1.5px solid rgba(236, 72, 153, 0.4);
+  background: transparent;
+  border: none;
   box-shadow: none;
 }
 [data-theme="light"] .mlc-tab {
-  background: transparent !important;
-  color: #886b80;
-  border-right-color: rgba(236, 72, 153, 0.18);
+  background: #fff;
+  border-color: rgba(0,0,0,0.08);
+  color: #475569;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 [data-theme="light"] .mlc-tab.active {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.14), rgba(168, 85, 247, 0.08)) !important;
-  color: #c2185b;
-  font-weight: 800;
-  box-shadow: none;
+  color: #1f1730;
+  background: color-mix(in srgb, var(--tc, #EC4899) 8%, #fff);
+  border-color: var(--tc, #EC4899);
 }
 
 /* ═══ 폼 (재디자인 2026-04-27) ═══ */

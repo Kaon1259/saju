@@ -114,43 +114,6 @@ public class ClaudeApiService {
     }
 
     /**
-     * [임시 진단] 비스트림 generate() RestTemplate 경로를 그대로 재현해 Anthropic 실제 응답/에러를 노출.
-     * 스타검색이 Railway에서 빈 결과인 원인(키/모델/요청)을 식별하기 위함. 진단 후 제거.
-     */
-    public java.util.Map<String, Object> diagnose() {
-        java.util.Map<String, Object> out = new java.util.LinkedHashMap<>();
-        out.put("available", isAvailable());
-        out.put("defaultModel", model);
-        out.put("haikuModel", HAIKU_MODEL);
-        out.put("apiKeyLen", apiKey == null ? 0 : apiKey.length());
-        if (!isAvailable()) return out;
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("x-api-key", apiKey);
-            headers.set("anthropic-version", "2023-06-01");
-            java.util.Map<String, Object> body = Map.of(
-                "model", HAIKU_MODEL,
-                "max_tokens", 20,
-                "system", buildCachedSystem("You reply with one short word."),
-                "messages", List.of(Map.of("role", "user", "content", "Say OK"))
-            );
-            HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(body), headers);
-            ResponseEntity<String> response = restTemplate.exchange(API_URL, HttpMethod.POST, request, String.class);
-            out.put("status", response.getStatusCode().value());
-            String b = response.getBody();
-            out.put("bodySnippet", b == null ? null : b.substring(0, Math.min(400, b.length())));
-        } catch (org.springframework.web.client.HttpStatusCodeException e) {
-            out.put("httpStatus", e.getStatusCode().value());
-            String eb = e.getResponseBodyAsString();
-            out.put("errorBody", eb == null ? null : eb.substring(0, Math.min(500, eb.length())));
-        } catch (Exception e) {
-            out.put("exception", e.getClass().getName() + ": " + e.getMessage());
-        }
-        return out;
-    }
-
-    /**
      * Claude API 스트리밍 호출 - SSE로 텍스트 청크 전달
      */
     public SseEmitter generateStream(String systemPrompt, String userPrompt, int maxTokens) {
