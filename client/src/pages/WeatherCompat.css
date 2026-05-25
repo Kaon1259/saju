@@ -62,7 +62,11 @@
   font-weight: 600;
   text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
+.wc-hero-city { display: inline-flex; align-items: center; gap: 4px; }
 .wc-hero-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 3px 9px;
   border-radius: 999px;
   background: rgba(255,255,255,0.18);
@@ -311,6 +315,10 @@
   padding: 12px 14px;
   border: 1px solid rgba(236, 72, 153, 0.3);
   border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: rgba(236, 72, 153, 0.08);
   color: var(--color-text);
   font-size: 13px;

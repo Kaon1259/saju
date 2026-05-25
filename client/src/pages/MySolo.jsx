@@ -28,8 +28,8 @@ function MySolo() {
           {[...Array(10)].map((_, i) => <span key={i} style={{ '--ms-i': i }}>✦</span>)}
         </div>
         <div className="mysolo-hero-icons">
-          <span className="mysolo-hero-star">✨</span>
-          <span className="mysolo-hero-face">🙋</span>
+          <span className="mysolo-hero-star"><MenuIcon name="sparkle" size={28} /></span>
+          <span className="mysolo-hero-face"><MenuIcon name="user" size={28} /></span>
         </div>
         <h1 className="mysolo-hero-title">나는 솔로</h1>
         <p className="mysolo-hero-sub">연애운·이상형·만남시기·결혼운까지, 솔로를 위한 맞춤 운세</p>
@@ -67,7 +67,7 @@ function MySolo() {
 
       <section className="mysolo-footer">
         <p className="mysolo-footer-text">
-          💡 <strong>솔로 탈출</strong>의 첫걸음, 사주가 알려주는 인연의 방향
+          <MenuIcon name="lightbulb" size={15} /> <strong>솔로 탈출</strong>의 첫걸음, 사주가 알려주는 인연의 방향
         </p>
       </section>
     </div>

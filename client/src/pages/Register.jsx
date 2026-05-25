@@ -6,6 +6,7 @@ import { kakaoLogin, kakaoRegister, updateUser, prefetchSseToken, deleteUser, ap
 import { setToken, clearAuth } from '../utils/auth';
 import { useToast } from '../components/Toast';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
+import MenuIcon from '../components/MenuIcon';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import { startKakaoLogin, peekKakaoReturnTo, clearKakaoReturnTo, getKakaoRedirectUri } from '../utils/kakaoAuth';
@@ -231,7 +232,7 @@ function Register() {
     <div className="register-page">
       <section className="register-header animate-fade-in-up">
         <h1 className="register-header__title">
-          {step === 'kakao' ? '🔮 로그인' : '🌟 프로필 설정'}
+          {step === 'kakao' ? <><MenuIcon name="crystalBall" size={22} /> 로그인</> : <><MenuIcon name="star" size={22} /> 프로필 설정</>}
         </h1>
         <p className="register-header__subtitle">
           {step === 'kakao'
@@ -252,7 +253,7 @@ function Register() {
 
           {error && (
             <div className="form-error animate-fade-in">
-              <span>&#x26A0;&#xFE0F;</span> {error}
+              <MenuIcon name="alert" size={15} /> {error}
             </div>
           )}
 
@@ -270,7 +271,7 @@ function Register() {
       {step === 'terms' && (
         <div className="register-form glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           <div className="register-terms-welcome">
-            <span className="register-terms-icon">📜</span>
+            <span className="register-terms-icon"><MenuIcon name="tojeong" size={32} /></span>
             <h3 className="register-terms-title">가입 전 약관 동의</h3>
             <p className="register-terms-sub">서비스를 이용하려면 아래 약관에 동의해주세요</p>
           </div>
@@ -414,10 +415,10 @@ function Register() {
             <p className="register-referral-hint">친구 코드를 입력하면 둘 다 +30하트를 받아요</p>
           </div>
 
-          {error && <div className="form-error animate-fade-in"><span>&#x26A0;&#xFE0F;</span> {error}</div>}
+          {error && <div className="form-error animate-fade-in"><MenuIcon name="alert" size={15} /> {error}</div>}
 
           <button type="submit" className="btn-gold register-submit" disabled={submitting}>
-            {submitting ? '확인 중...' : '🔮 프로필 저장'}
+            {submitting ? '확인 중...' : <><MenuIcon name="crystalBall" size={16} /> 프로필 저장</>}
           </button>
         </form>
       )}
@@ -428,11 +429,11 @@ function Register() {
           <div className="autologin-ask-modal">
             {referralResult?.ok && (
               <div className="autologin-ask-referral">
-                💗 친구 초대 보너스 <strong>+{referralResult.inviteeBonus}하트</strong> 지급!
+                <MenuIcon name="heart" size={15} /> 친구 초대 보너스 <strong>+{referralResult.inviteeBonus}하트</strong> 지급!
                 {referralResult.inviterName ? <small>{referralResult.inviterName}님이 초대해주셨어요</small> : null}
               </div>
             )}
-            <div className="autologin-ask-icon">🔐</div>
+            <div className="autologin-ask-icon"><MenuIcon name="lock" size={32} /></div>
             <h3 className="autologin-ask-title">자동 로그인할까요?</h3>
             <p className="autologin-ask-desc">
               켜두시면 다음에 앱을 열 때<br />

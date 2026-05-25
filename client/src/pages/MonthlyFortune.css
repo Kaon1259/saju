@@ -54,9 +54,20 @@
 
 .mf-hero-icon {
   font-size: 42px;
-  display: block;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 8px;
 }
+
+/* ─── MenuIcon 정렬 ─── */
+.mf-submit { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.mf-reset { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.mf-loading-icon { display: inline-flex; justify-content: center; align-items: center; }
+.mf-result-season-icon { display: inline-flex; align-items: center; }
+.mf-week-icon { display: inline-flex; align-items: center; }
+.mf-lucky-day-icon { display: inline-flex; align-items: center; }
+.mf-month-heart .menu-icon { width: 12px; height: 12px; }
 
 .mf-title {
   font-size: 26px;

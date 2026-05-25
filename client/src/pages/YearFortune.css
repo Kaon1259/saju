@@ -363,6 +363,19 @@
   font-size: 18px;
 }
 
+/* ─── MenuIcon 정렬 ─── */
+.yf-hero-icon { display: inline-flex; justify-content: center; align-items: center; }
+.yf-theme-emoji { display: inline-flex; align-items: center; color: #FFD700; }
+.yf-quarter-icon { display: inline-flex; align-items: center; justify-content: center; }
+.yf-months-label { display: inline-flex; align-items: center; gap: 5px; }
+.yf-action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.yf-submit { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.yf-form-heading { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.myf-badge--cal { display: inline-flex; align-items: center; gap: 4px; }
+/* 라이트 모드 섹션 타이틀은 color:transparent(text-clip) → 아이콘은 실색상 강제 */
+.yf-section-title .menu-icon { color: var(--color-text); -webkit-text-fill-color: currentColor; }
+[data-theme="light"] .yf-section-title .menu-icon { color: #c2185b; }
+
 /* 분기별 타임라인 */
 .yf-quarters-grid {
   display: grid;

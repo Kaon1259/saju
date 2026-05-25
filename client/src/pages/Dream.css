@@ -95,6 +95,10 @@
   font-size: 56px;
   line-height: 1;
   margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fde68a;
   filter: drop-shadow(0 0 20px rgba(253, 230, 138, 0.4));
   animation: dreamMoonFloat 4s ease-in-out infinite;
 }
@@ -140,6 +144,8 @@
 
 .dream-section-icon {
   font-size: 16px;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* ═══ 키워드 칩 ═══ */
@@ -178,6 +184,8 @@
 
 .dream-chip-emoji {
   font-size: 15px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .dream-chip-label {
@@ -355,6 +363,8 @@
 
 .dream-submit-icon {
   font-size: 20px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .dream-submit-glow {

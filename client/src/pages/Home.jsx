@@ -463,11 +463,14 @@ const DAILY_TAROT_CARDS = [
     lucky: '🍀 색: 에메랄드 · 숫자: 21 · 시간: 정오' },
 ];
 
-// 사용 가능한 덱 ID — 모두 m{NN}_v0.jpg (variants) 형식
+// 사용 가능한 덱 ID — 실제 폴더가 존재하는 8개 덱만 (cats/dogs 폴더 없어 제거)
 const DAILY_TAROT_DECKS = [
-  'newclassic', 'masterpiece', 'jester', 'cats', 'dogs',
+  'newclassic', 'masterpiece', 'jester',
   'celestial', 'kdrama', 'lady', 'cartoon_girl', 'cartoon_boy',
 ];
+
+// 덱 ID → 앞면 폴더명. 카툰 덱만 폴더가 하이픈(tarot-cartoon-girl), 나머지는 ID 그대로.
+const deckFrontFolder = (deckId) => deckId.startsWith('cartoon_') ? deckId.replace('_', '-') : deckId;
 
 function DailyTarot({ variant = 'hero' }) {
   const [flipped, setFlipped] = useState(false);
@@ -497,7 +500,7 @@ function DailyTarot({ variant = 'hero' }) {
     return {
       deck: deckId,
       card,
-      frontSrc: `/tarot-${deckId}/m${cardNum}_v0.webp`,
+      frontSrc: `/tarot-${deckFrontFolder(deckId)}/m${cardNum}_v0.webp`,
       backSrc:  `/tarot-backs/${deckId}_0.webp`,
     };
   }, []);
@@ -530,7 +533,7 @@ function DailyTarot({ variant = 'hero' }) {
             </div>
           </div>
           <div className="home-tarot-row-info">
-            <span className="home-tarot-row-tag">🔮 오늘의 타로 한 장</span>
+            <span className="home-tarot-row-tag"><MenuIcon name="crystalBall" size={14} /> 오늘의 타로 한 장</span>
             {flipped && <h3 className="home-tarot-row-title">{card.nameKr}</h3>}
             <p className="home-tarot-row-sub">{flipped ? card.msg : '카드를 탭하면 오늘의 메시지를 받을 수 있어요'}</p>
           </div>
@@ -691,25 +694,25 @@ function DailyTarotModal({ card, frontSrc, onClose, autoStart = false }) {
         <div className="dt-detail-sections">
           {view.overall && (
             <div className="dt-detail-section">
-              <span className="dt-detail-section-label">🔮 오늘의 메시지</span>
+              <span className="dt-detail-section-label"><MenuIcon name="crystalBall" size={16} /> 오늘의 메시지</span>
               <p className="dt-detail-section-text">{view.overall}</p>
             </div>
           )}
           {view.love && (
             <div className="dt-detail-section">
-              <span className="dt-detail-section-label">💕 연애운</span>
+              <span className="dt-detail-section-label"><MenuIcon name="love" size={16} /> 연애운</span>
               <p className="dt-detail-section-text">{view.love}</p>
             </div>
           )}
           {view.career && (
             <div className="dt-detail-section">
-              <span className="dt-detail-section-label">💼 일·재물운</span>
+              <span className="dt-detail-section-label"><MenuIcon name="work" size={16} /> 일·재물운</span>
               <p className="dt-detail-section-text">{view.career}</p>
             </div>
           )}
           {view.advice && (
             <div className="dt-detail-section">
-              <span className="dt-detail-section-label">💡 행동 조언</span>
+              <span className="dt-detail-section-label"><MenuIcon name="lightbulb" size={16} /> 행동 조언</span>
               <p className="dt-detail-section-text">{view.advice}</p>
             </div>
           )}
@@ -722,7 +725,7 @@ function DailyTarotModal({ card, frontSrc, onClose, autoStart = false }) {
 
         {/* 하단 CTA — 비로그인 / 로그인(AI 미사용) / 로그인(AI 사용 완료) */}
         {aiLoading ? (
-          <div className="dt-detail-loading">✨ AI가 카드를 풀이하는 중...</div>
+          <div className="dt-detail-loading"><MenuIcon name="sparkle" size={16} /> AI가 카드를 풀이하는 중...</div>
         ) : aiError ? (
           <div className="dt-detail-error">{aiError}</div>
         ) : !userId ? (
@@ -732,11 +735,11 @@ function DailyTarotModal({ card, frontSrc, onClose, autoStart = false }) {
             localStorage.setItem('pendingDailyTarotAnalysis', '1');
             startKakaoLogin('/');
           }}>
-            🔑 카카오 로그인하고 AI 맞춤 분석 받기
+            <MenuIcon name="lock" size={16} /> 카카오 로그인하고 AI 맞춤 분석 받기
           </button>
         ) : !aiResult ? (
           <button className="dt-detail-cta dt-detail-cta--ai" onClick={startAiAnalysis}>
-            ✨ AI 맞춤 분석 받기 <span className="dt-detail-cta-cost">하트 5개</span>
+            <MenuIcon name="sparkle" size={16} /> AI 맞춤 분석 받기 <span className="dt-detail-cta-cost">하트 5개</span>
           </button>
         ) : null}
 
@@ -833,25 +836,25 @@ function ScoreGauge({ score, color = '#ec4899' }) {
 const MENU_PAGES = [
   // 페이지 1 — 오늘의 운세 + 연애 핵심
   [
-    { icon: '🔮', label: '오늘의 운세', path: '/my' },
-    { icon: '💑', label: '나의 연인',   path: '/my-love-compat' },
-    { icon: '💘', label: '썸·짝사랑',   path: '/my-some-crush' },
-    { icon: '🙋', label: '솔로 운세',   path: '/my-solo' },
-    { icon: '🌙', label: '다시 만날까', path: '/again-meet' },
-    { icon: '💞', label: '사주궁합',   path: '/compatibility' },
-    { icon: '✨', label: '별자리',     path: '/constellation' },
-    { icon: '🎊', label: '신년운세',   path: '/year-fortune' },
+    { iconKey: 'crystalBall',  label: '오늘의 운세', path: '/my' },
+    { iconKey: 'couple',       label: '나의 연인',   path: '/my-love-compat' },
+    { iconKey: 'heartArrow',   label: '썸·짝사랑',   path: '/my-some-crush' },
+    { iconKey: 'user',         label: '솔로 운세',   path: '/my-solo' },
+    { iconKey: 'moon',         label: '다시 만날까', path: '/again-meet' },
+    { iconKey: 'sparkleHeart', label: '사주궁합',   path: '/compatibility' },
+    { iconKey: 'constellation', label: '별자리',     path: '/constellation' },
+    { iconKey: 'newyear',      label: '신년운세',   path: '/year-fortune' },
   ],
   // 페이지 2 — 종합 / 특수 분석
   [
-    { icon: '⭐', label: '스타 운세',   path: '/star-fortune' },
-    { icon: '🩸', label: '혈액형',     path: '/bloodtype' },
-    { icon: '🧬', label: 'MBTI',       path: '/mbti' },
-    { icon: '💭', label: '꿈해몽',     path: '/dream' },
-    { icon: '🧠', label: '심리테스트', path: '/psych-test' },
-    { icon: '👤', label: '관상분석',   path: '/face-reading' },
-    { icon: '📅', label: '월간운세',   path: '/monthly-fortune' },
-    { icon: '📜', label: '토정비결',   path: '/tojeong' },
+    { iconKey: 'star',         label: '스타 운세',   path: '/star-fortune' },
+    { iconKey: 'bloodtype',    label: '혈액형',     path: '/bloodtype' },
+    { iconKey: 'mbti',         label: 'MBTI',       path: '/mbti' },
+    { iconKey: 'dream',        label: '꿈해몽',     path: '/dream' },
+    { iconKey: 'psych',        label: '심리테스트', path: '/psych-test' },
+    { iconKey: 'face',         label: '관상분석',   path: '/face-reading' },
+    { iconKey: 'monthly',      label: '월간운세',   path: '/monthly-fortune' },
+    { iconKey: 'tojeong',      label: '토정비결',   path: '/tojeong' },
   ],
 ];
 
@@ -884,7 +887,9 @@ function MenuPager({ navigate }) {
           <div className="home-menu-page" key={pIdx}>
             {page.map((m) => (
               <button key={m.label} className="home-menu-tile" onClick={() => navigate(m.path)}>
-                <span className="home-menu-tile-icon">{m.icon}</span>
+                <span className="home-menu-tile-icon">
+                  {m.iconKey ? <MenuIcon name={m.iconKey} size={26} /> : m.icon}
+                </span>
                 <span className="home-menu-tile-label">{m.label}</span>
               </button>
             ))}
@@ -1552,7 +1557,7 @@ function Home() {
 
         {/* 상단 메타 — 도시·날씨·시간대 (작게) */}
         <div className="home-hero-cs-meta">
-          <span>📍 {heroWeather.city}</span>
+          <span className="home-hero-cs-meta-city"><MenuIcon name="pin" size={13} /> {heroWeather.city}</span>
           <span className="home-hero-cs-meta-sep">·</span>
           <button
             className="home-hero-cs-meta-weather"
@@ -1713,7 +1718,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <button className="home-mystar-banner" onClick={() => navigate('/star-fortune')}>
-          <span className="home-mystar-icon">🌟</span>
+          <span className="home-mystar-icon"><MenuIcon name="star" size={26} /></span>
           <div className="home-mystar-text">
             <span className="home-mystar-title">스타 운세</span>
             <span className="home-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
@@ -1727,7 +1732,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <button className="home-decision-banner" onClick={() => navigate('/decision')}>
-          <span className="home-decision-icon">🧭</span>
+          <span className="home-decision-icon"><MenuIcon name="compass" size={26} /></span>
           <div className="home-decision-text">
             <span className="home-decision-title">고민되는 연애 결정, 사주가 답해드려요</span>
             <span className="home-decision-sub">재회 · 이별 · 고백 · 결혼</span>
@@ -1741,7 +1746,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <div className="home-section-header">
-          <h2 className="home-section-title">💕 연애 운세</h2>
+          <h2 className="home-section-title"><MenuIcon name="love" size={18} /> 연애 운세</h2>
           <span className="home-section-sub">당신의 연애를 위한 모든 운세</span>
         </div>
         <div className="home-banner-stack home-banner-stack--love">
@@ -1773,7 +1778,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <div className="home-section-header">
-          <h2 className="home-section-title">🎊 시즌 운세</h2>
+          <h2 className="home-section-title"><MenuIcon name="sparkle" size={18} /> 시즌 운세</h2>
           <span className="home-section-sub">한 해 · 한 달 · 한 주의 흐름</span>
         </div>
         <div className="home-banner-stack">
@@ -1805,7 +1810,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       <section className="home-section">
         <div className="home-section-header">
-          <h2 className="home-section-title">✨ 종합 · 특수</h2>
+          <h2 className="home-section-title"><MenuIcon name="sparkle" size={18} /> 종합 · 특수</h2>
           <span className="home-section-sub">별자리 · 띠 · 타로 · 그 외</span>
         </div>
         <div className="home-banner-stack home-banner-stack--compact">
@@ -1838,7 +1843,7 @@ function Home() {
           <div className="love-modal-sheet" onClick={e => e.stopPropagation()}>
             <div className="love-modal-handle" />
             <div className="love-modal-header">
-              <span className="love-modal-icon">{loveInfo?.icon === 'couple' ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span> : loveInfo?.icon === 'wedding' ? <span className="wedding-icon wedding-icon--lg"><span className="wedding-person"><span className="wedding-hat">🎩</span><span className="wedding-sym wedding-sym--m">♂</span></span><span className="wedding-person"><span className="wedding-hat">🎀</span><span className="wedding-sym wedding-sym--f">♀</span></span></span> : loveInfo?.icon}</span>
+              <span className="love-modal-icon">{loveInfo?.icon === 'couple' ? <span className="couple-icon"><span className="couple-m">♂</span><span className="couple-heart">♡</span><span className="couple-f">♀</span></span> : loveInfo?.icon === 'wedding' ? <span className="wedding-icon wedding-icon--lg"><span className="wedding-person"><span className="wedding-hat">🎩</span><span className="wedding-sym wedding-sym--m">♂</span></span><span className="wedding-person"><span className="wedding-hat">🎀</span><span className="wedding-sym wedding-sym--f">♀</span></span></span> : (loveInfo?.iconKey ? <MenuIcon name={loveInfo.iconKey} size={30} /> : loveInfo?.icon)}</span>
               <h2 className="love-modal-title">{loveInfo?.label}</h2>
               <span className="love-modal-desc">{loveInfo?.desc}</span>
               <button className="love-modal-close" onClick={closeLoveModal}>✕</button>
@@ -1891,10 +1896,10 @@ function Home() {
                         return (prof.partnerBirthDate || stars.length > 0) ? (
                           <div className="compat-autofill-row">
                             {prof.partnerBirthDate && (
-                              <button className="sf-autofill-btn" onClick={() => { setLovePartnerDate(prof.partnerBirthDate); if (prof.gender === 'M') setLovePartnerGender('F'); else setLovePartnerGender('M'); }}>💕 연인 정보로 채우기</button>
+                              <button className="sf-autofill-btn" onClick={() => { setLovePartnerDate(prof.partnerBirthDate); if (prof.gender === 'M') setLovePartnerGender('F'); else setLovePartnerGender('M'); }}><MenuIcon name="love" size={16} /> 연인 정보로 채우기</button>
                             )}
                             {stars.length > 0 && (
-                              <button className="sf-autofill-btn" onClick={() => setLoveShowStarPicker(true)}>⭐ 스타 정보로 채우기</button>
+                              <button className="sf-autofill-btn" onClick={() => setLoveShowStarPicker(true)}><MenuIcon name="star" size={16} /> 스타 정보로 채우기</button>
                             )}
                           </div>
                         ) : null;
@@ -1903,7 +1908,7 @@ function Home() {
                         <div className="star-picker-overlay" onClick={() => setLoveShowStarPicker(false)}>
                           <div className="star-picker-popup" onClick={e => e.stopPropagation()}>
                             <div className="star-picker-header">
-                              <h3 className="star-picker-title">⭐ 나의 스타 선택</h3>
+                              <h3 className="star-picker-title"><MenuIcon name="star" size={18} /> 나의 스타 선택</h3>
                               <button className="star-picker-close" onClick={() => setLoveShowStarPicker(false)}>✕</button>
                             </div>
                             <div className="star-picker-list">
@@ -1994,7 +1999,7 @@ function Home() {
                     const text = `[1:1연애 💕 ${loveInfo?.label}]\n점수: ${loveResult.score}점 (${loveResult.grade})\n${(loveResult.overall||'').split('.').slice(0,2).join('.')}.\n\nhttps://recipepig.kr`;
                     const res = await shareResult({ title: `${loveInfo?.label} 결과`, text });
                     if (res === 'copied') toast('클립보드에 복사되었습니다', 'success');
-                  }}>📤 공유하기</button>
+                  }}><MenuIcon name="share" size={16} /> 공유하기</button>
                   <button className="love-modal-reset" onClick={() => { setLoveResult(null); setLoveBirth(''); }}>다시 보기</button>
                 </div>
               )}

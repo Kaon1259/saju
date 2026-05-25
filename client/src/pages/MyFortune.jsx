@@ -21,7 +21,7 @@ import FortuneSkeleton from '../components/Skeleton';
 import { useAiAbort } from '../hooks/useAiAbort';
 import './MyFortune.css';
 
-const TIME_ICON = { '아침': '🌅', '점심': '☀️', '오후': '🌤️', '저녁': '🌆', '밤': '🌙' };
+const TIME_ICON = { '아침': 'sun', '점심': 'sun', '오후': 'sun', '저녁': 'moon', '밤': 'moon' };
 
 function scoreToStars(score) {
   const half = Math.max(0, Math.min(10, Math.round((Number(score) || 70) / 10)));
@@ -79,7 +79,7 @@ function LuckyOutfitCard({ color }) {
       </div>
       <div className="myf-outfit-color">{outfit.color}</div>
       <p className="myf-outfit-desc">{outfit.desc}</p>
-      <p className="myf-outfit-combo">💡 {outfit.combo}</p>
+      <p className="myf-outfit-combo"><MenuIcon name="lightbulb" size={15} /> {outfit.combo}</p>
     </div>
   );
 }
@@ -103,7 +103,7 @@ function ScoreTrendChart({ zodiac }) {
   const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xs(i)} ${ys(p.score)}`).join(' ');
   return (
     <div className="myf-trend glass-card">
-      <h4 className="myf-trend-title">📈 최근 7일 점수 흐름</h4>
+      <h4 className="myf-trend-title"><MenuIcon name="chart" size={18} /> 최근 7일 점수 흐름</h4>
       <svg viewBox={`0 0 ${W} ${H}`} className="myf-trend-svg" preserveAspectRatio="none">
         <defs>
           <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
@@ -153,7 +153,7 @@ function ZodiacByYearCard({ zodiac, userBirthYear, fullCard = false }) {
   // 컴팩트 (오늘운세 탭 하단용)
   return (
     <div className="myf-zby glass-card">
-      <h4 className="myf-zby-title">🐾 {zodiac}띠 출생연도별 운세</h4>
+      <h4 className="myf-zby-title"><MenuIcon name="paw" size={18} /> {zodiac}띠 출생연도별 운세</h4>
       <div className="myf-zby-list">
         {list.map((it, i) => (
           <div className="myf-zby-row" key={i} style={{ animationDelay: `${i * 50}ms` }}>
@@ -178,7 +178,7 @@ function TodayCelebsCard() {
   if (matches.length === 0) return null;
   return (
     <div className="myf-celebs glass-card">
-      <h4 className="myf-celebs-title">🎂 오늘 태어난 유명인</h4>
+      <h4 className="myf-celebs-title"><MenuIcon name="gift" size={18} /> 오늘 태어난 유명인</h4>
       <div className="myf-celebs-list">
         {matches.map((c, i) => (
           <div className="myf-celebs-chip" key={i} style={{ animationDelay: `${i * 60}ms` }}>
@@ -195,13 +195,13 @@ function HourlyTimeline({ items }) {
   if (!Array.isArray(items) || items.length === 0) return null;
   return (
     <div className="myf-hourly glass-card">
-      <h4 className="myf-hourly-title">⏰ 오늘의 시간대 흐름</h4>
+      <h4 className="myf-hourly-title"><MenuIcon name="clock" size={18} /> 오늘의 시간대 흐름</h4>
       <div className="myf-hourly-list">
         {items.map((it, i) => {
           const score = Number(it.score) || 70;
           return (
             <div className="myf-hourly-row" key={i} style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="myf-hourly-icon">{TIME_ICON[it.time] || '⏰'}</div>
+              <div className="myf-hourly-icon"><MenuIcon name={TIME_ICON[it.time] || 'clock'} size={18} /></div>
               <div className="myf-hourly-main">
                 <div className="myf-hourly-head">
                   <span className="myf-hourly-time">{it.time}</span>
@@ -223,7 +223,7 @@ function BiorhythmLink() {
   const nav = useNavigate();
   return (
     <button className="myf-biolink glass-card" onClick={() => nav('/biorhythm')}>
-      <span className="myf-biolink-icon">📊</span>
+      <span className="myf-biolink-icon"><MenuIcon name="chart" size={24} /></span>
       <span className="myf-biolink-main">
         <span className="myf-biolink-title">오늘의 바이오리듬</span>
         <span className="myf-biolink-sub">신체·감정·지성·직관 4사이클 + 30일 곡선</span>
@@ -525,7 +525,7 @@ function MyFortune() {
       <div className="myf-streaming-wrap">
         <div className="myf-streaming-header">
           <div className="myf-streaming-title">
-            <span className="myf-streaming-orb">🔮</span>
+            <span className="myf-streaming-orb"><MenuIcon name="crystalBall" size={24} /></span>
             <span>{label}</span>
             <span className="streaming-dots"><i/><i/><i/></span>
           </div>
@@ -544,7 +544,7 @@ function MyFortune() {
         {showHourly && (
           <div className="myf-hourly myf-hourly--streaming glass-card fade-in">
             <h4 className="myf-hourly-title">
-              ⏰ 오늘의 시간대 흐름
+              <MenuIcon name="clock" size={18} /> 오늘의 시간대 흐름
               <span className="myf-hourly-streaming-badge">분석 중<span className="streaming-dots"><i/><i/><i/></span></span>
             </h4>
             <div className="myf-hourly-list">
@@ -554,7 +554,7 @@ function MyFortune() {
                   const score = Number(filled.score) || 70;
                   return (
                     <div className="myf-hourly-row myf-hourly-row--filled" key={slotName} style={{ animationDelay: `${i * 80}ms` }}>
-                      <div className="myf-hourly-icon">{TIME_ICON[filled.time] || TIME_ICON[slotName] || '⏰'}</div>
+                      <div className="myf-hourly-icon"><MenuIcon name={TIME_ICON[filled.time] || TIME_ICON[slotName] || 'clock'} size={18} /></div>
                       <div className="myf-hourly-main">
                         <div className="myf-hourly-head">
                           <span className="myf-hourly-time">{filled.time || slotName}</span>
@@ -571,7 +571,7 @@ function MyFortune() {
                 const isActive = i === hourlyStream.length;
                 return (
                   <div className={`myf-hourly-row myf-hourly-row--pending ${isActive ? 'is-active' : ''}`} key={slotName}>
-                    <div className="myf-hourly-icon myf-hourly-icon--pending">{TIME_ICON[slotName] || '⏰'}</div>
+                    <div className="myf-hourly-icon myf-hourly-icon--pending"><MenuIcon name={TIME_ICON[slotName] || 'clock'} size={18} /></div>
                     <div className="myf-hourly-main">
                       <div className="myf-hourly-head">
                         <span className="myf-hourly-time">{slotName}</span>
@@ -720,7 +720,7 @@ function MyFortune() {
     return (
       <div className="myf-page">
         <div className="myf-empty">
-          <div className="myf-empty-icon">🔮</div>
+          <div className="myf-empty-icon"><MenuIcon name="crystalBall" size={48} /></div>
           <h2>나만의 맞춤 운세</h2>
           <p>회원가입하면 사주 + 혈액형 + MBTI를<br />종합한 나만의 운세를 볼 수 있어요</p>
           <KakaoLoginCTA returnTo="/my" className="myf-register-btn">카카오 로그인하고 오늘의 운세 받기</KakaoLoginCTA>
@@ -784,7 +784,7 @@ function MyFortune() {
 
         {rd.personalityReading && (
           <div className="myf-analysis glass-card">
-            <span className="myf-analysis-icon">☯️</span>
+            <span className="myf-analysis-icon"><MenuIcon name="traditional" size={20} /></span>
             <h4 className="myf-analysis-title">사주 성격 분석</h4>
             <p>{rd.personalityReading}</p>
           </div>
@@ -796,7 +796,7 @@ function MyFortune() {
           className={`myf-extras-toggle ${showExtras ? 'is-open' : ''}`}
           onClick={() => setShowExtras(v => !v)}
         >
-          {showExtras ? '간략히 보기' : '🍀 행운·코디·트렌드 더보기'}
+          {showExtras ? '간략히 보기' : <><MenuIcon name="clover" size={16} /> 행운·코디·트렌드 더보기</>}
           <span className="myf-extras-toggle-arrow">{showExtras ? '▲' : '▼'}</span>
         </button>
         {showExtras && (
@@ -814,8 +814,8 @@ function MyFortune() {
         <DeepAnalysis type="today" birthDate={birthInfo.birthDate} birthTime={birthInfo.birthTime} gender={birthInfo.gender} calendarType={birthInfo.calendarType} previousResult={rd} />
       )}
       <div className="myf-actions">
-        <button className="myf-share-btn" onClick={onShare}>{copied ? '✅ 복사 완료!' : '📤 공유하기'}</button>
-        <button className="myf-share-btn" onClick={onReset}>🔄 다시 보기</button>
+        <button className="myf-share-btn" onClick={onShare}>{copied ? <><MenuIcon name="check" size={16} /> 복사 완료!</> : <><MenuIcon name="share" size={16} /> 공유하기</>}</button>
+        <button className="myf-share-btn" onClick={onReset}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
       </div>
     </>
   );
@@ -859,14 +859,14 @@ function MyFortune() {
                   if (showDatePicker) { setShowDatePicker(false); return; }
                   setShowDatePicker(true);
                 }}
-              >📅 {dateMode === 'pick' && pickDate && !showDatePicker ? getDateLabel() : '지정'}</button>
+              ><MenuIcon name="calendar" size={14} /> {dateMode === 'pick' && pickDate && !showDatePicker ? getDateLabel() : '지정'}</button>
             </div>
           );
         })()}
       </div>
       {showDatePicker && (
         <div className="myf-date-picker-inline glass-card">
-          <h3 className="myf-date-picker-title">📅 분석할 날짜 선택</h3>
+          <h3 className="myf-date-picker-title"><MenuIcon name="calendar" size={18} /> 분석할 날짜 선택</h3>
           <BirthDatePicker
             value={pickDate}
             onChange={(v) => {
@@ -888,7 +888,7 @@ function MyFortune() {
           {partnerCacheChecking && !partnerData && !partnerLoading && !partnerStreaming && (
             <>
               <div className="myf-cache-check myf-cache-check--inline">
-                <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+                <div className="myf-cache-check-icon" aria-hidden="true"><MenuIcon name="clock" size={20} /></div>
                 <p className="myf-cache-check-text">저장된 연인 운세 확인중</p>
               </div>
               <FortuneSkeleton scoreLabel="연인 운세" cards={3} />
@@ -899,15 +899,15 @@ function MyFortune() {
             renderLoading(partnerLoading, partnerStreaming, partnerStreamText, partnerData, partnerStreamFields, partnerDoneFields, partnerStreamHourly) || (
               !partnerData ? (
                 <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
-                  <h2 style={{ marginBottom: 12 }}>💕 연인 운세</h2>
+                  <h2 style={{ marginBottom: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><MenuIcon name="love" size={20} /> 연인 운세</h2>
                   {partnerInfo ? (
                     <>
                       <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 16 }}>
                         프로필에 등록된 연인 정보로 운세를 분석합니다
                       </p>
                       <div className="myf-badges" style={{ justifyContent: 'center', marginBottom: 20 }}>
-                        <span className="myf-badge">
-                          {partnerInfo.calendarType === 'LUNAR' ? '🌙 음력' : '☀️ 양력'} {partnerInfo.birthDate}
+                        <span className="myf-badge myf-badge--icon">
+                          {partnerInfo.calendarType === 'LUNAR' ? <><MenuIcon name="moon" size={13} /> 음력</> : <><MenuIcon name="sun" size={13} /> 양력</>} {partnerInfo.birthDate}
                         </span>
                         {partnerInfo.birthTime && <span className="myf-badge">{partnerInfo.birthTime}</span>}
                         {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
@@ -919,12 +919,12 @@ function MyFortune() {
                           setStreamFields: setPartnerStreamFields, setDoneFields: setPartnerDoneFields,
                           setStreamHourly: setPartnerStreamHourly,
                         }, { targetType: 'partner', date: getTargetDate() }))}>
-                        💕 연인의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
+                        <MenuIcon name="love" size={16} /> 연인의 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : `${getDateLabel()}`} 운세 보기 <HeartCost category="TODAY_FORTUNE" />
                       </button>
                     </>
                   ) : (
                     <>
-                      <div style={{ fontSize: 48, margin: '20px 0' }}>💔</div>
+                      <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center' }}><MenuIcon name="heartBroken" size={48} /></div>
                       <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
                         등록된 연인 정보가 없습니다.<br />프로필에서 연인 정보를 먼저 입력해주세요.
                       </p>
@@ -969,7 +969,7 @@ function MyFortune() {
           {renderLoading(otherLoading, otherStreaming, otherStreamText, otherData, otherStreamFields, otherDoneFields, otherStreamHourly) || (
             !otherData ? (
               <div className="myf-other-form glass-card">
-                <h2 style={{ textAlign: 'center', marginBottom: 6 }}>🔮 다른 사람 생년월일 입력하기</h2>
+                <h2 style={{ marginBottom: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%' }}><MenuIcon name="crystalBall" size={20} /> 다른 사람 생년월일 입력하기</h2>
                 <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--color-text-muted)', marginTop: 0, marginBottom: 14 }}>
                   {dateMode === 'today' ? '오늘 운세를 볼 사람의 정보를 입력해주세요'
                   : dateMode === 'tomorrow' ? '내일 운세를 볼 사람의 정보를 입력해주세요'
@@ -981,7 +981,7 @@ function MyFortune() {
                     <button className="sf-autofill-btn" style={{ marginBottom: 10 }} onClick={() => {
                       const el = document.getElementById('other-star-picker');
                       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
-                    }}>⭐ 스타 정보로 채우기</button>
+                    }}><MenuIcon name="star" size={16} /> 스타 정보로 채우기</button>
                   ) : null;
                 })()}
                 <div id="other-star-picker" style={{ display: 'none', marginBottom: 10 }}>
@@ -1034,9 +1034,9 @@ function MyFortune() {
                   }, { targetType: 'other', date: getTargetDate() }))}>
                   {otherLoading || otherStreaming
                     ? 'AI 분석중...'
-                    : dateMode === 'today' ? '☀️ 오늘의 운세 보기'
-                    : dateMode === 'tomorrow' ? '🌙 내일의 운세 보기'
-                    : `📅 ${getDateLabel()} 날짜 지정 운세 보기`}
+                    : dateMode === 'today' ? <><MenuIcon name="sun" size={16} /> 오늘의 운세 보기</>
+                    : dateMode === 'tomorrow' ? <><MenuIcon name="moon" size={16} /> 내일의 운세 보기</>
+                    : <><MenuIcon name="calendar" size={16} /> {getDateLabel()} 날짜 지정 운세 보기</>}
                   <HeartCost category="TODAY_FORTUNE" />
                 </button>
               </div>
@@ -1071,7 +1071,7 @@ function MyFortune() {
       {viewMode === 'mine' && !data && cacheChecking && (
         <>
           <div className="myf-cache-check myf-cache-check--inline">
-            <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+            <div className="myf-cache-check-icon" aria-hidden="true"><MenuIcon name="clock" size={20} /></div>
             <p className="myf-cache-check-text">저장된 운세 확인중</p>
           </div>
           <FortuneSkeleton scoreLabel="오늘의 운세" cards={3} />
@@ -1092,7 +1092,7 @@ function MyFortune() {
 
       {viewMode === 'mine' && !data && !cacheChecking && (
         <div className="myf-other-form glass-card" style={{ textAlign: 'center' }}>
-          <h2 style={{ marginBottom: 12 }}>🔮 {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
+          <h2 style={{ marginBottom: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><MenuIcon name="crystalBall" size={20} /> {dateMode === 'today' ? '오늘의' : dateMode === 'tomorrow' ? '내일의' : getDateLabel()} 운세</h2>
           <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
             버튼을 누르면 AI가 {userName || '당신'}님의 사주를 분석해드려요
           </p>
@@ -1140,13 +1140,13 @@ function MyFortune() {
 
           {saju?.personalityReading && (
             <div className="myf-analysis glass-card">
-              <span className="myf-analysis-icon">☯️</span>
+              <span className="myf-analysis-icon"><MenuIcon name="traditional" size={20} /></span>
               <h4 className="myf-analysis-title">사주 성격 분석</h4>
               <p>{saju.personalityReading}</p>
             </div>
           )}
 
-          {f.tip && (<div className="myf-tip glass-card"><span>💡</span><p>{f.tip}</p></div>)}
+          {f.tip && (<div className="myf-tip glass-card"><span className="myf-tip-icon"><MenuIcon name="lightbulb" size={18} /></span><p>{f.tip}</p></div>)}
 
           {/* ═══ 더보기: 부가 섹션 (행운/코디/트렌드/연도별 띠/유명인/바이오리듬) ═══ */}
           <button
@@ -1154,7 +1154,7 @@ function MyFortune() {
             className={`myf-extras-toggle ${showExtras ? 'is-open' : ''}`}
             onClick={() => setShowExtras(v => !v)}
           >
-            {showExtras ? '간략히 보기' : '🍀 행운·코디·트렌드 더보기'}
+            {showExtras ? '간략히 보기' : <><MenuIcon name="clover" size={16} /> 행운·코디·트렌드 더보기</>}
             <span className="myf-extras-toggle-arrow">{showExtras ? '▲' : '▼'}</span>
           </button>
           {showExtras && (
@@ -1177,7 +1177,7 @@ function MyFortune() {
             return (
               <div className="myf-quicklinks">
                 <button className="myf-quicklink" onClick={() => navigate('/zodiac', myZodiac ? { state: { autoStart: myZodiac } } : undefined)}>
-                  <span className="myf-quicklink-icon">🐯</span>
+                  <span className="myf-quicklink-icon"><MenuIcon name="paw" size={24} /></span>
                   <span className="myf-quicklink-text">
                     <span className="myf-quicklink-title">{myZodiac ? `${myZodiac}띠 운세 바로 보기` : '띠 운세'}</span>
                     <span className="myf-quicklink-sub">12지신 AI 상세 분석</span>
@@ -1196,7 +1196,7 @@ function MyFortune() {
                   }
                   navigate('/constellation');
                 }}>
-                  <span className="myf-quicklink-icon">✨</span>
+                  <span className="myf-quicklink-icon"><MenuIcon name="constellation" size={24} /></span>
                   <span className="myf-quicklink-text">
                     <span className="myf-quicklink-title">내 별자리 운세 바로 보기</span>
                     <span className="myf-quicklink-sub">12별자리 AI 상세 분석</span>
@@ -1204,7 +1204,7 @@ function MyFortune() {
                   <span className="myf-quicklink-arrow">›</span>
                 </button>
                 <button className="myf-quicklink" onClick={() => navigate('/monthly-fortune')}>
-                  <span className="myf-quicklink-icon">📆</span>
+                  <span className="myf-quicklink-icon"><MenuIcon name="monthly" size={24} /></span>
                   <span className="myf-quicklink-text">
                     <span className="myf-quicklink-title">이번 달 운세</span>
                     <span className="myf-quicklink-sub">한 달의 흐름 보기</span>
@@ -1212,7 +1212,7 @@ function MyFortune() {
                   <span className="myf-quicklink-arrow">›</span>
                 </button>
                 <button className="myf-quicklink" onClick={() => navigate('/year-fortune')}>
-                  <span className="myf-quicklink-icon">🎊</span>
+                  <span className="myf-quicklink-icon"><MenuIcon name="newyear" size={24} /></span>
                   <span className="myf-quicklink-text">
                     <span className="myf-quicklink-title">2026 신년 운세</span>
                     <span className="myf-quicklink-sub">한 해의 큰 흐름</span>
@@ -1233,7 +1233,7 @@ function MyFortune() {
 
           <div className="myf-actions">
             <button className="myf-share-btn" onClick={() => handleShare(data, '오늘의 사주 운세')}>
-              {copied ? '✅ 복사 완료!' : '📤 운세 공유하기'}
+              {copied ? <><MenuIcon name="check" size={16} /> 복사 완료!</> : <><MenuIcon name="share" size={16} /> 운세 공유하기</>}
             </button>
           </div>
         </div>

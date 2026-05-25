@@ -111,6 +111,7 @@
 .myf-badges { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
 .myf-badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
 .myf-badge--saju { border-color: rgba(251,191,36,0.4); color: #FBBF24; background: rgba(251,191,36,0.1); }
+.myf-badge--icon { display: inline-flex; align-items: center; gap: 4px; }
 .myf-badge--bt { border-color: rgba(244,114,182,0.4); color: #F472B6; background: rgba(244,114,182,0.1); }
 .myf-badge--mbti { border-color: rgba(52,211,153,0.4); color: #34D399; background: rgba(52,211,153,0.1); }
 
@@ -684,6 +685,7 @@
 }
 .myf-seg-btn {
   flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
   padding: 8px 10px;
   border: none;
   border-radius: 8px;
@@ -821,3 +823,34 @@
 [data-theme="light"] .myf-quicklink-title { color: #2e2e45; }
 [data-theme="light"] .myf-quicklink-sub { color: #886b80; }
 [data-theme="light"] .myf-quicklink-arrow { color: #c2185b; }
+
+/* ───────── MenuIcon(외곽선 SVG) 정렬 ───────── */
+/* 섹션 타이틀 — 아이콘+텍스트 한 줄 */
+.myf-trend-title,
+.myf-zby-title,
+.myf-celebs-title,
+.myf-date-picker-title,
+.myf-outfit-combo { display: inline-flex; align-items: center; gap: 6px; }
+.myf-date-picker-title { display: flex; justify-content: center; }
+
+/* 공유 버튼 — 아이콘+텍스트 가운데 (extras-toggle 은 이미 flex) */
+.myf-share-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+
+/* 아이콘 래퍼 span — SVG 가운데 정렬 + 색 상속 */
+.myf-analysis-icon,
+.myf-streaming-orb,
+.myf-tip-icon,
+.myf-biolink-icon,
+.myf-empty-icon,
+.myf-cache-check-icon,
+.myf-hourly-icon { display: inline-flex; align-items: center; justify-content: center; }
+.myf-hourly-icon { color: var(--color-accent-gold); }
+.myf-analysis-icon { color: var(--color-accent-gold); }
+.myf-tip-icon { color: var(--color-accent-gold); }
+.myf-streaming-orb { color: #fbbf24; }
+.myf-empty-icon,
+.myf-cache-check-icon,
+.myf-biolink-icon { color: var(--color-primary, #a855f7); }
+.myf-quicklink-icon { color: #a855f7; }
+[data-theme="light"] .myf-quicklink-icon { color: #c2185b; }
+[data-theme="light"] .myf-hourly-icon { color: #c2185b; }

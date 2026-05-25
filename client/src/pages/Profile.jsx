@@ -168,10 +168,10 @@ function Profile() {
         <div className="pf-info-divider" />
         <div className="pf-info-row">
           <span className="pf-info-label"><MenuIcon name="heart" size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />연애 상태</span>
-          <span className="pf-info-value">
-            {user.relationshipStatus === 'IN_RELATIONSHIP' ? '💕 연애중' :
-             user.relationshipStatus === 'SOME' ? '💗 썸' :
-             user.relationshipStatus === 'COMPLICATED' ? '💔 복잡' : '💫 솔로'}
+          <span className="pf-info-value pf-info-value--rel">
+            {user.relationshipStatus === 'IN_RELATIONSHIP' ? <><MenuIcon name="love" size={15} /> 연애중</> :
+             user.relationshipStatus === 'SOME' ? <><MenuIcon name="heart" size={15} /> 썸</> :
+             user.relationshipStatus === 'COMPLICATED' ? <><MenuIcon name="heartBroken" size={15} /> 복잡</> : <><MenuIcon name="sparkle" size={15} /> 솔로</>}
           </span>
         </div>
       </section>
@@ -184,7 +184,7 @@ function Profile() {
             <div className="pf-partner-row">
               <span className="pf-partner-label">생년월일</span>
               <span className="pf-partner-value">
-                {user.partnerCalendarType === 'LUNAR' ? '🌙 음력' : '☀️ 양력'} {formatDate(user.partnerBirthDate)}
+                {user.partnerCalendarType === 'LUNAR' ? <><MenuIcon name="moon" size={14} /> 음력</> : <><MenuIcon name="sun" size={14} /> 양력</>} {formatDate(user.partnerBirthDate)}
               </span>
             </div>
             {(() => {
@@ -200,7 +200,7 @@ function Profile() {
             })()}
           </div>
           <button className="pf-partner-compat-btn" onClick={() => navigate('/compatibility')}>
-            💑 궁합 분석하러 가기
+            <MenuIcon name="couple" size={16} /> 궁합 분석하러 가기
           </button>
         </section>
       )}
@@ -252,7 +252,7 @@ function Profile() {
               }
               setDailyUnlocking(false);
             }}>
-              {dailyUnlocking ? '처리 중...' : <>🔓 일운 더보기 ({dailyFortunes.length - 3}일) <HeartCost category="DAILY_FORTUNE_EXTRA" /></>}
+              {dailyUnlocking ? '처리 중...' : <><MenuIcon name="lock" size={15} /> 일운 더보기 ({dailyFortunes.length - 3}일) <HeartCost category="DAILY_FORTUNE_EXTRA" /></>}
             </button>
           )}
         </section>
@@ -261,24 +261,24 @@ function Profile() {
       {/* 설정 바로가기 */}
       <section className="pf-actions" style={{ marginBottom: 0 }}>
         <button className="pf-btn pf-btn--secondary" onClick={() => navigate('/settings')}>
-          ⚙️ 설정
+          <MenuIcon name="settings" size={16} /> 설정
         </button>
       </section>
 
       {/* 액션 */}
       <section className="pf-actions">
         <button className="pf-btn pf-btn--primary" onClick={() => navigate('/my')}>
-          🔮 나의 통합 운세 보기
+          <MenuIcon name="crystalBall" size={16} /> 나의 통합 운세 보기
         </button>
         <button className="pf-btn pf-btn--primary" style={{ background: 'linear-gradient(135deg, #E91E63, #FF6B6B)' }} onClick={() => navigate('/profile/edit')}>
-          ✏️ 프로필 수정
+          <MenuIcon name="user" size={16} /> 프로필 수정
         </button>
         <button className="pf-btn pf-btn--logout" onClick={() => {
           clearAuth();
           localStorage.setItem('autoLogin', 'off');
           navigate('/register');
         }}>
-          🚪 로그아웃
+          <MenuIcon name="lock" size={16} /> 로그아웃
         </button>
         <button
           className="pf-btn pf-btn--logout"

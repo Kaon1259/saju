@@ -177,6 +177,15 @@ public class CompatibilityService {
     }
 
     /**
+     * 컨트롤러용 캐시 조회 — 히트면 무료 반환(차감 없음), 미스면 null.
+     * analyzeSaju(line 34)와 동일한 키 구성을 사용해야 동일 캐시를 맞춘다.
+     */
+    public Map<String, Object> peekCompatCache(LocalDate bd1, String bt1, LocalDate bd2, String bt2, String gender1, String gender2) {
+        String dbCacheKey = buildCacheKey("compatibility_v2", bd1.toString(), bt1, bd2.toString(), bt2, gender1, gender2);
+        return getFromCache("compatibility", dbCacheKey);
+    }
+
+    /**
      * 스트리밍 완료 후 캐시 저장용
      */
     public void saveCompatCache(String bd1, String bt1, String bd2, String bt2, String gender1, String gender2, Map<String, Object> result) {

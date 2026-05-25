@@ -104,6 +104,9 @@ public class CompatibilityController {
         } catch (Exception ignored) {}
     }
 
+    // GET /saju 차감 허용 카테고리 화이트리스트 (그룹궁합/스타궁합/사주궁합 — 클라가 보낸 값 검증)
+    private static final Set<String> COMPAT_CATEGORIES = Set.of("COMPATIBILITY", "GROUP_COMPAT", "CELEB_COMPAT");
+
     @GetMapping("/saju")
     public ResponseEntity<Map<String, Object>> analyzeSajuCompatibility(
             @RequestParam("birthDate1") String birthDate1Str,
@@ -113,7 +116,10 @@ public class CompatibilityController {
             @RequestParam(value = "calendarType1", defaultValue = "SOLAR") String calendarType1,
             @RequestParam(value = "calendarType2", defaultValue = "SOLAR") String calendarType2,
             @RequestParam(value = "gender1", defaultValue = "M") String gender1,
-            @RequestParam(value = "gender2", defaultValue = "F") String gender2) {
+            @RequestParam(value = "gender2", defaultValue = "F") String gender2,
+            @RequestParam(value = "category", defaultValue = "COMPATIBILITY") String category,
+            HttpServletRequest req) {
+        Long userId = AuthUtil.optionalUserId(req);
         LocalDate bd1 = LocalDate.parse(birthDate1Str);
         LocalDate bd2 = LocalDate.parse(birthDate2Str);
         if ("LUNAR".equalsIgnoreCase(calendarType1)) {
@@ -122,7 +128,38 @@ public class CompatibilityController {
         if ("LUNAR".equalsIgnoreCase(calendarType2)) {
             bd2 = lunarCalendarService.lunarToSolar(bd2);
         }
-        return ResponseEntity.ok(compatibilityService.analyzeSaju(bd1, birthTime1, bd2, birthTime2, gender1, gender2));
+        // 클라가 보낸 카테고리 검증 (조작 방지) — 화이트리스트 밖이면 기본 사주궁합으로
+        final String cat = COMPAT_CATEGORIES.contains(category) ? category : "COMPATIBILITY";
+
+        // 1) 캐시 히트 = 무료 (스트리밍 경로와 동일하게 캐시는 차감 없음)
+        Map<String, Object> cached = compatibilityService.peekCompatCache(bd1, birthTime1, bd2, birthTime2, gender1, gender2);
+        if (cached != null) {
+            return ResponseEntity.ok(cached);
+        }
+
+        // 2) 캐시 미스 → AI 호출 전 하트 잔액 확인 (부족하면 무료 AI 차단)
+        if (userId != null) {
+            try {
+                heartPointService.checkPoints(userId, cat);
+            } catch (InsufficientHeartsException e) {
+                Map<String, Object> err = new LinkedHashMap<>();
+                err.put("insufficientHearts", true);
+                err.put("required", e.getRequired());
+                err.put("available", e.getAvailable());
+                return ResponseEntity.ok(err);
+            }
+        }
+
+        // 3) AI 분석 (내부에서 캐시 미스 시 Claude 호출 + 캐시 저장)
+        Map<String, Object> result = compatibilityService.analyzeSaju(bd1, birthTime1, bd2, birthTime2, gender1, gender2);
+
+        // 4) 실제 AI 결과가 생성된 경우에만 차감 (Claude 미가용/실패 시 차감 없음)
+        //    deducted 플래그로 클라가 캐시히트(무료)와 신규차감을 구분 — 캐시 저장은 이미 끝나서 오염 없음
+        if (userId != null && (result.get("aiAnalysis") != null || result.get("aiSummary") != null)) {
+            heartPointService.deductPoints(userId, cat, "궁합");
+            result.put("deducted", true);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/saju/cache")

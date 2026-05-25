@@ -71,6 +71,10 @@
   font-size: 52px;
   margin-bottom: 8px;
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9B59B6;
 }
 
 .pt-title {
@@ -147,6 +151,10 @@
 
 .pt-test-icon {
   font-size: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--test-color);
   filter: drop-shadow(0 0 10px var(--test-color));
 }
 

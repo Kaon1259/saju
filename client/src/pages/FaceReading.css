@@ -66,6 +66,10 @@
 .fr-hero-icon {
   font-size: 56px;
   margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #DAA520;
   filter: drop-shadow(0 0 20px rgba(218, 165, 32, 0.4));
   position: relative;
 }
@@ -148,7 +152,7 @@
 
 .fr-progress-dot { position: relative; }
 
-.fr-progress-icon { font-size: 18px; }
+.fr-progress-icon { font-size: 18px; display: inline-flex; align-items: center; justify-content: center; }
 .fr-progress-label { font-size: 10px; font-weight: 700; color: var(--color-text-muted); }
 
 .fr-progress-dot.active .fr-progress-label { color: #DAA520; }
@@ -171,7 +175,7 @@
   gap: 8px;
 }
 
-.fr-feature-icon { font-size: 22px; }
+.fr-feature-icon { font-size: 22px; display: inline-flex; align-items: center; }
 
 .fr-feature-step {
   margin-left: auto;
@@ -221,7 +225,7 @@
   box-shadow: 0 6px 20px rgba(218, 165, 32, 0.2);
 }
 
-.fr-option-emoji { font-size: 28px; }
+.fr-option-emoji { font-size: 28px; display: inline-flex; align-items: center; justify-content: center; }
 .fr-option-value { font-size: 13px; font-weight: 800; color: var(--color-text); }
 .fr-option-desc { font-size: 10px; color: var(--color-text-muted); }
 
@@ -263,6 +267,9 @@
 }
 
 .fr-summary-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
   border-radius: 8px;
   background: rgba(218, 165, 32, 0.1);
@@ -381,7 +388,7 @@
   cursor: not-allowed;
 }
 
-.fr-analyze-icon { font-size: 20px; }
+.fr-analyze-icon { font-size: 20px; display: inline-flex; align-items: center; }
 
 .fr-analyze-glow {
   position: absolute;
@@ -537,6 +544,10 @@
   font-size: 56px;
   margin-bottom: 8px;
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #DAA520;
   filter: drop-shadow(0 0 16px rgba(218, 165, 32, 0.3));
 }
 
@@ -625,7 +636,7 @@
   gap: 6px;
 }
 
-.fr-section-title span { font-size: 18px; }
+.fr-section-title span { font-size: 18px; display: inline-flex; align-items: center; }
 
 .fr-personality-text {
   font-size: 14px;
@@ -653,6 +664,9 @@
 }
 
 .fr-list-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 15px;
   font-weight: 800;
   margin: 0 0 10px;

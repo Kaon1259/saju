@@ -7,6 +7,7 @@ import HistoryDrawer from '../components/HistoryDrawer';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StreamingCard from '../components/StreamingCard';
 import AnalysisComplete from '../components/AnalysisComplete';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -207,8 +208,8 @@ function Zodiac() {
 
       {selected && !fortune && !loading && localStorage.getItem('userId') && (
         <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-          <button className="btn-gold" onClick={() => guardZodiac(() => handleSelect(selected))} style={{ width: '100%' }}>
-            🐯 내 띠 운세 보기 <HeartCost category="ZODIAC" />
+          <button className="btn-gold zd-cta-btn" onClick={() => guardZodiac(() => handleSelect(selected))} style={{ width: '100%' }}>
+            <MenuIcon name="paw" size={16} /> 내 띠 운세 보기 <HeartCost category="ZODIAC" />
           </button>
         </div>
       )}
@@ -222,7 +223,7 @@ function Zodiac() {
         return (
           <div className="zd-streaming-wrap">
             <div className="zd-streaming-header">
-              <span className="zd-streaming-orb">✨</span>
+              <span className="zd-streaming-orb"><MenuIcon name="paw" size={24} /></span>
               <span className="zd-streaming-title">AI가 띠 운세를 분석중이에요</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>
@@ -279,25 +280,25 @@ function Zodiac() {
 
           {fortune.elementInfluence && (
             <div className="zd-extra glass-card">
-              <h4>🌀 오행의 흐름</h4>
+              <h4><MenuIcon name="spark" size={18} /> 오행의 흐름</h4>
               <p>{fortune.elementInfluence}</p>
             </div>
           )}
           {fortune.timeAdvice && (
             <div className="zd-extra glass-card">
-              <h4>⏰ 시간대 조언</h4>
+              <h4><MenuIcon name="clock" size={18} /> 시간대 조언</h4>
               <p>{fortune.timeAdvice}</p>
             </div>
           )}
           {fortune.emotionalTip && (
             <div className="zd-extra glass-card">
-              <h4>💭 감정 케어</h4>
+              <h4><MenuIcon name="chat" size={18} /> 감정 케어</h4>
               <p>{fortune.emotionalTip}</p>
             </div>
           )}
           {fortune.advice && (
             <div className="zd-extra glass-card">
-              <h4>💡 오늘의 조언</h4>
+              <h4><MenuIcon name="lightbulb" size={18} /> 오늘의 조언</h4>
               <p>{fortune.advice}</p>
             </div>
           )}

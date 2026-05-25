@@ -6,6 +6,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -277,7 +278,7 @@ function Tojeong() {
       <div className="tj-page">
         <div className="tj-streaming-wrap">
           <div className="tj-streaming-header">
-            <span className="tj-streaming-orb">📜</span>
+            <span className="tj-streaming-orb"><MenuIcon name="tojeong" size={24} /></span>
             <span className="tj-streaming-title">AI가 토정비결을 분석중이에요</span>
             <span className="streaming-dots"><i/><i/><i/></span>
           </div>
@@ -332,8 +333,8 @@ function Tojeong() {
 
         {userId && (
           <div className="glass-card animate-fade-in-up" style={{ padding: '20px', textAlign: 'center', marginBottom: 16 }}>
-            <button className="btn-gold" onClick={loadUserTojeong} style={{ width: '100%' }}>
-              🔮 내 토정비결 보기 <HeartCost category="TOJEONG" />
+            <button className="btn-gold tj-btn-icon" onClick={loadUserTojeong} style={{ width: '100%' }}>
+              <MenuIcon name="crystalBall" size={16} /> 내 토정비결 보기 <HeartCost category="TOJEONG" />
             </button>
           </div>
         )}
@@ -347,7 +348,7 @@ function Tojeong() {
                 if (p.gender) setGender(p.gender);
                 if (p.calendarType) setCalendarType(p.calendarType);
               } catch {}
-            }}>✨ 내 정보로 채우기</button>
+            }}><MenuIcon name="sparkle" size={16} /> 내 정보로 채우기</button>
           )}
           <div className="form-group">
             <label className="form-label">생년월일</label>
@@ -404,7 +405,7 @@ function Tojeong() {
       {/* 올해 총평 */}
       {result.yearSummary && (
         <section className="tj-summary glass-card animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <h2 className="tj-section-title">📅 {new Date().getFullYear()}년 총평</h2>
+          <h2 className="tj-section-title"><MenuIcon name="calendar" size={18} /> {new Date().getFullYear()}년 총평</h2>
           <p className="tj-summary-text">{result.yearSummary}</p>
         </section>
       )}
@@ -439,8 +440,8 @@ function Tojeong() {
 
       {/* 다시하기 */}
       <section className="tj-actions animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-        <button className="tj-reset-btn" onClick={() => { setResult(null); setShowInput(true); }}>
-          🔄 다른 생년월일로 보기
+        <button className="tj-reset-btn tj-btn-icon" onClick={() => { setResult(null); setShowInput(true); }}>
+          <MenuIcon name="refresh" size={16} /> 다른 생년월일로 보기
         </button>
       </section>
     </div>

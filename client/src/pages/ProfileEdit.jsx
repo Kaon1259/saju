@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUser, updateUser } from '../api/fortune';
 import { ZODIAC_ANIMALS } from '../components/ZodiacGrid';
+import MenuIcon from '../components/MenuIcon';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import './Register.css';
@@ -20,11 +21,11 @@ const BIRTH_TIMES = [
 const MBTI_TYPES = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
 
 const REL_STATUS = [
-  { id: 'SINGLE', label: '솔로', icon: '💫', color: '#FFB020' },
-  { id: 'SOME', label: '썸', icon: '💗', color: '#FF6B6B' },
-  { id: 'IN_RELATIONSHIP', label: '연애중', icon: '💕', color: '#E91E63' },
-  { id: 'MARRIED', label: '기혼', icon: '💍', color: '#9B59B6' },
-  { id: 'COMPLICATED', label: '복잡', icon: '💔', color: '#94A3B8' },
+  { id: 'SINGLE', label: '솔로', icon: '💫', iconKey: 'sparkle', color: '#FFB020' },
+  { id: 'SOME', label: '썸', icon: '💗', iconKey: 'heart', color: '#FF6B6B' },
+  { id: 'IN_RELATIONSHIP', label: '연애중', icon: '💕', iconKey: 'love', color: '#E91E63' },
+  { id: 'MARRIED', label: '기혼', icon: '💍', iconKey: 'ring', color: '#9B59B6' },
+  { id: 'COMPLICATED', label: '복잡', icon: '💔', iconKey: 'heartBroken', color: '#94A3B8' },
 ];
 
 const CONSTELLATIONS = [
@@ -139,7 +140,7 @@ function ProfileEdit() {
   return (
     <div className="register-page">
       <section className="register-header">
-        <h1 className="register-header__title">✏️ 프로필 수정</h1>
+        <h1 className="register-header__title"><MenuIcon name="user" size={22} /> 프로필 수정</h1>
         <p className="register-header__subtitle">내 정보와 연애 상태를 수정할 수 있어요</p>
       </section>
 
@@ -147,7 +148,7 @@ function ProfileEdit() {
         <div className="pe-list">
           {/* 이름 + 성별 — 한 줄 통합 */}
           <div className="pe-row pe-row-combo">
-            <span className="pe-input-icon">👤</span>
+            <span className="pe-input-icon"><MenuIcon name="user" size={18} /></span>
             <input
               type="text"
               className="pe-input-name"
@@ -237,7 +238,7 @@ function ProfileEdit() {
                     style={form.relationshipStatus === rs.id ? { borderColor: rs.color, background: `${rs.color}22`, color: '#fff' } : {}}
                     onClick={() => handleChange('relationshipStatus', rs.id)}
                   >
-                    <span>{rs.icon}</span> {rs.label}
+                    <span className="pe-chip-icon">{rs.iconKey ? <MenuIcon name={rs.iconKey} size={15} /> : rs.icon}</span> {rs.label}
                   </button>
                 ))}
               </div>
@@ -247,7 +248,7 @@ function ProfileEdit() {
 
         {/* ═══ 연인 정보 섹션 ═══ */}
         <div className="pe-section-heading">
-          <span>💑 연인 정보</span>
+          <span><MenuIcon name="couple" size={16} /> 연인 정보</span>
           <span className="pe-section-heading-line" />
           {!isPartnerEnabled && <span className="pe-partner-hint">솔로 시 비활성</span>}
         </div>
@@ -337,11 +338,11 @@ function ProfileEdit() {
         </div>
 
         <div className="pe-actions">
-          {error && <div className="form-error"><span>⚠️</span> {error}</div>}
-          {success && <div className="form-error" style={{ background: 'rgba(74,222,128,0.1)', borderColor: 'rgba(74,222,128,0.2)', color: '#4ade80' }}>✅ 저장되었습니다!</div>}
+          {error && <div className="form-error"><MenuIcon name="alert" size={15} /> {error}</div>}
+          {success && <div className="form-error" style={{ background: 'rgba(74,222,128,0.1)', borderColor: 'rgba(74,222,128,0.2)', color: '#4ade80' }}><MenuIcon name="check" size={15} /> 저장되었습니다!</div>}
 
           <button className="btn-gold register-submit" onClick={handleSave} disabled={saving}>
-            {saving ? '저장 중...' : '💾 저장'}
+            {saving ? '저장 중...' : <><MenuIcon name="check" size={16} /> 저장</>}
           </button>
           <button className="register-back-step" onClick={() => navigate('/profile')}>← 프로필로 돌아가기</button>
         </div>

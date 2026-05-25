@@ -1022,7 +1022,7 @@ function MyLoveCompat() {
       {!result && !loading && !aiStreaming && (
         <div className="mlc-form fade-in">
           {userId ? (
-            <button className="mlc-autofill-btn" onClick={handleAutoFill}>✨ 내 정보 / 연인 정보로 채우기</button>
+            <button className="mlc-autofill-btn" onClick={handleAutoFill}><MenuIcon name="sparkle" size={16} /> 내 정보 / 연인 정보로 채우기</button>
           ) : (
             <KakaoLoginCTA returnTo="/my-love-compat" className="mlc-login-cta">
               카카오 로그인하고 연인과 궁합보기
@@ -1033,7 +1033,7 @@ function MyLoveCompat() {
           {tab === 'saju' && (
             <>
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">👤 내 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="user" size={16} /> 내 정보</h3>
                 <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g1} onChange={setG1} />
@@ -1041,7 +1041,7 @@ function MyLoveCompat() {
               </div>
 
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">💕 연인 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="love" size={16} /> 연인 정보</h3>
                 <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g2} onChange={setG2} />
@@ -1049,7 +1049,7 @@ function MyLoveCompat() {
               </div>
 
               <button className="mlc-submit" onClick={() => guardSajuCompat(analyzeSaju)} disabled={!bd1 || !bd2}>
-                🔮 사주 궁합 보기 <HeartCost category="COMPATIBILITY" />
+                <MenuIcon name="crystalBall" size={18} /> 사주 궁합 보기 <HeartCost category="COMPATIBILITY" />
               </button>
             </>
           )}
@@ -1058,7 +1058,7 @@ function MyLoveCompat() {
           {tab === 'marriage' && (
             <>
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">👤 내 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="user" size={16} /> 내 정보</h3>
                 <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g1} onChange={setG1} />
@@ -1066,17 +1066,17 @@ function MyLoveCompat() {
               </div>
 
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">💕 연인 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="love" size={16} /> 연인 정보</h3>
                 <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 
-              <p className="mlc-marriage-hint">💒 결혼 시기·자녀운·양가관계·공동재물까지 결혼에 초점 맞춘 분석</p>
+              <p className="mlc-marriage-hint"><MenuIcon name="wedding" size={15} /> 결혼 시기·자녀운·양가관계·공동재물까지 결혼에 초점 맞춘 분석</p>
 
               <button className="mlc-submit" onClick={() => guardMarriageCompat(analyzeMarriage)} disabled={!bd1 || !bd2}>
-                💒 결혼 궁합 보기 <HeartCost category="COMPATIBILITY" />
+                <MenuIcon name="wedding" size={18} /> 결혼 궁합 보기 <HeartCost category="COMPATIBILITY" />
               </button>
             </>
           )}
@@ -1085,7 +1085,7 @@ function MyLoveCompat() {
           {tab === 'skinship' && (
             <>
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">👤 내 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="user" size={16} /> 내 정보</h3>
                 <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g1} onChange={setG1} />
@@ -1093,17 +1093,17 @@ function MyLoveCompat() {
               </div>
 
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">💕 연인 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="love" size={16} /> 연인 정보</h3>
                 <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 
-              <p className="mlc-marriage-hint">💋 오행별 스킨십 스타일·단계별 타이밍·분위기 세팅까지 케미 분석</p>
+              <p className="mlc-marriage-hint"><MenuIcon name="kiss" size={15} /> 오행별 스킨십 스타일·단계별 타이밍·분위기 세팅까지 케미 분석</p>
 
               <button className="mlc-submit" onClick={() => guardSkinshipCompat(analyzeSkinship)} disabled={!bd1 || !bd2}>
-                💋 스킨십 궁합 보기 <HeartCost category="LOVE_COUPLE" />
+                <MenuIcon name="kiss" size={18} /> 스킨십 궁합 보기 <HeartCost category="LOVE_COUPLE" />
               </button>
             </>
           )}
@@ -1112,7 +1112,7 @@ function MyLoveCompat() {
           {tab === 'date' && (
             <>
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">👤 내 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="user" size={16} /> 내 정보</h3>
                 <BirthDatePicker value={bd1} onChange={setBd1} calendarType={ct1} onCalendarTypeChange={setCt1} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g1} onChange={setG1} />
@@ -1120,17 +1120,17 @@ function MyLoveCompat() {
               </div>
 
               <div className="mlc-person-block">
-                <h3 className="mlc-person-title">💕 연인 정보</h3>
+                <h3 className="mlc-person-title"><MenuIcon name="love" size={16} /> 연인 정보</h3>
                 <BirthDatePicker value={bd2} onChange={setBd2} calendarType={ct2} onCalendarTypeChange={setCt2} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={g2} onChange={setG2} />
                 </div>
               </div>
 
-              <p className="mlc-marriage-hint">💑 오늘 둘이 만나도 좋은 날일까요? 행운의 시간대·장소·컬러까지</p>
+              <p className="mlc-marriage-hint"><MenuIcon name="couple" size={15} /> 오늘 둘이 만나도 좋은 날일까요? 행운의 시간대·장소·컬러까지</p>
 
               <button className="mlc-submit" onClick={() => guardDateCompat(analyzeDate)} disabled={!bd1 || !bd2}>
-                💑 오늘의 데이트운 보기 <HeartCost category="LOVE_COUPLE" />
+                <MenuIcon name="couple" size={18} /> 오늘의 데이트운 보기 <HeartCost category="LOVE_COUPLE" />
               </button>
             </>
           )}
@@ -1204,9 +1204,9 @@ function MyLoveCompat() {
 
               {!streamingActive && !result.aiSummary && !result.aiAnalysis && !result.aiLoveCompat && (
                 <div className="mlc-empty-ai">
-                  <p className="mlc-empty-ai-msg">⚠️ 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
+                  <p className="mlc-empty-ai-msg"><MenuIcon name="alert" size={15} /> 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
                   <button className="mlc-empty-ai-btn" onClick={() => guardSajuCompat(() => analyzeSaju())}>
-                    🔮 사주 궁합 다시 분석하기 <HeartCost category="COMPATIBILITY" />
+                    <MenuIcon name="crystalBall" size={16} /> 사주 궁합 다시 분석하기 <HeartCost category="COMPATIBILITY" />
                   </button>
                 </div>
               )}
@@ -1230,7 +1230,7 @@ function MyLoveCompat() {
                 return deepResult ? (
                   <div className="mlc-section">
                     <button className={`mlc-section-toggle ${basicExpanded ? 'open' : ''}`} onClick={() => setBasicExpanded((v) => !v)}>
-                      <span className="mlc-section-title">📋 일반 분석</span>
+                      <span className="mlc-section-title"><MenuIcon name="inbox" size={16} /> 일반 분석</span>
                       <span className="mlc-section-chevron">▾</span>
                     </button>
                     {basicExpanded && <div className="mlc-section-body">{cards}</div>}
@@ -1242,13 +1242,13 @@ function MyLoveCompat() {
               <div ref={deepRef} className="mlc-deep-section">
                 {!deepResult && !deepStreaming && !deepCompleting && (
                   <button className="mlc-deep-btn" onClick={() => guardDeepSajuCompat(() => startDeepCompat('compatibility'))}>
-                    🔍 심화분석 보기 <HeartCost category="DEEP_COMPATIBILITY" />
+                    <MenuIcon name="search" size={16} /> 심화분석 보기 <HeartCost category="DEEP_COMPATIBILITY" />
                   </button>
                 )}
                 {deepCompleting && (
                   <div className="mlc-deep-complete">
                     <div className="mlc-deep-complete-burst">
-                      <span className="mlc-deep-complete-icon">✨</span>
+                      <span className="mlc-deep-complete-icon"><MenuIcon name="sparkle" size={28} /></span>
                       <span className="mlc-deep-complete-ring" />
                       <span className="mlc-deep-complete-ring mlc-deep-complete-ring-2" />
                     </div>
@@ -1260,7 +1260,7 @@ function MyLoveCompat() {
                   <div className="mlc-section mlc-section--deep">
                     <button className={`mlc-section-toggle mlc-section-toggle--deep ${deepExpanded ? 'open' : ''}`} onClick={() => setDeepExpanded((v) => !v)}>
                       <span className="mlc-section-title">
-                        ✨ 심화분석
+                        <MenuIcon name="sparkle" size={16} /> 심화분석
                         {deepStreaming && <span className="mlc-deep-progress"> · AI가 더 깊이 분석 중<span className="mlc-deep-dots"><i/><i/><i/></span></span>}
                       </span>
                       <span className="mlc-section-chevron">▾</span>
@@ -1333,15 +1333,15 @@ function MyLoveCompat() {
                   </div>
                 </div>
                 <span className="mlc-grade-badge" style={{ color: GRADE_COLORS[result.grade] || getScoreColor(result.score) }}>
-                  💒 {result.grade}
+                  <MenuIcon name="wedding" size={15} /> {result.grade}
                 </span>
               </div>
 
               {!streamingActive && !result.aiSummary && !result.aiAnalysis && !result.aiMarriageTiming && (
                 <div className="mlc-empty-ai">
-                  <p className="mlc-empty-ai-msg">⚠️ 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
+                  <p className="mlc-empty-ai-msg"><MenuIcon name="alert" size={15} /> 이전 분석 결과의 AI 텍스트가 누락된 상태예요.<br/>다시 분석하시면 최신 AI 결과를 받으실 수 있어요.</p>
                   <button className="mlc-empty-ai-btn" onClick={() => guardMarriageCompat(() => analyzeMarriage())}>
-                    💒 결혼 궁합 다시 분석하기 <HeartCost category="COMPATIBILITY" />
+                    <MenuIcon name="wedding" size={16} /> 결혼 궁합 다시 분석하기 <HeartCost category="COMPATIBILITY" />
                   </button>
                 </div>
               )}
@@ -1369,7 +1369,7 @@ function MyLoveCompat() {
                 return deepResult ? (
                   <div className="mlc-section">
                     <button className={`mlc-section-toggle ${basicExpanded ? 'open' : ''}`} onClick={() => setBasicExpanded((v) => !v)}>
-                      <span className="mlc-section-title">📋 일반 분석</span>
+                      <span className="mlc-section-title"><MenuIcon name="inbox" size={16} /> 일반 분석</span>
                       <span className="mlc-section-chevron">▾</span>
                     </button>
                     {basicExpanded && <div className="mlc-section-body">{cards}</div>}
@@ -1381,13 +1381,13 @@ function MyLoveCompat() {
               <div ref={deepRef} className="mlc-deep-section">
                 {!deepResult && !deepStreaming && !deepCompleting && (
                   <button className="mlc-deep-btn" onClick={() => guardDeepMarriageCompat(() => startDeepCompat('marriage_compat'))}>
-                    🔍 결혼궁합 심화분석 보기 <HeartCost category="DEEP_MARRIAGE_COMPAT" />
+                    <MenuIcon name="search" size={16} /> 결혼궁합 심화분석 보기 <HeartCost category="DEEP_MARRIAGE_COMPAT" />
                   </button>
                 )}
                 {deepCompleting && (
                   <div className="mlc-deep-complete">
                     <div className="mlc-deep-complete-burst">
-                      <span className="mlc-deep-complete-icon">✨</span>
+                      <span className="mlc-deep-complete-icon"><MenuIcon name="sparkle" size={28} /></span>
                       <span className="mlc-deep-complete-ring" />
                       <span className="mlc-deep-complete-ring mlc-deep-complete-ring-2" />
                     </div>
@@ -1399,7 +1399,7 @@ function MyLoveCompat() {
                   <div className="mlc-section mlc-section--deep">
                     <button className={`mlc-section-toggle mlc-section-toggle--deep ${deepExpanded ? 'open' : ''}`} onClick={() => setDeepExpanded((v) => !v)}>
                       <span className="mlc-section-title">
-                        ✨ 결혼궁합 심화분석
+                        <MenuIcon name="sparkle" size={16} /> 결혼궁합 심화분석
                         {deepStreaming && <span className="mlc-deep-progress"> · AI가 더 깊이 분석 중<span className="mlc-deep-dots"><i/><i/><i/></span></span>}
                       </span>
                       <span className="mlc-section-chevron">▾</span>
@@ -1473,7 +1473,7 @@ function MyLoveCompat() {
                   </div>
                 </div>
                 <span className="mlc-grade-badge" style={{ color: GRADE_COLORS[result.grade] || getScoreColor(result.score) }}>
-                  💋 {result.grade}
+                  <MenuIcon name="kiss" size={15} /> {result.grade}
                 </span>
               </div>
 
@@ -1554,7 +1554,7 @@ function MyLoveCompat() {
                   </div>
                 </div>
                 <span className="mlc-grade-badge" style={{ color: GRADE_COLORS[result.grade] || getScoreColor(result.score) }}>
-                  💑 {result.grade}
+                  <MenuIcon name="couple" size={15} /> {result.grade}
                 </span>
               </div>
 
@@ -1599,7 +1599,7 @@ function MyLoveCompat() {
             </>
           )}
 
-          <button className="mlc-reset-btn" onClick={handleReset}>🔄 다시 보기</button>
+          <button className="mlc-reset-btn" onClick={handleReset}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
         </div>
       )}
 

@@ -2994,7 +2994,8 @@
 .love-modal-header {
   text-align: center; padding: 16px 20px 12px; position: relative;
 }
-.love-modal-icon { font-size: 40px; display: block; margin-bottom: 6px; }
+.love-modal-icon { font-size: 40px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+.love-modal-icon > svg { color: #fff; }
 .love-modal-title { font-size: 24px; font-weight: 500; color: #fff; margin: 0 0 4px; letter-spacing: -0.3px; }
 .love-modal-desc { font-size: 14.5px; color: rgba(255,255,255,0.7); line-height: 1.4; }
 .love-modal-close {
@@ -3126,6 +3127,15 @@
   width: 100%; padding: 13px; border-radius: 14px; border: 1.5px solid rgba(244,114,182,0.3);
   background: rgba(244,114,182,0.08); color: #F472B6;
   font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+/* 연인 모달 내 공용 버튼/타이틀 아이콘 정렬 (전역 .sf-autofill-btn/.star-picker-title 비파괴 스코프 오버라이드) */
+.love-modal-partner .sf-autofill-btn,
+.star-picker-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .love-modal-share:hover { background: rgba(244,114,182,0.15); }
 .love-modal-reset {
@@ -3244,6 +3254,9 @@
   font-weight: 500;
   color: var(--color-text-primary, #fff);
   margin: 0 0 12px 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ─── 빠른 메뉴 ─── */
@@ -3778,7 +3791,9 @@
   text-align: center;
 }
 .dt-detail-section-label {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11.5px;
   font-weight: 600;
   color: rgba(222, 169, 87, 0.95);
@@ -3798,6 +3813,10 @@
   width: 100%;
   max-width: 320px;
   margin: 18px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 13px 16px;
   border-radius: 12px;
   border: 1px solid rgba(222, 169, 87, 0.55);
@@ -3834,6 +3853,10 @@
 
 .dt-detail-loading {
   margin: 18px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 12px 18px;
   border-radius: 10px;
   background: rgba(168, 85, 247, 0.15);
@@ -4558,8 +4581,11 @@
 }
 .home-menu-tile:active { transform: scale(0.96); }
 .home-menu-tile-icon {
-  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+  color: var(--color-primary, #ec4899);
   filter: drop-shadow(0 0 4px rgba(236, 72, 153, 0.15));
 }
 .home-menu-tile-label {
@@ -5369,6 +5395,9 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .home-section-sub {
   font-size: 12px; color: var(--color-text-muted); font-weight: 400;
@@ -5457,6 +5486,7 @@
   flex-wrap: wrap;
 }
 .home-hero-cs-meta-sep { color: rgba(255,255,255,0.45); }
+.home-hero-cs-meta-city { display: inline-flex; align-items: center; gap: 4px; }
 .home-hero-cs-meta-weather {
   background: rgba(255,255,255,0.14);
   border: 1px solid rgba(255,255,255,0.18);
@@ -6092,6 +6122,9 @@
   font-size: 11px; font-weight: 600;
   color: #a855f7;
   letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .home-tarot-row-title {
   font-size: 15px; font-weight: 700;
@@ -6398,7 +6431,10 @@
 .home-mystar-banner:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4); }
 .home-mystar-banner:active { transform: scale(0.99); }
 .home-mystar-icon {
-  font-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.18));
   animation: homeMyStarTwinkle 2.2s ease-in-out infinite;
   position: relative;
@@ -6440,7 +6476,10 @@
 .home-decision-banner:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(168, 85, 247, 0.42); }
 .home-decision-banner:active { transform: scale(0.99); }
 .home-decision-icon {
-  font-size: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.18));
   position: relative;
   flex-shrink: 0;

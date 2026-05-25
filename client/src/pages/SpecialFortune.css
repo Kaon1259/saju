@@ -13,6 +13,7 @@
 }
 .sf-tab {
   flex: 1; padding: 12px 8px; border-radius: 10px; border: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   background: transparent; color: var(--color-text-muted);
   font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;
 }
@@ -37,7 +38,7 @@
   display: flex; align-items: center; justify-content: center;
 }
 .sf-love-chip { position: relative; }
-.sf-chip-icon { font-size: 24px; }
+.sf-chip-icon { font-size: 24px; display: flex; align-items: center; justify-content: center; }
 .sf-chip-label { font-size: 13px; font-weight: 800; color: var(--color-text); }
 .sf-chip-desc { font-size: 10px; color: var(--color-text-muted); text-align: center; line-height: 1.3; }
 
@@ -78,6 +79,7 @@
 
 .sf-submit {
   padding: 16px; border-radius: 14px; border: none; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
   font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s;
 }
 .sf-submit--love { background: linear-gradient(135deg, #E91E63, #FF6B6B); }
@@ -157,6 +159,7 @@
 .sf-time-modes { display: flex; gap: 8px; margin-bottom: 16px; }
 .sf-mode-btn {
   flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--color-glass-border);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   background: var(--color-glass); color: var(--color-text-muted); font-size: 13px; font-weight: 700;
   cursor: pointer; transition: all 0.3s;
 }
@@ -197,14 +200,14 @@
   font-size: 11px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); z-index: 1;
 }
 .sf-block-fortune { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin: 0 0 6px; }
-.sf-block-advice { font-size: 12px; color: var(--color-primary-light); margin: 0 0 4px; }
+.sf-block-advice { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-primary-light); margin: 0 0 4px; }
 .sf-block-action { font-size: 11px; color: var(--color-text-muted); background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 8px; display: inline-block; }
 
 /* 12시진 */
 .sf-hourly-result { display: flex; flex-direction: column; gap: 12px; }
 .sf-best-worst { display: flex; justify-content: center; gap: 16px; margin-top: 8px; }
-.sf-best { font-size: 14px; font-weight: 700; color: #4ade80; }
-.sf-worst { font-size: 14px; font-weight: 700; color: #f87171; }
+.sf-best { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; color: #4ade80; }
+.sf-worst { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; color: #f87171; }
 .sf-hourly-grid { display: flex; flex-direction: column; gap: 8px; }
 .sf-hour-card { padding: 14px; border-radius: 14px; }
 .sf-hour--best { border: 1.5px solid rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
@@ -217,11 +220,12 @@
 .sf-hour-score.mid { background: rgba(251,191,36,0.15); color: #fbbf24; }
 .sf-hour-score.low { background: rgba(248,113,113,0.15); color: #f87171; }
 .sf-hour-fortune { font-size: 14px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
-.sf-hour-action { font-size: 12px; color: var(--color-primary-light); margin: 4px 0 0; }
+.sf-hour-action { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-primary-light); margin: 4px 0 0; }
 
 /* ═══ 공통 ═══ */
 .sf-reset {
   padding: 14px; border-radius: 14px; border: 1.5px solid var(--color-glass-border);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   background: var(--color-glass); color: var(--color-text); font-size: 15px; font-weight: 700;
   cursor: pointer; transition: all 0.2s; margin-top: 4px; width: 100%;
 }
@@ -231,6 +235,7 @@
 
 .sf-autofill-btn {
   width: 100%; padding: 11px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
   color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
 }

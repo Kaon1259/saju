@@ -33,7 +33,7 @@ function StarFortune() {
       <div className="star-fortune-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
         <HeroIconButtons color="#FF9800" onBack={() => navigate('/')} />
         <div className="star-fortune-hero-glow" />
-        <span className="star-fortune-badge">✨ SPECIAL</span>
+        <span className="star-fortune-badge"><MenuIcon name="sparkle" size={14} /> SPECIAL</span>
         <h1 className="star-fortune-title">나의 스타 운세</h1>
         <p className="star-fortune-desc">좋아하는 스타와 사주로 통하는 운명을 확인해보세요</p>
       </div>

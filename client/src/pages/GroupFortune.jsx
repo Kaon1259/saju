@@ -106,7 +106,7 @@ function GroupFortune() {
   const compatTargetBirth = fortuneTargetBirth;
 
   const { guardedAction: guardGroupFortune } = useHeartGuard('GROUP_FORTUNE');
-  const { guardedAction: guardGroupCompat } = useHeartGuard('GROUP_COMPAT');
+  const { guardedAction: guardGroupCompat, cost: groupCompatCost } = useHeartGuard('GROUP_COMPAT');
 
   // 오늘의 운세 (멤버 또는 그룹, 스트리밍)
   const handleGroupFortune = () => {
@@ -213,12 +213,21 @@ function GroupFortune() {
     try { stopAmbientRef.current?.(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
     try {
-      const data = await getSajuCompatibility(myBirth, compatTargetBirth, undefined, undefined, myCalType, 'SOLAR');
+      const data = await getSajuCompatibility(myBirth, compatTargetBirth, undefined, undefined, myCalType, 'SOLAR', myGender || undefined, undefined, 'GROUP_COMPAT');
+      // 하트 부족 → 전역 충전 팝업 + 오버레이 정리
+      if (data?.insufficientHearts) {
+        setMatrixShown(false); setMatrixExiting(false);
+        window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: { required: data.required, available: data.available } }));
+        return;
+      }
       data._groupName = selectedGroup.name;
       data._celebName = compatTargetName;
       pendingCompatRef.current = data;
       setMatrixShown(false);
       setCompleting(true);
+      // 신규 차감 시에만 잔액 갱신 + 차감 버블 (캐시 히트는 무료)
+      window.dispatchEvent(new CustomEvent('heart:refresh'));
+      if (data?.deducted) window.dispatchEvent(new CustomEvent('heart:deducted', { detail: { cost: groupCompatCost } }));
     } catch (e) { console.error(e); }
     finally {
       setCompatLoading(false);

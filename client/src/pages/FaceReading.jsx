@@ -7,6 +7,7 @@ import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -20,61 +21,61 @@ const FACE_FEATURES = [
   {
     id: 'faceShape',
     label: '얼굴형',
-    icon: '🧑',
+    iconKey: 'face',
     options: [
-      { value: '둥근형', emoji: '🟠', desc: '둥글고 부드러운' },
-      { value: '긴형', emoji: '📐', desc: '길고 날렵한' },
-      { value: '각진형', emoji: '⬜', desc: '각지고 단단한' },
-      { value: '역삼각형', emoji: '🔻', desc: '이마 넓고 턱 좁은' },
-      { value: '타원형', emoji: '🥚', desc: '균형 잡힌' },
+      { value: '둥근형', iconKey: 'face', desc: '둥글고 부드러운' },
+      { value: '긴형', iconKey: 'face', desc: '길고 날렵한' },
+      { value: '각진형', iconKey: 'face', desc: '각지고 단단한' },
+      { value: '역삼각형', iconKey: 'face', desc: '이마 넓고 턱 좁은' },
+      { value: '타원형', iconKey: 'face', desc: '균형 잡힌' },
     ],
   },
   {
     id: 'eyeShape',
     label: '눈',
-    icon: '👁',
+    iconKey: 'face',
     options: [
-      { value: '큰 눈', emoji: '👀', desc: '크고 선명한' },
-      { value: '작은 눈', emoji: '🫣', desc: '작고 깊은' },
-      { value: '긴 눈', emoji: '🌊', desc: '길게 뻗은' },
-      { value: '둥근 눈', emoji: '🔵', desc: '동그란' },
-      { value: '날카로운 눈', emoji: '🦅', desc: '날카로운' },
+      { value: '큰 눈', iconKey: 'face', desc: '크고 선명한' },
+      { value: '작은 눈', iconKey: 'face', desc: '작고 깊은' },
+      { value: '긴 눈', iconKey: 'face', desc: '길게 뻗은' },
+      { value: '둥근 눈', iconKey: 'face', desc: '동그란' },
+      { value: '날카로운 눈', iconKey: 'face', desc: '날카로운' },
     ],
   },
   {
     id: 'noseShape',
     label: '코',
-    icon: '👃',
+    iconKey: 'face',
     options: [
-      { value: '높은 코', emoji: '🏔', desc: '높고 뚜렷한' },
-      { value: '넓은 코', emoji: '🌄', desc: '넓고 안정적인' },
-      { value: '오뚝한 코', emoji: '⛰', desc: '오뚝하고 세련된' },
-      { value: '둥근 코', emoji: '🟡', desc: '둥글고 복스러운' },
-      { value: '작은 코', emoji: '🔹', desc: '작고 앙증맞은' },
+      { value: '높은 코', iconKey: 'compass', desc: '높고 뚜렷한' },
+      { value: '넓은 코', iconKey: 'compass', desc: '넓고 안정적인' },
+      { value: '오뚝한 코', iconKey: 'compass', desc: '오뚝하고 세련된' },
+      { value: '둥근 코', iconKey: 'compass', desc: '둥글고 복스러운' },
+      { value: '작은 코', iconKey: 'compass', desc: '작고 앙증맞은' },
     ],
   },
   {
     id: 'mouthShape',
     label: '입',
-    icon: '👄',
+    iconKey: 'kiss',
     options: [
-      { value: '큰 입', emoji: '😃', desc: '크고 시원한' },
-      { value: '작은 입', emoji: '🤏', desc: '작고 단정한' },
-      { value: '두꺼운 입술', emoji: '💋', desc: '두툼한' },
-      { value: '얇은 입술', emoji: '➖', desc: '얇고 날렵한' },
-      { value: '입꼬리 올라감', emoji: '😊', desc: '입꼬리가 올라간' },
+      { value: '큰 입', iconKey: 'kiss', desc: '크고 시원한' },
+      { value: '작은 입', iconKey: 'kiss', desc: '작고 단정한' },
+      { value: '두꺼운 입술', iconKey: 'kiss', desc: '두툼한' },
+      { value: '얇은 입술', iconKey: 'kiss', desc: '얇고 날렵한' },
+      { value: '입꼬리 올라감', iconKey: 'kiss', desc: '입꼬리가 올라간' },
     ],
   },
   {
     id: 'foreheadShape',
     label: '이마',
-    icon: '🧠',
+    iconKey: 'mbti',
     options: [
-      { value: '넓은 이마', emoji: '📏', desc: '넓고 시원한' },
-      { value: '좁은 이마', emoji: '📎', desc: '좁고 아담한' },
-      { value: '볼록한 이마', emoji: '🌙', desc: '볼록하게 나온' },
-      { value: '평평한 이마', emoji: '📋', desc: '평평하고 단정한' },
-      { value: '높은 이마', emoji: '🗼', desc: '높고 넓은' },
+      { value: '넓은 이마', iconKey: 'mbti', desc: '넓고 시원한' },
+      { value: '좁은 이마', iconKey: 'mbti', desc: '좁고 아담한' },
+      { value: '볼록한 이마', iconKey: 'mbti', desc: '볼록하게 나온' },
+      { value: '평평한 이마', iconKey: 'mbti', desc: '평평하고 단정한' },
+      { value: '높은 이마', iconKey: 'mbti', desc: '높고 넓은' },
     ],
   },
 ];
@@ -348,7 +349,7 @@ function FaceReading() {
       {step === 'select' && (
         <div className="fr-hero fade-in">
           <div className="fr-hero-glow" />
-          <div className="fr-hero-icon">&#128100;</div>
+          <div className="fr-hero-icon"><MenuIcon name="face" size={48} /></div>
           <h1 className="fr-title">AI 관상 분석</h1>
           <p className="fr-subtitle">당신의 이목구비로 알아보는 운명의 메시지</p>
           <div className="fr-hero-divider" />
@@ -366,7 +367,7 @@ function FaceReading() {
                 className={`fr-progress-dot ${i === currentFeature ? 'active' : ''} ${selections[f.id] ? 'done' : ''}`}
                 onClick={() => setCurrentFeature(i)}
               >
-                <span className="fr-progress-icon">{f.icon}</span>
+                <span className="fr-progress-icon"><MenuIcon name={f.iconKey} size={20} /></span>
                 <span className="fr-progress-label">{f.label}</span>
               </button>
             ))}
@@ -377,7 +378,7 @@ function FaceReading() {
             fIdx === currentFeature && (
               <div key={feature.id} className="fr-feature-section fade-in">
                 <h2 className="fr-feature-title">
-                  <span className="fr-feature-icon">{feature.icon}</span>
+                  <span className="fr-feature-icon"><MenuIcon name={feature.iconKey} size={22} /></span>
                   {feature.label} 선택
                   <span className="fr-feature-step">{fIdx + 1}/{FACE_FEATURES.length}</span>
                 </h2>
@@ -388,7 +389,7 @@ function FaceReading() {
                       className={`fr-option glass-card ${selections[feature.id] === opt.value ? 'active' : ''}`}
                       onClick={() => handleSelect(feature.id, opt.value)}
                     >
-                      <span className="fr-option-emoji">{opt.emoji}</span>
+                      <span className="fr-option-emoji"><MenuIcon name={opt.iconKey} size={24} /></span>
                       <span className="fr-option-value">{opt.value}</span>
                       <span className="fr-option-desc">{opt.desc}</span>
                       {selections[feature.id] === opt.value && (
@@ -408,7 +409,7 @@ function FaceReading() {
               <div className="fr-summary-tags">
                 {FACE_FEATURES.map(f => selections[f.id] ? (
                   <span key={f.id} className="fr-summary-tag">
-                    {f.icon} {selections[f.id]}
+                    <MenuIcon name={f.iconKey} size={14} /> {selections[f.id]}
                   </span>
                 ) : null)}
               </div>
@@ -446,7 +447,7 @@ function FaceReading() {
             onClick={() => guardFace(handleAnalyze)}
             disabled={!allSelected}
           >
-            <span className="fr-analyze-icon">&#128100;</span>
+            <span className="fr-analyze-icon"><MenuIcon name="face" size={20} /></span>
             <span>{allSelected ? '관상 분석 시작' : `${FACE_FEATURES.length - Object.keys(selections).length}개 더 선택해주세요`}</span>
             {allSelected && <HeartCost category="FACE_READING" />}
             {allSelected && <span className="fr-analyze-glow" />}
@@ -496,7 +497,7 @@ function FaceReading() {
         return (
           <div className="fr-streaming-wrap">
             <div className="fr-streaming-header">
-              <span className="fr-streaming-orb">👁️</span>
+              <span className="fr-streaming-orb"><MenuIcon name="face" size={24} /></span>
               <span className="fr-streaming-title">AI가 관상을 분석중이에요</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>
@@ -520,7 +521,7 @@ function FaceReading() {
           {/* 전체 유형 */}
           <div className="fr-type-card glass-card">
             <div className="fr-type-aura" style={{ background: `radial-gradient(circle, ${ELEMENT_COLORS[result.element] || '#DAA520'}22, transparent 70%)` }} />
-            <div className="fr-type-emoji">{result.emoji || '😊'}</div>
+            <div className="fr-type-emoji">{result.emoji || <MenuIcon name="face" size={48} />}</div>
             <h2 className="fr-type-name">{result.overallType}</h2>
             {result.element && (
               <span className="fr-element-badge" style={{ background: `${ELEMENT_COLORS[result.element] || '#DAA520'}22`, color: ELEMENT_COLORS[result.element] || '#DAA520' }}>
@@ -554,7 +555,7 @@ function FaceReading() {
 
           {/* 성격 분석 */}
           <div className="fr-personality glass-card">
-            <h3 className="fr-section-title"><span>&#128203;</span> 성격 분석</h3>
+            <h3 className="fr-section-title"><span><MenuIcon name="book" size={18} /></span> 성격 분석</h3>
             <p className="fr-personality-text">{result.personality}</p>
           </div>
 
@@ -570,7 +571,7 @@ function FaceReading() {
           <div className="fr-lists">
             {result.strengths && result.strengths.length > 0 && (
               <div className="fr-list-card glass-card">
-                <h3 className="fr-list-title fr-list-title--strength">&#127775; 강점</h3>
+                <h3 className="fr-list-title fr-list-title--strength"><MenuIcon name="star" size={18} /> 강점</h3>
                 <div className="fr-list-items">
                   {result.strengths.map((s, i) => (
                     <span key={i} className="fr-list-badge fr-badge--strength">{s}</span>
@@ -580,7 +581,7 @@ function FaceReading() {
             )}
             {result.improvements && result.improvements.length > 0 && (
               <div className="fr-list-card glass-card">
-                <h3 className="fr-list-title fr-list-title--improve">&#128161; 개선점</h3>
+                <h3 className="fr-list-title fr-list-title--improve"><MenuIcon name="lightbulb" size={18} /> 개선점</h3>
                 <div className="fr-list-items">
                   {result.improvements.map((s, i) => (
                     <span key={i} className="fr-list-badge fr-badge--improve">{s}</span>
@@ -592,7 +593,7 @@ function FaceReading() {
 
           {/* 행운 정보 */}
           <div className="fr-lucky glass-card">
-            <h3 className="fr-section-title"><span>&#127808;</span> 행운 정보</h3>
+            <h3 className="fr-section-title"><span><MenuIcon name="clover" size={18} /></span> 행운 정보</h3>
             <div className="fr-lucky-grid">
               {result.luckyColor && (
                 <div className="fr-lucky-item">
@@ -618,10 +619,10 @@ function FaceReading() {
           {/* 액션 */}
           <div className="fr-actions">
             <button className="fr-action-btn fr-share-btn" onClick={handleShare}>
-              <span>&#128228;</span> 공유하기
+              <MenuIcon name="share" size={16} /> 공유하기
             </button>
             <button className="fr-action-btn fr-reset-btn" onClick={resetAll}>
-              <span>&#128260;</span> 다시 분석
+              <MenuIcon name="refresh" size={16} /> 다시 분석
             </button>
           </div>
         </div>

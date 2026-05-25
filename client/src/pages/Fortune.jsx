@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import FortuneLoading from '../components/FortuneLoading';
 import { getFortuneByZodiacStream, getFortuneByUserStream } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
@@ -228,7 +229,7 @@ function Fortune() {
       <div className="fortune-page">
         <div className="glass-card" style={{ padding: '28px 20px', textAlign: 'center', marginTop: 16, position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
           <HeroIconButtons color="#7c3aed" />
-          <div style={{ fontSize: 36, marginBottom: 10 }}>🔮</div>
+          <div style={{ marginBottom: 10, color: '#7c3aed', display: 'flex', justifyContent: 'center' }}><MenuIcon name="crystalBall" size={36} /></div>
           <h2 style={{ marginBottom: 12 }}>오늘의 {zodiacParam ? `${zodiacParam}띠 ` : ''}운세</h2>
           <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20 }}>
             버튼을 누르면 AI가 오늘의 운세를 분석해드려요
@@ -312,7 +313,7 @@ function Fortune() {
       {/* Lucky Info */}
       {(fortune.luckyNumber || fortune.luckyColor) && (
         <section className="fortune-lucky glass-card animate-fade-in-up" style={{ animationDelay: '700ms' }}>
-          <h3 className="fortune-lucky__title">&#x1F340; 행운 정보</h3>
+          <h3 className="fortune-lucky__title"><MenuIcon name="clover" size={16} /> 행운 정보</h3>
           <div className="fortune-lucky__items">
             {fortune.luckyNumber != null && (
               <div className="fortune-lucky__item">
@@ -346,7 +347,7 @@ function Fortune() {
       {/* Share Button */}
       <section className="fortune-actions animate-fade-in-up" style={{ animationDelay: '800ms' }}>
         <button className="btn-share fortune-share-btn" onClick={handleShare}>
-          {copied ? '✅ 복사 완료!' : '📤 운세 공유하기'}
+          {copied ? <><MenuIcon name="check" size={16} /> 복사 완료!</> : <><MenuIcon name="share" size={16} /> 운세 공유하기</>}
         </button>
       </section>
     </div>

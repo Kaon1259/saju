@@ -8,16 +8,17 @@ import StreamText from '../components/StreamText';
 import StreamingCard from '../components/StreamingCard';
 import HeroIconButtons from '../components/HeroIconButtons';
 import AnalysisComplete from '../components/AnalysisComplete';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './BloodType.css';
 
 const TYPES = [
-  { id: 'A', label: 'A형', sub: '꼼꼼한 완벽주의자', icon: '💎', color: '#3B82F6', bg: 'linear-gradient(135deg, #1E3A5F, #3B82F6)' },
-  { id: 'B', label: 'B형', sub: '자유로운 창의가', icon: '🔥', color: '#EF4444', bg: 'linear-gradient(135deg, #7F1D1D, #EF4444)' },
-  { id: 'O', label: 'O형', sub: '리더십의 행동파', icon: '🌿', color: '#10B981', bg: 'linear-gradient(135deg, #064E3B, #10B981)' },
-  { id: 'AB', label: 'AB형', sub: '이성적 천재형', icon: '✨', color: '#C084FC', bg: 'linear-gradient(135deg, #581C87, #C084FC)' },
+  { id: 'A', label: 'A형', sub: '꼼꼼한 완벽주의자', iconKey: 'gem', color: '#3B82F6', bg: 'linear-gradient(135deg, #1E3A5F, #3B82F6)' },
+  { id: 'B', label: 'B형', sub: '자유로운 창의가', iconKey: 'spark', color: '#EF4444', bg: 'linear-gradient(135deg, #7F1D1D, #EF4444)' },
+  { id: 'O', label: 'O형', sub: '리더십의 행동파', iconKey: 'clover', color: '#10B981', bg: 'linear-gradient(135deg, #064E3B, #10B981)' },
+  { id: 'AB', label: 'AB형', sub: '이성적 천재형', iconKey: 'sparkle', color: '#C084FC', bg: 'linear-gradient(135deg, #581C87, #C084FC)' },
 ];
 
 function BloodType() {
@@ -175,10 +176,10 @@ function BloodType() {
 
       <div className="bt-tabs">
         <button className={`bt-tab ${tab === 'fortune' ? 'active' : ''}`} onClick={() => setTab('fortune')}>
-          🔮 오늘의 운세
+          <MenuIcon name="crystalBall" size={18} /> 오늘의 운세
         </button>
         <button className={`bt-tab ${tab === 'compat' ? 'active' : ''}`} onClick={() => setTab('compat')}>
-          💕 궁합
+          <MenuIcon name="love" size={18} /> 궁합
         </button>
       </div>
 
@@ -194,7 +195,7 @@ function BloodType() {
                 onClick={() => handleSelect(t.id)}
               >
                 <div className="bt-card-bg" />
-                <span className="bt-card-icon">{t.icon}</span>
+                <span className="bt-card-icon"><MenuIcon name={t.iconKey} size={40} /></span>
                 <span className="bt-card-label">{t.label}</span>
                 <span className="bt-card-sub">{t.sub}</span>
               </button>
@@ -203,8 +204,8 @@ function BloodType() {
 
           {selected && !fortune && !loading && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-              <button className="btn-gold" onClick={() => guardBlood(() => handleSelect(selected))} style={{ width: '100%' }}>
-                🔮 내 혈액형 운세 보기 <HeartCost category="BLOOD_TYPE" />
+              <button className="btn-gold bt-cta-btn" onClick={() => guardBlood(() => handleSelect(selected))} style={{ width: '100%' }}>
+                <MenuIcon name="crystalBall" size={16} /> 내 혈액형 운세 보기 <HeartCost category="BLOOD_TYPE" />
               </button>
             </div>
           )}
@@ -218,7 +219,7 @@ function BloodType() {
             return (
               <div className="bt-streaming-wrap">
                 <div className="bt-streaming-header">
-                  <span className="bt-streaming-orb">🩸</span>
+                  <span className="bt-streaming-orb"><MenuIcon name="bloodtype" size={24} /></span>
                   <span className="bt-streaming-title">AI가 혈액형 운세를 분석중이에요</span>
                   <span className="streaming-dots"><i/><i/><i/></span>
                 </div>
@@ -259,7 +260,7 @@ function BloodType() {
               <div className="bt-personality glass-card">
                 <div className="bt-personality-header">
                   <div className="bt-personality-badge" style={{ background: getTypeInfo(fortune.bloodType).bg }}>
-                    <span>{getTypeInfo(fortune.bloodType).icon}</span>
+                    <span><MenuIcon name={getTypeInfo(fortune.bloodType).iconKey} size={18} /></span>
                     <span>{fortune.bloodType}형</span>
                   </div>
                   <p className="bt-personality-label">성격 분석</p>
@@ -269,7 +270,7 @@ function BloodType() {
 
               {fortune.dayAnalysis && (
                 <div className="bt-day-analysis glass-card">
-                  <span>☯️</span><p>{fortune.dayAnalysis}</p>
+                  <span><MenuIcon name="traditional" size={20} /></span><p>{fortune.dayAnalysis}</p>
                 </div>
               )}
 
@@ -314,7 +315,7 @@ function BloodType() {
                         className={`bt-compat-btn ${val === t.id ? 'active' : ''}`}
                         style={{ '--bt-color': t.color }}
                         onClick={() => setter(t.id)}>
-                        {t.icon} {t.id}
+                        <MenuIcon name={t.iconKey} size={22} /> {t.id}
                       </button>
                     ))}
                   </div>
@@ -323,14 +324,14 @@ function BloodType() {
             })}
           </div>
           <button className="bt-compat-submit" onClick={() => guardBlood(handleCompat)} disabled={!type1 || !type2 || compatLoading}>
-            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'} <HeartCost category="BLOOD_TYPE" />
+            {compatLoading ? 'AI 분석중...' : <><MenuIcon name="love" size={16} /> 궁합 보기</>} <HeartCost category="BLOOD_TYPE" />
           </button>
           {compat && !compatLoading && (
             <div className="bt-compat-result fade-in glass-card">
               <div className="bt-compat-header">
-                <span className="bt-compat-type" style={{ color: getTypeInfo(compat.type1).color }}>{getTypeInfo(compat.type1).icon} {compat.type1}형</span>
+                <span className="bt-compat-type" style={{ color: getTypeInfo(compat.type1).color }}><MenuIcon name={getTypeInfo(compat.type1).iconKey} size={24} /> {compat.type1}형</span>
                 <span className="bt-compat-x">×</span>
-                <span className="bt-compat-type" style={{ color: getTypeInfo(compat.type2).color }}>{getTypeInfo(compat.type2).icon} {compat.type2}형</span>
+                <span className="bt-compat-type" style={{ color: getTypeInfo(compat.type2).color }}><MenuIcon name={getTypeInfo(compat.type2).iconKey} size={24} /> {compat.type2}형</span>
               </div>
               <div className="bt-compat-score">{compat.score}점</div>
               <div className="bt-compat-grade">{compat.grade}</div>

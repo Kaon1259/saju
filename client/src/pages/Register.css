@@ -15,6 +15,10 @@
   font-weight: 900;
   color: var(--color-text);
   margin-bottom: var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .register-header__subtitle {
@@ -522,6 +526,10 @@
 .autologin-ask-icon {
   font-size: 52px;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a78bfa;
   animation: alAskBob 1.8s ease-in-out infinite;
   filter: drop-shadow(0 4px 14px rgba(124, 58, 237, 0.4));
 }
@@ -669,6 +677,8 @@
   font-size: 38px;
   line-height: 1;
   margin-bottom: 10px;
+  display: inline-flex;
+  color: #ff8fb0;
   filter: drop-shadow(0 2px 8px rgba(255,107,157,0.3));
 }
 .register-terms-title {

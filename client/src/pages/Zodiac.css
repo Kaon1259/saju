@@ -183,7 +183,8 @@
 
 /* 추가 카드 (오행/시간대/감정/조언) */
 .zd-extra { padding: 14px 16px; margin-bottom: 10px; }
-.zd-extra h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 0.3px; }
+.zd-extra h4 { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 6px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 0.3px; }
+.zd-cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .zd-extra p { margin: 0; font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.78); }
 
 /* 럭키 */

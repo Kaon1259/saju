@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import MenuIcon from './MenuIcon';
 import './AnalysisComplete.css';
 
 /**
@@ -51,7 +52,7 @@ export default function AnalysisComplete({
   const content = (
     <div className="ana-complete" style={{ '--ac-c1': c1, '--ac-c2': c2 }}>
       <div className="ana-complete-burst">
-        <span className="ana-complete-icon">✨</span>
+        <span className="ana-complete-icon"><MenuIcon name="sparkle" size={40} /></span>
         <span className="ana-complete-ring" />
         <span className="ana-complete-ring ana-complete-ring-2" />
       </div>

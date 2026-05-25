@@ -10,6 +10,7 @@ import GenderPicker from '../components/GenderPicker';
 import StreamText from '../components/StreamText';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import MenuIcon from '../components/MenuIcon';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './WeeklyFortune.css';
 
@@ -216,7 +217,7 @@ function WeeklyFortune() {
       {/* 히어로 */}
       <div className="wf-hero">
         <div className="wf-hero-glow" />
-        <div className="wf-hero-icon">&#128198;</div>
+        <div className="wf-hero-icon"><MenuIcon name="weekly" size={40} /></div>
         <h1 className="wf-title">이번 주 운세</h1>
         <p className="wf-subtitle">{weekRange}</p>
       </div>
@@ -226,7 +227,7 @@ function WeeklyFortune() {
         <div className="wf-form glass-card fade-in">
           {localStorage.getItem('userId') && (
             <button className="sf-autofill-btn" onClick={handleAutofill}>
-              &#10024; 내 정보로 채우기
+              <MenuIcon name="sparkle" size={16} /> 내 정보로 채우기
             </button>
           )}
 
@@ -248,7 +249,7 @@ function WeeklyFortune() {
           </div>
 
           <button className="wf-submit" onClick={() => guardWeekly(handleAnalyze)} disabled={!birthDate}>
-            &#128198; 이번 주 운세 보기 <HeartCost category="WEEKLY_FORTUNE" />
+            <MenuIcon name="weekly" size={16} /> 이번 주 운세 보기 <HeartCost category="WEEKLY_FORTUNE" />
           </button>
         </div>
       )}
@@ -277,7 +278,7 @@ function WeeklyFortune() {
           <div className="wf-result-header glass-card">
             <div className="wf-result-header-top">
               <span className="wf-result-range">{result.weekRange || weekRange}</span>
-              {result.theme && <span className="wf-result-theme">{result.themeEmoji || '📋'} {result.theme}</span>}
+              {result.theme && <span className="wf-result-theme"><MenuIcon name="book" size={15} /> {result.theme}</span>}
             </div>
           </div>
 
@@ -317,7 +318,7 @@ function WeeklyFortune() {
           {/* 요일별 운세 — 월~일 하루단위 풀폭 카드 */}
           {result.days && result.days.length > 0 && (
             <div className="wf-section">
-              <h3 className="wf-section-title"><span>&#128197;</span> 요일별 운세</h3>
+              <h3 className="wf-section-title"><MenuIcon name="calendar" size={18} /> 요일별 운세</h3>
               <div className="wf-daylist">
                 {result.days.map((day, i) => {
                   const label = day.dayLabel || day.day || DAY_LABELS[i] || '';
@@ -347,7 +348,7 @@ function WeeklyFortune() {
                       {day.keyword && <span className="wf-dayrow-keyword">{day.keyword}</span>}
                       {day.tip && <p className="wf-dayrow-tip">{day.tip}</p>}
                       {day.advice && (
-                        <p className="wf-dayrow-advice"><span>&#128161;</span>{day.advice}</p>
+                        <p className="wf-dayrow-advice"><MenuIcon name="lightbulb" size={14} />{day.advice}</p>
                       )}
                     </div>
                   );
@@ -357,7 +358,7 @@ function WeeklyFortune() {
           )}
 
           {/* 이번 주 전체 흐름 (주간 종합) */}
-          <h3 className="wf-section-title"><span>&#128202;</span> 이번 주 전체 흐름</h3>
+          <h3 className="wf-section-title"><MenuIcon name="chart" size={18} /> 이번 주 전체 흐름</h3>
 
           {/* 운세 카드들 (Progressive 모드: streamingActive일 때 placeholder + typewriter) */}
           {(() => {
@@ -394,7 +395,7 @@ function WeeklyFortune() {
 
           {/* 리셋 */}
           <button className="wf-reset" onClick={resetAll}>
-            &#128260; 다시 보기
+            <MenuIcon name="refresh" size={16} /> 다시 보기
           </button>
         </div>
       )}

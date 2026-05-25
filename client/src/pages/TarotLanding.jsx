@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startKakaoLogin } from '../utils/kakaoAuth';
+import MenuIcon from '../components/MenuIcon';
 import './TarotLanding.css';
 
 // 미리보기용 덱 커버 (12개 중 대표 5개)
@@ -13,9 +14,9 @@ const PREVIEW_COVERS = [
 ];
 
 const TAROT_HIGHLIGHTS = [
-  { icon: '🎴', title: '12종 풀 덱', desc: '78장 × 12 덱\nK-드라마부터 셀레스티얼까지' },
-  { icon: '🤖', title: 'AI 해석',    desc: '카드의 의미를 사주·일진과\n결합해 풀어드립니다' },
-  { icon: '💗', title: '매일 무료', desc: '데일리 하트로\n오늘의 한 장 무료 리딩' },
+  { icon: '🎴', iconKey: 'tarot',    title: '12종 풀 덱', desc: '78장 × 12 덱\nK-드라마부터 셀레스티얼까지' },
+  { icon: '🤖', iconKey: 'sparkle',  title: 'AI 해석',    desc: '카드의 의미를 사주·일진과\n결합해 풀어드립니다' },
+  { icon: '💗', iconKey: 'heart',    title: '매일 무료', desc: '데일리 하트로\n오늘의 한 장 무료 리딩' },
 ];
 
 function TarotLanding() {
@@ -60,7 +61,7 @@ function TarotLanding() {
       <section className="tlanding-hero">
         <div className="tlanding-hero-icon">
           <span className="tlanding-hero-aura" />
-          <span className="tlanding-hero-emoji">🔮</span>
+          <span className="tlanding-hero-emoji"><MenuIcon name="crystalBall" size={40} /></span>
         </div>
         <h1 className="tlanding-title">
           <span className="tlanding-title-line">신비로운 카드가</span>
@@ -89,7 +90,7 @@ function TarotLanding() {
         <div className="tlanding-highlights-track" style={{ '--slide-idx': slide }}>
           {TAROT_HIGHLIGHTS.map((h, i) => (
             <div key={h.title} className={`tlanding-highlight ${i === slide ? 'active' : ''}`}>
-              <div className="tlanding-highlight-icon">{h.icon}</div>
+              <div className="tlanding-highlight-icon">{h.iconKey ? <MenuIcon name={h.iconKey} size={30} /> : h.icon}</div>
               <h3 className="tlanding-highlight-title">{h.title}</h3>
               <p className="tlanding-highlight-desc">{h.desc}</p>
             </div>

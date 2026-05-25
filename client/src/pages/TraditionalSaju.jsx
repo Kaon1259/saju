@@ -42,7 +42,7 @@ function TraditionalSaju() {
         <div className="ts-menu-grid">
           {MAIN_MENUS.map((item) => (
             <button key={item.path} className="ts-menu-card" onClick={() => navigate(item.path)} style={{ '--ts-color': item.color }}>
-              {item.cost && <span className="ts-cost-badge">💗{item.cost}</span>}
+              {item.cost && <span className="ts-cost-badge"><MenuIcon name="heart" size={13} />{item.cost}</span>}
               <span className={`ts-menu-icon ts-anim--${item.id}`}>{item.iconKey ? <MenuIcon name={item.iconKey} size={28} /> : item.icon}</span>
               <div className="ts-menu-info">
                 <span className="ts-menu-label">{item.label}</span>
@@ -59,7 +59,7 @@ function TraditionalSaju() {
         <div className="ts-menu-grid">
           {TIME_MENUS.map((item) => (
             <button key={item.path} className="ts-menu-card" onClick={() => navigate(item.path)} style={{ '--ts-color': item.color }}>
-              {item.cost && <span className="ts-cost-badge">💗{item.cost}</span>}
+              {item.cost && <span className="ts-cost-badge"><MenuIcon name="heart" size={13} />{item.cost}</span>}
               <span className={`ts-menu-icon ts-anim--${item.id}`}>{item.iconKey ? <MenuIcon name={item.iconKey} size={28} /> : item.icon}</span>
               <div className="ts-menu-info">
                 <span className="ts-menu-label">{item.label}</span>
@@ -76,7 +76,7 @@ function TraditionalSaju() {
         <div className="ts-menu-grid">
           {TYPE_MENUS.map((item) => (
             <button key={item.path} className="ts-menu-card" onClick={() => navigate(item.path)} style={{ '--ts-color': item.color }}>
-              {item.cost && <span className="ts-cost-badge">💗{item.cost}</span>}
+              {item.cost && <span className="ts-cost-badge"><MenuIcon name="heart" size={13} />{item.cost}</span>}
               <span className={`ts-menu-icon ts-anim--${item.id}`}>{item.iconKey ? <MenuIcon name={item.iconKey} size={28} /> : item.icon}</span>
               <div className="ts-menu-info">
                 <span className="ts-menu-label">{item.label}</span>

@@ -11,7 +11,7 @@
 .settings-row {
   display: flex; align-items: center; justify-content: space-between;
 }
-.settings-label { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.settings-label { font-size: 15px; font-weight: 600; color: var(--color-text); display: inline-flex; align-items: center; gap: 6px; }
 .settings-value { font-size: 14px; color: var(--color-text-muted); }
 .settings-desc { font-size: 13px; color: var(--color-text-muted); margin-top: 6px; margin-bottom: 4px; }
 .settings-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 16px 0; }

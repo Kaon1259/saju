@@ -9,6 +9,7 @@ import HistoryDrawer from '../components/HistoryDrawer';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import StreamingCard from '../components/StreamingCard';
 import AnalysisComplete from '../components/AnalysisComplete';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -225,8 +226,8 @@ function Constellation() {
 
       {selected && !fortune && !loading && localStorage.getItem('userId') && (
         <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-          <button className="btn-gold" onClick={() => guardConst(() => handleSelect(selected))} style={{ width: '100%' }}>
-            🔮 내 별자리 운세 보기 <HeartCost category="CONSTELLATION" />
+          <button className="btn-gold cs-cta-btn" onClick={() => guardConst(() => handleSelect(selected))} style={{ width: '100%' }}>
+            <MenuIcon name="constellation" size={16} /> 내 별자리 운세 보기 <HeartCost category="CONSTELLATION" />
           </button>
         </div>
       )}
@@ -240,7 +241,7 @@ function Constellation() {
         return (
           <div className="cs-streaming-wrap">
             <div className="cs-streaming-header">
-              <span className="cs-streaming-orb">✨</span>
+              <span className="cs-streaming-orb"><MenuIcon name="constellation" size={24} /></span>
               <span className="cs-streaming-title">AI가 별자리 운세를 분석중이에요</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>

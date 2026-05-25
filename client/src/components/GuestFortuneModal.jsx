@@ -5,6 +5,7 @@ import BirthDatePicker from './BirthDatePicker';
 import GenderPicker from './GenderPicker';
 import RewardedAdModal from './RewardedAdModal';
 import StreamingCard from './StreamingCard';
+import MenuIcon from './MenuIcon';
 import KakaoLoginCTA from './KakaoLoginCTA';
 import { useToast } from './Toast';
 import './GuestFortuneModal.css';
@@ -168,9 +169,9 @@ export default function GuestFortuneModal({ open, onClose }) {
       <div className="gfm-sheet">
         <header className="gfm-header">
           <h2 className="gfm-title">
-            {phase === 'form' && '🔮 무료 사주 운세'}
-            {phase === 'analyzing' && '✨ 오늘의 운세 분석 중'}
-            {phase === 'result' && '🌟 오늘의 사주 운세'}
+            {phase === 'form' && <><MenuIcon name="crystalBall" size={18} /> 무료 사주 운세</>}
+            {phase === 'analyzing' && <><MenuIcon name="sparkle" size={18} /> 오늘의 운세 분석 중</>}
+            {phase === 'result' && <><MenuIcon name="star" size={18} /> 오늘의 사주 운세</>}
           </h2>
           <button className="gfm-close" onClick={onClose} aria-label="닫기">×</button>
         </header>
@@ -211,7 +212,7 @@ export default function GuestFortuneModal({ open, onClose }) {
           {phase === 'analyzing' && (
             <div className="gfm-analyzing fade-in">
               <div className="gfm-streaming-header">
-                <span className="gfm-streaming-orb">🔮</span>
+                <span className="gfm-streaming-orb"><MenuIcon name="crystalBall" size={24} /></span>
                 <span>AI가 오늘의 운세를 분석 중...</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
@@ -243,10 +244,10 @@ export default function GuestFortuneModal({ open, onClose }) {
                 {(luckyNumber != null || luckyColor) && (
                   <div className="gfm-result-lucky">
                     {luckyNumber != null && (
-                      <span className="gfm-lucky-item">🎲 행운의 숫자 <strong>{luckyNumber}</strong></span>
+                      <span className="gfm-lucky-item"><MenuIcon name="hash" size={15} /> 행운의 숫자 <strong>{luckyNumber}</strong></span>
                     )}
                     {luckyColor && (
-                      <span className="gfm-lucky-item">🎨 행운의 색 <strong>{luckyColor}</strong></span>
+                      <span className="gfm-lucky-item"><MenuIcon name="palette" size={15} /> 행운의 색 <strong>{luckyColor}</strong></span>
                     )}
                   </div>
                 )}

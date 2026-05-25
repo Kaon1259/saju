@@ -25,8 +25,8 @@ function MyAgainMeet() {
           {[...Array(10)].map((_, i) => <span key={i} style={{ '--ma-i': i }}>✦</span>)}
         </div>
         <div className="myagain-hero-icons">
-          <span className="myagain-hero-moon">🌙</span>
-          <span className="myagain-hero-heart">💔</span>
+          <span className="myagain-hero-moon"><MenuIcon name="moon" size={28} /></span>
+          <span className="myagain-hero-heart"><MenuIcon name="heartBroken" size={28} /></span>
         </div>
         <h1 className="myagain-hero-title">다시 만날까?</h1>
         <p className="myagain-hero-sub">옛 인연·재회·회복까지, 마음 정리에 필요한 운세</p>
@@ -64,7 +64,7 @@ function MyAgainMeet() {
 
       <section className="myagain-footer">
         <p className="myagain-footer-text">
-          🌙 다시 만날지, 놓아줄지 — <strong>사주가 알려주는 마음의 방향</strong>
+          <MenuIcon name="moon" size={15} /> 다시 만날지, 놓아줄지 — <strong>사주가 알려주는 마음의 방향</strong>
         </p>
       </section>
     </div>

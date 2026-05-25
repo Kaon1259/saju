@@ -8,28 +8,29 @@ import StreamText from '../components/StreamText';
 import StreamingCard from '../components/StreamingCard';
 import HeroIconButtons from '../components/HeroIconButtons';
 import AnalysisComplete from '../components/AnalysisComplete';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import './Mbti.css';
 
 const TYPES_DATA = {
-  INTJ: { nick: '전략가', icon: '🏰', desc: '독창적 완벽주의', color: '#6D28D9' },
-  INTP: { nick: '논리술사', icon: '🔬', desc: '끝없는 호기심', color: '#7C3AED' },
-  ENTJ: { nick: '통솔자', icon: '👑', desc: '타고난 리더', color: '#5B21B6' },
-  ENTP: { nick: '변론가', icon: '⚡', desc: '재치있는 혁신가', color: '#8B5CF6' },
-  INFJ: { nick: '옹호자', icon: '🌙', desc: '깊은 통찰력', color: '#059669' },
-  INFP: { nick: '중재자', icon: '🦋', desc: '감성적 몽상가', color: '#10B981' },
-  ENFJ: { nick: '선도자', icon: '🌟', desc: '따뜻한 카리스마', color: '#047857' },
-  ENFP: { nick: '활동가', icon: '🌈', desc: '열정의 자유영혼', color: '#34D399' },
-  ISTJ: { nick: '현실주의자', icon: '🛡️', desc: '믿음직한 책임감', color: '#1D4ED8' },
-  ISFJ: { nick: '수호자', icon: '🏠', desc: '헌신적 보호자', color: '#2563EB' },
-  ESTJ: { nick: '경영자', icon: '📋', desc: '체계적 리더십', color: '#1E40AF' },
-  ESFJ: { nick: '집정관', icon: '🤝', desc: '배려의 화합', color: '#3B82F6' },
-  ISTP: { nick: '장인', icon: '🔧', desc: '논리적 해결사', color: '#D97706' },
-  ISFP: { nick: '모험가', icon: '🎨', desc: '감성적 예술가', color: '#F59E0B' },
-  ESTP: { nick: '사업가', icon: '🎯', desc: '행동파 모험가', color: '#B45309' },
-  ESFP: { nick: '연예인', icon: '🎭', desc: '에너지 엔터테이너', color: '#FBBF24' },
+  INTJ: { nick: '전략가', iconKey: 'compass', desc: '독창적 완벽주의', color: '#6D28D9' },
+  INTP: { nick: '논리술사', iconKey: 'search', desc: '끝없는 호기심', color: '#7C3AED' },
+  ENTJ: { nick: '통솔자', iconKey: 'star', desc: '타고난 리더', color: '#5B21B6' },
+  ENTP: { nick: '변론가', iconKey: 'spark', desc: '재치있는 혁신가', color: '#8B5CF6' },
+  INFJ: { nick: '옹호자', iconKey: 'moon', desc: '깊은 통찰력', color: '#059669' },
+  INFP: { nick: '중재자', iconKey: 'sparkle', desc: '감성적 몽상가', color: '#10B981' },
+  ENFJ: { nick: '선도자', iconKey: 'star', desc: '따뜻한 카리스마', color: '#047857' },
+  ENFP: { nick: '활동가', iconKey: 'sparkle', desc: '열정의 자유영혼', color: '#34D399' },
+  ISTJ: { nick: '현실주의자', iconKey: 'lock', desc: '믿음직한 책임감', color: '#1D4ED8' },
+  ISFJ: { nick: '수호자', iconKey: 'home', desc: '헌신적 보호자', color: '#2563EB' },
+  ESTJ: { nick: '경영자', iconKey: 'book', desc: '체계적 리더십', color: '#1E40AF' },
+  ESFJ: { nick: '집정관', iconKey: 'handshake', desc: '배려의 화합', color: '#3B82F6' },
+  ISTP: { nick: '장인', iconKey: 'settings', desc: '논리적 해결사', color: '#D97706' },
+  ISFP: { nick: '모험가', iconKey: 'palette', desc: '감성적 예술가', color: '#F59E0B' },
+  ESTP: { nick: '사업가', iconKey: 'target', desc: '행동파 모험가', color: '#B45309' },
+  ESFP: { nick: '연예인', iconKey: 'mic', desc: '에너지 엔터테이너', color: '#FBBF24' },
 };
 
 const GROUPS = [
@@ -193,8 +194,8 @@ function Mbti() {
       </div>
 
       <div className="mbti-tabs">
-        <button className={`mbti-tab ${tab === 'fortune' ? 'active' : ''}`} onClick={() => setTab('fortune')}>🔮 오늘의 운세</button>
-        <button className={`mbti-tab ${tab === 'compat' ? 'active' : ''}`} onClick={() => setTab('compat')}>💕 궁합</button>
+        <button className={`mbti-tab ${tab === 'fortune' ? 'active' : ''}`} onClick={() => setTab('fortune')}><MenuIcon name="crystalBall" size={18} /> 오늘의 운세</button>
+        <button className={`mbti-tab ${tab === 'compat' ? 'active' : ''}`} onClick={() => setTab('compat')}><MenuIcon name="love" size={18} /> 궁합</button>
       </div>
 
       {tab === 'fortune' && (
@@ -212,7 +213,7 @@ function Mbti() {
                       style={{ '--m-color': info.color }}
                       onClick={() => handleSelect(t)}>
                       <div className="mbti-card-glow" />
-                      <span className="mbti-card-icon">{info.icon}</span>
+                      <span className="mbti-card-icon"><MenuIcon name={info.iconKey} size={24} /></span>
                       <span className="mbti-card-code">{t}</span>
                       <span className="mbti-card-nick">{info.nick}</span>
                       {scoreData?.score && <span className="mbti-card-score">{scoreData.score}점</span>}
@@ -225,8 +226,8 @@ function Mbti() {
 
           {selected && !fortune && !loading && localStorage.getItem('userId') && (
             <div className="glass-card" style={{ padding: '20px', textAlign: 'center', marginTop: 16 }}>
-              <button className="btn-gold" onClick={() => guardMbti(() => handleSelect(selected))} style={{ width: '100%' }}>
-                🔮 내 MBTI 운세 보기 <HeartCost category="MBTI" />
+              <button className="btn-gold mbti-cta-btn" onClick={() => guardMbti(() => handleSelect(selected))} style={{ width: '100%' }}>
+                <MenuIcon name="crystalBall" size={16} /> 내 MBTI 운세 보기 <HeartCost category="MBTI" />
               </button>
             </div>
           )}
@@ -240,7 +241,7 @@ function Mbti() {
             return (
               <div className="mbti-streaming-wrap">
                 <div className="mbti-streaming-header">
-                  <span className="mbti-streaming-orb">🧬</span>
+                  <span className="mbti-streaming-orb"><MenuIcon name="dna" size={24} /></span>
                   <span className="mbti-streaming-title">AI가 MBTI 운세를 분석중이에요</span>
                   <span className="streaming-dots"><i/><i/><i/></span>
                 </div>
@@ -263,7 +264,7 @@ function Mbti() {
             <div className="mbti-result fade-in" ref={resultRef}>
               <div className="mbti-result-header glass-card">
                 <div className="mbti-result-badge" style={{ background: TYPES_DATA[fortune.mbtiType]?.color }}>
-                  <span className="mbti-result-icon">{TYPES_DATA[fortune.mbtiType]?.icon}</span>
+                  <span className="mbti-result-icon"><MenuIcon name={TYPES_DATA[fortune.mbtiType]?.iconKey} size={28} /></span>
                   <div>
                     <span className="mbti-result-code">{fortune.mbtiType}</span>
                     <span className="mbti-result-nick">{TYPES_DATA[fortune.mbtiType]?.nick}</span>
@@ -294,7 +295,7 @@ function Mbti() {
 
               {fortune.tip && (
                 <div className="mbti-tip glass-card">
-                  <span>💡</span><p>{fortune.tip}</p>
+                  <span><MenuIcon name="lightbulb" size={20} /></span><p>{fortune.tip}</p>
                 </div>
               )}
 
@@ -336,7 +337,7 @@ function Mbti() {
                   {Object.entries(TYPES_DATA).map(([t, info]) => (
                     <button key={t} className={`mbti-compat-btn ${val === t ? 'active' : ''}`}
                       style={{ '--m-color': info.color }} onClick={() => setter(t)}>
-                      <span>{info.icon}</span> {t}
+                      <span><MenuIcon name={info.iconKey} size={16} /></span> {t}
                     </button>
                   ))}
                 </div>
@@ -344,17 +345,17 @@ function Mbti() {
             );
           })}
           <button className="mbti-compat-submit" onClick={() => guardMbti(handleCompat)} disabled={!type1 || !type2 || compatLoading}>
-            {compatLoading ? 'AI 분석중...' : '💕 궁합 보기'} <HeartCost category="MBTI" />
+            {compatLoading ? 'AI 분석중...' : <><MenuIcon name="love" size={16} /> 궁합 보기</>} <HeartCost category="MBTI" />
           </button>
           {compat && !compatLoading && (
             <div className="mbti-compat-result fade-in glass-card">
               <div className="mbti-compat-header">
                 <div className="mbti-compat-type-badge" style={{ background: TYPES_DATA[compat.type1]?.color }}>
-                  {TYPES_DATA[compat.type1]?.icon} {compat.type1}
+                  <MenuIcon name={TYPES_DATA[compat.type1]?.iconKey} size={16} /> {compat.type1}
                 </div>
                 <span className="mbti-compat-x">×</span>
                 <div className="mbti-compat-type-badge" style={{ background: TYPES_DATA[compat.type2]?.color }}>
-                  {TYPES_DATA[compat.type2]?.icon} {compat.type2}
+                  <MenuIcon name={TYPES_DATA[compat.type2]?.iconKey} size={16} /> {compat.type2}
                 </div>
               </div>
               <div className="mbti-compat-score">{compat.score}점</div>
@@ -362,7 +363,7 @@ function Mbti() {
               <div className="mbti-compat-bar"><div className="mbti-compat-bar-fill" style={{ width: `${compat.score}%`, background: TYPES_DATA[compat.type1]?.color }} /></div>
               <p className="mbti-compat-advice">{compat.advice}</p>
               {compat.bestMatch && (
-                <div className="mbti-best-match">🏆 {compat.type1}의 베스트 매치: <strong>{compat.bestMatch} ({TYPES_DATA[compat.bestMatch]?.nick})</strong></div>
+                <div className="mbti-best-match"><MenuIcon name="star" size={16} /> {compat.type1}의 베스트 매치: <strong>{compat.bestMatch} ({TYPES_DATA[compat.bestMatch]?.nick})</strong></div>
               )}
             </div>
           )}

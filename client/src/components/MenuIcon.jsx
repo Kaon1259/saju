@@ -581,6 +581,24 @@ const PATHS = {
   chevronLeft: (
     <path d="M15 5l-7 7 7 7" />
   ),
+  // 체크 — 긍정/완료/예 (✅✔ 대체)
+  check: (
+    <path d="M5 13l4 4 10-12" strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  // 금지 — 부정/아니오/피할 것 (🛑⛔ 대체)
+  ban: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M5.6 5.6l12.8 12.8" strokeLinecap="round" />
+    </>
+  ),
+  // 깨진 하트 — 이별/헤어짐 (💔🚪 대체)
+  heartBroken: (
+    <>
+      <path d="M12 20.3l-1.2-1.1C5.7 14.6 3 12 3 8.5 3 6 5 4 7.5 4c1.5 0 2.9.7 3.8 1.8l.7.8.7-.8C13.6 4.7 15 4 16.5 4 19 4 21 6 21 8.5c0 3.5-2.7 6.1-7.8 10.7L12 20.3z" />
+      <path d="M12.5 5.5l-2 4 3 2.2-2 3.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
 };
 
 export default function MenuIcon({ name, size = 36, className = '', style }) {

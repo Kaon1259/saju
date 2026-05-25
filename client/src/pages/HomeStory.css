@@ -645,7 +645,10 @@
 .hs-mystar-banner:hover { transform: translateY(-2px) rotate(-0.3deg); }
 .hs-mystar-banner:active { transform: scale(0.99); }
 .hs-mystar-icon {
-  font-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent, #ec4899);
   animation: hsMyStarTwinkle 2.2s ease-in-out infinite;
 }
 @keyframes hsMyStarTwinkle {

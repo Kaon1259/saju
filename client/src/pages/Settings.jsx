@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clearAuth } from '../utils/auth';
 import { useToast } from '../components/Toast';
+import MenuIcon from '../components/MenuIcon';
 import './Settings.css';
 
 const HOME_STYLES = [
@@ -72,7 +73,7 @@ function Settings() {
 
         {/* 다크/라이트 모드 */}
         <div className="settings-row">
-          <span className="settings-label">{theme === 'dark' ? '🌙 다크 모드' : '☀️ 라이트 모드'}</span>
+          <span className="settings-label">{theme === 'dark' ? <><MenuIcon name="moon" size={16} /> 다크 모드</> : <><MenuIcon name="sun" size={16} /> 라이트 모드</>}</span>
           <label className="settings-toggle">
             <input type="checkbox" checked={theme === 'dark'} onChange={toggleTheme} />
             <span className="settings-toggle-slider" />

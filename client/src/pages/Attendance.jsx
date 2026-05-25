@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAttendanceStatus, getAttendanceHistory, checkInAttendance } from '../api/fortune';
 import { useToast } from '../components/Toast';
+import MenuIcon from '../components/MenuIcon';
 import './Attendance.css';
 
 const MILESTONES = [
@@ -87,7 +88,7 @@ export default function Attendance() {
       <div className="attend-page">
         <header className="attend-page-header">
           <button className="attend-back" onClick={() => navigate(-1)}>‹</button>
-          <h1 className="attend-page-title">📆 출석부</h1>
+          <h1 className="attend-page-title"><MenuIcon name="calendar" size={20} /> 출석부</h1>
           <span className="attend-back attend-back--ghost" />
         </header>
         <div className="attend-loading">불러오는 중...</div>
@@ -109,7 +110,7 @@ export default function Attendance() {
     <div className="attend-page">
       <header className="attend-page-header">
         <button className="attend-back" onClick={() => navigate(-1)}>‹</button>
-        <h1 className="attend-page-title">📆 출석부</h1>
+        <h1 className="attend-page-title"><MenuIcon name="calendar" size={20} /> 출석부</h1>
         <span className="attend-back attend-back--ghost" />
       </header>
 
@@ -121,11 +122,11 @@ export default function Attendance() {
         </div>
         {!checkedToday ? (
           <button className="attend-hero-cta" onClick={handleCheckIn}>
-            🎁 오늘의 출석 보상 받기 (+3)
+            <MenuIcon name="gift" size={16} /> 오늘의 출석 보상 받기 (+3)
           </button>
         ) : (
           <div className="attend-hero-done">
-            ✅ 오늘 출석 완료
+            <MenuIcon name="check" size={16} /> 오늘 출석 완료
             {daysToNextMilestone > 0 && (
               <span className="attend-hero-next">
                 · {daysToNextMilestone}일 후 +{nextMilestoneReward}하트
@@ -134,13 +135,13 @@ export default function Attendance() {
           </div>
         )}
         {balanceAfter != null && (
-          <div className="attend-hero-balance">현재 보유: ❤ {balanceAfter} 하트</div>
+          <div className="attend-hero-balance">현재 보유: <MenuIcon name="heart" size={14} /> {balanceAfter} 하트</div>
         )}
       </section>
 
       {/* 2. 마일스톤 진행도 */}
       <section className="attend-section">
-        <h2 className="attend-section-title">⭐ 마일스톤</h2>
+        <h2 className="attend-section-title"><MenuIcon name="star" size={18} /> 마일스톤</h2>
         <div className="attend-milestones">
           {MILESTONES.map((ms) => {
             const reached = consecutiveDays >= ms.day;
@@ -167,7 +168,7 @@ export default function Attendance() {
 
       {/* 3. 30일 캘린더 */}
       <section className="attend-section">
-        <h2 className="attend-section-title">📅 최근 30일</h2>
+        <h2 className="attend-section-title"><MenuIcon name="calendar" size={18} /> 최근 30일</h2>
         <div className="attend-cal">
           {days.map((d) => {
             const attended = attendedSet.has(d.date);
@@ -197,7 +198,7 @@ export default function Attendance() {
 
       {/* 4. 보상 안내 */}
       <section className="attend-section attend-tips">
-        <h2 className="attend-section-title">💡 출석 보상 안내</h2>
+        <h2 className="attend-section-title"><MenuIcon name="lightbulb" size={18} /> 출석 보상 안내</h2>
         <ul className="attend-tip-list">
           <li>매일 첫 로그인 시 <strong>+3하트</strong> 자동 지급</li>
           <li>7일 연속 출석마다 <strong>+15하트</strong> 추가</li>

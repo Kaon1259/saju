@@ -126,6 +126,7 @@ function LoveFortune() {
   };
 
   const { guardedAction: guardLoveFortune } = useHeartGuard('LOVE_RELATIONSHIP');
+  const { guardedAction: guardCelebDetail, cost: celebDetailCost } = useHeartGuard('CELEB_COMPAT');
 
   const handleAnalyze = async () => {
     if (!birthDate || !relationStatus) return;
@@ -258,11 +259,21 @@ function LoveFortune() {
     try {
       const data = await getSajuCompatibility(
         birthDate, celeb.birth, null, null, 'SOLAR', 'SOLAR',
-        gender || 'M', celeb.gender
+        gender || 'M', celeb.gender, 'CELEB_COMPAT'
       );
+      // 하트 부족 → 전역 충전 팝업 + 팝업 닫기
+      if (data?.insufficientHearts) {
+        setCelebPopup(false); setSelectedCeleb(null);
+        window.dispatchEvent(new CustomEvent('heart:insufficient', { detail: { required: data.required, available: data.available } }));
+        setCelebDetailLoading(false);
+        return;
+      }
       data._celebName = celeb.name;
       data._celebGroup = celeb.group;
       setCelebResult(data);
+      // 신규 차감 시에만 잔액 갱신 + 차감 버블 (캐시 히트는 무료)
+      window.dispatchEvent(new CustomEvent('heart:refresh'));
+      if (data?.deducted) window.dispatchEvent(new CustomEvent('heart:deducted', { detail: { cost: celebDetailCost } }));
     } catch (e) { console.error(e); }
     setCelebDetailLoading(false);
   };
@@ -323,7 +334,7 @@ function LoveFortune() {
       {!result && !loading && !aiStreaming && (
         <div className="lf-form fade-in">
           {userId && (
-            <button className="lf-autofill-btn" onClick={handleAutoFill}>✨ 내 정보로 채우기</button>
+            <button className="lf-autofill-btn" onClick={handleAutoFill}><MenuIcon name="sparkle" size={16} /> 내 정보로 채우기</button>
           )}
 
           {/* 연애 상태 */}
@@ -374,7 +385,7 @@ function LoveFortune() {
           <div className="lf-streaming-wrap">
             <div className="lf-streaming-header">
               <div className="lf-streaming-title">
-                <span className="lf-streaming-orb">💕</span>
+                <span className="lf-streaming-orb"><MenuIcon name="love" size={24} /></span>
                 <span>AI가 연애운을 분석중이에요</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
@@ -416,28 +427,28 @@ function LoveFortune() {
             {result.luckyColor && <div className="lf-lucky-item"><span className="lf-lucky-label">행운의 색</span><span className="lf-lucky-value">{result.luckyColor}</span></div>}
           </div>
 
-          <button className="lf-reset" onClick={() => { setResult(null); setBirthDate(''); setRelationStatus(''); setAiStreaming(false); setCelebListOpen(false); setCelebList([]); setCelebResult(null); setSelectedCeleb(null); setCelebPopup(false); }}>🔄 다시 보기</button>
+          <button className="lf-reset" onClick={() => { setResult(null); setBirthDate(''); setRelationStatus(''); setAiStreaming(false); setCelebListOpen(false); setCelebList([]); setCelebResult(null); setSelectedCeleb(null); setCelebPopup(false); }}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
 
           {/* 궁합이 맞는 연예인 */}
           {!celebListOpen && (
             <button className="lf-celeb-match-btn" onClick={handleCelebMatch}>
-              💫 나와 궁합이 맞는 연예인은?
+              <MenuIcon name="sparkleHeart" size={16} /> 나와 궁합이 맞는 연예인은?
             </button>
           )}
 
           {/* 연예인 리스트 */}
           {celebListOpen && (
             <div className="lf-celeb-section fade-in">
-              <h3 className="lf-celeb-title">💫 나와 궁합이 맞는 연예인 TOP 5</h3>
+              <h3 className="lf-celeb-title"><MenuIcon name="sparkleHeart" size={18} /> 나와 궁합이 맞는 연예인 TOP 5</h3>
               {celebLoading ? (
                 <div className="lf-celeb-loading">
-                  <span className="lf-celeb-loading-icon">💫</span>
+                  <span className="lf-celeb-loading-icon"><MenuIcon name="sparkleHeart" size={24} /></span>
                   <p>궁합이 맞는 연예인을 찾고 있어요...</p>
                 </div>
               ) : (
                 <div className="lf-celeb-list">
                   {celebList.map((celeb, i) => (
-                    <button key={i} className="lf-celeb-item glass-card" onClick={() => handleCelebDetail(celeb)}>
+                    <button key={i} className="lf-celeb-item glass-card" onClick={() => guardCelebDetail(() => handleCelebDetail(celeb))}>
                       <span className="lf-celeb-rank">{i + 1}</span>
                       <span className={`lf-celeb-gender ${celeb.gender === 'M' ? 'lf-celeb-gender--m' : 'lf-celeb-gender--f'}`}>
                         {celeb.gender === 'M' ? '♂' : '♀'}
@@ -488,19 +499,19 @@ function LoveFortune() {
                     )}
                     {celebResult.aiAnalysis && (
                       <div className="lf-celeb-card glass-card">
-                        <h4>🔮 종합 분석</h4>
+                        <h4><MenuIcon name="crystalBall" size={16} /> 종합 분석</h4>
                         <p>{celebResult.aiAnalysis}</p>
                       </div>
                     )}
                     {celebResult.aiLoveCompat && (
                       <div className="lf-celeb-card glass-card">
-                        <h4>💕 연애 궁합</h4>
+                        <h4><MenuIcon name="love" size={16} /> 연애 궁합</h4>
                         <p>{celebResult.aiLoveCompat}</p>
                       </div>
                     )}
                     {celebResult.aiAdvice && (
                       <div className="lf-celeb-card glass-card">
-                        <h4>💡 조언</h4>
+                        <h4><MenuIcon name="lightbulb" size={16} /> 조언</h4>
                         <p>{celebResult.aiAdvice}</p>
                       </div>
                     )}

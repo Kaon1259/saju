@@ -105,6 +105,9 @@
 }
 
 .fortune-lucky__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: var(--space-md);

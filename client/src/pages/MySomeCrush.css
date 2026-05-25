@@ -243,6 +243,11 @@
 }
 .mysome-footer-text {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.75);
   line-height: 1.7;

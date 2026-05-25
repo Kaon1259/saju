@@ -10,6 +10,7 @@ import GenderPicker from '../components/GenderPicker';
 import StreamText from '../components/StreamText';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import MenuIcon from '../components/MenuIcon';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './MonthlyFortune.css';
 
@@ -43,6 +44,12 @@ function getSeasonEmoji(month) {
   if (month >= 6 && month <= 8) return '☀️';
   if (month >= 9 && month <= 11) return '🍂';
   return '❄️';
+}
+
+// 계절 → outline 아이콘 키 (봄/가을/겨울=sparkle, 여름=sun)
+function getSeasonIconKey(month) {
+  if (month >= 6 && month <= 8) return 'sun';
+  return 'sparkle';
 }
 
 function getScoreColor(score) {
@@ -256,7 +263,7 @@ function MonthlyFortune() {
       {/* 히어로 */}
       <div className="mf-hero">
         <div className="mf-hero-glow" />
-        <div className="mf-hero-icon">&#128197;</div>
+        <div className="mf-hero-icon"><MenuIcon name="monthly" size={40} /></div>
         <h1 className="mf-title">월별 운세</h1>
         <p className="mf-subtitle">매달의 운세 흐름을 확인하세요</p>
       </div>
@@ -275,20 +282,20 @@ function MonthlyFortune() {
                 <span className="mf-month-num">{m}</span>
                 <span className="mf-month-label">월</span>
                 {m === currentMonth && <span className="mf-month-now">NOW</span>}
-                {isExtraMonth(m) && <span className="mf-month-heart">💗</span>}
+                {isExtraMonth(m) && <span className="mf-month-heart"><MenuIcon name="love" size={12} /></span>}
               </button>
             ))}
           </div>
           {!showAllMonths && (
             <button className="mf-show-more-btn" onClick={() => setShowAllMonths(true)}>
-              🔓 다른 월 더보기 <HeartCost category="MONTHLY_FORTUNE_EXTRA" />
+              <MenuIcon name="lock" size={16} /> 다른 월 더보기 <HeartCost category="MONTHLY_FORTUNE_EXTRA" />
             </button>
           )}
 
           <div className="mf-form glass-card">
             {localStorage.getItem('userId') && (
               <button className="sf-autofill-btn" onClick={handleAutofill}>
-                &#10024; 내 정보로 채우기
+                <MenuIcon name="sparkle" size={16} /> 내 정보로 채우기
               </button>
             )}
 
@@ -310,7 +317,7 @@ function MonthlyFortune() {
             </div>
 
             <button className="mf-submit" onClick={() => guardMonthly(() => handleAnalyze())} disabled={!birthDate}>
-              {getSeasonEmoji(selectedMonth)} {selectedMonth}월 운세 보기 <HeartCost category="MONTHLY_FORTUNE" />
+              <MenuIcon name={getSeasonIconKey(selectedMonth)} size={16} /> {selectedMonth}월 운세 보기 <HeartCost category="MONTHLY_FORTUNE" />
             </button>
           </div>
         </div>
@@ -319,7 +326,7 @@ function MonthlyFortune() {
       {/* 로딩 */}
       {loading && !streaming && (
         <div className="mf-loading">
-          <div className="mf-loading-icon">{getSeasonEmoji(selectedMonth)}</div>
+          <div className="mf-loading-icon"><MenuIcon name={getSeasonIconKey(selectedMonth)} size={40} /></div>
           <p className="mf-loading-text">AI가 {selectedMonth}월 운세를 분석하고 있어요<span className="mf-dots" /></p>
         </div>
       )}
@@ -334,7 +341,7 @@ function MonthlyFortune() {
         <div className="mf-result fade-in" ref={resultRef}>
           {/* 월 헤더 */}
           <div className="mf-result-header glass-card">
-            <span className="mf-result-season-icon">{getSeasonEmoji(result.month)}</span>
+            <span className="mf-result-season-icon"><MenuIcon name={getSeasonIconKey(result.month)} size={26} /></span>
             <div className="mf-result-header-text">
               <h2 className="mf-result-month">{result.month}월</h2>
               {result.pillar && <span className="mf-result-pillar">{result.pillar}</span>}
@@ -405,7 +412,7 @@ function MonthlyFortune() {
             <div className="mf-weeks glass-card">
               {result.bestWeek && (
                 <div className="mf-week-item mf-week--best">
-                  <span className="mf-week-icon">&#10024;</span>
+                  <span className="mf-week-icon"><MenuIcon name="sparkle" size={18} /></span>
                   <div>
                     <span className="mf-week-label">최고의 주</span>
                     <span className="mf-week-value">{result.bestWeek}</span>
@@ -414,7 +421,7 @@ function MonthlyFortune() {
               )}
               {result.cautionWeek && (
                 <div className="mf-week-item mf-week--caution">
-                  <span className="mf-week-icon">&#9888;&#65039;</span>
+                  <span className="mf-week-icon"><MenuIcon name="alert" size={18} /></span>
                   <div>
                     <span className="mf-week-label">주의 주간</span>
                     <span className="mf-week-value">{result.cautionWeek}</span>
@@ -427,7 +434,7 @@ function MonthlyFortune() {
           {/* 행운의 날 */}
           {result.luckyDay && (
             <div className="mf-lucky-day glass-card">
-              <span className="mf-lucky-day-icon">&#128197;</span>
+              <span className="mf-lucky-day-icon"><MenuIcon name="calendar" size={18} /></span>
               <span className="mf-lucky-day-label">행운의 날</span>
               <span className="mf-lucky-day-value">{result.luckyDay}</span>
             </div>
@@ -460,7 +467,7 @@ function MonthlyFortune() {
 
           {/* 리셋 */}
           <button className="mf-reset" onClick={resetAll}>
-            &#128260; 다시 보기
+            <MenuIcon name="refresh" size={16} /> 다시 보기
           </button>
         </div>
       )}

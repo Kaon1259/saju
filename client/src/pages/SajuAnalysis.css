@@ -7,7 +7,14 @@
 .saju-streaming-wrap { padding: 8px 16px 16px; }
 .saju-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
 .saju-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #fbbf24 0%, #a855f7 50%, #ec4899 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.saju-streaming-orb { font-size: 22px; display: inline-block; animation: sajuOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8)); }
+.saju-streaming-orb { font-size: 22px; display: inline-flex; align-items: center; animation: sajuOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8)); }
+
+/* MenuIcon 정렬 (아이콘 + 텍스트 인라인) */
+.saju-btn-icon { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.saju-page .saju-tab { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.saju-page .element-bar-label { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.saju-page .elements-tag { display: inline-flex; align-items: center; gap: 4px; }
+.saju-page .fortune-lucky__title { display: inline-flex; align-items: center; gap: 6px; }
 @keyframes sajuOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
 .saju-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 
@@ -42,6 +49,9 @@
   font-size: 3.5rem;
   margin-bottom: var(--space-md);
   animation: float 3s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  color: var(--color-accent-gold);
 }
 
 .saju-intro__title {

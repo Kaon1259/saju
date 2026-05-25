@@ -789,7 +789,7 @@ export const getSajuCompatibilityBasic = async (birthDate1, birthDate2, birthTim
   return response.data;
 };
 
-export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2) => {
+export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, birthTime2, calendarType1, calendarType2, gender1, gender2, category) => {
   const params = { birthDate1, birthDate2 };
   if (birthTime1) params.birthTime1 = birthTime1;
   if (birthTime2) params.birthTime2 = birthTime2;
@@ -797,6 +797,9 @@ export const getSajuCompatibility = async (birthDate1, birthDate2, birthTime1, b
   if (calendarType2) params.calendarType2 = calendarType2;
   if (gender1) params.gender1 = gender1;
   if (gender2) params.gender2 = gender2;
+  if (category) params.category = category;            // 하트 차감 카테고리 (GROUP_COMPAT/CELEB_COMPAT/COMPATIBILITY)
+  const uid = localStorage.getItem('userId');
+  if (uid) params.userId = uid;                        // JWT 누락 시 차감 대상 식별용 폴백
   const response = await api.get('/compatibility/saju', { params });
   return response.data;
 };

@@ -321,7 +321,7 @@ function HomeNew() {
 
       {/* ── 스타 운세 배너 ─────────────────────────────── */}
       <button className="hn-mystar-banner" onClick={() => go('/star-fortune')}>
-        <span className="hn-mystar-icon">🌟</span>
+        <span className="hn-mystar-icon"><MenuIcon name="star" size={22} /></span>
         <div className="hn-mystar-text">
           <span className="hn-mystar-title">스타 운세</span>
           <span className="hn-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>

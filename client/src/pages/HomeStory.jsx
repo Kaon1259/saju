@@ -476,7 +476,7 @@ function HomeStory() {
 
       {/* ── 스타 운세 배너 ─────────────────────────────── */}
       <button className="hs-mystar-banner" onClick={() => go('/star-fortune')}>
-        <span className="hs-mystar-icon">🌟</span>
+        <span className="hs-mystar-icon"><MenuIcon name="star" size={22} /></span>
         <div className="hs-mystar-text">
           <span className="hs-mystar-title">스타 운세</span>
           <span className="hs-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>

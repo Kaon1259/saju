@@ -13,6 +13,7 @@ import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import KakaoLoginCTA from '../components/KakaoLoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
+import MenuIcon from '../components/MenuIcon';
 import './YearFortune.css';
 
 const BIRTH_TIMES = [
@@ -25,7 +26,8 @@ const BIRTH_TIMES = [
   { value: '술시', label: '술시 (19:00~21:00)' }, { value: '해시', label: '해시 (21:00~23:00)' },
 ];
 const QUARTER_LABELS = ['1분기 (1~3월)', '2분기 (4~6월)', '3분기 (7~9월)', '4분기 (10~12월)'];
-const QUARTER_ICONS = ['🌸', '☀️', '🍂', '❄️'];
+// 분기 아이콘 키 (봄=sparkle/꽃, 여름=sun, 가을=sparkle/낙엽, 겨울=sparkle/눈)
+const QUARTER_ICON_KEYS = ['sparkle', 'sun', 'sparkle', 'sparkle'];
 
 function getScoreColor(s) { return s >= 85 ? '#ff3d7f' : s >= 70 ? '#fbbf24' : s >= 55 ? '#4ade80' : '#94a3b8'; }
 function getGradeLabel(s) { return s >= 90 ? '대길' : s >= 75 ? '길' : s >= 55 ? '보통' : '흉'; }
@@ -224,14 +226,13 @@ function YearFortune() {
     const rScore = result.overallScore ?? result.score ?? 0;
     const rGrade = result.overallGrade || result.grade || getGradeLabel(rScore);
     const rTheme = result.yearTheme || result.theme || '도약의 해';
-    const rThemeEmoji = result.yearEmoji || result.themeEmoji || '🐴';
     const rQuarters = result.quarterly || result.quarters;
     const rAdvice = result.yearAdvice || result.advice;
 
     return (
       <div className="yf-result fade-in" ref={resultRef}>
         <div className="yf-theme-badge glass-card">
-          <span className="yf-theme-emoji">{rThemeEmoji}</span>
+          <span className="yf-theme-emoji"><MenuIcon name="star" size={20} /></span>
           <span className="yf-theme-text">{rTheme}</span>
         </div>
         <div className="yf-score-card glass-card">
@@ -250,11 +251,11 @@ function YearFortune() {
         {result.summary && <div className="yf-summary glass-card"><p>{result.summary}</p></div>}
         {rQuarters && rQuarters.length > 0 && (
           <div className="yf-section">
-            <h3 className="yf-section-title"><span>📅</span> 분기별 운세</h3>
+            <h3 className="yf-section-title"><MenuIcon name="calendar" size={18} /> 분기별 운세</h3>
             <div className="yf-quarters-grid">
               {rQuarters.map((q, i) => (
                 <div key={i} className="yf-quarter-card glass-card" style={{ '--q-color': getScoreColor(q.score) }}>
-                  <span className="yf-quarter-icon">{QUARTER_ICONS[i]}</span>
+                  <span className="yf-quarter-icon"><MenuIcon name={QUARTER_ICON_KEYS[i]} size={22} /></span>
                   <span className="yf-quarter-label">{QUARTER_LABELS[i]}</span>
                   <div className="yf-quarter-score-bar"><div className="yf-quarter-score-fill" style={{ width: `${q.score}%`, background: getScoreColor(q.score) }} /></div>
                   <span className="yf-quarter-score">{q.score}점</span>
@@ -265,7 +266,7 @@ function YearFortune() {
           </div>
         )}
         <div className="yf-section">
-          <h3 className="yf-section-title"><span>🔮</span> 영역별 운세</h3>
+          <h3 className="yf-section-title"><MenuIcon name="crystalBall" size={18} /> 영역별 운세</h3>
           {(() => {
             const fs = (field) => {
               if (!streamingActive) return 'done';
@@ -297,8 +298,8 @@ function YearFortune() {
         </div>
         {(result.luckyMonths || result.cautionMonths) && (
           <div className="yf-months glass-card">
-            {result.luckyMonths && <div className="yf-months-row"><span className="yf-months-label">✨ 행운의 달</span><div className="yf-months-badges">{(Array.isArray(result.luckyMonths) ? result.luckyMonths : [result.luckyMonths]).map((m, i) => <span key={i} className="yf-month-badge yf-month-badge--lucky">{m}</span>)}</div></div>}
-            {result.cautionMonths && <div className="yf-months-row"><span className="yf-months-label">⚠️ 주의 달</span><div className="yf-months-badges">{(Array.isArray(result.cautionMonths) ? result.cautionMonths : [result.cautionMonths]).map((m, i) => <span key={i} className="yf-month-badge yf-month-badge--caution">{m}</span>)}</div></div>}
+            {result.luckyMonths && <div className="yf-months-row"><span className="yf-months-label"><MenuIcon name="sparkle" size={15} /> 행운의 달</span><div className="yf-months-badges">{(Array.isArray(result.luckyMonths) ? result.luckyMonths : [result.luckyMonths]).map((m, i) => <span key={i} className="yf-month-badge yf-month-badge--lucky">{m}</span>)}</div></div>}
+            {result.cautionMonths && <div className="yf-months-row"><span className="yf-months-label"><MenuIcon name="alert" size={15} /> 주의 달</span><div className="yf-months-badges">{(Array.isArray(result.cautionMonths) ? result.cautionMonths : [result.cautionMonths]).map((m, i) => <span key={i} className="yf-month-badge yf-month-badge--caution">{m}</span>)}</div></div>}
           </div>
         )}
         {(result.luckyColor || result.luckyNumber || result.luckyDirection) && (
@@ -315,8 +316,8 @@ function YearFortune() {
         ) : rAdvice && <FortuneCard icon="💡" title="2026년 조언" description={rAdvice} delay={400} />}
         {bd && <DeepAnalysis type="yearly" birthDate={bd} birthTime={bt} gender={g} calendarType={ct} previousResult={result} />}
         <div className="yf-actions">
-          <button className="yf-action-btn yf-share-btn" onClick={() => handleShare(result)}>{copied ? '✅ 복사됨' : '📤 공유하기'}</button>
-          <button className="yf-action-btn yf-reset-btn" onClick={onReset}>🔄 다시 보기</button>
+          <button className="yf-action-btn yf-share-btn" onClick={() => handleShare(result)}>{copied ? <><MenuIcon name="check" size={16} /> 복사됨</> : <><MenuIcon name="share" size={16} /> 공유하기</>}</button>
+          <button className="yf-action-btn yf-reset-btn" onClick={onReset}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
         </div>
       </div>
     );
@@ -346,7 +347,7 @@ function YearFortune() {
       <div className="yf-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
         <HeroIconButtons color="#fbbf24" />
         <div className="yf-hero-glow" />
-        <div className="yf-hero-icon">🎊</div>
+        <div className="yf-hero-icon"><MenuIcon name="sparkle" size={40} /></div>
         <h1 className="yf-title">2026 신년운세</h1>
         <p className="yf-subtitle">병오년, 새해의 운명을 미리 확인하세요</p>
       </div>
@@ -365,7 +366,7 @@ function YearFortune() {
             <div className="yf-form glass-card fade-in" style={{ textAlign: 'center' }}>
               {profile.birthDate ? (
                 <>
-                  <h2 style={{ marginBottom: 12 }}>🎊 내 2026 신년운세</h2>
+                  <h2 className="yf-form-heading" style={{ marginBottom: 12 }}><MenuIcon name="sparkle" size={20} /> 내 2026 신년운세</h2>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 16 }}>프로필 정보로 분석합니다</p>
                   <div className="myf-badges" style={{ justifyContent: 'center', marginBottom: 20, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <span className="myf-badge">{profile.birthDate}</span>
@@ -374,11 +375,11 @@ function YearFortune() {
                   </div>
                   <button className="yf-submit" onClick={() => guardYear(() => startAnalysis(profile.birthDate, profile.birthTime, profile.gender, profile.calendarType || 'solar', {
                     setResult: setMineResult, setLoading: setMineLoading, setStreamText: setMineStreamText, setStreaming: setMineStreaming, cleanupRef: mineCleanupRef
-                  }))}>🎊 내 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
+                  }))}><MenuIcon name="sparkle" size={16} /> 내 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: 48, margin: '20px 0' }}>🔮</div>
+                  <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center', color: 'var(--color-accent-gold)' }}><MenuIcon name="crystalBall" size={48} /></div>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>프로필 정보가 없습니다.<br />회원가입 후 이용해주세요.</p>
                   <KakaoLoginCTA returnTo="/year-fortune" className="yf-submit">카카오 로그인하고 신년운세 받기</KakaoLoginCTA>
                 </>
@@ -395,22 +396,24 @@ function YearFortune() {
             <div className="yf-form glass-card fade-in" style={{ textAlign: 'center' }}>
               {partnerInfo ? (
                 <>
-                  <h2 style={{ marginBottom: 12 }}>💕 연인 2026 신년운세</h2>
+                  <h2 className="yf-form-heading" style={{ marginBottom: 12 }}><MenuIcon name="love" size={20} /> 연인 2026 신년운세</h2>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 16 }}>프로필에 등록된 연인 정보로 분석합니다</p>
                   <div className="myf-badges" style={{ justifyContent: 'center', marginBottom: 20, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <span className="myf-badge">
-                      {partnerInfo.calendarType === 'LUNAR' ? '🌙 음력' : '☀️ 양력'} {partnerInfo.birthDate}
+                    <span className="myf-badge myf-badge--cal">
+                      {partnerInfo.calendarType === 'LUNAR'
+                        ? <><MenuIcon name="moon" size={13} /> 음력</>
+                        : <><MenuIcon name="sun" size={13} /> 양력</>} {partnerInfo.birthDate}
                     </span>
                     {partnerInfo.birthTime && <span className="myf-badge">{partnerInfo.birthTime}</span>}
                     {partnerInfo.gender && <span className="myf-badge">{partnerInfo.gender === 'M' ? '♂ 남성' : '♀ 여성'}</span>}
                   </div>
                   <button className="yf-submit" onClick={() => guardYear(() => startAnalysis(partnerInfo.birthDate, partnerInfo.birthTime, partnerInfo.gender, (partnerInfo.calendarType || 'solar').toLowerCase(), {
                     setResult: setPartnerResult, setLoading: setPartnerLoading, setStreamText: setPartnerStreamText, setStreaming: setPartnerStreaming, cleanupRef: partnerCleanupRef
-                  }))}>💕 연인 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
+                  }))}><MenuIcon name="love" size={16} /> 연인 신년운세 보기 <HeartCost category="YEAR_FORTUNE" /></button>
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: 48, margin: '20px 0' }}>💔</div>
+                  <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center', color: 'var(--color-accent-gold)' }}><MenuIcon name="heartBroken" size={48} /></div>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>등록된 연인 정보가 없습니다.<br />프로필에서 연인 정보를 먼저 입력해주세요.</p>
                   <button className="yf-submit" onClick={() => navigate('/profile/edit')}>프로필에서 연인 등록하기</button>
                 </>
@@ -448,7 +451,7 @@ function YearFortune() {
               <button className="yf-submit" style={{ marginTop: 8 }} disabled={!birthDate || otherLoading} onClick={() => guardYear(() => startAnalysis(birthDate, birthTime, gender, calendarType, {
                 setResult: setOtherResult, setLoading: setOtherLoading, setStreamText: setOtherStreamText, setStreaming: setOtherStreaming, cleanupRef: otherCleanupRef
               }))}>
-                {otherLoading || otherStreaming ? 'AI 분석중...' : '🎊 2026 운세 보기'} <HeartCost category="YEAR_FORTUNE" />
+                {otherLoading || otherStreaming ? 'AI 분석중...' : <><MenuIcon name="sparkle" size={16} /> 2026 운세 보기</>} <HeartCost category="YEAR_FORTUNE" />
               </button>
             </div>
           ) : renderResult(otherResult, birthDate, birthTime, gender, calendarType, () => { otherCleanupRef.current?.(); setOtherResult(null); setBirthDate(''); setBirthTime(''); setGender(''); setOtherStreamText(''); setOtherStreaming(false); window.scrollTo({ top: 0, behavior: 'smooth' }); })

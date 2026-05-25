@@ -8,6 +8,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
+import MenuIcon from '../components/MenuIcon';
 import { useToast } from '../components/Toast';
 import './Biorhythm.css';
 
@@ -334,7 +335,7 @@ function Biorhythm() {
         return (
           <div className="br-streaming-wrap">
             <div className="br-streaming-header">
-              <span className="br-streaming-orb">📊</span>
+              <span className="br-streaming-orb"><MenuIcon name="chart" size={24} /></span>
               <span className="br-streaming-title">AI가 바이오리듬을 분석중이에요</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>
@@ -368,7 +369,7 @@ function Biorhythm() {
             <h3 className="bio-input-title">{'\uD83C\uDF82'} 생년월일 입력</h3>
             {localStorage.getItem('userId') && (
               <button className="sf-autofill-btn" style={{ marginBottom: 12 }} onClick={handleAutoFill}>
-                ✨ 내 정보로 채우기
+                <MenuIcon name="sparkle" size={16} /> 내 정보로 채우기
               </button>
             )}
             <div className="bio-input-row">

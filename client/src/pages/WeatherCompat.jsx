@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import HeartCost from '../components/HeartCost';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
@@ -219,7 +220,7 @@ export default function WeatherCompat() {
         <div className="wc-hero-orb wc-hero-orb--1" />
         <div className="wc-hero-orb wc-hero-orb--2" />
         <div className="wc-hero-top">
-          <span className="wc-hero-city">📍 {effectiveWeather.city || '서울'}</span>
+          <span className="wc-hero-city"><MenuIcon name="pin" size={15} /> {effectiveWeather.city || '서울'}</span>
           <span className="wc-hero-time">{timeBand.icon} {timeBand.label}</span>
         </div>
         <div className="wc-hero-title-wrap">
@@ -245,15 +246,15 @@ export default function WeatherCompat() {
       <section className="wc-body">
         {!result && !loading && (
           <div className="wc-cta-card glass-card fade-in">
-            <span className="wc-cta-icon">🔮</span>
+            <span className="wc-cta-icon"><MenuIcon name="crystalBall" size={32} /></span>
             <h2 className="wc-cta-title">오늘 날씨와 내 사주, 얼마나 잘 맞을까?</h2>
             <p className="wc-cta-desc">
               오늘은 <b>{effectiveWeather.conditionLabel || effectiveWeather.condition}</b>이에요.<br/>
               날씨가 가진 오행과 내 일간의 상생/상극으로 오늘의 운세를 봐드릴게요.
             </p>
             {!weather && (
-              <p className="wc-cta-desc" style={{ color: '#94a3b8', fontSize: '12px', marginTop: '-8px' }}>
-                ⚠️ 위치 권한이 없어 기본값(맑음)으로 분석합니다.
+              <p className="wc-cta-desc" style={{ color: '#94a3b8', fontSize: '12px', marginTop: '-8px', display: 'inline-flex', alignItems: 'center', gap: 5, justifyContent: 'center' }}>
+                <MenuIcon name="alert" size={14} /> 위치 권한이 없어 기본값(맑음)으로 분석합니다.
               </p>
             )}
             {!hasBirth ? (
@@ -262,12 +263,12 @@ export default function WeatherCompat() {
                   먼저 사주 정보(생년월일)를 등록해주세요.
                 </p>
                 <button className="wc-analyze-btn" onClick={() => navigate('/profile/edit')}>
-                  ✨ 내 정보 등록하기
+                  <MenuIcon name="sparkle" size={16} /> 내 정보 등록하기
                 </button>
               </>
             ) : (
               <button className="wc-analyze-btn" onClick={handleAnalyze}>
-                ✨ 날씨 궁합 분석받기
+                <MenuIcon name="sparkle" size={16} /> 날씨 궁합 분석받기
                 <HeartCost category="WEATHER_COMPAT" />
               </button>
             )}
@@ -342,7 +343,7 @@ export default function WeatherCompat() {
                 const text = `[날씨 궁합 🌤️]\n오늘 ${result.conditionKo || result.condition} × 내 일간 ${result.dayMaster}\n점수: ${result.score}점 (${result.grade})\n${(result.overall || '').split('.').slice(0, 2).join('.')}.\n\nhttps://recipepig.kr`;
                 const r = await shareResult({ title: '날씨 궁합 결과', text });
                 if (r === 'copied') toast('클립보드에 복사되었습니다', 'success');
-              }}>📤 공유하기</button>
+              }}><MenuIcon name="share" size={16} /> 공유하기</button>
               <button className="wc-reset-btn" onClick={() => { setResult(null); }}>다시 보기</button>
             </div>
           </div>

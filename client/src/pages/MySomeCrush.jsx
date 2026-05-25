@@ -24,7 +24,7 @@ function MySomeCrush() {
           {[...Array(10)].map((_, i) => <span key={i} style={{ '--msc-i': i }}>✦</span>)}
         </div>
         <div className="mysome-hero-icons">
-          <span className="mysome-hero-heart">💘</span>
+          <span className="mysome-hero-heart"><MenuIcon name="heartArrow" size={28} /></span>
           <span className="mysome-hero-q">?</span>
         </div>
         <h1 className="mysome-hero-title">나의 썸·짝사랑</h1>
@@ -63,7 +63,7 @@ function MySomeCrush() {
 
       <section className="mysome-footer">
         <p className="mysome-footer-text">
-          💡 <strong>썸에서 연애로</strong>, 사주가 읽어주는 그 사람의 마음
+          <MenuIcon name="lightbulb" size={15} /> <strong>썸에서 연애로</strong>, 사주가 읽어주는 그 사람의 마음
         </p>
       </section>
     </div>

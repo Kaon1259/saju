@@ -321,8 +321,10 @@ function App() {
 
     const savedDeck = localStorage.getItem('tarotDeck') || 'newclassic';
     const deck = DECK_IDS.includes(savedDeck) ? savedDeck : 'newclassic';
+    // 카툰 덱만 앞면 폴더가 하이픈(tarot-cartoon-girl) — 언더스코어로 프리로드하면 404
+    const deckFolder = deck.startsWith('cartoon_') ? deck.replace('_', '-') : deck;
     const SELECTED_DECK_CARDS = saveData ? [] : Array.from({ length: 78 }, (_, i) =>
-      `/tarot-${deck}/m${String(i).padStart(2,'0')}_v0.webp`
+      `/tarot-${deckFolder}/m${String(i).padStart(2,'0')}_v0.webp`
     );
 
     const run = () => {

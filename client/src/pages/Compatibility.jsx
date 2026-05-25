@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getSajuCompatibilityBasic, getCompatibilityStream, saveCompatCache, isGuest, getHistory, getUser } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
+import MenuIcon from '../components/MenuIcon';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import { shareResult } from '../utils/share';
@@ -315,7 +316,7 @@ function Compatibility() {
         <section className="compat-cards">
           {aiStreaming && (
             <div className="compat-progress-bar">
-              <span className="compat-progress-icon">✨</span>
+              <span className="compat-progress-icon"><MenuIcon name="sparkle" size={16} /></span>
               <span className="compat-progress-text">AI가 더 깊이 분석 중<span className="compat-progress-dots"><i/><i/><i/></span></span>
             </div>
           )}
@@ -326,17 +327,17 @@ function Compatibility() {
           )}
           {result.aiAnalysis && (
             <div className="compat-card glass-card compat-card--ai">
-              <div className="compat-card-header"><span className="compat-card-icon">🔮</span><h3>종합 분석</h3></div>
+              <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="crystalBall" size={22} /></span><h3>종합 분석</h3></div>
               <p className="compat-card-text">{cleanAiText(result.aiAnalysis)}</p>
             </div>
           )}
           <div className="compat-card glass-card">
-            <div className="compat-card-header"><span className="compat-card-icon">☯️</span><h3>음양 조화</h3></div>
+            <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="traditional" size={22} /></span><h3>음양 조화</h3></div>
             <p className="compat-card-text">{result.yinyangBalance}</p>
           </div>
           {result.aiLoveCompat && (
             <div className="compat-card glass-card compat-card--ai">
-              <div className="compat-card-header"><span className="compat-card-icon">💕</span><h3>연애/결혼 궁합</h3></div>
+              <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="love" size={22} /></span><h3>연애/결혼 궁합</h3></div>
               <p className="compat-card-text">{cleanAiText(result.aiLoveCompat)}</p>
             </div>
           )}
@@ -348,28 +349,28 @@ function Compatibility() {
             <>
               {result.aiWorkCompat && (
                 <div className="compat-card glass-card compat-card--ai fade-in">
-                  <div className="compat-card-header"><span className="compat-card-icon">💼</span><h3>직장/업무 궁합</h3></div>
+                  <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="work" size={22} /></span><h3>직장/업무 궁합</h3></div>
                   <p className="compat-card-text">{cleanAiText(result.aiWorkCompat)}</p>
                 </div>
               )}
               {result.aiConflictPoint && (
                 <div className="compat-card glass-card compat-card--ai fade-in">
-                  <div className="compat-card-header"><span className="compat-card-icon">⚠️</span><h3>갈등 포인트 & 해결법</h3></div>
+                  <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="alert" size={22} /></span><h3>갈등 포인트 & 해결법</h3></div>
                   <p className="compat-card-text">{cleanAiText(result.aiConflictPoint)}</p>
                 </div>
               )}
               {result.aiAdvice && (
                 <div className="compat-card glass-card compat-card--ai fade-in">
-                  <div className="compat-card-header"><span className="compat-card-icon">💡</span><h3>관계 개선 조언</h3></div>
+                  <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="lightbulb" size={22} /></span><h3>관계 개선 조언</h3></div>
                   <p className="compat-card-text">{cleanAiText(result.aiAdvice)}</p>
                 </div>
               )}
               <div className="compat-card glass-card fade-in">
-                <div className="compat-card-header"><span className="compat-card-icon">⚡</span><h3>오행 관계</h3></div>
+                <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="spark" size={22} /></span><h3>오행 관계</h3></div>
                 <p className="compat-card-text">{result.elementRelation}</p>
               </div>
               <div className="compat-card glass-card fade-in">
-                <div className="compat-card-header"><span className="compat-card-icon">🔗</span><h3>일지 관계</h3></div>
+                <div className="compat-card-header"><span className="compat-card-icon"><MenuIcon name="handshake" size={22} /></span><h3>일지 관계</h3></div>
                 <p className="compat-card-text">{result.branchRelation}</p>
               </div>
               <button className="compat-more-btn" onClick={() => setShowMoreCards(false)}>접기 ▲</button>
@@ -384,7 +385,7 @@ function Compatibility() {
           const text = `[1:1연애 💕 사주 궁합]\n궁합 점수: ${result.score}점 (${result.grade})\n${result.aiSummary || ''}\n\nhttps://recipepig.kr`;
           const res = await shareResult({ title: '사주 궁합 결과', text });
           if (res === 'copied') { setShareMsg('클립보드에 복사됨!'); setTimeout(() => setShareMsg(''), 2000); }
-        }}>📤 결과 공유하기</button>
+        }}><MenuIcon name="share" size={16} /> 결과 공유하기</button>
         {shareMsg && <p style={{ textAlign: 'center', fontSize: 12, color: '#4ade80', margin: '4px 0' }}>{shareMsg}</p>}
       </div>
     );
@@ -410,7 +411,7 @@ function Compatibility() {
       )}
       {analysisCompleteEl}
       <section className="compat-intro compat-intro--compact">
-        <span className="compat-intro-icon">💕</span>
+        <span className="compat-intro-icon"><MenuIcon name="love" size={28} /></span>
         <h1 className="compat-intro-title">사주 궁합</h1>
       </section>
 
@@ -452,7 +453,7 @@ function Compatibility() {
               if (p.birthTime) setBt1(p.birthTime);
               if (p.calendarType) setCalType1(p.calendarType);
             } catch {}
-          }}>✨ 내 정보로 채우기</button>
+          }}><MenuIcon name="sparkle" size={16} /> 내 정보로 채우기</button>
         )}
         <div className="form-group">
           <label className="form-label">성별</label>
@@ -463,7 +464,7 @@ function Compatibility() {
           <BirthDatePicker value={bd1} onChange={setBd1} calendarType={calType1} onCalendarTypeChange={setCalType1} />
         </div>
         {!showTime && (
-          <button className="compat-time-toggle" onClick={() => setShowTime(true)}>⏰ 태어난 시간 입력 (선택, 더 정확한 분석)</button>
+          <button className="compat-time-toggle" onClick={() => setShowTime(true)}><MenuIcon name="clock" size={14} /> 태어난 시간 입력 (선택, 더 정확한 분석)</button>
         )}
         {showTime && (
           <div className="form-group">
@@ -493,11 +494,11 @@ function Compatibility() {
                   setBd2(profile.partnerBirthDate);
                   if (profile.partnerBirthTime) setBt2(profile.partnerBirthTime);
                   if (profile.gender === 'M') setG2('F'); else setG2('M');
-                }}>💕 연인 정보로 채우기</button>
+                }}><MenuIcon name="love" size={16} /> 연인 정보로 채우기</button>
               )}
               {stars.length > 0 && (
                 <button className="sf-autofill-btn" onClick={() => setShowStarPicker(true)}>
-                  ⭐ 스타 정보로 채우기
+                  <MenuIcon name="star" size={16} /> 스타 정보로 채우기
                 </button>
               )}
             </div>
@@ -507,7 +508,7 @@ function Compatibility() {
           <div className="star-picker-overlay" onClick={() => setShowStarPicker(false)}>
             <div className="star-picker-popup" onClick={e => e.stopPropagation()}>
               <div className="star-picker-header">
-                <h3 className="star-picker-title">⭐ 나의 스타 선택</h3>
+                <h3 className="star-picker-title"><MenuIcon name="star" size={18} /> 나의 스타 선택</h3>
                 <button className="star-picker-close" onClick={() => setShowStarPicker(false)}>✕</button>
               </div>
               <div className="star-picker-list">
@@ -547,7 +548,7 @@ function Compatibility() {
         )}
 
         <button className="btn-gold" onClick={() => guardCompat(handleAnalyze)} disabled={!bd1 || !bd2} style={{ opacity: bd1 && bd2 ? 1 : 0.5 }}>
-          💕 궁합 분석하기 <HeartCost category="COMPATIBILITY" />
+          <MenuIcon name="love" size={16} /> 궁합 분석하기 <HeartCost category="COMPATIBILITY" />
         </button>
       </div>
     </div>

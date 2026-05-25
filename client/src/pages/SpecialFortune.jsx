@@ -3,16 +3,17 @@ import { useSearchParams } from 'react-router-dom';
 import { getSpecialLoveFortune, getHourlyFortune, getTimeblockFortune } from '../api/fortune';
 import DeepAnalysis from '../components/DeepAnalysis';
 import FortuneCard from '../components/FortuneCard';
+import MenuIcon from '../components/MenuIcon';
 import BirthDatePicker from '../components/BirthDatePicker';
 import GenderPicker from '../components/GenderPicker';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import './SpecialFortune.css';
 
 const LOVE_TYPES = [
-  { id: 'relationship', label: '연애운',   icon: '💕', desc: '연인과의 오늘 하루' },
-  { id: 'reunion',      label: '재회운',   icon: '💔', desc: '다시 만날 수 있을까?' },
-  { id: 'remarriage',   label: '재혼운',   icon: '💍', desc: '새로운 인연의 가능성' },
-  { id: 'blind_date',   label: '소개팅운', icon: '💘', desc: '좋은 만남이 올까?' },
+  { id: 'relationship', label: '연애운',   icon: '💕', iconKey: 'love',       desc: '연인과의 오늘 하루' },
+  { id: 'reunion',      label: '재회운',   icon: '💔', iconKey: 'moon',       desc: '다시 만날 수 있을까?' },
+  { id: 'remarriage',   label: '재혼운',   icon: '💍', iconKey: 'ring',       desc: '새로운 인연의 가능성' },
+  { id: 'blind_date',   label: '소개팅운', icon: '💘', iconKey: 'heartArrow', desc: '좋은 만남이 올까?' },
 ];
 
 const GRADE_COLORS = { '대길': '#ff3d7f', '길': '#ff6b9d', '보통': '#fbbf24', '흉': '#94a3b8' };
@@ -135,10 +136,10 @@ function SpecialFortune() {
       {/* 상단 탭 */}
       <div className="sf-tabs">
         <button className={`sf-tab ${tab === 'love' ? 'active sf-tab--love' : ''}`} onClick={() => switchTab('love')}>
-          💝 연애 운세
+          <MenuIcon name="letter" size={18} /> 연애 운세
         </button>
         <button className={`sf-tab ${tab === 'time' ? 'active sf-tab--time' : ''}`} onClick={() => switchTab('time')}>
-          🕐 시간별 운세
+          <MenuIcon name="clock" size={18} /> 시간별 운세
         </button>
       </div>
 
@@ -151,7 +152,7 @@ function SpecialFortune() {
               <button key={lt.id}
                 className={`sf-love-chip ${loveType === lt.id ? 'active' : ''}`}
                 onClick={() => { setLoveType(lt.id); resetResult(); }}>
-                <span className="sf-chip-icon">{lt.icon}</span>
+                <span className="sf-chip-icon"><MenuIcon name={lt.iconKey} size={24} /></span>
                 <span className="sf-chip-label">{lt.label}</span>
                 <span className="sf-chip-desc">{lt.desc}</span>
               </button>
@@ -172,7 +173,7 @@ function SpecialFortune() {
                     if (p.calendarType) setCalendarType(p.calendarType);
                     if (p.birthTime) setBirthTime(p.birthTime);
                   } catch {}
-                }}>✨ 내 정보로 채우기</button>
+                }}><MenuIcon name="sparkle" size={16} /> 내 정보로 채우기</button>
               )}
               <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
@@ -219,10 +220,10 @@ function SpecialFortune() {
                     return (prof.partnerBirthDate || stars.length > 0) ? (
                       <div className="compat-autofill-row">
                         {prof.partnerBirthDate && (
-                          <button className="sf-autofill-btn" onClick={() => { setPartnerDate(prof.partnerBirthDate); if (prof.gender === 'M') setPartnerGender('F'); else setPartnerGender('M'); }}>💕 연인 정보로 채우기</button>
+                          <button className="sf-autofill-btn" onClick={() => { setPartnerDate(prof.partnerBirthDate); if (prof.gender === 'M') setPartnerGender('F'); else setPartnerGender('M'); }}><MenuIcon name="love" size={16} /> 연인 정보로 채우기</button>
                         )}
                         {stars.length > 0 && (
-                          <button className="sf-autofill-btn" onClick={() => setShowStarPicker(true)}>⭐ 스타 정보로 채우기</button>
+                          <button className="sf-autofill-btn" onClick={() => setShowStarPicker(true)}><MenuIcon name="star" size={16} /> 스타 정보로 채우기</button>
                         )}
                       </div>
                     ) : null;
@@ -231,7 +232,7 @@ function SpecialFortune() {
                     <div className="star-picker-overlay" onClick={() => setShowStarPicker(false)}>
                       <div className="star-picker-popup" onClick={e => e.stopPropagation()}>
                         <div className="star-picker-header">
-                          <h3 className="star-picker-title">⭐ 나의 스타 선택</h3>
+                          <h3 className="star-picker-title"><MenuIcon name="star" size={18} /> 나의 스타 선택</h3>
                           <button className="star-picker-close" onClick={() => setShowStarPicker(false)}>✕</button>
                         </div>
                         <div className="star-picker-list">
@@ -258,7 +259,7 @@ function SpecialFortune() {
               )}
 
               <button className="sf-submit sf-submit--love" onClick={handleAnalyze} disabled={!birthDate || loading}>
-                {loading ? 'AI 분석 중...' : `${loveInfo?.icon} ${loveInfo?.label} 보기`}
+                {loading ? 'AI 분석 중...' : <>{loveInfo?.iconKey && <MenuIcon name={loveInfo.iconKey} size={18} />} {loveInfo?.label} 보기</>}
               </button>
             </div>
           )}
@@ -303,7 +304,7 @@ function SpecialFortune() {
                 <DeepAnalysis type={loveType === 'relationship' ? 'love' : loveType} birthDate={birthDate} birthTime={birthTime} gender={gender} calendarType={calendarType} previousResult={result} />
               )}
 
-              <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}>🔄 다시 보기</button>
+              <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
             </div>
           )}
         </div>
@@ -316,11 +317,11 @@ function SpecialFortune() {
           <div className="sf-time-modes">
             <button className={`sf-mode-btn ${timeMode === 'timeblock' ? 'active' : ''}`}
               onClick={() => { setTimeMode('timeblock'); resetResult(); }}>
-              🌅 아침 · 점심 · 저녁
+              <MenuIcon name="sun" size={16} /> 아침 · 점심 · 저녁
             </button>
             <button className={`sf-mode-btn ${timeMode === 'hourly' ? 'active' : ''}`}
               onClick={() => { setTimeMode('hourly'); resetResult(); }}>
-              🕐 12시진 상세
+              <MenuIcon name="clock" size={16} /> 12시진 상세
             </button>
           </div>
 
@@ -336,7 +337,7 @@ function SpecialFortune() {
                     if (p.calendarType) setCalendarType(p.calendarType);
                     if (p.birthTime) setBirthTime(p.birthTime);
                   } catch {}
-                }}>✨ 내 정보로 채우기</button>
+                }}><MenuIcon name="sparkle" size={16} /> 내 정보로 채우기</button>
               )}
               <div className="sf-form-group">
                 <label className="sf-label">생년월일</label>
@@ -353,7 +354,7 @@ function SpecialFortune() {
                 </select>
               </div>
               <button className="sf-submit sf-submit--time" onClick={handleAnalyze} disabled={!birthDate || loading}>
-                {loading ? 'AI 분석 중...' : `⏰ ${timeMode === 'timeblock' ? '아침/점심/저녁' : '12시진'} 운세 보기`}
+                {loading ? 'AI 분석 중...' : <><MenuIcon name="clock" size={18} /> {timeMode === 'timeblock' ? '아침/점심/저녁' : '12시진'} 운세 보기</>}
               </button>
             </div>
           )}
@@ -394,13 +395,13 @@ function SpecialFortune() {
                         </div>
                       </div>
                       <p className="sf-block-fortune">{b.fortune}</p>
-                      <p className="sf-block-advice">💡 {b.advice}</p>
+                      <p className="sf-block-advice"><MenuIcon name="lightbulb" size={15} /> {b.advice}</p>
                       {b.luckyAction && <span className="sf-block-action">추천: {b.luckyAction}</span>}
                     </div>
                   );
                 })}
               </div>
-              <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}>🔄 다시 보기</button>
+              <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
             </div>
           )}
 
@@ -411,8 +412,8 @@ function SpecialFortune() {
                 <div className="sf-time-summary glass-card">
                   <p>{result.summary}</p>
                   <div className="sf-best-worst">
-                    <span className="sf-best">✨ 최고: {result.bestHour}</span>
-                    <span className="sf-worst">⚠️ 주의: {result.worstHour}</span>
+                    <span className="sf-best"><MenuIcon name="sparkle" size={15} /> 최고: {result.bestHour}</span>
+                    <span className="sf-worst"><MenuIcon name="alert" size={15} /> 주의: {result.worstHour}</span>
                   </div>
                 </div>
               )}
@@ -429,12 +430,12 @@ function SpecialFortune() {
                         <span className={`sf-hour-score ${h.score >= 75 ? 'high' : h.score >= 55 ? 'mid' : 'low'}`}>{h.score}점</span>
                       </div>
                       <p className="sf-hour-fortune">{h.fortune}</p>
-                      {h.action && <p className="sf-hour-action">💡 {h.action}</p>}
+                      {h.action && <p className="sf-hour-action"><MenuIcon name="lightbulb" size={15} /> {h.action}</p>}
                     </div>
                   );
                 })}
               </div>
-              <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}>🔄 다시 보기</button>
+              <button className="sf-reset" onClick={() => { setResult(null); setBirthDate(''); }}><MenuIcon name="refresh" size={16} /> 다시 보기</button>
             </div>
           )}
         </div>

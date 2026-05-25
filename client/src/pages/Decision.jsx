@@ -51,16 +51,16 @@ const CATEGORIES = {
 };
 
 const VERDICT_LABELS = {
-  yes:  { label: '진행해도 좋아', color: '#10B981', icon: '✅' },
-  no:   { label: '조심스럽게 멈춰', color: '#F43F5E', icon: '🛑' },
-  wait: { label: '조금만 더 기다려', color: '#F59E0B', icon: '⏳' },
+  yes:  { label: '진행해도 좋아', color: '#10B981', iconKey: 'check' },
+  no:   { label: '조심스럽게 멈춰', color: '#F43F5E', iconKey: 'ban' },
+  wait: { label: '조금만 더 기다려', color: '#F59E0B', iconKey: 'clock' },
 };
 
 function VerdictBadge({ verdict, label, confidence, color }) {
   const v = VERDICT_LABELS[verdict] || VERDICT_LABELS.wait;
   return (
     <div className="dec-verdict-card" style={{ '--vc': color || v.color }}>
-      <div className="dec-verdict-icon">{v.icon}</div>
+      <div className="dec-verdict-icon"><MenuIcon name={v.iconKey} size={34} /></div>
       <div className="dec-verdict-label">{label || v.label}</div>
       <div className="dec-verdict-confidence">
         <span className="dec-vc-num">{confidence ?? 60}</span>
@@ -432,7 +432,7 @@ function Decision() {
           <div className="dec-streaming-wrap">
             <div className="dec-streaming-header">
               <div className="dec-streaming-title">
-                <span className="dec-streaming-orb">{info.icon}</span>
+                <span className="dec-streaming-orb"><MenuIcon name={info.iconKey} size={26} /></span>
                 <span>사주의 흐름을 읽고 있어요</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
@@ -470,23 +470,23 @@ function Decision() {
           )}
 
           {result.overall && (
-            <FortuneCard icon="📖" title="종합 분석" description={result.overall} delay={0} />
+            <FortuneCard iconKey="book" title="종합 분석" description={result.overall} delay={0} />
           )}
           {result.timing && (
-            <FortuneCard icon="⏳" title="타이밍 분석" description={result.timing} delay={80} />
+            <FortuneCard iconKey="clock" title="타이밍 분석" description={result.timing} delay={80} />
           )}
 
           {(result.bestPeriod || result.worstPeriod) && (
             <div className="dec-period-grid">
               {result.bestPeriod && (
                 <div className="dec-period dec-period--best">
-                  <div className="dec-period-label">📅 가장 좋은 시기</div>
+                  <div className="dec-period-label"><MenuIcon name="calendar" size={15} /> 가장 좋은 시기</div>
                   <div className="dec-period-text">{result.bestPeriod}</div>
                 </div>
               )}
               {result.worstPeriod && (
                 <div className="dec-period dec-period--worst">
-                  <div className="dec-period-label">⛔ 피해야 할 시기</div>
+                  <div className="dec-period-label"><MenuIcon name="ban" size={15} /> 피해야 할 시기</div>
                   <div className="dec-period-text">{result.worstPeriod}</div>
                 </div>
               )}
@@ -494,18 +494,18 @@ function Decision() {
           )}
 
           {result.actionPlan && (
-            <FortuneCard icon="🗺️" title="행동 로드맵" description={result.actionPlan} delay={160} />
+            <FortuneCard iconKey="compass" title="행동 로드맵" description={result.actionPlan} delay={160} />
           )}
           {result.conditions && (
-            <FortuneCard icon="✅" title="결정 조건" description={result.conditions} delay={240} />
+            <FortuneCard iconKey="check" title="결정 조건" description={result.conditions} delay={240} />
           )}
           {result.redFlags && (
-            <FortuneCard icon="⚠️" title="주의 신호" description={result.redFlags} delay={320} />
+            <FortuneCard iconKey="alert" title="주의 신호" description={result.redFlags} delay={320} />
           )}
 
           {result.ownerNote && (
             <div className="dec-owner-note">
-              <span className="dec-owner-icon">💡</span>
+              <span className="dec-owner-icon"><MenuIcon name="lightbulb" size={18} /></span>
               <div>{result.ownerNote}</div>
             </div>
           )}
@@ -519,7 +519,7 @@ function Decision() {
             const text = `[${info.title}]\n"${result.headline || ''}"\n${(result.overall || '').split('.').slice(0, 2).join('.')}.\n\nhttps://recipepig.kr`;
             const res = await shareResult({ title: `${info.title} 결과`, text });
             if (res === 'copied') toast('클립보드에 복사되었습니다', 'success');
-          }}>📤 공유하기</button>
+          }}><MenuIcon name="share" size={16} /> 공유하기</button>
           <button className="dec-reset" onClick={handleReset}>다시 보기</button>
         </div>
       )}

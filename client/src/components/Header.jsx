@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTransition } from './PageTransition';
 import { useHearts } from '../context/HeartContext';
 import { useApp } from '../context/AppContext';
+import MenuIcon from './MenuIcon';
 import {
   playHomeChime, playLovebeat, playCrystalBall, playHarmony, playOriental,
   playProfilePing, playTarotReveal, playStarTwinkle, playBloodDrop,
@@ -194,15 +195,16 @@ function Header({ onHomeSplash, onTabIntro }) {
               aria-label="하트 잔량 새로고침"
               title="탭하면 잔량 새로고침"
             >
-              <span className="top-bar-hearts-icon">{heartRefreshing ? '🔄' : '💗'}</span>
+              <span className="top-bar-hearts-icon">{heartRefreshing ? <MenuIcon name="refresh" size={15} /> : <MenuIcon name="heart" size={15} />}</span>
               <span className="top-bar-hearts-count">{heartPoints}</span>
             </div>
           )}
           <button
             className="top-bar-settings-btn"
             onClick={() => navigate('/settings')}
+            aria-label="설정"
           >
-            ⚙️
+            <MenuIcon name="settings" size={20} />
           </button>
         </div>
       </header>

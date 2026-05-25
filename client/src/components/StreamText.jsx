@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import MenuIcon from './MenuIcon';
+import { emojiToIconKey } from '../utils/emojiIcon';
 import './StreamText.css';
 
 /**
@@ -23,10 +25,14 @@ function StreamText({ text, icon = '🔮', label = 'AI가 분석하고 있어요
 
   if (!text) return null;
 
+  const iconKey = typeof icon === 'string' ? emojiToIconKey(icon) : null;
+
   return (
     <div className="stream-text-wrap glass-card" ref={containerRef} style={{ '--stream-color': color || '#FBBF24' }}>
       <div className="stream-text-header">
-        <span className="stream-text-icon">{icon}</span>
+        <span className="stream-text-icon" style={iconKey ? { color: color || '#FBBF24' } : undefined}>
+          {iconKey ? <MenuIcon name={iconKey} size={24} /> : icon}
+        </span>
         <span className="stream-text-label">{label}</span>
         <div className="stream-text-dots"><span /><span /><span /></div>
       </div>

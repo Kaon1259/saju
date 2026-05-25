@@ -7,6 +7,7 @@ import GenderPicker from '../components/GenderPicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -17,18 +18,18 @@ import './Dream.css';
 // 인기 꿈 키워드
 // ═══════════════════════════════════════════════════
 const DREAM_KEYWORDS = [
-  { label: '물',   emoji: '🌊' },
-  { label: '뱀',   emoji: '🐍' },
-  { label: '돈',   emoji: '💰' },
-  { label: '죽음', emoji: '💀' },
-  { label: '비행', emoji: '🕊️' },
-  { label: '불',   emoji: '🔥' },
-  { label: '아기', emoji: '👶' },
-  { label: '시험', emoji: '📝' },
-  { label: '결혼', emoji: '💍' },
-  { label: '이빨', emoji: '🦷' },
-  { label: '꽃',   emoji: '🌸' },
-  { label: '산',   emoji: '⛰️' },
+  { label: '물',   iconKey: 'biorhythm' },
+  { label: '뱀',   iconKey: 'spark' },
+  { label: '돈',   iconKey: 'money' },
+  { label: '죽음', iconKey: 'moon' },
+  { label: '비행', iconKey: 'plane' },
+  { label: '불',   iconKey: 'spark' },
+  { label: '아기', iconKey: 'user' },
+  { label: '시험', iconKey: 'book' },
+  { label: '결혼', iconKey: 'ring' },
+  { label: '이빨', iconKey: 'gem' },
+  { label: '꽃',   iconKey: 'sparkle' },
+  { label: '산',   iconKey: 'compass' },
 ];
 
 const MAX_CHARS = 500;
@@ -238,7 +239,7 @@ function Dream() {
       {/* ── 히어로 ── */}
       <div className="dream-hero">
         <div className="dream-hero-glow" />
-        <div className="dream-hero-moon">🌙</div>
+        <div className="dream-hero-moon"><MenuIcon name="dream" size={48} /></div>
         <h1 className="dream-title">꿈해몽</h1>
         <p className="dream-subtitle">꿈 속 메시지를 풀어드립니다</p>
       </div>
@@ -250,7 +251,7 @@ function Dream() {
           {/* 인기 키워드 */}
           <section className="dream-section">
             <h2 className="dream-section-title">
-              <span className="dream-section-icon">✨</span>
+              <span className="dream-section-icon"><MenuIcon name="sparkle" size={18} /></span>
               인기 꿈 키워드
             </h2>
             <div className="dream-keywords">
@@ -258,7 +259,7 @@ function Dream() {
                 <button key={kw.label}
                   className="dream-keyword-chip"
                   onClick={() => handleKeyword(kw.label)}>
-                  <span className="dream-chip-emoji">{kw.emoji}</span>
+                  <span className="dream-chip-emoji"><MenuIcon name={kw.iconKey} size={20} /></span>
                   <span className="dream-chip-label">{kw.label}</span>
                 </button>
               ))}
@@ -268,7 +269,7 @@ function Dream() {
           {/* 꿈 설명 텍스트 */}
           <section className="dream-section">
             <h2 className="dream-section-title">
-              <span className="dream-section-icon">💭</span>
+              <span className="dream-section-icon"><MenuIcon name="chat" size={18} /></span>
               꿈 내용
             </h2>
             <div className="dream-textarea-wrap">
@@ -320,7 +321,7 @@ function Dream() {
             className="dream-submit-btn"
             onClick={() => guardDream(handleSubmit)}
             disabled={!dreamText.trim()}>
-            <span className="dream-submit-icon">🌙</span>
+            <span className="dream-submit-icon"><MenuIcon name="dream" size={20} /></span>
             <span>꿈 해석하기</span>
             <HeartCost category="DREAM" />
             <span className="dream-submit-glow" />
@@ -339,7 +340,7 @@ function Dream() {
           return (
             <div className="dream-streaming-wrap">
               <div className="dream-streaming-header">
-                <span className="dream-streaming-orb">🌙</span>
+                <span className="dream-streaming-orb"><MenuIcon name="dream" size={24} /></span>
                 <span className="dream-streaming-title">AI가 꿈을 해석중이에요</span>
                 <span className="streaming-dots"><i/><i/><i/></span>
               </div>
@@ -439,10 +440,10 @@ function Dream() {
             {/* ── 액션 버튼 ── */}
             <div className="dream-actions">
               <button className="dream-action-btn dream-share-btn" onClick={handleShare}>
-                <span>📤</span> 공유하기
+                <MenuIcon name="share" size={16} /> 공유하기
               </button>
               <button className="dream-action-btn dream-reset-btn" onClick={resetAll}>
-                <span>🔄</span> 다시 해몽하기
+                <MenuIcon name="refresh" size={16} /> 다시 해몽하기
               </button>
             </div>
           </div>

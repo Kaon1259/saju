@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPsychTests, analyzePsychTestStream, isGuest } from '../api/fortune';
 
@@ -6,6 +6,7 @@ import StreamText from '../components/StreamText';
 import StreamingCard from '../components/StreamingCard';
 import HeroIconButtons from '../components/HeroIconButtons';
 import AnalysisComplete from '../components/AnalysisComplete';
+import MenuIcon from '../components/MenuIcon';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
@@ -15,6 +16,14 @@ import './PsychTest.css';
 // ═══════════════════════════════════════════════════
 // 테스트 목록 (서버 미응답시 폴백)
 // ═══════════════════════════════════════════════════
+// 테스트 id → outline 아이콘 키 (서버/폴백 공통)
+const TEST_ICON_KEYS = {
+  love: 'love', 'love-style': 'love',
+  hidden: 'sparkle', 'hidden-self': 'sparkle',
+  luck: 'clover',
+};
+const testIconKey = (test) => TEST_ICON_KEYS[test?.id] || 'psych';
+
 const FALLBACK_TESTS = [
   {
     id: 'love',
@@ -273,7 +282,7 @@ function PsychTest() {
         <div className="pt-hero fade-in" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
           <HeroIconButtons color={selectedTest?.color || '#9B59B6'} onReset={goToOtherTest} />
           <div className="pt-hero-glow" />
-          <div className="pt-hero-icon">{'\uD83E\uDDE0'}</div>
+          <div className="pt-hero-icon"><MenuIcon name="psych" size={48} /></div>
           <h1 className="pt-title">심리테스트</h1>
           <p className="pt-subtitle">재미있는 테스트로 나를 더 알아보세요</p>
           <div className="pt-hero-divider" />
@@ -292,7 +301,7 @@ function PsychTest() {
                 onClick={() => guardPsych(() => startTest(test))}
               >
                 <div className="pt-test-card-glow" />
-                <span className="pt-test-icon">{test.icon}</span>
+                <span className="pt-test-icon"><MenuIcon name={testIconKey(test)} size={36} /></span>
                 <h3 className="pt-test-title">{test.title}</h3>
                 <p className="pt-test-desc">{test.description}</p>
                 <div className="pt-test-meta">
@@ -352,7 +361,7 @@ function PsychTest() {
       {step === 'loading' && (
         <div className="pt-loading fade-in">
           <div className="pt-loading-container">
-            <div className="pt-loading-brain">{'\uD83E\uDDE0'}</div>
+            <div className="pt-loading-brain"><MenuIcon name="psych" size={40} /></div>
             <div className="pt-loading-rings">
               <div className="pt-loading-ring pt-loading-ring--1" style={{ borderColor: selectedTest?.color || '#9B59B6' }} />
               <div className="pt-loading-ring pt-loading-ring--2" style={{ borderColor: selectedTest?.color || '#9B59B6' }} />
@@ -373,7 +382,7 @@ function PsychTest() {
         return (
           <div className="pt-streaming-wrap fade-in">
             <div className="pt-streaming-header">
-              <span className="pt-streaming-orb">🎭</span>
+              <span className="pt-streaming-orb"><MenuIcon name="psych" size={24} /></span>
               <span className="pt-streaming-title">AI가 심리를 분석중이에요</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>
@@ -404,7 +413,7 @@ function PsychTest() {
           {/* 강점 */}
           {result.strengths && result.strengths.length > 0 && (
             <div className="pt-traits-card glass-card">
-              <h3 className="pt-traits-title pt-traits--strength">{'\uD83C\uDF1F'} 강점</h3>
+              <h3 className="pt-traits-title pt-traits--strength"><MenuIcon name="star" size={18} /> 강점</h3>
               <div className="pt-traits-list">
                 {result.strengths.map((s, i) => (
                   <span key={i} className="pt-trait-badge pt-trait--green">{s}</span>
@@ -416,7 +425,7 @@ function PsychTest() {
           {/* 약점 */}
           {result.weaknesses && result.weaknesses.length > 0 && (
             <div className="pt-traits-card glass-card">
-              <h3 className="pt-traits-title pt-traits--weakness">{'\u26A0\uFE0F'} 주의할 점</h3>
+              <h3 className="pt-traits-title pt-traits--weakness"><MenuIcon name="alert" size={18} /> 주의할 점</h3>
               <div className="pt-traits-list">
                 {result.weaknesses.map((w, i) => (
                   <span key={i} className="pt-trait-badge pt-trait--yellow">{w}</span>
@@ -428,7 +437,7 @@ function PsychTest() {
           {/* 조언 */}
           {result.advice && (
             <div className="pt-advice-card glass-card">
-              <h3 className="pt-advice-title">{'\uD83D\uDCA1'} 조언</h3>
+              <h3 className="pt-advice-title"><MenuIcon name="lightbulb" size={18} /> 조언</h3>
               <p className="pt-advice-text">{result.advice}</p>
             </div>
           )}
@@ -436,7 +445,7 @@ function PsychTest() {
           {/* 궁합 */}
           {result.compatibility && (
             <div className="pt-compat-card glass-card">
-              <h3 className="pt-compat-title">{'\uD83D\uDC9E'} 궁합 정보</h3>
+              <h3 className="pt-compat-title"><MenuIcon name="love" size={18} /> 궁합 정보</h3>
               <p className="pt-compat-text">{result.compatibility}</p>
             </div>
           )}
@@ -464,10 +473,10 @@ function PsychTest() {
           {/* 액션 */}
           <div className="pt-actions">
             <button className="pt-action-btn pt-share-btn" style={{ background: `linear-gradient(135deg, ${selectedTest?.color || '#9B59B6'}, ${selectedTest?.color || '#9B59B6'}cc)` }} onClick={handleShare}>
-              <span>{'\uD83D\uDCE4'}</span> 공유하기
+              <MenuIcon name="share" size={16} /> 공유하기
             </button>
             <button className="pt-action-btn pt-other-btn" onClick={goToOtherTest}>
-              <span>{'\uD83C\uDFAF'}</span> 다른 테스트
+              <MenuIcon name="target" size={16} /> 다른 테스트
             </button>
           </div>
         </div>

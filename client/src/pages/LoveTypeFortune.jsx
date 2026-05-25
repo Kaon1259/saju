@@ -174,7 +174,7 @@ function LoveTypeFortune() {
       <div className="ltf-page">
         <div className="ltf-notfound" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
           <HeroIconButtons color="#94A3B8" />
-          <span style={{ fontSize: 48 }}>❓</span>
+          <span style={{ color: '#94A3B8' }}><MenuIcon name="search" size={48} /></span>
           <h2>존재하지 않는 운세입니다</h2>
           <button className="ltf-submit" onClick={() => navigate('/')}>홈으로</button>
         </div>
@@ -365,21 +365,22 @@ function LoveTypeFortune() {
       {!result && !loading && !streaming && (() => {
         const PARTNER_REQUIRED_TYPES = ['couple_fortune', 'some_check', 'crush'];
         const partnerBlockLabel = {
-          couple_fortune: '💕 연인 정보',
-          some_check:     '💛 썸 상대 정보',
-          crush:          '💘 짝사랑 상대 정보',
+          couple_fortune: { iconKey: 'love',       text: '연인 정보' },
+          some_check:     { iconKey: 'heart',      text: '썸 상대 정보' },
+          crush:          { iconKey: 'heartArrow', text: '짝사랑 상대 정보' },
         };
         const autofillLabel = {
-          couple_fortune: '✨ 내 정보 / 연인 정보로 채우기',
-          some_check:     '✨ 내 정보 / 썸 상대 정보로 채우기',
-          crush:          '✨ 내 정보 / 짝사랑 상대 정보로 채우기',
+          couple_fortune: '내 정보 / 연인 정보로 채우기',
+          some_check:     '내 정보 / 썸 상대 정보로 채우기',
+          crush:          '내 정보 / 짝사랑 상대 정보로 채우기',
         };
+        const partnerBlk = partnerBlockLabel[type] || { iconKey: 'love', text: '상대 정보' };
         const isPartnerRequired = PARTNER_REQUIRED_TYPES.includes(type);
         return (
         <div className="ltf-form fade-in">
           {userId && (
             <button className="ltf-autofill" onClick={handleAutoFill}>
-              {autofillLabel[type] || '✨ 내 정보로 채우기'}
+              <MenuIcon name="sparkle" size={16} /> {autofillLabel[type] || '내 정보로 채우기'}
             </button>
           )}
 
@@ -387,7 +388,7 @@ function LoveTypeFortune() {
             /* ═══ 상대 필수 타입 — 정통궁합처럼 내 정보 / 상대 정보 블록 2개 ═══ */
             <>
               <div className="ltf-person-block">
-                <h3 className="ltf-person-title">👤 내 정보</h3>
+                <h3 className="ltf-person-title"><MenuIcon name="user" size={18} /> 내 정보</h3>
                 <BirthDatePicker value={birth} onChange={setBirth} calendarType={calendarType} onCalendarTypeChange={setCalendarType} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={gender} onChange={setGender} />
@@ -395,7 +396,7 @@ function LoveTypeFortune() {
               </div>
 
               <div className="ltf-person-block">
-                <h3 className="ltf-person-title">{partnerBlockLabel[type]}</h3>
+                <h3 className="ltf-person-title"><MenuIcon name={partnerBlk.iconKey} size={18} /> {partnerBlk.text}</h3>
                 <BirthDatePicker value={partnerDate} onChange={setPartnerDate} calendarType={partnerCalendarType} onCalendarTypeChange={setPartnerCalendarType} />
                 <div style={{ marginTop: 10 }}>
                   <GenderPicker value={partnerGender} onChange={setPartnerGender} />
@@ -496,7 +497,7 @@ function LoveTypeFortune() {
         <div className="ltf-result ltf-result-reveal" ref={resultRef} style={{ '--heart-color': heartColor }}>
           {type === 'ideal_type' ? (
             <div className="ltf-ideal-header">
-              <span className="ltf-ideal-emoji">👩‍❤️‍👨</span>
+              <span className="ltf-ideal-emoji"><MenuIcon name="sparkleHeart" size={40} /></span>
               <h3 className="ltf-ideal-title">나의 이상형 분석</h3>
             </div>
           ) : (
@@ -536,7 +537,7 @@ function LoveTypeFortune() {
             const text = `[${info.label}]\n점수: ${result.score}점 (${result.grade})\n${(result.overall||'').split('.').slice(0,2).join('.')}.\n\nhttps://recipepig.kr`;
             const res = await shareResult({ title: `${info.label} 결과`, text });
             if (res === 'copied') toast('클립보드에 복사되었습니다', 'success');
-          }}>📤 공유하기</button>
+          }}><MenuIcon name="share" size={16} /> 공유하기</button>
           <button className="ltf-reset" onClick={handleReset}>다시 보기</button>
         </div>
       )}

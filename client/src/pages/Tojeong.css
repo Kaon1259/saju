@@ -2,7 +2,9 @@
 .tj-streaming-wrap { padding: 8px 0 16px; }
 .tj-streaming-header { text-align: center; margin: 8px 0 18px; display: flex; justify-content: center; align-items: center; gap: 8px; }
 .tj-streaming-title { font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #fbbf24 0%, #ef4444 50%, #a855f7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.tj-streaming-orb { font-size: 22px; display: inline-block; animation: tjOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8)); }
+.tj-streaming-orb { font-size: 22px; display: inline-flex; align-items: center; animation: tjOrb 1.6s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8)); }
+/* MenuIcon 정렬 */
+.tj-btn-icon { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 @keyframes tjOrb { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(-10deg); } }
 .tj-streaming-cards { display: flex; flex-direction: column; gap: 10px; }
 
@@ -82,7 +84,7 @@
 .tj-gwae-name { font-size: 16px; font-weight: 800; color: var(--color-accent-gold); text-align: center; padding: 8px 20px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); border-radius: 20px; display: inline-block; }
 
 /* Summary */
-.tj-section-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+.tj-section-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 .tj-summary { padding: 16px; }
 .tj-summary-text { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); }
 

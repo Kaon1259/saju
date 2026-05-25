@@ -5,6 +5,7 @@ import BirthDatePicker from '../components/BirthDatePicker';
 import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import StreamingCard from '../components/StreamingCard';
+import MenuIcon from '../components/MenuIcon';
 import { SkeletonCard } from '../components/Skeleton';
 import parseAiJson, { extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
@@ -15,11 +16,11 @@ import './Manseryeok.css';
 const ELEMENT_COLORS = { '목': '#4ade80', '화': '#f87171', '토': '#fbbf24', '금': '#e2e8f0', '수': '#60a5fa' };
 
 const AI_SECTIONS = [
-  { key: 'dayMasterMeaning', icon: '☯️', label: '일간 해석' },
-  { key: 'fiveElementBalance', icon: '🔄', label: '오행 균형 분석' },
-  { key: 'pillarRelation', icon: '🏛️', label: '기둥 간 관계' },
-  { key: 'todayEnergy', icon: '✨', label: '오늘의 기운' },
-  { key: 'advice', icon: '💡', label: '조언' },
+  { key: 'dayMasterMeaning', icon: '☯️', iconKey: 'traditional', label: '일간 해석' },
+  { key: 'fiveElementBalance', icon: '🔄', iconKey: 'refresh', label: '오행 균형 분석' },
+  { key: 'pillarRelation', icon: '🏛️', iconKey: 'traditional', label: '기둥 간 관계' },
+  { key: 'todayEnergy', icon: '✨', iconKey: 'sparkle', label: '오늘의 기운' },
+  { key: 'advice', icon: '💡', iconKey: 'lightbulb', label: '조언' },
 ];
 
 function Manseryeok() {
@@ -231,7 +232,7 @@ function Manseryeok() {
         return (
           <div className="ms-streaming-wrap">
             <div className="ms-streaming-header">
-              <span className="ms-streaming-orb">📜</span>
+              <span className="ms-streaming-orb"><MenuIcon name="tojeong" size={24} /></span>
               <span className="ms-streaming-title">AI가 만세력을 분석중이에요</span>
               <span className="streaming-dots"><i/><i/><i/></span>
             </div>
@@ -268,7 +269,7 @@ function Manseryeok() {
         <div className="ms-result fade-in">
 
           <section className="ms-pillars glass-card">
-            <h2 className="ms-section-title">📅 {data.date} ({data.zodiacAnimal}띠 해)</h2>
+            <h2 className="ms-section-title"><MenuIcon name="calendar" size={18} /> {data.date} ({data.zodiacAnimal}띠 해)</h2>
             <div className="ms-pillars-grid">
               {renderPillar(data.yearPillar)}
               {renderPillar(data.monthPillar)}
@@ -280,7 +281,7 @@ function Manseryeok() {
           {!aiResult && aiCacheChecking && !aiStreaming && !aiLoading && (
             <>
               <div className="myf-cache-check myf-cache-check--inline">
-                <div className="myf-cache-check-icon" aria-hidden="true">⏳</div>
+                <div className="myf-cache-check-icon" aria-hidden="true"><MenuIcon name="clock" size={20} /></div>
                 <p className="myf-cache-check-text">저장된 AI 해석 확인중</p>
               </div>
               <div className="sk-page">
@@ -294,7 +295,7 @@ function Manseryeok() {
           {/* AI 해석 없음 → 버튼 노출 */}
           {!aiResult && !aiCacheChecking && !aiStreaming && !aiLoading && (
             <section className="glass-card" style={{ padding: '22px 20px', textAlign: 'center' }}>
-              <h2 className="ms-section-title" style={{ marginBottom: 10 }}>📖 AI 만세력 해석</h2>
+              <h2 className="ms-section-title" style={{ marginBottom: 10 }}><MenuIcon name="book" size={18} /> AI 만세력 해석</h2>
               <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 16 }}>
                 버튼을 누르면 AI가 이 날의 천간지지를 해석해드려요
               </p>
@@ -308,12 +309,12 @@ function Manseryeok() {
           {/* AI 해석 완료 결과 */}
           {aiResult && !aiStreaming && (
             <section className="ms-ai-interp glass-card fade-in">
-              <h2 className="ms-section-title">📖 AI 만세력 해석</h2>
+              <h2 className="ms-section-title"><MenuIcon name="book" size={18} /> AI 만세력 해석</h2>
               {renderAiScore()}
-              {AI_SECTIONS.map(({ key, icon, label }) =>
+              {AI_SECTIONS.map(({ key, iconKey, label }) =>
                 aiResult[key] ? (
                   <div key={key} className="ms-interp-item">
-                    <span className="ms-interp-icon">{icon}</span>
+                    <span className="ms-interp-icon"><MenuIcon name={iconKey} size={20} /></span>
                     <div>
                       <h4 className="ms-interp-label">{label}</h4>
                       <p>{aiResult[key]}</p>
@@ -328,28 +329,28 @@ function Manseryeok() {
           {/* 기존 서버 해석 (AI 스트리밍 결과가 없을 때 폴백) */}
           {!aiResult && !aiStreaming && !aiLoading && data.interpretation && (
             <section className="ms-interp glass-card">
-              <h2 className="ms-section-title">📖 만세력 해석</h2>
+              <h2 className="ms-section-title"><MenuIcon name="book" size={18} /> 만세력 해석</h2>
               {data.interpretation.dayAnalysis && (
                 <div className="ms-interp-item">
-                  <span className="ms-interp-icon">☯️</span>
+                  <span className="ms-interp-icon"><MenuIcon name="traditional" size={20} /></span>
                   <div><h4 className="ms-interp-label">일간 특성</h4><p>{data.interpretation.dayAnalysis}</p></div>
                 </div>
               )}
               {data.interpretation.elementBalance && (
                 <div className="ms-interp-item">
-                  <span className="ms-interp-icon">🔄</span>
+                  <span className="ms-interp-icon"><MenuIcon name="refresh" size={20} /></span>
                   <div><h4 className="ms-interp-label">오행 분석</h4><p>{data.interpretation.elementBalance}</p></div>
                 </div>
               )}
               {data.interpretation.luckyTime && (
                 <div className="ms-interp-item">
-                  <span className="ms-interp-icon">🕐</span>
+                  <span className="ms-interp-icon"><MenuIcon name="clock" size={20} /></span>
                   <div><h4 className="ms-interp-label">길한 시간대</h4><p>{data.interpretation.luckyTime}</p></div>
                 </div>
               )}
               {data.interpretation.advice && (
                 <div className="ms-interp-item">
-                  <span className="ms-interp-icon">💡</span>
+                  <span className="ms-interp-icon"><MenuIcon name="lightbulb" size={20} /></span>
                   <div><h4 className="ms-interp-label">총평 및 조언</h4><p>{data.interpretation.advice}</p></div>
                 </div>
               )}
@@ -357,7 +358,7 @@ function Manseryeok() {
           )}
 
           <section className="ms-hours glass-card">
-            <h2 className="ms-section-title">🕐 시주 (12시진)</h2>
+            <h2 className="ms-section-title"><MenuIcon name="clock" size={18} /> 시주 (12시진)</h2>
             <div className="ms-hours-grid">
               {data.hours && data.hours.map((h, i) => (
                 <div key={i} className="ms-hour-item">

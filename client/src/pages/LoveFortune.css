@@ -191,6 +191,7 @@
 
 .lf-autofill-btn {
   width: 100%; padding: 11px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   border: 1.5px dashed rgba(155,89,182,0.4); background: rgba(155,89,182,0.08);
   color: #C49BF0; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
 }
@@ -298,6 +299,7 @@
 /* ═══ 리셋 ═══ */
 .lf-reset {
   padding: 14px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.15);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   background: var(--color-glass); color: var(--color-text); font-size: 15px; font-weight: 700;
   cursor: pointer; transition: all 0.2s; width: 100%;
 }
@@ -328,6 +330,7 @@
 /* ═══ 연예인 궁합 매칭 ═══ */
 .lf-celeb-match-btn {
   width: 100%; padding: 16px; border-radius: 14px; border: 1.5px solid rgba(233,30,99,0.3);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   background: linear-gradient(135deg, rgba(233,30,99,0.08), rgba(156,39,176,0.08));
   color: #F472B6; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s;
 }
@@ -335,7 +338,7 @@
 [data-theme="light"] .lf-celeb-match-btn { color: #c2185b; background: linear-gradient(135deg, rgba(233,30,99,0.05), rgba(156,39,176,0.04)); border-color: rgba(233,30,99,0.25); }
 
 .lf-celeb-section { margin-top: 4px; display: flex; flex-direction: column; gap: 10px; }
-.lf-celeb-title { text-align: center; font-size: 17px; font-weight: 900; color: #F472B6; margin: 0; }
+.lf-celeb-title { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; font-size: 17px; font-weight: 900; color: #F472B6; margin: 0; }
 [data-theme="light"] .lf-celeb-title { color: #c2185b; }
 
 .lf-celeb-loading { text-align: center; padding: 30px 0; }
@@ -416,7 +419,7 @@
 .lf-celeb-detail-grade { display: block; font-size: 16px; font-weight: 800; color: var(--color-text-secondary); }
 
 .lf-celeb-card { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-.lf-celeb-card h4 { margin: 0; font-size: 15px; font-weight: 800; color: var(--color-text); }
+.lf-celeb-card h4 { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 15px; font-weight: 800; color: var(--color-text); }
 [data-theme="light"] .lf-celeb-card h4 { color: #222; }
 .lf-celeb-card p { margin: 0; font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); }
 [data-theme="light"] .lf-celeb-card p { color: #2e2e45; }

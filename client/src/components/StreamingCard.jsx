@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import MenuIcon from './MenuIcon';
+import { emojiToIconKey } from '../utils/emojiIcon';
 import './StreamingCard.css';
 
 /**
@@ -43,6 +45,9 @@ export default function StreamingCard({ icon, title, text, status, delay = 0, ac
     return () => clearTimeout(t);
   }, [status, autoScroll]);
 
+  // 이모지 문자열이면 외곽선 SVG로 자동 변환 (React 노드는 그대로 렌더)
+  const iconKey = typeof icon === 'string' ? emojiToIconKey(icon) : null;
+
   return (
     <div
       ref={cardRef}
@@ -50,7 +55,9 @@ export default function StreamingCard({ icon, title, text, status, delay = 0, ac
       style={{ '--streaming-accent': accent }}
     >
       <div className="streaming-card-header">
-        <span className="streaming-card-icon">{icon}</span>
+        <span className="streaming-card-icon" style={iconKey ? { color: accent } : undefined}>
+          {iconKey ? <MenuIcon name={iconKey} size={22} /> : icon}
+        </span>
         <h3 className="streaming-card-title">{title}</h3>
       </div>
       {status === 'pending' ? (

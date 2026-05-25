@@ -505,6 +505,14 @@
   color: var(--color-text, #fff);
 }
 .dec-reset:hover { background: rgba(255,255,255,0.08); }
+
+/* 외곽선 아이콘(MenuIcon) 정렬·색상 — 이모지에서 전환 */
+.dec-verdict-icon { color: var(--vc, #EC4899); display: flex; justify-content: center; align-items: center; }
+.dec-streaming-orb { color: var(--dec-color, #EC4899); }
+.dec-period-label { display: inline-flex; align-items: center; gap: 5px; }
+.dec-owner-icon { display: inline-flex; align-items: center; color: #a855f7; }
+.dec-share { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+
 [data-theme="light"] .dec-reset {
   background: #fff;
   border-color: rgba(0,0,0,0.1);

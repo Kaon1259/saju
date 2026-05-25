@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useHearts } from '../context/HeartContext';
+import MenuIcon from './MenuIcon';
 import './HeartCost.css';
 
 export default function HeartCost({ category }) {
@@ -13,7 +14,7 @@ export default function HeartCost({ category }) {
   if (isGuest) {
     return (
       <span className="heart-cost-badge heart-cost-badge--login">
-        <span className="heart-cost-icon">🔒</span>
+        <span className="heart-cost-icon"><MenuIcon name="lock" size={13} /></span>
         <span className="heart-cost-num">로그인</span>
       </span>
     );
@@ -21,7 +22,7 @@ export default function HeartCost({ category }) {
   const sufficient = heartPoints == null || heartPoints >= cost;
   return (
     <span className={`heart-cost-badge ${sufficient ? '' : 'heart-cost-badge--low'}`}>
-      <span className="heart-cost-icon">💗</span>
+      <span className="heart-cost-icon"><MenuIcon name="heart" size={13} /></span>
       <span className="heart-cost-num">{cost}</span>
     </span>
   );
