@@ -208,6 +208,18 @@ export const checkHeartSufficient = async (userId, category = 'BASIC_ANALYSIS') 
   return response.data;
 };
 
+// 리워드 광고 — 오늘 잔여 횟수/회당 보상 조회
+export const getAdRewardStatus = async () => {
+  const response = await api.get('/hearts/ad-reward/status');
+  return response.data; // { dailyLimit, todayCount, remaining, rewardPerAd }
+};
+
+// 리워드 광고 시청 보상 지급 (하루 한도는 서버에서 검증)
+export const claimAdReward = async () => {
+  const response = await api.post('/hearts/ad-reward');
+  return response.data; // { rewarded, amount, balance, todayCount, remaining, dailyLimit, reason? }
+};
+
 // 하트 차감
 export const deductHearts = async (userId, category) => {
   const response = await api.post('/hearts/deduct', null, { params: { userId, category } });

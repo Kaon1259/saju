@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,60 @@ public class HeartPointController {
         Long userId = AuthUtil.requireUserId(req);
         int balance = heartPointService.getBalance(userId);
         return ResponseEntity.ok(Map.of("userId", userId, "heartPoints", balance));
+    }
+
+    // 리워드 광고 하루 지급 한도 (BM ② — 1회 5하트 × 하루 5회 = 25하트/일)
+    private static final int AD_REWARD_DAILY_LIMIT = 5;
+
+    /**
+     * 리워드 광고 시청 보상 — REWARD_AD(5하트) 지급, 하루 AD_REWARD_DAILY_LIMIT회 한도.
+     * ⚠️ v1은 클라 신뢰 기반(광고 시청 사실은 클라가 보장). 추후 AdMob SSV(서버검증)로 강화 가능.
+     *    한도가 있어 어뷰징해도 하루 25하트(=정상 사용량)로 제한되므로 손실은 한정적.
+     */
+    @PostMapping("/ad-reward")
+    public ResponseEntity<Map<String, Object>> claimAdReward(HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        int todayCount = heartPointLogRepository
+                .countByUserIdAndTransactionTypeAndCreatedAtAfter(userId, "REWARD_AD", startOfDay);
+
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("dailyLimit", AD_REWARD_DAILY_LIMIT);
+        if (todayCount >= AD_REWARD_DAILY_LIMIT) {
+            res.put("rewarded", false);
+            res.put("reason", "daily_limit");
+            res.put("amount", 0);
+            res.put("todayCount", todayCount);
+            res.put("remaining", 0);
+            res.put("balance", heartPointService.getBalance(userId));
+            return ResponseEntity.ok(res);
+        }
+
+        int amount = heartPointService.grantBonus(userId, "REWARD_AD", "리워드 광고 보상");
+        int newCount = todayCount + 1;
+        res.put("rewarded", true);
+        res.put("amount", amount);
+        res.put("todayCount", newCount);
+        res.put("remaining", Math.max(0, AD_REWARD_DAILY_LIMIT - newCount));
+        res.put("balance", heartPointService.getBalance(userId));
+        return ResponseEntity.ok(res);
+    }
+
+    /**
+     * 리워드 광고 오늘 잔여 횟수 조회 (충전 화면 진입 시 버튼 상태용)
+     */
+    @GetMapping("/ad-reward/status")
+    public ResponseEntity<Map<String, Object>> adRewardStatus(HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        int todayCount = heartPointLogRepository
+                .countByUserIdAndTransactionTypeAndCreatedAtAfter(userId, "REWARD_AD", startOfDay);
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("dailyLimit", AD_REWARD_DAILY_LIMIT);
+        res.put("todayCount", todayCount);
+        res.put("remaining", Math.max(0, AD_REWARD_DAILY_LIMIT - todayCount));
+        res.put("rewardPerAd", heartPointService.getCost("REWARD_AD"));
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/check")

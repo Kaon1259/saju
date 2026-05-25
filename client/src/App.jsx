@@ -289,6 +289,11 @@ function App() {
     import('./utils/tapBubble').then(({ initTapBubble }) => initTapBubble());
   }, []);
 
+  // AdMob 초기화 (네이티브에서만 실제 동작 — 웹/dev는 no-op)
+  useEffect(() => {
+    import('./utils/adMob').then(({ initializeAdMob }) => initializeAdMob()).catch(() => {});
+  }, []);
+
   // 타로 자산 유휴 시간 프리로드 — 페이지/셔플/카드 노출 지연 제거
   useEffect(() => {
     const DECK_IDS = ['newclassic','jester','masterpiece','cartoon_girl','cartoon_boy','kdrama','celestial','lady'];

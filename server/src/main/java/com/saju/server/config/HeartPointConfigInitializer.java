@@ -123,6 +123,9 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("ATTENDANCE_14DAY",    20,  "시스템",      "14일 연속 출석 보너스"); // 30 → 20
         init("ATTENDANCE_30DAY",    40,  "시스템",      "30일 연속 출석 보너스"); // 60 → 40
 
+        // ── 리워드 광고 (BM ② — 1회 5하트, 하루 5회 한도는 컨트롤러 AD_REWARD_DAILY_LIMIT) ──
+        init("REWARD_AD",            5,  "시스템",      "리워드 광고 보상 (1회)");
+
         // ── 친구 초대 / 평점 (양방향 보너스) ──
         init("INVITE_INVITER",      20,  "시스템",      "친구 초대 보너스 (초대자)");   // 30 → 20 (BM 박하게)
         init("INVITE_INVITEE",      20,  "시스템",      "친구 초대 보너스 (피초대자)"); // 30 → 20

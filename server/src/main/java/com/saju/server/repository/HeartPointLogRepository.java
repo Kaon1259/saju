@@ -8,11 +8,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface HeartPointLogRepository extends JpaRepository<HeartPointLog, Long> {
+
+    /** 특정 유저의 오늘(또는 지정 시각 이후) 특정 타입 지급 횟수 — 리워드 광고 하루 한도 체크용 */
+    int countByUserIdAndTransactionTypeAndCreatedAtAfter(Long userId, String transactionType, LocalDateTime after);
 
     /** 게스트 정리 시 해당 유저들의 하트 로그 일괄 삭제 */
     @Modifying
