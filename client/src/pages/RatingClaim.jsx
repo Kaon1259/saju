@@ -28,7 +28,7 @@ function RatingClaim() {
     return () => { alive = false; };
   }, [guest]);
 
-  const reward = status?.reward ?? 50;
+  const reward = status?.reward ?? 30;
   const claimed = Boolean(status?.claimed);
 
   const openStore = () => {

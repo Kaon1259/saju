@@ -27,8 +27,8 @@ function Invite() {
   const code = stats?.code || '';
   const invited = stats?.invitedCount ?? 0;
   const earned = stats?.totalEarned ?? 0;
-  const per = stats?.rewardPerInvite ?? 30;
-  const inviteeBonus = stats?.inviteeBonus ?? 30;
+  const per = stats?.rewardPerInvite ?? 20;
+  const inviteeBonus = stats?.inviteeBonus ?? 20;
 
   const shareText = code
     ? `사주 연애운 앱 같이 해요! 가입할 때 초대코드 [${code}] 입력하면 둘 다 ${inviteeBonus}하트 받아요 💗`

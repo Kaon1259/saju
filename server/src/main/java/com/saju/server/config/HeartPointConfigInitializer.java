@@ -114,19 +114,19 @@ public class HeartPointConfigInitializer implements CommandLineRunner {
         init("DECISION_CONSULT",    80,  "결정상담",    "결정 상담 (연애 결정)");
 
         // ── 시스템 (보너스/지급) ──
-        // 무료 적립 균형 조정 (2026-05-16): 가입+출석 무한 적립 과다 → 절반 수준으로 하향.
-        // 신규 가입은 40 + 프로필 완성 30 = 진성 유저 70 / 어뷰징 계정 40.
-        init("SIGNUP_BONUS",        40,  "시스템",      "회원가입 보너스");      // 70 → 40 (적립 과다 조정)
+        // BM 확정 (2026-05-25): 가입 30 박하게 — 결제/광고 동기 강화. 무료 적립 전반 하향.
+        // 신규 가입은 30 + 프로필 완성 30 = 진성 유저 60 / 어뷰징 계정 30.
+        init("SIGNUP_BONUS",        30,  "시스템",      "회원가입 보너스");      // 40 → 30 (BM 박하게)
         init("PROFILE_COMPLETE",    30,  "시스템",      "프로필 완성 보너스");   // 양질 데이터 유도 — UserService 연동
-        init("DAILY_ATTENDANCE",     3,  "시스템",      "일일 출석 보너스");     // 5 → 3 (무한 적립 억제)
-        init("ATTENDANCE_7DAY",     15,  "시스템",      "7일 연속 출석 보너스"); // 20 → 15
-        init("ATTENDANCE_14DAY",    30,  "시스템",      "14일 연속 출석 보너스"); // 50 → 30
-        init("ATTENDANCE_30DAY",    60,  "시스템",      "30일 연속 출석 보너스"); // 100 → 60
+        init("DAILY_ATTENDANCE",     2,  "시스템",      "일일 출석 보너스");     // 3 → 2 (BM 박하게)
+        init("ATTENDANCE_7DAY",     10,  "시스템",      "7일 연속 출석 보너스"); // 15 → 10
+        init("ATTENDANCE_14DAY",    20,  "시스템",      "14일 연속 출석 보너스"); // 30 → 20
+        init("ATTENDANCE_30DAY",    40,  "시스템",      "30일 연속 출석 보너스"); // 60 → 40
 
         // ── 친구 초대 / 평점 (양방향 보너스) ──
-        init("INVITE_INVITER",      30,  "시스템",      "친구 초대 보너스 (초대자)");
-        init("INVITE_INVITEE",      30,  "시스템",      "친구 초대 보너스 (피초대자)");
-        init("RATING_REWARD",       50,  "시스템",      "Play Store 평점 보너스 (1회)");
+        init("INVITE_INVITER",      20,  "시스템",      "친구 초대 보너스 (초대자)");   // 30 → 20 (BM 박하게)
+        init("INVITE_INVITEE",      20,  "시스템",      "친구 초대 보너스 (피초대자)"); // 30 → 20
+        init("RATING_REWARD",       30,  "시스템",      "Play Store 평점 보너스 (1회)"); // 50 → 30
     }
 
     private void init(String category, int cost, String group, String description) {
