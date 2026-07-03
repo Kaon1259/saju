@@ -167,16 +167,16 @@
   cursor: pointer;
   font-size: 20px;
   line-height: 1;
-  /* 헤더는 두 테마 모두 항상 어두운 배경 → 설정 아이콘은 항상 흰색 고정 */
+  /* 다크 테마: 헤더 배경이 어두우므로 설정 아이콘 흰색 */
   color: #fff;
-  opacity: 0.7;
+  opacity: 0.75;
   transition: opacity 0.2s;
 }
 .top-bar-settings-btn:hover {
   opacity: 1;
 }
-/* 라이트 테마에서도 헤더 배경은 다크 유지되므로 흰색 유지 */
-[data-theme="light"] .top-bar-settings-btn { color: #fff; }
+/* 라이트 테마: 헤더 배경이 흰색(index.css rgba(255,255,255,0.9))이므로 아이콘 검정 */
+[data-theme="light"] .top-bar-settings-btn { color: #1a1a1a; }
 
 .top-bar-more-btn:hover,
 .top-bar-more-btn.active {
