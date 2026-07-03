@@ -687,18 +687,50 @@ function MyFortune() {
   };
 
   // 날짜/사용자 변경 시: 결과 리셋 + "캐시 확인중" → 캐시 있으면 자동 표시, 없으면 버튼 노출
+  // ⚠️ 안드로이드 WebView는 첫 진입 시 cacheOnly SSE 연결이 페이지 로드 버스트(유저/출석/하트
+  //    요청)에 끼어 자주 스톨난다(브라우저는 정상). cached/no-cache/error 가 안 오면 콜백이 안
+  //    불려 "저장된 운세 확인중" 스피너가 영구 정지됨. 사용자가 날짜 토글로 재시도하면 풀리던 것을
+  //    → 워치독으로 5초 내 무응답(행)/에러 시 연결 닫고 1회 자동 재시도, 그래도 안 되면 버튼 노출.
   useEffect(() => {
     cleanupRef.current?.();
     setData(null); setStreamText(''); setStreaming(false); setLoading(false);
     if (!userId) { setCacheChecking(false); return; }
     setCacheChecking(true);
-    cleanupRef.current = getMyFortuneStream(userId, {
-      cacheOnly: true,
-      onCached: (d) => { setData(d); setCacheChecking(false); },
-      onNoCache: () => { setCacheChecking(false); }, // 캐시 없음 → 버튼 노출
-      onError: () => { setCacheChecking(false); },   // 에러 → 버튼 노출
-    }, getTargetDate());
-    return () => cleanupRef.current?.();
+
+    let settled = false;
+    let attempt = 0;
+    let watchdog = null;
+    const targetDate = getTargetDate();
+
+    // 캐시 히트(d) 또는 캐시 없음(null) = 정상 응답 → 종료. 재시도 안 함.
+    const succeed = (d) => {
+      if (settled) return;
+      settled = true; clearTimeout(watchdog);
+      if (d) setData(d);
+      setCacheChecking(false);
+    };
+    // 무응답(행)/에러 = WebView 첫 시도 스톨 → 1회 재시도, 그래도 안 되면 버튼.
+    const retryOrGiveUp = () => {
+      if (settled) return;
+      clearTimeout(watchdog);
+      try { cleanupRef.current?.(); } catch {}
+      if (attempt < 2) open();
+      else { settled = true; setCacheChecking(false); }
+    };
+    function open() {
+      attempt += 1;
+      cleanupRef.current = getMyFortuneStream(userId, {
+        cacheOnly: true,
+        onCached: (d) => succeed(d),
+        onNoCache: () => succeed(null), // 캐시 없음 = 정상 → 버튼 (재시도 X)
+        onError: () => retryOrGiveUp(), // WebView 첫 시도 에러 → 1회 재시도
+      }, targetDate);
+      // 서버는 정상 시 ~3초 내 cached/no-cache 응답 → 5초 워치독.
+      watchdog = setTimeout(retryOrGiveUp, 5000);
+    }
+    open();
+
+    return () => { clearTimeout(watchdog); cleanupRef.current?.(); };
   }, [userId, dateMode, pickDate]);
 
   // 날짜 모드 변경 시 연인/다른사람 결과 리셋 — 새 날짜 폼이 다시 보이도록
@@ -834,32 +866,44 @@ function MyFortune() {
 
   return (
     <div className="myf-page">
-      {/* 컴팩트 컨트롤 바 — 모드(누구) + 날짜(언제) 한 헤더로 통합 */}
+      {/* 컴팩트 컨트롤 바 — 대상(누구) + 날짜(언제) 한 카드로 통합, 위계 구분 */}
       <div className="myf-control-bar">
-        <div className="myf-seg myf-seg--mode">
-          <button className={`myf-seg-btn ${viewMode === 'mine' ? 'active' : ''}`} onClick={() => setViewMode('mine')}>내 운세</button>
-          <button className={`myf-seg-btn ${viewMode === 'partner' ? 'active' : ''}`} onClick={() => setViewMode('partner')}>연인</button>
-          <button className={`myf-seg-btn ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>다른 사람</button>
-        </div>
+        {(() => {
+          const modeIndex = viewMode === 'mine' ? 0 : viewMode === 'partner' ? 1 : 2;
+          return (
+            <div className="myf-seg myf-seg--mode" role="tablist" aria-label="운세 대상">
+              <span className="myf-seg-thumb" style={{ transform: `translateX(${modeIndex * 100}%)` }} />
+              <button role="tab" aria-selected={viewMode === 'mine'} className={`myf-seg-btn ${viewMode === 'mine' ? 'active' : ''}`} onClick={() => setViewMode('mine')}>내 운세</button>
+              <button role="tab" aria-selected={viewMode === 'partner'} className={`myf-seg-btn ${viewMode === 'partner' ? 'active' : ''}`} onClick={() => setViewMode('partner')}>연인</button>
+              <button role="tab" aria-selected={viewMode === 'other'} className={`myf-seg-btn ${viewMode === 'other' ? 'active' : ''}`} onClick={() => setViewMode('other')}>다른 사람</button>
+            </div>
+          );
+        })()}
         {(() => {
           const activePill = showDatePicker ? 'pick' : dateMode;
           return (
-            <div className="myf-seg myf-seg--date" role="tablist" aria-label="운세 날짜">
-              <button
-                className={`myf-seg-btn ${activePill === 'today' ? 'active' : ''}`}
-                onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}
-              >오늘</button>
-              <button
-                className={`myf-seg-btn ${activePill === 'tomorrow' ? 'active' : ''}`}
-                onClick={() => { setDateMode('tomorrow'); setPickDate(''); setShowDatePicker(false); }}
-              >내일</button>
-              <button
-                className={`myf-seg-btn ${activePill === 'pick' ? 'active' : ''}`}
-                onClick={() => {
-                  if (showDatePicker) { setShowDatePicker(false); return; }
-                  setShowDatePicker(true);
-                }}
-              ><MenuIcon name="calendar" size={14} /> {dateMode === 'pick' && pickDate && !showDatePicker ? getDateLabel() : '지정'}</button>
+            <div className="myf-date-row">
+              <span className="myf-date-label"><MenuIcon name="clock" size={13} /> 언제</span>
+              <div className="myf-chips" role="tablist" aria-label="운세 날짜">
+                <button
+                  role="tab" aria-selected={activePill === 'today'}
+                  className={`myf-chip ${activePill === 'today' ? 'active' : ''}`}
+                  onClick={() => { setDateMode('today'); setPickDate(''); setShowDatePicker(false); }}
+                >오늘</button>
+                <button
+                  role="tab" aria-selected={activePill === 'tomorrow'}
+                  className={`myf-chip ${activePill === 'tomorrow' ? 'active' : ''}`}
+                  onClick={() => { setDateMode('tomorrow'); setPickDate(''); setShowDatePicker(false); }}
+                >내일</button>
+                <button
+                  role="tab" aria-selected={activePill === 'pick'}
+                  className={`myf-chip ${activePill === 'pick' ? 'active' : ''}`}
+                  onClick={() => {
+                    if (showDatePicker) { setShowDatePicker(false); return; }
+                    setShowDatePicker(true);
+                  }}
+                ><MenuIcon name="calendar" size={13} /> {dateMode === 'pick' && pickDate && !showDatePicker ? getDateLabel() : '지정'}</button>
+              </div>
             </div>
           );
         })()}

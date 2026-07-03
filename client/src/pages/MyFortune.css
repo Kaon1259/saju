@@ -670,55 +670,103 @@
 /* MyFortune 정리 (2026-04-27) — 컴팩트 컨트롤 바 + 더보기 + 빠른 이동 */
 /* ════════════════════════════════════════════════════════════════ */
 
-/* 통합 컨트롤 바 (모드 + 날짜) */
+/* 통합 컨트롤 바 (대상 + 날짜) — 하나의 카드, 위계 구분 */
 .myf-control-bar {
-  display: flex; flex-direction: column; gap: 8px;
-  margin-bottom: 14px;
-}
-.myf-seg {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 16px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.myf-seg-btn {
+
+/* ── WHO(대상) — 주 세그먼트: 슬라이딩 썸 ── */
+.myf-seg--mode {
+  position: relative;
+  display: flex;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+  isolation: isolate;
+}
+.myf-seg-thumb {
+  position: absolute;
+  top: 4px; bottom: 4px; left: 4px;
+  width: calc((100% - 8px) / 3);
+  border-radius: 9px;
+  background: linear-gradient(135deg, #ff5a7e, #a855f7);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.38);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+.myf-seg--mode .myf-seg-btn {
   flex: 1;
-  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-  padding: 8px 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.22s;
+  white-space: nowrap;
+}
+.myf-seg--mode .myf-seg-btn.active { color: #fff; }
+
+/* ── WHEN(날짜) — 보조 칩: 우측 정렬, 가벼운 톤 ── */
+.myf-date-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px 2px;
+}
+.myf-date-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600;
+  color: var(--color-text-muted);
+  opacity: 0.72;
+  letter-spacing: 0.02em;
+}
+.myf-chips { display: flex; gap: 6px; }
+.myf-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px; font-weight: 500;
   cursor: pointer;
   transition: all 0.18s;
   white-space: nowrap;
 }
-.myf-seg-btn:hover { color: var(--color-text); }
-.myf-seg-btn.active {
-  background: linear-gradient(135deg, #ec4899, #a855f7);
-  color: #fff;
+.myf-chip:hover { border-color: rgba(255, 90, 126, 0.4); color: var(--color-text); }
+.myf-chip.active {
+  background: rgba(255, 90, 126, 0.14);
+  border-color: rgba(255, 90, 126, 0.55);
+  color: #ff7a98;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
-}
-.myf-seg--date .myf-seg-btn.active {
-  background: linear-gradient(135deg, #f59e0b, #ec4899);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 [data-theme="light"] .myf-quicklink-sub { color: #886b80; }
 [data-theme="light"] .myf-quicklink-arrow { color: #c2185b; }
-[data-theme="light"] .myf-seg {
+[data-theme="light"] .myf-control-bar {
   background: #fff;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
-[data-theme="light"] .myf-seg-btn { color: #886b80; }
-[data-theme="light"] .myf-seg-btn:hover { color: #c2185b; }
-[data-theme="light"] .myf-seg-btn.active { color: #fff; }
+[data-theme="light"] .myf-seg--mode { background: #f3eef1; }
+[data-theme="light"] .myf-seg--mode .myf-seg-btn { color: #886b80; }
+[data-theme="light"] .myf-seg--mode .myf-seg-btn.active { color: #fff; }
+[data-theme="light"] .myf-date-label { color: #a98ba0; }
+[data-theme="light"] .myf-chip { color: #886b80; border-color: rgba(0, 0, 0, 0.1); }
+[data-theme="light"] .myf-chip:hover { color: #c2185b; border-color: rgba(194, 24, 91, 0.35); }
+[data-theme="light"] .myf-chip.active {
+  background: rgba(255, 90, 126, 0.12);
+  border-color: rgba(255, 90, 126, 0.5);
+  color: #c2185b;
+}
 
 /* 컴팩트 결과 헤더 */
 .myf-header--compact {
