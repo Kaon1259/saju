@@ -6,8 +6,8 @@ import { ToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import './index.css';
 
-// 저장된 테마 적용
-const savedTheme = localStorage.getItem('theme') || 'dark';
+// 저장된 테마 적용 — 첫 시작(저장값 없음) 기본은 라이트 모드
+const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

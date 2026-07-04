@@ -22,8 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
             "https://localhost",          // Capacitor 모바일 WebView (androidScheme: https)
             "https://*.vercel.app",       // Vercel 웹 프론트 (preview 포함)
             "https://*.up.railway.app",   // Railway 호스팅 프론트 (운영툴/프리뷰 포함)
-            "https://www.recipepig.kr",   // 운영툴
-            "https://recipepig.kr"        // 운영툴
+            "https://www.recipepig.kr",   // 운영툴 / 웹 프론트
+            "https://recipepig.kr"        // 운영툴 / 웹 프론트
         ));
         if (extraOrigins != null && !extraOrigins.isBlank()) {
             for (String o : extraOrigins.split(",")) {
