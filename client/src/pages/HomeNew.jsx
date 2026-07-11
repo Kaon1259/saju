@@ -174,7 +174,6 @@ const SECTION_TRAD = [
   { label: '관상',       icon: 'face',        path: '/face-reading' },
   { label: '꿈해몽',     icon: 'dream',       path: '/dream' },
   { label: '심리테스트', icon: 'psych',       path: '/psych-test' },
-  { label: '띠 성격',    icon: 'zodiac',      path: '/zodiac' },
 ];
 
 function HomeNew() {

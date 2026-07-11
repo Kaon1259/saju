@@ -1229,7 +1229,6 @@ const SEASON_MENUS = [
 const OTHER_MENUS = [
   { iconKey: 'constellation', label: '별자리 운세', sub: '12별자리 오늘의 운세',     path: '/constellation', from: '#6366f1', to: '#4338ca' },
   { iconKey: 'zodiac',        label: '띠 운세',     sub: '내 띠로 보는 오늘 운세',   path: '/fortune',       from: '#f59e0b', to: '#b45309' },
-  { iconKey: 'zodiac',        label: '띠 성격',     sub: '12지신 성격·기질',        path: '/zodiac',        from: '#f59e0b', to: '#d97706' },
   { iconKey: 'tarot',         label: '타로 카드',   sub: '오늘의 메시지 78장 풀덱',  path: '/tarot',         from: '#d946ef', to: '#a21caf' },
   { iconKey: 'traditional',   label: '사주 정통',   sub: '천간지지·격국·신살',       path: '/traditional',   from: '#475569', to: '#1e293b' },
   { iconKey: 'compass',       label: '만세력',      sub: '내 사주 네 기둥 원국표',   path: '/manseryeok',    from: '#334155', to: '#0f172a' },

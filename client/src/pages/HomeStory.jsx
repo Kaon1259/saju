@@ -120,7 +120,6 @@ const CHAPTERS = [
       { label: '관상',       sub: '얼굴의 운',     icon: 'face',        path: '/face-reading' },
       { label: '꿈해몽',     sub: '꿈의 의미',     icon: 'dream',       path: '/dream' },
       { label: '심리테스트', sub: '마음 들여다보기', icon: 'psych',     path: '/psych-test' },
-      { label: '띠 성격',    sub: '띠가 말하는',   icon: 'zodiac',      path: '/zodiac' },
     ],
   },
 ];
