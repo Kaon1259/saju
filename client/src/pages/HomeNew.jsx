@@ -152,6 +152,7 @@ const SECTION_LOVE = [
   { label: '사주궁합',  icon: 'sparkleHeart', path: '/compatibility' },
   { label: '스타매칭',  icon: 'people',       path: '/celeb-match' },
   { label: '그룹궁합',  icon: 'handshake',    path: '/celeb-fortune' },
+  { label: '날씨궁합',  icon: 'sun',          path: '/weather-compat' },
 ];
 
 const SECTION_SEASON = [

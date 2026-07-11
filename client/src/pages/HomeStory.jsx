@@ -94,6 +94,7 @@ const CHAPTERS = [
       { label: '사주궁합',  sub: '우리 둘',       icon: 'sparkleHeart', path: '/compatibility' },
       { label: '스타매칭',  sub: '최애와 나',     icon: 'people',       path: '/celeb-match' },
       { label: '그룹궁합',  sub: '여럿의 인연',   icon: 'handshake',    path: '/celeb-fortune' },
+      { label: '날씨궁합',  sub: '오늘 날씨와',   icon: 'sun',          path: '/weather-compat' },
     ],
   },
   {

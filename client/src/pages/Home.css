@@ -6488,3 +6488,83 @@
 .home-decision-title { font-size: 14px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.3; }
 .home-decision-sub { font-size: 11.5px; opacity: 0.92; font-weight: 500; }
 .home-decision-arrow { font-size: 20px; opacity: 0.85; position: relative; flex-shrink: 0; }
+
+/* ── 결정 상담 상단 승격 (간판 배지 + 카테고리 칩) — 심플/동화홈과 위계 통일 ── */
+.home-decision-section {
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 60%, #6366f1 100%);
+  border-radius: 20px;
+  padding: 16px 16px 18px;
+  box-shadow: 0 8px 26px rgba(168, 85, 247, 0.32);
+  position: relative;
+  overflow: hidden;
+}
+.home-decision-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 88% 12%, rgba(255,255,255,0.22), transparent 55%);
+  pointer-events: none;
+}
+.home-decision-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+.home-decision-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.home-decision-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: #a855f7;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.home-decision-q {
+  color: rgba(255,255,255,0.92);
+  font-size: 12px;
+  font-weight: 600;
+}
+.home-decision-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.home-decision-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 4px 10px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.home-decision-chip:hover { transform: translateY(-2px); background: rgba(255,255,255,0.26); }
+.home-decision-chip:active { transform: scale(0.97); }
+.home-decision-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+}
+.home-decision-chip-label { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
+.home-decision-chip-desc { font-size: 10px; font-weight: 500; opacity: 0.9; line-height: 1.2; text-align: center; }

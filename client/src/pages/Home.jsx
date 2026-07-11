@@ -1228,9 +1228,11 @@ const SEASON_MENUS = [
 // ════════════════════════════════════════════════════════════════
 const OTHER_MENUS = [
   { iconKey: 'constellation', label: '별자리 운세', sub: '12별자리 오늘의 운세',     path: '/constellation', from: '#6366f1', to: '#4338ca' },
-  { iconKey: 'zodiac',        label: '띠 운세',     sub: '12간지로 보는 한 해',      path: '/zodiac',        from: '#f59e0b', to: '#b45309' },
+  { iconKey: 'zodiac',        label: '띠 운세',     sub: '내 띠로 보는 오늘 운세',   path: '/fortune',       from: '#f59e0b', to: '#b45309' },
+  { iconKey: 'zodiac',        label: '띠 성격',     sub: '12지신 성격·기질',        path: '/zodiac',        from: '#f59e0b', to: '#d97706' },
   { iconKey: 'tarot',         label: '타로 카드',   sub: '오늘의 메시지 78장 풀덱',  path: '/tarot',         from: '#d946ef', to: '#a21caf' },
   { iconKey: 'traditional',   label: '사주 정통',   sub: '천간지지·격국·신살',       path: '/traditional',   from: '#475569', to: '#1e293b' },
+  { iconKey: 'compass',       label: '만세력',      sub: '내 사주 네 기둥 원국표',   path: '/manseryeok',    from: '#334155', to: '#0f172a' },
   { iconKey: 'bloodtype',     label: '혈액형 운세', sub: 'A·B·O·AB 별 성향',         path: '/bloodtype',     from: '#ef4444', to: '#b91c1c' },
   { iconKey: 'mbti',          label: 'MBTI 운세',   sub: '16유형 깊은 분석',         path: '/mbti',          from: '#10b981', to: '#047857' },
   { iconKey: 'face',          label: '관상 분석',   sub: 'AI가 보는 얼굴 운세',      path: '/face-reading',  from: '#3b82f6', to: '#1d4ed8' },
@@ -1661,6 +1663,34 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 2. (로그인) 가로 스크롤 운세 요약 띠                          */}
       {/* ════════════════════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      {/* 1.6 결정 상담 (간판 유료 상품) — 상단 승격 + 카테고리 칩       */}
+      {/* ════════════════════════════════════════════════════════════ */}
+      <section className="home-section home-decision-section">
+        <div className="home-decision-head">
+          <h2 className="home-decision-heading">
+            <MenuIcon name="compass" size={18} /> 결정 상담
+            <span className="home-decision-badge">간판</span>
+          </h2>
+          <span className="home-decision-q">"이 연애 결정, 지금이 맞을까?"</span>
+        </div>
+        <div className="home-decision-grid">
+          {[
+            { key: 'reunion',  label: '재회', icon: 'moon',   desc: '다시 만날까' },
+            { key: 'breakup',  label: '이별', icon: 'moon',   desc: '끝낼까' },
+            { key: 'confess',  label: '고백', icon: 'letter', desc: '마음 전할까' },
+            { key: 'marriage', label: '결혼', icon: 'ring',   desc: '평생 약속할까' },
+          ].map((d) => (
+            <button key={d.key} className="home-decision-chip"
+              onClick={() => navigate('/decision', { state: { category: d.key } })}>
+              <span className="home-decision-chip-icon"><MenuIcon name={d.icon} size={24} /></span>
+              <span className="home-decision-chip-label">{d.label}</span>
+              <span className="home-decision-chip-desc">{d.desc}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* 출석 카드 — 로그인 시만, /attendance 진입점 */}
       {userId && <AttendanceCard refreshKey={attendanceRefreshKey} />}
 
@@ -1730,16 +1760,7 @@ function Home() {
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 4.5. 결정 상담 (간판 유료 상품)                              */}
       {/* ════════════════════════════════════════════════════════════ */}
-      <section className="home-section">
-        <button className="home-decision-banner" onClick={() => navigate('/decision')}>
-          <span className="home-decision-icon"><MenuIcon name="compass" size={26} /></span>
-          <div className="home-decision-text">
-            <span className="home-decision-title">고민되는 연애 결정, 사주가 답해드려요</span>
-            <span className="home-decision-sub">재회 · 이별 · 고백 · 결혼</span>
-          </div>
-          <span className="home-decision-arrow">›</span>
-        </button>
-      </section>
+      {/* 결정 상담은 상단(1.6)으로 승격 이동됨 */}
 
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 5. 연애 배너 세로 스택 (점신 스타일)                           */}
