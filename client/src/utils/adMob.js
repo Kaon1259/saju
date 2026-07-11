@@ -90,3 +90,87 @@ function runSimulation({ slot, onTick }) {
 }
 
 export const AD_SIM_DURATION_SEC = SIM_DURATION_SEC;
+
+// ══════════════════════════════════════════════════════════════════════
+//  배너 / 인터스티셜 (BM ② 확장 — "균형": 브라우즈 화면 배너 + 세션당 1회 전면)
+//  ⚠️ 아래는 Google 공식 "테스트" 광고 ID. 출시 전:
+//     ① 실제 광고단위 ID로 교체  ② USE_TEST_ADS=false
+//     ③ AndroidManifest APPLICATION_ID 교체  ④ 본인 기기 AdMob 테스트기기 등록
+// ══════════════════════════════════════════════════════════════════════
+const BANNER_AD_ID = {
+  android: 'ca-app-pub-3940256099942544/6300978111',
+  ios: 'ca-app-pub-3940256099942544/2934735716',
+};
+const INTERSTITIAL_AD_ID = {
+  android: 'ca-app-pub-3940256099942544/1033173712',
+  ios: 'ca-app-pub-3940256099942544/4411468910',
+};
+// 탭바 위로 배너를 올리기 위한 하단 여백(dp). ⚠️ APK 실측 후 조정 필요.
+const BANNER_BOTTOM_MARGIN = 58;
+
+/**
+ * 광고 노출 게이트 — 네이티브 + 광고제거(구독) 아닐 때만 true.
+ * 구독 미구현 상태이므로 localStorage 'adFree'='1' 로 임시 표현.
+ * 구독(엔타이틀먼트) 붙으면 이 함수만 교체하면 전 광고가 자동으로 꺼진다.
+ */
+export function adsEnabled() {
+  if (!Capacitor.isNativePlatform()) return false;
+  try { if (localStorage.getItem('adFree') === '1') return false; } catch { /* ignore */ }
+  return true;
+}
+
+let _bannerShown = false;
+/** 브라우즈(비유료) 화면 하단 앵커 배너. ⚠️ 유료 AI 결과 화면에서는 호출 금지. */
+export async function showBanner() {
+  if (!adsEnabled() || _bannerShown) return;
+  try {
+    const { AdMob, BannerAdSize, BannerAdPosition } = await loadPlugin();
+    if (!_initialized) await initializeAdMob();
+    const platform = Capacitor.getPlatform();
+    await AdMob.showBanner({
+      adId: BANNER_AD_ID[platform] || BANNER_AD_ID.android,
+      adSize: BannerAdSize.ADAPTIVE_BANNER,
+      position: BannerAdPosition.BOTTOM_CENTER,
+      margin: BANNER_BOTTOM_MARGIN,
+      isTesting: USE_TEST_ADS,
+    });
+    _bannerShown = true;
+    try { document.body.classList.add('has-ad-banner'); } catch { /* ignore */ }
+  } catch (e) {
+    console.warn('[adMob] 배너 노출 실패:', e?.message || e);
+  }
+}
+
+/** 배너 제거 — 유료/결과 화면 진입 시 반드시 호출. */
+export async function hideBanner() {
+  try { document.body.classList.remove('has-ad-banner'); } catch { /* ignore */ }
+  if (!_bannerShown) return;
+  _bannerShown = false;
+  try {
+    const { AdMob } = await loadPlugin();
+    await AdMob.removeBanner();
+  } catch (e) {
+    console.warn('[adMob] 배너 제거 실패:', e?.message || e);
+  }
+}
+
+let _interstitialShownThisSession = false;
+/** 세션당 1회 전면(인터스티셜). 무료 흐름/브라우즈 전환에서만 호출 — 유료 결과 인접 금지. */
+export async function maybeShowInterstitial() {
+  if (!adsEnabled() || _interstitialShownThisSession) return false;
+  try {
+    const { AdMob } = await loadPlugin();
+    if (!_initialized) await initializeAdMob();
+    const platform = Capacitor.getPlatform();
+    await AdMob.prepareInterstitial({
+      adId: INTERSTITIAL_AD_ID[platform] || INTERSTITIAL_AD_ID.android,
+      isTesting: USE_TEST_ADS,
+    });
+    await AdMob.showInterstitial();
+    _interstitialShownThisSession = true;
+    return true;
+  } catch (e) {
+    console.warn('[adMob] 인터스티셜 실패:', e?.message || e);
+    return false;
+  }
+}
