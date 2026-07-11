@@ -278,6 +278,20 @@ public class DecisionService {
         sb.append(String.join(" ", elParts));
         sb.append(" (가장 강함: ").append(strongest).append(" / 가장 약함: ").append(weakest).append(")");
         sb.append(" / 음양: 양").append(yang).append(" 음").append(yin).append("\n");
+        // 일간 기준 오행별 십성(관계 요약) — AI가 사주에 없는 오행의 십성을 오판하지 않도록 명시
+        int dEl = dayPillar.getStemElement();
+        String[] OH = SajuConstants.OHENG;
+        int sikEl = SajuConstants.OHENG_PRODUCES[dEl];   // 식상
+        int jaeEl = SajuConstants.OHENG_OVERCOMES[dEl];  // 재성
+        int gwanEl = -1, inEl = -1;
+        for (int e = 0; e < 5; e++) {
+            if (SajuConstants.OHENG_OVERCOMES[e] == dEl) gwanEl = e; // 관성(나를 극하는 오행)
+            if (SajuConstants.OHENG_PRODUCES[e] == dEl) inEl = e;    // 인성(나를 생하는 오행)
+        }
+        sb.append("일간 오행별 십성(참고 — 이 매핑을 따를 것): ")
+          .append(OH[dEl]).append("=비겁 / ").append(OH[sikEl]).append("=식상 / ")
+          .append(OH[jaeEl]).append("=재성 / ").append(OH[gwanEl]).append("=관성 / ")
+          .append(OH[inEl]).append("=인성\n");
         if (currentDaeun != null) {
             sb.append("현재 대운(지금 10년 큰 흐름): ").append(currentDaeun.getStartAge()).append("~")
               .append(currentDaeun.getEndAge()).append("세 ").append(currentDaeun.getFullName())
