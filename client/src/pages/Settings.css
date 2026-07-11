@@ -131,3 +131,6 @@
 }
 .settings-logout-btn:hover { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.5); }
 [data-theme="light"] .settings-logout-btn { background: #fef2f2; border-color: #fca5a5; }
+
+/* 한글 단어 중간 줄바꿈 방지 (감 성 → 감성) */
+.settings-homestyle-desc { word-break: keep-all; }

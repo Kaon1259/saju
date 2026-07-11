@@ -418,3 +418,6 @@
   color: rgba(255, 255, 255, 0.5);
 }
 [data-theme="light"] .mymenu-card-arrow { color: #c084fc; }
+
+/* 한글 단어 중간 줄바꿈 방지 */
+.mymenu-card-sub { word-break: keep-all; }

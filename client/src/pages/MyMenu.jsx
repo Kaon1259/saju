@@ -81,7 +81,7 @@ function MyMenu() {
             <span className="mymenu-card-title">광고 보고 하트 받기</span>
             <span className="mymenu-card-sub">
               {isGuest
-                ? `광고 시청 1회당 +${rewardPerAd} 하트 (로그인 필요)`
+                ? `로그인하고 광고 보면 +${rewardPerAd} 하트`
                 : soldOut
                   ? '오늘 보상 완료 · 내일 다시 받기'
                   : `광고 1회 시청 +${rewardPerAd} 하트${remaining != null ? ` · 오늘 ${dailyLimit - remaining}/${dailyLimit}` : ''}`}

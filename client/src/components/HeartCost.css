@@ -32,12 +32,12 @@
 }
 /* Guest 로그인 필요 */
 .heart-cost-badge--login {
-  background: rgba(148,163,184,0.2);
-  border-color: rgba(148,163,184,0.3);
-  color: #94a3b8;
+  background: rgba(30,41,59,0.80);
+  border-color: rgba(255,255,255,0.28);
+  color: #fff;
 }
 [data-theme="light"] .heart-cost-badge--login {
-  background: rgba(100,116,139,0.1);
-  border-color: rgba(100,116,139,0.2);
-  color: #64748b;
+  background: rgba(30,41,59,0.82);
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
 }

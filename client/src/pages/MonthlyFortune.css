@@ -145,10 +145,10 @@
 }
 
 .mf-month-now {
-  position: absolute;
-  bottom: 2px;
-  font-size: 7px;
+  margin-top: 3px;
+  font-size: 8px;
   font-weight: 900;
+  line-height: 1;
   color: var(--mf-accent);
   letter-spacing: 0.5px;
 }
