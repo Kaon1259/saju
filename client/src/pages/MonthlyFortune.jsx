@@ -288,7 +288,7 @@ function MonthlyFortune() {
           </div>
           {!showAllMonths && (
             <button className="mf-show-more-btn" onClick={() => setShowAllMonths(true)}>
-              <MenuIcon name="lock" size={16} /> 다른 월 더보기 <HeartCost category="MONTHLY_FORTUNE_EXTRA" />
+              <MenuIcon name="lock" size={16} /> 다른 월 더보기
             </button>
           )}
 
