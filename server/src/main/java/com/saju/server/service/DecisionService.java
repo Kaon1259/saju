@@ -3,7 +3,9 @@ package com.saju.server.service;
 import com.saju.server.entity.SpecialFortune;
 import com.saju.server.repository.SpecialFortuneRepository;
 import com.saju.server.saju.SajuCalculator;
+import com.saju.server.saju.SajuConstants;
 import com.saju.server.saju.SajuPillar;
+import com.saju.server.saju.DaeunInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +45,8 @@ public class DecisionService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final LocalDate CACHE_ANCHOR = LocalDate.of(2000, 1, 1);
+    // v2: 만세력 그라운딩 강화(십성·오행·대운·월운 물림). 기존 짧은 캐시 결과 바이패스.
+    private static final String CACHE_PREFIX = "decision_v2_";
 
     private static final Map<String, String> CATEGORY_KR = Map.of(
         "reunion", "재회 결정 상담",
@@ -61,7 +65,7 @@ public class DecisionService {
     public Map<String, Object> getCachedDecision(String category, String birthDate, String gender,
                                                   String partnerInfo, String situation, String history) {
         String cacheKey = buildCacheKey(birthDate, gender, category, partnerInfo, situation, history);
-        return getFromCache("decision_" + category, cacheKey);
+        return getFromCache(CACHE_PREFIX + category, cacheKey);
     }
 
     /**
@@ -106,7 +110,7 @@ public class DecisionService {
             result.put("closing", node.path("closing").asText("")); // 따뜻한 마무리 한 마디
 
             String cacheKey = buildCacheKey(birthDate, gender, category, partnerInfo, situation, history);
-            saveToCache("decision_" + category, cacheKey, result);
+            saveToCache(CACHE_PREFIX + category, cacheKey, result);
             log.info("결정 상담 캐시 저장 완료: category={}, key={}", category, cacheKey);
             return true;
         } catch (Exception e) {
@@ -179,6 +183,7 @@ public class DecisionService {
 3. 정직함 — 운세의 관점임을 분명히, 본인 판단 함께 권유
 
 【작성 규칙】
+- ★그라운딩★ 유저 메시지에 제공된 만세력 실제 계산값(네 기둥·십성·오행·현재 대운·향후 6개월 월운)에 반드시 근거해 분석할 것. 특히 타이밍은 '향후 6개월 월운'의 실제 십성·기세를 근거로 특정 월을 지목하고, 데이터에 없는 사주 정보나 시기를 지어내지 말 것
 - 반드시 JSON만 응답 (설명 텍스트, 코드블록 금지)
 - 카페에서 친구한테 진지하게 조언하듯 자연스러운 대화체 반말
 - 사주 용어는 쉬운 일상어로 풀어서 (한자/사자성어 금지)
@@ -191,17 +196,109 @@ public class DecisionService {
                                     String partnerInfo, String situation, String history) {
         LocalDate date = LocalDate.parse(birthDate);
         LocalDate today = LocalDate.now();
+        boolean isMale = "M".equals(gender);
+
+        // ── 친구 사주 네 기둥(만세력) ──
         int sajuYear = SajuCalculator.getSajuYear(date);
         SajuPillar yearPillar = SajuCalculator.calculateYearPillar(sajuYear);
+        SajuPillar monthPillar = SajuCalculator.calculateMonthPillar(date, yearPillar.getStemIndex());
         SajuPillar dayPillar = SajuCalculator.calculateDayPillar(date);
+        int dayStem = dayPillar.getStemIndex();
+        SajuPillar hourPillar = null;
+        if (birthTime != null && !birthTime.isBlank()) {
+            hourPillar = SajuCalculator.calculateHourPillar(birthTime, dayStem);
+        }
+
+        // 표시하는 기둥만으로 오행/음양 분포 계산 (시주 미상 시 추정값 오염 방지)
+        List<SajuPillar> pillars = new ArrayList<>(Arrays.asList(yearPillar, monthPillar, dayPillar));
+        if (hourPillar != null) pillars.add(hourPillar);
+        Map<String, Integer> elMap = new LinkedHashMap<>();
+        for (String oh : SajuConstants.OHENG) elMap.put(oh, 0);
+        int yang = 0, yin = 0;
+        for (SajuPillar p : pillars) {
+            elMap.merge(p.getStemElementName(), 1, Integer::sum);
+            elMap.merge(p.getBranchElementName(), 1, Integer::sum);
+            yang += p.isStemYang() ? 1 : 0;
+            yin += p.isStemYang() ? 0 : 1;
+            if (SajuConstants.JIJI_YINYANG[p.getBranchIndex()] == 0) yang++; else yin++;
+        }
+        String strongest = null, weakest = null;
+        int mx = -1, mn = Integer.MAX_VALUE;
+        for (Map.Entry<String, Integer> e : elMap.entrySet()) {
+            if (e.getValue() > mx) { mx = e.getValue(); strongest = e.getKey(); }
+            if (e.getValue() < mn) { mn = e.getValue(); weakest = e.getKey(); }
+        }
+
+        // 오늘 일진 + 일진 십성/기세
         SajuPillar todayPillar = SajuCalculator.calculateDayPillar(today);
+        Map<String, Object> todayFortune = SajuCalculator.calculateDailyFortune(dayStem, today);
+
+        // 현재 대운(지금 10년)
+        List<DaeunInfo> daeunList = SajuCalculator.calculateDaeun(
+            date, yearPillar.getStemIndex(), monthPillar, isMale, dayStem);
+        DaeunInfo currentDaeun = daeunList.stream()
+            .filter(DaeunInfo::isCurrent).findFirst().orElse(null);
+
+        // 올해 세운
+        SajuPillar yearSaewoon = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(today));
+        String yearSipsung = SajuCalculator.getSipsungName(dayStem, yearSaewoon.getStemIndex());
 
         StringBuilder sb = new StringBuilder();
-        sb.append("【오늘】").append(today).append(" (").append(todayPillar.getFullName()).append("일)\n");
-        sb.append("【상담 카테고리】").append(getCategoryKr(category)).append("\n");
-        sb.append("【친구】").append(yearPillar.getAnimal()).append("띠 / 일간: ").append(dayPillar.getFullName());
-        if (gender != null) sb.append(" / 성별: ").append("M".equals(gender) ? "남" : "여");
-        if (birthTime != null && !birthTime.isBlank()) sb.append(" / 태어난 시간: ").append(birthTime);
+        sb.append("【오늘】").append(today).append(" (").append(todayPillar.getFullName()).append("일)")
+          .append(" — 오늘 일진 십성: ").append(todayFortune.get("sipsung"))
+          .append(" / 기세: ").append(todayFortune.get("rating")).append("\n");
+        sb.append("【상담 카테고리】").append(getCategoryKr(category)).append("\n\n");
+
+        // ── 친구 사주(만세력 실제 계산값) ──
+        sb.append("━━ 친구의 사주(만세력 실제 계산값) ━━\n");
+        sb.append("생년월일: ").append(birthDate).append(" (사주년 ").append(sajuYear).append(")");
+        sb.append(" / 성별: ").append(isMale ? "남" : "여");
+        sb.append(" / 태어난 시간: ").append(hourPillar != null ? birthTime : "모름(시주 제외)");
+        sb.append("\n");
+        sb.append("네 기둥: 년주 ").append(yearPillar.getFullName())
+          .append(" · 월주 ").append(monthPillar.getFullName())
+          .append(" · 일주 ").append(dayPillar.getFullName());
+        if (hourPillar != null) sb.append(" · 시주 ").append(hourPillar.getFullName());
+        sb.append("\n");
+        sb.append("일간(나 자신): ").append(dayPillar.getStemName())
+          .append(" — ").append(dayPillar.getStemElementName())
+          .append(dayPillar.isStemYang() ? "(양)" : "(음)").append("\n");
+        sb.append("십성 분포(일간 기준): 년간 ").append(yearPillar.getStemName()).append("=")
+          .append(SajuCalculator.getSipsungName(dayStem, yearPillar.getStemIndex()))
+          .append(" / 월간 ").append(monthPillar.getStemName()).append("=")
+          .append(SajuCalculator.getSipsungName(dayStem, monthPillar.getStemIndex()));
+        if (hourPillar != null) {
+            sb.append(" / 시간 ").append(hourPillar.getStemName()).append("=")
+              .append(SajuCalculator.getSipsungName(dayStem, hourPillar.getStemIndex()));
+        }
+        sb.append("\n");
+        sb.append("오행 분포: ");
+        List<String> elParts = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : elMap.entrySet()) elParts.add(e.getKey() + e.getValue());
+        sb.append(String.join(" ", elParts));
+        sb.append(" (가장 강함: ").append(strongest).append(" / 가장 약함: ").append(weakest).append(")");
+        sb.append(" / 음양: 양").append(yang).append(" 음").append(yin).append("\n");
+        if (currentDaeun != null) {
+            sb.append("현재 대운(지금 10년 큰 흐름): ").append(currentDaeun.getStartAge()).append("~")
+              .append(currentDaeun.getEndAge()).append("세 ").append(currentDaeun.getFullName())
+              .append(" 대운 — 십성 ").append(currentDaeun.getSipsung())
+              .append(" / 기세 ").append(currentDaeun.getTwelveStage()).append("\n");
+        }
+        sb.append("올해(").append(today.getYear()).append(") 세운: ").append(yearSaewoon.getFullName())
+          .append("년 — 십성 ").append(yearSipsung).append("\n");
+        // 향후 6개월 월운 (달력 기준으로 정확히 계산 — 타이밍 지목의 근거)
+        sb.append("향후 6개월 월운(일간 기준 십성·기세):\n");
+        for (int i = 0; i < 6; i++) {
+            LocalDate mid = today.plusMonths(i).withDayOfMonth(15);
+            SajuPillar mYear = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(mid));
+            SajuPillar mPillar = SajuCalculator.calculateMonthPillar(mid, mYear.getStemIndex());
+            String mSip = SajuCalculator.getSipsungName(dayStem, mPillar.getStemIndex());
+            String mStage = SajuCalculator.getTwelveStageName(dayStem, mPillar.getBranchIndex());
+            sb.append("  ").append(mid.getYear()).append("-")
+              .append(String.format("%02d", mid.getMonthValue()))
+              .append(" ").append(mPillar.getFullName()).append("월: 십성 ").append(mSip)
+              .append(" / 기세 ").append(mStage).append("\n");
+        }
         sb.append("\n");
 
         if (partnerInfo != null && !partnerInfo.isBlank()) {
@@ -214,7 +311,9 @@ public class DecisionService {
             sb.append("【관계의 흐름】").append(history).append("\n");
         }
 
-        sb.append("\n위 정보를 바탕으로 '").append(getCategoryKr(category)).append("' 분석을 진행하세요.\n");
+        sb.append("\n위 만세력 계산값(십성·오행·대운·월운)에 반드시 근거해서 '")
+          .append(getCategoryKr(category)).append("' 분석을 진행하세요.\n");
+        sb.append("특히 bestPeriod/worstPeriod는 위 '향후 6개월 월운'의 실제 십성·기세를 근거로 특정 월을 지목하고, 데이터에 없는 시기를 지어내지 마세요.\n");
         sb.append("반드시 아래 JSON 형식으로만 응답:\n");
         sb.append("""
 {
