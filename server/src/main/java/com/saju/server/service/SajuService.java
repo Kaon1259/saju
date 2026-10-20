@@ -52,7 +52,7 @@ public class SajuService {
             try {
                 SajuResult dbResult = objectMapper.convertValue(dbCached, SajuResult.class);
                 log.debug("Saju DB cache hit: {}", dbCacheKey);
-                return dbResult;
+                return ensurePillarDetails(dbResult, birthDate, birthTime);
             } catch (Exception e) {
                 log.warn("Failed to deserialize DB cached saju result: {}", e.getMessage());
             }
@@ -70,7 +70,7 @@ public class SajuService {
         SajuResult cached = cache.get(cacheKey);
         if (cached != null) {
             log.debug("Saju memory cache hit: {}", cacheKey);
-            return cached;
+            return ensurePillarDetails(cached, birthDate, birthTime);
         }
 
         SajuResult result = SajuCalculator.calculate(birthDate, birthTime);
@@ -90,6 +90,7 @@ public class SajuService {
             result.setSinsalList(SajuCalculator.calculateSinsal(dayStemIdx, dayP.getBranchIndex(), yearP, monthP, dayP, hourP));
             // 12운성
             result.setTwelveStages(SajuCalculator.calculateAllTwelveStages(dayStemIdx, yearP, monthP, dayP, hourP));
+            result.setPillarDetails(SajuCalculator.calculatePillarDetails(dayStemIdx, yearP, monthP, dayP, hourP));
             // 격국
             result.setGyeokguk(SajuCalculator.calculateGyeokguk(dayStemIdx, monthP));
 
@@ -190,12 +191,28 @@ public class SajuService {
         Map<String, Object> dbCached = getFromCache("saju", dbCacheKey);
         if (dbCached != null) {
             try {
-                return objectMapper.convertValue(dbCached, SajuResult.class);
+                return ensurePillarDetails(objectMapper.convertValue(dbCached, SajuResult.class), birthDate, birthTime);
             } catch (Exception e) {
                 log.warn("Failed to deserialize cached saju result: {}", e.getMessage());
             }
         }
         return null;
+    }
+
+    /**
+     * 만세력 표(기둥별 십성·지장간·12운성) 필드가 없는 구버전 캐시에 계산 데이터만 보충 (AI 재호출 없음)
+     */
+    private SajuResult ensurePillarDetails(SajuResult result, LocalDate birthDate, String birthTime) {
+        if (result == null || result.getPillarDetails() != null) return result;
+        int dayStemIdx = getDayMasterIndex(result.getDayMaster());
+        if (dayStemIdx < 0) return result;
+        SajuPillar yearP = SajuCalculator.calculateYearPillar(SajuCalculator.getSajuYear(birthDate));
+        SajuPillar monthP = SajuCalculator.calculateMonthPillar(birthDate, yearP.getStemIndex());
+        SajuPillar dayP = SajuCalculator.calculateDayPillar(birthDate);
+        SajuPillar hourP = (birthTime != null && !birthTime.isEmpty())
+            ? SajuCalculator.calculateHourPillar(birthTime, dayP.getStemIndex()) : null;
+        result.setPillarDetails(SajuCalculator.calculatePillarDetails(dayStemIdx, yearP, monthP, dayP, hourP));
+        return result;
     }
 
     /**
@@ -213,6 +230,7 @@ public class SajuService {
             result.setInteractions(SajuCalculator.calculateInteractions(yearP, monthP, dayP, hourP));
             result.setSinsalList(SajuCalculator.calculateSinsal(dayStemIdx, dayP.getBranchIndex(), yearP, monthP, dayP, hourP));
             result.setTwelveStages(SajuCalculator.calculateAllTwelveStages(dayStemIdx, yearP, monthP, dayP, hourP));
+            result.setPillarDetails(SajuCalculator.calculatePillarDetails(dayStemIdx, yearP, monthP, dayP, hourP));
             result.setGyeokguk(SajuCalculator.calculateGyeokguk(dayStemIdx, monthP));
             result.setInteractionAnalysis(SajuInterpreter.interpretInteractions(result.getInteractions()));
             result.setGyeokgukAnalysis(SajuInterpreter.interpretGyeokguk(result.getGyeokguk()));

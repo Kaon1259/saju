@@ -6568,3 +6568,7 @@
 }
 .home-decision-chip-label { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
 .home-decision-chip-desc { font-size: 10px; font-weight: 500; opacity: 0.9; line-height: 1.2; text-align: center; }
+
+/* 한글 어절 단위 줄바꿈 — "만날/까" 같은 글자 중간 끊김 방지 */
+.home-decision-chip-desc, .home-decision-chip-label { word-break: keep-all; text-wrap: balance; }
+.home-mystar-sub { word-break: keep-all; text-wrap: balance; }

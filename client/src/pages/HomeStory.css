@@ -680,3 +680,4 @@
     animation: none !important;
   }
 }
+.hs-mystar-sub { word-break: keep-all; text-wrap: balance; }

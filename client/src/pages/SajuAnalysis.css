@@ -460,3 +460,76 @@
 [data-theme="light"] .saju-rating--normal { background: rgba(184,134,11,0.08); color: #92710a; }
 [data-theme="light"] .saju-rating--bad { background: rgba(220,38,38,0.08); color: #dc2626; }
 [data-theme="light"] .saju-rating--worst { background: rgba(185,28,28,0.08); color: #b91c1c; }
+
+/* 만세력 표 — 기둥별 십성 · 지장간 · 12운성 */
+.pillar-sipsung {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.pillar-sipsung--me {
+  background: rgba(255, 107, 157, 0.18);
+  color: #ff8fb1;
+}
+.pillar-col .pillar-char { aspect-ratio: auto; padding: 10px 0; }
+.pillar-hidden {
+  display: flex;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  opacity: 0.9;
+}
+.pillar-stage {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  padding-top: 4px;
+  width: 100%;
+  text-align: center;
+}
+.pillar-legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+[data-theme="light"] .pillar-sipsung { background: rgba(0, 0, 0, 0.05); color: #4a4a60; }
+[data-theme="light"] .pillar-sipsung--me { background: rgba(255, 90, 126, 0.14); color: #c2185b; }
+[data-theme="light"] .pillar-stage { border-top-color: rgba(0, 0, 0, 0.1); }
+[data-theme="light"] .pillar-hidden__item { filter: brightness(0.7) saturate(1.4); }
+
+/* 오행 도넛 */
+.element-donut { display: flex; align-items: center; gap: 16px; margin-bottom: var(--space-md); }
+.element-donut__svg { width: 140px; height: 140px; flex-shrink: 0; color: var(--color-text-primary, #fff); }
+.element-donut__big { font-size: 30px; font-weight: 900; }
+.element-donut__sub { font-size: 9px; opacity: 0.6; }
+.element-donut__legend { list-style: none; margin: 0; padding: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.element-donut__legend li { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+.element-donut__legend i { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.element-donut__legend span { font-weight: 700; width: 20px; }
+.element-donut__legend b { font-weight: 800; }
+.element-donut__legend em { margin-left: auto; font-style: normal; font-size: 0.7rem; color: var(--color-text-muted); }
+.element-donut__legend--zero { opacity: 0.4; }
+
+/* 기둥 하단 신살 태그 */
+.pillar-sinsal { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 100%; }
+.pillar-sinsal__tag { font-size: 0.62rem; font-weight: 700; padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+.pillar-sinsal__tag--good { background: rgba(74, 222, 128, 0.16); color: #4ade80; }
+.pillar-sinsal__tag--bad { background: rgba(248, 113, 113, 0.16); color: #f87171; }
+[data-theme="light"] .element-donut__svg { color: #222; }
+[data-theme="light"] .pillar-sinsal__tag--good { background: rgba(22, 163, 74, 0.12); color: #15803d; }
+[data-theme="light"] .pillar-sinsal__tag--bad { background: rgba(220, 38, 38, 0.1); color: #b91c1c; }
+
+/* 대운 타임라인 — 가로 레일 + 스냅 */
+.saju-daeun-timeline { position: relative; scroll-snap-type: x proximity; padding-top: 14px; }
+.saju-daeun-item { scroll-snap-align: center; }
+.saju-daeun-item::before { content: ''; position: absolute; top: -8px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); }
+.saju-daeun--current::before { background: var(--color-accent-gold, #fbbf24); box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25); }
+.saju-daeun-hanja { display: flex; gap: 2px; flex-direction: column; align-items: center; line-height: 1.1; }
+[data-theme="light"] .saju-daeun-item::before { background: rgba(0, 0, 0, 0.18); }

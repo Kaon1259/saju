@@ -368,6 +368,41 @@ public class SajuCalculator {
         return stages;
     }
 
+    /**
+     * 기둥별 상세 (만세력 표용): 천간/지지 십성(지지는 본기 기준), 지장간, 12운성.
+     * 일주 천간은 일원이라 stemSipsung = "일원".
+     */
+    public static Map<String, Map<String, Object>> calculatePillarDetails(int dayStemIndex,
+            SajuPillar year, SajuPillar month, SajuPillar day, SajuPillar hour) {
+        Map<String, Map<String, Object>> details = new LinkedHashMap<>();
+        details.put("년주", pillarDetail(dayStemIndex, year, false));
+        details.put("월주", pillarDetail(dayStemIndex, month, false));
+        details.put("일주", pillarDetail(dayStemIndex, day, true));
+        if (hour != null) {
+            details.put("시주", pillarDetail(dayStemIndex, hour, false));
+        }
+        return details;
+    }
+
+    private static Map<String, Object> pillarDetail(int dayStemIndex, SajuPillar p, boolean isDay) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("stemSipsung", isDay ? "일원" : getSipsungName(dayStemIndex, p.getStemIndex()));
+        int[] hidden = SajuConstants.JIJANGGAN[p.getBranchIndex()];
+        m.put("branchSipsung", getSipsungName(dayStemIndex, hidden[hidden.length - 1]));
+        List<Map<String, Object>> hiddenList = new ArrayList<>();
+        for (int idx : hidden) {
+            Map<String, Object> h = new LinkedHashMap<>();
+            h.put("stem", SajuConstants.CHEONGAN[idx]);
+            h.put("hanja", SajuConstants.CHEONGAN_HANJA[idx]);
+            h.put("element", SajuConstants.OHENG[SajuConstants.CHEONGAN_OHENG[idx]]);
+            h.put("sipsung", getSipsungName(dayStemIndex, idx));
+            hiddenList.add(h);
+        }
+        m.put("hidden", hiddenList);
+        m.put("twelveStage", getTwelveStageName(dayStemIndex, p.getBranchIndex()));
+        return m;
+    }
+
     // =========================================================================
     // 합충형해 (Interactions)
     // =========================================================================

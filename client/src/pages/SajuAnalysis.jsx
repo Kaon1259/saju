@@ -57,6 +57,55 @@ const ELEMENT_ICON_KEY = {
   '수': 'bloodtype',
 };
 
+const ELEMENT_ORDER = ['목', '화', '토', '금', '수'];
+
+// 오행 분포 도넛 — 상생 순서(목→화→토→금→수)로 호를 배치, 중앙에 가장 강한 오행
+function ElementDonut({ counts, total }) {
+  const R = 52;
+  const C = 2 * Math.PI * R;
+  const GAP = 3;
+  let offset = 0;
+  const strongest = ELEMENT_ORDER.reduce((a, b) => ((counts[b] || 0) > (counts[a] || 0) ? b : a), '목');
+  return (
+    <div className="element-donut">
+      <svg viewBox="0 0 140 140" className="element-donut__svg" role="img" aria-label="오행 분포 도넛 차트">
+        <circle cx="70" cy="70" r={R} fill="none" stroke="currentColor" strokeOpacity="0.08" strokeWidth="16" />
+        {ELEMENT_ORDER.map((el) => {
+          const n = counts[el] || 0;
+          if (!n) return null;
+          const len = Math.max((n / total) * C - GAP, 1);
+          const circle = (
+            <circle
+              key={el}
+              cx="70" cy="70" r={R}
+              fill="none"
+              stroke={ELEMENT_COLORS[el]}
+              strokeWidth="16"
+              strokeDasharray={`${len} ${C - len}`}
+              strokeDashoffset={-offset}
+              transform="rotate(-90 70 70)"
+            />
+          );
+          offset += (n / total) * C;
+          return circle;
+        })}
+        <text x="70" y="66" textAnchor="middle" className="element-donut__big" fill={ELEMENT_COLORS[strongest]}>{strongest}</text>
+        <text x="70" y="86" textAnchor="middle" className="element-donut__sub" fill="currentColor">가장 강한 기운</text>
+      </svg>
+      <ul className="element-donut__legend">
+        {ELEMENT_ORDER.map((el) => (
+          <li key={el} className={(counts[el] || 0) === 0 ? 'element-donut__legend--zero' : ''}>
+            <i style={{ background: ELEMENT_COLORS[el] }} />
+            <span>{el}</span>
+            <b>{counts[el] || 0}</b>
+            <em>{Math.round(((counts[el] || 0) / total) * 100)}%</em>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function SajuAnalysis() {
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
@@ -66,6 +115,7 @@ function SajuAnalysis() {
   const [birthTime, setBirthTime] = useState('');
   const [calendarType, setCalendarType] = useState('SOLAR');
   const [gender, setGender] = useState('');
+  const daeunRef = useRef(null);
   const [activeTab, setActiveTab] = useState('saju'); // saju, fortune, advanced
   const [dailyFortunes, setDailyFortunes] = useState(null);
   const [streaming, setStreaming] = useState(false);
@@ -98,6 +148,14 @@ function SajuAnalysis() {
       return () => clearTimeout(t);
     }
   }, [result, matrixShown]);
+
+  // 심화분석 탭 진입 시 현재 대운이 가운데 오도록 가로 스크롤
+  useEffect(() => {
+    if (activeTab !== 'advanced') return;
+    const box = daeunRef.current;
+    const cur = box?.querySelector('[data-current="true"]');
+    if (box && cur) box.scrollLeft = cur.offsetLeft - box.clientWidth / 2 + cur.clientWidth / 2;
+  }, [activeTab, result]);
 
   const loadUserSaju = () => {
     const userId = localStorage.getItem('userId');
@@ -482,17 +540,45 @@ function SajuAnalysis() {
                   <span className="pillar-label">{label}</span>
                   {pillar ? (
                     <>
+                      {result.pillarDetails?.[label] && (
+                        <span className={`pillar-sipsung ${label === '일주' ? 'pillar-sipsung--me' : ''}`}>
+                          {result.pillarDetails[label].stemSipsung}
+                        </span>
+                      )}
                       <div className="pillar-char pillar-stem" style={{ color: ELEMENT_COLORS[pillar.stemElement] }}>
                         <span className="pillar-hanja">{pillar.stemHanja}</span>
-                        <span className="pillar-korean">{pillar.stem}</span>
+                        <span className="pillar-korean">{pillar.stem} · {pillar.stemElement}</span>
                       </div>
                       <div className="pillar-char pillar-branch" style={{ color: ELEMENT_COLORS[pillar.branchElement] }}>
                         <span className="pillar-hanja">{pillar.branchHanja}</span>
-                        <span className="pillar-korean">{pillar.branch}</span>
+                        <span className="pillar-korean">{pillar.branch} · {pillar.branchElement}</span>
                       </div>
-                      <span className="pillar-element">
-                        {pillar.stemElement}/{pillar.branchElement}
-                      </span>
+                      {result.pillarDetails?.[label] ? (
+                        <>
+                          <span className="pillar-sipsung">{result.pillarDetails[label].branchSipsung}</span>
+                          <div className="pillar-hidden" title="지장간">
+                            {result.pillarDetails[label].hidden.map((h, i) => (
+                              <span key={i} className="pillar-hidden__item" style={{ color: ELEMENT_COLORS[h.element] }}>
+                                {h.hanja}
+                              </span>
+                            ))}
+                          </div>
+                          <span className="pillar-stage">{result.pillarDetails[label].twelveStage}</span>
+                          {(result.sinsalList || []).filter(sn => sn.present && sn.foundInPillar === label).length > 0 && (
+                            <div className="pillar-sinsal">
+                              {result.sinsalList.filter(sn => sn.present && sn.foundInPillar === label).map((sn, i) => (
+                                <span key={i} className={`pillar-sinsal__tag ${sn.positive ? 'pillar-sinsal__tag--good' : 'pillar-sinsal__tag--bad'}`}>
+                                  {sn.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className="pillar-element">
+                          {pillar.stemElement}/{pillar.branchElement}
+                        </span>
+                      )}
                     </>
                   ) : (
                     <>
@@ -510,6 +596,11 @@ function SajuAnalysis() {
                 </div>
               ))}
             </div>
+            {result.pillarDetails && (
+              <div className="pillar-legend">
+                <span>위: 천간 십성</span><span>아래: 지지 십성 · 지장간 · 12운성</span>
+              </div>
+            )}
             <div className="pillar-daymaster">
               일간(日干): <strong style={{ color: ELEMENT_COLORS[result.dayMasterElement] }}>
                 {result.dayMasterHanja} {result.dayMaster}({result.dayMasterElement})
@@ -521,6 +612,7 @@ function SajuAnalysis() {
           {/* Five Elements Chart */}
           <section className="saju-elements glass-card animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <h2 className="saju-section-title">오행 분포 (五行)</h2>
+            {result.fiveElements && <ElementDonut counts={result.fiveElements} total={totalElements} />}
             <div className="elements-bars">
               {result.fiveElements && Object.entries(result.fiveElements).map(([name, count]) => (
                 <div key={name} className="element-bar-row">
@@ -653,12 +745,15 @@ function SajuAnalysis() {
           {result.daeunList && result.daeunList.length > 0 && (
             <section className="saju-reading glass-card animate-fade-in-up" style={{ animationDelay: '400ms' }}>
               <h2 className="saju-section-title"><MenuIcon name="biorhythm" size={18} /> 대운 (大運) 흐름</h2>
-              <div className="saju-daeun-timeline">
+              <div className="saju-daeun-timeline" ref={daeunRef}>
                 {result.daeunList.map((d, idx) => (
-                  <div key={idx} className={`saju-daeun-item ${d.current ? 'saju-daeun--current' : ''}`}>
+                  <div key={idx} data-current={d.current ? 'true' : undefined} className={`saju-daeun-item ${d.current ? 'saju-daeun--current' : ''}`}>
                     <div className="saju-daeun-age">{d.startAge}~{d.endAge}세</div>
                     <div className="saju-daeun-pillar">
-                      <span className="saju-daeun-hanja">{d.fullHanja}</span>
+                      <span className="saju-daeun-hanja">
+                        <span style={{ color: ELEMENT_COLORS[d.stemElement] }}>{d.stemHanja}</span>
+                        <span style={{ color: ELEMENT_COLORS[d.branchElement] }}>{d.branchHanja}</span>
+                      </span>
                       <span className="saju-daeun-name">{d.fullName}</span>
                     </div>
                     <div className="saju-daeun-info">

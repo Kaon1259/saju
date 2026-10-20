@@ -1675,8 +1675,8 @@ function Home() {
         </div>
         <div className="home-decision-grid">
           {[
-            { key: 'reunion',  label: '재회', icon: 'moon',   desc: '다시 만날까' },
-            { key: 'breakup',  label: '이별', icon: 'moon',   desc: '끝낼까' },
+            { key: 'reunion',  label: '재회', icon: 'refresh',   desc: '다시 만날까' },
+            { key: 'breakup',  label: '이별', icon: 'heartBroken',   desc: '끝낼까' },
             { key: 'confess',  label: '고백', icon: 'letter', desc: '마음 전할까' },
             { key: 'marriage', label: '결혼', icon: 'ring',   desc: '평생 약속할까' },
           ].map((d) => (

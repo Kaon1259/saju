@@ -42,6 +42,7 @@ public class SajuResult {
     private java.util.List<SajuInteraction> interactions;  // 합충형해
     private java.util.List<SinsalInfo> sinsalList;         // 신살
     private java.util.Map<String, String> twelveStages;    // 12운성
+    private java.util.Map<String, java.util.Map<String, Object>> pillarDetails; // 기둥별 십성·지장간·12운성 (만세력 표)
     private String gyeokguk;                               // 격국
     private java.util.List<DaeunInfo> daeunList;           // 대운
     private Integer daeunStartAge;                         // 대운 시작 나이
