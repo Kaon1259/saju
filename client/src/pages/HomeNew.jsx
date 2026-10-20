@@ -66,6 +66,15 @@ const SCORE_DESC = {
 };
 
 /* ── 오각형 레이더 차트 (SVG) ──────────────────────────────────── */
+const ELEMENT_COLORS = { 목: '#22a85a', 화: '#ef4444', 토: '#d99a0b', 금: '#8a94a6', 수: '#3b82f6' };
+// 비로그인 히어로용 예시 사주 (1990-05-15 · 경오 신사 병인 + 시주 미상)
+const SAMPLE_PILLARS = [
+  { label: '시주', sip: '?', s: '?', b: '?', se: '금', be: '금' },
+  { label: '일주', sip: '일원', s: '丙', b: '寅', se: '화', be: '목' },
+  { label: '월주', sip: '정재', s: '辛', b: '巳', se: '금', be: '화' },
+  { label: '년주', sip: '편재', s: '庚', b: '午', se: '금', be: '화' },
+];
+
 function RadarChart({ data, size = 138 }) {
   const cx = size / 2;
   const cy = size / 2;
@@ -292,42 +301,24 @@ function HomeNew() {
       ) : (
         <section className="hn-hero hn-hero--guest">
           <div className="hn-hero-guest-body">
-            <span className="hn-hero-label">나만의 운세 점수</span>
+            <span className="hn-hero-label">내 사주팔자는 어떤 모양일까?</span>
+            <div className="hn-sample" aria-label="사주 원국 예시">
+              {SAMPLE_PILLARS.map((p) => (
+                <div key={p.label} className="hn-sample-col">
+                  <span className="hn-sample-sip">{p.sip}</span>
+                  <span className="hn-sample-ch" style={{ color: ELEMENT_COLORS[p.se], borderColor: ELEMENT_COLORS[p.se] }}>{p.s}</span>
+                  <span className="hn-sample-ch" style={{ color: ELEMENT_COLORS[p.be], borderColor: ELEMENT_COLORS[p.be] }}>{p.b}</span>
+                  <span className="hn-sample-lb">{p.label}</span>
+                </div>
+              ))}
+            </div>
             <p className="hn-hero-guest-text">
-              로그인하면 사주 기반 오늘의 총 운세와<br />항목별 분석 차트를 볼 수 있어요
+              생년월일만 알려주시면 <strong>나만의 사주 원국·오행·대운</strong>과<br />오늘의 총 운세를 풀어드려요 <em className="hn-sample-tag">예시</em>
             </p>
           </div>
-          <KakaoLoginCTA returnTo="/">카카오로 시작하고 내 운세 보기</KakaoLoginCTA>
+          <KakaoLoginCTA returnTo="/">카카오로 시작하고 내 사주 보기</KakaoLoginCTA>
         </section>
       )}
-
-      {/* ── 오늘의 행운 ─────────────────────────────────────── */}
-      <section className="hn-lucky">
-        <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="palette" size={16} /> 행운의 색</span>
-          <span className="hn-lucky-val">{lucky.color}</span>
-        </div>
-        <div className="hn-lucky-sep" />
-        <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="hash" size={16} /> 행운의 숫자</span>
-          <span className="hn-lucky-val">{lucky.number}</span>
-        </div>
-        <div className="hn-lucky-sep" />
-        <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="compass" size={16} /> 행운의 방향</span>
-          <span className="hn-lucky-val">{lucky.direction}</span>
-        </div>
-      </section>
-
-      {/* ── 스타 운세 배너 ─────────────────────────────── */}
-      <button className="hn-mystar-banner" onClick={() => go('/star-fortune')}>
-        <span className="hn-mystar-icon"><MenuIcon name="star" size={22} /></span>
-        <div className="hn-mystar-text">
-          <span className="hn-mystar-title">스타 운세</span>
-          <span className="hn-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
-        </div>
-        <span className="hn-mystar-arrow">›</span>
-      </button>
 
       {/* ── 결정 상담 (간판 유료 상품) — hn-section 패턴 통일 ─── */}
       <section className="hn-section hn-section--decision">
@@ -356,6 +347,34 @@ function HomeNew() {
           ))}
         </div>
       </section>
+
+      {/* ── 오늘의 행운 ─────────────────────────────────────── */}
+      <section className="hn-lucky">
+        <div className="hn-lucky-item">
+          <span className="hn-lucky-key"><MenuIcon name="palette" size={16} /> 행운의 색</span>
+          <span className="hn-lucky-val">{lucky.color}</span>
+        </div>
+        <div className="hn-lucky-sep" />
+        <div className="hn-lucky-item">
+          <span className="hn-lucky-key"><MenuIcon name="hash" size={16} /> 행운의 숫자</span>
+          <span className="hn-lucky-val">{lucky.number}</span>
+        </div>
+        <div className="hn-lucky-sep" />
+        <div className="hn-lucky-item">
+          <span className="hn-lucky-key"><MenuIcon name="compass" size={16} /> 행운의 방향</span>
+          <span className="hn-lucky-val">{lucky.direction}</span>
+        </div>
+      </section>
+
+      {/* ── 스타 운세 배너 ─────────────────────────────── */}
+      <button className="hn-mystar-banner" onClick={() => go('/star-fortune')}>
+        <span className="hn-mystar-icon"><MenuIcon name="star" size={22} /></span>
+        <div className="hn-mystar-text">
+          <span className="hn-mystar-title">스타 운세</span>
+          <span className="hn-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
+        </div>
+        <span className="hn-mystar-arrow">›</span>
+      </button>
 
       {/* ── 퀵 액션 ─────────────────────────────────────────── */}
       <section className="hn-quick">

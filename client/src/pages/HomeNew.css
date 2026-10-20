@@ -444,3 +444,30 @@
 /* 한글 어절 단위 줄바꿈 */
 .hn-card-sub, .hn-card-label { word-break: keep-all; text-wrap: balance; }
 .hn-mystar-sub { word-break: keep-all; text-wrap: balance; }
+
+/* ── 샘플 사주 원국 (비로그인 히어로) ───────────────────────── */
+.hn-sample { display: flex; justify-content: center; gap: 10px; margin: 12px 0 4px; }
+.hn-sample-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.hn-sample-sip { font-size: 10.5px; font-weight: 700; color: var(--hn-text-2); height: 14px; }
+.hn-sample-ch {
+  width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 900; border-radius: 14px; border: 1.5px solid;
+  background: var(--hn-surface); box-shadow: var(--hn-shadow);
+}
+.hn-sample-lb { font-size: 10.5px; color: var(--hn-text-2); font-weight: 600; margin-top: 1px; }
+.hn-hero-guest-text strong { color: var(--hn-text); font-weight: 800; }
+.hn-sample-tag {
+  font-style: normal; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 6px;
+  background: var(--hn-accent-soft); color: var(--hn-accent); vertical-align: 1px; margin-left: 2px;
+}
+
+/* ── 결정 상담 — 간판 상품 패널 (히어로 바로 아래) ───────────── */
+.hn-section--decision {
+  padding: 16px 14px 14px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ff5a7e 0%, #d946ef 55%, #6366f1 100%);
+  box-shadow: 0 10px 28px rgba(217, 70, 239, 0.28);
+}
+.hn-section--decision .hn-section-title { color: #fff; font-size: 18px; }
+.hn-section--decision .hn-decision-badge { background: #fff; color: #d946ef; }
+.hn-section--decision .hn-decision-q { color: rgba(255, 255, 255, 0.92); }
