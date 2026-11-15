@@ -327,10 +327,12 @@
   color: #475569;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
+/* 8% 틴트는 흰 배경 위에서 사실상 흰색이라 선택이 안 보였다 → 흰 카드 + 색 링 */
 [data-theme="light"] .mlc-tab.active {
   color: #1f1730;
-  background: color-mix(in srgb, var(--tc, #EC4899) 8%, #fff);
+  background: #fff;
   border-color: var(--tc, #EC4899);
+  box-shadow: 0 0 0 2px var(--tc, #EC4899), 0 6px 16px rgba(0, 0, 0, 0.10);
 }
 
 /* ═══ 폼 (재디자인 2026-04-27) ═══ */
@@ -561,8 +563,10 @@
 }
 .mlc-blood-btn.active {
   border-color: var(--bb-color, #EF4444);
+  background: rgba(255, 255, 255, 0.08); /* color-mix 미지원 폴백 */
   background: color-mix(in srgb, var(--bb-color, #EF4444) 14%, transparent);
   color: var(--bb-color, #EF4444);
+  box-shadow: 0 0 0 2px var(--bb-color, #EF4444);
   transform: scale(1.04);
 }
 [data-theme="light"] .mlc-blood-btn {

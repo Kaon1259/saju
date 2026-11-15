@@ -57,6 +57,8 @@ import { clearAuth } from './utils/auth';
 import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
+// 구형 WebView(color-mix 미지원) 폴백 — 반드시 마지막에 임포트해야 캐스케이드에서 이긴다
+import './colormix-fallback.css';
 
 const TITLE_IMAGES = Array.from({ length: 20 }, (_, i) => `/title/title_${String(i).padStart(2, '0')}.jpg`);
 

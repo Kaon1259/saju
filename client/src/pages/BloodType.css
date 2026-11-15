@@ -70,7 +70,7 @@
 .bt-compat-btns { display: flex; gap: 10px; }
 .bt-compat-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 18px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.1); background: var(--color-glass); color: #fff; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); min-width: 60px; }
 .bt-compat-btn:hover { transform: translateY(-3px); }
-.bt-compat-btn.active { background: linear-gradient(135deg, color-mix(in srgb, var(--bt-color) 30%, transparent), transparent); border-color: var(--bt-color); box-shadow: 0 4px 16px color-mix(in srgb, var(--bt-color) 30%, transparent); transform: translateY(-3px) scale(1.05); }
+.bt-compat-btn.active { background: var(--color-glass); background: linear-gradient(135deg, color-mix(in srgb, var(--bt-color) 30%, transparent), transparent); border-color: var(--bt-color); box-shadow: 0 0 0 2px var(--bt-color), 0 4px 16px rgba(0,0,0,0.25); transform: translateY(-3px) scale(1.05); }
 .bt-compat-submit { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 14px; border-radius: 14px; border: none; background: linear-gradient(135deg, #EF4444, #C084FC); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
 .bt-compat-submit:disabled { opacity: 0.5; }
 .bt-cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }

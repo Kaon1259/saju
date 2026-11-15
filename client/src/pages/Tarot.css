@@ -2869,9 +2869,10 @@
 }
 .tarot-spread-card.active {
   border-color: var(--spread-color);
+  background: rgba(255, 255, 255, 0.1); /* color-mix 미지원 폴백 */
   background: color-mix(in srgb, var(--spread-color) 15%, transparent);
   transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--spread-color) 25%, transparent), 0 0 0 1px color-mix(in srgb, var(--spread-color) 20%, transparent);
+  box-shadow: 0 0 0 2px var(--spread-color), 0 6px 20px rgba(0, 0, 0, 0.32);
 }
 .tarot-spread-card.active::after {
   content: '';
@@ -3003,9 +3004,10 @@
 }
 .tarot-cat-btn.active {
   border-color: var(--cat-color);
+  background: rgba(255, 255, 255, 0.1); /* color-mix 미지원 폴백 */
   background: color-mix(in srgb, var(--cat-color) 15%, transparent);
   transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--cat-color) 25%, transparent), 0 0 0 1px color-mix(in srgb, var(--cat-color) 20%, transparent);
+  box-shadow: 0 0 0 2px var(--cat-color), 0 6px 20px rgba(0, 0, 0, 0.32);
 }
 .tarot-cat-btn.active::after {
   content: '';

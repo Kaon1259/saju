@@ -270,9 +270,10 @@
 }
 .ltf-toggle-btn.active {
   border-color: var(--ltf-color, #E91E63);
+  background: rgba(255, 255, 255, 0.1); /* color-mix 미지원 폴백 */
   background: color-mix(in srgb, var(--ltf-color, #E91E63) 12%, transparent);
   color: var(--color-text, #fff);
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--ltf-color, #E91E63) 25%, transparent);
+  box-shadow: 0 0 0 2px var(--ltf-color, #E91E63), 0 2px 10px rgba(0, 0, 0, 0.22);
 }
 .ltf-g-circle {
   display: inline-flex;

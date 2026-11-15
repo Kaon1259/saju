@@ -1,0 +1,75 @@
+/* ════════════════════════════════════════════════════════════
+   color-mix() 미지원 폴백 — 구형 Android WebView (Chrome 111 미만)
+
+   CSS 는 값이 무효면 '선언 전체'를 버린다. 그래서 color-mix 를 쓴
+   background 는 구형 WebView 에서 통째로 사라지고,
+     · -webkit-text-fill-color: transparent 와 같이 쓰인 제목은 글자가 증발하고
+     · 버튼/배지는 배경 없는 맨 글자로 보인다.
+
+   @supports not 이라 지원 브라우저(Chrome 111+)는 이 블록을 건너뛴다.
+   → 현재 화면은 전혀 바뀌지 않고, 구형 기기에서만 적용된다.
+   html 접두사는 임포트 순서와 무관하게 이기기 위한 특이도 확보용.
+
+   ※ 히어로 글로우·오라·hover 틴트는 장식이라 사라져도 무방 → 폴백 없음.
+   ════════════════════════════════════════════════════════════ */
+@supports not (background: color-mix(in srgb, red 50%, white)) {
+
+  /* ── ① 그라데이션 텍스트 — 가장 위험(글자가 통째로 사라짐) ── */
+  html .star-hero-title,
+  html .ltf-hero-title,
+  html .dec-streaming-orb {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+  html .star-hero-title { color: var(--sh-color, #ff9800); }
+  html .ltf-hero-title  { color: var(--ltf-color, #e91e63); }
+
+  /* ── ② 주요 버튼 — 배경이 빠지면 '그냥 글자'가 된다 ────────── */
+  html .dec-submit,
+  html .ltf-submit {
+    background: linear-gradient(135deg, #ff5a7e, #d946ef);
+    color: #fff;
+  }
+  html .dec-autofill,
+  html .ltf-autofill {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text, #fff);
+  }
+  html[data-theme="light"] .dec-autofill,
+  html[data-theme="light"] .ltf-autofill {
+    background: #fff;
+    color: #1f1730;
+  }
+
+  /* ── ③ 배지·칩 — 흰 글자가 투명 배경 위에 남지 않게 ────────── */
+  html .dec-hero-badge,
+  html .celeb-tag--cat {
+    background: rgba(0, 0, 0, 0.4);
+    color: #fff;
+  }
+
+  /* ── ④ 결과 카드/배너 배경 ─────────────────────────────────── */
+  html .dec-verdict-card,
+  html .dec-headline,
+  html .dec-closing,
+  html .dec-q-banner,
+  html .ltf-oneliner,
+  html .star-fortune-card-icon,
+  html .ts-menu-icon,
+  html .fortune-card__icon--svg {
+    background: rgba(255, 255, 255, 0.07);
+  }
+  html[data-theme="light"] .dec-verdict-card,
+  html[data-theme="light"] .dec-headline,
+  html[data-theme="light"] .dec-closing,
+  html[data-theme="light"] .dec-q-banner,
+  html[data-theme="light"] .ltf-oneliner,
+  html[data-theme="light"] .star-fortune-card-icon,
+  html[data-theme="light"] .ts-menu-icon,
+  html[data-theme="light"] .fortune-card__icon--svg {
+    background: #fff;
+  }
+
+  /* ── ⑤ 선택 상태는 각 페이지에서 색 링(box-shadow 0 0 0 2px)으로
+         이미 처리했다. 링은 color-mix 를 쓰지 않아 여기서는 다루지 않는다. */
+}
