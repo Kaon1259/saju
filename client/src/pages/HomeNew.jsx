@@ -67,13 +67,21 @@ const SCORE_DESC = {
 
 /* ── 오각형 레이더 차트 (SVG) ──────────────────────────────────── */
 const ELEMENT_COLORS = { 목: '#22a85a', 화: '#ef4444', 토: '#d99a0b', 금: '#8a94a6', 수: '#3b82f6' };
+// 한자 타일 채움/테두리 — color-mix 는 구형 Android WebView 미지원이라 값으로 고정
+const ELEMENT_TINTS = { 목: '#e9f7ef', 화: '#fdecec', 토: '#fbf2e0', 금: '#eff1f4', 수: '#e9f0fe' };
+const ELEMENT_LINES = { 목: '#a8ddc0', 화: '#f8b4b4', 토: '#efd79a', 금: '#ccd2db', 수: '#b3cbfb' };
 // 비로그인 히어로용 예시 사주 (1990-05-15 · 경오 신사 병인 + 시주 미상)
+// 시주는 unknown — 점선 빈 칸으로 "아직 비어 있다"를 보여 가입을 유도한다
 const SAMPLE_PILLARS = [
-  { label: '시주', sip: '?', s: '?', b: '?', se: '금', be: '금' },
+  { label: '시주', sip: '미상', s: '?', b: '?', se: '금', be: '금', unknown: true },
   { label: '일주', sip: '일원', s: '丙', b: '寅', se: '화', be: '목' },
   { label: '월주', sip: '정재', s: '辛', b: '巳', se: '금', be: '화' },
   { label: '년주', sip: '편재', s: '庚', b: '午', se: '금', be: '화' },
 ];
+// 오행 색을 타일에 입히는 인라인 스타일 (unknown 은 CSS 클래스가 처리)
+const chStyle = (el) => ({
+  color: ELEMENT_COLORS[el], background: ELEMENT_TINTS[el], borderColor: ELEMENT_LINES[el],
+});
 
 function RadarChart({ data, size = 138 }) {
   const cx = size / 2;
@@ -137,7 +145,7 @@ function CardSection({ title, items, onNav }) {
             <span className="hn-card-icon">
               <MenuIcon name={it.icon} size={28} />
             </span>
-            <span className="hn-card-label">{it.label}</span>
+            <span className="hn-card-label fs-fixed">{it.label}</span>
           </button>
         ))}
       </div>
@@ -145,11 +153,13 @@ function CardSection({ title, items, onNav }) {
   );
 }
 
+// 바로가기 — 아래 섹션과 중복되지 않는 것만 둔다.
+// (사주궁합은 '연애 운세'에, 만세력은 여기로 모아 중복 제거)
 const QUICK = [
-  { label: '오늘운세', icon: 'sun',          path: '/my' },
-  { label: '타로',     icon: 'tarot',        path: '/tarot' },
-  { label: '사주궁합', icon: 'sparkleHeart', path: '/compatibility' },
-  { label: '출석체크', icon: 'attendance',   path: '/attendance' },
+  { label: '오늘운세', icon: 'sun',        path: '/my' },
+  { label: '타로',     icon: 'tarot',      path: '/tarot' },
+  { label: '만세력',   icon: 'compass',    path: '/manseryeok' },
+  { label: '출석체크', icon: 'attendance', path: '/attendance' },
 ];
 
 const SECTION_LOVE = [
@@ -169,7 +179,6 @@ const SECTION_SEASON = [
   { label: '월간운세', icon: 'monthly',       path: '/monthly-fortune' },
   { label: '주간운세', icon: 'weekly',        path: '/weekly-fortune' },
   { label: '토정비결', icon: 'tojeong',       path: '/tojeong' },
-  { label: '오늘운세', icon: 'sun',           path: '/my' },
   { label: '띠 운세',  icon: 'zodiac',        path: '/fortune' },
   { label: '별자리',   icon: 'constellation', path: '/constellation' },
   { label: '바이오리듬', icon: 'biorhythm',   path: '/biorhythm' },
@@ -177,13 +186,16 @@ const SECTION_SEASON = [
 
 const SECTION_TRAD = [
   { label: '정통사주',   icon: 'traditional', path: '/traditional' },
-  { label: '만세력',     icon: 'compass',     path: '/manseryeok' },
   { label: 'MBTI',       icon: 'mbti',        path: '/mbti' },
   { label: '혈액형',     icon: 'bloodtype',   path: '/bloodtype' },
   { label: '관상',       icon: 'face',        path: '/face-reading' },
   { label: '꿈해몽',     icon: 'dream',       path: '/dream' },
   { label: '심리테스트', icon: 'psych',       path: '/psych-test' },
 ];
+
+// 시즌 + 정통을 한 섹션으로 — 똑같이 생긴 4타일 행이 네 번 반복되던 걸 줄인다.
+// (앞 4개만 노출되고 나머지는 '더보기'로 접힌다)
+const SECTION_MORE = [...SECTION_SEASON, ...SECTION_TRAD];
 
 function HomeNew() {
   const navigate = useNavigate();
@@ -279,17 +291,47 @@ function HomeNew() {
             <>오늘의 기운을 살펴보세요</>
           )}
         </h1>
-        <p className="hn-greet-sub">오늘의 운세와 연애운, 행운의 흐름을 확인해 보세요</p>
       </header>
 
-      {/* ── 히어로 — 총 운세 점수 + 레이더 차트 ───────────────── */}
+      {/* ── 결정 상담 (간판 유료 상품) — 홈 최상단 ──────────────────
+          이 앱의 메인 상품이므로 히어로보다 위. 비로그인도 여기서 먼저 보게 두는 게
+          유리하다 — "재회가 궁금해서" 가입하는 동기가 생겨 범용 CTA 보다 전환이 좋다.
+          일반 카테고리 행(.hn-section/.hn-grid)과 구조를 달리해 위계를 만든다. */}
+      <section className="hn-flagship">
+        <span className="hn-flagship-badge fs-fixed">사주 기반 결정 상담</span>
+        <h2 className="hn-flagship-title">“이 결정, 지금이 맞을까?”</h2>
+        <p className="hn-flagship-sub">
+          만세력으로 계산한 <strong>대운·세운</strong>으로 언제가 유리한지 짚어드려요
+        </p>
+        <div className="hn-flagship-grid">
+          {[
+            { key: 'reunion',  label: '재회', icon: 'refresh',     desc: '다시 만날까' },
+            { key: 'breakup',  label: '이별', icon: 'heartBroken', desc: '끝낼까' },
+            { key: 'confess',  label: '고백', icon: 'letter',      desc: '마음 전할까' },
+            { key: 'marriage', label: '결혼', icon: 'ring',        desc: '이 사람일까' },
+          ].map((d) => (
+            <button key={d.key} className="hn-fs-tile"
+              onClick={() => navigate('/decision', { state: { category: d.key } })}>
+              <span className="hn-fs-icon">
+                <MenuIcon name={d.icon} size={22} />
+              </span>
+              <span className="hn-fs-text">
+                <span className="hn-fs-label fs-fixed">{d.label}</span>
+                <span className="hn-fs-desc fs-fixed">{d.desc}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 히어로 — 총 운세 점수 / 비로그인은 사주 원국 샘플 ───── */}
       {userId && !isGuestUser ? (
         <section className="hn-hero" onClick={() => go('/my')}>
           <div className="hn-hero-main">
-            <span className="hn-hero-label">오늘의 총 운세</span>
+            <span className="hn-hero-label fs-fixed">오늘의 총 운세</span>
             <div className="hn-hero-score">
               <strong>{overall ?? '—'}</strong>
-              <span className="hn-hero-out">/100</span>
+              <span className="hn-hero-out fs-fixed">/100</span>
               <em className={`hn-hero-grade hn-hero-grade--${g.cls}`}>{g.label}</em>
             </div>
             <p className="hn-hero-desc">{overall != null ? SCORE_DESC[g.cls] : '탭하여 오늘의 운세를 분석해 보세요'}</p>
@@ -301,104 +343,81 @@ function HomeNew() {
       ) : (
         <section className="hn-hero hn-hero--guest">
           <div className="hn-hero-guest-body">
-            <span className="hn-hero-label">내 사주팔자는 어떤 모양일까?</span>
+            <span className="hn-hero-label fs-fixed">내 사주 원국 <em className="hn-sample-tag">예시</em></span>
             <div className="hn-sample" aria-label="사주 원국 예시">
               {SAMPLE_PILLARS.map((p) => (
                 <div key={p.label} className="hn-sample-col">
-                  <span className="hn-sample-sip">{p.sip}</span>
-                  <span className="hn-sample-ch" style={{ color: ELEMENT_COLORS[p.se], borderColor: ELEMENT_COLORS[p.se] }}>{p.s}</span>
-                  <span className="hn-sample-ch" style={{ color: ELEMENT_COLORS[p.be], borderColor: ELEMENT_COLORS[p.be] }}>{p.b}</span>
-                  <span className="hn-sample-lb">{p.label}</span>
+                  <span className="hn-sample-sip fs-fixed">{p.sip}</span>
+                  <span className={`hn-sample-ch fs-fixed${p.unknown ? ' hn-sample-ch--unknown' : ''}`}
+                    style={p.unknown ? undefined : chStyle(p.se)}>{p.s}</span>
+                  <span className={`hn-sample-ch fs-fixed${p.unknown ? ' hn-sample-ch--unknown' : ''}`}
+                    style={p.unknown ? undefined : chStyle(p.be)}>{p.b}</span>
+                  <span className="hn-sample-lb fs-fixed">{p.label}</span>
                 </div>
               ))}
             </div>
             <p className="hn-hero-guest-text">
-              생년월일만 알려주시면 <strong>나만의 사주 원국·오행·대운</strong>과<br />오늘의 총 운세를 풀어드려요 <em className="hn-sample-tag">예시</em>
+              생년월일만 알려주시면 <strong>내 여덟 글자</strong>가 채워져요
             </p>
           </div>
           <KakaoLoginCTA returnTo="/">카카오로 시작하고 내 사주 보기</KakaoLoginCTA>
         </section>
       )}
 
-      {/* ── 결정 상담 (간판 유료 상품) — hn-section 패턴 통일 ─── */}
-      <section className="hn-section hn-section--decision">
-        <div className="hn-section-head">
-          <h2 className="hn-section-title">
-            결정 상담
-            <span className="hn-decision-badge">간판</span>
-          </h2>
-          <span className="hn-decision-q">"이 결정, 지금이 맞을까?"</span>
-        </div>
-        <div className="hn-grid">
-          {[
-            { key: 'reunion',  label: '재회', icon: 'refresh',         desc: '다시 만날까' },
-            { key: 'breakup',  label: '이별', icon: 'heartBroken',         desc: '끝낼까' },
-            { key: 'confess',  label: '고백', icon: 'letter',       desc: '마음 전할까' },
-            { key: 'marriage', label: '결혼', icon: 'ring',         desc: '평생 약속할까' },
-          ].map((d) => (
-            <button key={d.key} className="hn-card hn-card--decision"
-              onClick={() => navigate('/decision', { state: { category: d.key } })}>
-              <span className="hn-card-icon">
-                <MenuIcon name={d.icon} size={28} />
-              </span>
-              <span className="hn-card-label">{d.label}</span>
-              <span className="hn-card-sub">{d.desc}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 오늘의 행운 ─────────────────────────────────────── */}
-      <section className="hn-lucky">
-        <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="palette" size={16} /> 행운의 색</span>
-          <span className="hn-lucky-val">{lucky.color}</span>
-        </div>
-        <div className="hn-lucky-sep" />
-        <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="hash" size={16} /> 행운의 숫자</span>
-          <span className="hn-lucky-val">{lucky.number}</span>
-        </div>
-        <div className="hn-lucky-sep" />
-        <div className="hn-lucky-item">
-          <span className="hn-lucky-key"><MenuIcon name="compass" size={16} /> 행운의 방향</span>
-          <span className="hn-lucky-val">{lucky.direction}</span>
-        </div>
-      </section>
-
-      {/* ── 스타 운세 배너 ─────────────────────────────── */}
-      <button className="hn-mystar-banner" onClick={() => go('/star-fortune')}>
-        <span className="hn-mystar-icon"><MenuIcon name="star" size={22} /></span>
-        <div className="hn-mystar-text">
-          <span className="hn-mystar-title">스타 운세</span>
-          <span className="hn-mystar-sub">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
-        </div>
-        <span className="hn-mystar-arrow">›</span>
-      </button>
-
-      {/* ── 퀵 액션 ─────────────────────────────────────────── */}
+      {/* ── 퀵 액션 — 간판 바로 아래 무료 후크 ─────────────────
+          간판(유료)을 본 직후 바로 쓸 수 있는 무료·저가 진입점을 둔다.
+          여기서 신뢰가 쌓여야 80하트짜리 간판으로 넘어온다. */}
       <section className="hn-quick">
         {QUICK.map((q) => (
           <button key={q.label} className="hn-quick-btn" onClick={() => go(q.path)}>
             <span className="hn-quick-icon">
               <MenuIcon name={q.icon} size={25} />
             </span>
-            <span className="hn-quick-label">{q.label}</span>
+            <span className="hn-quick-label fs-fixed">{q.label}</span>
           </button>
         ))}
       </section>
 
-      {/* ── 출석 카드 (로그인 시) ───────────────────────────── */}
+      {/* ── 출석 카드 (로그인 시) — 리텐션 ──────────────────── */}
       {userId && !isGuestUser && (
         <div className="hn-attendance">
           <AttendanceCard refreshKey={attendanceRefreshKey} />
         </div>
       )}
 
-      {/* ── 섹션 — 연애 / 시즌 / 정통 ───────────────────────── */}
-      <CardSection title="연애 운세"      items={SECTION_LOVE}   onNav={go} />
-      <CardSection title="시즌 운세"      items={SECTION_SEASON} onNav={go} />
-      <CardSection title="정통·종합 운세" items={SECTION_TRAD}   onNav={go} />
+      {/* ── 연애 운세 — 이 앱의 본 카테고리 ─────────────────── */}
+      <CardSection title="연애 운세" items={SECTION_LOVE} onNav={go} />
+
+      {/* ── 스타 운세 배너 ─────────────────────────────── */}
+      <button className="hn-mystar-banner" onClick={() => go('/star-fortune')}>
+        <span className="hn-mystar-icon"><MenuIcon name="star" size={22} /></span>
+        <div className="hn-mystar-text">
+          <span className="hn-mystar-title fs-fixed">스타 운세</span>
+          <span className="hn-mystar-sub fs-fixed">최애 스타의 오늘 운세·궁합·그룹 운세 모아보기</span>
+        </div>
+        <span className="hn-mystar-arrow fs-fixed">›</span>
+      </button>
+
+      {/* ── 오늘의 행운 — 장식성이라 간판에서 떼어 아래로 ────── */}
+      <section className="hn-lucky">
+        <div className="hn-lucky-item">
+          <span className="hn-lucky-key fs-fixed"><MenuIcon name="palette" size={16} /> 행운의 색</span>
+          <span className="hn-lucky-val fs-fixed">{lucky.color}</span>
+        </div>
+        <div className="hn-lucky-sep" />
+        <div className="hn-lucky-item">
+          <span className="hn-lucky-key fs-fixed"><MenuIcon name="hash" size={16} /> 행운의 숫자</span>
+          <span className="hn-lucky-val fs-fixed">{lucky.number}</span>
+        </div>
+        <div className="hn-lucky-sep" />
+        <div className="hn-lucky-item">
+          <span className="hn-lucky-key fs-fixed"><MenuIcon name="compass" size={16} /> 행운의 방향</span>
+          <span className="hn-lucky-val fs-fixed">{lucky.direction}</span>
+        </div>
+      </section>
+
+      {/* ── 시즌·정통 — 한 섹션으로 통합 ───────────────────────── */}
+      <CardSection title="시즌·정통 운세" items={SECTION_MORE} onNav={go} />
 
       <p className="hn-foot">오늘도 좋은 기운이 함께하길 바라요 ✦</p>
     </div>

@@ -20,28 +20,28 @@ import { WAIT_MESSAGES } from '../data/waitMessages';
 import './Decision.css';
 
 const CATEGORIES = {
-  reunion:  { label: '재회',   icon: '💔', iconKey: 'refresh',      color: '#A78BFA',
+  reunion:  { label: '재회',   icon: '💔', iconKey: 'refresh',      color: '#A78BFA', soft: '#f1ecfe',
               title: '재회 결정 상담',
               question: '헤어진 사람과 다시 만나야 할까?',
               partnerLabel: '헤어진 사람 정보',
               situationPlaceholder: '얼마나 만났는지, 누가 먼저 헤어지자 했는지, 지금 연락 상태는 어떤지...',
               historyPlaceholder: '헤어진 후 다시 연락이 닿은 적이 있는지, 미련이 어느 정도인지...',
               particles: ['💔','💧','✨','💫','🌙'] },
-  breakup:  { label: '이별',   icon: '🚪', iconKey: 'moon',         color: '#94A3B8',
+  breakup:  { label: '이별',   icon: '🚪', iconKey: 'heartBroken',  color: '#94A3B8', soft: '#eef1f6',
               title: '이별 결정 상담',
               question: '이 관계를 끝내야 할까?',
               partnerLabel: '상대방 정보',
               situationPlaceholder: '얼마나 만났는지, 어떤 점이 힘든지, 무엇 때문에 헤어지고 싶은지...',
               historyPlaceholder: '얼마나 자주 다투는지, 권태기인지 본질적 갈등인지...',
               particles: ['🚪','💧','✨','🌙','💫'] },
-  confess:  { label: '고백',   icon: '💌', iconKey: 'letter',       color: '#EC4899',
+  confess:  { label: '고백',   icon: '💌', iconKey: 'letter',       color: '#EC4899', soft: '#fdeaf4',
               title: '고백 결정 상담',
               question: '이 마음을 전해도 될까?',
               partnerLabel: '좋아하는 사람 정보',
               situationPlaceholder: '어떻게 알게 됐는지, 얼마나 좋아했는지, 상대 반응은 어떤지...',
               historyPlaceholder: '연락은 얼마나 자주 하는지, 둘만 만난 적이 있는지...',
               particles: ['💌','💘','💗','✨','🌹'] },
-  marriage: { label: '결혼',   icon: '💒', iconKey: 'ring',         color: '#F472B6',
+  marriage: { label: '결혼',   icon: '💒', iconKey: 'ring',         color: '#F472B6', soft: '#fdeef6',
               title: '결혼 결정 상담',
               question: '이 사람과 평생을 약속해도 될까?',
               partnerLabel: '예비 배우자 정보',
@@ -79,8 +79,12 @@ function Decision() {
   const toast = useToast();
   const userId = localStorage.getItem('userId');
 
-  const initialCat = location.state?.category && CATEGORIES[location.state.category]
-    ? location.state.category : 'reunion';
+  // 선택 카테고리 출처 우선순위: ?cat= (딥링크·새로고침에도 유지) → navigate state → 기본값
+  const qsCat = new URLSearchParams(location.search).get('cat');
+  const initialCat = qsCat && CATEGORIES[qsCat]
+    ? qsCat
+    : (location.state?.category && CATEGORIES[location.state.category]
+        ? location.state.category : 'reunion');
   const [category, setCategory] = useState(initialCat);
   const info = CATEGORIES[category];
 
@@ -165,6 +169,13 @@ function Decision() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state?.restoreHistoryId]);
+
+  // 탭 전환 시 URL 도 같이 바꿔 새로고침·공유에도 선택이 유지된다.
+  // state 는 그대로 넘겨 히스토리 복원(restoreHistoryId) 흐름을 깨지 않는다.
+  const selectCategory = (key) => {
+    setCategory(key);
+    navigate(`/decision?cat=${key}`, { replace: true, state: location.state });
+  };
 
   const { guardedAction } = useHeartGuard('DECISION_CONSULT');
 
@@ -300,12 +311,9 @@ function Decision() {
       <div className="dec-hero" style={{ position: 'relative', paddingLeft: 48, paddingRight: 48 }}>
         <HeroIconButtons color={info.color} onReset={result ? handleReset : undefined} />
         <div className="dec-hero-bg" />
-        <div className="dec-hero-particles">
-          {info.particles.map((p, i) => (
-            <span key={i} className="dec-hero-particle" style={{ '--p-i': i, '--p-delay': `${i * 0.4}s` }}>{p}</span>
-          ))}
-        </div>
-        <div className="dec-hero-badge">간판 · 결정 상담</div>
+        {/* 이모지 파티클 제거 — 중앙에서 방사형으로 퍼지며 제목 위를 지나가 글자와 겹쳤고,
+            홈 간판(외곽선 아이콘·깔끔한 면)과 톤이 맞지 않았다. 배경 글로우만 유지. */}
+        <div className="dec-hero-badge">사주 기반 결정 상담</div>
         <h1 className="dec-hero-title">결정이 어려울 때</h1>
         <p className="dec-hero-desc">사주의 흐름이 알려주는 <b>지금의 답</b></p>
       </div>
@@ -315,7 +323,8 @@ function Decision() {
         {Object.entries(CATEGORIES).map(([key, c]) => (
           <button key={key}
             className={`dec-tab ${category === key ? 'dec-tab--active' : ''}`}
-            onClick={() => setCategory(key)}
+            onClick={() => selectCategory(key)}
+            aria-pressed={category === key}
             style={category === key ? { '--tc': c.color } : {}}>
             <span className="dec-tab-icon"><MenuIcon name={c.iconKey} size={22} /></span>
             <span className="dec-tab-label">{c.label}</span>
@@ -324,7 +333,7 @@ function Decision() {
       </div>
 
       {/* ═══ 카테고리별 질문 헤더 ═══ */}
-      <div className="dec-q-banner" style={{ '--tc': info.color }}>
+      <div className="dec-q-banner" style={{ '--tc': info.color, '--tc-soft': info.soft }}>
         <div className="dec-q-title">{info.title}</div>
         <div className="dec-q-text">"{info.question}"</div>
       </div>

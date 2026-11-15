@@ -86,7 +86,7 @@
   min-width: 0;
 }
 .hn-hero-label {
-  font-size: 12.5px;
+  font-size: calc(12.5px * var(--fs-scale, 1));
   font-weight: 600;
   color: var(--hn-text-2);
 }
@@ -167,7 +167,8 @@
 .hn-hero--guest {
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 10px;
+  padding: 15px 16px 14px;
   cursor: default;
 }
 .hn-hero--guest:active {
@@ -177,10 +178,13 @@
   text-align: center;
 }
 .hn-hero-guest-text {
-  margin: 6px 0 0;
-  font-size: 13px;
-  line-height: 1.55;
+  margin: 5px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--hn-text-2);
+  /* 강제 <br> 대신 브라우저가 균형 잡게 — "…대운과 / 운과" 식 고아 줄 방지 */
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 /* ── 오늘의 행운 ───────────────────────────────────────────── */
@@ -260,7 +264,7 @@
   transform: scale(0.93);
 }
 .hn-quick-label {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--fs-scale, 1));
   font-weight: 600;
   color: var(--hn-text);
   text-align: center;
@@ -334,7 +338,7 @@
   transform: scale(0.93);
 }
 .hn-card-label {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--fs-scale, 1));
   font-weight: 600;
   color: var(--hn-text);
   text-align: center;
@@ -396,78 +400,139 @@
 .hn-mystar-arrow { font-size: 20px; opacity: 0.85; position: relative; }
 
 /* ── 결정 상담 (간판 유료 상품) — hn-section 패턴 통일 ─────── */
-.hn-section--decision .hn-section-head { align-items: flex-start; }
-.hn-section--decision .hn-section-title {
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.hn-decision-badge {
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  background: var(--hn-accent);
-  color: #fff;
-  vertical-align: 2px;
-}
-.hn-decision-q {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--hn-accent);
-  margin-top: 2px;
-}
-/* 결정 상담 카드 — hn-card 패턴 + 서브텍스트 추가 */
-.hn-card--decision {
-  position: relative;
-}
-.hn-card--decision .hn-card-icon {
-  color: var(--hn-accent);
-  background: color-mix(in srgb, var(--hn-accent) 8%, var(--hn-surface));
-  border-color: color-mix(in srgb, var(--hn-accent) 22%, var(--hn-border));
-}
-.hn-card--decision:hover .hn-card-icon {
-  background: color-mix(in srgb, var(--hn-accent) 14%, var(--hn-surface));
-  transform: translateY(-1px);
-}
-.hn-card-sub {
-  font-size: 10.5px;
-  font-weight: 500;
-  color: var(--hn-text-2);
-  margin-top: -1px;
-  text-align: center;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-}
 
 
 /* 한글 어절 단위 줄바꿈 */
-.hn-card-sub, .hn-card-label { word-break: keep-all; text-wrap: balance; }
+.hn-card-label { word-break: keep-all; text-wrap: balance; }
 .hn-mystar-sub { word-break: keep-all; text-wrap: balance; }
 
 /* ── 샘플 사주 원국 (비로그인 히어로) ───────────────────────── */
-.hn-sample { display: flex; justify-content: center; gap: 10px; margin: 12px 0 4px; }
+/* 간판(결정 상담)이 첫 화면에 들어오도록 게스트 히어로는 컴팩트하게 */
+/* 4등분 그리드 — 고정폭 flex 로 두면 표가 200px 밖에 안 돼 카드 좌우가 휑하고,
+   라벨이 제 타일 중앙에 정확히 안 맞는다. 1fr 컬럼이면 라벨·타일이 같은 축에 정렬된다. */
+.hn-sample {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  max-width: 300px;
+  margin: 11px auto 3px;
+}
 .hn-sample-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.hn-sample-sip { font-size: 10.5px; font-weight: 700; color: var(--hn-text-2); height: 14px; }
+/* 십성 라벨 — line-height 를 명시하지 않으면 기본 행간(≈15px)이 height(13px)를
+   넘쳐 아래 한자 타일 테두리와 겹친다. 실제로 겹쳐 보이던 원인. */
+.hn-sample-sip {
+  font-size: calc(10px * var(--fs-scale, 1));
+  font-weight: 700;
+  line-height: 1.2;
+  /* 고정 height 를 주면 글자 크기 설정이 커질 때 다시 넘친다 → min-height 로 정렬만 맞춘다 */
+  min-height: calc(12px * var(--fs-scale, 1));
+  color: var(--hn-text-2); letter-spacing: -0.02em;
+}
+/* 한자는 '데이터'라 외곽선 아이콘으로 대체할 수 없다. 대신 타일을
+   다른 메뉴 타일(.hn-quick-icon = 연한 채움 + 컬러 글리프)과 같은 언어로 맞추고,
+   한자는 명조로 조판해 UI 텍스트가 아니라 '조판된 데이터'로 보이게 한다. */
 .hn-sample-ch {
   width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
-  font-size: 26px; font-weight: 900; border-radius: 14px; border: 1.5px solid;
-  background: var(--hn-surface); box-shadow: var(--hn-shadow);
+  font-size: calc(26px * var(--fs-scale, 1)); font-weight: 700; line-height: 1;
+  border-radius: 16px; border: 1px solid;
+  font-family: 'Nanum Myeongjo', 'Noto Serif KR', 'Noto Serif CJK KR', Batang, serif;
 }
-.hn-sample-lb { font-size: 10.5px; color: var(--hn-text-2); font-weight: 600; margin-top: 1px; }
-.hn-hero-guest-text strong { color: var(--hn-text); font-weight: 800; }
+/* 시주 미상 — 점선 빈 칸: "여기가 아직 비어 있다"를 보여 가입 동기를 만든다 */
+.hn-sample-ch--unknown {
+  color: var(--hn-text-2);
+  background: transparent;
+  border: 1px dashed var(--hn-border);
+  font-family: inherit;
+  font-size: calc(20px * var(--fs-scale, 1));
+  opacity: 0.7;
+}
+.hn-sample-lb {
+  font-size: calc(10px * var(--fs-scale, 1));
+  color: var(--hn-text-2); font-weight: 600; margin-top: 1px;
+}
+/* 가운뎃점(·)이 줄바꿈 기회라 "원국·오행· / 대운" 으로 쪼개진다 → 구절 통째로 묶음 */
+.hn-hero-guest-text strong { color: var(--hn-text); font-weight: 800; white-space: nowrap; }
 .hn-sample-tag {
   font-style: normal; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 6px;
   background: var(--hn-accent-soft); color: var(--hn-accent); vertical-align: 1px; margin-left: 2px;
 }
 
-/* ── 결정 상담 — 간판 상품 패널 (히어로 바로 아래) ───────────── */
-.hn-section--decision {
-  padding: 16px 14px 14px;
+/* ── 결정 상담 — 간판 플래그십 블록 (히어로 바로 아래) ─────────
+   일반 카테고리 행(.hn-section + .hn-grid)과 의도적으로 구조를 다르게 둔다.
+   간판이 다른 섹션과 같은 모양이면 위계가 생기지 않는다. */
+.hn-flagship {
+  padding: 18px 16px 16px;
   border-radius: 24px;
   background: linear-gradient(135deg, #ff5a7e 0%, #d946ef 55%, #6366f1 100%);
   box-shadow: 0 10px 28px rgba(217, 70, 239, 0.28);
+  overflow: hidden;
 }
-.hn-section--decision .hn-section-title { color: #fff; font-size: 18px; }
-.hn-section--decision .hn-decision-badge { background: #fff; color: #d946ef; }
-.hn-section--decision .hn-decision-q { color: rgba(255, 255, 255, 0.92); }
+.hn-flagship-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #c026d3;
+  font-size: calc(10.5px * var(--fs-scale, 1));
+  font-weight: 800;
+}
+.hn-flagship-title {
+  margin: 10px 0 0;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: #fff;
+  word-break: keep-all;
+}
+.hn-flagship-sub {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+  word-break: keep-all;
+  text-wrap: balance;
+}
+.hn-flagship-sub strong { color: #fff; font-weight: 800; }
+
+/* 2×2 — 4열로 욱여넣으면 보조 문구가 읽히지 않는다 */
+.hn-flagship-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+  margin-top: 14px;
+}
+.hn-fs-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s;
+}
+.hn-fs-tile:hover { background: rgba(255, 255, 255, 0.26); transform: translateY(-1px); }
+.hn-fs-tile:active { transform: scale(0.97); }
+.hn-fs-icon {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #d946ef;
+}
+.hn-fs-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hn-fs-label { font-size: calc(14px * var(--fs-scale, 1)); font-weight: 800; color: #fff; }
+.hn-fs-desc {
+  font-size: calc(10.5px * var(--fs-scale, 1));
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  word-break: keep-all;
+}

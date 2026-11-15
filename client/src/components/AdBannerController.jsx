@@ -15,7 +15,6 @@ const BANNER_SAFE = new Set([
   '/',            // 홈(브라우즈 — 유료 결과는 별도 페이지)
   '/my-menu',     // 마이메뉴
   '/attendance',  // 출석
-  '/choose-home', // 홈 스타일 선택
   '/star-fortune',// 스타 운세 허브
   '/invite',      // 친구 초대
   '/rating',      // 평점 후기

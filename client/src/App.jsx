@@ -1,13 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { TransitionProvider } from './components/PageTransition';
 import Header from './components/Header';
-import StoryDecor from './components/StoryDecor';
 import AdBannerController from './components/AdBannerController';
-import Home from './pages/Home';
 import HomeNew from './pages/HomeNew';
-import HomeStory from './pages/HomeStory';
-import ChooseHome from './pages/ChooseHome';
 import Fortune from './pages/Fortune';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -61,7 +57,6 @@ import { clearAuth } from './utils/auth';
 import './context/HeartContext.css';
 // import FloatingMenu from './components/FloatingMenu';
 import './App.css';
-import './homestyle.css';
 
 const TITLE_IMAGES = Array.from({ length: 20 }, (_, i) => `/title/title_${String(i).padStart(2, '0')}.jpg`);
 
@@ -195,39 +190,6 @@ function useLandingRedirect() {
   }, [location.pathname]);
 }
 
-// homeStyle 미선택 사용자 → /choose-home 으로 1회 유도 (선택 후 localStorage.homeStyle 기록)
-function useHomeStyleRedirect() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.pathname !== '/') return;
-    if (localStorage.getItem('homeStyle')) return;
-    // 첫 방문 비로그인 사용자는 온보딩(/welcome)을 먼저 보도록 양보
-    const seen = localStorage.getItem('landingSeen');
-    const userId = localStorage.getItem('userId');
-    if (!seen && !userId) return;
-    navigate('/choose-home', { replace: true });
-  }, [location.pathname]);
-}
-
-// homeStyle 을 <html data-homestyle> 로 노출 — 전역 스킨(homestyle.css)이 전 페이지에 적용
-function useHomeStyleAttr() {
-  const location = useLocation();
-  useEffect(() => {
-    const hs = localStorage.getItem('homeStyle') || 'classic';
-    document.documentElement.setAttribute('data-homestyle', hs);
-  }, [location.pathname]);
-}
-
-// 홈 진입점 — homeStyle 에 따라 감성 홈(Home) / 심플 홈(HomeNew) / 동화 홈(HomeStory) 분기
-function HomeRouter() {
-  const style = localStorage.getItem('homeStyle');
-  if (style === 'new') return <HomeNew />;
-  if (style === 'story') return <HomeStory />;
-  return <Home />;
-}
-
 // 프로필 미완성 사용자 리다이렉트
 // - 로그인 유저 + birthDate 없음 → /register?needProfile=true
 // - Guest 유저 + AI 라우트 진입 → /register?needProfile=true (AI 호출이 사주 정보를 요구하므로)
@@ -239,7 +201,7 @@ function useProfileGuard() {
     // 사주 정보가 필요 없는 라우트 (Guest도 자유롭게 진입 가능)
     const safePaths = [
       '/register', '/auth/kakao/callback', '/settings', '/welcome',
-      '/profile', '/profile/edit', '/my-menu', '/landing', '/choose-home',
+      '/profile', '/profile/edit', '/my-menu', '/landing',
       '/privacy', '/terms', '/attendance',
       '/invite', '/rating',
     ];
@@ -272,8 +234,6 @@ function App() {
   useTimeTheme();
   useFontSize();
   useLandingRedirect();
-  useHomeStyleRedirect();
-  useHomeStyleAttr();
   useProfileGuard();
   useGlobalAiAbort();    // 라우트 변경 시 모든 진행 중 SSE 자동 종료 (비용 누수 차단)
   useAndroidBackButton(); // 안드로이드 하드웨어 백버튼: 시트 닫기 → 라우터 뒤로 → 앱 종료
@@ -372,14 +332,12 @@ function App() {
       {showSplash && <Splash key={splashKey} onDone={handleSplashDone} />}
       {tabIntro && <TabIntro key={tabIntro.key} tabKey={tabIntro.tabKey} onDone={() => setTabIntro(null)} />}
       <div className="app" style={{ display: showSplash ? 'none' : undefined }}>
-        <StoryDecor />
         <TransitionProvider>
           <Header onHomeSplash={triggerSplash} onTabIntro={triggerTabIntro} />
           <AdBannerController />
           <main className="app-main">
             <Routes>
-              <Route path="/" element={<HomeRouter />} />
-              <Route path="/choose-home" element={<ChooseHome />} />
+              <Route path="/" element={<HomeNew />} />
               <Route path="/fortune" element={<Fortune />} />
               <Route path="/register" element={<Register />} />
               <Route path="/auth/kakao/callback" element={<Register />} />
@@ -426,6 +384,8 @@ function App() {
               <Route path="/rating" element={<RatingClaim />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              {/* 없어진 경로(구 /choose-home 등)·오타 → 홈으로 */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
           {/* <FloatingMenu /> */}

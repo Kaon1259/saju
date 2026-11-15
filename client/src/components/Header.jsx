@@ -16,12 +16,13 @@ const NAV_ITEMS = [
   { path: '/', label: '홈', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><path d="M3 12.5L12 3l9 9.5V21a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1v-8.5z" /></svg>
   ), color: '#FF6B6B' },
+  // 간판(유료 플래그십) — 홈 다음 가장 강한 자리 + highlight
+  { path: '/decision', label: '결정상담', icon: (
+    <svg viewBox="0 0 24 24" className="tab-svg"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 9.6 9.6 0 01-2.8-.4L4 21l1.4-3.9A8.2 8.2 0 013 11.5 8.4 8.4 0 0112 3a8.4 8.4 0 019 8.5z" /><path d="M12 14.4l-2.1-2a1.5 1.5 0 112.1-2.1 1.5 1.5 0 112.1 2.1l-2.1 2z" /></svg>
+  ), color: '#D946EF', highlight: true },
   { path: '/tarot', label: '타로카드', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><rect x="4" y="2" width="16" height="20" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M12 7l1 2h-2l1-2M9 15h6" /><path d="M8 4h8M8 20h8" strokeWidth="1" opacity="0.5" /></svg>
-  ), color: '#9B59B6', highlight: true },
-  { path: '/traditional', label: '정통운세', icon: (
-    <svg viewBox="0 0 24 24" className="tab-svg"><circle cx="12" cy="12" r="10" /><path d="M12 2c0 5.5-5 10-5 10s5 4.5 5 10" /><circle cx="10" cy="7" r="1.5" fill="var(--color-bg, #1a0533)" stroke="none" /><circle cx="14" cy="17" r="1.5" /></svg>
-  ), color: '#E879F9' },
+  ), color: '#9B59B6' },
   { path: '/my-menu', label: '하트충전', icon: (
     <svg viewBox="0 0 24 24" className="tab-svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
   ), color: '#FBBF24' },
@@ -46,6 +47,7 @@ const PATH_EFFECTS = {
   '/my-menu': 'fortune',
   '/compatibility': 'compatibility',
   '/traditional': 'saju',
+  '/decision': 'compatibility',
   '/profile': 'profile',
   '/saju': 'saju',
   '/tojeong': 'tojeong',
@@ -65,6 +67,7 @@ const PATH_SOUNDS = {
   '/my-menu': playCrystalBall,
   '/compatibility': playHarmony,
   '/traditional': playOriental,
+  '/decision': playCrystalBall,
   '/profile': playProfilePing,
   '/tarot': playTarotReveal,
   '/constellation': playStarTwinkle,
@@ -81,7 +84,7 @@ const PATH_SOUNDS = {
 
 // 탭 경로 → 인트로 키 매핑
 const TAB_INTRO_MAP = {
-  '/traditional': 'fortune',
+  '/decision': 'fortune',
   '/my-menu': 'heart',
   '/profile': 'my',
 };

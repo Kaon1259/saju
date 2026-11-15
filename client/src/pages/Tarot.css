@@ -1041,55 +1041,6 @@
   --th-gold: #e6c585;
 }
 
-/* ── 홈 스타일(homeStyle)별 톤 — <html data-homestyle> 연동 ──
-   심플(new) = 기본 .tarot-hub 토큰 그대로. 감성(classic)·동화(story)만 분기. */
-
-/* 감성(classic) — 로즈 펄 + 미스틱, 다크는 우주 배경 노출 */
-[data-homestyle="classic"][data-theme="light"] .tarot-hub {
-  --th-page: #fbeef2;
-  --th-surface: #ffffff;
-  --th-text: #2a2030;
-  --th-text-2: #9c8a96;
-  --th-border: #f2dde4;
-  --th-accent: #e3457a;
-  --th-accent-soft: #ffe3ec;
-  --th-gold: #bf8f3c;
-  --th-shadow: 0 3px 15px rgba(120, 40, 70, 0.09);
-}
-[data-homestyle="classic"][data-theme="dark"] .tarot-hub {
-  --th-page: #181320;
-  --th-surface: #221b30;
-  --th-text: #f1eff7;
-  --th-text-2: #9b96b0;
-  --th-border: rgba(255, 255, 255, 0.09);
-  --th-accent: #ff7a98;
-  --th-accent-soft: rgba(255, 90, 126, 0.16);
-  --th-gold: #e6c585;
-}
-
-/* 동화(story) — 파스텔 노을 + 종이 카드 (전역 크레파스 그레인 노출) */
-[data-homestyle="story"][data-theme="light"] .tarot-hub {
-  --th-page: #fbe9ec;              /* 파스텔 노을 톤 페이퍼 (::after 그레인 노출) */
-  --th-surface: #fff8f2;
-  --th-text: #4b3a47;
-  --th-text-2: #a98fa1;
-  --th-border: #f0d9df;
-  --th-accent: #ef6890;
-  --th-accent-soft: #ffe6ec;
-  --th-gold: #c98f55;
-  --th-shadow: 0 4px 18px rgba(150, 90, 120, 0.13);
-}
-[data-homestyle="story"][data-theme="dark"] .tarot-hub {
-  --th-page: #241c2c;
-  --th-surface: #2e2638;
-  --th-text: #f1e7ef;
-  --th-text-2: #ac96a8;
-  --th-border: rgba(255, 255, 255, 0.09);
-  --th-accent: #ff8fad;
-  --th-accent-soft: rgba(239, 104, 144, 0.2);
-  --th-gold: #e6c585;
-}
-
 /* ── 책 위저드 — 상단 크롬(뒤로 + 페이지 점) ── */
 .tarot-book-chrome {
   flex-shrink: 0;

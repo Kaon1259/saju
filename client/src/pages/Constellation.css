@@ -83,13 +83,16 @@
   box-shadow: 0 8px 24px color-mix(in srgb, var(--cs-color) 22%, transparent);
 }
 
+/* 선택 표시는 color-mix 에 기대지 않는다 — 구형 WebView 가 무시하면 테두리만 남아
+   "뭐가 선택됐는지" 가 사라진다. 색 링(0 0 0 2px)은 어디서나 또렷하다. */
 .cs-card.active {
   border-color: var(--cs-color);
+  background: rgba(255, 255, 255, 0.08);
   background: color-mix(in srgb, var(--cs-color) 15%, transparent);
   transform: translateY(-4px) scale(1.03);
   box-shadow:
-    0 8px 24px color-mix(in srgb, var(--cs-color) 30%, transparent),
-    0 0 20px color-mix(in srgb, var(--cs-color) 15%, transparent),
+    0 0 0 2px var(--cs-color),
+    0 8px 24px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
@@ -209,7 +212,11 @@
 
 /* ── 라이트 모드 ── */
 [data-theme="light"] .cs-card { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); }
-[data-theme="light"] .cs-card.active { background: color-mix(in srgb, var(--cs-color) 8%, transparent); }
+/* 라이트에서 8% 틴트는 사실상 흰색이라 선택이 안 보였다 → 흰 카드 + 색 링 */
+[data-theme="light"] .cs-card.active {
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--cs-color), 0 8px 20px rgba(0, 0, 0, 0.12);
+}
 [data-theme="light"] .cs-card-name { color: #2e2e45; }
 [data-theme="light"] .cs-card.active .cs-card-name { color: #111; }
 [data-theme="light"] .cs-tiny-star { color: rgba(0,0,0,0.15); }
