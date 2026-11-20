@@ -1690,17 +1690,30 @@ export const claimRatingReward = async () => {
 
 // ─── 결정 상담 (간판 유료 상품) ───
 // category: reunion / breakup / confess / marriage
-export const getDecisionBasic = async (category, { birthDate, gender, partnerInfo, situation, history } = {}) => {
+// 구조화 입력 스키마(질문·선택지) — 서버가 단일 출처
+export const getDecisionSchema = async () => {
+  const res = await api.get('/decision/schema');
+  return res.data;
+};
+
+// answers: { key: code } → "k:v;k:v" (서버가 스키마로 검증)
+const encodeAnswers = (answers) =>
+  Object.entries(answers || {}).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(';');
+
+// 판정(서버 규칙, AI 호출 없음) + 캐시 선조회. 미스면 판정·월별 타이밍 미리보기, 위기 입력이면 safety 필드.
+export const getDecisionBasic = async (category, { birthDate, birthTime, gender, partnerInfo, answers, situation } = {}) => {
   const params = { category, birthDate };
+  if (birthTime) params.birthTime = birthTime;
   if (gender) params.gender = gender;
   if (partnerInfo) params.partnerInfo = partnerInfo;
+  const a = encodeAnswers(answers);
+  if (a) params.answers = a;
   if (situation) params.situation = situation;
-  if (history) params.history = history;
   const res = await api.get('/decision/basic', { params });
   return res.data;
 };
 
-export const getDecisionStream = (category, { birthDate, birthTime, gender, partnerInfo, situation, history,
+export const getDecisionStream = (category, { birthDate, birthTime, gender, partnerInfo, answers, situation,
     onChunk, onDone, onError, onInsufficientHearts } = {}) => {
   if (!requireLogin(onError)) return () => {};
   if (!requireBirthDate(birthDate, onError)) return () => {};
@@ -1708,8 +1721,9 @@ export const getDecisionStream = (category, { birthDate, birthTime, gender, part
   if (birthTime) params.set('birthTime', birthTime);
   if (gender) params.set('gender', gender);
   if (partnerInfo) params.set('partnerInfo', partnerInfo);
+  const a = encodeAnswers(answers);
+  if (a) params.set('answers', a);
   if (situation) params.set('situation', situation);
-  if (history) params.set('history', history);
   appendUserId(params);
   const baseURL = import.meta.env.VITE_API_URL || '/api';
   const url = `${baseURL}/decision/stream?${params.toString()}`;

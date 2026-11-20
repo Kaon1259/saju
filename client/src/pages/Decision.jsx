@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getDecisionBasic, getDecisionStream, getUser, getHistory } from '../api/fortune';
+import { getDecisionBasic, getDecisionStream, getDecisionSchema, getUser, getHistory } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
 import FortuneCard from '../components/FortuneCard';
 import MenuIcon from '../components/MenuIcon';
@@ -56,19 +56,52 @@ const VERDICT_LABELS = {
   wait: { label: '조금만 더 기다려', color: '#F59E0B', iconKey: 'clock' },
 };
 
-function VerdictBadge({ verdict, label, confidence, color }) {
+// 판정은 서버 규칙이 사용자가 고른 현실 상황으로 확정한다. 숫자 확신도는 근거가 없어 쓰지 않고,
+// "판단 근거 충분도"만 보여준다.
+function VerdictBadge({ verdict, label, evidence, color }) {
   const v = VERDICT_LABELS[verdict] || VERDICT_LABELS.wait;
   return (
     <div className="dec-verdict-card" style={{ '--vc': color || v.color }}>
       <div className="dec-verdict-icon"><MenuIcon name={v.iconKey} size={34} /></div>
       <div className="dec-verdict-label">{label || v.label}</div>
-      <div className="dec-verdict-confidence">
-        <span className="dec-vc-num">{confidence ?? 60}</span>
-        <span className="dec-vc-unit">% 확신</span>
+      {evidence && (
+        <div className="dec-verdict-evidence">
+          판단 근거 <b>{evidence}</b>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const GRADE_COLORS = { '유리': '#10B981', '보통': '#94A3B8', '주의': '#F59E0B' };
+
+// 월별 타이밍 — 서버가 월운(지지 합충형해·보완 오행·기세)으로 계산한 등급
+function TimingGrid({ grid }) {
+  if (!Array.isArray(grid) || grid.length === 0) return null;
+  return (
+    <div className="dec-tgrid">
+      <div className="dec-tgrid-title">
+        <MenuIcon name="calendar" size={15} /> 향후 6개월 사주 타이밍
       </div>
-      <div className="dec-verdict-bar">
-        <div className="dec-verdict-bar-fill" style={{ width: `${confidence ?? 60}%` }} />
-      </div>
+      {grid.map((m) => (
+        <div className="dec-tgrid-row" key={m.ym}>
+          <span className="dec-tgrid-month">{m.month}월</span>
+          <span className="dec-tgrid-grade" style={{ '--gc': GRADE_COLORS[m.grade] || '#94A3B8' }}>{m.grade}</span>
+          <span className="dec-tgrid-why">{m.summary}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// 위기(폭력·위협·자해) 입력 시 운세 대신 안내를 보여준다. AI 호출·하트 차감 없음.
+function SafetyNotice({ message, onBack }) {
+  return (
+    <div className="dec-safety fade-in" role="alert">
+      <div className="dec-safety-title"><MenuIcon name="alert" size={20} /> 안전이 먼저예요</div>
+      <p className="dec-safety-msg">{message}</p>
+      <p className="dec-safety-sub">이 상담은 운세의 관점으로 보는 참고용이라, 안전과 관련된 결정에는 쓰지 않는 게 좋아요. 하트는 차감되지 않았어요.</p>
+      <button className="dec-reset" onClick={onBack}>돌아가기</button>
     </div>
   );
 }
@@ -96,8 +129,24 @@ function Decision() {
   const [partnerGender, setPartnerGender] = useState('');
   const [partnerCalendarType, setPartnerCalendarType] = useState('SOLAR');
   const [situation, setSituation] = useState('');
-  const [history, setHistory] = useState('');
   const [showPartner, setShowPartner] = useState(true);
+
+  // 구조화 입력: 질문 스키마는 서버가 단일 출처. 답변은 카테고리별로 보관(탭 전환해도 유지).
+  const [schema, setSchema] = useState(null);
+  const [answersByCat, setAnswersByCat] = useState({});
+  const [safety, setSafety] = useState(null);     // { message } — 위기 입력 안내
+  const [preview, setPreview] = useState(null);   // 서버 판정 미리보기(스트리밍 중 표시)
+  const answers = answersByCat[category] || { safety: 'none' };
+  const setAnswer = (key, code) =>
+    setAnswersByCat((prev) => ({ ...prev, [category]: { safety: 'none', ...(prev[category] || {}), [key]: code } }));
+  const questions = schema?.[category] || [];
+  const requiredMissing = questions.filter((q) => q.required && !answers[q.key]);
+
+  useEffect(() => {
+    let alive = true;
+    getDecisionSchema().then((s) => { if (alive) setSchema(s); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -116,6 +165,8 @@ function Decision() {
   // 카테고리 전환 시 결과/스트리밍 초기화 (입력은 유지)
   useEffect(() => {
     setResult(null);
+    setSafety(null);
+    setPreview(null);
     setMatrixShown(false);
     setStreamFields({});
     setDoneFields(new Set());
@@ -187,10 +238,14 @@ function Decision() {
     return s;
   };
 
+  const stopAmbient = () => { try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null; };
+
   const handleAnalyze = async () => {
-    if (!birth) return;
+    if (!birth || requiredMissing.length > 0) return;
     setLoading(true);
     setResult(null);
+    setSafety(null);
+    setPreview(null);
     setMatrixShown(true);
     try { playAnalyzeStart(); } catch {}
     try { stopAmbientRef.current = startAnalyzeAmbient(); } catch {}
@@ -198,18 +253,25 @@ function Decision() {
     const partnerInfo = buildPartnerInfo();
 
     try {
-      // 캐시 선조회
+      // 서버 판정(AI 호출 없음) + 캐시 선조회
       const basic = await getDecisionBasic(category, {
-        birthDate: birth, gender: gender || 'M',
-        partnerInfo, situation, history,
+        birthDate: birth, birthTime: birthTime || null, gender: gender || 'M',
+        partnerInfo, answers, situation,
       });
+      if (basic.safety) {
+        // 위기 입력 — 운세 대신 안내. AI 호출·차감 없음.
+        setSafety({ message: basic.safetyMessage });
+        setLoading(false); setMatrixShown(false); stopAmbient();
+        return;
+      }
       if (basic.aiAnalyzed && basic.overall) {
         setResult(basic);
         setLoading(false);
         setMatrixShown(false);
-        try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+        stopAmbient();
         return;
       }
+      setPreview(basic);
 
       // 스트리밍
       setStreaming(true);
@@ -220,7 +282,7 @@ function Decision() {
         birthDate: birth,
         birthTime: birthTime || null,
         gender: gender || 'M',
-        partnerInfo, situation, history,
+        partnerInfo, answers, situation,
         onChunk: (text) => {
           buffer += text;
           const partial = extractStreamingFieldsPartial(buffer, PROG_FIELDS);
@@ -240,39 +302,24 @@ function Decision() {
         onDone: (fullText) => {
           setStreaming(false); setLoading(false);
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          // done 페이로드 = 서버가 검증·정리한 최종 결과(판정은 서버 확정값). verdict 가 없으면 검증/파싱 실패.
           const parsed = parseAiJson(fullText || '');
-          if (parsed) {
-            pendingResultRef.current = {
-              category, categoryKr: info.title,
-              birthDate: birth,
-              verdict: parsed.verdict || 'wait',
-              verdictLabel: parsed.verdictLabel || '',
-              confidence: parsed.confidence ?? 60,
-              headline: parsed.headline || '',
-              overall: parsed.overall || '',
-              timing: parsed.timing || '',
-              bestPeriod: parsed.bestPeriod || '',
-              worstPeriod: parsed.worstPeriod || '',
-              actionPlan: parsed.actionPlan || '',
-              conditions: parsed.conditions || '',
-              redFlags: parsed.redFlags || '',
-              ownerNote: parsed.ownerNote || '',
-              closing: parsed.closing || '',
-            };
+          if (parsed && parsed.verdict && parsed.overall) {
+            pendingResultRef.current = parsed;
+            setStreamFields({}); setDoneFields(new Set());
+            setMatrixShown(false);
+            setCompleting(true);
           } else {
-            pendingResultRef.current = {
-              category, categoryKr: info.title, birthDate: birth,
-              verdict: 'wait', confidence: 60,
-              overall: fullText || ''
-            };
+            pendingResultRef.current = null;
+            setStreamFields({}); setDoneFields(new Set());
+            setMatrixShown(false); setPreview(null);
+            toast('결과를 만들지 못했어요. 하트는 차감되지 않았어요. 다시 시도해 주세요.', 'error');
           }
-          setStreamFields({}); setDoneFields(new Set());
-          setMatrixShown(false);
-          setCompleting(true);
         },
         onError: (err) => {
           setStreaming(false); setLoading(false); setMatrixShown(false);
           try { stopAmbientRef.current?.(); } catch {} stopAmbientRef.current = null;
+          if (err === 'safety') { setSafety({ message: '안전이 먼저예요. 상황이 위험하다면 112 또는 1366에 연락해 주세요.' }); return; }
           if (err && err !== 'profile_required') toast('분석에 실패했어요. 다시 시도해 주세요.', 'error');
         },
       });
@@ -285,6 +332,8 @@ function Decision() {
 
   const handleReset = () => {
     setResult(null);
+    setSafety(null);
+    setPreview(null);
     setMatrixShown(false);
     setStreamFields({}); setDoneFields(new Set());
     cleanupRef.current?.();
@@ -355,8 +404,13 @@ function Decision() {
         />
       )}
 
+      {/* ═══ 위기 안내 (운세 대신) ═══ */}
+      {safety && !result && !loading && !streaming && (
+        <SafetyNotice message={safety.message} onBack={() => setSafety(null)} />
+      )}
+
       {/* ═══ 입력 폼 ═══ */}
-      {!result && !loading && !streaming && (
+      {!result && !loading && !streaming && !safety && (
         <div className="dec-form fade-in">
           {userId && (
             <button className="dec-autofill" onClick={handleAutoFill}>
@@ -390,11 +444,37 @@ function Decision() {
             </div>
           </div>
 
+          {/* 구조화 질문 — 선택지는 서버 규칙이 판정에 쓰는 현실 근거. 같은 상황이면 같은 판정이 나온다. */}
           <div className="dec-guide-block">
             <h3 className="dec-guide-title">
               <MenuIcon name="chat" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-              지금 상황 알려줘
-              <span className="dec-opt"> (선택 — 더 정확한 상담을 위해)</span>
+              지금 상황을 골라줘
+            </h3>
+            {!schema && <div className="dec-opt">질문을 불러오는 중…</div>}
+            {questions.map((q) => (
+              <div className="dec-q" key={q.key}>
+                <div className="dec-q-label">
+                  {q.label}{!q.required && <span className="dec-opt"> (선택)</span>}
+                </div>
+                <div className="dec-q-chips" role="group" aria-label={q.label}>
+                  {q.options.map((op) => (
+                    <button key={op.code} type="button"
+                      className={`dec-q-chip ${answers[q.key] === op.code ? 'dec-q-chip--on' : ''}`}
+                      aria-pressed={answers[q.key] === op.code}
+                      onClick={() => setAnswer(q.key, op.code)}>
+                      {op.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="dec-guide-block">
+            <h3 className="dec-guide-title">
+              <MenuIcon name="history" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              더 하고 싶은 말
+              <span className="dec-opt"> (선택 — 판정은 위 선택지로 정해져요)</span>
             </h3>
             <textarea className="dec-textarea"
               placeholder={info.situationPlaceholder}
@@ -403,24 +483,14 @@ function Decision() {
             <div className="dec-chars">{situation.length}/300</div>
           </div>
 
-          <div className="dec-guide-block">
-            <h3 className="dec-guide-title">
-              <MenuIcon name="history" size={17} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-              관계의 흐름
-              <span className="dec-opt"> (선택)</span>
-            </h3>
-            <textarea className="dec-textarea"
-              placeholder={info.historyPlaceholder}
-              value={history} onChange={(e) => setHistory(e.target.value.slice(0, 300))}
-              rows={3} maxLength={300} />
-            <div className="dec-chars">{history.length}/300</div>
-          </div>
-
           <button className="dec-submit" onClick={() => guardedAction(handleAnalyze)}
-            disabled={!birth}>
+            disabled={!birth || !schema || requiredMissing.length > 0}>
             {info.iconKey ? <MenuIcon name={info.iconKey} size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} /> : info.icon}
             {' '}{info.title} 시작 <HeartCost category="DECISION_CONSULT" />
           </button>
+          {schema && birth && requiredMissing.length > 0 && (
+            <p className="dec-need">위 질문 {requiredMissing.length}개에 답해 주세요</p>
+          )}
 
           <p className="dec-disclaimer">
             ※ 결정 상담은 사주의 흐름으로 보는 <b>참고 분석</b>이에요.
@@ -447,6 +517,10 @@ function Decision() {
               </div>
               <WaitMessages messages={WAIT_MESSAGES.love} interval={6000} variant="large" />
             </div>
+            {preview?.verdict && (
+              <VerdictBadge verdict={preview.verdict} label={preview.verdictLabel}
+                evidence={preview.evidence} color={info.color} />
+            )}
             <div className="dec-streaming-cards">
               <StreamingCard icon="🎯" title="한 줄 요지"     text={streamFields.headline   || ''} status={st('headline')}   delay={0} />
               <StreamingCard icon="📖" title="종합 분석"     text={streamFields.overall    || ''} status={st('overall')}    delay={80} />
@@ -466,9 +540,16 @@ function Decision() {
           <VerdictBadge
             verdict={result.verdict}
             label={result.verdictLabel}
-            confidence={result.confidence}
+            evidence={result.evidence}
             color={info.color}
           />
+
+          {Array.isArray(result.reasons) && result.reasons.length > 0 && (
+            <div className="dec-reasons">
+              <div className="dec-reasons-title">이렇게 판단했어요 <span className="dec-opt">(내가 고른 상황 기준)</span></div>
+              <ul>{result.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
+            </div>
+          )}
 
           {result.headline && (
             <div className="dec-headline" style={{ '--tc': info.color }}>
@@ -484,6 +565,8 @@ function Decision() {
           {result.timing && (
             <FortuneCard iconKey="clock" title="타이밍 분석" description={result.timing} delay={80} />
           )}
+
+          <TimingGrid grid={result.timingGrid} />
 
           {(result.bestPeriod || result.worstPeriod) && (
             <div className="dec-period-grid">
@@ -510,6 +593,14 @@ function Decision() {
           )}
           {result.redFlags && (
             <FortuneCard iconKey="alert" title="주의 신호" description={result.redFlags} delay={320} />
+          )}
+
+          {Array.isArray(result.basis) && result.basis.length > 0 && (
+            <details className="dec-basis">
+              <summary>풀이 근거 보기 <span className="dec-opt">(사주 계산값 · 추정 포함)</span></summary>
+              <ul>{result.basis.map((b) => <li key={b.id}>{b.text}</li>)}</ul>
+              {result.strength && <p className="dec-basis-note">신강·신약, 보완 오행은 월령·지장간 기준의 <b>추정 후보</b>예요 ({result.strength}).</p>}
+            </details>
           )}
 
           {result.ownerNote && (
