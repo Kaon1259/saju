@@ -5,8 +5,6 @@
   "server": {
     "androidScheme": "https",
     "allowNavigation": [
-      "kauth.kakao.com",
-      "accounts.kakao.com",
       "saju-production-ac3c.up.railway.app"
     ]
   }

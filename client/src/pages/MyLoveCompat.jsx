@@ -22,7 +22,7 @@ import AnalysisComplete from '../components/AnalysisComplete';
 import parseAiJson, { extractStreamingFields, extractStreamingFieldsPartial } from '../utils/parseAiJson';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import WaitMessages from '../components/WaitMessages';
 import { WAIT_MESSAGES } from '../data/waitMessages';
 import { useAiAbort } from '../hooks/useAiAbort';
@@ -1024,9 +1024,9 @@ function MyLoveCompat() {
           {userId ? (
             <button className="mlc-autofill-btn" onClick={handleAutoFill}><MenuIcon name="sparkle" size={16} /> 내 정보 / 연인 정보로 채우기</button>
           ) : (
-            <KakaoLoginCTA returnTo="/my-love-compat" className="mlc-login-cta">
-              카카오 로그인하고 연인과 궁합보기
-            </KakaoLoginCTA>
+            <LoginCTA returnTo="/my-love-compat" className="mlc-login-cta">
+              로그인하고 연인과 궁합보기
+            </LoginCTA>
           )}
 
           {/* ═══ 사주 ═══ */}

@@ -6,7 +6,7 @@ import GenderPicker from './GenderPicker';
 import RewardedAdModal from './RewardedAdModal';
 import StreamingCard from './StreamingCard';
 import MenuIcon from './MenuIcon';
-import KakaoLoginCTA from './KakaoLoginCTA';
+import LoginCTA from './LoginCTA';
 import { useToast } from './Toast';
 import './GuestFortuneModal.css';
 
@@ -204,7 +204,7 @@ export default function GuestFortuneModal({ open, onClose }) {
               </button>
               <div className="gfm-form-foot">
                 <span>회원이 되시면 광고 없이 더 자세한 운세를 받을 수 있어요</span>
-                <KakaoLoginCTA returnTo="/" className="gfm-kakao">카카오로 가입하고 받기</KakaoLoginCTA>
+                <LoginCTA returnTo="/" className="gfm-kakao">가입하고 받기</LoginCTA>
               </div>
             </div>
           )}
@@ -269,9 +269,9 @@ export default function GuestFortuneModal({ open, onClose }) {
               </div>
               <div className="gfm-result-actions">
                 <button className="gfm-action gfm-action--ghost" onClick={reset}>다시 보기</button>
-                <KakaoLoginCTA returnTo="/" className="gfm-action gfm-action--primary">
-                  카카오로 가입하고 더 보기
-                </KakaoLoginCTA>
+                <LoginCTA returnTo="/" className="gfm-action gfm-action--primary">
+                  가입하고 더 보기
+                </LoginCTA>
               </div>
             </div>
           )}

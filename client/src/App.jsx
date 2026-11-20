@@ -202,7 +202,7 @@ function useProfileGuard() {
   useEffect(() => {
     // 사주 정보가 필요 없는 라우트 (Guest도 자유롭게 진입 가능)
     const safePaths = [
-      '/register', '/auth/kakao/callback', '/settings', '/welcome',
+      '/register', '/settings', '/welcome',
       '/profile', '/profile/edit', '/my-menu', '/landing',
       '/privacy', '/terms', '/attendance',
       '/invite', '/rating',
@@ -342,7 +342,6 @@ function App() {
               <Route path="/" element={<HomeNew />} />
               <Route path="/fortune" element={<Fortune />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/auth/kakao/callback" element={<Register />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/saju" element={<SajuAnalysis />} />
               <Route path="/bloodtype" element={<BloodType />} />

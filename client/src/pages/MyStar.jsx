@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CELEBRITIES from '../data/celebrities';
 import StarHero from '../components/StarHero';
 import CelebAvatar from '../components/CelebAvatar';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
 import MenuIcon from '../components/MenuIcon';
 import { getMyStars, saveMyStars } from '../utils/myStars';
@@ -64,7 +64,7 @@ function MyStar() {
           <h2 className="mystar-login-title">로그인이 필요해요</h2>
           <p className="mystar-login-desc">나의 스타를 등록하고 관리하려면<br/>로그인 또는 회원가입을 해주세요</p>
           <div className="mystar-login-btns">
-            <KakaoLoginCTA returnTo="/my-star">카카오 로그인하고 나의 스타 등록하기</KakaoLoginCTA>
+            <LoginCTA returnTo="/my-star">로그인하고 나의 스타 등록하기</LoginCTA>
           </div>
         </section>
 

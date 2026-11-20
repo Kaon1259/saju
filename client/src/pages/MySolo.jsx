@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
 import MenuIcon from '../components/MenuIcon';
 import './MySolo.css';
@@ -37,9 +37,9 @@ function MySolo() {
 
       {!isLoggedIn && (
         <section className="mysolo-login-cta">
-          <KakaoLoginCTA returnTo="/my-solo">
-            카카오 로그인하고 맞춤 솔로 운세 받기
-          </KakaoLoginCTA>
+          <LoginCTA returnTo="/my-solo">
+            로그인하고 맞춤 솔로 운세 받기
+          </LoginCTA>
         </section>
       )}
 

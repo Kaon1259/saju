@@ -4,7 +4,7 @@ import { getReferralStats } from '../api/fortune';
 import MenuIcon from '../components/MenuIcon';
 import { Skeleton } from '../components/Skeleton';
 import StatusView from '../components/StatusView';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import { isGuest } from '../api/fortune';
 import './Invite.css';
 
@@ -85,7 +85,7 @@ function Invite() {
           message={`친구가 가입할 때 내 코드를 입력하면\n친구는 +${inviteeBonus}하트, 나는 +${per}하트 받아요`}
         />
         <div className="invite-guest-cta">
-          <KakaoLoginCTA returnTo="/invite">카카오로 시작하기</KakaoLoginCTA>
+          <LoginCTA returnTo="/invite">시작하기</LoginCTA>
         </div>
       </div>
     );
@@ -150,7 +150,7 @@ function Invite() {
         <h3 className="invite-how-title">이렇게 사용해요</h3>
         <ol className="invite-how-list">
           <li><span className="invite-how-step">1</span>위 코드를 복사하거나 공유해 친구에게 보내요</li>
-          <li><span className="invite-how-step">2</span>친구가 카카오로 가입한 뒤 코드를 입력해요</li>
+          <li><span className="invite-how-step">2</span>친구가 가입한 뒤 코드를 입력해요</li>
           <li><span className="invite-how-step">3</span>둘 다 즉시 보너스 하트를 받아요</li>
         </ol>
         <p className="invite-how-note">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRatingStatus, claimRatingReward, isGuest } from '../api/fortune';
 import MenuIcon from '../components/MenuIcon';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import StatusView from '../components/StatusView';
 import './RatingClaim.css';
 
@@ -71,7 +71,7 @@ function RatingClaim() {
           message={`Play Store에 5점 후기를 남기면\n+${reward}하트를 1회 지급해드려요`}
         />
         <div className="rating-guest-cta">
-          <KakaoLoginCTA returnTo="/rating">카카오로 시작하기</KakaoLoginCTA>
+          <LoginCTA returnTo="/rating">시작하기</LoginCTA>
         </div>
       </div>
     );

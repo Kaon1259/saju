@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startKakaoLogin } from '../utils/kakaoAuth';
 import MenuIcon from '../components/MenuIcon';
 import './TarotLanding.css';
 
@@ -33,7 +32,7 @@ function TarotLanding() {
   }, []);
 
   const goLogin = () => {
-    startKakaoLogin('/tarot');
+    navigate('/register', { state: { from: '/tarot' } });
   };
 
   const goHome = () => {
@@ -111,10 +110,7 @@ function TarotLanding() {
       {/* 하단 CTA */}
       <div className="tlanding-cta-bar">
         <button className="tlanding-cta-kakao" onClick={goLogin}>
-          <svg className="tlanding-cta-kakao-logo" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path fill="#000" d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.38 6.24l-1.12 4.16c-.1.36.32.65.64.44l4.94-3.26c.38.04.76.06 1.16.06 5.52 0 10-3.36 10-7.64C22 6.36 17.52 3 12 3z"/>
-          </svg>
-          <span>카카오 로그인하고 카드 뽑기</span>
+          <span>로그인하고 카드 뽑기</span>
         </button>
         <button className="tlanding-cta-skip" onClick={goHome}>← 홈으로 돌아가기</button>
       </div>

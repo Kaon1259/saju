@@ -11,7 +11,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
 import MenuIcon from '../components/MenuIcon';
 import './YearFortune.css';
@@ -381,7 +381,7 @@ function YearFortune() {
                 <>
                   <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center', color: 'var(--color-accent-gold)' }}><MenuIcon name="crystalBall" size={48} /></div>
                   <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>프로필 정보가 없습니다.<br />회원가입 후 이용해주세요.</p>
-                  <KakaoLoginCTA returnTo="/year-fortune" className="yf-submit">카카오 로그인하고 신년운세 받기</KakaoLoginCTA>
+                  <LoginCTA returnTo="/year-fortune" className="yf-submit">로그인하고 신년운세 받기</LoginCTA>
                 </>
               )}
             </div>

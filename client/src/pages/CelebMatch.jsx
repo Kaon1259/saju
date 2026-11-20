@@ -5,7 +5,7 @@ import GROUPS from '../data/groups';
 import { shareResult } from '../utils/share';
 import StarHero from '../components/StarHero';
 import CelebAvatar from '../components/CelebAvatar';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
 import MenuIcon from '../components/MenuIcon';
 import { getMyStars, toggleMyStar } from '../utils/myStars';
@@ -152,7 +152,7 @@ function CelebMatch() {
           <h2 className="mystar-login-title">로그인이 필요해요</h2>
           <p className="mystar-login-desc">나와 궁합이 맞는 스타를 찾으려면<br/>로그인 또는 회원가입을 해주세요</p>
           <div className="mystar-login-btns">
-            <KakaoLoginCTA returnTo="/celeb-match">카카오 로그인하고 스타와 궁합보기</KakaoLoginCTA>
+            <LoginCTA returnTo="/celeb-match">로그인하고 스타와 궁합보기</LoginCTA>
           </div>
         </section>
         <section className="cm-quick">

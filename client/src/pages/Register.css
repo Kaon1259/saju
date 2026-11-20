@@ -293,22 +293,6 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* ── 카카오 로그인 ── */
-.kakao-login-btn {
-  width: 100%; padding: 14px 20px; border-radius: 12px; border: none;
-  background: #FEE500; color: #191919; font-size: 16px; font-weight: 800;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.2s; box-shadow: 0 2px 8px rgba(254,229,0,0.3);
-}
-.kakao-login-btn:hover { background: #F5DD00; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(254,229,0,0.4); }
-.kakao-logo { flex-shrink: 0; }
-.register-kakao-notice { font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; margin: 8px 0 0; }
-.register-kakao-welcome { text-align: center; padding: 12px; border-radius: 10px; background: rgba(254,229,0,0.08); border: 1px solid rgba(254,229,0,0.2); color: #FEE500; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-.register-kakao-loading { text-align: center; padding: 80px 20px; }
-.register-kakao-spinner { width: 40px; height: 40px; border: 3px solid rgba(254,229,0,0.2); border-top-color: #FEE500; border-radius: 50%; animation: kakaoSpin 0.8s linear infinite; margin: 0 auto 16px; }
-.register-kakao-loading p { font-size: 15px; font-weight: 700; color: var(--color-text); }
-@keyframes kakaoSpin { to { transform: rotate(360deg); } }
-[data-theme="light"] .register-kakao-notice { color: rgba(0,0,0,0.4); }
 
 /* Skip & Back buttons */
 .register-skip {
@@ -394,8 +378,6 @@
 [data-theme="light"] .register-constellation { background: rgba(167, 139, 250, 0.1); border-color: rgba(167, 139, 250, 0.28); }
 [data-theme="light"] .register-constellation__text { color: #7c3aed; }
 [data-theme="light"] .form-error { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); color: #dc2626; }
-[data-theme="light"] .register-kakao-notice { color: #8a8699; }
-[data-theme="light"] .register-kakao-welcome { background: rgba(254,229,0,0.14); border-color: rgba(254,229,0,0.45); color: #8a7400; }
 [data-theme="light"] .form-select { color: #1f1d2b; }
 [data-theme="light"] .pe-partner-section { background: rgba(255, 90, 126, 0.06); border-color: rgba(255, 90, 126, 0.2); }
 
@@ -648,7 +630,6 @@
   border-bottom-color: rgba(0,0,0,0.08);
 }
 
-/* 카카오 로그인 화면 — 약관 안내 (동의 X, 안내만) */
 .register-terms-note {
   font-size: 11.5px;
   color: rgba(255,255,255,0.42);
@@ -705,3 +686,33 @@
   background-clip: text;
 }
 [data-theme="light"] .register-terms-sub { color: #555; }
+
+/* ── 전화번호 + PIN 가입/로그인 ── (color-mix 미사용: 구형 WebView 호환) */
+.register-tabs { display: flex; gap: 8px; margin: 0 0 12px; }
+.register-tab {
+  flex: 1; padding: 11px 8px; border-radius: 12px; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  border: 1.5px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.04); color: var(--color-text, #fff);
+}
+.register-tab--on { background: #ff5a7e; border-color: #ff5a7e; color: #fff; }
+[data-theme="light"] .register-tab { background: #fff; border-color: rgba(0,0,0,0.14); color: #3b3350; }
+[data-theme="light"] .register-tab--on { background: #ff5a7e; border-color: #ff5a7e; color: #fff; }
+.register-step-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; font-weight: 800; margin: 0 0 12px; color: var(--color-text, #fff);
+}
+[data-theme="light"] .register-step-title { color: #1f1730; }
+.register-pin-note {
+  margin: 4px 0 14px; font-size: 12px; line-height: 1.6; text-align: center;
+  color: rgba(255,255,255,0.6);
+}
+.register-pin-note b { color: #ff7a98; }
+[data-theme="light"] .register-pin-note { color: #6b6580; }
+[data-theme="light"] .register-pin-note b { color: #d6336c; }
+.register-more-toggle {
+  width: 100%; margin: 2px 0 12px; padding: 10px; border-radius: 10px; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  border: 1px dashed rgba(255,255,255,0.25); background: transparent; color: var(--color-text, #fff);
+}
+[data-theme="light"] .register-more-toggle { border-color: rgba(0,0,0,0.22); color: #3b3350; }

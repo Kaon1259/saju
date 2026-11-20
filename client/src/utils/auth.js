@@ -14,7 +14,6 @@ const EXTRA_LOCAL_KEYS = [
 ];
 const SESSION_KEYS = [
   'splashShown',     // 세션 내 스플래시 표시 여부
-  'kakaoReturnTo',   // 카카오 OAuth 복귀 경로
 ];
 
 export const getToken = () => {

@@ -16,7 +16,7 @@ import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { mapLuckyOutfit } from '../utils/luckyOutfitTemplate';
 import { getZodiacByYearList } from '../utils/zodiacByYearTemplate';
 import CELEBRITIES from '../data/celebrities';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import FortuneSkeleton from '../components/Skeleton';
 import { useAiAbort } from '../hooks/useAiAbort';
 import './MyFortune.css';
@@ -755,7 +755,7 @@ function MyFortune() {
           <div className="myf-empty-icon"><MenuIcon name="crystalBall" size={48} /></div>
           <h2>나만의 맞춤 운세</h2>
           <p>회원가입하면 사주 + 혈액형 + MBTI를<br />종합한 나만의 운세를 볼 수 있어요</p>
-          <KakaoLoginCTA returnTo="/my" className="myf-register-btn">카카오 로그인하고 오늘의 운세 받기</KakaoLoginCTA>
+          <LoginCTA returnTo="/my" className="myf-register-btn">로그인하고 오늘의 운세 받기</LoginCTA>
         </div>
       </div>
     );

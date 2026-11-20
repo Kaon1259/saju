@@ -23,7 +23,7 @@ import java.io.IOException;
  *
  * 인증 면제 경로:
  *  - OPTIONS preflight
- *  - /api/auth/kakao/** (로그인 자체)
+ *  - /api/auth/phone/signup, /api/auth/phone/login (로그인 자체)
  *  - /api/app/init (게스트/기존세션 마이그레이션 — 토큰 발급)
  *  - /api/admin/** (X-Admin-Secret 별도 인증)
  *  - /api/hearts/grant-bulk (X-Admin-Secret)
@@ -42,10 +42,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static boolean isPublic(String path) {
         if (path == null) return true;
-        // 카카오 register 는 인증 필수 (IDOR 차단) — 콜백 직후 토큰 보유 상태에서만 호출
-        if (path.equals("/api/auth/kakao/register")) return false;
+        // 전화번호 가입/로그인만 공개. change-pin 등 그 외 /api/auth/phone/** 은 토큰 필수.
         return !path.startsWith("/api/")
-                || path.startsWith("/api/auth/kakao/")
+                || path.equals("/api/auth/phone/signup")
+                || path.equals("/api/auth/phone/login")
                 || path.equals("/api/app/init")
                 || path.startsWith("/api/admin/")
                 || path.equals("/api/hearts/grant-bulk")

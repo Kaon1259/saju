@@ -281,24 +281,24 @@
   padding: 16px;
   border-radius: 14px;
   border: none;
-  background: #FEE500;
-  color: #181600;
+  background: #ff5a7e;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
   box-shadow:
-    0 6px 20px rgba(254, 229, 0, 0.45),
+    0 6px 20px rgba(255, 90, 126, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   letter-spacing: 0.3px;
   -webkit-tap-highlight-color: transparent;
   font-family: inherit;
 }
 .tlanding-cta-kakao:hover {
-  background: #FFEB3B;
+  background: #ff7a98;
   transform: translateY(-2px);
   box-shadow:
-    0 8px 26px rgba(254, 229, 0, 0.55),
+    0 8px 26px rgba(255, 90, 126, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .tlanding-cta-kakao:active { transform: scale(0.97); }

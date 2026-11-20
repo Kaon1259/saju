@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUser, getMyFortune, checkInAttendance } from '../api/fortune';
 import MenuIcon from '../components/MenuIcon';
 import AttendanceCard from '../components/AttendanceCard';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import { useToast } from '../components/Toast';
 import './HomeNew.css';
 
@@ -360,7 +360,7 @@ function HomeNew() {
               생년월일만 알려주시면 <strong>내 여덟 글자</strong>가 채워져요
             </p>
           </div>
-          <KakaoLoginCTA returnTo="/">카카오로 시작하고 내 사주 보기</KakaoLoginCTA>
+          <LoginCTA returnTo="/">시작하고 내 사주 보기</LoginCTA>
         </section>
       )}
 

@@ -436,8 +436,8 @@
   padding: 16px 20px;
   border: none;
   border-radius: 14px;
-  background: #FEE500;
-  color: #181600;
+  background: #ff5a7e;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 800;
   cursor: pointer;
@@ -445,20 +445,20 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 8px 24px rgba(254, 229, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(255, 90, 126, 0.4);
   transition: all 0.2s;
   animation: onbKakaoPulse 2.4s ease-in-out infinite;
   font-family: inherit;
 }
 .onb-cta-kakao:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(254, 229, 0, 0.55);
+  box-shadow: 0 10px 28px rgba(255, 90, 126, 0.55);
 }
 .onb-cta-kakao:active { transform: scale(0.98); }
 .onb-cta-kakao-icon { font-size: 20px; }
 @keyframes onbKakaoPulse {
-  0%,100% { box-shadow: 0 8px 24px rgba(254, 229, 0, 0.35); }
-  50%     { box-shadow: 0 8px 32px rgba(254, 229, 0, 0.65); }
+  0%,100% { box-shadow: 0 8px 24px rgba(255, 90, 126, 0.35); }
+  50%     { box-shadow: 0 8px 32px rgba(255, 90, 126, 0.65); }
 }
 
 .onb-cta-ghost {

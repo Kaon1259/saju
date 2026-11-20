@@ -31,7 +31,7 @@ api.interceptors.response.use(
 
     // 401 + 토큰 보유 상태 + 인증 갱신 호출 자체가 아닐 때만 로그아웃
     // (인증 엔드포인트 401 → register 페이지 자체가 처리)
-    const isAuthEndpoint = url.includes('/auth/sse-token') || url.includes('/auth/kakao/');
+    const isAuthEndpoint = url.includes('/auth/sse-token') || url.includes('/auth/phone/');
     if (status === 401 && hadToken && !isAuthEndpoint && !_authExpiredHandled) {
       _authExpiredHandled = true;
       try {
@@ -294,17 +294,20 @@ export const getFortuneByUser = async (userId) => {
   return response.data;
 };
 
-// (registerUser, loginUser 제거됨 — 카카오 OAuth만 사용. dead code 정리)
-
-// 카카오 로그인
-export const kakaoLogin = async (code, redirectUri) => {
-  const effectiveRedirectUri = redirectUri || `${window.location.origin}/auth/kakao/callback`;
-  const response = await api.post('/auth/kakao/login', { code, redirectUri: effectiveRedirectUri });
+// 전화번호 + PIN 인증 (카카오 로그인 대체). 서버: /api/auth/phone/*
+// signup: 사주 정보 + 전화번호 + PIN → { status, user, profileComplete, token }
+export const phoneSignup = async (payload) => {
+  const response = await api.post('/auth/phone/signup', payload);
   return response.data;
 };
 
-export const kakaoRegister = async (userData) => {
-  const response = await api.post('/auth/kakao/register', userData);
+export const phoneLogin = async ({ phone, pin }) => {
+  const response = await api.post('/auth/phone/login', { phone, pin });
+  return response.data;
+};
+
+export const changePin = async ({ currentPin, newPin }) => {
+  const response = await api.post('/auth/phone/change-pin', { currentPin, newPin });
   return response.data;
 };
 

@@ -5,7 +5,7 @@
   width: 100%;
 }
 
-/* ─── 카카오 로그인 CTA (전역) ─── */
+/* ─── 로그인/가입 CTA (전역) — 클래스명은 kakao-cta-btn 이지만 카카오 로그인은 제거됨 ─── */
 .kakao-cta-btn {
   display: flex;
   align-items: center;
@@ -15,24 +15,24 @@
   padding: 14px 16px;
   border-radius: 14px;
   border: none;
-  background: #FEE500;
-  color: #181600;
+  background: #ff5a7e;
+  color: #ffffff;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
   box-shadow:
-    0 4px 14px rgba(254, 229, 0, 0.45),
+    0 4px 14px rgba(255, 90, 126, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   letter-spacing: 0.3px;
   -webkit-tap-highlight-color: transparent;
   font-family: inherit;
 }
 .kakao-cta-btn:hover {
-  background: #FFEB3B;
+  background: #ff7a98;
   transform: translateY(-2px);
   box-shadow:
-    0 6px 20px rgba(254, 229, 0, 0.55),
+    0 6px 20px rgba(255, 90, 126, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .kakao-cta-btn:active {
@@ -43,7 +43,7 @@
 }
 [data-theme="light"] .kakao-cta-btn {
   box-shadow:
-    0 4px 14px rgba(254, 229, 0, 0.4),
+    0 4px 14px rgba(255, 90, 126, 0.4),
     0 1px 3px rgba(0, 0, 0, 0.08);
 }
 

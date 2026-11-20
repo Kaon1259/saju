@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
 import MenuIcon from '../components/MenuIcon';
 import './MySomeCrush.css';
@@ -33,9 +33,9 @@ function MySomeCrush() {
 
       {!isLoggedIn && (
         <section className="mysome-login-cta">
-          <KakaoLoginCTA returnTo="/my-some-crush">
-            카카오 로그인하고 맞춤 썸 분석 받기
-          </KakaoLoginCTA>
+          <LoginCTA returnTo="/my-some-crush">
+            로그인하고 맞춤 썸 분석 받기
+          </LoginCTA>
         </section>
       )}
 

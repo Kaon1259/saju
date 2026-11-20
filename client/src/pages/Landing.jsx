@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startKakaoLogin } from '../utils/kakaoAuth';
 import MenuIcon from '../components/MenuIcon';
 import './Landing.css';
 
@@ -50,7 +49,7 @@ function Landing() {
 
   const goLogin = () => {
     markSeen();
-    startKakaoLogin('/');
+    navigate('/register', { state: { from: '/' } });
   };
 
   const goHome = () => {
@@ -191,8 +190,8 @@ function Landing() {
         ) : (
           <>
             <button type="button" className="onb-cta-kakao" onClick={goLogin}>
-              <span className="onb-cta-kakao-icon" aria-hidden="true">💬</span>
-              <span>카카오로 3초만에 시작</span>
+              <span className="onb-cta-kakao-icon" aria-hidden="true"><MenuIcon name="star" size={20} /></span>
+              <span>3초만에 시작</span>
             </button>
             <button type="button" className="onb-cta-ghost" onClick={goHome}>
               그냥 둘러보기

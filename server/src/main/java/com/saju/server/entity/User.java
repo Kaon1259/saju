@@ -21,8 +21,18 @@ public class User {
     @Column(unique = true)
     private String phone;
 
+    /** 레거시(카카오 로그인 제거 전 가입자) + 게스트 계정 식별자("guest_*"). 신규 가입에는 쓰지 않는다. */
     @Column(unique = true)
     private String kakaoId;
+
+    /** 전화번호 로그인 PIN — PBKDF2 해시/salt. NULL=전화번호 계정이 아님(레거시·게스트). 응답 DTO 로 내보내지 않는다. */
+    @Column(length = 64)
+    private String pinHash;
+    @Column(length = 32)
+    private String pinSalt;
+    /** PIN 연속 실패 횟수 / 잠금 해제 시각 (무차별 대입 방어). NULL 은 0/잠금 없음으로 취급. */
+    private Integer pinFailCount;
+    private LocalDateTime pinLockedUntil;
 
     @Column(nullable = false)
     private String name;

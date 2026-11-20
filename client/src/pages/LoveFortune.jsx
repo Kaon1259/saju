@@ -13,7 +13,7 @@ import AnalysisMatrix from '../components/AnalysisMatrix';
 import AnalysisComplete from '../components/AnalysisComplete';
 import HeartCost, { useHeartGuard } from '../components/HeartCost';
 import { playAnalyzeStart, startAnalyzeAmbient } from '../utils/sounds';
-import KakaoLoginCTA from '../components/KakaoLoginCTA';
+import LoginCTA from '../components/LoginCTA';
 import HeroIconButtons from '../components/HeroIconButtons';
 import { useAiAbort } from '../hooks/useAiAbort';
 import './LoveFortune.css';
@@ -325,9 +325,9 @@ function LoveFortune() {
 
       {/* 비로그인 CTA */}
       {!userId && !result && !loading && !aiStreaming && (
-        <KakaoLoginCTA returnTo="/love-fortune" style={{ margin: '0 0 10px' }}>
-          카카오 로그인하고 맞춤 연애운 받기
-        </KakaoLoginCTA>
+        <LoginCTA returnTo="/love-fortune" style={{ margin: '0 0 10px' }}>
+          로그인하고 맞춤 연애운 받기
+        </LoginCTA>
       )}
 
       {/* 입력 폼 */}
