@@ -86,8 +86,12 @@ function Register() {
 
   // 'signup'(처음이에요: 사주 정보 + 전화번호 + PIN) | 'login'(전화번호 + PIN)
   const [mode, setMode] = useState(searchParams.get('mode') === 'login' ? 'login' : 'signup');
+  // 랜딩(/welcome)에서 이미 입력한 생년월일·성별은 다시 묻지 않고 미리 채운다
+  const landingPre = useRef((() => {
+    try { return JSON.parse(sessionStorage.getItem('landingBirth') || 'null') || {}; } catch { return {}; }
+  })()).current;
   const [form, setForm] = useState({
-    name: '', birthDate: '', calendarType: 'SOLAR', gender: 'M',
+    name: '', birthDate: landingPre.birthDate || '', calendarType: 'SOLAR', gender: landingPre.gender || 'M',
     birthTime: '', bloodType: '', mbtiType: '',
     referralCode: searchParams.get('ref') || '',
   });
@@ -117,6 +121,7 @@ function Register() {
 
   // 로그인 완료 처리 (localStorage 저장 + 리다이렉트)
   const completeLogin = (user) => {
+    try { sessionStorage.removeItem('landingBirth'); } catch {}
     localStorage.setItem('userId', user.id);
     localStorage.setItem('userName', user.name);
     localStorage.setItem('userProfile', JSON.stringify(user));

@@ -30,6 +30,8 @@ function Landing() {
   const onSubmit = () => {
     if (!canSubmit) return;
     setTeaser(buildTeaser(birth, gender));
+    // 가입 화면에서 다시 묻지 않도록 이 탭 세션에만 임시 보관 (가입 완료 시 삭제)
+    try { sessionStorage.setItem('landingBirth', JSON.stringify({ birthDate: birth, gender })); } catch {}
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
 
@@ -80,7 +82,7 @@ function Landing() {
               <MenuIcon name="sparkleHeart" size={18} />
               <span>내 연애 타이밍 보기</span>
             </button>
-            <p className="lp-note">로그인 없이 바로 확인 · 입력한 정보는 저장되지 않아요</p>
+            <p className="lp-note">로그인 없이 바로 확인 · 가입 전에는 서버에 저장되지 않아요</p>
           </div>
 
           {teaser && (

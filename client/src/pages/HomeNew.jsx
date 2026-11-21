@@ -324,6 +324,16 @@ function HomeNew() {
         </div>
       </section>
 
+      {/* ── 내 연애 타이밍 (무료·AI 없음) — 결정 상담 바로 아래 가벼운 진입 행 ── */}
+      <button type="button" className="hn-timing" onClick={() => navigate('/love-timing')}>
+        <span className="hn-timing-icon"><MenuIcon name="calendar" size={20} /></span>
+        <span className="hn-timing-text">
+          <span className="hn-timing-title fs-fixed">내 연애 타이밍</span>
+          <span className="hn-timing-desc fs-fixed">향후 12개월, 인연이 움직이는 달 · 무료</span>
+        </span>
+        <span className="hn-timing-go fs-fixed" aria-hidden="true">›</span>
+      </button>
+
       {/* ── 히어로 — 총 운세 점수 / 비로그인은 사주 원국 샘플 ───── */}
       {userId && !isGuestUser ? (
         <section className="hn-hero" onClick={() => go('/my')}>

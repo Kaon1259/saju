@@ -536,3 +536,15 @@
   color: rgba(255, 255, 255, 0.85);
   word-break: keep-all;
 }
+
+/* 내 연애 타이밍 진입 행 */
+.hn-timing {
+  width: 100%; display: flex; align-items: center; gap: 12px; margin: 10px 0 4px;
+  padding: 13px 14px; border-radius: 16px; cursor: pointer; font: inherit; text-align: left; color: inherit;
+  background: var(--hn-surface, rgba(255,255,255,.07)); border: 1px solid rgba(255,90,126,.25);
+}
+.hn-timing-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: #ff5a7e; background: rgba(255,90,126,.14); }
+.hn-timing-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.hn-timing-title { font-size: calc(15px * var(--fs-scale, 1)); font-weight: 800; }
+.hn-timing-desc { font-size: calc(12px * var(--fs-scale, 1)); opacity: .65; }
+.hn-timing-go { font-size: calc(22px * var(--fs-scale, 1)); opacity: .5; }
