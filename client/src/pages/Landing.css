@@ -575,3 +575,31 @@
 .lp-r-blur span { font-size: calc(16px * var(--fs-scale, 1)); }
 
 .lp-r-block--cat { border-color: rgba(255,90,126,.45); }
+
+/* ─── 호기심 장치: 12달 미리보기 + 풀이 연출 ─── */
+.lp-months { margin: 0 0 18px; }
+.lp-months-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.lp-month {
+  display: flex; align-items: center; justify-content: center; height: 34px; border-radius: 10px;
+  font-size: calc(13px * var(--fs-scale, 1)); font-weight: 800;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.55);
+  animation: lpMonth 2.6s ease-in-out infinite;
+}
+[data-theme="light"] .lp-month { background: #fff; border-color: rgba(255,90,126,.2); color: #b5b0c2; }
+@keyframes lpMonth {
+  0%, 70%, 100% { background: rgba(255,255,255,.08); color: rgba(255,255,255,.55); transform: none; }
+  35% { background: linear-gradient(135deg, #ff5a7e, #ff8a5b); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(255,90,126,.4); }
+}
+.lp-months-cap { margin-top: 10px; text-align: center; font-size: 13.5px; opacity: .85; }
+.lp-months-cap b { color: #ff7a98; font-weight: 800; }
+[data-theme="light"] .lp-months-cap b { color: #e11d63; }
+.lp-months--locked { margin: 12px 0 0; }
+.lp-month--lock { animation: none; filter: blur(1.5px); opacity: 1; background: linear-gradient(135deg, rgba(255,90,126,.18), rgba(255,138,91,.18)); color: #e11d63; }
+
+.lp-cta--ready { animation: lpPulse 1.8s ease-in-out infinite; }
+@keyframes lpPulse { 0%,100% { box-shadow: 0 10px 24px rgba(255,90,126,.35); } 50% { box-shadow: 0 10px 34px rgba(255,90,126,.7); } }
+@media (prefers-reduced-motion: reduce) { .lp-month, .lp-cta--ready { animation: none; } }
+
+/* 둘러보기: 고정 대신 흐름 안(우측 정렬) — 스크롤 시 카드와 겹치지 않음 */
+.lp-scroll { padding-top: calc(14px + env(safe-area-inset-top)); }
+.lp-skip { position: static; align-self: flex-end; margin: 0 0 12px; }
