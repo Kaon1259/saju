@@ -268,6 +268,23 @@ public class SajuController {
     }
 
     /**
+     * 향후 12개월 연애 타이밍 (AI 호출 없음, 하트 무소모) — 로그인 사용자 본인 기준
+     * GET /api/saju/love-timing
+     */
+    @GetMapping("/love-timing")
+    public ResponseEntity<Map<String, Object>> getLoveTiming(HttpServletRequest req) {
+        Long userId = AuthUtil.requireUserId(req);
+        UserResponse user = userService.getUser(userId);
+        LocalDate birthDate = user.getBirthDate();
+        if (birthDate == null) return ResponseEntity.badRequest().build();
+        if ("LUNAR".equalsIgnoreCase(user.getCalendarType())) {
+            birthDate = lunarCalendarService.lunarToSolar(birthDate);
+        }
+        boolean isMale = !"F".equalsIgnoreCase(user.getGender());
+        return ResponseEntity.ok(LoveTimingBuilder.build(birthDate, isMale, LocalDate.now()));
+    }
+
+    /**
      * 만세력 AI 해석 스트리밍
      * GET /api/saju/manseryeok/stream?date=2026-04-07&calendarType=SOLAR&birthDate=1990-05-15
      */

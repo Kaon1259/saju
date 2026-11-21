@@ -710,6 +710,12 @@ export const getMbtiCompatibilityStream = (type1, type2, { onChunk, onDone, onEr
   return () => { __chunker.cancel(); eventSource.close(); };
 };
 
+// ─── 향후 12개월 연애 타이밍 (AI 없음·무료·로그인 필요) ───
+export const getLoveTiming = async () => {
+  const response = await api.get('/saju/love-timing');
+  return response.data;
+};
+
 // ─── 만세력 ───
 export const getManseryeok = async (date, calendarType) => {
   const params = { date };

@@ -1,203 +1,123 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MenuIcon from '../components/MenuIcon';
+import BirthDatePicker from '../components/BirthDatePicker';
+import { buildTeaser } from '../utils/sajuTeaser';
 import './Landing.css';
 
-const SLIDES = [
-  {
-    id: 'welcome',
-    iconKey: 'sparkleHeart',
-    accent: '#EC4899',
-    title: ['당신의 연애 운명,', '사주가 알려줍니다'],
-    sub: '1:1 연애운 · 사주 궁합 · 타로 12덱',
-    highlight: 'AI 사주 마스터 "러브"가 풀어드려요',
-  },
-  {
-    id: 'features',
-    iconKey: 'couple',
-    accent: '#A78BFA',
-    title: ['매일 새로운 운세,', '실시간 스트리밍'],
-    sub: '사주·일진 기반 깊이 있는 분석',
-    points: [
-      { iconKey: 'target', text: '사주·일진 기반 정확한 분석' },
-      { iconKey: 'spark', text: '실시간 스트리밍, 빠른 결과' },
-      { iconKey: 'tarot', text: '타로 12덱 · 사주 궁합 · 토정비결' },
-    ],
-  },
-  {
-    id: 'start',
-    iconKey: 'gift',
-    accent: '#F472B6',
-    title: ['가입 + 프로필 완성', '60하트 지급'],
-    sub: '매일 출석 +2하트 · 7일 연속 +10',
-    perks: [
-      { iconKey: 'attendance', label: '매일 출석', value: '+2' },
-      { iconKey: 'star', label: '7일 연속', value: '+10' },
-      { iconKey: 'sparkleHeart', label: '가입+프로필', value: '+60' },
-    ],
-  },
-];
+const QUESTIONS = ['그 사람, 다시 연락 올까?', '올해 안에 인연이 올까?', '고백, 해도 될까?', '이 사람과 결혼해도 될까?'];
 
 function Landing() {
   const navigate = useNavigate();
-  const trackRef = useRef(null);
-  const [active, setActive] = useState(0);
+  const resultRef = useRef(null);
+  const [birth, setBirth] = useState('');
+  const [gender, setGender] = useState('');
+  const [teaser, setTeaser] = useState(null);
 
   const markSeen = () => {
     try { localStorage.setItem('landingSeen', '1'); } catch {}
   };
-
-  const goLogin = () => {
+  const goRegister = () => {
     markSeen();
-    navigate('/register', { state: { from: '/' } });
+    navigate('/register', { state: { from: '/love-timing' } });
   };
-
   const goHome = () => {
     markSeen();
     navigate('/', { replace: true });
   };
 
-  const goSlide = (idx) => {
-    const t = trackRef.current;
-    if (!t) return;
-    const target = Math.max(0, Math.min(SLIDES.length - 1, idx));
-    t.scrollTo({ left: target * t.clientWidth, behavior: 'smooth' });
+  const canSubmit = !!birth && !!gender;
+  const onSubmit = () => {
+    if (!canSubmit) return;
+    setTeaser(buildTeaser(birth, gender));
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
-
-  const onScroll = () => {
-    const t = trackRef.current;
-    if (!t) return;
-    const idx = Math.round(t.scrollLeft / t.clientWidth);
-    if (idx !== active) setActive(idx);
-  };
-
-  // 키보드 화살표 지원 (데스크탑/접근성)
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'ArrowRight') goSlide(active + 1);
-      else if (e.key === 'ArrowLeft') goSlide(active - 1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [active]);
-
-  const isLast = active === SLIDES.length - 1;
 
   return (
-    <div className="onb-page">
-      {/* 배경 효과 — 슬라이드 전체에 공통 */}
+    <div className="onb-page lp-page">
       <div className="onb-bg" aria-hidden="true">
         <div className="onb-bg-orb onb-bg-orb-1" />
         <div className="onb-bg-orb onb-bg-orb-2" />
         <div className="onb-bg-orb onb-bg-orb-3" />
-        {Array.from({ length: 16 }).map((_, i) => (
-          <span key={i} className="onb-particle" style={{
-            '--p-x': `${(i * 13.7) % 100}%`,
-            '--p-y': `${(i * 23.1) % 100}%`,
-            '--p-delay': `${(i % 12) * 0.4}s`,
-            '--p-dur': `${3 + (i % 5) * 0.7}s`,
-            '--p-size': `${6 + (i % 4) * 3}px`,
-          }}>{i % 3 === 0 ? '✦' : i % 3 === 1 ? '✧' : '·'}</span>
-        ))}
       </div>
 
-      {/* 상단 — Skip */}
-      <button type="button" className="onb-skip" onClick={goHome} aria-label="온보딩 건너뛰기">
-        건너뛰기
+      <button type="button" className="onb-skip" onClick={goHome} aria-label="건너뛰고 둘러보기">
+        둘러보기
       </button>
 
-      {/* 슬라이드 트랙 */}
-      <div className="onb-track" ref={trackRef} onScroll={onScroll}>
-        {SLIDES.map((s, i) => (
-          <section
-            key={s.id}
-            className={`onb-slide ${active === i ? 'onb-slide--active' : ''}`}
-            style={{ '--accent': s.accent }}
-            aria-hidden={active !== i}
-          >
-            <div className="onb-slide-inner">
-              <div className="onb-icon-wrap">
-                <span className="onb-icon-glow" aria-hidden="true" />
-                <MenuIcon name={s.iconKey} size={88} className="onb-icon" />
+      <div className="lp-scroll">
+        <div className="lp-inner">
+          <p className="lp-kicker">1:1연애 · 사주 결정 상담</p>
+          <h1 className="lp-title">
+            <span className="fs-fixed lp-title-l">올해, 내 연애</span>
+            <span className="fs-fixed lp-title-l lp-title-accent">언제 풀릴까?</span>
+          </h1>
+          <p className="lp-sub">생년월일만 넣으면 사주로 바로 보여드려요</p>
+
+          <ul className="lp-questions" aria-label="이런 고민에 답해드려요">
+            {QUESTIONS.map((q) => <li key={q}>{q}</li>)}
+          </ul>
+
+          <div className="lp-card">
+            <div className="lp-field-label">양력 생년월일</div>
+            <BirthDatePicker value={birth} onChange={setBirth} />
+
+            <div className="lp-field-label lp-field-label--gap">성별</div>
+            <div className="lp-gender" role="radiogroup" aria-label="성별">
+              {[['F', '여자'], ['M', '남자']].map(([v, label]) => (
+                <button
+                  key={v}
+                  type="button"
+                  role="radio"
+                  aria-checked={gender === v}
+                  className={`lp-gender-btn ${gender === v ? 'lp-gender-btn--on' : ''}`}
+                  onClick={() => setGender(v)}
+                >{label}</button>
+              ))}
+            </div>
+
+            <button type="button" className="lp-cta" disabled={!canSubmit} onClick={onSubmit}>
+              <MenuIcon name="sparkleHeart" size={18} />
+              <span>내 연애 타이밍 보기</span>
+            </button>
+            <p className="lp-note">로그인 없이 바로 확인 · 입력한 정보는 저장되지 않아요</p>
+          </div>
+
+          {teaser && (
+            <div className="lp-result" ref={resultRef}>
+              <div className="lp-r-head">
+                <span className="fs-fixed lp-r-badge">{teaser.dayStemKo}{teaser.dayElement} · {teaser.dayStemHanja}{teaser.dayElementHanja} 일간</span>
+                <h2 className="lp-r-title">당신은 <em>{teaser.image}</em> 같은 사람</h2>
+                <p className="lp-r-text">{teaser.love}</p>
               </div>
 
-              <h1 className="onb-title">
-                {s.title.map((line, idx) => (
-                  <span key={idx} className={`onb-title-line onb-title-line--${idx}`}>{line}</span>
-                ))}
-              </h1>
-              <p className="onb-sub">{s.sub}</p>
-
-              {/* 슬라이드 1 — 강조 한 줄 */}
-              {s.highlight && (
-                <div className="onb-highlight">
-                  <MenuIcon name="sparkle" size={14} />
-                  <span>{s.highlight}</span>
+              <div className="lp-r-block">
+                <div className="lp-r-label">
+                  {teaser.year}년 {teaser.yearGanjiKo}년의 연애 흐름
+                  <small className="fs-fixed">세운 {teaser.stemGod} · {teaser.branchGod}</small>
                 </div>
-              )}
+                <p className="lp-r-text">{teaser.yearLine}</p>
+              </div>
 
-              {/* 슬라이드 2 — 포인트 3개 */}
-              {s.points && (
-                <ul className="onb-points">
-                  {s.points.map((p, idx) => (
-                    <li key={idx} className="onb-point" style={{ animationDelay: `${0.2 + idx * 0.08}s` }}>
-                      <span className="onb-point-icon"><MenuIcon name={p.iconKey} size={20} /></span>
-                      <span className="onb-point-text">{p.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {/* 슬라이드 3 — 보상 3개 */}
-              {s.perks && (
-                <div className="onb-perks">
-                  {s.perks.map((p, idx) => (
-                    <div key={idx} className="onb-perk" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
-                      <span className="onb-perk-icon"><MenuIcon name={p.iconKey} size={28} /></span>
-                      <span className="onb-perk-label">{p.label}</span>
-                      <span className="onb-perk-value">{p.value}<small>하트</small></span>
-                    </div>
-                  ))}
+              <div className="lp-r-block lp-r-block--locked">
+                <div className="lp-r-label">인연이 가장 가까워지는 달은?</div>
+                <div className="lp-r-blur" aria-hidden="true">
+                  <span className="fs-fixed">▒▒월 ▒▒주</span>
+                  <span className="fs-fixed">이 시기에 ▒▒▒▒▒ 하면 ▒▒▒▒▒</span>
                 </div>
-              )}
+                <div className="lp-r-lock"><MenuIcon name="lock" size={16} /><span>가입하면 월별 타이밍을 열어드려요</span></div>
+              </div>
+
+              <button type="button" className="lp-cta lp-cta--solid" onClick={goRegister}>
+                <span>3초 가입하고 이어서 보기 · 60하트</span>
+              </button>
+              <button type="button" className="onb-cta-ghost lp-ghost" onClick={goHome}>
+                가입 없이 둘러보기
+              </button>
+              <p className="lp-note">사주 풀이는 운세의 관점이에요. 중요한 결정은 본인의 판단과 함께 참고하세요.</p>
             </div>
-          </section>
-        ))}
-      </div>
-
-      {/* 페이지 인디케이터 */}
-      <div className="onb-dots" role="tablist" aria-label="온보딩 단계">
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            className={`onb-dot ${active === i ? 'onb-dot--active' : ''}`}
-            onClick={() => goSlide(i)}
-            role="tab"
-            aria-selected={active === i}
-            aria-label={`슬라이드 ${i + 1}`}
-          />
-        ))}
-      </div>
-
-      {/* 하단 CTA — 슬라이드별 분기 */}
-      <div className="onb-cta">
-        {!isLast ? (
-          <button type="button" className="onb-cta-next" onClick={() => goSlide(active + 1)}>
-            다음
-            <span aria-hidden="true">→</span>
-          </button>
-        ) : (
-          <>
-            <button type="button" className="onb-cta-kakao" onClick={goLogin}>
-              <span className="onb-cta-kakao-icon" aria-hidden="true"><MenuIcon name="star" size={20} /></span>
-              <span>3초만에 시작</span>
-            </button>
-            <button type="button" className="onb-cta-ghost" onClick={goHome}>
-              그냥 둘러보기
-            </button>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
