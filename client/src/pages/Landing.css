@@ -513,12 +513,15 @@
 .lp-sub { margin: 10px 0 16px; font-size: 15px; color: rgba(255,255,255,.7); }
 [data-theme="light"] .lp-sub { color: #5b5870; }
 
-.lp-questions { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.lp-questions li {
-  padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.88);
+.lp-questions { margin: 0 0 20px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.lp-q-label { margin: 0 0 8px; font-size: 13px; font-weight: 700; opacity: .8; }
+.lp-q-label small { font-weight: 600; opacity: .7; font-size: calc(12px * var(--fs-scale, 1)); }
+.lp-q {
+  padding: 9px 13px; border-radius: 999px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.16); color: rgba(255,255,255,.88);
 }
-[data-theme="light"] .lp-questions li { background: rgba(255,255,255,.8); border-color: rgba(255,90,126,.22); color: #3b3850; }
+[data-theme="light"] .lp-q { background: rgba(255,255,255,.8); border-color: rgba(255,90,126,.22); color: #3b3850; }
+.lp-q--on, [data-theme="light"] .lp-q--on { background: linear-gradient(135deg, #ff5a7e, #ff8a5b); border-color: transparent; color: #fff; }
 
 .lp-card {
   padding: 18px 16px; border-radius: 22px;
@@ -570,3 +573,5 @@
 .lp-r-badge { font-size: calc(12px * var(--fs-scale, 1)); }
 .lp-r-label small { font-size: calc(12px * var(--fs-scale, 1)); }
 .lp-r-blur span { font-size: calc(16px * var(--fs-scale, 1)); }
+
+.lp-r-block--cat { border-color: rgba(255,90,126,.45); }

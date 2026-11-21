@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import LoveTimingCard from '../components/LoveTimingCard';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getDecisionBasic, getDecisionStream, getDecisionSchema, getUser, getHistory } from '../api/fortune';
 import HistoryDrawer from '../components/HistoryDrawer';
@@ -386,6 +387,15 @@ function Decision() {
         <div className="dec-q-title">{info.title}</div>
         <div className="dec-q-text">"{info.question}"</div>
       </div>
+
+      {/* ═══ 내 연애 타이밍 (무료 근거 자료) — 유리한 달을 상담 질문에 반영 ═══ */}
+      {userId && !loading && !streaming && !result && !safety && (
+        <LoveTimingCard onPick={(m) => {
+          const verb = { reunion: '연락', breakup: '정리', confess: '고백', marriage: '결혼 얘기' }[category] || '결정';
+          setSituation((prev) => (prev && prev.trim() ? prev : `${m.month}월쯤 ${verb}을 생각하고 있어요. `));
+          setTimeout(() => document.querySelector('.dec-textarea, textarea')?.focus(), 50);
+        }} />
+      )}
 
       {/* ═══ 최근 본 결정 상담 ═══ */}
       {userId && !loading && !streaming && !result && (

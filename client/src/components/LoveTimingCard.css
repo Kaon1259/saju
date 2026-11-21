@@ -1,0 +1,15 @@
+.ltc { margin: 0 0 14px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,90,126,.28); }
+[data-theme="light"] .ltc { background: #fff; box-shadow: 0 4px 14px rgba(15,23,42,.06); }
+.ltc-head { display: flex; align-items: center; justify-content: space-between; }
+.ltc-title { font-size: calc(14px * var(--fs-scale, 1)); font-weight: 800; }
+.ltc-free { padding: 2px 8px; border-radius: 999px; font-size: calc(11px * var(--fs-scale, 1)); font-weight: 800; color: #ff5a7e; background: rgba(255,90,126,.14); }
+.ltc-strip { display: flex; gap: 5px; margin: 10px 0 12px; }
+.ltc-dot { flex: 1; height: 7px; border-radius: 4px; background: rgba(128,128,150,.35); }
+.ltc-dot--유리 { background: #ff5a7e; }
+.ltc-dot--주의 { background: #f5a524; }
+.ltc-label { font-size: 12px; opacity: .65; margin-bottom: 8px; }
+.ltc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ltc-chip { padding: 8px 12px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer; color: inherit;
+  background: rgba(255,90,126,.12); border: 1px solid rgba(255,90,126,.35); }
+.ltc-chip b { color: #ff5a7e; }
+.ltc-warn { margin: 10px 0 0; font-size: 12px; opacity: .65; }

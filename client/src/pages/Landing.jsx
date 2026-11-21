@@ -2,10 +2,9 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MenuIcon from '../components/MenuIcon';
 import BirthDatePicker from '../components/BirthDatePicker';
-import { buildTeaser } from '../utils/sajuTeaser';
+import { buildTeaser, categoryLine, DECISION_CATS } from '../utils/sajuTeaser';
 import './Landing.css';
 
-const QUESTIONS = ['그 사람, 다시 연락 올까?', '올해 안에 인연이 올까?', '고백, 해도 될까?', '이 사람과 결혼해도 될까?'];
 
 function Landing() {
   const navigate = useNavigate();
@@ -13,13 +12,15 @@ function Landing() {
   const [birth, setBirth] = useState('');
   const [gender, setGender] = useState('');
   const [teaser, setTeaser] = useState(null);
+  const [cat, setCat] = useState(''); // '' = 그냥 올해 연애운
 
   const markSeen = () => {
     try { localStorage.setItem('landingSeen', '1'); } catch {}
   };
   const goRegister = () => {
     markSeen();
-    navigate('/register', { state: { from: '/love-timing' } });
+    // 고민을 골랐으면 가입 직후 해당 결정 상담 탭으로, 아니면 연애 타이밍 페이지로
+    navigate('/register', { state: { from: cat ? `/decision?cat=${cat}` : '/love-timing' } });
   };
   const goHome = () => {
     markSeen();
@@ -31,7 +32,7 @@ function Landing() {
     if (!canSubmit) return;
     setTeaser(buildTeaser(birth, gender));
     // 가입 화면에서 다시 묻지 않도록 이 탭 세션에만 임시 보관 (가입 완료 시 삭제)
-    try { sessionStorage.setItem('landingBirth', JSON.stringify({ birthDate: birth, gender })); } catch {}
+    try { sessionStorage.setItem('landingBirth', JSON.stringify({ birthDate: birth, gender, cat })); } catch {}
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   };
 
@@ -56,9 +57,13 @@ function Landing() {
           </h1>
           <p className="lp-sub">생년월일만 넣으면 사주로 바로 보여드려요</p>
 
-          <ul className="lp-questions" aria-label="이런 고민에 답해드려요">
-            {QUESTIONS.map((q) => <li key={q}>{q}</li>)}
-          </ul>
+          <div className="lp-q-label">어떤 고민인가요? <small className="fs-fixed">(선택)</small></div>
+          <div className="lp-questions" role="radiogroup" aria-label="고민 선택">
+            {[...Object.entries(DECISION_CATS).map(([k, c]) => [k, c.question]), ['', '그냥 올해 연애운이 궁금해요']].map(([k, q]) => (
+              <button key={k || 'general'} type="button" role="radio" aria-checked={cat === k}
+                className={`lp-q ${cat === k ? 'lp-q--on' : ''}`} onClick={() => setCat(k)}>{q}</button>
+            ))}
+          </div>
 
           <div className="lp-card">
             <div className="lp-field-label">양력 생년월일</div>
@@ -93,6 +98,13 @@ function Landing() {
                 <p className="lp-r-text">{teaser.love}</p>
               </div>
 
+              {cat && (
+                <div className="lp-r-block lp-r-block--cat">
+                  <div className="lp-r-label">‘{DECISION_CATS[cat].question}’ — 올해 사주의 경향</div>
+                  <p className="lp-r-text">{categoryLine(cat, teaser)}</p>
+                </div>
+              )}
+
               <div className="lp-r-block">
                 <div className="lp-r-label">
                   {teaser.year}년 {teaser.yearGanjiKo}년의 연애 흐름
@@ -102,7 +114,7 @@ function Landing() {
               </div>
 
               <div className="lp-r-block lp-r-block--locked">
-                <div className="lp-r-label">인연이 가장 가까워지는 달은?</div>
+                <div className="lp-r-label">{cat ? `${DECISION_CATS[cat].label}, 언제가 가장 유리할까?` : '인연이 가장 가까워지는 달은?'}</div>
                 <div className="lp-r-blur" aria-hidden="true">
                   <span className="fs-fixed">▒▒월 ▒▒주</span>
                   <span className="fs-fixed">이 시기에 ▒▒▒▒▒ 하면 ▒▒▒▒▒</span>
@@ -111,7 +123,7 @@ function Landing() {
               </div>
 
               <button type="button" className="lp-cta lp-cta--solid" onClick={goRegister}>
-                <span>3초 가입하고 이어서 보기 · 60하트</span>
+                <span>{cat ? `3초 가입하고 ${DECISION_CATS[cat].label} 상담 이어서 보기` : '3초 가입하고 이어서 보기'} · 60하트</span>
               </button>
               <button type="button" className="onb-cta-ghost lp-ghost" onClick={goHome}>
                 가입 없이 둘러보기
